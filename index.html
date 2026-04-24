@@ -5,6 +5,13 @@
   <title>YAMADEN Support</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0b3d91">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="YAMADEN">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
   <style>
     body {
       margin: 0;
@@ -287,6 +294,13 @@ function resizeImage(file, maxWidth, quality) {
 }
 
 applyLanguage();
+
+// PWA service worker
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/service-worker.js")
+    .then(() => console.log("Service Worker OK"))
+    .catch(err => console.log("Service Worker Error:", err));
+}
 </script>
 
 </body>
