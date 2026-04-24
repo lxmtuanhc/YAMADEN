@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Gửi yêu cầu sửa điện</title>
+</head>
+<body>
+
+<h2>Gửi yêu cầu sửa điện</h2>
+
+<input id="name" placeholder="Tên khách"><br><br>
+
+<textarea id="content" placeholder="Mô tả sự cố"></textarea><br><br>
+
+<input type="file" id="image"><br><br>
+
+<button onclick="sendRequest()">Gửi</button>
+
+<p id="result"></p>
+
+<script>
+async function sendRequest() {
+  const name = document.getElementById("name").value;
+  const content = document.getElementById("content").value;
+  const file = document.getElementById("image").files[0];
+
+  console.log("file:", file); // debug
+
+  let imageBase64 = "";
+
+  if (file) {
+    const reader = new FileReader();
+
+    reader.onload = async function() {
+      imageBase64 = reader.result;
+
+      console.log("base64 ok");
+
+      await sendToServer(name, content, imageBase64);
+    };
+
+    reader.readAsDataURL(file);
+  } else {
+    await sendToServer(name, content, "");
+  }
+}
+
+async function sendToServer(name, content, image) {
+  const res = await fetch("http://localhost:3000/request", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ name, content, image })
+  });
+
+  const data = await res.json();
+
+  console.log(data);
+
+  document.getElementById("result").innerText = "Đã gửi thành công!";
+}
+</script>
+
+</body>
+</html>
