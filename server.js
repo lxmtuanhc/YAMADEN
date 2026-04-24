@@ -8,7 +8,7 @@ app.use(cors({
   origin: "*"
 }));
 
-app.use(express.json({ limit: "20mb" }));
+app.use(express.json({ limit: "100mb" }));
 
 const DB_FILE = "requests.json";
 

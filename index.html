@@ -9,9 +9,7 @@
 <h2>Gửi yêu cầu sửa điện</h2>
 
 <input id="name" placeholder="Tên khách"><br><br>
-
 <textarea id="content" placeholder="Mô tả sự cố"></textarea><br><br>
-
 <input type="file" id="image" accept="image/*"><br><br>
 
 <button onclick="sendRequest()">Gửi</button>
@@ -34,32 +32,39 @@ async function sendRequest() {
 }
 
 async function sendToServer(name, content, image) {
-  const res = await fetch("https://yamaden.onrender.com/request", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      name: name,
-      content: content,
-      image: image
-    })
-  });
+  try {
+    document.getElementById("result").innerText = "Đang gửi...";
 
-  const data = await res.json();
+    const res = await fetch("https://yamaden.onrender.com/request", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name, content, image })
+    });
 
-  console.log(data);
+    console.log("status:", res.status);
 
-  document.getElementById("result").innerText = "Đã gửi thành công!";
+    const data = await res.json();
+    console.log("data:", data);
+
+    if (res.ok) {
+      document.getElementById("result").innerText = "Đã gửi thành công!";
+    } else {
+      document.getElementById("result").innerText = "Gửi thất bại: " + data.message;
+    }
+
+  } catch (err) {
+    console.log("LỖI GỬI:", err);
+    document.getElementById("result").innerText = "Gửi thất bại!";
+  }
 }
 
 function toBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-
     reader.onload = () => resolve(reader.result);
     reader.onerror = error => reject(error);
-
     reader.readAsDataURL(file);
   });
 }
