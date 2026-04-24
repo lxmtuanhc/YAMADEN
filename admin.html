@@ -2,19 +2,72 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Admin - Yêu cầu khách hàng</title>
+  <title>Admin - YAMADEN</title>
 </head>
 <body>
 
-<h2>Danh sách yêu cầu khách hàng</h2>
-<button onclick="loadRequests()">Tải lại</button>
+<select id="language" onchange="changeLanguage()">
+  <option value="vi">Tiếng Việt</option>
+  <option value="ja">日本語</option>
+</select>
+
+<h2 id="title">Danh sách yêu cầu khách hàng</h2>
+<button id="reloadBtn" onclick="loadRequests()">Tải lại</button>
 
 <div id="list"></div>
 
 <script>
 const API = "https://yamaden.onrender.com";
 
+const texts = {
+  vi: {
+    title: "Danh sách yêu cầu khách hàng",
+    reload: "Tải lại",
+    id: "ID",
+    name: "Tên",
+    content: "Nội dung",
+    image: "Hình ảnh",
+    noImage: "Không có hình",
+    status: "Trạng thái",
+    date: "Ngày gửi",
+    processing: "Đang xử lý",
+    completed: "Hoàn thành"
+  },
+  ja: {
+    title: "お客様リクエスト一覧",
+    reload: "再読み込み",
+    id: "ID",
+    name: "名前",
+    content: "内容",
+    image: "画像",
+    noImage: "画像なし",
+    status: "状態",
+    date: "送信日時",
+    processing: "処理中",
+    completed: "完了"
+  }
+};
+
+let currentLang = localStorage.getItem("language") || "vi";
+
+function applyLanguage() {
+  const t = texts[currentLang];
+
+  document.getElementById("language").value = currentLang;
+  document.getElementById("title").innerText = t.title;
+  document.getElementById("reloadBtn").innerText = t.reload;
+}
+
+function changeLanguage() {
+  currentLang = document.getElementById("language").value;
+  localStorage.setItem("language", currentLang);
+  applyLanguage();
+  loadRequests();
+}
+
 async function loadRequests() {
+  const t = texts[currentLang];
+
   const res = await fetch(API + "/requests");
   const data = await res.json();
 
@@ -24,23 +77,23 @@ async function loadRequests() {
   data.forEach(item => {
     list.innerHTML += `
       <div style="border-radius:10px; padding:15px; margin:15px; background:#f5f5f5;">
-        <p><b>ID:</b> ${item.id}</p>
-        <p><b>Tên:</b> ${item.name}</p>
-        <p><b>Nội dung:</b> ${item.content}</p>
+        <p><b>${t.id}:</b> ${item.id}</p>
+        <p><b>${t.name}:</b> ${item.name}</p>
+        <p><b>${t.content}:</b> ${item.content}</p>
 
-        <p><b>Hình ảnh:</b><br>
+        <p><b>${t.image}:</b><br>
           ${
             item.image 
             ? `<img src="${item.image}" width="200">`
-            : "Không có hình"
+            : t.noImage
           }
         </p>
 
-        <p><b>Trạng thái:</b> ${item.status}</p>
-        <p><b>Ngày gửi:</b> ${new Date(item.createdAt).toLocaleString()}</p>
+        <p><b>${t.status}:</b> ${item.status}</p>
+        <p><b>${t.date}:</b> ${new Date(item.createdAt).toLocaleString()}</p>
 
-        <button onclick="updateStatus(${item.id}, 'processing')">Đang xử lý</button>
-        <button onclick="updateStatus(${item.id}, 'completed')">Hoàn thành</button>
+        <button onclick="updateStatus(${item.id}, 'processing')">${t.processing}</button>
+        <button onclick="updateStatus(${item.id}, 'completed')">${t.completed}</button>
       </div>
     `;
   });
@@ -58,6 +111,7 @@ async function updateStatus(id, status) {
   loadRequests();
 }
 
+applyLanguage();
 loadRequests();
 </script>
 

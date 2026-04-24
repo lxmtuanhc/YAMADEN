@@ -2,27 +2,75 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Gửi yêu cầu sửa điện</title>
+  <title>YAMADEN</title>
 </head>
 <body>
 
-<h2>Gửi yêu cầu sửa điện</h2>
+<select id="language" onchange="changeLanguage()">
+  <option value="vi">Tiếng Việt</option>
+  <option value="ja">日本語</option>
+</select>
+
+<h2 id="title">Gửi yêu cầu sửa điện</h2>
 
 <input id="name" placeholder="Tên khách"><br><br>
 <textarea id="content" placeholder="Mô tả sự cố"></textarea><br><br>
 <input type="file" id="image" accept="image/*"><br><br>
 
-<button onclick="sendRequest()">Gửi</button>
+<button id="sendBtn" onclick="sendRequest()">Gửi</button>
 
 <p id="result"></p>
 
 <script>
+const API = "https://yamaden.onrender.com";
+
+const texts = {
+  vi: {
+    title: "Gửi yêu cầu sửa điện",
+    name: "Tên khách",
+    content: "Mô tả sự cố",
+    send: "Gửi",
+    sending: "Đang gửi...",
+    success: "Đã gửi thành công!",
+    failed: "Gửi thất bại!"
+  },
+  ja: {
+    title: "電気修理依頼を送信",
+    name: "お客様名",
+    content: "不具合内容",
+    send: "送信",
+    sending: "送信中...",
+    success: "送信が完了しました！",
+    failed: "送信に失敗しました！"
+  }
+};
+
+let currentLang = localStorage.getItem("language") || "vi";
+
+function applyLanguage() {
+  const t = texts[currentLang];
+
+  document.getElementById("language").value = currentLang;
+  document.getElementById("title").innerText = t.title;
+  document.getElementById("name").placeholder = t.name;
+  document.getElementById("content").placeholder = t.content;
+  document.getElementById("sendBtn").innerText = t.send;
+}
+
+function changeLanguage() {
+  currentLang = document.getElementById("language").value;
+  localStorage.setItem("language", currentLang);
+  applyLanguage();
+}
+
 async function sendRequest() {
+  const t = texts[currentLang];
+
   const name = document.getElementById("name").value;
   const content = document.getElementById("content").value;
   const file = document.getElementById("image").files[0];
 
-  document.getElementById("result").innerText = "Đang gửi...";
+  document.getElementById("result").innerText = t.sending;
 
   let imageBase64 = "";
 
@@ -31,7 +79,7 @@ async function sendRequest() {
   }
 
   try {
-    const res = await fetch("https://yamaden.onrender.com/request", {
+    const res = await fetch(API + "/request", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -42,13 +90,13 @@ async function sendRequest() {
     const data = await res.json();
 
     if (res.ok) {
-      document.getElementById("result").innerText = "Đã gửi thành công!";
+      document.getElementById("result").innerText = t.success;
     } else {
-      document.getElementById("result").innerText = "Gửi thất bại: " + data.message;
+      document.getElementById("result").innerText = t.failed + " " + data.message;
     }
   } catch (err) {
     console.log(err);
-    document.getElementById("result").innerText = "Gửi thất bại!";
+    document.getElementById("result").innerText = t.failed;
   }
 }
 
@@ -86,6 +134,8 @@ function resizeImage(file, maxWidth, quality) {
     reader.readAsDataURL(file);
   });
 }
+
+applyLanguage();
 </script>
 
 </body>
