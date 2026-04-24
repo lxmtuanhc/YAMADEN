@@ -2,42 +2,187 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>YAMADEN</title>
+  <title>YAMADEN Support</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f6fb;
+      color: #222;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0b3d91, #1f8dd6);
+      color: white;
+      padding: 28px 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .header p {
+      margin: 8px 0 0;
+      font-size: 15px;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      color: #0b3d91;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin-top: 8px;
+      margin-bottom: 14px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 120px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: #0b3d91;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #092f70;
+    }
+
+    .info {
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .result {
+      font-weight: bold;
+      color: #0b3d91;
+      margin-top: 12px;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+      padding: 20px;
+    }
+
+    .lang {
+      text-align: right;
+      margin-bottom: 12px;
+    }
+
+    .lang select {
+      width: auto;
+      min-width: 140px;
+    }
+  </style>
 </head>
+
 <body>
 
-<select id="language" onchange="changeLanguage()">
-  <option value="vi">Tiếng Việt</option>
-  <option value="ja">日本語</option>
-</select>
+<div class="header">
+  <h1>YAMADEN</h1>
+  <p id="slogan">電気と生きる、明るい未来を。</p>
+</div>
 
-<h2 id="title">Gửi yêu cầu sửa điện</h2>
+<div class="container">
 
-<input id="name" placeholder="Tên khách"><br><br>
-<textarea id="content" placeholder="Mô tả sự cố"></textarea><br><br>
-<input type="file" id="image" accept="image/*"><br><br>
+  <div class="lang">
+    <select id="language" onchange="changeLanguage()">
+      <option value="vi">Tiếng Việt</option>
+      <option value="ja">日本語</option>
+    </select>
+  </div>
 
-<button id="sendBtn" onclick="sendRequest()">Gửi</button>
+  <div class="card">
+    <h2 id="companyTitle">Thông tin công ty</h2>
+    <div class="info" id="companyInfo">
+      <b>株式会社 山電 / YAMADEN CO., LTD</b><br>
+      Điện công trình, thiết bị đo lường, bảo trì thiết bị điều khiển tự động.<br>
+      Địa chỉ: 〒733-0851 広島県広島市西区田方2-9-23<br>
+      TEL: 082-516-4423
+    </div>
+  </div>
 
-<p id="result"></p>
+  <div class="card">
+    <h2 id="formTitle">Gửi yêu cầu hỗ trợ công trình</h2>
+
+    <input id="name" placeholder="Tên khách hàng">
+    <textarea id="content" placeholder="Mô tả sự cố hoặc nội dung cần hỗ trợ"></textarea>
+    <input type="file" id="image" accept="image/*">
+
+    <button id="sendBtn" onclick="sendRequest()">Gửi yêu cầu</button>
+
+    <p id="result" class="result"></p>
+  </div>
+
+</div>
+
+<div class="footer">
+  © YAMADEN Co., Ltd. Support App
+</div>
 
 <script>
 const API = "https://yamaden.onrender.com";
 
 const texts = {
   vi: {
-    title: "Gửi yêu cầu sửa điện",
-    name: "Tên khách",
-    content: "Mô tả sự cố",
-    send: "Gửi",
+    slogan: "Sống cùng điện, hướng tới tương lai tươi sáng.",
+    companyTitle: "Thông tin công ty",
+    companyInfo: `<b>株式会社 山電 / YAMADEN CO., LTD</b><br>
+      Điện công trình, thiết bị đo lường, bảo trì thiết bị điều khiển tự động.<br>
+      Địa chỉ: 〒733-0851 広島県広島市西区田方2-9-23<br>
+      TEL: 082-516-4423`,
+    formTitle: "Gửi yêu cầu hỗ trợ công trình",
+    name: "Tên khách hàng",
+    content: "Mô tả sự cố hoặc nội dung cần hỗ trợ",
+    send: "Gửi yêu cầu",
     sending: "Đang gửi...",
     success: "Đã gửi thành công!",
     failed: "Gửi thất bại!"
   },
   ja: {
-    title: "電気修理依頼を送信",
+    slogan: "電気と生きる、明るい未来を。",
+    companyTitle: "会社情報",
+    companyInfo: `<b>株式会社 山電 / YAMADEN CO., LTD</b><br>
+      電気工事、計装工事、自動制御設備保守メンテナンス<br>
+      住所：〒733-0851 広島県広島市西区田方2-9-23<br>
+      TEL：082-516-4423`,
+    formTitle: "工事サポート依頼",
     name: "お客様名",
-    content: "不具合内容",
+    content: "不具合内容・ご相談内容",
     send: "送信",
     sending: "送信中...",
     success: "送信が完了しました！",
@@ -51,7 +196,10 @@ function applyLanguage() {
   const t = texts[currentLang];
 
   document.getElementById("language").value = currentLang;
-  document.getElementById("title").innerText = t.title;
+  document.getElementById("slogan").innerText = t.slogan;
+  document.getElementById("companyTitle").innerText = t.companyTitle;
+  document.getElementById("companyInfo").innerHTML = t.companyInfo;
+  document.getElementById("formTitle").innerText = t.formTitle;
   document.getElementById("name").placeholder = t.name;
   document.getElementById("content").placeholder = t.content;
   document.getElementById("sendBtn").innerText = t.send;
@@ -91,6 +239,9 @@ async function sendRequest() {
 
     if (res.ok) {
       document.getElementById("result").innerText = t.success;
+      document.getElementById("name").value = "";
+      document.getElementById("content").value = "";
+      document.getElementById("image").value = "";
     } else {
       document.getElementById("result").innerText = t.failed + " " + data.message;
     }
