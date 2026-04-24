@@ -12,7 +12,7 @@
 
 <textarea id="content" placeholder="Mô tả sự cố"></textarea><br><br>
 
-<input type="file" id="image"><br><br>
+<input type="file" id="image" accept="image/*"><br><br>
 
 <button onclick="sendRequest()">Gửi</button>
 
@@ -24,34 +24,26 @@ async function sendRequest() {
   const content = document.getElementById("content").value;
   const file = document.getElementById("image").files[0];
 
-  console.log("file:", file); // debug
-
   let imageBase64 = "";
 
   if (file) {
-    const reader = new FileReader();
-
-    reader.onload = async function() {
-      imageBase64 = reader.result;
-
-      console.log("base64 ok");
-
-      await sendToServer(name, content, imageBase64);
-    };
-
-    reader.readAsDataURL(file);
-  } else {
-    await sendToServer(name, content, "");
+    imageBase64 = await toBase64(file);
   }
+
+  await sendToServer(name, content, imageBase64);
 }
 
 async function sendToServer(name, content, image) {
-  const res = await fetch("http://localhost:3000/request", {
+  const res = await fetch("https://yamaden.onrender.com/request", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ name, content, image })
+    body: JSON.stringify({
+      name: name,
+      content: content,
+      image: image
+    })
   });
 
   const data = await res.json();
@@ -59,6 +51,17 @@ async function sendToServer(name, content, image) {
   console.log(data);
 
   document.getElementById("result").innerText = "Đã gửi thành công!";
+}
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+
+    reader.readAsDataURL(file);
+  });
 }
 </script>
 

@@ -4,8 +4,11 @@ const fs = require("fs");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: "*"
+}));
+
+app.use(express.json({ limit: "20mb" }));
 
 const DB_FILE = "requests.json";
 
@@ -29,55 +32,77 @@ app.get("/", (req, res) => {
 
 // Tạo yêu cầu mới
 app.post("/request", (req, res) => {
-  const requests = readData();
+  try {
+    const requests = readData();
 
-  const newRequest = {
-    id: Date.now(),
-    name: req.body.name || "",
-    content: req.body.content || "",
-    image: req.body.image || "",
-    status: "pending",
-    createdAt: new Date()
-  };
+    const newRequest = {
+      id: Date.now(),
+      name: req.body.name || "",
+      content: req.body.content || "",
+      image: req.body.image || "",
+      status: "pending",
+      createdAt: new Date()
+    };
 
-  requests.unshift(newRequest);
-  writeData(requests);
+    requests.unshift(newRequest);
+    writeData(requests);
 
-  console.log("Saved:", newRequest);
+    console.log("Saved:", newRequest.id);
 
-  res.json({
-    message: "Saved to local file",
-    data: newRequest
-  });
+    res.json({
+      message: "Saved to local file",
+      data: newRequest
+    });
+  } catch (error) {
+    console.log("Save error:", error);
+    res.status(500).json({
+      message: "Save failed",
+      error: error.message
+    });
+  }
 });
 
 // Lấy danh sách yêu cầu
 app.get("/requests", (req, res) => {
-  res.json(readData());
+  try {
+    res.json(readData());
+  } catch (error) {
+    res.status(500).json({
+      message: "Read failed",
+      error: error.message
+    });
+  }
 });
 
 // Cập nhật trạng thái
 app.put("/request/:id", (req, res) => {
-  const requests = readData();
-  const id = Number(req.params.id);
+  try {
+    const requests = readData();
+    const id = Number(req.params.id);
 
-  const item = requests.find(r => r.id === id);
+    const item = requests.find(r => r.id === id);
 
-  if (!item) {
-    return res.status(404).json({
-      message: "Not found"
+    if (!item) {
+      return res.status(404).json({
+        message: "Not found"
+      });
+    }
+
+    item.status = req.body.status || item.status;
+    writeData(requests);
+
+    console.log("Updated:", item.id, item.status);
+
+    res.json({
+      message: "Updated",
+      data: item
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Update failed",
+      error: error.message
     });
   }
-
-  item.status = req.body.status || item.status;
-  writeData(requests);
-
-  console.log("Updated:", item);
-
-  res.json({
-    message: "Updated",
-    data: item
-  });
 });
 
 const PORT = process.env.PORT || 3000;

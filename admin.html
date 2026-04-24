@@ -5,50 +5,61 @@
   <title>Admin - Yêu cầu khách hàng</title>
 </head>
 <body>
-  <h2>Danh sách yêu cầu khách hàng</h2>
-  <button onclick="loadRequests()">Tải lại</button>
-  <div id="list"></div>
 
-  <script>
-    async function loadRequests() {
-      const res = await fetch("http://localhost:3000/requests");
-      const data = await res.json();
+<h2>Danh sách yêu cầu khách hàng</h2>
+<button onclick="loadRequests()">Tải lại</button>
 
-      const list = document.getElementById("list");
-      list.innerHTML = "";
+<div id="list"></div>
 
-      data.forEach(item => {
-        list.innerHTML += `
-          <div style="border-radius:10px; padding:15px; margin:15px; background:#f5f5f5;">
-            <p><b>ID:</b> ${item.id}</p>
-            <p><b>Tên:</b> ${item.name}</p>
-            <p><b>Nội dung:</b> ${item.content}</p>
-            <p><b>Hình ảnh:</b><br>
-              ${item.image ? `<img src="${item.image}" width="200">` : "Không có hình"}
-            </p>
-            <p><b>Trạng thái:</b> ${item.status}</p>
-            <p><b>Ngày gửi:</b> ${item.createdAt}</p>
+<script>
+const API = "https://yamaden.onrender.com";
 
-            <button onclick="updateStatus(${item.id}, 'processing')">Đang xử lý</button>
-            <button onclick="updateStatus(${item.id}, 'completed')">Hoàn thành</button>
-          </div>
-        `;
-      });
-    }
+async function loadRequests() {
+  const res = await fetch(API + "/requests");
+  const data = await res.json();
 
-    async function updateStatus(id, status) {
-      await fetch(`http://localhost:3000/request/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ status })
-      });
+  const list = document.getElementById("list");
+  list.innerHTML = "";
 
-      loadRequests();
-    }
+  data.forEach(item => {
+    list.innerHTML += `
+      <div style="border-radius:10px; padding:15px; margin:15px; background:#f5f5f5;">
+        <p><b>ID:</b> ${item.id}</p>
+        <p><b>Tên:</b> ${item.name}</p>
+        <p><b>Nội dung:</b> ${item.content}</p>
 
-    loadRequests();
-  </script>
+        <p><b>Hình ảnh:</b><br>
+          ${
+            item.image 
+            ? `<img src="${item.image}" width="200">`
+            : "Không có hình"
+          }
+        </p>
+
+        <p><b>Trạng thái:</b> ${item.status}</p>
+        <p><b>Ngày gửi:</b> ${new Date(item.createdAt).toLocaleString()}</p>
+
+        <button onclick="updateStatus(${item.id}, 'processing')">Đang xử lý</button>
+        <button onclick="updateStatus(${item.id}, 'completed')">Hoàn thành</button>
+      </div>
+    `;
+  });
+}
+
+async function updateStatus(id, status) {
+  await fetch(API + `/request/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ status })
+  });
+
+  loadRequests();
+}
+
+loadRequests();
+</script>
+
 </body>
 </html>
