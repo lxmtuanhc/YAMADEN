@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
+const path = require("path");
 
 const app = express();
 
@@ -9,6 +10,9 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: "100mb" }));
+
+// Cho server hiển thị index.html, admin.html
+app.use(express.static(__dirname));
 
 const DB_FILE = "requests.json";
 
@@ -25,9 +29,9 @@ function writeData(data) {
   fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 }
 
-// Test server
+// Trang chính
 app.get("/", (req, res) => {
-  res.send("Server is running 🚀");
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // Tạo yêu cầu mới
@@ -47,14 +51,11 @@ app.post("/request", (req, res) => {
     requests.unshift(newRequest);
     writeData(requests);
 
-    console.log("Saved:", newRequest.id);
-
     res.json({
       message: "Saved to local file",
       data: newRequest
     });
   } catch (error) {
-    console.log("Save error:", error);
     res.status(500).json({
       message: "Save failed",
       error: error.message
@@ -90,8 +91,6 @@ app.put("/request/:id", (req, res) => {
 
     item.status = req.body.status || item.status;
     writeData(requests);
-
-    console.log("Updated:", item.id, item.status);
 
     res.json({
       message: "Updated",
