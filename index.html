@@ -5,7 +5,6 @@
   <title>YAMADEN Support</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- PWA -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0b3d91">
 
@@ -45,6 +44,7 @@
       margin-bottom: 15px;
       border-radius: 10px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
     }
 
     textarea {
@@ -61,6 +61,7 @@
       font-size: 16px;
       cursor: pointer;
       transition: 0.2s;
+      margin-top: 8px;
     }
 
     button:active {
@@ -71,6 +72,22 @@
       margin-top: 10px;
       font-weight: bold;
       color: #0b3d91;
+    }
+
+    .success-box {
+      background: #e8f2ff;
+      padding: 15px;
+      border-radius: 12px;
+      color: #0b3d91;
+      line-height: 1.7;
+    }
+
+    .copy-btn {
+      background: #1f8dd6;
+    }
+
+    .check-btn {
+      background: #0b3d91;
     }
 
     .loader {
@@ -146,7 +163,11 @@ const texts = {
     sending: "Đang gửi...",
     success: "Đã gửi thành công!",
     fail: "Gửi thất bại!",
-    required: "Vui lòng nhập đầy đủ thông tin!"
+    required: "Vui lòng nhập đầy đủ thông tin!",
+    requestId: "Mã yêu cầu",
+    copy: "📋 Copy ID",
+    checkNow: "🔍 Tra cứu ngay",
+    copied: "Đã copy ID!"
   },
   ja: {
     title: "修理依頼送信",
@@ -159,7 +180,11 @@ const texts = {
     sending: "送信中...",
     success: "送信完了！",
     fail: "送信失敗！",
-    required: "必須項目を入力してください"
+    required: "必須項目を入力してください",
+    requestId: "受付ID",
+    copy: "📋 IDをコピー",
+    checkNow: "🔍 今すぐ確認",
+    copied: "IDをコピーしました！"
   }
 };
 
@@ -167,6 +192,7 @@ let lang = localStorage.getItem("lang") || "vi";
 
 function applyLang() {
   const t = texts[lang];
+
   document.getElementById("language").value = lang;
   document.getElementById("title").innerText = t.title;
   document.getElementById("name").placeholder = t.name;
@@ -214,32 +240,62 @@ async function sendRequest() {
       body: JSON.stringify({name, phone, contact, address, content, image})
     });
 
+    const data = await res.json();
+
     if (res.ok) {
-      result.innerText = t.success;
+      const id = data.data.id;
+
+      result.innerHTML = `
+        <div class="success-box">
+          <div><b>${t.success}</b></div>
+          <div>${t.requestId}: <b id="reqId">${id}</b></div>
+          <button class="copy-btn" onclick="copyId()">${t.copy}</button>
+          <button class="check-btn" onclick="goCheck('${id}')">${t.checkNow}</button>
+        </div>
+      `;
+
       nameEl.value = "";
       phoneEl.value = "";
       contactEl.value = "";
       addressEl.value = "";
       contentEl.value = "";
       imageEl.value = "";
+
     } else {
       result.innerText = t.fail;
     }
 
-  } catch {
+  } catch (err) {
+    console.log(err);
     result.innerText = t.fail;
   }
 
   loader.style.display = "none";
 }
 
+function copyId() {
+  const t = texts[lang];
+  const id = document.getElementById("reqId").innerText;
+
+  navigator.clipboard.writeText(id).then(() => {
+    alert(t.copied);
+  });
+}
+
+function goCheck(id) {
+  window.location.href = "check.html?id=" + id;
+}
+
 function resizeImage(file, maxWidth, quality) {
   return new Promise(resolve => {
     const reader = new FileReader();
+
     reader.onload = e => {
       const img = new Image();
+
       img.onload = () => {
         const canvas = document.createElement("canvas");
+
         let w = img.width;
         let h = img.height;
 
@@ -250,12 +306,15 @@ function resizeImage(file, maxWidth, quality) {
 
         canvas.width = w;
         canvas.height = h;
-        canvas.getContext("2d").drawImage(img,0,0,w,h);
+
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
 
         resolve(canvas.toDataURL("image/jpeg", quality));
       };
+
       img.src = e.target.result;
     };
+
     reader.readAsDataURL(file);
   });
 }
@@ -271,7 +330,6 @@ const loader = document.getElementById("loader");
 
 applyLang();
 
-// PWA
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/service-worker.js");
 }
