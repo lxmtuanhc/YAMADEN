@@ -83,7 +83,28 @@ app.get("/requests", (req, res) => {
     });
   }
 });
+// Tra cứu 1 yêu cầu theo ID
+app.get("/request/:id", (req, res) => {
+  try {
+    const requests = readData();
+    const id = Number(req.params.id);
 
+    const item = requests.find(r => r.id === id);
+
+    if (!item) {
+      return res.status(404).json({
+        message: "Not found"
+      });
+    }
+
+    res.json(item);
+  } catch (error) {
+    res.status(500).json({
+      message: "Read failed",
+      error: error.message
+    });
+  }
+});
 // Cập nhật trạng thái
 app.put("/request/:id", (req, res) => {
   try {
