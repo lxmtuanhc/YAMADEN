@@ -25,26 +25,36 @@ const texts = {
     reload: "Tải lại",
     id: "ID",
     name: "Tên",
+    phone: "Số điện thoại",
+    contact: "Liên hệ",
+    address: "Địa chỉ",
     content: "Nội dung",
     image: "Hình ảnh",
     noImage: "Không có hình",
     status: "Trạng thái",
     date: "Ngày gửi",
     processing: "Đang xử lý",
-    completed: "Hoàn thành"
+    completed: "Hoàn thành",
+    call: "Gọi điện",
+    map: "Mở bản đồ"
   },
   ja: {
     title: "お客様リクエスト一覧",
     reload: "再読み込み",
     id: "ID",
     name: "名前",
+    phone: "電話番号",
+    contact: "連絡先",
+    address: "住所",
     content: "内容",
     image: "画像",
     noImage: "画像なし",
     status: "状態",
     date: "送信日時",
     processing: "処理中",
-    completed: "完了"
+    completed: "完了",
+    call: "電話する",
+    map: "地図を開く"
   }
 };
 
@@ -75,15 +85,20 @@ async function loadRequests() {
   list.innerHTML = "";
 
   data.forEach(item => {
+    const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
+
     list.innerHTML += `
       <div style="border-radius:10px; padding:15px; margin:15px; background:#f5f5f5;">
         <p><b>${t.id}:</b> ${item.id}</p>
-        <p><b>${t.name}:</b> ${item.name}</p>
-        <p><b>${t.content}:</b> ${item.content}</p>
+        <p><b>${t.name}:</b> ${item.name || ""}</p>
+        <p><b>${t.phone}:</b> ${item.phone || ""}</p>
+        <p><b>${t.contact}:</b> ${item.contact || ""}</p>
+        <p><b>${t.address}:</b> ${item.address || ""}</p>
+        <p><b>${t.content}:</b> ${item.content || ""}</p>
 
         <p><b>${t.image}:</b><br>
           ${
-            item.image 
+            item.image
             ? `<img src="${item.image}" width="200">`
             : t.noImage
           }
@@ -92,7 +107,11 @@ async function loadRequests() {
         <p><b>${t.status}:</b> ${item.status}</p>
         <p><b>${t.date}:</b> ${new Date(item.createdAt).toLocaleString()}</p>
 
+        ${item.phone ? `<a href="tel:${item.phone}"><button>${t.call}</button></a><br><br>` : ""}
+        ${item.address ? `<a href="${mapUrl}" target="_blank"><button>${t.map}</button></a><br><br>` : ""}
+
         <button onclick="updateStatus(${item.id}, 'processing')">${t.processing}</button>
+        <br><br>
         <button onclick="updateStatus(${item.id}, 'completed')">${t.completed}</button>
       </div>
     `;
