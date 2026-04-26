@@ -8,63 +8,43 @@
   <!-- PWA -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0b3d91">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="YAMADEN">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: Arial;
       background: #f3f6fb;
-      color: #222;
     }
 
     .header {
       background: linear-gradient(135deg, #0b3d91, #1f8dd6);
       color: white;
-      padding: 28px 20px;
+      padding: 25px;
       text-align: center;
-    }
-
-    .header h1 {
-      margin: 0;
-      font-size: 28px;
-    }
-
-    .header p {
-      margin: 8px 0 0;
-      font-size: 15px;
+      font-size: 22px;
+      font-weight: bold;
     }
 
     .container {
-      max-width: 760px;
+      max-width: 700px;
       margin: 20px auto;
-      padding: 0 15px;
+      padding: 15px;
     }
 
     .card {
       background: white;
-      border-radius: 16px;
       padding: 20px;
-      margin-bottom: 18px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-    }
-
-    .card h2 {
-      margin-top: 0;
-      color: #0b3d91;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     }
 
     input, textarea, select {
       width: 100%;
-      box-sizing: border-box;
       padding: 12px;
-      margin-top: 8px;
-      margin-bottom: 14px;
-      border: 1px solid #ccc;
+      margin-top: 10px;
+      margin-bottom: 15px;
       border-radius: 10px;
-      font-size: 15px;
+      border: 1px solid #ccc;
     }
 
     textarea {
@@ -79,50 +59,45 @@
       background: #0b3d91;
       color: white;
       font-size: 16px;
-      font-weight: bold;
       cursor: pointer;
+      transition: 0.2s;
     }
 
-    button:hover {
-      background: #092f70;
-    }
-
-    .info {
-      line-height: 1.7;
-      font-size: 14px;
+    button:active {
+      transform: scale(0.96);
     }
 
     .result {
+      margin-top: 10px;
       font-weight: bold;
       color: #0b3d91;
-      margin-top: 12px;
     }
 
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      color: #777;
-      padding: 20px;
+    .loader {
+      border: 4px solid #ccc;
+      border-top: 4px solid #0b3d91;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+      display: none;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
     }
 
     .lang {
       text-align: right;
-      margin-bottom: 12px;
-    }
-
-    .lang select {
-      width: auto;
-      min-width: 140px;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 
 <body>
 
-<div class="header">
-  <h1>YAMADEN</h1>
-  <p id="slogan">電気と生きる、明るい未来を。</p>
-</div>
+<div class="header">YAMADEN Support</div>
 
 <div class="container">
 
@@ -134,31 +109,26 @@
   </div>
 
   <div class="card">
-    <h2 id="companyTitle">Thông tin công ty</h2>
-    <div class="info" id="companyInfo">
-      <b>株式会社 山電 / YAMADEN CO., LTD</b><br>
-      Điện công trình, thiết bị đo lường, bảo trì thiết bị điều khiển tự động.<br>
-      Địa chỉ: 〒733-0851 広島県広島市西区田方2-9-23<br>
-      TEL: 082-516-4423
-    </div>
-  </div>
 
-  <div class="card">
-    <h2 id="formTitle">Gửi yêu cầu hỗ trợ công trình</h2>
+    <h3 id="title">Gửi yêu cầu</h3>
 
-    <input id="name" placeholder="Tên khách hàng">
-    <textarea id="content" placeholder="Mô tả sự cố hoặc nội dung cần hỗ trợ"></textarea>
+    <input id="name" placeholder="Tên khách">
+    <input id="phone" placeholder="Số điện thoại">
+    <input id="contact" placeholder="Email / LINE / Zalo">
+    <input id="address" placeholder="Địa chỉ công trình">
+
+    <textarea id="content" placeholder="Mô tả sự cố"></textarea>
+
     <input type="file" id="image" accept="image/*">
 
-    <button id="sendBtn" onclick="sendRequest()">Gửi yêu cầu</button>
+    <button onclick="sendRequest()" id="sendBtn">Gửi</button>
+
+    <div class="loader" id="loader"></div>
 
     <p id="result" class="result"></p>
+
   </div>
 
-</div>
-
-<div class="footer">
-  © YAMADEN Co., Ltd. Support App
 </div>
 
 <script>
@@ -166,140 +136,144 @@ const API = "https://yamaden.onrender.com";
 
 const texts = {
   vi: {
-    slogan: "Sống cùng điện, hướng tới tương lai tươi sáng.",
-    companyTitle: "Thông tin công ty",
-    companyInfo: `<b>株式会社 山電 / YAMADEN CO., LTD</b><br>
-      Điện công trình, thiết bị đo lường, bảo trì thiết bị điều khiển tự động.<br>
-      Địa chỉ: 〒733-0851 広島県広島市西区田方2-9-23<br>
-      TEL: 082-516-4423`,
-    formTitle: "Gửi yêu cầu hỗ trợ công trình",
-    name: "Tên khách hàng",
-    content: "Mô tả sự cố hoặc nội dung cần hỗ trợ",
-    send: "Gửi yêu cầu",
+    title: "Gửi yêu cầu sửa điện",
+    name: "Tên khách",
+    phone: "Số điện thoại",
+    contact: "Email / LINE / Zalo",
+    address: "Địa chỉ công trình",
+    content: "Mô tả sự cố",
+    send: "Gửi",
     sending: "Đang gửi...",
     success: "Đã gửi thành công!",
-    failed: "Gửi thất bại!"
+    fail: "Gửi thất bại!",
+    required: "Vui lòng nhập đầy đủ thông tin!"
   },
   ja: {
-    slogan: "電気と生きる、明るい未来を。",
-    companyTitle: "会社情報",
-    companyInfo: `<b>株式会社 山電 / YAMADEN CO., LTD</b><br>
-      電気工事、計装工事、自動制御設備保守メンテナンス<br>
-      住所：〒733-0851 広島県広島市西区田方2-9-23<br>
-      TEL：082-516-4423`,
-    formTitle: "工事サポート依頼",
-    name: "お客様名",
-    content: "不具合内容・ご相談内容",
+    title: "修理依頼送信",
+    name: "名前",
+    phone: "電話番号",
+    contact: "連絡先",
+    address: "住所",
+    content: "内容",
     send: "送信",
     sending: "送信中...",
-    success: "送信が完了しました！",
-    failed: "送信に失敗しました！"
+    success: "送信完了！",
+    fail: "送信失敗！",
+    required: "必須項目を入力してください"
   }
 };
 
-let currentLang = localStorage.getItem("language") || "vi";
+let lang = localStorage.getItem("lang") || "vi";
 
-function applyLanguage() {
-  const t = texts[currentLang];
-
-  document.getElementById("language").value = currentLang;
-  document.getElementById("slogan").innerText = t.slogan;
-  document.getElementById("companyTitle").innerText = t.companyTitle;
-  document.getElementById("companyInfo").innerHTML = t.companyInfo;
-  document.getElementById("formTitle").innerText = t.formTitle;
+function applyLang() {
+  const t = texts[lang];
+  document.getElementById("language").value = lang;
+  document.getElementById("title").innerText = t.title;
   document.getElementById("name").placeholder = t.name;
+  document.getElementById("phone").placeholder = t.phone;
+  document.getElementById("contact").placeholder = t.contact;
+  document.getElementById("address").placeholder = t.address;
   document.getElementById("content").placeholder = t.content;
   document.getElementById("sendBtn").innerText = t.send;
 }
 
 function changeLanguage() {
-  currentLang = document.getElementById("language").value;
-  localStorage.setItem("language", currentLang);
-  applyLanguage();
+  lang = document.getElementById("language").value;
+  localStorage.setItem("lang", lang);
+  applyLang();
 }
 
 async function sendRequest() {
-  const t = texts[currentLang];
+  const t = texts[lang];
 
-  const name = document.getElementById("name").value;
-  const content = document.getElementById("content").value;
-  const file = document.getElementById("image").files[0];
+  const name = nameEl.value;
+  const phone = phoneEl.value;
+  const contact = contactEl.value;
+  const address = addressEl.value;
+  const content = contentEl.value;
+  const file = imageEl.files[0];
 
-  document.getElementById("result").innerText = t.sending;
+  if (!name || !phone || !address || !content) {
+    result.innerText = t.required;
+    return;
+  }
 
-  let imageBase64 = "";
+  loader.style.display = "block";
+  result.innerText = t.sending;
+
+  let image = "";
 
   if (file) {
-    imageBase64 = await resizeImage(file, 800, 0.6);
+    image = await resizeImage(file, 800, 0.6);
   }
 
   try {
     const res = await fetch(API + "/request", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ name, content, image: imageBase64 })
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({name, phone, contact, address, content, image})
     });
 
-    const data = await res.json();
-
     if (res.ok) {
-      document.getElementById("result").innerText = t.success;
-      document.getElementById("name").value = "";
-      document.getElementById("content").value = "";
-      document.getElementById("image").value = "";
+      result.innerText = t.success;
+      nameEl.value = "";
+      phoneEl.value = "";
+      contactEl.value = "";
+      addressEl.value = "";
+      contentEl.value = "";
+      imageEl.value = "";
     } else {
-      document.getElementById("result").innerText = t.failed + " " + data.message;
+      result.innerText = t.fail;
     }
-  } catch (err) {
-    console.log(err);
-    document.getElementById("result").innerText = t.failed;
+
+  } catch {
+    result.innerText = t.fail;
   }
+
+  loader.style.display = "none";
 }
 
 function resizeImage(file, maxWidth, quality) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const reader = new FileReader();
-
-    reader.onload = function(e) {
+    reader.onload = e => {
       const img = new Image();
-
-      img.onload = function() {
+      img.onload = () => {
         const canvas = document.createElement("canvas");
+        let w = img.width;
+        let h = img.height;
 
-        let width = img.width;
-        let height = img.height;
-
-        if (width > maxWidth) {
-          height = Math.round(height * maxWidth / width);
-          width = maxWidth;
+        if (w > maxWidth) {
+          h = h * maxWidth / w;
+          w = maxWidth;
         }
 
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d").drawImage(img,0,0,w,h);
 
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const base64 = canvas.toDataURL("image/jpeg", quality);
-        resolve(base64);
+        resolve(canvas.toDataURL("image/jpeg", quality));
       };
-
       img.src = e.target.result;
     };
-
     reader.readAsDataURL(file);
   });
 }
 
-applyLanguage();
+const nameEl = document.getElementById("name");
+const phoneEl = document.getElementById("phone");
+const contactEl = document.getElementById("contact");
+const addressEl = document.getElementById("address");
+const contentEl = document.getElementById("content");
+const imageEl = document.getElementById("image");
+const result = document.getElementById("result");
+const loader = document.getElementById("loader");
 
-// PWA service worker
+applyLang();
+
+// PWA
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/service-worker.js")
-    .then(() => console.log("Service Worker OK"))
-    .catch(err => console.log("Service Worker Error:", err));
+  navigator.serviceWorker.register("/service-worker.js");
 }
 </script>
 

@@ -11,7 +11,7 @@ app.use(cors({
 
 app.use(express.json({ limit: "100mb" }));
 
-// Cho server hiển thị index.html, admin.html
+// Cho server hiển thị index.html, admin.html, icon, manifest
 app.use(express.static(__dirname));
 
 const DB_FILE = "requests.json";
@@ -41,9 +41,18 @@ app.post("/request", (req, res) => {
 
     const newRequest = {
       id: Date.now(),
+
+      // Thông tin khách hàng
       name: req.body.name || "",
+      phone: req.body.phone || "",
+      contact: req.body.contact || "",
+      address: req.body.address || "",
+
+      // Nội dung yêu cầu
       content: req.body.content || "",
       image: req.body.image || "",
+
+      // Trạng thái
       status: "pending",
       createdAt: new Date()
     };
