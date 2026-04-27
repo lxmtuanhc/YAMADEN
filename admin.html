@@ -1,387 +1,276 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Admin - YAMADEN</title>
+<meta charset="UTF-8">
+<title>Admin - YAMADEN</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f6fb;
-      margin: 0;
-      padding: 20px;
-      color: #222;
-    }
+<style>
+body{
+  margin:0;
+  font-family:"Segoe UI";
+  background:#eef4ff;
+}
 
-    select {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 10px;
-    }
+/* HEADER */
+.header{
+  background:linear-gradient(135deg,#0b3d91,#1f8dd6);
+  color:white;
+  padding:18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-    h2 {
-      margin-top: 10px;
-      color: #0b3d91;
-    }
+.header h1{
+  margin:0;
+  font-size:20px;
+}
 
-    .notice {
-      display: none;
-      background: #fff3cd;
-      color: #92400e;
-      padding: 12px;
-      border-radius: 10px;
-      margin: 10px 0;
-      font-weight: bold;
-    }
+.header select{
+  border:none;
+  border-radius:10px;
+  padding:8px;
+}
 
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin: 15px 0;
-    }
+/* DASHBOARD */
+.dashboard{
+  display:flex;
+  gap:10px;
+  padding:15px;
+}
 
-    .tabs button {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      background: #dbe8ff;
-      color: #0b3d91;
-      cursor: pointer;
-      font-weight: bold;
-    }
+.box{
+  flex:1;
+  background:white;
+  border-radius:16px;
+  padding:15px;
+  text-align:center;
+  box-shadow:0 6px 16px rgba(0,0,0,0.1);
+}
 
-    .tabs button.active {
-      background: #0b3d91;
-      color: white;
-    }
+.box h2{
+  margin:0;
+  font-size:22px;
+  color:#0b3d91;
+}
 
-    button {
-      padding: 12px 16px;
-      border: none;
-      border-radius: 10px;
-      background: #0b3d91;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
+/* SEARCH */
+.search{
+  padding:0 15px;
+}
 
-    .reload {
-      margin-bottom: 10px;
-    }
+.search input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #ccc;
+}
 
-    .card {
-      border-radius: 16px;
-      padding: 18px;
-      margin: 16px 0;
-      background: white;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    }
+/* TABS */
+.tabs{
+  display:flex;
+  gap:10px;
+  padding:15px;
+}
 
-    .info p {
-      margin: 8px 0;
-      line-height: 1.5;
-    }
+.tabs button{
+  flex:1;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#dbe8ff;
+  color:#0b3d91;
+  font-weight:bold;
+}
 
-    .image {
-      max-width: 240px;
-      width: 100%;
-      border-radius: 10px;
-      margin-top: 8px;
-    }
+.tabs button.active{
+  background:#0b3d91;
+  color:white;
+}
 
-    .action-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
+/* CARD */
+.card{
+  margin:15px;
+  padding:18px;
+  border-radius:18px;
+  background:white;
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
 
-    .action-row button {
-      flex: 1;
-      min-width: 140px;
-    }
+.image{
+  width:100%;
+  max-width:240px;
+  border-radius:12px;
+}
 
-    .btn-call { background: #16a34a; }
-    .btn-map { background: #2563eb; }
-    .btn-processing { background: #d97706; }
-    .btn-completed { background: #16a34a; }
+/* BUTTON */
+.btn{
+  width:100%;
+  margin-top:10px;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  color:white;
+  font-weight:bold;
+}
 
-    .reply-box {
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid #ddd;
-    }
+.call{background:#16a34a;}
+.map{background:#2563eb;}
+.processing{background:#d97706;}
+.done{background:#16a34a;}
 
-    .reply-box textarea {
-      width: 100%;
-      min-height: 150px;
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      font-size: 15px;
-      box-sizing: border-box;
-      resize: vertical;
-      background: #fff;
-      box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
-    }
+/* STATUS */
+.badge{
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:bold;
+}
 
-    .reply-box button {
-      width: 100%;
-      margin-top: 10px;
-    }
+.pending{background:#eee;}
+.processing-b{background:orange;color:white;}
+.done-b{background:green;color:white;}
 
-    .status {
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-weight: bold;
-    }
-
-    .status-pending { background: #e5e7eb; color: #374151; }
-    .status-processing { background: #fef3c7; color: #92400e; }
-    .status-completed { background: #dcfce7; color: #166534; }
-  </style>
+textarea{
+  width:100%;
+  min-height:130px;
+  margin-top:10px;
+  border-radius:12px;
+  padding:12px;
+  border:1px solid #ccc;
+}
+</style>
 </head>
 
 <body>
 
-<select id="language" onchange="changeLanguage()">
-  <option value="vi">Tiếng Việt</option>
-  <option value="ja">日本語</option>
-</select>
+<div class="header">
+  <h1>⚡ YAMADEN Admin</h1>
+  <select id="language" onchange="changeLanguage()">
+    <option value="vi">VI</option>
+    <option value="ja">JP</option>
+  </select>
+</div>
 
-<h2 id="title">Danh sách yêu cầu khách hàng</h2>
+<div class="dashboard">
+  <div class="box"><h2 id="total">0</h2>Tổng</div>
+  <div class="box"><h2 id="active">0</h2>Đang xử lý</div>
+  <div class="box"><h2 id="done">0</h2>Hoàn thành</div>
+</div>
 
-<div id="notice" class="notice">🔔 Có yêu cầu mới!</div>
+<div class="search">
+  <input id="search" placeholder="🔍 Tìm theo tên / SĐT">
+</div>
 
 <div class="tabs">
   <button id="tabActive" class="active" onclick="changeTab('active')">Đang xử lý</button>
-  <button id="tabDone" onclick="changeTab('done')">Đã hoàn thành</button>
+  <button id="tabDone" onclick="changeTab('done')">Hoàn thành</button>
 </div>
-
-<button class="reload" id="reloadBtn" onclick="loadRequests(false)">Tải lại</button>
 
 <div id="list"></div>
 
 <script>
-const API = "https://yamaden.onrender.com";
+const API="https://yamaden.onrender.com";
+let currentTab="active";
 
-let currentLang = localStorage.getItem("language") || "vi";
-let currentTab = "active";
-let lastRequestCount = null;
+function changeTab(tab){
+  currentTab=tab;
+  tabActive.classList.remove("active");
+  tabDone.classList.remove("active");
 
-const texts = {
-  vi: {
-    title: "Danh sách yêu cầu khách hàng",
-    active: "Đang xử lý",
-    done: "Đã hoàn thành",
-    reload: "Tải lại",
-    id: "ID",
-    name: "Tên",
-    phone: "Số điện thoại",
-    contact: "Liên hệ",
-    address: "Địa chỉ",
-    content: "Nội dung",
-    image: "Hình ảnh",
-    noImage: "Không có hình",
-    status: "Trạng thái",
-    date: "Ngày gửi",
-    call: "📞 Gọi điện",
-    map: "📍 Mở bản đồ",
-    processing: "Đang xử lý",
-    completed: "Hoàn thành",
-    reply: "Phản hồi",
-    save: "Lưu phản hồi",
-    newRequest: "🔔 Có yêu cầu mới!"
-  },
-  ja: {
-    title: "お客様リクエスト一覧",
-    active: "処理中",
-    done: "完了",
-    reload: "再読み込み",
-    id: "ID",
-    name: "名前",
-    phone: "電話番号",
-    contact: "連絡先",
-    address: "住所",
-    content: "内容",
-    image: "画像",
-    noImage: "画像なし",
-    status: "状態",
-    date: "送信日時",
-    call: "📞 電話する",
-    map: "📍 地図を開く",
-    processing: "処理中",
-    completed: "完了",
-    reply: "返信",
-    save: "返信を保存",
-    newRequest: "🔔 新しい依頼があります！"
-  }
-};
+  if(tab==="active") tabActive.classList.add("active");
+  else tabDone.classList.add("active");
 
-function applyLanguage() {
-  const t = texts[currentLang];
-
-  document.getElementById("language").value = currentLang;
-  document.getElementById("title").innerText = t.title;
-  document.getElementById("reloadBtn").innerText = t.reload;
+  load();
 }
 
-function changeLanguage() {
-  currentLang = document.getElementById("language").value;
-  localStorage.setItem("language", currentLang);
-  applyLanguage();
-  loadRequests(false);
+function getBadge(status){
+  if(status==="processing") return "badge processing-b";
+  if(status==="completed") return "badge done-b";
+  return "badge pending";
 }
 
-function changeTab(tab) {
-  currentTab = tab;
+async function load(){
+  const res=await fetch(API+"/requests");
+  const data=await res.json();
 
-  document.getElementById("tabActive").classList.remove("active");
-  document.getElementById("tabDone").classList.remove("active");
+  total.innerText=data.length;
+  active.innerText=data.filter(x=>x.status!=="completed").length;
+  done.innerText=data.filter(x=>x.status==="completed").length;
 
-  if (tab === "active") {
-    document.getElementById("tabActive").classList.add("active");
-  } else {
-    document.getElementById("tabDone").classList.add("active");
-  }
+  const keyword=search.value.toLowerCase();
 
-  loadRequests(false);
-}
+  const filtered=data.filter(x=>{
+    const match =
+      (x.name||"").toLowerCase().includes(keyword) ||
+      (x.phone||"").toLowerCase().includes(keyword);
 
-function getStatusClass(status) {
-  if (status === "processing") return "status status-processing";
-  if (status === "completed") return "status status-completed";
-  return "status status-pending";
-}
-
-function notifyNewRequest() {
-  const t = texts[currentLang];
-
-  const notice = document.getElementById("notice");
-  notice.innerText = t.newRequest;
-  notice.style.display = "block";
-
-  setTimeout(() => {
-    notice.style.display = "none";
-  }, 5000);
-
-  try {
-    const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
-    audio.play();
-  } catch (e) {}
-
-  alert(t.newRequest);
-}
-
-async function loadRequests(checkNotify = true) {
-  const t = texts[currentLang];
-
-  const res = await fetch(API + "/requests");
-  const data = await res.json();
-
-  if (checkNotify && lastRequestCount !== null && data.length > lastRequestCount) {
-    notifyNewRequest();
-  }
-
-  lastRequestCount = data.length;
-
-  const activeCount = data.filter(item => item.status !== "completed").length;
-  const doneCount = data.filter(item => item.status === "completed").length;
-
-  document.getElementById("tabActive").innerText = `${t.active} (${activeCount})`;
-  document.getElementById("tabDone").innerText = `${t.done} (${doneCount})`;
-
-  const list = document.getElementById("list");
-  list.innerHTML = "";
-
-  const filtered = data.filter(item => {
-    if (currentTab === "active") {
-      return item.status !== "completed";
-    } else {
-      return item.status === "completed";
-    }
+    if(currentTab==="active") return match && x.status!=="completed";
+    return match && x.status==="completed";
   });
 
-  filtered.forEach(item => {
-    const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
+  list.innerHTML="";
 
-    list.innerHTML += `
-      <div class="card">
-        <div class="info">
-          <p><b>${t.id}:</b> ${item.id}</p>
-          <p><b>${t.name}:</b> ${item.name || ""}</p>
-          <p><b>${t.phone}:</b> ${item.phone || ""}</p>
-          <p><b>${t.contact}:</b> ${item.contact || ""}</p>
-          <p><b>${t.address}:</b> ${item.address || ""}</p>
-          <p><b>${t.content}:</b> ${item.content || ""}</p>
+  filtered.forEach(item=>{
+    const map="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(item.address||"");
 
-          <p><b>${t.image}:</b><br>
-            ${
-              item.image
-              ? `<img class="image" src="${item.image}">`
-              : t.noImage
-            }
-          </p>
+    list.innerHTML+=`
+    <div class="card">
 
-          <p><b>${t.status}:</b> <span class="${getStatusClass(item.status)}">${item.status}</span></p>
-          <p><b>${t.date}:</b> ${new Date(item.createdAt).toLocaleString()}</p>
-        </div>
+      <b>ID:</b> ${item.id}<br>
+      <b>Tên:</b> ${item.name||""}<br>
+      <b>SĐT:</b> ${item.phone||""}<br>
+      <b>Địa chỉ:</b> ${item.address||""}<br>
+      <b>Nội dung:</b> ${item.content||""}<br><br>
 
-        <div class="action-row">
-          ${item.phone ? `<a href="tel:${item.phone}"><button class="btn-call">${t.call}</button></a>` : ""}
-          ${item.address ? `<a href="${mapUrl}" target="_blank"><button class="btn-map">${t.map}</button></a>` : ""}
-        </div>
+      ${item.image?`<img class="image" src="${item.image}"><br><br>`:""}
 
-        ${
-          item.status !== "completed"
-          ? `
-            <div class="action-row">
-              <button class="btn-processing" onclick="updateStatus(${item.id}, 'processing')">${t.processing}</button>
-              <button class="btn-completed" onclick="updateStatus(${item.id}, 'completed')">${t.completed}</button>
-            </div>
-          `
-          : ""
-        }
+      <b>Status:</b> <span class="${getBadge(item.status)}">${item.status}</span><br><br>
 
-        <div class="reply-box">
-          <p><b>${t.reply}:</b></p>
-          <textarea id="reply-${item.id}">${item.adminReply || ""}</textarea>
-          <button onclick="saveReply(${item.id})">${t.save}</button>
-        </div>
-      </div>
+      ${item.phone?`<a href="tel:${item.phone}"><button class="btn call">📞 Gọi</button></a>`:""}
+      ${item.address?`<a href="${map}" target="_blank"><button class="btn map">📍 Map</button></a>`:""}
+
+      ${
+        item.status!=="completed"?
+        `
+        <button class="btn processing" onclick="updateStatus(${item.id},'processing')">Đang xử lý</button>
+        <button class="btn done" onclick="updateStatus(${item.id},'completed')">Hoàn thành</button>
+        `
+        :""
+      }
+
+      <textarea id="reply-${item.id}">${item.adminReply||""}</textarea>
+      <button class="btn" onclick="saveReply(${item.id})">Lưu phản hồi</button>
+
+    </div>
     `;
   });
 }
 
-async function updateStatus(id, status) {
-  await fetch(API + "/request/" + id, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status })
+async function updateStatus(id,status){
+  await fetch(API+"/request/"+id,{
+    method:"PUT",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({status})
   });
-
-  loadRequests(false);
+  load();
 }
 
-async function saveReply(id) {
-  const reply = document.getElementById("reply-" + id).value;
+async function saveReply(id){
+  const val=document.getElementById("reply-"+id).value;
 
-  await fetch(API + "/request/" + id, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ adminReply: reply })
+  await fetch(API+"/request/"+id,{
+    method:"PUT",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({adminReply:val})
   });
 
-  loadRequests(false);
+  load();
 }
 
-applyLanguage();
-loadRequests(false);
+search.addEventListener("input",load);
 
-
+load();
 </script>
 
 </body>
