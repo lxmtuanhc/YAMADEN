@@ -162,7 +162,6 @@
     <button id="tabCheck" onclick="showTab('check')">Tra cứu</button>
   </div>
 
-  <!-- GỬI YÊU CẦU -->
   <div class="card" id="sendSection">
     <h3 id="sendTitle">Gửi yêu cầu sửa điện</h3>
 
@@ -182,7 +181,6 @@
     <p id="result" class="result"></p>
   </div>
 
-  <!-- TRA CỨU -->
   <div class="card hidden" id="checkSection">
     <h3 id="checkTitle">Tra cứu trạng thái yêu cầu</h3>
 
@@ -223,7 +221,9 @@ const texts = {
     status: "Trạng thái",
     pending: "Đã tiếp nhận",
     processing: "Đang xử lý",
-    completed: "Hoàn thành"
+    completed: "Hoàn thành",
+    adminReply: "Phản hồi admin",
+    noReply: "Chưa có phản hồi"
   },
   ja: {
     tabSend: "依頼送信",
@@ -249,7 +249,9 @@ const texts = {
     status: "状態",
     pending: "受付済み",
     processing: "処理中",
-    completed: "完了"
+    completed: "完了",
+    adminReply: "管理者コメント",
+    noReply: "まだ返信はありません"
   }
 };
 
@@ -414,6 +416,11 @@ async function checkStatus() {
     <div class="success-box">
       <div>${t.requestId}: <b>${data.id}</b></div>
       <div>${t.status}: <b class="${cls}">${statusText}</b></div>
+
+      <div style="margin-top:12px;">
+        <b>${t.adminReply}:</b><br>
+        ${data.adminReply ? data.adminReply : t.noReply}
+      </div>
     </div>
   `;
 }

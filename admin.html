@@ -36,7 +36,9 @@ const texts = {
     processing: "Đang xử lý",
     completed: "Hoàn thành",
     call: "Gọi điện",
-    map: "Mở bản đồ"
+    map: "Mở bản đồ",
+    reply: "Phản hồi admin",
+    save: "Lưu phản hồi"
   },
   ja: {
     title: "お客様リクエスト一覧",
@@ -54,7 +56,9 @@ const texts = {
     processing: "処理中",
     completed: "完了",
     call: "電話する",
-    map: "地図を開く"
+    map: "地図を開く",
+    reply: "管理者コメント",
+    save: "保存"
   }
 };
 
@@ -89,6 +93,7 @@ async function loadRequests() {
 
     list.innerHTML += `
       <div style="border-radius:10px; padding:15px; margin:15px; background:#f5f5f5;">
+
         <p><b>${t.id}:</b> ${item.id}</p>
         <p><b>${t.name}:</b> ${item.name || ""}</p>
         <p><b>${t.phone}:</b> ${item.phone || ""}</p>
@@ -113,6 +118,14 @@ async function loadRequests() {
         <button onclick="updateStatus(${item.id}, 'processing')">${t.processing}</button>
         <br><br>
         <button onclick="updateStatus(${item.id}, 'completed')">${t.completed}</button>
+
+        <hr>
+
+        <p><b>${t.reply}:</b></p>
+        <textarea id="reply-${item.id}" style="width:100%; min-height:80px;">${item.adminReply || ""}</textarea>
+
+        <button onclick="saveReply(${item.id})">${t.save}</button>
+
       </div>
     `;
   });
@@ -125,6 +138,20 @@ async function updateStatus(id, status) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({ status })
+  });
+
+  loadRequests();
+}
+
+async function saveReply(id) {
+  const reply = document.getElementById("reply-" + id).value;
+
+  await fetch(API + `/request/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ adminReply: reply })
   });
 
   loadRequests();

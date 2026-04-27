@@ -54,6 +54,7 @@ app.post("/request", (req, res) => {
 
       // Trạng thái
       status: "pending",
+      adminReply: "",
       createdAt: new Date()
     };
 
@@ -120,6 +121,7 @@ app.put("/request/:id", (req, res) => {
     }
 
     item.status = req.body.status || item.status;
+    item.adminReply = req.body.adminReply ?? item.adminReply;
     writeData(requests);
 
     res.json({
