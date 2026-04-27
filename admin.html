@@ -25,6 +25,16 @@
       color: #0b3d91;
     }
 
+    .notice {
+      display: none;
+      background: #fff3cd;
+      color: #92400e;
+      padding: 12px;
+      border-radius: 10px;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+
     .tabs {
       display: flex;
       gap: 10px;
@@ -93,21 +103,10 @@
       min-width: 140px;
     }
 
-    .btn-call {
-      background: #16a34a;
-    }
-
-    .btn-map {
-      background: #2563eb;
-    }
-
-    .btn-processing {
-      background: #d97706;
-    }
-
-    .btn-completed {
-      background: #16a34a;
-    }
+    .btn-call { background: #16a34a; }
+    .btn-map { background: #2563eb; }
+    .btn-processing { background: #d97706; }
+    .btn-completed { background: #16a34a; }
 
     .reply-box {
       margin-top: 15px;
@@ -140,20 +139,9 @@
       font-weight: bold;
     }
 
-    .status-pending {
-      background: #e5e7eb;
-      color: #374151;
-    }
-
-    .status-processing {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .status-completed {
-      background: #dcfce7;
-      color: #166534;
-    }
+    .status-pending { background: #e5e7eb; color: #374151; }
+    .status-processing { background: #fef3c7; color: #92400e; }
+    .status-completed { background: #dcfce7; color: #166534; }
   </style>
 </head>
 
@@ -166,12 +154,14 @@
 
 <h2 id="title">Danh sách yêu cầu khách hàng</h2>
 
+<div id="notice" class="notice">🔔 Có yêu cầu mới!</div>
+
 <div class="tabs">
   <button id="tabActive" class="active" onclick="changeTab('active')">Đang xử lý</button>
   <button id="tabDone" onclick="changeTab('done')">Đã hoàn thành</button>
 </div>
 
-<button class="reload" id="reloadBtn" onclick="loadRequests()">Tải lại</button>
+<button class="reload" id="reloadBtn" onclick="loadRequests(false)">Tải lại</button>
 
 <div id="list"></div>
 
@@ -180,6 +170,7 @@ const API = "https://yamaden.onrender.com";
 
 let currentLang = localStorage.getItem("language") || "vi";
 let currentTab = "active";
+let lastRequestCount = null;
 
 const texts = {
   vi: {
@@ -202,7 +193,8 @@ const texts = {
     processing: "Đang xử lý",
     completed: "Hoàn thành",
     reply: "Phản hồi",
-    save: "Lưu phản hồi"
+    save: "Lưu phản hồi",
+    newRequest: "🔔 Có yêu cầu mới!"
   },
   ja: {
     title: "お客様リクエスト一覧",
@@ -224,7 +216,8 @@ const texts = {
     processing: "処理中",
     completed: "完了",
     reply: "返信",
-    save: "返信を保存"
+    save: "返信を保存",
+    newRequest: "🔔 新しい依頼があります！"
   }
 };
 
@@ -233,8 +226,6 @@ function applyLanguage() {
 
   document.getElementById("language").value = currentLang;
   document.getElementById("title").innerText = t.title;
-  document.getElementById("tabActive").innerText = t.active;
-  document.getElementById("tabDone").innerText = t.done;
   document.getElementById("reloadBtn").innerText = t.reload;
 }
 
@@ -242,7 +233,7 @@ function changeLanguage() {
   currentLang = document.getElementById("language").value;
   localStorage.setItem("language", currentLang);
   applyLanguage();
-  loadRequests();
+  loadRequests(false);
 }
 
 function changeTab(tab) {
@@ -257,7 +248,7 @@ function changeTab(tab) {
     document.getElementById("tabDone").classList.add("active");
   }
 
-  loadRequests();
+  loadRequests(false);
 }
 
 function getStatusClass(status) {
@@ -266,11 +257,42 @@ function getStatusClass(status) {
   return "status status-pending";
 }
 
-async function loadRequests() {
+function notifyNewRequest() {
+  const t = texts[currentLang];
+
+  const notice = document.getElementById("notice");
+  notice.innerText = t.newRequest;
+  notice.style.display = "block";
+
+  setTimeout(() => {
+    notice.style.display = "none";
+  }, 5000);
+
+  try {
+    const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
+    audio.play();
+  } catch (e) {}
+
+  alert(t.newRequest);
+}
+
+async function loadRequests(checkNotify = true) {
   const t = texts[currentLang];
 
   const res = await fetch(API + "/requests");
   const data = await res.json();
+
+  if (checkNotify && lastRequestCount !== null && data.length > lastRequestCount) {
+    notifyNewRequest();
+  }
+
+  lastRequestCount = data.length;
+
+  const activeCount = data.filter(item => item.status !== "completed").length;
+  const doneCount = data.filter(item => item.status === "completed").length;
+
+  document.getElementById("tabActive").innerText = `${t.active} (${activeCount})`;
+  document.getElementById("tabDone").innerText = `${t.done} (${doneCount})`;
 
   const list = document.getElementById("list");
   list.innerHTML = "";
@@ -341,7 +363,7 @@ async function updateStatus(id, status) {
     body: JSON.stringify({ status })
   });
 
-  loadRequests();
+  loadRequests(false);
 }
 
 async function saveReply(id) {
@@ -353,11 +375,16 @@ async function saveReply(id) {
     body: JSON.stringify({ adminReply: reply })
   });
 
-  loadRequests();
+  loadRequests(false);
 }
 
 applyLanguage();
-loadRequests();
+loadRequests(false);
+
+// 🔄 Tự cập nhật mỗi 5 giây
+setInterval(() => {
+  loadRequests(true);
+}, 5000);
 </script>
 
 </body>

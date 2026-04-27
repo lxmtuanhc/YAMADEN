@@ -102,6 +102,16 @@
       line-height: 1.8;
     }
 
+    .notice {
+      display: none;
+      background: #fff3cd;
+      color: #92400e;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
     .copy-btn {
       background: #1f8dd6;
     }
@@ -156,6 +166,8 @@
     </select>
   </div>
 
+  <div id="notice" class="notice">🔔 Admin đã phản hồi!</div>
+
   <div class="tabs">
     <button id="tabSend" class="active" onclick="showTab('send')">Gửi yêu cầu</button>
     <button id="tabCheck" onclick="showTab('check')">Tra cứu</button>
@@ -185,7 +197,7 @@
 
     <input id="checkId" placeholder="Nhập mã yêu cầu">
 
-    <button onclick="checkStatus()" id="checkBtn">Kiểm tra</button>
+    <button onclick="checkStatus(false)" id="checkBtn">Kiểm tra</button>
 
     <p id="checkResult" class="result"></p>
   </div>
@@ -194,6 +206,9 @@
 
 <script>
 const API = "https://yamaden.onrender.com";
+
+let lastAdminReply = "";
+let lastCheckedId = "";
 
 const texts = {
   vi: {
@@ -224,7 +239,8 @@ const texts = {
     completed: "Hoàn thành",
     adminReply: "Phản hồi admin",
     noReply: "Chưa có phản hồi",
-    noImage: "Không có hình"
+    noImage: "Không có hình",
+    newReply: "🔔 Admin đã phản hồi!"
   },
   ja: {
     tabSend: "依頼送信",
@@ -254,7 +270,8 @@ const texts = {
     completed: "完了",
     adminReply: "管理者コメント",
     noReply: "まだ返信はありません",
-    noImage: "画像なし"
+    noImage: "画像なし",
+    newReply: "🔔 管理者から返信がありました！"
   }
 };
 
@@ -279,12 +296,30 @@ function applyLang() {
   document.getElementById("sendBtn").innerText = t.send;
   document.getElementById("checkBtn").innerText = t.check;
   document.getElementById("checkId").placeholder = t.checkPlaceholder;
+  document.getElementById("notice").innerText = t.newReply;
 }
 
 function changeLanguage() {
   lang = document.getElementById("language").value;
   localStorage.setItem("lang", lang);
   applyLang();
+}
+
+function showNotice() {
+  const notice = document.getElementById("notice");
+  notice.innerText = texts[lang].newReply;
+  notice.style.display = "block";
+
+  setTimeout(() => {
+    notice.style.display = "none";
+  }, 5000);
+
+  try {
+    const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
+    audio.play();
+  } catch (e) {}
+
+  alert(texts[lang].newReply);
 }
 
 function showTab(tab) {
@@ -376,25 +411,41 @@ function copyId() {
 function openCheck(id) {
   showTab("check");
   checkId.value = id;
-  checkStatus();
+  lastAdminReply = "";
+  lastCheckedId = id;
+  checkStatus(false);
 }
 
-async function checkStatus() {
+async function checkStatus(isAuto = false) {
   const t = texts[lang];
   const id = checkId.value;
 
   if (!id) return;
 
-  checkResult.innerText = "Loading...";
+  if (!isAuto) {
+    checkResult.innerText = "Loading...";
+  }
 
   const res = await fetch(API + "/request/" + id);
 
   if (!res.ok) {
-    checkResult.innerText = t.notFound;
+    if (!isAuto) {
+      checkResult.innerText = t.notFound;
+    }
     return;
   }
 
   const data = await res.json();
+
+  if (lastCheckedId !== id) {
+    lastAdminReply = data.adminReply || "";
+    lastCheckedId = id;
+  } else {
+    if (isAuto && lastAdminReply && data.adminReply && data.adminReply !== lastAdminReply) {
+      showNotice();
+    }
+    lastAdminReply = data.adminReply || "";
+  }
 
   let statusText = "";
   let cls = "";
@@ -506,6 +557,12 @@ const checkId = document.getElementById("checkId");
 const checkResult = document.getElementById("checkResult");
 
 applyLang();
+
+setInterval(() => {
+  if (!checkSection.classList.contains("hidden") && checkId.value) {
+    checkStatus(true);
+  }
+}, 5000);
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/service-worker.js");
