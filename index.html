@@ -126,20 +126,19 @@
       margin-bottom: 10px;
     }
 
-    .status-pending {
-      color: gray;
-    }
-
-    .status-processing {
-      color: orange;
-    }
-
-    .status-completed {
-      color: green;
-    }
+    .status-pending { color: gray; font-weight: bold; }
+    .status-processing { color: orange; font-weight: bold; }
+    .status-completed { color: green; font-weight: bold; }
 
     .hidden {
       display: none;
+    }
+
+    .check-image {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 12px;
+      margin-top: 8px;
     }
   </style>
 </head>
@@ -204,9 +203,10 @@ const texts = {
     checkTitle: "Tra cứu trạng thái yêu cầu",
     name: "Tên khách",
     phone: "Số điện thoại",
-    contact: "Email / LINE / Zalo",
+    contact: "Liên hệ",
     address: "Địa chỉ công trình",
-    content: "Mô tả sự cố",
+    content: "Nội dung sự cố",
+    image: "Hình ảnh",
     send: "Gửi",
     check: "Kiểm tra",
     checkPlaceholder: "Nhập mã yêu cầu",
@@ -223,7 +223,8 @@ const texts = {
     processing: "Đang xử lý",
     completed: "Hoàn thành",
     adminReply: "Phản hồi admin",
-    noReply: "Chưa có phản hồi"
+    noReply: "Chưa có phản hồi",
+    noImage: "Không có hình"
   },
   ja: {
     tabSend: "依頼送信",
@@ -235,6 +236,7 @@ const texts = {
     contact: "連絡先",
     address: "住所",
     content: "内容",
+    image: "画像",
     send: "送信",
     check: "確認",
     checkPlaceholder: "受付IDを入力",
@@ -251,7 +253,8 @@ const texts = {
     processing: "処理中",
     completed: "完了",
     adminReply: "管理者コメント",
-    noReply: "まだ返信はありません"
+    noReply: "まだ返信はありません",
+    noImage: "画像なし"
   }
 };
 
@@ -261,7 +264,6 @@ function applyLang() {
   const t = texts[lang];
 
   document.getElementById("language").value = lang;
-
   document.getElementById("tabSend").innerText = t.tabSend;
   document.getElementById("tabCheck").innerText = t.tabCheck;
 
@@ -414,10 +416,37 @@ async function checkStatus() {
 
   checkResult.innerHTML = `
     <div class="success-box">
-      <div>${t.requestId}: <b>${data.id}</b></div>
-      <div>${t.status}: <b class="${cls}">${statusText}</b></div>
+      <div><b>${t.requestId}:</b> ${data.id}</div>
 
-      <div style="margin-top:12px;">
+      <div style="margin-top:8px;">
+        <b>${t.status}:</b>
+        <span class="${cls}">${statusText}</span>
+      </div>
+
+      <hr>
+
+      <div><b>${t.name}:</b> ${data.name || ""}</div>
+      <div><b>${t.phone}:</b> ${data.phone || ""}</div>
+      <div><b>${t.contact}:</b> ${data.contact || ""}</div>
+      <div><b>${t.address}:</b> ${data.address || ""}</div>
+
+      <div style="margin-top:8px;">
+        <b>${t.content}:</b><br>
+        ${data.content || ""}
+      </div>
+
+      <div style="margin-top:10px;">
+        <b>${t.image}:</b><br>
+        ${
+          data.image
+          ? `<img src="${data.image}" class="check-image">`
+          : t.noImage
+        }
+      </div>
+
+      <hr>
+
+      <div>
         <b>${t.adminReply}:</b><br>
         ${data.adminReply ? data.adminReply : t.noReply}
       </div>
