@@ -16,209 +16,204 @@
     body {
       margin: 0;
       font-family: "Segoe UI", Arial, sans-serif;
-      background: #eef3fb;
+      background: #eef4ff;
       color: #1f2937;
     }
 
     .app {
-      max-width: 720px;
+      max-width: 480px;
       margin: 0 auto;
       min-height: 100vh;
-      background: #eef3fb;
+      background: #eef4ff;
+      padding-bottom: 90px;
     }
 
-    .header {
+    .top-header {
       background: linear-gradient(135deg, #0b3d91, #1f8dd6);
       color: white;
-      padding: 20px 18px 26px;
-      border-radius: 0 0 24px 24px;
-      box-shadow: 0 6px 18px rgba(11,61,145,0.25);
+      padding: 18px;
+      border-radius: 0 0 28px 28px;
+      box-shadow: 0 8px 22px rgba(11,61,145,0.25);
     }
 
-    .header-top {
+    .top-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .brand {
+    .logo-box {
       display: flex;
       align-items: center;
       gap: 10px;
       font-size: 21px;
-      font-weight: bold;
+      font-weight: 800;
     }
 
-    .brand img {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
+    .logo-box img {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
       background: white;
     }
 
     .lang-select {
-      width: 90px;
+      width: 78px;
       padding: 8px;
-      border-radius: 10px;
+      border-radius: 12px;
       border: none;
       font-weight: bold;
     }
 
-    .welcome {
-      margin-top: 20px;
-      background: rgba(255,255,255,0.16);
-      padding: 16px;
-      border-radius: 18px;
+    .hero {
+      margin-top: 18px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 22px;
+      padding: 18px;
     }
 
-    .welcome h2 {
+    .hero h2 {
       margin: 0 0 8px;
-      font-size: 22px;
+      font-size: 23px;
     }
 
-    .welcome p {
+    .hero p {
       margin: 0;
       font-size: 14px;
+      line-height: 1.6;
       opacity: 0.95;
-      line-height: 1.5;
     }
 
     .container {
-      padding: 16px;
+      padding: 18px;
     }
 
     .notice {
       display: none;
-      background: #ecfdf5;
+      background: #dcfce7;
       color: #166534;
       padding: 14px;
-      border-radius: 14px;
-      margin-bottom: 14px;
-      font-weight: bold;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    }
-
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 14px;
-      background: white;
-      padding: 6px;
       border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    }
-
-    .tabs button {
-      flex: 1;
-      border: none;
-      padding: 12px;
-      border-radius: 12px;
-      background: transparent;
-      color: #0b3d91;
-      font-weight: bold;
-      font-size: 15px;
-      cursor: pointer;
-    }
-
-    .tabs button.active {
-      background: #0b3d91;
-      color: white;
-      box-shadow: 0 4px 10px rgba(11,61,145,0.25);
+      margin-bottom: 14px;
+      font-weight: 700;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
     }
 
     .card {
       background: white;
-      padding: 18px;
-      border-radius: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.08);
       margin-bottom: 18px;
     }
 
     .card h3 {
-      margin-top: 0;
-      color: #0b3d91;
+      margin: 0 0 18px;
+      color: #111827;
+      font-size: 22px;
     }
 
-    label {
+    .field {
+      margin-bottom: 15px;
+    }
+
+    .field label {
       display: block;
-      font-weight: bold;
-      margin-bottom: 6px;
-      color: #374151;
+      font-weight: 700;
+      margin-bottom: 7px;
       font-size: 14px;
+      color: #374151;
     }
 
     input, textarea {
       width: 100%;
-      padding: 14px;
-      margin-bottom: 14px;
-      border-radius: 14px;
       border: 1px solid #d1d5db;
-      font-size: 15px;
+      border-radius: 15px;
+      padding: 15px;
+      font-size: 16px;
       outline: none;
       background: #fff;
     }
 
-    input:focus, textarea:focus {
-      border-color: #1f8dd6;
-      box-shadow: 0 0 0 3px rgba(31,141,214,0.12);
-    }
-
     textarea {
-      min-height: 120px;
+      min-height: 130px;
       resize: vertical;
     }
 
-    button.main-btn {
-      width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #0b3d91, #1f8dd6);
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
+    input:focus, textarea:focus {
+      border-color: #1f8dd6;
+      box-shadow: 0 0 0 4px rgba(31,141,214,0.12);
     }
 
-    button.main-btn:active {
-      transform: scale(0.96);
+    .upload-box {
+      border: 2px dashed #9bbcf2;
+      background: #f8fbff;
+      padding: 18px;
+      border-radius: 18px;
+      text-align: center;
+      color: #0b3d91;
+      font-weight: 700;
+    }
+
+    .upload-box input {
+      border: none;
+      padding: 10px 0 0;
+      background: transparent;
+    }
+
+    .main-btn {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 16px;
+      background: linear-gradient(135deg, #0b3d91, #1f8dd6);
+      color: white;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(11,61,145,0.22);
+    }
+
+    .main-btn:active {
+      transform: scale(0.97);
     }
 
     .copy-btn {
       width: 100%;
-      padding: 13px;
       border: none;
-      border-radius: 14px;
+      border-radius: 16px;
+      padding: 14px;
       background: #1f8dd6;
       color: white;
-      font-weight: bold;
+      font-size: 15px;
+      font-weight: 800;
       margin-top: 10px;
-    }
-
-    .result {
-      margin-top: 14px;
-      font-weight: bold;
-      color: #0b3d91;
-      line-height: 1.7;
     }
 
     .success-box {
       background: #e8f2ff;
-      padding: 16px;
-      border-radius: 16px;
       color: #0b3d91;
+      padding: 16px;
+      border-radius: 18px;
       line-height: 1.8;
+    }
+
+    .result {
+      margin-top: 14px;
+      font-weight: 700;
+      color: #0b3d91;
+      line-height: 1.7;
     }
 
     .loader {
       border: 4px solid #d1d5db;
       border-top: 4px solid #0b3d91;
       border-radius: 50%;
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       animation: spin 1s linear infinite;
-      margin: 16px auto;
+      margin: 18px auto;
       display: none;
     }
 
@@ -232,23 +227,23 @@
 
     .badge {
       display: inline-block;
-      padding: 6px 12px;
+      padding: 7px 13px;
       border-radius: 999px;
       font-size: 13px;
-      font-weight: bold;
+      font-weight: 800;
     }
 
-    .badge.pending {
+    .pending {
       background: #e5e7eb;
       color: #374151;
     }
 
-    .badge.processing {
+    .processing {
       background: #fef3c7;
       color: #92400e;
     }
 
-    .badge.completed {
+    .completed {
       background: #dcfce7;
       color: #166534;
     }
@@ -256,19 +251,50 @@
     .check-image {
       width: 100%;
       max-width: 320px;
-      border-radius: 14px;
+      border-radius: 16px;
       margin-top: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.14);
     }
 
-    .info-row {
-      margin: 6px 0;
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      width: min(440px, calc(100% - 28px));
+      background: white;
+      border-radius: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+      display: flex;
+      padding: 8px;
+      gap: 8px;
+      z-index: 100;
+    }
+
+    .bottom-nav button {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: #6b7280;
+      border-radius: 16px;
+      padding: 11px 8px;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .bottom-nav button.active {
+      background: #0b3d91;
+      color: white;
     }
 
     hr {
       border: none;
       border-top: 1px solid #dbe3ef;
       margin: 14px 0;
+    }
+
+    .info-line {
+      margin: 7px 0;
     }
   </style>
 </head>
@@ -277,9 +303,9 @@
 
 <div class="app">
 
-  <div class="header">
-    <div class="header-top">
-      <div class="brand">
+  <div class="top-header">
+    <div class="top-row">
+      <div class="logo-box">
         <img src="/icon-192.png" alt="YAMADEN">
         <span>YAMADEN</span>
       </div>
@@ -290,7 +316,7 @@
       </select>
     </div>
 
-    <div class="welcome">
+    <div class="hero">
       <h2 id="welcomeTitle">Xin chào!</h2>
       <p id="welcomeText">Gửi yêu cầu hỗ trợ và tra cứu trạng thái nhanh chóng.</p>
     </div>
@@ -300,50 +326,66 @@
 
     <div id="notice" class="notice">🔔 Admin đã phản hồi!</div>
 
-    <div class="tabs">
-      <button id="tabSend" class="active" onclick="showTab('send')">Gửi yêu cầu</button>
-      <button id="tabCheck" onclick="showTab('check')">Tra cứu</button>
-    </div>
-
     <div class="card" id="sendSection">
       <h3 id="sendTitle">Gửi yêu cầu sửa điện</h3>
 
-      <label id="labelName">Tên khách</label>
-      <input id="name" placeholder="Tên khách">
+      <div class="field">
+        <label id="labelName">Tên khách</label>
+        <input id="name" placeholder="Tên khách">
+      </div>
 
-      <label id="labelPhone">Số điện thoại</label>
-      <input id="phone" placeholder="Số điện thoại">
+      <div class="field">
+        <label id="labelPhone">Số điện thoại</label>
+        <input id="phone" placeholder="Số điện thoại">
+      </div>
 
-      <label id="labelContact">Liên hệ</label>
-      <input id="contact" placeholder="Email / LINE / Zalo">
+      <div class="field">
+        <label id="labelContact">Liên hệ</label>
+        <input id="contact" placeholder="Email / LINE / Zalo">
+      </div>
 
-      <label id="labelAddress">Địa chỉ công trình</label>
-      <input id="address" placeholder="Địa chỉ công trình">
+      <div class="field">
+        <label id="labelAddress">Địa chỉ công trình</label>
+        <input id="address" placeholder="Địa chỉ công trình">
+      </div>
 
-      <label id="labelContent">Nội dung sự cố</label>
-      <textarea id="content" placeholder="Mô tả sự cố"></textarea>
+      <div class="field">
+        <label id="labelContent">Nội dung sự cố</label>
+        <textarea id="content" placeholder="Mô tả sự cố"></textarea>
+      </div>
 
-      <label id="labelImage">Hình ảnh</label>
-      <input type="file" id="image" accept="image/*">
+      <div class="field">
+        <label id="labelImage">Hình ảnh</label>
+        <div class="upload-box">
+          📷 Chọn ảnh hoặc chụp ảnh
+          <input type="file" id="image" accept="image/*">
+        </div>
+      </div>
 
-      <button class="main-btn" onclick="sendRequest()" id="sendBtn">Gửi</button>
+      <button class="main-btn" onclick="sendRequest()" id="sendBtn">Gửi yêu cầu</button>
 
       <div class="loader" id="loader"></div>
-
       <div id="result" class="result"></div>
     </div>
 
     <div class="card hidden" id="checkSection">
       <h3 id="checkTitle">Tra cứu trạng thái yêu cầu</h3>
 
-      <label id="labelCheckId">Mã yêu cầu</label>
-      <input id="checkId" placeholder="Nhập mã yêu cầu">
+      <div class="field">
+        <label id="labelCheckId">Mã yêu cầu</label>
+        <input id="checkId" placeholder="Nhập mã yêu cầu">
+      </div>
 
       <button class="main-btn" onclick="checkStatus(false)" id="checkBtn">Kiểm tra</button>
 
       <div id="checkResult" class="result"></div>
     </div>
 
+  </div>
+
+  <div class="bottom-nav">
+    <button id="tabSend" class="active" onclick="showTab('send')">Gửi yêu cầu</button>
+    <button id="tabCheck" onclick="showTab('check')">Tra cứu</button>
   </div>
 
 </div>
@@ -386,7 +428,8 @@ const texts = {
     adminReply: "Phản hồi admin",
     noReply: "Chưa có phản hồi",
     noImage: "Không có hình",
-    newReply: "🔔 Admin đã phản hồi!"
+    newReply: "🔔 Admin đã phản hồi!",
+    upload: "📷 Chọn ảnh hoặc chụp ảnh"
   },
   ja: {
     welcomeTitle: "こんにちは！",
@@ -419,7 +462,8 @@ const texts = {
     adminReply: "管理者コメント",
     noReply: "まだ返信はありません",
     noImage: "画像なし",
-    newReply: "🔔 管理者から返信がありました！"
+    newReply: "🔔 管理者から返信がありました！",
+    upload: "📷 画像を選択・撮影"
   }
 };
 
@@ -428,8 +472,7 @@ let lang = localStorage.getItem("lang") || "vi";
 function applyLang() {
   const t = texts[lang];
 
-  document.getElementById("language").value = lang;
-
+  language.value = lang;
   welcomeTitle.innerText = t.welcomeTitle;
   welcomeText.innerText = t.welcomeText;
 
@@ -460,23 +503,9 @@ function applyLang() {
 }
 
 function changeLanguage() {
-  lang = document.getElementById("language").value;
+  lang = language.value;
   localStorage.setItem("lang", lang);
   applyLang();
-}
-
-function showNotice() {
-  notice.innerText = texts[lang].newReply;
-  notice.style.display = "block";
-
-  setTimeout(() => {
-    notice.style.display = "none";
-  }, 5000);
-
-  try {
-    const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
-    audio.play();
-  } catch (e) {}
 }
 
 function showTab(tab) {
@@ -491,6 +520,20 @@ function showTab(tab) {
     tabSend.classList.remove("active");
     tabCheck.classList.add("active");
   }
+}
+
+function showNotice() {
+  notice.innerText = texts[lang].newReply;
+  notice.style.display = "block";
+
+  setTimeout(() => {
+    notice.style.display = "none";
+  }, 5000);
+
+  try {
+    const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
+    audio.play();
+  } catch (e) {}
 }
 
 async function sendRequest() {
@@ -633,10 +676,10 @@ async function checkStatus(isAuto = false) {
 
       <hr>
 
-      <div class="info-row"><b>${t.name}:</b> ${data.name || ""}</div>
-      <div class="info-row"><b>${t.phone}:</b> ${data.phone || ""}</div>
-      <div class="info-row"><b>${t.contact}:</b> ${data.contact || ""}</div>
-      <div class="info-row"><b>${t.address}:</b> ${data.address || ""}</div>
+      <div class="info-line"><b>${t.name}:</b> ${data.name || ""}</div>
+      <div class="info-line"><b>${t.phone}:</b> ${data.phone || ""}</div>
+      <div class="info-line"><b>${t.contact}:</b> ${data.contact || ""}</div>
+      <div class="info-line"><b>${t.address}:</b> ${data.address || ""}</div>
 
       <div style="margin-top:8px;">
         <b>${t.content}:</b><br>
