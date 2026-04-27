@@ -86,9 +86,7 @@
       outline:none;
     }
 
-    .lang-select option {
-      color:#111;
-    }
+    .lang-select option { color:#111; }
 
     .hero {
       margin-top:24px;
@@ -141,14 +139,8 @@
     }
 
     @keyframes cardUp {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity:0; transform:translateY(12px); }
+      to { opacity:1; transform:translateY(0); }
     }
 
     .card-title {
@@ -176,9 +168,7 @@
       font-weight:950;
     }
 
-    .field {
-      margin-bottom:17px;
-    }
+    .field { margin-bottom:17px; }
 
     .field label {
       display:block;
@@ -188,13 +178,9 @@
       color:#111827;
     }
 
-    .required {
-      color:#dc2626;
-    }
+    .required { color:#dc2626; }
 
-    .input-wrap {
-      position:relative;
-    }
+    .input-wrap { position:relative; }
 
     .input-icon {
       position:absolute;
@@ -297,9 +283,7 @@
       gap:9px;
     }
 
-    .main-btn:active {
-      transform:scale(0.99);
-    }
+    .main-btn:active { transform:scale(0.99); }
 
     .main-btn:disabled {
       opacity:0.65;
@@ -1167,7 +1151,7 @@ function openCheck(id) {
 
 async function checkStatus(isAuto = false) {
   const t = texts[lang];
-  const id = checkId.value;
+  const id = checkId.value.trim();
 
   if (!id) return;
 
@@ -1180,7 +1164,7 @@ async function checkStatus(isAuto = false) {
     checkBtn.innerHTML = `${iconSpinner()} <span>${t.loading}</span>`;
   }
 
-  const res = await fetch(API + "/request/" + id);
+  const res = await fetch(API + "/request/" + encodeURIComponent(id));
 
   if (!res.ok) {
     if (!isAuto) {

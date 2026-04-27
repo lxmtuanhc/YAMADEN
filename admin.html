@@ -320,7 +320,6 @@ body {
   color: #64748b;
 }
 
-/* MODAL */
 .modal {
   display: none;
   position: fixed;
@@ -398,14 +397,8 @@ body {
 }
 
 @keyframes modalPop {
-  from {
-    transform: scale(0.92);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 @media (max-width: 1200px) {
@@ -525,15 +518,6 @@ const texts = {
     today: "Hôm nay",
     reload: "Tải lại",
     search: "🔍 Tìm theo tên, SĐT, địa chỉ...",
-    name: "Tên",
-    phone: "SĐT",
-    contact: "Liên hệ",
-    address: "Địa chỉ",
-    content: "Nội dung",
-    image: "Hình ảnh",
-    noImage: "Không có hình",
-    status: "Trạng thái",
-    date: "Ngày gửi",
     call: "📞 Gọi",
     map: "📍 Bản đồ",
     processing: "Đang xử lý",
@@ -555,15 +539,6 @@ const texts = {
     today: "本日",
     reload: "再読み込み",
     search: "🔍 名前、電話番号、住所で検索...",
-    name: "名前",
-    phone: "電話番号",
-    contact: "連絡先",
-    address: "住所",
-    content: "内容",
-    image: "画像",
-    noImage: "画像なし",
-    status: "状態",
-    date: "送信日時",
     call: "📞 電話",
     map: "📍 地図",
     processing: "処理中",
@@ -579,6 +554,10 @@ const texts = {
   }
 };
 
+function safeId(id) {
+  return String(id).replace(/'/g, "\\'");
+}
+
 function applyLanguage() {
   const t = texts[currentLang];
 
@@ -591,9 +570,9 @@ function applyLanguage() {
   reloadBtn.innerText = t.reload;
   search.placeholder = t.search;
 
-  document.getElementById("modalTitle").innerText = t.confirmTitle;
-  document.getElementById("modalCancelBtn").innerText = t.cancel;
-  document.getElementById("modalDeleteBtn").innerText = t.delete;
+  modalTitle.innerText = t.confirmTitle;
+  modalCancelBtn.innerText = t.cancel;
+  modalDeleteBtn.innerText = t.delete;
 
   updateTabLabels();
 }
@@ -678,6 +657,7 @@ async function load() {
 
   const filtered = data.filter(item => {
     const match =
+      String(item.id || "").toLowerCase().includes(keyword) ||
       (item.name || "").toLowerCase().includes(keyword) ||
       (item.phone || "").toLowerCase().includes(keyword) ||
       (item.address || "").toLowerCase().includes(keyword) ||
@@ -698,6 +678,7 @@ async function load() {
   }
 
   filtered.forEach(item => {
+    const id = safeId(item.id);
     const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
 
     list.innerHTML += `
@@ -734,11 +715,11 @@ async function load() {
           ${
             item.status !== "completed"
             ? `
-              <button class="processing" onclick="updateStatus(${item.id}, 'processing')">${t.processing}</button>
-              <button class="completed" onclick="updateStatus(${item.id}, 'completed')">${t.completed}</button>
+              <button class="processing" onclick="updateStatus('${id}', 'processing')">${t.processing}</button>
+              <button class="completed" onclick="updateStatus('${id}', 'completed')">${t.completed}</button>
             `
             : `
-              <button class="delete" onclick="deleteRequest(${item.id})">🗑️ ${t.delete}</button>
+              <button class="delete" onclick="deleteRequest('${id}')">🗑️ ${t.delete}</button>
             `
           }
         </div>
@@ -746,7 +727,7 @@ async function load() {
         <div class="reply-card">
           <div class="reply-title">${t.reply}</div>
           <textarea id="reply-${item.id}">${item.adminReply || ""}</textarea>
-          <button class="save" onclick="saveReply(${item.id})">${t.save}</button>
+          <button class="save" onclick="saveReply('${id}')">${t.save}</button>
         </div>
 
       </div>
@@ -755,7 +736,7 @@ async function load() {
 }
 
 async function updateStatus(id, status) {
-  await fetch(API + "/request/" + id, {
+  await fetch(API + "/request/" + encodeURIComponent(id), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status })
@@ -767,7 +748,7 @@ async function updateStatus(id, status) {
 async function saveReply(id) {
   const reply = document.getElementById("reply-" + id).value;
 
-  await fetch(API + "/request/" + id, {
+  await fetch(API + "/request/" + encodeURIComponent(id), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ adminReply: reply })
@@ -780,19 +761,19 @@ function deleteRequest(id) {
   const t = texts[currentLang];
 
   deleteId = id;
-  document.getElementById("modalText").innerText = t.confirmDelete;
-  document.getElementById("modal").style.display = "flex";
+  modalText.innerText = t.confirmDelete;
+  modal.style.display = "flex";
 }
 
 function closeModal() {
-  document.getElementById("modal").style.display = "none";
+  modal.style.display = "none";
   deleteId = null;
 }
 
 async function confirmDelete() {
   if (deleteId === null) return;
 
-  await fetch(API + "/request/" + deleteId, {
+  await fetch(API + "/request/" + encodeURIComponent(deleteId), {
     method: "DELETE"
   });
 
