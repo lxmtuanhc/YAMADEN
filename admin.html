@@ -3,6 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <title>Admin - YAMADEN</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f3f6fb;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin: 10px;
+    }
+
+    .tabs button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: #ddd;
+      cursor: pointer;
+    }
+
+    .tabs button.active {
+      background: #0b3d91;
+      color: white;
+    }
+
+    .card {
+      border-radius:10px;
+      padding:15px;
+      margin:15px;
+      background:#f5f5f5;
+    }
+  </style>
 </head>
 <body>
 
@@ -12,6 +45,12 @@
 </select>
 
 <h2 id="title">Danh sách yêu cầu khách hàng</h2>
+
+<div class="tabs">
+  <button id="tabActive" class="active" onclick="changeTab('active')">Đang xử lý</button>
+  <button id="tabDone" onclick="changeTab('done')">Đã hoàn thành</button>
+</div>
+
 <button id="reloadBtn" onclick="loadRequests()">Tải lại</button>
 
 <div id="list"></div>
@@ -19,112 +58,74 @@
 <script>
 const API = "https://yamaden.onrender.com";
 
-const texts = {
-  vi: {
-    title: "Danh sách yêu cầu khách hàng",
-    reload: "Tải lại",
-    id: "ID",
-    name: "Tên",
-    phone: "Số điện thoại",
-    contact: "Liên hệ",
-    address: "Địa chỉ",
-    content: "Nội dung",
-    image: "Hình ảnh",
-    noImage: "Không có hình",
-    status: "Trạng thái",
-    date: "Ngày gửi",
-    processing: "Đang xử lý",
-    completed: "Hoàn thành",
-    call: "Gọi điện",
-    map: "Mở bản đồ",
-    reply: "Phản hồi admin",
-    save: "Lưu phản hồi"
-  },
-  ja: {
-    title: "お客様リクエスト一覧",
-    reload: "再読み込み",
-    id: "ID",
-    name: "名前",
-    phone: "電話番号",
-    contact: "連絡先",
-    address: "住所",
-    content: "内容",
-    image: "画像",
-    noImage: "画像なし",
-    status: "状態",
-    date: "送信日時",
-    processing: "処理中",
-    completed: "完了",
-    call: "電話する",
-    map: "地図を開く",
-    reply: "管理者コメント",
-    save: "保存"
-  }
-};
-
 let currentLang = localStorage.getItem("language") || "vi";
+let currentTab = "active";
 
-function applyLanguage() {
-  const t = texts[currentLang];
+function changeTab(tab) {
+  currentTab = tab;
 
-  document.getElementById("language").value = currentLang;
-  document.getElementById("title").innerText = t.title;
-  document.getElementById("reloadBtn").innerText = t.reload;
-}
+  document.getElementById("tabActive").classList.remove("active");
+  document.getElementById("tabDone").classList.remove("active");
 
-function changeLanguage() {
-  currentLang = document.getElementById("language").value;
-  localStorage.setItem("language", currentLang);
-  applyLanguage();
+  if (tab === "active") {
+    document.getElementById("tabActive").classList.add("active");
+  } else {
+    document.getElementById("tabDone").classList.add("active");
+  }
+
   loadRequests();
 }
 
 async function loadRequests() {
-  const t = texts[currentLang];
-
   const res = await fetch(API + "/requests");
   const data = await res.json();
 
   const list = document.getElementById("list");
   list.innerHTML = "";
 
-  data.forEach(item => {
+  // 🔥 FILTER
+  const filtered = data.filter(item => {
+    if (currentTab === "active") {
+      return item.status !== "completed";
+    } else {
+      return item.status === "completed";
+    }
+  });
+
+  filtered.forEach(item => {
     const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
 
     list.innerHTML += `
-      <div style="border-radius:10px; padding:15px; margin:15px; background:#f5f5f5;">
+      <div class="card">
 
-        <p><b>${t.id}:</b> ${item.id}</p>
-        <p><b>${t.name}:</b> ${item.name || ""}</p>
-        <p><b>${t.phone}:</b> ${item.phone || ""}</p>
-        <p><b>${t.contact}:</b> ${item.contact || ""}</p>
-        <p><b>${t.address}:</b> ${item.address || ""}</p>
-        <p><b>${t.content}:</b> ${item.content || ""}</p>
+        <p><b>ID:</b> ${item.id}</p>
+        <p><b>Tên:</b> ${item.name || ""}</p>
+        <p><b>Phone:</b> ${item.phone || ""}</p>
+        <p><b>Địa chỉ:</b> ${item.address || ""}</p>
+        <p><b>Nội dung:</b> ${item.content || ""}</p>
 
-        <p><b>${t.image}:</b><br>
-          ${
-            item.image
-            ? `<img src="${item.image}" width="200">`
-            : t.noImage
-          }
+        <p><b>Hình:</b><br>
+          ${item.image ? `<img src="${item.image}" width="200">` : "Không có"}
         </p>
 
-        <p><b>${t.status}:</b> ${item.status}</p>
-        <p><b>${t.date}:</b> ${new Date(item.createdAt).toLocaleString()}</p>
+        <p><b>Status:</b> ${item.status}</p>
 
-        ${item.phone ? `<a href="tel:${item.phone}"><button>${t.call}</button></a><br><br>` : ""}
-        ${item.address ? `<a href="${mapUrl}" target="_blank"><button>${t.map}</button></a><br><br>` : ""}
+        ${item.phone ? `<a href="tel:${item.phone}"><button>📞 Gọi</button></a><br><br>` : ""}
+        ${item.address ? `<a href="${mapUrl}" target="_blank"><button>📍 Map</button></a><br><br>` : ""}
 
-        <button onclick="updateStatus(${item.id}, 'processing')">${t.processing}</button>
-        <br><br>
-        <button onclick="updateStatus(${item.id}, 'completed')">${t.completed}</button>
+        ${
+          item.status !== "completed"
+          ? `<button onclick="updateStatus(${item.id}, 'processing')">Đang xử lý</button><br><br>
+             <button onclick="updateStatus(${item.id}, 'completed')">Hoàn thành</button>`
+          : ""
+        }
 
         <hr>
 
-        <p><b>${t.reply}:</b></p>
-        <textarea id="reply-${item.id}" style="width:100%; min-height:80px;">${item.adminReply || ""}</textarea>
+        <p><b>Phản hồi:</b></p>
+        <textarea id="reply-${item.id}">${item.adminReply || ""}</textarea>
 
-        <button onclick="saveReply(${item.id})">${t.save}</button>
+        <button onclick="saveReply(${item.id})">Lưu</button>
 
       </div>
     `;
@@ -132,11 +133,9 @@ async function loadRequests() {
 }
 
 async function updateStatus(id, status) {
-  await fetch(API + `/request/${id}`, {
+  await fetch(API + "/request/" + id, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status })
   });
 
@@ -146,18 +145,20 @@ async function updateStatus(id, status) {
 async function saveReply(id) {
   const reply = document.getElementById("reply-" + id).value;
 
-  await fetch(API + `/request/${id}`, {
+  await fetch(API + "/request/" + id, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ adminReply: reply })
   });
 
   loadRequests();
 }
 
-applyLanguage();
+function changeLanguage() {
+  currentLang = document.getElementById("language").value;
+  localStorage.setItem("language", currentLang);
+}
+
 loadRequests();
 </script>
 
