@@ -5,139 +5,250 @@
 <title>Admin - YAMADEN</title>
 
 <style>
-body{
-  margin:0;
-  font-family:"Segoe UI";
-  background:#eef4ff;
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #eef4ff;
+  color: #1f2937;
 }
 
 /* HEADER */
-.header{
-  background:linear-gradient(135deg,#0b3d91,#1f8dd6);
-  color:white;
-  padding:18px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+.header {
+  background: linear-gradient(135deg, #0b3d91, #1f8dd6);
+  color: white;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 6px 18px rgba(11,61,145,0.25);
 }
 
-.header h1{
-  margin:0;
-  font-size:20px;
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 22px;
+  font-weight: 800;
 }
 
-.header select{
-  border:none;
-  border-radius:10px;
-  padding:8px;
+.logo img {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: white;
+}
+
+.header select {
+  border: none;
+  border-radius: 12px;
+  padding: 10px;
+  font-weight: bold;
+}
+
+/* MAIN */
+.container {
+  padding: 22px;
 }
 
 /* DASHBOARD */
-.dashboard{
-  display:flex;
-  gap:10px;
-  padding:15px;
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
-.box{
-  flex:1;
-  background:white;
-  border-radius:16px;
-  padding:15px;
-  text-align:center;
-  box-shadow:0 6px 16px rgba(0,0,0,0.1);
+.box {
+  background: white;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
 }
 
-.box h2{
-  margin:0;
-  font-size:22px;
-  color:#0b3d91;
+.box-title {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 8px;
 }
 
-/* SEARCH */
-.search{
-  padding:0 15px;
+.box-number {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0b3d91;
 }
 
-.search input{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid #ccc;
+/* TOOLBAR */
+.toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.search input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #d1d5db;
+  font-size: 15px;
+}
+
+.reload {
+  padding: 14px 20px;
+  border: none;
+  border-radius: 14px;
+  background: #0b3d91;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 /* TABS */
-.tabs{
-  display:flex;
-  gap:10px;
-  padding:15px;
+.tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
-.tabs button{
-  flex:1;
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  background:#dbe8ff;
-  color:#0b3d91;
-  font-weight:bold;
+.tabs button {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  background: #dbe8ff;
+  color: #0b3d91;
+  font-weight: 800;
+  cursor: pointer;
 }
 
-.tabs button.active{
-  background:#0b3d91;
-  color:white;
+.tabs button.active {
+  background: #0b3d91;
+  color: white;
+  box-shadow: 0 6px 14px rgba(11,61,145,0.25);
 }
 
 /* CARD */
-.card{
-  margin:15px;
-  padding:18px;
-  border-radius:18px;
-  background:white;
-  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 0.9fr;
+  gap: 18px;
 }
 
-.image{
-  width:100%;
-  max-width:240px;
-  border-radius:12px;
+.request-id {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0b3d91;
+  margin-bottom: 10px;
 }
 
-/* BUTTON */
-.btn{
-  width:100%;
-  margin-top:10px;
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  color:white;
-  font-weight:bold;
+.info p {
+  margin: 8px 0;
+  line-height: 1.5;
 }
 
-.call{background:#16a34a;}
-.map{background:#2563eb;}
-.processing{background:#d97706;}
-.done{background:#16a34a;}
+.image {
+  width: 100%;
+  max-width: 220px;
+  border-radius: 14px;
+  margin-top: 8px;
+}
 
 /* STATUS */
-.badge{
-  padding:5px 10px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:bold;
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
 }
 
-.pending{background:#eee;}
-.processing-b{background:orange;color:white;}
-.done-b{background:green;color:white;}
+.status-pending {
+  background: #e5e7eb;
+  color: #374151;
+}
 
-textarea{
-  width:100%;
-  min-height:130px;
-  margin-top:10px;
-  border-radius:12px;
-  padding:12px;
-  border:1px solid #ccc;
+.status-processing {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* BUTTONS */
+.action-col button,
+.reply-box button {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.btn-call {
+  background: #16a34a;
+}
+
+.btn-map {
+  background: #2563eb;
+}
+
+.btn-processing {
+  background: #d97706;
+}
+
+.btn-completed {
+  background: #16a34a;
+}
+
+.btn-save {
+  background: #0b3d91;
+}
+
+/* REPLY */
+.reply-box textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #d1d5db;
+  font-size: 15px;
+  resize: vertical;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.reply-title {
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
@@ -145,131 +256,286 @@ textarea{
 <body>
 
 <div class="header">
-  <h1>⚡ YAMADEN Admin</h1>
+  <div class="logo">
+    <img src="/icon-192.png" alt="YAMADEN">
+    <span>YAMADEN Admin</span>
+  </div>
+
   <select id="language" onchange="changeLanguage()">
     <option value="vi">VI</option>
     <option value="ja">JP</option>
   </select>
 </div>
 
-<div class="dashboard">
-  <div class="box"><h2 id="total">0</h2>Tổng</div>
-  <div class="box"><h2 id="active">0</h2>Đang xử lý</div>
-  <div class="box"><h2 id="done">0</h2>Hoàn thành</div>
-</div>
+<div class="container">
 
-<div class="search">
-  <input id="search" placeholder="🔍 Tìm theo tên / SĐT">
-</div>
+  <div class="dashboard">
+    <div class="box">
+      <div class="box-title" id="labelTotal">Tổng yêu cầu</div>
+      <div class="box-number" id="total">0</div>
+    </div>
 
-<div class="tabs">
-  <button id="tabActive" class="active" onclick="changeTab('active')">Đang xử lý</button>
-  <button id="tabDone" onclick="changeTab('done')">Hoàn thành</button>
-</div>
+    <div class="box">
+      <div class="box-title" id="labelActive">Đang xử lý</div>
+      <div class="box-number" id="active">0</div>
+    </div>
 
-<div id="list"></div>
+    <div class="box">
+      <div class="box-title" id="labelDone">Hoàn thành</div>
+      <div class="box-number" id="done">0</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search">
+      <input id="search" placeholder="🔍 Tìm theo tên / SĐT / địa chỉ">
+    </div>
+
+    <button class="reload" id="reloadBtn" onclick="load()">Tải lại</button>
+  </div>
+
+  <div class="tabs">
+    <button id="tabActive" class="active" onclick="changeTab('active')">Đang xử lý</button>
+    <button id="tabDone" onclick="changeTab('done')">Đã hoàn thành</button>
+  </div>
+
+  <div id="list"></div>
+
+</div>
 
 <script>
-const API="https://yamaden.onrender.com";
-let currentTab="active";
+const API = "https://yamaden.onrender.com";
 
-function changeTab(tab){
-  currentTab=tab;
+let currentLang = localStorage.getItem("language") || "vi";
+let currentTab = "active";
+
+const texts = {
+  vi: {
+    total: "Tổng yêu cầu",
+    active: "Đang xử lý",
+    done: "Hoàn thành",
+    reload: "Tải lại",
+    search: "🔍 Tìm theo tên / SĐT / địa chỉ",
+    id: "ID",
+    name: "Tên",
+    phone: "Số điện thoại",
+    contact: "Liên hệ",
+    address: "Địa chỉ",
+    content: "Nội dung",
+    image: "Hình ảnh",
+    noImage: "Không có hình",
+    status: "Trạng thái",
+    date: "Ngày gửi",
+    call: "📞 Gọi điện",
+    map: "📍 Mở bản đồ",
+    processing: "Đang xử lý",
+    completed: "Hoàn thành",
+    reply: "Phản hồi khách hàng",
+    save: "💾 Lưu phản hồi"
+  },
+  ja: {
+    total: "総依頼数",
+    active: "処理中",
+    done: "完了",
+    reload: "再読み込み",
+    search: "🔍 名前 / 電話番号 / 住所で検索",
+    id: "ID",
+    name: "名前",
+    phone: "電話番号",
+    contact: "連絡先",
+    address: "住所",
+    content: "内容",
+    image: "画像",
+    noImage: "画像なし",
+    status: "状態",
+    date: "送信日時",
+    call: "📞 電話する",
+    map: "📍 地図を開く",
+    processing: "処理中",
+    completed: "完了",
+    reply: "お客様への返信",
+    save: "💾 返信を保存"
+  }
+};
+
+function applyLanguage() {
+  const t = texts[currentLang];
+
+  language.value = currentLang;
+  labelTotal.innerText = t.total;
+  labelActive.innerText = t.active;
+  labelDone.innerText = t.done;
+  reloadBtn.innerText = t.reload;
+  search.placeholder = t.search;
+
+  updateTabLabels();
+}
+
+function changeLanguage() {
+  currentLang = language.value;
+  localStorage.setItem("language", currentLang);
+  applyLanguage();
+  load();
+}
+
+function changeTab(tab) {
+  currentTab = tab;
+
   tabActive.classList.remove("active");
   tabDone.classList.remove("active");
 
-  if(tab==="active") tabActive.classList.add("active");
-  else tabDone.classList.add("active");
+  if (tab === "active") {
+    tabActive.classList.add("active");
+  } else {
+    tabDone.classList.add("active");
+  }
 
   load();
 }
 
-function getBadge(status){
-  if(status==="processing") return "badge processing-b";
-  if(status==="completed") return "badge done-b";
-  return "badge pending";
+function updateTabLabels(activeCount = null, doneCount = null) {
+  const t = texts[currentLang];
+
+  if (activeCount === null || doneCount === null) {
+    tabActive.innerText = t.active;
+    tabDone.innerText = t.done;
+  } else {
+    tabActive.innerText = `${t.active} (${activeCount})`;
+    tabDone.innerText = `${t.done} (${doneCount})`;
+  }
 }
 
-async function load(){
-  const res=await fetch(API+"/requests");
-  const data=await res.json();
+function getStatusClass(status) {
+  if (status === "processing") return "badge status-processing";
+  if (status === "completed") return "badge status-completed";
+  return "badge status-pending";
+}
 
-  total.innerText=data.length;
-  active.innerText=data.filter(x=>x.status!=="completed").length;
-  done.innerText=data.filter(x=>x.status==="completed").length;
+function getStatusText(status) {
+  const t = texts[currentLang];
 
-  const keyword=search.value.toLowerCase();
+  if (status === "processing") return t.processing;
+  if (status === "completed") return t.completed;
+  return "pending";
+}
 
-  const filtered=data.filter(x=>{
+async function load() {
+  const t = texts[currentLang];
+
+  const res = await fetch(API + "/requests");
+  const data = await res.json();
+
+  const activeCount = data.filter(item => item.status !== "completed").length;
+  const doneCount = data.filter(item => item.status === "completed").length;
+
+  total.innerText = data.length;
+  active.innerText = activeCount;
+  done.innerText = doneCount;
+
+  updateTabLabels(activeCount, doneCount);
+
+  const keyword = search.value.toLowerCase();
+
+  const filtered = data.filter(item => {
     const match =
-      (x.name||"").toLowerCase().includes(keyword) ||
-      (x.phone||"").toLowerCase().includes(keyword);
+      (item.name || "").toLowerCase().includes(keyword) ||
+      (item.phone || "").toLowerCase().includes(keyword) ||
+      (item.address || "").toLowerCase().includes(keyword);
 
-    if(currentTab==="active") return match && x.status!=="completed";
-    return match && x.status==="completed";
+    if (currentTab === "active") {
+      return match && item.status !== "completed";
+    }
+
+    return match && item.status === "completed";
   });
 
-  list.innerHTML="";
+  list.innerHTML = "";
 
-  filtered.forEach(item=>{
-    const map="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(item.address||"");
+  filtered.forEach(item => {
+    const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
 
-    list.innerHTML+=`
-    <div class="card">
+    list.innerHTML += `
+      <div class="card">
 
-      <b>ID:</b> ${item.id}<br>
-      <b>Tên:</b> ${item.name||""}<br>
-      <b>SĐT:</b> ${item.phone||""}<br>
-      <b>Địa chỉ:</b> ${item.address||""}<br>
-      <b>Nội dung:</b> ${item.content||""}<br><br>
+        <div class="info">
+          <div class="request-id">#${item.id}</div>
 
-      ${item.image?`<img class="image" src="${item.image}"><br><br>`:""}
+          <p><b>${t.name}:</b> ${item.name || ""}</p>
+          <p><b>${t.phone}:</b> ${item.phone || ""}</p>
+          <p><b>${t.contact}:</b> ${item.contact || ""}</p>
+          <p><b>${t.address}:</b> ${item.address || ""}</p>
 
-      <b>Status:</b> <span class="${getBadge(item.status)}">${item.status}</span><br><br>
+          <p><b>${t.status}:</b> 
+            <span class="${getStatusClass(item.status)}">${getStatusText(item.status)}</span>
+          </p>
 
-      ${item.phone?`<a href="tel:${item.phone}"><button class="btn call">📞 Gọi</button></a>`:""}
-      ${item.address?`<a href="${map}" target="_blank"><button class="btn map">📍 Map</button></a>`:""}
+          <p><b>${t.date}:</b> ${new Date(item.createdAt).toLocaleString()}</p>
+        </div>
 
-      ${
-        item.status!=="completed"?
-        `
-        <button class="btn processing" onclick="updateStatus(${item.id},'processing')">Đang xử lý</button>
-        <button class="btn done" onclick="updateStatus(${item.id},'completed')">Hoàn thành</button>
-        `
-        :""
-      }
+        <div class="info">
+          <p><b>${t.content}:</b><br>${item.content || ""}</p>
 
-      <textarea id="reply-${item.id}">${item.adminReply||""}</textarea>
-      <button class="btn" onclick="saveReply(${item.id})">Lưu phản hồi</button>
+          <p><b>${t.image}:</b><br>
+            ${
+              item.image
+              ? `<img class="image" src="${item.image}">`
+              : t.noImage
+            }
+          </p>
+        </div>
 
-    </div>
+        <div>
+          <div class="action-col">
+            ${item.phone ? `<a href="tel:${item.phone}"><button class="btn-call">${t.call}</button></a>` : ""}
+            ${item.address ? `<a href="${mapUrl}" target="_blank"><button class="btn-map">${t.map}</button></a>` : ""}
+
+            ${
+              item.status !== "completed"
+              ? `
+                <button class="btn-processing" onclick="updateStatus(${item.id}, 'processing')">${t.processing}</button>
+                <button class="btn-completed" onclick="updateStatus(${item.id}, 'completed')">${t.completed}</button>
+              `
+              : ""
+            }
+          </div>
+
+          <div class="reply-box">
+            <div class="reply-title">${t.reply}</div>
+            <textarea id="reply-${item.id}">${item.adminReply || ""}</textarea>
+            <button class="btn-save" onclick="saveReply(${item.id})">${t.save}</button>
+          </div>
+        </div>
+
+      </div>
     `;
   });
 }
 
-async function updateStatus(id,status){
-  await fetch(API+"/request/"+id,{
-    method:"PUT",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({status})
-  });
-  load();
-}
-
-async function saveReply(id){
-  const val=document.getElementById("reply-"+id).value;
-
-  await fetch(API+"/request/"+id,{
-    method:"PUT",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({adminReply:val})
+async function updateStatus(id, status) {
+  await fetch(API + "/request/" + id, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status })
   });
 
   load();
 }
 
-search.addEventListener("input",load);
+async function saveReply(id) {
+  const reply = document.getElementById("reply-" + id).value;
 
+  await fetch(API + "/request/" + id, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ adminReply: reply })
+  });
+
+  load();
+}
+
+search.addEventListener("input", load);
+
+applyLanguage();
 load();
 </script>
 
