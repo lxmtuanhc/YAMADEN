@@ -21,7 +21,9 @@ mongoose.connect("mongodb+srv://lxmtuanhc_db_user:yamadenapp@cluster0.revraqf.mo
 
 // ===== Schema =====
 const RequestSchema = new mongoose.Schema({
-  id: String,
+  // ID mới là String: YD-1234
+  // ID cũ trong DB có thể vẫn là Number
+  id: mongoose.Schema.Types.Mixed,
 
   name: String,
   phone: String,
@@ -37,6 +39,17 @@ const RequestSchema = new mongoose.Schema({
 });
 
 const Request = mongoose.model("Request", RequestSchema);
+
+// ===== Hỗ trợ cả ID mới String và ID cũ Number =====
+function makeIdQuery(id) {
+  const query = [{ id: id }];
+
+  if (!isNaN(Number(id))) {
+    query.push({ id: Number(id) });
+  }
+
+  return { $or: query };
+}
 
 // ===== Generate short ID =====
 async function generateRequestId() {
@@ -109,7 +122,7 @@ app.get("/requests", async (req, res) => {
 app.get("/request/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const item = await Request.findOne({ id });
+    const item = await Request.findOne(makeIdQuery(id));
 
     if (!item) {
       return res.status(404).json({
@@ -131,7 +144,7 @@ app.get("/request/:id", async (req, res) => {
 app.put("/request/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const item = await Request.findOne({ id });
+    const item = await Request.findOne(makeIdQuery(id));
 
     if (!item) {
       return res.status(404).json({
@@ -167,7 +180,7 @@ app.delete("/request/:id", async (req, res) => {
   try {
     const id = req.params.id;
 
-    const result = await Request.deleteOne({ id });
+    const result = await Request.deleteOne(makeIdQuery(id));
 
     if (result.deletedCount === 0) {
       return res.status(404).json({
