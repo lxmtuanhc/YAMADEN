@@ -21,7 +21,7 @@ mongoose.connect("mongodb+srv://lxmtuanhc_db_user:yamadenapp@cluster0.revraqf.mo
 
 // ===== Schema =====
 const RequestSchema = new mongoose.Schema({
-  id: Number,
+  id: String,
 
   name: String,
   phone: String,
@@ -38,6 +38,19 @@ const RequestSchema = new mongoose.Schema({
 
 const Request = mongoose.model("Request", RequestSchema);
 
+// ===== Generate short ID =====
+async function generateRequestId() {
+  let id;
+  let exists;
+
+  do {
+    id = "YD-" + Math.floor(1000 + Math.random() * 9000);
+    exists = await Request.findOne({ id });
+  } while (exists);
+
+  return id;
+}
+
 // Trang chính
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
@@ -46,8 +59,10 @@ app.get("/", (req, res) => {
 // Tạo yêu cầu mới
 app.post("/request", async (req, res) => {
   try {
+    const shortId = await generateRequestId();
+
     const newRequest = new Request({
-      id: Date.now(),
+      id: shortId,
 
       name: req.body.name || "",
       phone: req.body.phone || "",
@@ -93,7 +108,7 @@ app.get("/requests", async (req, res) => {
 // Tra cứu 1 yêu cầu theo ID
 app.get("/request/:id", async (req, res) => {
   try {
-    const id = Number(req.params.id);
+    const id = req.params.id;
     const item = await Request.findOne({ id });
 
     if (!item) {
@@ -115,7 +130,7 @@ app.get("/request/:id", async (req, res) => {
 // Cập nhật trạng thái / phản hồi admin
 app.put("/request/:id", async (req, res) => {
   try {
-    const id = Number(req.params.id);
+    const id = req.params.id;
     const item = await Request.findOne({ id });
 
     if (!item) {
@@ -147,19 +162,23 @@ app.put("/request/:id", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
 // Xóa yêu cầu
 app.delete("/request/:id", async (req, res) => {
   try {
-    const id = Number(req.params.id);
+    const id = req.params.id;
 
     const result = await Request.deleteOne({ id });
 
     if (result.deletedCount === 0) {
-      return res.status(404).json({ message: "Not found" });
+      return res.status(404).json({
+        message: "Not found"
+      });
     }
 
-    res.json({ message: "Deleted" });
+    res.json({
+      message: "Deleted"
+    });
+
   } catch (error) {
     res.status(500).json({
       message: "Delete failed",
@@ -167,6 +186,9 @@ app.delete("/request/:id", async (req, res) => {
     });
   }
 });
+
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
