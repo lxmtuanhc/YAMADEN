@@ -9,75 +9,149 @@
 <link rel="apple-touch-icon" href="/icon-192.png">
 
 <style>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
   font-family: "Segoe UI", Arial, sans-serif;
-  background: #f4f4f4;
-  color: #111;
+  background: #f5f7fb;
+  color: #111827;
 }
 
-/* HEADER */
-.header {
-  height: 72px;
-  background: #111;
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  background: #0f172a;
   color: white;
+  padding: 22px 16px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 28px;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+  flex-direction: column;
 }
 
-.logo {
+.brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 22px;
+  margin-bottom: 28px;
+}
+
+.brand img {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: white;
+}
+
+.brand-title {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.brand-sub {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.menu-title {
+  color: #94a3b8;
+  font-size: 12px;
   font-weight: 800;
+  margin: 22px 12px 10px;
 }
 
-.logo img {
-  width: 42px;
-  height: 42px;
+.menu-item {
+  padding: 13px 14px;
   border-radius: 12px;
-  background: white;
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  color: #e5e7eb;
+  display: flex;
+  justify-content: space-between;
 }
 
-.header select {
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid #444;
-  background: white;
-  font-weight: bold;
+.menu-item.active {
+  background: #2563eb;
+  color: white;
+}
+
+.menu-badge {
+  background: rgba(255,255,255,0.16);
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 /* MAIN */
-.container {
+.main {
+  padding: 0;
+}
+
+.topbar {
+  height: 76px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lang {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  font-weight: 700;
+}
+
+.admin-info {
+  font-weight: 800;
+}
+
+.content {
   padding: 24px;
 }
 
 /* STATS */
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 18px;
   margin-bottom: 22px;
 }
 
-.stat-card {
+.stat {
   background: white;
-  border-radius: 20px;
+  border-radius: 18px;
   padding: 22px;
-  border: 1px solid #ddd;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.06);
 }
 
-.stat-title {
-  color: #555;
+.stat-label {
+  color: #64748b;
   font-size: 14px;
   margin-bottom: 8px;
 }
@@ -85,103 +159,112 @@ body {
 .stat-number {
   font-size: 34px;
   font-weight: 900;
-  color: #111;
+}
+
+.panel {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  overflow: hidden;
 }
 
 /* TOOLBAR */
 .toolbar {
-  background: white;
-  border-radius: 18px;
-  padding: 16px;
+  padding: 18px;
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 12px;
-  border: 1px solid #ddd;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.06);
-  margin-bottom: 18px;
+  gap: 14px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.search input {
+.search {
   width: 100%;
-  padding: 14px;
+  padding: 14px 16px;
   border-radius: 14px;
-  border: 1px solid #ccc;
+  border: 1px solid #d1d5db;
   font-size: 15px;
 }
 
 .reload {
-  padding: 14px 22px;
   border: none;
   border-radius: 14px;
-  background: #111;
+  padding: 14px 22px;
+  background: #0f172a;
   color: white;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
 }
 
 /* TABS */
 .tabs {
   display: flex;
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: 26px;
+  padding: 0 18px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .tabs button {
-  flex: 1;
-  padding: 15px;
+  background: none;
   border: none;
-  border-radius: 16px;
-  background: #e5e5e5;
-  color: #111;
+  padding: 18px 4px;
   font-weight: 900;
   cursor: pointer;
+  color: #64748b;
+  border-bottom: 3px solid transparent;
 }
 
 .tabs button.active {
-  background: #111;
-  color: white;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  color: #2563eb;
+  border-bottom-color: #2563eb;
 }
 
-/* REQUEST CARD */
-.request-card {
-  background: white;
-  border-radius: 22px;
-  padding: 18px;
-  margin-bottom: 18px;
-  border: 1px solid #ddd;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+/* REQUEST ROW */
+.request {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 0.8fr 1.1fr;
+  grid-template-columns: 150px 1.7fr 130px 230px 320px;
   gap: 18px;
-  align-items: start;
+  padding: 18px;
+  border-bottom: 1px solid #e5e7eb;
+  align-items: center;
 }
 
-.request-id {
+.request:last-child {
+  border-bottom: none;
+}
+
+.req-img {
+  width: 140px;
+  height: 105px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  background: #f1f5f9;
+}
+
+.req-id {
+  color: #2563eb;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.req-name {
   font-size: 18px;
   font-weight: 900;
-  color: #111;
-  margin-bottom: 12px;
 }
 
-.info-line {
-  margin: 8px 0;
-  line-height: 1.5;
-  color: #333;
+.req-phone {
+  color: #2563eb;
+  font-weight: 800;
+  margin-left: 10px;
 }
 
-.info-line b {
-  color: #111;
+.req-line {
+  margin-top: 7px;
+  color: #475569;
+  line-height: 1.45;
 }
 
-.request-image {
-  width: 100%;
-  max-width: 220px;
-  border-radius: 16px;
-  border: 1px solid #ddd;
-}
-
-/* BADGE */
 .badge {
   display: inline-block;
   padding: 7px 13px;
@@ -190,154 +273,165 @@ body {
   font-weight: 900;
 }
 
-.status-pending {
-  background: #ddd;
-  color: #111;
-}
+.status-pending { background: #e5e7eb; color: #111; }
+.status-processing { background: #fff1d6; color: #b45309; }
+.status-completed { background: #dcfce7; color: #166534; }
 
-.status-processing {
-  background: #777;
-  color: white;
-}
-
-.status-completed {
-  background: #111;
-  color: white;
-}
-
-/* ACTION */
-.action-col button,
-.reply-box button {
+.actions button {
   width: 100%;
-  padding: 13px;
+  margin-bottom: 9px;
+  padding: 12px;
   border: none;
-  border-radius: 14px;
+  border-radius: 13px;
   color: white;
   font-weight: 900;
   cursor: pointer;
-  margin-bottom: 10px;
 }
 
-.btn-call { background: #000; }
-.btn-map { background: #333; }
-.btn-processing { background: #666; }
-.btn-completed { background: #111; }
-.btn-save { background: #111; }
+.call { background: #16a34a; }
+.map { background: #2563eb; }
+.processing { background: #f59e0b; }
+.completed { background: #111827; }
 
-/* REPLY */
-.reply-box {
-  border-left: 1px solid #ddd;
-  padding-left: 18px;
+.reply-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 14px;
+  background: #fafafa;
 }
 
 .reply-title {
   font-weight: 900;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
-.reply-box textarea {
+.reply-card textarea {
   width: 100%;
-  min-height: 150px;
-  padding: 14px;
-  border-radius: 14px;
-  border: 1px solid #ccc;
+  min-height: 90px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
   resize: vertical;
-  font-size: 15px;
-  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.save {
+  width: 100%;
+  margin-top: 8px;
+  padding: 11px;
+  border: none;
+  border-radius: 12px;
+  background: #0f172a;
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .empty {
-  background: white;
-  padding: 24px;
-  border-radius: 18px;
+  padding: 35px;
   text-align: center;
-  border: 1px solid #ddd;
-  color: #666;
+  color: #64748b;
 }
 
-/* MOBILE */
-@media (max-width: 1100px) {
-  .request-card {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .reply-box {
-    border-left: none;
-    padding-left: 0;
-  }
+/* RESPONSIVE */
+@media (max-width: 1200px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .request { grid-template-columns: 1fr; }
+  .req-img { width: 100%; height: 180px; }
 }
 
 @media (max-width: 700px) {
-  .stats {
-    grid-template-columns: 1fr;
-  }
-
-  .toolbar {
-    grid-template-columns: 1fr;
-  }
-
-  .request-card {
-    grid-template-columns: 1fr;
-  }
-
-  .header {
-    padding: 14px;
-  }
-
-  .logo span {
-    font-size: 18px;
-  }
+  .stats { grid-template-columns: 1fr; }
+  .toolbar { grid-template-columns: 1fr; }
+  .topbar { padding: 0 14px; }
+  .content { padding: 14px; }
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  <div class="logo">
-    <img src="/icon-192.png" alt="YAMADEN">
-    <span>YAMADEN Admin</span>
-  </div>
+<div class="layout">
 
-  <select id="language" onchange="changeLanguage()">
-    <option value="vi">VI</option>
-    <option value="ja">JP</option>
-  </select>
-</div>
-
-<div class="container">
-
-  <div class="stats">
-    <div class="stat-card">
-      <div class="stat-title" id="labelTotal">Tổng yêu cầu</div>
-      <div class="stat-number" id="total">0</div>
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="/icon-192.png" alt="YAMADEN">
+      <div>
+        <div class="brand-title">YAMADEN</div>
+        <div class="brand-sub">Admin Dashboard</div>
+      </div>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-title" id="labelActive">Đang xử lý</div>
-      <div class="stat-number" id="active">0</div>
+    <div class="menu-item active">🏠 Tổng quan</div>
+
+    <div class="menu-title">QUẢN LÝ YÊU CẦU</div>
+    <div class="menu-item" onclick="changeTab('active')">🕒 Đang xử lý <span class="menu-badge" id="sideActive">0</span></div>
+    <div class="menu-item" onclick="changeTab('done')">✅ Hoàn thành <span class="menu-badge" id="sideDone">0</span></div>
+
+    <div class="menu-title">CÀI ĐẶT</div>
+    <div class="menu-item">⚙️ Cài đặt</div>
+
+    <div class="sidebar-footer">
+      © 2026 YAMADEN<br>
+      Customer Request System
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title" id="pageTitle">Quản lý yêu cầu khách hàng</div>
+
+      <div class="top-actions">
+        <select class="lang" id="language" onchange="changeLanguage()">
+          <option value="vi">VI</option>
+          <option value="ja">JP</option>
+        </select>
+        <div class="admin-info">Admin</div>
+      </div>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-title" id="labelDone">Hoàn thành</div>
-      <div class="stat-number" id="done">0</div>
+    <div class="content">
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label" id="labelTotal">Tổng yêu cầu</div>
+          <div class="stat-number" id="total">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label" id="labelActive">Đang xử lý</div>
+          <div class="stat-number" id="active">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label" id="labelDone">Hoàn thành</div>
+          <div class="stat-number" id="done">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label" id="labelToday">Hôm nay</div>
+          <div class="stat-number" id="today">0</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="toolbar">
+          <input class="search" id="search" placeholder="🔍 Tìm theo tên, SĐT, địa chỉ...">
+          <button class="reload" id="reloadBtn" onclick="load()">Tải lại</button>
+        </div>
+
+        <div class="tabs">
+          <button id="tabActive" class="active" onclick="changeTab('active')">Đang xử lý</button>
+          <button id="tabDone" onclick="changeTab('done')">Hoàn thành</button>
+        </div>
+
+        <div id="list"></div>
+      </div>
+
     </div>
-  </div>
-
-  <div class="toolbar">
-    <div class="search">
-      <input id="search" placeholder="🔍 Tìm theo tên / SĐT / địa chỉ">
-    </div>
-
-    <button class="reload" id="reloadBtn" onclick="load()">Tải lại</button>
-  </div>
-
-  <div class="tabs">
-    <button id="tabActive" class="active" onclick="changeTab('active')">Đang xử lý</button>
-    <button id="tabDone" onclick="changeTab('done')">Đã hoàn thành</button>
-  </div>
-
-  <div id="list"></div>
+  </main>
 
 </div>
 
@@ -349,13 +443,15 @@ let currentTab = "active";
 
 const texts = {
   vi: {
+    pageTitle: "Quản lý yêu cầu khách hàng",
     total: "Tổng yêu cầu",
     active: "Đang xử lý",
     done: "Hoàn thành",
+    today: "Hôm nay",
     reload: "Tải lại",
-    search: "🔍 Tìm theo tên / SĐT / địa chỉ",
+    search: "🔍 Tìm theo tên, SĐT, địa chỉ...",
     name: "Tên",
-    phone: "Số điện thoại",
+    phone: "SĐT",
     contact: "Liên hệ",
     address: "Địa chỉ",
     content: "Nội dung",
@@ -363,21 +459,23 @@ const texts = {
     noImage: "Không có hình",
     status: "Trạng thái",
     date: "Ngày gửi",
-    call: "📞 Gọi điện",
-    map: "📍 Mở bản đồ",
+    call: "📞 Gọi",
+    map: "📍 Bản đồ",
     processing: "Đang xử lý",
     completed: "Hoàn thành",
-    pending: "Đã tiếp nhận",
+    pending: "Mới tiếp nhận",
     reply: "Phản hồi khách hàng",
-    save: "💾 Lưu phản hồi",
+    save: "Lưu phản hồi",
     empty: "Không có yêu cầu nào"
   },
   ja: {
+    pageTitle: "お客様リクエスト管理",
     total: "総依頼数",
     active: "処理中",
     done: "完了",
+    today: "本日",
     reload: "再読み込み",
-    search: "🔍 名前 / 電話番号 / 住所で検索",
+    search: "🔍 名前、電話番号、住所で検索...",
     name: "名前",
     phone: "電話番号",
     contact: "連絡先",
@@ -387,13 +485,13 @@ const texts = {
     noImage: "画像なし",
     status: "状態",
     date: "送信日時",
-    call: "📞 電話する",
-    map: "📍 地図を開く",
+    call: "📞 電話",
+    map: "📍 地図",
     processing: "処理中",
     completed: "完了",
     pending: "受付済み",
     reply: "お客様への返信",
-    save: "💾 返信を保存",
+    save: "返信を保存",
     empty: "依頼はありません"
   }
 };
@@ -402,9 +500,11 @@ function applyLanguage() {
   const t = texts[currentLang];
 
   language.value = currentLang;
+  pageTitle.innerText = t.pageTitle;
   labelTotal.innerText = t.total;
   labelActive.innerText = t.active;
   labelDone.innerText = t.done;
+  labelToday.innerText = t.today;
   reloadBtn.innerText = t.reload;
   search.placeholder = t.search;
 
@@ -442,6 +542,8 @@ function updateTabLabels(activeCount = null, doneCount = null) {
   } else {
     tabActive.innerText = `${t.active} (${activeCount})`;
     tabDone.innerText = `${t.done} (${doneCount})`;
+    sideActive.innerText = activeCount;
+    sideDone.innerText = doneCount;
   }
 }
 
@@ -459,6 +561,15 @@ function getStatusText(status) {
   return t.pending;
 }
 
+function isToday(dateString) {
+  const d = new Date(dateString);
+  const now = new Date();
+
+  return d.getFullYear() === now.getFullYear()
+    && d.getMonth() === now.getMonth()
+    && d.getDate() === now.getDate();
+}
+
 async function load() {
   const t = texts[currentLang];
 
@@ -467,10 +578,12 @@ async function load() {
 
   const activeCount = data.filter(item => item.status !== "completed").length;
   const doneCount = data.filter(item => item.status === "completed").length;
+  const todayCount = data.filter(item => isToday(item.createdAt)).length;
 
   total.innerText = data.length;
   active.innerText = activeCount;
   done.innerText = doneCount;
+  today.innerText = todayCount;
 
   updateTabLabels(activeCount, doneCount);
 
@@ -501,54 +614,50 @@ async function load() {
     const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
 
     list.innerHTML += `
-      <div class="request-card">
+      <div class="request">
 
         <div>
-          <div class="request-id">#${item.id}</div>
-
-          <div class="info-line"><b>${t.name}:</b> ${item.name || ""}</div>
-          <div class="info-line"><b>${t.phone}:</b> ${item.phone || ""}</div>
-          <div class="info-line"><b>${t.contact}:</b> ${item.contact || ""}</div>
-          <div class="info-line"><b>${t.address}:</b> ${item.address || ""}</div>
-
-          <div class="info-line">
-            <b>${t.status}:</b>
-            <span class="${getStatusClass(item.status)}">${getStatusText(item.status)}</span>
-          </div>
-
-          <div class="info-line"><b>${t.date}:</b> ${new Date(item.createdAt).toLocaleString()}</div>
+          ${
+            item.image
+            ? `<img class="req-img" src="${item.image}">`
+            : `<div class="req-img"></div>`
+          }
         </div>
 
         <div>
-          <div class="info-line"><b>${t.content}:</b><br>${item.content || ""}</div>
-
-          <div class="info-line"><b>${t.image}:</b><br>
-            ${
-              item.image
-              ? `<img class="request-image" src="${item.image}">`
-              : t.noImage
-            }
+          <div class="req-id">#${item.id}</div>
+          <div>
+            <span class="req-name">${item.name || ""}</span>
+            <span class="req-phone">${item.phone || ""}</span>
           </div>
+
+          <div class="req-line">📍 ${item.address || ""}</div>
+          <div class="req-line">${item.content || ""}</div>
+          <div class="req-line">🕒 ${new Date(item.createdAt).toLocaleString()}</div>
         </div>
 
-        <div class="action-col">
-          ${item.phone ? `<a href="tel:${item.phone}"><button class="btn-call">${t.call}</button></a>` : ""}
-          ${item.address ? `<a href="${mapUrl}" target="_blank"><button class="btn-map">${t.map}</button></a>` : ""}
+        <div>
+          <span class="${getStatusClass(item.status)}">${getStatusText(item.status)}</span>
+        </div>
+
+        <div class="actions">
+          ${item.phone ? `<a href="tel:${item.phone}"><button class="call">${t.call}</button></a>` : ""}
+          ${item.address ? `<a href="${mapUrl}" target="_blank"><button class="map">${t.map}</button></a>` : ""}
 
           ${
             item.status !== "completed"
             ? `
-              <button class="btn-processing" onclick="updateStatus(${item.id}, 'processing')">${t.processing}</button>
-              <button class="btn-completed" onclick="updateStatus(${item.id}, 'completed')">${t.completed}</button>
+              <button class="processing" onclick="updateStatus(${item.id}, 'processing')">${t.processing}</button>
+              <button class="completed" onclick="updateStatus(${item.id}, 'completed')">${t.completed}</button>
             `
             : ""
           }
         </div>
 
-        <div class="reply-box">
+        <div class="reply-card">
           <div class="reply-title">${t.reply}</div>
           <textarea id="reply-${item.id}">${item.adminReply || ""}</textarea>
-          <button class="btn-save" onclick="saveReply(${item.id})">${t.save}</button>
+          <button class="save" onclick="saveReply(${item.id})">${t.save}</button>
         </div>
 
       </div>
