@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <title>Admin - YAMADEN</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
 
 <style>
 * {
@@ -16,14 +20,16 @@ body {
   color: #111;
 }
 
+/* HEADER */
 .header {
+  height: 72px;
   background: #111;
   color: white;
-  padding: 18px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  padding: 16px 28px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.25);
 }
 
 .logo {
@@ -42,48 +48,57 @@ body {
 }
 
 .header select {
-  border: none;
+  padding: 10px 14px;
   border-radius: 12px;
-  padding: 10px;
+  border: 1px solid #444;
+  background: white;
   font-weight: bold;
 }
 
+/* MAIN */
 .container {
-  padding: 22px;
+  padding: 24px;
 }
 
-.dashboard {
+/* STATS */
+.stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-bottom: 18px;
+  gap: 18px;
+  margin-bottom: 22px;
 }
 
-.box {
+.stat-card {
   background: white;
-  border-radius: 18px;
-  padding: 18px;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+  border-radius: 20px;
+  padding: 22px;
   border: 1px solid #ddd;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
 }
 
-.box-title {
+.stat-title {
   color: #555;
   font-size: 14px;
   margin-bottom: 8px;
 }
 
-.box-number {
-  font-size: 32px;
-  font-weight: 800;
+.stat-number {
+  font-size: 34px;
+  font-weight: 900;
   color: #111;
 }
 
+/* TOOLBAR */
 .toolbar {
+  background: white;
+  border-radius: 18px;
+  padding: 16px;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 12px;
-  margin-bottom: 16px;
+  border: 1px solid #ddd;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.06);
+  margin-bottom: 18px;
 }
 
 .search input {
@@ -95,15 +110,16 @@ body {
 }
 
 .reload {
-  padding: 14px 20px;
+  padding: 14px 22px;
   border: none;
   border-radius: 14px;
   background: #111;
   color: white;
-  font-weight: bold;
+  font-weight: 800;
   cursor: pointer;
 }
 
+/* TABS */
 .tabs {
   display: flex;
   gap: 12px;
@@ -112,58 +128,66 @@ body {
 
 .tabs button {
   flex: 1;
-  padding: 14px;
+  padding: 15px;
   border: none;
-  border-radius: 14px;
+  border-radius: 16px;
   background: #e5e5e5;
   color: #111;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
 }
 
 .tabs button.active {
   background: #111;
   color: white;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
 }
 
-.card {
+/* REQUEST CARD */
+.request-card {
   background: white;
-  border-radius: 20px;
+  border-radius: 22px;
   padding: 18px;
-  margin-bottom: 16px;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+  margin-bottom: 18px;
   border: 1px solid #ddd;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr 0.9fr;
+  grid-template-columns: 1.2fr 1fr 0.8fr 1.1fr;
   gap: 18px;
+  align-items: start;
 }
 
 .request-id {
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 900;
   color: #111;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-.info p {
+.info-line {
   margin: 8px 0;
   line-height: 1.5;
+  color: #333;
 }
 
-.image {
+.info-line b {
+  color: #111;
+}
+
+.request-image {
   width: 100%;
   max-width: 220px;
-  border-radius: 14px;
-  margin-top: 8px;
+  border-radius: 16px;
+  border: 1px solid #ddd;
 }
 
+/* BADGE */
 .badge {
   display: inline-block;
-  padding: 6px 12px;
+  padding: 7px 13px;
   border-radius: 999px;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .status-pending {
@@ -181,6 +205,7 @@ body {
   color: white;
 }
 
+/* ACTION */
 .action-col button,
 .reply-box button {
   width: 100%;
@@ -188,29 +213,26 @@ body {
   border: none;
   border-radius: 14px;
   color: white;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
   margin-bottom: 10px;
 }
 
-.btn-call {
-  background: #000;
+.btn-call { background: #000; }
+.btn-map { background: #333; }
+.btn-processing { background: #666; }
+.btn-completed { background: #111; }
+.btn-save { background: #111; }
+
+/* REPLY */
+.reply-box {
+  border-left: 1px solid #ddd;
+  padding-left: 18px;
 }
 
-.btn-map {
-  background: #333;
-}
-
-.btn-processing {
-  background: #666;
-}
-
-.btn-completed {
-  background: #111;
-}
-
-.btn-save {
-  background: #111;
+.reply-title {
+  font-weight: 900;
+  margin-bottom: 10px;
 }
 
 .reply-box textarea {
@@ -219,18 +241,34 @@ body {
   padding: 14px;
   border-radius: 14px;
   border: 1px solid #ccc;
-  font-size: 15px;
   resize: vertical;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+  font-size: 15px;
+  margin-bottom: 10px;
 }
 
-.reply-title {
-  font-weight: 800;
-  margin-bottom: 8px;
+.empty {
+  background: white;
+  padding: 24px;
+  border-radius: 18px;
+  text-align: center;
+  border: 1px solid #ddd;
+  color: #666;
 }
 
-@media (max-width: 900px) {
-  .dashboard {
+/* MOBILE */
+@media (max-width: 1100px) {
+  .request-card {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .reply-box {
+    border-left: none;
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .stats {
     grid-template-columns: 1fr;
   }
 
@@ -238,8 +276,16 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .card {
+  .request-card {
     grid-template-columns: 1fr;
+  }
+
+  .header {
+    padding: 14px;
+  }
+
+  .logo span {
+    font-size: 18px;
   }
 }
 </style>
@@ -261,20 +307,20 @@ body {
 
 <div class="container">
 
-  <div class="dashboard">
-    <div class="box">
-      <div class="box-title" id="labelTotal">Tổng yêu cầu</div>
-      <div class="box-number" id="total">0</div>
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-title" id="labelTotal">Tổng yêu cầu</div>
+      <div class="stat-number" id="total">0</div>
     </div>
 
-    <div class="box">
-      <div class="box-title" id="labelActive">Đang xử lý</div>
-      <div class="box-number" id="active">0</div>
+    <div class="stat-card">
+      <div class="stat-title" id="labelActive">Đang xử lý</div>
+      <div class="stat-number" id="active">0</div>
     </div>
 
-    <div class="box">
-      <div class="box-title" id="labelDone">Hoàn thành</div>
-      <div class="box-number" id="done">0</div>
+    <div class="stat-card">
+      <div class="stat-title" id="labelDone">Hoàn thành</div>
+      <div class="stat-number" id="done">0</div>
     </div>
   </div>
 
@@ -308,7 +354,6 @@ const texts = {
     done: "Hoàn thành",
     reload: "Tải lại",
     search: "🔍 Tìm theo tên / SĐT / địa chỉ",
-    id: "ID",
     name: "Tên",
     phone: "Số điện thoại",
     contact: "Liên hệ",
@@ -322,8 +367,10 @@ const texts = {
     map: "📍 Mở bản đồ",
     processing: "Đang xử lý",
     completed: "Hoàn thành",
+    pending: "Đã tiếp nhận",
     reply: "Phản hồi khách hàng",
-    save: "💾 Lưu phản hồi"
+    save: "💾 Lưu phản hồi",
+    empty: "Không có yêu cầu nào"
   },
   ja: {
     total: "総依頼数",
@@ -331,7 +378,6 @@ const texts = {
     done: "完了",
     reload: "再読み込み",
     search: "🔍 名前 / 電話番号 / 住所で検索",
-    id: "ID",
     name: "名前",
     phone: "電話番号",
     contact: "連絡先",
@@ -345,8 +391,10 @@ const texts = {
     map: "📍 地図を開く",
     processing: "処理中",
     completed: "完了",
+    pending: "受付済み",
     reply: "お客様への返信",
-    save: "💾 返信を保存"
+    save: "💾 返信を保存",
+    empty: "依頼はありません"
   }
 };
 
@@ -408,7 +456,7 @@ function getStatusText(status) {
 
   if (status === "processing") return t.processing;
   if (status === "completed") return t.completed;
-  return "pending";
+  return t.pending;
 }
 
 async function load() {
@@ -432,7 +480,8 @@ async function load() {
     const match =
       (item.name || "").toLowerCase().includes(keyword) ||
       (item.phone || "").toLowerCase().includes(keyword) ||
-      (item.address || "").toLowerCase().includes(keyword);
+      (item.address || "").toLowerCase().includes(keyword) ||
+      (item.content || "").toLowerCase().includes(keyword);
 
     if (currentTab === "active") {
       return match && item.status !== "completed";
@@ -443,59 +492,63 @@ async function load() {
 
   list.innerHTML = "";
 
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty">${t.empty}</div>`;
+    return;
+  }
+
   filtered.forEach(item => {
     const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
 
     list.innerHTML += `
-      <div class="card">
+      <div class="request-card">
 
-        <div class="info">
+        <div>
           <div class="request-id">#${item.id}</div>
 
-          <p><b>${t.name}:</b> ${item.name || ""}</p>
-          <p><b>${t.phone}:</b> ${item.phone || ""}</p>
-          <p><b>${t.contact}:</b> ${item.contact || ""}</p>
-          <p><b>${t.address}:</b> ${item.address || ""}</p>
+          <div class="info-line"><b>${t.name}:</b> ${item.name || ""}</div>
+          <div class="info-line"><b>${t.phone}:</b> ${item.phone || ""}</div>
+          <div class="info-line"><b>${t.contact}:</b> ${item.contact || ""}</div>
+          <div class="info-line"><b>${t.address}:</b> ${item.address || ""}</div>
 
-          <p><b>${t.status}:</b> 
+          <div class="info-line">
+            <b>${t.status}:</b>
             <span class="${getStatusClass(item.status)}">${getStatusText(item.status)}</span>
-          </p>
+          </div>
 
-          <p><b>${t.date}:</b> ${new Date(item.createdAt).toLocaleString()}</p>
-        </div>
-
-        <div class="info">
-          <p><b>${t.content}:</b><br>${item.content || ""}</p>
-
-          <p><b>${t.image}:</b><br>
-            ${
-              item.image
-              ? `<img class="image" src="${item.image}">`
-              : t.noImage
-            }
-          </p>
+          <div class="info-line"><b>${t.date}:</b> ${new Date(item.createdAt).toLocaleString()}</div>
         </div>
 
         <div>
-          <div class="action-col">
-            ${item.phone ? `<a href="tel:${item.phone}"><button class="btn-call">${t.call}</button></a>` : ""}
-            ${item.address ? `<a href="${mapUrl}" target="_blank"><button class="btn-map">${t.map}</button></a>` : ""}
+          <div class="info-line"><b>${t.content}:</b><br>${item.content || ""}</div>
 
+          <div class="info-line"><b>${t.image}:</b><br>
             ${
-              item.status !== "completed"
-              ? `
-                <button class="btn-processing" onclick="updateStatus(${item.id}, 'processing')">${t.processing}</button>
-                <button class="btn-completed" onclick="updateStatus(${item.id}, 'completed')">${t.completed}</button>
-              `
-              : ""
+              item.image
+              ? `<img class="request-image" src="${item.image}">`
+              : t.noImage
             }
           </div>
+        </div>
 
-          <div class="reply-box">
-            <div class="reply-title">${t.reply}</div>
-            <textarea id="reply-${item.id}">${item.adminReply || ""}</textarea>
-            <button class="btn-save" onclick="saveReply(${item.id})">${t.save}</button>
-          </div>
+        <div class="action-col">
+          ${item.phone ? `<a href="tel:${item.phone}"><button class="btn-call">${t.call}</button></a>` : ""}
+          ${item.address ? `<a href="${mapUrl}" target="_blank"><button class="btn-map">${t.map}</button></a>` : ""}
+
+          ${
+            item.status !== "completed"
+            ? `
+              <button class="btn-processing" onclick="updateStatus(${item.id}, 'processing')">${t.processing}</button>
+              <button class="btn-completed" onclick="updateStatus(${item.id}, 'completed')">${t.completed}</button>
+            `
+            : ""
+          }
+        </div>
+
+        <div class="reply-box">
+          <div class="reply-title">${t.reply}</div>
+          <textarea id="reply-${item.id}">${item.adminReply || ""}</textarea>
+          <button class="btn-save" onclick="saveReply(${item.id})">${t.save}</button>
         </div>
 
       </div>
