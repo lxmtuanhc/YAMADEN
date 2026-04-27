@@ -137,6 +137,18 @@
       box-shadow:0 18px 45px rgba(15,23,42,0.08);
       margin-bottom:18px;
       border:1px solid rgba(229,231,235,0.9);
+      animation: cardUp 0.35s ease;
+    }
+
+    @keyframes cardUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .card-title {
@@ -259,6 +271,15 @@
       box-shadow:none;
     }
 
+    .preview-img {
+      width:100%;
+      max-height:220px;
+      object-fit:cover;
+      border-radius:18px;
+      margin-bottom:12px;
+      box-shadow:0 10px 24px rgba(0,0,0,0.14);
+    }
+
     .main-btn {
       width:100%;
       border:none;
@@ -278,6 +299,11 @@
 
     .main-btn:active {
       transform:scale(0.99);
+    }
+
+    .main-btn:disabled {
+      opacity:0.65;
+      cursor:not-allowed;
     }
 
     .secondary-row {
@@ -428,6 +454,34 @@
       color:#166534;
     }
 
+    .status-timeline {
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:8px;
+      margin:18px 0;
+    }
+
+    .step {
+      text-align:center;
+      padding:10px 6px;
+      border-radius:16px;
+      background:#f3f4f6;
+      color:#6b7280;
+      font-size:12px;
+      font-weight:900;
+      line-height:1.4;
+    }
+
+    .step.active {
+      background:#111827;
+      color:white;
+    }
+
+    .step.done {
+      background:#dcfce7;
+      color:#166534;
+    }
+
     .check-image {
       width:100%;
       max-width:320px;
@@ -534,6 +588,30 @@
       cursor:pointer;
       text-decoration:underline;
       font-weight:700;
+    }
+
+    .toast {
+      position:fixed;
+      top:18px;
+      left:50%;
+      transform:translateX(-50%) translateY(-20px);
+      background:#111827;
+      color:white;
+      padding:13px 18px;
+      border-radius:16px;
+      font-weight:900;
+      z-index:9999;
+      box-shadow:0 14px 35px rgba(0,0,0,0.25);
+      opacity:0;
+      pointer-events:none;
+      transition:0.25s ease;
+      max-width:calc(100% - 32px);
+      text-align:center;
+    }
+
+    .toast.show {
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
     }
 
     svg {
@@ -647,7 +725,7 @@
 
       <button class="main-btn" onclick="sendRequest()" id="sendBtn">
         <svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-        Gửi yêu cầu
+        <span id="sendBtnText">Gửi yêu cầu</span>
       </button>
 
       <div class="secondary-row">
@@ -685,7 +763,7 @@
 
       <button class="main-btn" onclick="checkStatus(false)" id="checkBtn">
         <svg viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
-        Kiểm tra
+        <span id="checkBtnText">Kiểm tra</span>
       </button>
 
       <hr>
@@ -712,6 +790,8 @@
 
 </div>
 
+<div id="toast" class="toast"></div>
+
 <script>
 const API = "https://yamaden.onrender.com";
 
@@ -737,6 +817,7 @@ const texts = {
     check: "Kiểm tra",
     checkPlaceholder: "Nhập mã yêu cầu",
     sending: "Đang gửi...",
+    loading: "Đang tải...",
     success: "Gửi yêu cầu thành công!",
     successSub: "Cảm ơn bạn đã gửi yêu cầu. Chúng tôi sẽ liên hệ hỗ trợ bạn sớm nhất.",
     fail: "Gửi thất bại!",
@@ -755,7 +836,8 @@ const texts = {
     newReply: "🔔 Admin đã phản hồi!",
     myRequests: "Yêu cầu của tôi",
     noHistory: "Chưa có yêu cầu nào trên máy này",
-    clearHistory: "Xóa lịch sử trên máy này"
+    clearHistory: "Xóa lịch sử trên máy này",
+    saveIdTip: "Vui lòng lưu ID yêu cầu để tra cứu trạng thái sau này."
   },
   ja: {
     welcomeTitle: "いつでもサポートします",
@@ -775,6 +857,7 @@ const texts = {
     check: "確認",
     checkPlaceholder: "受付IDを入力",
     sending: "送信中...",
+    loading: "読み込み中...",
     success: "送信完了！",
     successSub: "依頼を受け付けました。担当者よりご連絡いたします。",
     fail: "送信失敗！",
@@ -793,7 +876,8 @@ const texts = {
     newReply: "🔔 管理者から返信がありました！",
     myRequests: "自分の依頼",
     noHistory: "この端末には履歴がありません",
-    clearHistory: "この端末の履歴を削除"
+    clearHistory: "この端末の履歴を削除",
+    saveIdTip: "あとで状況確認できるように受付IDを保存してください。"
   }
 };
 
@@ -811,8 +895,21 @@ function iconLight() {
   return `<svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M12 2v2"/><path d="M12 8a4 4 0 0 0-2 7.46V17h4v-1.54A4 4 0 0 0 12 8Z"/></svg>`;
 }
 
-function iconImage() {
-  return `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.5-3.5L9 20"/></svg>`;
+function iconSend() {
+  return `<svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>`;
+}
+
+function iconSpinner() {
+  return `<svg viewBox="0 0 24 24"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="m16.24 7.76 2.83-2.83"/></svg>`;
+}
+
+function showToast(message) {
+  toast.innerText = message;
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2200);
 }
 
 function applyLang() {
@@ -836,7 +933,9 @@ function applyLang() {
   labelImage.innerText = t.image;
   labelCheckId.innerText = t.requestId;
 
-  uploadText.innerText = t.uploadText;
+  if (!imageEl.files[0]) {
+    uploadText.innerText = t.uploadText;
+  }
 
   nameEl.placeholder = t.name;
   phoneEl.placeholder = t.phone;
@@ -844,8 +943,8 @@ function applyLang() {
   addressEl.placeholder = t.address;
   contentEl.placeholder = t.content;
 
-  sendBtn.lastChild.textContent = " " + t.send;
-  checkBtn.lastChild.textContent = " " + t.check;
+  sendBtnText.innerText = t.send;
+  checkBtnText.innerText = t.check;
   checkId.placeholder = t.checkPlaceholder;
   notice.innerText = t.newReply;
 
@@ -879,6 +978,7 @@ function showTab(tab) {
 function showNotice() {
   notice.innerText = texts[lang].newReply;
   notice.style.display = "block";
+  showToast(texts[lang].newReply);
 
   setTimeout(() => {
     notice.style.display = "none";
@@ -932,6 +1032,7 @@ function renderMyRequests() {
 function clearMyRequests() {
   localStorage.removeItem("myRequests");
   renderMyRequests();
+  showToast(texts[lang].clearHistory);
 }
 
 async function sendRequest() {
@@ -946,11 +1047,14 @@ async function sendRequest() {
 
   if (!name || !phone || !address || !content) {
     result.innerText = t.required;
+    showToast(t.required);
     return;
   }
 
   loader.style.display = "block";
   result.innerText = t.sending;
+  sendBtn.disabled = true;
+  sendBtn.innerHTML = `${iconSpinner()} <span>${t.sending}</span>`;
 
   let image = "";
 
@@ -989,7 +1093,7 @@ async function sendRequest() {
 
           <div class="tip-box">
             <div>${iconLight()}</div>
-            <div>Vui lòng lưu ID yêu cầu để tra cứu trạng thái sau này.</div>
+            <div>${t.saveIdTip}</div>
           </div>
 
           <button class="copy-btn" onclick="copyId()">${iconCopy()} ${t.copy}</button>
@@ -1004,24 +1108,38 @@ async function sendRequest() {
       addressEl.value = "";
       contentEl.value = "";
       imageEl.value = "";
+      uploadText.innerText = t.uploadText;
+
+      showToast(t.success);
     } else {
       result.innerText = t.fail;
+      showToast(t.fail);
     }
 
   } catch (err) {
     console.log(err);
     result.innerText = t.fail;
+    showToast(t.fail);
   }
 
   loader.style.display = "none";
+  sendBtn.disabled = false;
+  sendBtn.innerHTML = `${iconSend()} <span id="sendBtnText">${t.send}</span>`;
 }
 
 function copyId() {
   const t = texts[lang];
-  const id = document.getElementById("reqId").innerText;
+  const el = document.getElementById("reqId");
+
+  if (!el) {
+    showToast(t.noHistory);
+    return;
+  }
+
+  const id = el.innerText;
 
   navigator.clipboard.writeText(id).then(() => {
-    alert(t.copied);
+    showToast(t.copied);
   });
 }
 
@@ -1029,10 +1147,13 @@ function copyLastId() {
   const id = localStorage.getItem("lastRequestId");
   const t = texts[lang];
 
-  if (!id) return;
+  if (!id) {
+    showToast(t.noHistory);
+    return;
+  }
 
   navigator.clipboard.writeText(id).then(() => {
-    alert(t.copied);
+    showToast(t.copied);
   });
 }
 
@@ -1054,7 +1175,9 @@ async function checkStatus(isAuto = false) {
   renderMyRequests();
 
   if (!isAuto) {
-    checkResult.innerText = "Loading...";
+    checkResult.innerText = t.loading;
+    checkBtn.disabled = true;
+    checkBtn.innerHTML = `${iconSpinner()} <span>${t.loading}</span>`;
   }
 
   const res = await fetch(API + "/request/" + id);
@@ -1062,6 +1185,9 @@ async function checkStatus(isAuto = false) {
   if (!res.ok) {
     if (!isAuto) {
       checkResult.innerText = t.notFound;
+      showToast(t.notFound);
+      checkBtn.disabled = false;
+      checkBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><span id="checkBtnText">${t.check}</span>`;
     }
     return;
   }
@@ -1096,9 +1222,19 @@ async function checkStatus(isAuto = false) {
     badgeClass = "completed";
   }
 
+  const isPending = data.status === "pending";
+  const isProcessing = data.status === "processing";
+  const isCompleted = data.status === "completed";
+
   checkResult.innerHTML = `
     <div class="success-box">
       <div><b>${t.requestId}:</b> #${data.id}</div>
+
+      <div class="status-timeline">
+        <div class="step ${isPending ? "active" : "done"}">①<br>${t.pending}</div>
+        <div class="step ${isProcessing ? "active" : isCompleted ? "done" : ""}">②<br>${t.processing}</div>
+        <div class="step ${isCompleted ? "active" : ""}">③<br>${t.completed}</div>
+      </div>
 
       <div style="margin-top:10px;">
         <b>${t.status}:</b>
@@ -1134,6 +1270,11 @@ async function checkStatus(isAuto = false) {
       </div>
     </div>
   `;
+
+  if (!isAuto) {
+    checkBtn.disabled = false;
+    checkBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><span id="checkBtnText">${t.check}</span>`;
+  }
 }
 
 function resizeImage(file, maxWidth, quality) {
@@ -1191,6 +1332,26 @@ const notice = document.getElementById("notice");
 const myRequests = document.getElementById("myRequests");
 const myRequestTitle = document.getElementById("myRequestTitle");
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
+const uploadText = document.getElementById("uploadText");
+const toast = document.getElementById("toast");
+
+imageEl.addEventListener("change", () => {
+  const file = imageEl.files[0];
+  const t = texts[lang];
+
+  if (!file) {
+    uploadText.innerHTML = t.uploadText;
+    return;
+  }
+
+  const url = URL.createObjectURL(file);
+
+  uploadText.innerHTML = `
+    <img src="${url}" class="preview-img">
+    <div>✅ ${file.name}</div>
+  `;
+});
 
 applyLang();
 
