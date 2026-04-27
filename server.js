@@ -148,7 +148,25 @@ app.put("/request/:id", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+// Xóa yêu cầu
+app.delete("/request/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
 
+    const result = await Request.deleteOne({ id });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    res.json({ message: "Deleted" });
+  } catch (error) {
+    res.status(500).json({
+      message: "Delete failed",
+      error: error.message
+    });
+  }
+});
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
