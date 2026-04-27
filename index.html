@@ -4,36 +4,33 @@
   <meta charset="UTF-8">
   <title>YAMADEN Support</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0b3d91">
+  <meta name="theme-color" content="#111111">
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
       font-family: "Segoe UI", Arial, sans-serif;
-      background: #eef4ff;
-      color: #1f2937;
+      background: #f4f4f4;
+      color: #111;
     }
 
     .app {
       max-width: 480px;
       margin: 0 auto;
       min-height: 100vh;
-      background: #eef4ff;
+      background: #f4f4f4;
       padding-bottom: 90px;
     }
 
     .top-header {
-      background: linear-gradient(135deg, #0b3d91, #1f8dd6);
+      background: #111;
       color: white;
       padding: 18px;
       border-radius: 0 0 28px 28px;
-      box-shadow: 0 8px 22px rgba(11,61,145,0.25);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.25);
     }
 
     .top-row {
@@ -67,8 +64,8 @@
 
     .hero {
       margin-top: 18px;
-      background: rgba(255,255,255,0.18);
-      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
       border-radius: 22px;
       padding: 18px;
     }
@@ -82,17 +79,15 @@
       margin: 0;
       font-size: 14px;
       line-height: 1.6;
-      opacity: 0.95;
+      color: #e5e5e5;
     }
 
-    .container {
-      padding: 18px;
-    }
+    .container { padding: 18px; }
 
     .notice {
       display: none;
-      background: #dcfce7;
-      color: #166534;
+      background: #eeeeee;
+      color: #111;
       padding: 14px;
       border-radius: 16px;
       margin-bottom: 14px;
@@ -106,34 +101,33 @@
       padding: 20px;
       box-shadow: 0 10px 28px rgba(0,0,0,0.08);
       margin-bottom: 18px;
+      border: 1px solid #ddd;
     }
 
     .card h3 {
       margin: 0 0 18px;
-      color: #111827;
+      color: #111;
       font-size: 22px;
     }
 
-    .field {
-      margin-bottom: 15px;
-    }
+    .field { margin-bottom: 15px; }
 
     .field label {
       display: block;
       font-weight: 700;
       margin-bottom: 7px;
       font-size: 14px;
-      color: #374151;
+      color: #333;
     }
 
     input, textarea {
       width: 100%;
-      border: 1px solid #d1d5db;
+      border: 1px solid #ccc;
       border-radius: 15px;
       padding: 15px;
       font-size: 16px;
       outline: none;
-      background: #fff;
+      background: white;
     }
 
     textarea {
@@ -142,17 +136,17 @@
     }
 
     input:focus, textarea:focus {
-      border-color: #1f8dd6;
-      box-shadow: 0 0 0 4px rgba(31,141,214,0.12);
+      border-color: #111;
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.08);
     }
 
     .upload-box {
-      border: 2px dashed #9bbcf2;
-      background: #f8fbff;
+      border: 2px dashed #999;
+      background: #fafafa;
       padding: 18px;
       border-radius: 18px;
       text-align: center;
-      color: #0b3d91;
+      color: #111;
       font-weight: 700;
     }
 
@@ -167,16 +161,12 @@
       border: none;
       border-radius: 16px;
       padding: 16px;
-      background: linear-gradient(135deg, #0b3d91, #1f8dd6);
+      background: #111;
       color: white;
       font-size: 17px;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 8px 18px rgba(11,61,145,0.22);
-    }
-
-    .main-btn:active {
-      transform: scale(0.97);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.22);
     }
 
     .copy-btn {
@@ -184,7 +174,7 @@
       border: none;
       border-radius: 16px;
       padding: 14px;
-      background: #1f8dd6;
+      background: #444;
       color: white;
       font-size: 15px;
       font-weight: 800;
@@ -192,23 +182,24 @@
     }
 
     .success-box {
-      background: #e8f2ff;
-      color: #0b3d91;
+      background: #f1f1f1;
+      color: #111;
       padding: 16px;
       border-radius: 18px;
       line-height: 1.8;
+      border: 1px solid #ddd;
     }
 
     .result {
       margin-top: 14px;
       font-weight: 700;
-      color: #0b3d91;
+      color: #111;
       line-height: 1.7;
     }
 
     .loader {
-      border: 4px solid #d1d5db;
-      border-top: 4px solid #0b3d91;
+      border: 4px solid #ddd;
+      border-top: 4px solid #111;
       border-radius: 50%;
       width: 30px;
       height: 30px;
@@ -221,9 +212,7 @@
       100% { transform: rotate(360deg); }
     }
 
-    .hidden {
-      display: none;
-    }
+    .hidden { display: none; }
 
     .badge {
       display: inline-block;
@@ -233,20 +222,9 @@
       font-weight: 800;
     }
 
-    .pending {
-      background: #e5e7eb;
-      color: #374151;
-    }
-
-    .processing {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .completed {
-      background: #dcfce7;
-      color: #166534;
-    }
+    .pending { background: #ddd; color: #111; }
+    .processing { background: #777; color: white; }
+    .completed { background: #111; color: white; }
 
     .check-image {
       width: 100%;
@@ -269,13 +247,14 @@
       padding: 8px;
       gap: 8px;
       z-index: 100;
+      border: 1px solid #ddd;
     }
 
     .bottom-nav button {
       flex: 1;
       border: none;
       background: transparent;
-      color: #6b7280;
+      color: #666;
       border-radius: 16px;
       padding: 11px 8px;
       font-weight: 800;
@@ -283,19 +262,17 @@
     }
 
     .bottom-nav button.active {
-      background: #0b3d91;
+      background: #111;
       color: white;
     }
 
     hr {
       border: none;
-      border-top: 1px solid #dbe3ef;
+      border-top: 1px solid #ddd;
       margin: 14px 0;
     }
 
-    .info-line {
-      margin: 7px 0;
-    }
+    .info-line { margin: 7px 0; }
   </style>
 </head>
 
@@ -428,8 +405,7 @@ const texts = {
     adminReply: "Phản hồi admin",
     noReply: "Chưa có phản hồi",
     noImage: "Không có hình",
-    newReply: "🔔 Admin đã phản hồi!",
-    upload: "📷 Chọn ảnh hoặc chụp ảnh"
+    newReply: "🔔 Admin đã phản hồi!"
   },
   ja: {
     welcomeTitle: "こんにちは！",
@@ -462,8 +438,7 @@ const texts = {
     adminReply: "管理者コメント",
     noReply: "まだ返信はありません",
     noImage: "画像なし",
-    newReply: "🔔 管理者から返信がありました！",
-    upload: "📷 画像を選択・撮影"
+    newReply: "🔔 管理者から返信がありました！"
   }
 };
 
