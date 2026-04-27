@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>YAMADEN Admin Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin:0;
+  font-family:Segoe UI;
+  background:#0f172a;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+}
+
+.box {
+  background:white;
+  padding:30px;
+  border-radius:20px;
+  width:320px;
+  text-align:center;
+  box-shadow:0 20px 40px rgba(0,0,0,0.3);
+}
+
+h2 {
+  margin-bottom:20px;
+}
+
+input {
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  margin-bottom:15px;
+}
+
+button {
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#111827;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.error {
+  color:red;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>🔐 Admin Login</h2>
+
+  <input type="password" id="password" placeholder="Nhập mật khẩu">
+
+  <button onclick="login()">Đăng nhập</button>
+
+  <div id="error" class="error"></div>
+</div>
+
+<script>
+const PASSWORD = "yamaden123"; // 👉 đổi mật khẩu tại đây
+
+function login() {
+  const pass = document.getElementById("password").value;
+
+  if (pass === PASSWORD) {
+    localStorage.setItem("adminLogged", "true");
+    localStorage.setItem("loginTime", Date.now());
+
+    window.location.href = "/admin.html";
+  } else {
+    document.getElementById("error").innerText = "Sai mật khẩu!";
+  }
+}
+</script>
+
+</body>
+</html>

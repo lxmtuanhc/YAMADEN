@@ -124,6 +124,16 @@ body {
 
 .admin-info { font-weight: 800; }
 
+.logout-btn {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 12px;
+  background: #dc2626;
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+}
+
 .content { padding: 24px; }
 
 .stats {
@@ -456,6 +466,7 @@ body {
           <option value="ja">JP</option>
         </select>
         <div class="admin-info">Admin</div>
+        <button class="logout-btn" onclick="logout()">Đăng xuất</button>
       </div>
     </div>
 
@@ -503,6 +514,22 @@ body {
 </div>
 
 <script>
+// ===== CHECK LOGIN =====
+const isLogged = localStorage.getItem("adminLogged");
+const loginTime = localStorage.getItem("loginTime");
+
+if (!isLogged || !loginTime || Date.now() - loginTime > 86400000) {
+  localStorage.removeItem("adminLogged");
+  localStorage.removeItem("loginTime");
+  window.location.href = "/login.html";
+}
+
+function logout() {
+  localStorage.removeItem("adminLogged");
+  localStorage.removeItem("loginTime");
+  window.location.href = "/login.html";
+}
+
 const API = "https://yamaden.onrender.com";
 
 let currentLang = localStorage.getItem("language") || "vi";
