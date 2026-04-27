@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>YAMADEN Support</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#111111">
 
@@ -169,7 +171,7 @@
       box-shadow: 0 8px 18px rgba(0,0,0,0.22);
     }
 
-    .copy-btn {
+    .copy-btn, .history-btn {
       width: 100%;
       border: none;
       border-radius: 16px;
@@ -179,6 +181,14 @@
       font-size: 15px;
       font-weight: 800;
       margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .history-btn {
+      background: #f1f1f1;
+      color: #111;
+      border: 1px solid #ddd;
+      text-align: left;
     }
 
     .success-box {
@@ -273,6 +283,15 @@
     }
 
     .info-line { margin: 7px 0; }
+
+    .small-link {
+      margin-top: 10px;
+      text-align: center;
+      color: #555;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
   </style>
 </head>
 
@@ -355,6 +374,12 @@
 
       <button class="main-btn" onclick="checkStatus(false)" id="checkBtn">Kiểm tra</button>
 
+      <hr>
+
+      <h3 id="myRequestTitle">Yêu cầu của tôi</h3>
+      <div id="myRequests"></div>
+      <div class="small-link" id="clearHistoryBtn" onclick="clearMyRequests()">Xóa lịch sử trên máy này</div>
+
       <div id="checkResult" class="result"></div>
     </div>
 
@@ -405,7 +430,10 @@ const texts = {
     adminReply: "Phản hồi admin",
     noReply: "Chưa có phản hồi",
     noImage: "Không có hình",
-    newReply: "🔔 Admin đã phản hồi!"
+    newReply: "🔔 Admin đã phản hồi!",
+    myRequests: "Yêu cầu của tôi",
+    noHistory: "Chưa có yêu cầu nào trên máy này",
+    clearHistory: "Xóa lịch sử trên máy này"
   },
   ja: {
     welcomeTitle: "こんにちは！",
@@ -438,7 +466,10 @@ const texts = {
     adminReply: "管理者コメント",
     noReply: "まだ返信はありません",
     noImage: "画像なし",
-    newReply: "🔔 管理者から返信がありました！"
+    newReply: "🔔 管理者から返信がありました！",
+    myRequests: "自分の依頼",
+    noHistory: "この端末には履歴がありません",
+    clearHistory: "この端末の履歴を削除"
   }
 };
 
@@ -475,6 +506,11 @@ function applyLang() {
   checkBtn.innerText = t.check;
   checkId.placeholder = t.checkPlaceholder;
   notice.innerText = t.newReply;
+
+  myRequestTitle.innerText = t.myRequests;
+  clearHistoryBtn.innerText = t.clearHistory;
+
+  renderMyRequests();
 }
 
 function changeLanguage() {
@@ -494,6 +530,7 @@ function showTab(tab) {
     checkSection.classList.remove("hidden");
     tabSend.classList.remove("active");
     tabCheck.classList.add("active");
+    renderMyRequests();
   }
 }
 
@@ -509,6 +546,44 @@ function showNotice() {
     const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
     audio.play();
   } catch (e) {}
+}
+
+function getMyRequests() {
+  return JSON.parse(localStorage.getItem("myRequests") || "[]");
+}
+
+function saveMyRequest(id) {
+  let ids = getMyRequests();
+  id = String(id);
+
+  if (!ids.includes(id)) {
+    ids.unshift(id);
+  }
+
+  localStorage.setItem("myRequests", JSON.stringify(ids));
+}
+
+function renderMyRequests() {
+  const t = texts[lang];
+  const ids = getMyRequests();
+
+  if (!myRequests) return;
+
+  if (ids.length === 0) {
+    myRequests.innerHTML = `<div class="success-box">${t.noHistory}</div>`;
+    return;
+  }
+
+  myRequests.innerHTML = ids.map(id => `
+    <button class="history-btn" onclick="openCheck('${id}')">
+      ${t.requestId}: #${id}
+    </button>
+  `).join("");
+}
+
+function clearMyRequests() {
+  localStorage.removeItem("myRequests");
+  renderMyRequests();
 }
 
 async function sendRequest() {
@@ -546,6 +621,9 @@ async function sendRequest() {
 
     if (res.ok) {
       const id = data.data.id;
+
+      saveMyRequest(id);
+      renderMyRequests();
 
       result.innerHTML = `
         <div class="success-box">
@@ -596,6 +674,9 @@ async function checkStatus(isAuto = false) {
   const id = checkId.value;
 
   if (!id) return;
+
+  saveMyRequest(id);
+  renderMyRequests();
 
   if (!isAuto) {
     checkResult.innerText = "Loading...";
@@ -731,6 +812,10 @@ const loader = document.getElementById("loader");
 const checkId = document.getElementById("checkId");
 const checkResult = document.getElementById("checkResult");
 const notice = document.getElementById("notice");
+
+const myRequests = document.getElementById("myRequests");
+const myRequestTitle = document.getElementById("myRequestTitle");
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
 applyLang();
 
