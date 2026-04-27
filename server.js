@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const fs = require("fs");
 const path = require("path");
+const mongoose = require("mongoose");
 
 const app = express();
 
@@ -14,20 +14,29 @@ app.use(express.json({ limit: "100mb" }));
 // Cho server hiển thị index.html, admin.html, icon, manifest
 app.use(express.static(__dirname));
 
-const DB_FILE = "requests.json";
+// ===== MongoDB Connect =====
+mongoose.connect("mongodb+srv://lxmtuanhc_db_user:yamadenapp@cluster0.revraqf.mongodb.net/yamaden?retryWrites=true&w=majority&appName=Cluster0")
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.log("MongoDB error:", err));
 
-function readData() {
-  if (!fs.existsSync(DB_FILE)) return [];
+// ===== Schema =====
+const RequestSchema = new mongoose.Schema({
+  id: Number,
 
-  const content = fs.readFileSync(DB_FILE, "utf8");
-  if (!content) return [];
+  name: String,
+  phone: String,
+  contact: String,
+  address: String,
 
-  return JSON.parse(content);
-}
+  content: String,
+  image: String,
 
-function writeData(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-}
+  status: String,
+  adminReply: String,
+  createdAt: Date
+});
+
+const Request = mongoose.model("Request", RequestSchema);
 
 // Trang chính
 app.get("/", (req, res) => {
@@ -35,36 +44,31 @@ app.get("/", (req, res) => {
 });
 
 // Tạo yêu cầu mới
-app.post("/request", (req, res) => {
+app.post("/request", async (req, res) => {
   try {
-    const requests = readData();
-
-    const newRequest = {
+    const newRequest = new Request({
       id: Date.now(),
 
-      // Thông tin khách hàng
       name: req.body.name || "",
       phone: req.body.phone || "",
       contact: req.body.contact || "",
       address: req.body.address || "",
 
-      // Nội dung yêu cầu
       content: req.body.content || "",
       image: req.body.image || "",
 
-      // Trạng thái
       status: "pending",
       adminReply: "",
       createdAt: new Date()
-    };
+    });
 
-    requests.unshift(newRequest);
-    writeData(requests);
+    await newRequest.save();
 
     res.json({
-      message: "Saved to local file",
+      message: "Saved to MongoDB",
       data: newRequest
     });
+
   } catch (error) {
     res.status(500).json({
       message: "Save failed",
@@ -74,9 +78,10 @@ app.post("/request", (req, res) => {
 });
 
 // Lấy danh sách yêu cầu
-app.get("/requests", (req, res) => {
+app.get("/requests", async (req, res) => {
   try {
-    res.json(readData());
+    const requests = await Request.find().sort({ createdAt: -1 });
+    res.json(requests);
   } catch (error) {
     res.status(500).json({
       message: "Read failed",
@@ -84,13 +89,12 @@ app.get("/requests", (req, res) => {
     });
   }
 });
-// Tra cứu 1 yêu cầu theo ID
-app.get("/request/:id", (req, res) => {
-  try {
-    const requests = readData();
-    const id = Number(req.params.id);
 
-    const item = requests.find(r => r.id === id);
+// Tra cứu 1 yêu cầu theo ID
+app.get("/request/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const item = await Request.findOne({ id });
 
     if (!item) {
       return res.status(404).json({
@@ -99,6 +103,7 @@ app.get("/request/:id", (req, res) => {
     }
 
     res.json(item);
+
   } catch (error) {
     res.status(500).json({
       message: "Read failed",
@@ -106,13 +111,12 @@ app.get("/request/:id", (req, res) => {
     });
   }
 });
-// Cập nhật trạng thái
-app.put("/request/:id", (req, res) => {
-  try {
-    const requests = readData();
-    const id = Number(req.params.id);
 
-    const item = requests.find(r => r.id === id);
+// Cập nhật trạng thái / phản hồi admin
+app.put("/request/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const item = await Request.findOne({ id });
 
     if (!item) {
       return res.status(404).json({
@@ -120,14 +124,21 @@ app.put("/request/:id", (req, res) => {
       });
     }
 
-    item.status = req.body.status || item.status;
-    item.adminReply = req.body.adminReply ?? item.adminReply;
-    writeData(requests);
+    if (req.body.status) {
+      item.status = req.body.status;
+    }
+
+    if (req.body.adminReply !== undefined) {
+      item.adminReply = req.body.adminReply;
+    }
+
+    await item.save();
 
     res.json({
       message: "Updated",
       data: item
     });
+
   } catch (error) {
     res.status(500).json({
       message: "Update failed",
