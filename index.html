@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>YAMADEN Support</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="icon" type="image/png" href="/icon-192.png">
   <link rel="apple-touch-icon" href="/icon-192.png">
   <link rel="manifest" href="/manifest.json">
@@ -12,285 +13,537 @@
   <style>
     * { box-sizing: border-box; }
 
+    :root {
+      --black:#0b0b0f;
+      --dark:#111827;
+      --gray:#6b7280;
+      --line:#e5e7eb;
+      --bg:#f5f6fa;
+      --blue:#2563eb;
+      --green:#16a34a;
+      --orange:#f59e0b;
+      --red:#dc2626;
+    }
+
     body {
-      margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: #f4f4f4;
-      color: #111;
+      margin:0;
+      font-family:"Segoe UI", Arial, sans-serif;
+      background:linear-gradient(180deg,#eef1f6,#ffffff);
+      color:#111827;
     }
 
     .app {
-      max-width: 480px;
-      margin: 0 auto;
-      min-height: 100vh;
-      background: #f4f4f4;
-      padding-bottom: 90px;
+      max-width:480px;
+      margin:0 auto;
+      min-height:100vh;
+      background:#f7f8fb;
+      padding-bottom:105px;
+      position:relative;
+      overflow:hidden;
     }
 
     .top-header {
-      background: #111;
-      color: white;
-      padding: 18px;
-      border-radius: 0 0 28px 28px;
-      box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+      background:
+        radial-gradient(circle at top right, rgba(255,255,255,0.16), transparent 35%),
+        linear-gradient(145deg,#050505,#171717);
+      color:white;
+      padding:20px 18px 30px;
+      border-radius:0 0 36px 36px;
+      box-shadow:0 18px 45px rgba(0,0,0,0.28);
     }
 
     .top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
     }
 
     .logo-box {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 21px;
-      font-weight: 800;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:0.5px;
     }
 
     .logo-box img {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: white;
+      width:46px;
+      height:46px;
+      border-radius:14px;
+      background:white;
+      box-shadow:0 8px 20px rgba(0,0,0,0.25);
     }
 
     .lang-select {
-      width: 78px;
-      padding: 8px;
-      border-radius: 12px;
-      border: none;
-      font-weight: bold;
+      width:78px;
+      padding:10px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(255,255,255,0.12);
+      color:white;
+      font-weight:900;
+      outline:none;
+    }
+
+    .lang-select option {
+      color:#111;
     }
 
     .hero {
-      margin-top: 18px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 22px;
-      padding: 18px;
+      margin-top:24px;
+      padding:20px;
+      border-radius:26px;
+      background:rgba(255,255,255,0.1);
+      border:1px solid rgba(255,255,255,0.16);
+      backdrop-filter:blur(10px);
     }
 
     .hero h2 {
-      margin: 0 0 8px;
-      font-size: 23px;
+      margin:0 0 10px;
+      font-size:28px;
+      line-height:1.25;
+      font-weight:950;
     }
 
     .hero p {
-      margin: 0;
-      font-size: 14px;
-      line-height: 1.6;
-      color: #e5e5e5;
+      margin:0;
+      font-size:15px;
+      line-height:1.7;
+      color:#e5e7eb;
     }
 
-    .container { padding: 18px; }
+    .container {
+      padding:18px;
+      margin-top:-12px;
+    }
 
     .notice {
-      display: none;
-      background: #eeeeee;
-      color: #111;
-      padding: 14px;
-      border-radius: 16px;
-      margin-bottom: 14px;
-      font-weight: 700;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+      display:none;
+      background:#ecfdf5;
+      color:#166534;
+      padding:14px 16px;
+      border-radius:18px;
+      margin-bottom:14px;
+      font-weight:800;
+      border:1px solid #bbf7d0;
+      box-shadow:0 10px 22px rgba(22,163,74,0.12);
     }
 
     .card {
-      background: white;
-      border-radius: 24px;
-      padding: 20px;
-      box-shadow: 0 10px 28px rgba(0,0,0,0.08);
-      margin-bottom: 18px;
-      border: 1px solid #ddd;
+      background:white;
+      border-radius:28px;
+      padding:22px;
+      box-shadow:0 18px 45px rgba(15,23,42,0.08);
+      margin-bottom:18px;
+      border:1px solid rgba(229,231,235,0.9);
+    }
+
+    .card-title {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:22px;
+    }
+
+    .card-title-icon {
+      width:38px;
+      height:38px;
+      border-radius:13px;
+      background:#f3f4f6;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#111827;
     }
 
     .card h3 {
-      margin: 0 0 18px;
-      color: #111;
-      font-size: 22px;
+      margin:0;
+      color:#111827;
+      font-size:22px;
+      font-weight:950;
     }
 
-    .field { margin-bottom: 15px; }
+    .field {
+      margin-bottom:17px;
+    }
 
     .field label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 7px;
-      font-size: 14px;
-      color: #333;
+      display:block;
+      font-weight:850;
+      margin-bottom:8px;
+      font-size:14px;
+      color:#111827;
+    }
+
+    .required {
+      color:#dc2626;
+    }
+
+    .input-wrap {
+      position:relative;
+    }
+
+    .input-icon {
+      position:absolute;
+      left:14px;
+      top:50%;
+      transform:translateY(-50%);
+      color:#6b7280;
+      width:22px;
+      height:22px;
+      pointer-events:none;
+    }
+
+    .textarea-icon {
+      top:18px;
+      transform:none;
     }
 
     input, textarea {
-      width: 100%;
-      border: 1px solid #ccc;
-      border-radius: 15px;
-      padding: 15px;
-      font-size: 16px;
-      outline: none;
-      background: white;
+      width:100%;
+      border:1px solid #d1d5db;
+      border-radius:16px;
+      padding:15px 15px 15px 46px;
+      font-size:16px;
+      outline:none;
+      background:white;
+      transition:0.18s;
+      color:#111827;
     }
 
     textarea {
-      min-height: 130px;
-      resize: vertical;
+      min-height:130px;
+      resize:vertical;
+      line-height:1.5;
     }
 
     input:focus, textarea:focus {
-      border-color: #111;
-      box-shadow: 0 0 0 4px rgba(0,0,0,0.08);
+      border-color:#111827;
+      box-shadow:0 0 0 5px rgba(17,24,39,0.08);
     }
 
     .upload-box {
-      border: 2px dashed #999;
-      background: #fafafa;
-      padding: 18px;
-      border-radius: 18px;
-      text-align: center;
-      color: #111;
-      font-weight: 700;
+      border:2px dashed #9ca3af;
+      background:linear-gradient(180deg,#ffffff,#f9fafb);
+      padding:22px 18px;
+      border-radius:22px;
+      text-align:center;
+      color:#111827;
+      font-weight:800;
+    }
+
+    .upload-icon {
+      width:54px;
+      height:54px;
+      border-radius:18px;
+      margin:0 auto 10px;
+      background:#f3f4f6;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#111827;
+    }
+
+    .upload-sub {
+      color:#6b7280;
+      font-size:13px;
+      font-weight:650;
+      margin-top:4px;
     }
 
     .upload-box input {
-      border: none;
-      padding: 10px 0 0;
-      background: transparent;
+      border:none;
+      padding:12px 0 0;
+      background:transparent;
+      box-shadow:none;
     }
 
     .main-btn {
-      width: 100%;
-      border: none;
-      border-radius: 16px;
-      padding: 16px;
-      background: #111;
-      color: white;
-      font-size: 17px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.22);
+      width:100%;
+      border:none;
+      border-radius:18px;
+      padding:16px;
+      background:linear-gradient(135deg,#050505,#1f2937);
+      color:white;
+      font-size:17px;
+      font-weight:950;
+      cursor:pointer;
+      box-shadow:0 12px 24px rgba(0,0,0,0.24);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:9px;
     }
 
-    .copy-btn, .history-btn {
-      width: 100%;
-      border: none;
-      border-radius: 16px;
-      padding: 14px;
-      background: #444;
-      color: white;
-      font-size: 15px;
-      font-weight: 800;
-      margin-top: 10px;
-      cursor: pointer;
+    .main-btn:active {
+      transform:scale(0.99);
+    }
+
+    .secondary-row {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .soft-btn, .copy-btn, .history-btn {
+      width:100%;
+      border:none;
+      border-radius:16px;
+      padding:14px;
+      background:#f9fafb;
+      color:#111827;
+      font-size:14px;
+      font-weight:900;
+      cursor:pointer;
+      border:1px solid #e5e7eb;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+
+    .copy-btn {
+      background:#111827;
+      color:white;
+      margin-top:14px;
     }
 
     .history-btn {
-      background: #f1f1f1;
-      color: #111;
-      border: 1px solid #ddd;
-      text-align: left;
+      justify-content:flex-start;
+      margin-top:10px;
+      background:white;
+      box-shadow:0 8px 18px rgba(15,23,42,0.05);
     }
 
     .success-box {
-      background: #f1f1f1;
-      color: #111;
-      padding: 16px;
-      border-radius: 18px;
-      line-height: 1.8;
-      border: 1px solid #ddd;
+      background:linear-gradient(180deg,#ffffff,#f9fafb);
+      color:#111827;
+      padding:18px;
+      border-radius:22px;
+      line-height:1.8;
+      border:1px solid #e5e7eb;
+      box-shadow:0 12px 28px rgba(15,23,42,0.06);
+    }
+
+    .success-center {
+      text-align:center;
+      padding:8px 0;
+    }
+
+    .success-icon {
+      width:76px;
+      height:76px;
+      border-radius:50%;
+      background:#dcfce7;
+      color:#16a34a;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin:0 auto 16px;
+      box-shadow:0 0 0 14px rgba(22,163,74,0.08);
+    }
+
+    .success-title {
+      font-size:22px;
+      font-weight:950;
+      margin-bottom:6px;
+    }
+
+    .id-box {
+      margin:16px 0;
+      padding:18px;
+      border-radius:20px;
+      border:1px solid #e5e7eb;
+      background:white;
+      text-align:center;
+    }
+
+    .id-number {
+      font-size:34px;
+      color:#16a34a;
+      font-weight:950;
+    }
+
+    .tip-box {
+      background:#ecfdf5;
+      color:#166534;
+      padding:14px;
+      border-radius:16px;
+      border:1px solid #bbf7d0;
+      font-weight:750;
+      margin-bottom:14px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
     }
 
     .result {
-      margin-top: 14px;
-      font-weight: 700;
-      color: #111;
-      line-height: 1.7;
+      margin-top:14px;
+      font-weight:700;
+      color:#111827;
+      line-height:1.7;
     }
 
     .loader {
-      border: 4px solid #ddd;
-      border-top: 4px solid #111;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-      margin: 18px auto;
-      display: none;
+      border:4px solid #e5e7eb;
+      border-top:4px solid #111827;
+      border-radius:50%;
+      width:32px;
+      height:32px;
+      animation:spin 1s linear infinite;
+      margin:18px auto;
+      display:none;
     }
 
     @keyframes spin {
-      100% { transform: rotate(360deg); }
+      100% { transform:rotate(360deg); }
     }
 
-    .hidden { display: none; }
+    .hidden { display:none; }
 
     .badge {
-      display: inline-block;
-      padding: 7px 13px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 800;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:7px 13px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:900;
     }
 
-    .pending { background: #ddd; color: #111; }
-    .processing { background: #777; color: white; }
-    .completed { background: #111; color: white; }
+    .pending {
+      background:#f3f4f6;
+      color:#374151;
+    }
+
+    .processing {
+      background:#fff7ed;
+      color:#c2410c;
+    }
+
+    .completed {
+      background:#ecfdf5;
+      color:#166534;
+    }
 
     .check-image {
-      width: 100%;
-      max-width: 320px;
-      border-radius: 16px;
-      margin-top: 8px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.14);
+      width:100%;
+      max-width:320px;
+      border-radius:18px;
+      margin-top:8px;
+      box-shadow:0 10px 24px rgba(0,0,0,0.14);
+    }
+
+    .request-card {
+      display:flex;
+      gap:12px;
+      padding:14px;
+      border-radius:20px;
+      background:white;
+      border:1px solid #e5e7eb;
+      box-shadow:0 10px 24px rgba(15,23,42,0.06);
+      margin-bottom:12px;
+      cursor:pointer;
+    }
+
+    .request-thumb {
+      width:70px;
+      height:70px;
+      border-radius:16px;
+      background:#f3f4f6;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#6b7280;
+      flex-shrink:0;
+    }
+
+    .request-info {
+      flex:1;
+      min-width:0;
+    }
+
+    .request-id {
+      color:#2563eb;
+      font-weight:950;
+      font-size:16px;
+    }
+
+    .request-desc {
+      color:#374151;
+      font-size:13px;
+      margin-top:4px;
     }
 
     .bottom-nav {
-      position: fixed;
-      left: 50%;
-      bottom: 14px;
-      transform: translateX(-50%);
-      width: min(440px, calc(100% - 28px));
-      background: white;
-      border-radius: 22px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
-      display: flex;
-      padding: 8px;
-      gap: 8px;
-      z-index: 100;
-      border: 1px solid #ddd;
+      position:fixed;
+      left:50%;
+      bottom:14px;
+      transform:translateX(-50%);
+      width:min(440px, calc(100% - 28px));
+      background:rgba(255,255,255,0.92);
+      backdrop-filter:blur(14px);
+      border-radius:24px;
+      box-shadow:0 14px 36px rgba(0,0,0,0.18);
+      display:flex;
+      padding:8px;
+      gap:8px;
+      z-index:100;
+      border:1px solid #e5e7eb;
     }
 
     .bottom-nav button {
-      flex: 1;
-      border: none;
-      background: transparent;
-      color: #666;
-      border-radius: 16px;
-      padding: 11px 8px;
-      font-weight: 800;
-      font-size: 14px;
+      flex:1;
+      border:none;
+      background:transparent;
+      color:#6b7280;
+      border-radius:18px;
+      padding:11px 8px;
+      font-weight:900;
+      font-size:13px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+      cursor:pointer;
     }
 
     .bottom-nav button.active {
-      background: #111;
-      color: white;
+      background:#111827;
+      color:white;
     }
 
     hr {
-      border: none;
-      border-top: 1px solid #ddd;
-      margin: 14px 0;
+      border:none;
+      border-top:1px solid #e5e7eb;
+      margin:16px 0;
     }
 
-    .info-line { margin: 7px 0; }
+    .info-line {
+      margin:8px 0;
+      color:#374151;
+    }
 
     .small-link {
-      margin-top: 10px;
-      text-align: center;
-      color: #555;
-      font-size: 13px;
-      cursor: pointer;
-      text-decoration: underline;
+      margin-top:10px;
+      text-align:center;
+      color:#6b7280;
+      font-size:13px;
+      cursor:pointer;
+      text-decoration:underline;
+      font-weight:700;
+    }
+
+    svg {
+      width:21px;
+      height:21px;
+      stroke:currentColor;
+      stroke-width:2.2;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
     }
   </style>
 </head>
@@ -323,56 +576,117 @@
     <div id="notice" class="notice">🔔 Admin đã phản hồi!</div>
 
     <div class="card" id="sendSection">
-      <h3 id="sendTitle">Gửi yêu cầu sửa điện</h3>
-
-      <div class="field">
-        <label id="labelName">Tên khách</label>
-        <input id="name" placeholder="Tên khách">
+      <div class="card-title">
+        <div class="card-title-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </div>
+        <h3 id="sendTitle">Gửi yêu cầu sửa điện</h3>
       </div>
 
       <div class="field">
-        <label id="labelPhone">Số điện thoại</label>
-        <input id="phone" placeholder="Số điện thoại">
+        <label><span id="labelName">Tên khách</span> <span class="required">*</span></label>
+        <div class="input-wrap">
+          <div class="input-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <input id="name" placeholder="Tên khách">
+        </div>
+      </div>
+
+      <div class="field">
+        <label><span id="labelPhone">Số điện thoại</span> <span class="required">*</span></label>
+        <div class="input-wrap">
+          <div class="input-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3 5.18 2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.72c.12.9.32 1.77.6 2.6a2 2 0 0 1-.45 2.11L9 10.6a16 16 0 0 0 4.4 4.4l1.17-1.15a2 2 0 0 1 2.11-.45c.83.28 1.7.48 2.6.6A2 2 0 0 1 22 16.92Z"/></svg>
+          </div>
+          <input id="phone" placeholder="Số điện thoại">
+        </div>
       </div>
 
       <div class="field">
         <label id="labelContact">Liên hệ</label>
-        <input id="contact" placeholder="Email / LINE / Zalo">
+        <div class="input-wrap">
+          <div class="input-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg>
+          </div>
+          <input id="contact" placeholder="Email / LINE / Zalo">
+        </div>
       </div>
 
       <div class="field">
-        <label id="labelAddress">Địa chỉ công trình</label>
-        <input id="address" placeholder="Địa chỉ công trình">
+        <label><span id="labelAddress">Địa chỉ công trình</span> <span class="required">*</span></label>
+        <div class="input-wrap">
+          <div class="input-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <input id="address" placeholder="Địa chỉ công trình">
+        </div>
       </div>
 
       <div class="field">
-        <label id="labelContent">Nội dung sự cố</label>
-        <textarea id="content" placeholder="Mô tả sự cố"></textarea>
+        <label><span id="labelContent">Nội dung sự cố</span> <span class="required">*</span></label>
+        <div class="input-wrap">
+          <div class="input-icon textarea-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg>
+          </div>
+          <textarea id="content" placeholder="Mô tả sự cố"></textarea>
+        </div>
       </div>
 
       <div class="field">
         <label id="labelImage">Hình ảnh</label>
         <div class="upload-box">
-          📷 Chọn ảnh hoặc chụp ảnh
+          <div class="upload-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8 12 3 7 8"/><path d="M12 3v12"/></svg>
+          </div>
+          <div id="uploadText">Chọn ảnh hoặc chụp ảnh</div>
+          <div class="upload-sub">JPG / PNG</div>
           <input type="file" id="image" accept="image/*">
         </div>
       </div>
 
-      <button class="main-btn" onclick="sendRequest()" id="sendBtn">Gửi yêu cầu</button>
+      <button class="main-btn" onclick="sendRequest()" id="sendBtn">
+        <svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        Gửi yêu cầu
+      </button>
+
+      <div class="secondary-row">
+        <button class="soft-btn" onclick="copyLastId()">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy ID
+        </button>
+        <button class="soft-btn" onclick="showTab('check')">
+          <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          Lịch sử
+        </button>
+      </div>
 
       <div class="loader" id="loader"></div>
       <div id="result" class="result"></div>
     </div>
 
     <div class="card hidden" id="checkSection">
-      <h3 id="checkTitle">Tra cứu trạng thái yêu cầu</h3>
+      <div class="card-title">
+        <div class="card-title-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <h3 id="checkTitle">Tra cứu trạng thái yêu cầu</h3>
+      </div>
 
       <div class="field">
         <label id="labelCheckId">Mã yêu cầu</label>
-        <input id="checkId" placeholder="Nhập mã yêu cầu">
+        <div class="input-wrap">
+          <div class="input-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+          </div>
+          <input id="checkId" placeholder="Nhập mã yêu cầu">
+        </div>
       </div>
 
-      <button class="main-btn" onclick="checkStatus(false)" id="checkBtn">Kiểm tra</button>
+      <button class="main-btn" onclick="checkStatus(false)" id="checkBtn">
+        <svg viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        Kiểm tra
+      </button>
 
       <hr>
 
@@ -386,8 +700,14 @@
   </div>
 
   <div class="bottom-nav">
-    <button id="tabSend" class="active" onclick="showTab('send')">Gửi yêu cầu</button>
-    <button id="tabCheck" onclick="showTab('check')">Tra cứu</button>
+    <button id="tabSend" class="active" onclick="showTab('send')">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
+      <span>Gửi yêu cầu</span>
+    </button>
+    <button id="tabCheck" onclick="showTab('check')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      <span>Tra cứu</span>
+    </button>
   </div>
 
 </div>
@@ -400,31 +720,33 @@ let lastCheckedId = "";
 
 const texts = {
   vi: {
-    welcomeTitle: "Xin chào!",
-    welcomeText: "Gửi yêu cầu hỗ trợ và tra cứu trạng thái nhanh chóng.",
+    welcomeTitle: "Chúng tôi luôn sẵn sàng hỗ trợ bạn",
+    welcomeText: "Gửi yêu cầu và chúng tôi sẽ liên hệ hỗ trợ bạn trong thời gian sớm nhất.",
     tabSend: "Gửi yêu cầu",
     tabCheck: "Tra cứu",
-    sendTitle: "Gửi yêu cầu sửa điện",
+    sendTitle: "Gửi yêu cầu hỗ trợ",
     checkTitle: "Tra cứu trạng thái yêu cầu",
-    name: "Tên khách",
+    name: "Họ và tên",
     phone: "Số điện thoại",
     contact: "Liên hệ",
-    address: "Địa chỉ công trình",
-    content: "Nội dung sự cố",
+    address: "Địa chỉ",
+    content: "Nội dung yêu cầu",
     image: "Hình ảnh",
+    uploadText: "Chọn ảnh hoặc chụp ảnh",
     send: "Gửi yêu cầu",
     check: "Kiểm tra",
     checkPlaceholder: "Nhập mã yêu cầu",
     sending: "Đang gửi...",
-    success: "Đã gửi thành công!",
+    success: "Gửi yêu cầu thành công!",
+    successSub: "Cảm ơn bạn đã gửi yêu cầu. Chúng tôi sẽ liên hệ hỗ trợ bạn sớm nhất.",
     fail: "Gửi thất bại!",
-    required: "Vui lòng nhập đầy đủ thông tin!",
+    required: "Vui lòng nhập đầy đủ thông tin bắt buộc!",
     requestId: "Mã yêu cầu",
-    copy: "📋 Copy ID",
+    copy: "Sao chép ID",
     copied: "Đã copy ID!",
     notFound: "Không tìm thấy yêu cầu!",
     status: "Trạng thái",
-    pending: "Đã tiếp nhận",
+    pending: "Mới tiếp nhận",
     processing: "Đang xử lý",
     completed: "Hoàn thành",
     adminReply: "Phản hồi admin",
@@ -436,27 +758,29 @@ const texts = {
     clearHistory: "Xóa lịch sử trên máy này"
   },
   ja: {
-    welcomeTitle: "こんにちは！",
-    welcomeText: "依頼の送信と状況確認ができます。",
+    welcomeTitle: "いつでもサポートします",
+    welcomeText: "依頼を送信すると、担当者が早めにご連絡いたします。",
     tabSend: "依頼送信",
     tabCheck: "確認",
-    sendTitle: "修理依頼送信",
+    sendTitle: "サポート依頼送信",
     checkTitle: "依頼状況確認",
-    name: "名前",
+    name: "お名前",
     phone: "電話番号",
     contact: "連絡先",
     address: "住所",
-    content: "内容",
+    content: "依頼内容",
     image: "画像",
+    uploadText: "画像を選択または撮影",
     send: "送信",
     check: "確認",
     checkPlaceholder: "受付IDを入力",
     sending: "送信中...",
     success: "送信完了！",
+    successSub: "依頼を受け付けました。担当者よりご連絡いたします。",
     fail: "送信失敗！",
     required: "必須項目を入力してください",
     requestId: "受付ID",
-    copy: "📋 IDをコピー",
+    copy: "IDをコピー",
     copied: "IDをコピーしました！",
     notFound: "見つかりませんでした",
     status: "状態",
@@ -475,6 +799,22 @@ const texts = {
 
 let lang = localStorage.getItem("lang") || "vi";
 
+function iconCopy() {
+  return `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+}
+
+function iconCheck() {
+  return `<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>`;
+}
+
+function iconLight() {
+  return `<svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M12 2v2"/><path d="M12 8a4 4 0 0 0-2 7.46V17h4v-1.54A4 4 0 0 0 12 8Z"/></svg>`;
+}
+
+function iconImage() {
+  return `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.5-3.5L9 20"/></svg>`;
+}
+
 function applyLang() {
   const t = texts[lang];
 
@@ -482,8 +822,8 @@ function applyLang() {
   welcomeTitle.innerText = t.welcomeTitle;
   welcomeText.innerText = t.welcomeText;
 
-  tabSend.innerText = t.tabSend;
-  tabCheck.innerText = t.tabCheck;
+  tabSend.querySelector("span").innerText = t.tabSend;
+  tabCheck.querySelector("span").innerText = t.tabCheck;
 
   sendTitle.innerText = t.sendTitle;
   checkTitle.innerText = t.checkTitle;
@@ -496,14 +836,16 @@ function applyLang() {
   labelImage.innerText = t.image;
   labelCheckId.innerText = t.requestId;
 
+  uploadText.innerText = t.uploadText;
+
   nameEl.placeholder = t.name;
   phoneEl.placeholder = t.phone;
-  contactEl.placeholder = t.contact;
+  contactEl.placeholder = "Email / LINE / Zalo";
   addressEl.placeholder = t.address;
   contentEl.placeholder = t.content;
 
-  sendBtn.innerText = t.send;
-  checkBtn.innerText = t.check;
+  sendBtn.lastChild.textContent = " " + t.send;
+  checkBtn.lastChild.textContent = " " + t.check;
   checkId.placeholder = t.checkPlaceholder;
   notice.innerText = t.newReply;
 
@@ -575,9 +917,15 @@ function renderMyRequests() {
   }
 
   myRequests.innerHTML = ids.map(id => `
-    <button class="history-btn" onclick="openCheck('${id}')">
-      ${t.requestId}: #${id}
-    </button>
+    <div class="request-card" onclick="openCheck('${id}')">
+      <div class="request-thumb">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+      </div>
+      <div class="request-info">
+        <div class="request-id">#${id}</div>
+        <div class="request-desc">${t.requestId}: ${id}</div>
+      </div>
+    </div>
   `).join("");
 }
 
@@ -623,14 +971,30 @@ async function sendRequest() {
       const id = data.data.id;
 
       saveMyRequest(id);
+      localStorage.setItem("lastRequestId", id);
       renderMyRequests();
 
       result.innerHTML = `
         <div class="success-box">
-          <div><b>${t.success}</b></div>
-          <div>${t.requestId}: <b id="reqId">${id}</b></div>
-          <button class="copy-btn" onclick="copyId()">${t.copy}</button>
-          <button class="main-btn" onclick="openCheck('${id}')">🔍 ${t.tabCheck}</button>
+          <div class="success-center">
+            <div class="success-icon">${iconCheck()}</div>
+            <div class="success-title">${t.success}</div>
+            <div>${t.successSub}</div>
+          </div>
+
+          <div class="id-box">
+            <div>${t.requestId}</div>
+            <div class="id-number">#${id}</div>
+          </div>
+
+          <div class="tip-box">
+            <div>${iconLight()}</div>
+            <div>Vui lòng lưu ID yêu cầu để tra cứu trạng thái sau này.</div>
+          </div>
+
+          <button class="copy-btn" onclick="copyId()">${iconCopy()} ${t.copy}</button>
+          <button class="soft-btn" onclick="openCheck('${id}')">🔍 ${t.tabCheck}</button>
+          <b id="reqId" style="display:none;">${id}</b>
         </div>
       `;
 
@@ -655,6 +1019,17 @@ async function sendRequest() {
 function copyId() {
   const t = texts[lang];
   const id = document.getElementById("reqId").innerText;
+
+  navigator.clipboard.writeText(id).then(() => {
+    alert(t.copied);
+  });
+}
+
+function copyLastId() {
+  const id = localStorage.getItem("lastRequestId");
+  const t = texts[lang];
+
+  if (!id) return;
 
   navigator.clipboard.writeText(id).then(() => {
     alert(t.copied);
@@ -723,9 +1098,9 @@ async function checkStatus(isAuto = false) {
 
   checkResult.innerHTML = `
     <div class="success-box">
-      <div><b>${t.requestId}:</b> ${data.id}</div>
+      <div><b>${t.requestId}:</b> #${data.id}</div>
 
-      <div style="margin-top:8px;">
+      <div style="margin-top:10px;">
         <b>${t.status}:</b>
         <span class="badge ${badgeClass}">${statusText}</span>
       </div>
@@ -737,12 +1112,12 @@ async function checkStatus(isAuto = false) {
       <div class="info-line"><b>${t.contact}:</b> ${data.contact || ""}</div>
       <div class="info-line"><b>${t.address}:</b> ${data.address || ""}</div>
 
-      <div style="margin-top:8px;">
+      <div style="margin-top:10px;">
         <b>${t.content}:</b><br>
         ${data.content || ""}
       </div>
 
-      <div style="margin-top:10px;">
+      <div style="margin-top:12px;">
         <b>${t.image}:</b><br>
         ${
           data.image
