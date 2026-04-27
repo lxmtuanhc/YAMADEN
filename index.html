@@ -11,8 +11,9 @@
   <style>
     body {
       margin: 0;
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       background: #f3f6fb;
+      color: #222;
     }
 
     .header {
@@ -25,15 +26,32 @@
     }
 
     .container {
-      max-width: 700px;
+      max-width: 720px;
       margin: 20px auto;
       padding: 15px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .tabs button {
+      flex: 1;
+      background: #dbe8ff;
+      color: #0b3d91;
+    }
+
+    .tabs button.active {
+      background: #0b3d91;
+      color: white;
     }
 
     .card {
       background: white;
       padding: 20px;
-      border-radius: 15px;
+      border-radius: 16px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     }
 
@@ -45,6 +63,7 @@
       border-radius: 10px;
       border: 1px solid #ccc;
       box-sizing: border-box;
+      font-size: 15px;
     }
 
     textarea {
@@ -69,9 +88,10 @@
     }
 
     .result {
-      margin-top: 10px;
+      margin-top: 12px;
       font-weight: bold;
       color: #0b3d91;
+      line-height: 1.7;
     }
 
     .success-box {
@@ -79,15 +99,11 @@
       padding: 15px;
       border-radius: 12px;
       color: #0b3d91;
-      line-height: 1.7;
+      line-height: 1.8;
     }
 
     .copy-btn {
       background: #1f8dd6;
-    }
-
-    .check-btn {
-      background: #0b3d91;
     }
 
     .loader {
@@ -97,7 +113,7 @@
       width: 25px;
       height: 25px;
       animation: spin 1s linear infinite;
-      margin: auto;
+      margin: 15px auto;
       display: none;
     }
 
@@ -108,6 +124,22 @@
     .lang {
       text-align: right;
       margin-bottom: 10px;
+    }
+
+    .status-pending {
+      color: gray;
+    }
+
+    .status-processing {
+      color: orange;
+    }
+
+    .status-completed {
+      color: green;
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
@@ -125,9 +157,14 @@
     </select>
   </div>
 
-  <div class="card">
+  <div class="tabs">
+    <button id="tabSend" class="active" onclick="showTab('send')">Gửi yêu cầu</button>
+    <button id="tabCheck" onclick="showTab('check')">Tra cứu</button>
+  </div>
 
-    <h3 id="title">Gửi yêu cầu</h3>
+  <!-- GỬI YÊU CẦU -->
+  <div class="card" id="sendSection">
+    <h3 id="sendTitle">Gửi yêu cầu sửa điện</h3>
 
     <input id="name" placeholder="Tên khách">
     <input id="phone" placeholder="Số điện thoại">
@@ -143,7 +180,17 @@
     <div class="loader" id="loader"></div>
 
     <p id="result" class="result"></p>
+  </div>
 
+  <!-- TRA CỨU -->
+  <div class="card hidden" id="checkSection">
+    <h3 id="checkTitle">Tra cứu trạng thái yêu cầu</h3>
+
+    <input id="checkId" placeholder="Nhập mã yêu cầu">
+
+    <button onclick="checkStatus()" id="checkBtn">Kiểm tra</button>
+
+    <p id="checkResult" class="result"></p>
   </div>
 
 </div>
@@ -153,38 +200,56 @@ const API = "https://yamaden.onrender.com";
 
 const texts = {
   vi: {
-    title: "Gửi yêu cầu sửa điện",
+    tabSend: "Gửi yêu cầu",
+    tabCheck: "Tra cứu",
+    sendTitle: "Gửi yêu cầu sửa điện",
+    checkTitle: "Tra cứu trạng thái yêu cầu",
     name: "Tên khách",
     phone: "Số điện thoại",
     contact: "Email / LINE / Zalo",
     address: "Địa chỉ công trình",
     content: "Mô tả sự cố",
     send: "Gửi",
+    check: "Kiểm tra",
+    checkPlaceholder: "Nhập mã yêu cầu",
     sending: "Đang gửi...",
     success: "Đã gửi thành công!",
     fail: "Gửi thất bại!",
     required: "Vui lòng nhập đầy đủ thông tin!",
     requestId: "Mã yêu cầu",
     copy: "📋 Copy ID",
-    checkNow: "🔍 Tra cứu ngay",
-    copied: "Đã copy ID!"
+    copied: "Đã copy ID!",
+    notFound: "Không tìm thấy yêu cầu!",
+    status: "Trạng thái",
+    pending: "Đã tiếp nhận",
+    processing: "Đang xử lý",
+    completed: "Hoàn thành"
   },
   ja: {
-    title: "修理依頼送信",
+    tabSend: "依頼送信",
+    tabCheck: "確認",
+    sendTitle: "修理依頼送信",
+    checkTitle: "依頼状況確認",
     name: "名前",
     phone: "電話番号",
     contact: "連絡先",
     address: "住所",
     content: "内容",
     send: "送信",
+    check: "確認",
+    checkPlaceholder: "受付IDを入力",
     sending: "送信中...",
     success: "送信完了！",
     fail: "送信失敗！",
     required: "必須項目を入力してください",
     requestId: "受付ID",
     copy: "📋 IDをコピー",
-    checkNow: "🔍 今すぐ確認",
-    copied: "IDをコピーしました！"
+    copied: "IDをコピーしました！",
+    notFound: "見つかりませんでした",
+    status: "状態",
+    pending: "受付済み",
+    processing: "処理中",
+    completed: "完了"
   }
 };
 
@@ -194,19 +259,42 @@ function applyLang() {
   const t = texts[lang];
 
   document.getElementById("language").value = lang;
-  document.getElementById("title").innerText = t.title;
+
+  document.getElementById("tabSend").innerText = t.tabSend;
+  document.getElementById("tabCheck").innerText = t.tabCheck;
+
+  document.getElementById("sendTitle").innerText = t.sendTitle;
+  document.getElementById("checkTitle").innerText = t.checkTitle;
+
   document.getElementById("name").placeholder = t.name;
   document.getElementById("phone").placeholder = t.phone;
   document.getElementById("contact").placeholder = t.contact;
   document.getElementById("address").placeholder = t.address;
   document.getElementById("content").placeholder = t.content;
+
   document.getElementById("sendBtn").innerText = t.send;
+  document.getElementById("checkBtn").innerText = t.check;
+  document.getElementById("checkId").placeholder = t.checkPlaceholder;
 }
 
 function changeLanguage() {
   lang = document.getElementById("language").value;
   localStorage.setItem("lang", lang);
   applyLang();
+}
+
+function showTab(tab) {
+  if (tab === "send") {
+    sendSection.classList.remove("hidden");
+    checkSection.classList.add("hidden");
+    tabSend.classList.add("active");
+    tabCheck.classList.remove("active");
+  } else {
+    sendSection.classList.add("hidden");
+    checkSection.classList.remove("hidden");
+    tabSend.classList.remove("active");
+    tabCheck.classList.add("active");
+  }
 }
 
 async function sendRequest() {
@@ -237,7 +325,7 @@ async function sendRequest() {
     const res = await fetch(API + "/request", {
       method: "POST",
       headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({name, phone, contact, address, content, image})
+      body: JSON.stringify({ name, phone, contact, address, content, image })
     });
 
     const data = await res.json();
@@ -250,7 +338,7 @@ async function sendRequest() {
           <div><b>${t.success}</b></div>
           <div>${t.requestId}: <b id="reqId">${id}</b></div>
           <button class="copy-btn" onclick="copyId()">${t.copy}</button>
-          <button class="check-btn" onclick="goCheck('${id}')">${t.checkNow}</button>
+          <button onclick="openCheck('${id}')">🔍 ${t.tabCheck}</button>
         </div>
       `;
 
@@ -260,7 +348,6 @@ async function sendRequest() {
       addressEl.value = "";
       contentEl.value = "";
       imageEl.value = "";
-
     } else {
       result.innerText = t.fail;
     }
@@ -282,8 +369,53 @@ function copyId() {
   });
 }
 
-function goCheck(id) {
-  window.location.href = "check.html?id=" + id;
+function openCheck(id) {
+  showTab("check");
+  checkId.value = id;
+  checkStatus();
+}
+
+async function checkStatus() {
+  const t = texts[lang];
+  const id = checkId.value;
+
+  if (!id) return;
+
+  checkResult.innerText = "Loading...";
+
+  const res = await fetch(API + "/request/" + id);
+
+  if (!res.ok) {
+    checkResult.innerText = t.notFound;
+    return;
+  }
+
+  const data = await res.json();
+
+  let statusText = "";
+  let cls = "";
+
+  if (data.status === "pending") {
+    statusText = t.pending;
+    cls = "status-pending";
+  }
+
+  if (data.status === "processing") {
+    statusText = t.processing;
+    cls = "status-processing";
+  }
+
+  if (data.status === "completed") {
+    statusText = t.completed;
+    cls = "status-completed";
+  }
+
+  checkResult.innerHTML = `
+    <div class="success-box">
+      <div>${t.requestId}: <b>${data.id}</b></div>
+      <div>${t.status}: <b class="${cls}">${statusText}</b></div>
+    </div>
+  `;
 }
 
 function resizeImage(file, maxWidth, quality) {
@@ -319,14 +451,23 @@ function resizeImage(file, maxWidth, quality) {
   });
 }
 
+const sendSection = document.getElementById("sendSection");
+const checkSection = document.getElementById("checkSection");
+const tabSend = document.getElementById("tabSend");
+const tabCheck = document.getElementById("tabCheck");
+
 const nameEl = document.getElementById("name");
 const phoneEl = document.getElementById("phone");
 const contactEl = document.getElementById("contact");
 const addressEl = document.getElementById("address");
 const contentEl = document.getElementById("content");
 const imageEl = document.getElementById("image");
+
 const result = document.getElementById("result");
 const loader = document.getElementById("loader");
+
+const checkId = document.getElementById("checkId");
+const checkResult = document.getElementById("checkResult");
 
 applyLang();
 
