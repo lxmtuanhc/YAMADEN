@@ -320,6 +320,94 @@ body {
   color: #64748b;
 }
 
+/* MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(5px);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 18px;
+}
+
+.modal-box {
+  background: white;
+  width: 380px;
+  max-width: 100%;
+  border-radius: 24px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 25px 70px rgba(0,0,0,0.28);
+  animation: modalPop 0.2s ease;
+}
+
+.modal-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: #fee2e2;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  margin: 0 auto 16px;
+}
+
+.modal-title {
+  font-size: 21px;
+  font-weight: 900;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.modal-text {
+  color: #4b5563;
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0 0 24px;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.modal-btn {
+  padding: 13px;
+  border: none;
+  border-radius: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.modal-cancel {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.modal-delete {
+  background: #dc2626;
+  color: white;
+}
+
+@keyframes modalPop {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 @media (max-width: 1200px) {
   .layout { grid-template-columns: 1fr; }
   .sidebar { display: none; }
@@ -454,7 +542,9 @@ const texts = {
     reply: "Phản hồi khách hàng",
     save: "Lưu phản hồi",
     delete: "Xóa",
+    confirmTitle: "Xác nhận xóa",
     confirmDelete: "Bạn có chắc muốn xóa yêu cầu này?",
+    cancel: "Hủy",
     empty: "Không có yêu cầu nào"
   },
   ja: {
@@ -482,7 +572,9 @@ const texts = {
     reply: "お客様への返信",
     save: "返信を保存",
     delete: "削除",
+    confirmTitle: "削除の確認",
     confirmDelete: "この依頼を削除してもよろしいですか？",
+    cancel: "キャンセル",
     empty: "依頼はありません"
   }
 };
@@ -498,6 +590,10 @@ function applyLanguage() {
   labelToday.innerText = t.today;
   reloadBtn.innerText = t.reload;
   search.placeholder = t.search;
+
+  document.getElementById("modalTitle").innerText = t.confirmTitle;
+  document.getElementById("modalCancelBtn").innerText = t.cancel;
+  document.getElementById("modalDeleteBtn").innerText = t.delete;
 
   updateTabLabels();
 }
@@ -690,9 +786,12 @@ function deleteRequest(id) {
 
 function closeModal() {
   document.getElementById("modal").style.display = "none";
+  deleteId = null;
 }
 
 async function confirmDelete() {
+  if (deleteId === null) return;
+
   await fetch(API + "/request/" + deleteId, {
     method: "DELETE"
   });
@@ -707,62 +806,28 @@ applyLanguage();
 load();
 </script>
 
-<div id="modal" style="
-  display:none;
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.45);
-  justify-content:center;
-  align-items:center;
-  z-index:9999;
-">
+<div id="modal" class="modal" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
 
-  <div style="
-    background:white;
-    padding:25px;
-    border-radius:18px;
-    width:320px;
-    text-align:center;
-    box-shadow:0 10px 30px rgba(0,0,0,0.2);
-  ">
+    <div class="modal-icon">🗑️</div>
 
-    <p id="modalText" style="
-      font-weight:800;
-      margin-bottom:20px;
-      font-size:16px;
-    "></p>
+    <div class="modal-title" id="modalTitle">Xác nhận xóa</div>
 
-    <button onclick="confirmDelete()" style="
-      width:100%;
-      padding:12px;
-      margin-bottom:10px;
-      border:none;
-      border-radius:10px;
-      background:#dc2626;
-      color:white;
-      font-weight:800;
-      cursor:pointer;
-    ">
-      Xóa
-    </button>
+    <p class="modal-text" id="modalText">
+      Bạn có chắc muốn xóa yêu cầu này?
+    </p>
 
-    <button onclick="closeModal()" style="
-      width:100%;
-      padding:12px;
-      border:none;
-      border-radius:10px;
-      background:#e5e7eb;
-      font-weight:800;
-      cursor:pointer;
-    ">
-      Hủy
-    </button>
+    <div class="modal-actions">
+      <button class="modal-btn modal-cancel" id="modalCancelBtn" onclick="closeModal()">
+        Hủy
+      </button>
+
+      <button class="modal-btn modal-delete" id="modalDeleteBtn" onclick="confirmDelete()">
+        Xóa
+      </button>
+    </div>
 
   </div>
-
 </div>
 
 </body>
