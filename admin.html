@@ -6,22 +6,40 @@
 
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       background: #f3f6fb;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+
+    select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin-top: 10px;
+      color: #0b3d91;
     }
 
     .tabs {
       display: flex;
       gap: 10px;
-      margin: 10px;
+      margin: 15px 0;
     }
 
     .tabs button {
       flex: 1;
-      padding: 10px;
+      padding: 12px;
       border: none;
-      background: #ddd;
+      border-radius: 10px;
+      background: #dbe8ff;
+      color: #0b3d91;
       cursor: pointer;
+      font-weight: bold;
     }
 
     .tabs button.active {
@@ -29,14 +47,116 @@
       color: white;
     }
 
+    button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      background: #0b3d91;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .reload {
+      margin-bottom: 10px;
+    }
+
     .card {
-      border-radius:10px;
-      padding:15px;
-      margin:15px;
-      background:#f5f5f5;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 16px 0;
+      background: white;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+
+    .info p {
+      margin: 8px 0;
+      line-height: 1.5;
+    }
+
+    .image {
+      max-width: 240px;
+      width: 100%;
+      border-radius: 10px;
+      margin-top: 8px;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .action-row button {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .btn-call {
+      background: #16a34a;
+    }
+
+    .btn-map {
+      background: #2563eb;
+    }
+
+    .btn-processing {
+      background: #d97706;
+    }
+
+    .btn-completed {
+      background: #16a34a;
+    }
+
+    .reply-box {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #ddd;
+    }
+
+    .reply-box textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      box-sizing: border-box;
+      resize: vertical;
+      background: #fff;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .reply-box button {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-weight: bold;
+    }
+
+    .status-pending {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .status-processing {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-completed {
+      background: #dcfce7;
+      color: #166534;
     }
   </style>
 </head>
+
 <body>
 
 <select id="language" onchange="changeLanguage()">
@@ -51,7 +171,7 @@
   <button id="tabDone" onclick="changeTab('done')">Đã hoàn thành</button>
 </div>
 
-<button id="reloadBtn" onclick="loadRequests()">Tải lại</button>
+<button class="reload" id="reloadBtn" onclick="loadRequests()">Tải lại</button>
 
 <div id="list"></div>
 
@@ -60,6 +180,70 @@ const API = "https://yamaden.onrender.com";
 
 let currentLang = localStorage.getItem("language") || "vi";
 let currentTab = "active";
+
+const texts = {
+  vi: {
+    title: "Danh sách yêu cầu khách hàng",
+    active: "Đang xử lý",
+    done: "Đã hoàn thành",
+    reload: "Tải lại",
+    id: "ID",
+    name: "Tên",
+    phone: "Số điện thoại",
+    contact: "Liên hệ",
+    address: "Địa chỉ",
+    content: "Nội dung",
+    image: "Hình ảnh",
+    noImage: "Không có hình",
+    status: "Trạng thái",
+    date: "Ngày gửi",
+    call: "📞 Gọi điện",
+    map: "📍 Mở bản đồ",
+    processing: "Đang xử lý",
+    completed: "Hoàn thành",
+    reply: "Phản hồi",
+    save: "Lưu phản hồi"
+  },
+  ja: {
+    title: "お客様リクエスト一覧",
+    active: "処理中",
+    done: "完了",
+    reload: "再読み込み",
+    id: "ID",
+    name: "名前",
+    phone: "電話番号",
+    contact: "連絡先",
+    address: "住所",
+    content: "内容",
+    image: "画像",
+    noImage: "画像なし",
+    status: "状態",
+    date: "送信日時",
+    call: "📞 電話する",
+    map: "📍 地図を開く",
+    processing: "処理中",
+    completed: "完了",
+    reply: "返信",
+    save: "返信を保存"
+  }
+};
+
+function applyLanguage() {
+  const t = texts[currentLang];
+
+  document.getElementById("language").value = currentLang;
+  document.getElementById("title").innerText = t.title;
+  document.getElementById("tabActive").innerText = t.active;
+  document.getElementById("tabDone").innerText = t.done;
+  document.getElementById("reloadBtn").innerText = t.reload;
+}
+
+function changeLanguage() {
+  currentLang = document.getElementById("language").value;
+  localStorage.setItem("language", currentLang);
+  applyLanguage();
+  loadRequests();
+}
 
 function changeTab(tab) {
   currentTab = tab;
@@ -76,14 +260,21 @@ function changeTab(tab) {
   loadRequests();
 }
 
+function getStatusClass(status) {
+  if (status === "processing") return "status status-processing";
+  if (status === "completed") return "status status-completed";
+  return "status status-pending";
+}
+
 async function loadRequests() {
+  const t = texts[currentLang];
+
   const res = await fetch(API + "/requests");
   const data = await res.json();
 
   const list = document.getElementById("list");
   list.innerHTML = "";
 
-  // 🔥 FILTER
   const filtered = data.filter(item => {
     if (currentTab === "active") {
       return item.status !== "completed";
@@ -97,36 +288,47 @@ async function loadRequests() {
 
     list.innerHTML += `
       <div class="card">
+        <div class="info">
+          <p><b>${t.id}:</b> ${item.id}</p>
+          <p><b>${t.name}:</b> ${item.name || ""}</p>
+          <p><b>${t.phone}:</b> ${item.phone || ""}</p>
+          <p><b>${t.contact}:</b> ${item.contact || ""}</p>
+          <p><b>${t.address}:</b> ${item.address || ""}</p>
+          <p><b>${t.content}:</b> ${item.content || ""}</p>
 
-        <p><b>ID:</b> ${item.id}</p>
-        <p><b>Tên:</b> ${item.name || ""}</p>
-        <p><b>Phone:</b> ${item.phone || ""}</p>
-        <p><b>Địa chỉ:</b> ${item.address || ""}</p>
-        <p><b>Nội dung:</b> ${item.content || ""}</p>
+          <p><b>${t.image}:</b><br>
+            ${
+              item.image
+              ? `<img class="image" src="${item.image}">`
+              : t.noImage
+            }
+          </p>
 
-        <p><b>Hình:</b><br>
-          ${item.image ? `<img src="${item.image}" width="200">` : "Không có"}
-        </p>
+          <p><b>${t.status}:</b> <span class="${getStatusClass(item.status)}">${item.status}</span></p>
+          <p><b>${t.date}:</b> ${new Date(item.createdAt).toLocaleString()}</p>
+        </div>
 
-        <p><b>Status:</b> ${item.status}</p>
-
-        ${item.phone ? `<a href="tel:${item.phone}"><button>📞 Gọi</button></a><br><br>` : ""}
-        ${item.address ? `<a href="${mapUrl}" target="_blank"><button>📍 Map</button></a><br><br>` : ""}
+        <div class="action-row">
+          ${item.phone ? `<a href="tel:${item.phone}"><button class="btn-call">${t.call}</button></a>` : ""}
+          ${item.address ? `<a href="${mapUrl}" target="_blank"><button class="btn-map">${t.map}</button></a>` : ""}
+        </div>
 
         ${
           item.status !== "completed"
-          ? `<button onclick="updateStatus(${item.id}, 'processing')">Đang xử lý</button><br><br>
-             <button onclick="updateStatus(${item.id}, 'completed')">Hoàn thành</button>`
+          ? `
+            <div class="action-row">
+              <button class="btn-processing" onclick="updateStatus(${item.id}, 'processing')">${t.processing}</button>
+              <button class="btn-completed" onclick="updateStatus(${item.id}, 'completed')">${t.completed}</button>
+            </div>
+          `
           : ""
         }
 
-        <hr>
-
-        <p><b>Phản hồi:</b></p>
-        <textarea id="reply-${item.id}">${item.adminReply || ""}</textarea>
-
-        <button onclick="saveReply(${item.id})">Lưu</button>
-
+        <div class="reply-box">
+          <p><b>${t.reply}:</b></p>
+          <textarea id="reply-${item.id}">${item.adminReply || ""}</textarea>
+          <button onclick="saveReply(${item.id})">${t.save}</button>
+        </div>
       </div>
     `;
   });
@@ -154,11 +356,7 @@ async function saveReply(id) {
   loadRequests();
 }
 
-function changeLanguage() {
-  currentLang = document.getElementById("language").value;
-  localStorage.setItem("language", currentLang);
-}
-
+applyLanguage();
 loadRequests();
 </script>
 
