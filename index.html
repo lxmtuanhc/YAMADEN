@@ -1251,7 +1251,7 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
           <img src="/icon-192.png" alt="YAMADEN">
           <div>
             <div class="account-brand-title">YAMADEN</div>
-            <div class="account-brand-sub">株式会社ワイマデン</div>
+            <div class="account-brand-sub" id="accountBrandSub">YAMADEN Support</div>
           </div>
         </div>
 
@@ -1283,7 +1283,7 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
 
           <div class="account-card" id="accountFormCard">
             <div class="account-welcome">
-              <div class="account-welcome-ja">ようこそ</div>
+              <div class="account-welcome-ja" id="accountWelcome">Chào mừng</div>
               <div class="account-welcome-brand">YAMADEN</div>
               <div class="account-welcome-sub" id="accountText">Login with your information so YAMADEN can manage your requests and contact you smoothly.</div>
             </div>
@@ -1863,6 +1863,8 @@ function applyLang() {
   $("detail2Btn").innerText = t.detailBtn;
   $("detail3Btn").innerText = t.detailBtn;
   $("accountTitle").innerText = t.accountTitle;
+  if ($("accountBrandSub")) $("accountBrandSub").innerText = lang === "ja" ? "株式会社ワイマデン" : "Hỗ trợ khách hàng";
+  if ($("accountWelcome")) $("accountWelcome").innerText = lang === "ja" ? "ようこそ" : "Chào mừng";
   $("accountText").innerText = t.accountText;
   $("accountModeRegister").innerText = t.accountRegister;
   $("accountModeLogin").innerText = t.accountLoginMode;
@@ -1877,7 +1879,7 @@ function applyLang() {
   $("quickSupportTitle").innerText = t.quickSupportTitle;
   $("quickSupportText").innerText = t.quickSupportText;
   $("quickSupportBtn").innerText = t.quickSupportBtn;
-  if ($("accountDividerText")) $("accountDividerText").innerText = currentLang === "ja" ? "または" : "hoặc";
+  if ($("accountDividerText")) $("accountDividerText").innerText = lang === "ja" ? "または" : "hoặc";
   $("profileSub").innerText = t.profileActive;
   $("profilePhoneLabel").innerText = t.profilePhone;
   $("profileProvinceLabel").innerText = t.profileProvince;
@@ -2037,7 +2039,7 @@ async function userLogin() {
     return;
   }
   if (accountMode === "register" && (!email || !province || !projectName)) {
-    showToast(currentLang === "ja" ? "メール、地域、工事名を入力してください。" : "Vui lòng nhập email, tỉnh/thành và tên công trình.");
+    showToast(lang === "ja" ? "メール、地域、工事名を入力してください。" : "Vui lòng nhập email, tỉnh/thành và tên công trình.");
     return;
   }
 
