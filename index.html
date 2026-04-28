@@ -178,6 +178,127 @@ button, input, textarea, select { font-family:inherit; }
   border:1px solid #bbf7d0;
   box-shadow:0 10px 22px rgba(22,163,74,0.12);
 }
+.home-hero-card {
+  overflow:hidden;
+  position:relative;
+  color:white;
+  border-radius:28px;
+  padding:26px;
+  min-height:260px;
+  background:
+    linear-gradient(145deg, rgba(5,5,5,0.96), rgba(31,41,55,0.94)),
+    radial-gradient(circle at 82% 16%, rgba(37,99,235,0.32), transparent 34%);
+  box-shadow:0 22px 52px rgba(15,23,42,0.18);
+}
+.home-hero-card::after {
+  content:"";
+  position:absolute;
+  right:-80px;
+  bottom:-100px;
+  width:250px;
+  height:250px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.08);
+}
+.home-kicker {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.14);
+  color:#dbeafe;
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:0.6px;
+  position:relative;
+  z-index:1;
+}
+.home-title {
+  max-width:620px;
+  margin:18px 0 12px;
+  font-size:34px;
+  line-height:1.12;
+  font-weight:950;
+  letter-spacing:-0.7px;
+  position:relative;
+  z-index:1;
+}
+.home-desc {
+  max-width:650px;
+  color:#e5e7eb;
+  line-height:1.7;
+  font-weight:750;
+  position:relative;
+  z-index:1;
+}
+.home-actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:22px;
+  position:relative;
+  z-index:1;
+}
+.home-actions .main-btn,
+.home-actions .soft-btn { min-height:52px; }
+.home-actions .soft-btn {
+  color:white;
+  background:rgba(255,255,255,0.12);
+  border-color:rgba(255,255,255,0.16);
+}
+.service-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:16px;
+}
+.service-card {
+  background:white;
+  border:1px solid rgba(229,231,235,0.94);
+  border-radius:22px;
+  padding:18px;
+  box-shadow:0 12px 28px rgba(15,23,42,0.06);
+}
+.service-icon {
+  width:42px;
+  height:42px;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#111827;
+  background:#f3f4f6;
+  margin-bottom:12px;
+}
+.service-title { font-size:15px; font-weight:950; margin-bottom:6px; }
+.service-desc {
+  color:#6b7280;
+  font-size:13px;
+  line-height:1.5;
+  font-weight:700;
+}
+.trust-row {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin:16px 0 18px;
+}
+.trust-item {
+  background:#111827;
+  color:white;
+  border-radius:20px;
+  padding:16px;
+  box-shadow:0 12px 26px rgba(17,24,39,0.14);
+}
+.trust-number { font-size:25px; font-weight:950; }
+.trust-label {
+  margin-top:4px;
+  color:#d1d5db;
+  font-size:12px;
+  font-weight:800;
+}
 .card {
   background:white;
   border-radius:24px;
@@ -531,6 +652,17 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   }
   .card { border-radius:24px; padding:20px; }
   .form-grid { grid-template-columns:1fr; gap:0; }
+  .home-hero-card {
+    min-height:245px;
+    padding:22px;
+    border-radius:26px;
+  }
+  .home-title { font-size:28px; }
+  .home-actions { grid-template-columns:1fr; }
+  .service-grid { grid-template-columns:1fr; }
+  .trust-row { grid-template-columns:repeat(3,1fr); gap:8px; }
+  .trust-item { padding:13px 10px; border-radius:18px; }
+  .trust-number { font-size:21px; }
 }
 @media (max-width:420px) {
   .top-header { padding:18px 16px 26px; }
@@ -539,6 +671,9 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   .hero h1 { font-size:25px; }
   .secondary-row { grid-template-columns:1fr; }
   .bottom-nav { bottom:10px; width:calc(100% - 20px); }
+  .bottom-nav button { font-size:12px; padding:10px 5px; }
+  .home-title { font-size:25px; }
+  .trust-label { font-size:11px; }
 }
 </style>
 </head>
@@ -574,7 +709,49 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   <main class="main">
     <div id="notice" class="notice"></div>
 
-    <section class="card" id="sendSection">
+    <section id="homeSection">
+      <div class="home-hero-card">
+        <div class="home-kicker"><span class="icon" id="homeKickerIcon"></span><span id="homeKicker">YAMADEN SUPPORT</span></div>
+        <div class="home-title" id="homeTitle">Electrical support for homes and businesses</div>
+        <div class="home-desc" id="homeDesc">Send a request, attach a photo, and track the repair status from your phone.</div>
+        <div class="home-actions">
+          <button class="main-btn" onclick="showTab('send')"><span class="icon" id="homeSendIcon"></span><span id="homeSendText">Send request</span></button>
+          <button class="soft-btn" onclick="showTab('check')"><span class="icon" id="homeCheckIcon"></span><span id="homeCheckText">Check status</span></button>
+        </div>
+      </div>
+
+      <div class="trust-row">
+        <div class="trust-item"><div class="trust-number">24h</div><div class="trust-label" id="trust1">Fast reception</div></div>
+        <div class="trust-item"><div class="trust-number">VI/JP</div><div class="trust-label" id="trust2">Bilingual support</div></div>
+        <div class="trust-item"><div class="trust-number">ID</div><div class="trust-label" id="trust3">Easy tracking</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-icon" id="serviceTitleIcon"></div>
+          <h2 id="serviceTitle">Our services</h2>
+        </div>
+        <div class="service-grid">
+          <div class="service-card">
+            <div class="service-icon" id="service1Icon"></div>
+            <div class="service-title" id="service1Title">Electrical repair</div>
+            <div class="service-desc" id="service1Desc">Troubleshooting lights, switches, outlets and electrical issues.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-icon" id="service2Icon"></div>
+            <div class="service-title" id="service2Title">Installation</div>
+            <div class="service-desc" id="service2Desc">Support for devices, wiring, small fixtures and site work.</div>
+          </div>
+          <div class="service-card">
+            <div class="service-icon" id="service3Icon"></div>
+            <div class="service-title" id="service3Title">Request tracking</div>
+            <div class="service-desc" id="service3Desc">Use your request ID to check status and admin replies.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card hidden" id="sendSection">
       <div class="card-title">
         <div class="card-title-icon" id="sendTitleIcon"></div>
         <h2 id="sendTitle">Gửi yêu cầu hỗ trợ</h2>
@@ -675,7 +852,8 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   </main>
 
   <nav class="bottom-nav">
-    <button id="tabSend" class="active" onclick="showTab('send')"><span class="icon" id="tabSendIcon"></span><span>Gửi yêu cầu</span></button>
+    <button id="tabHome" class="active" onclick="showTab('home')"><span class="icon" id="tabHomeIcon"></span><span>Home</span></button>
+    <button id="tabSend" onclick="showTab('send')"><span class="icon" id="tabSendIcon"></span><span>Gửi yêu cầu</span></button>
     <button id="tabCheck" onclick="showTab('check')"><span class="icon" id="tabCheckIcon"></span><span>Tra cứu</span></button>
   </nav>
 </div>
@@ -705,6 +883,9 @@ const ICONS = {
   check:`<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>`,
   light:`<svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2v2"/><path d="M12 8a4 4 0 0 0-2 7.46V17h4v-1.54A4 4 0 0 0 12 8Z"/></svg>`,
   bell:`<svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>`,
+  home:`<svg viewBox="0 0 24 24"><path d="M3 10.8 12 3l9 7.8V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10.8Z"/></svg>`,
+  tool:`<svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5 5L3 18v3h3l6.7-6.7a4 4 0 0 0 5-5l-2.4 2.4-2.8-2.8 2.2-2.6Z"/></svg>`,
+  zap:`<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 10-13h-7l1-7Z"/></svg>`,
   spinner:`<svg class="spin" viewBox="0 0 24 24"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>`
 };
 
@@ -712,6 +893,21 @@ const texts = {
   vi: {
     welcomeTitle:"Chúng tôi luôn sẵn sàng hỗ trợ bạn",
     welcomeText:"Gửi yêu cầu và chúng tôi sẽ liên hệ hỗ trợ bạn trong thời gian sớm nhất.",
+    homeKicker:"YAMADEN SUPPORT",
+    homeTitle:"Dịch vụ hỗ trợ điện nhanh chóng, rõ ràng và dễ theo dõi",
+    homeDesc:"YAMADEN tiếp nhận yêu cầu sửa chữa, lắp đặt và kiểm tra sự cố điện. Bạn có thể gửi ảnh hiện trường, lưu mã yêu cầu và theo dõi phản hồi ngay trên điện thoại.",
+    homeSend:"Gửi yêu cầu ngay",
+    homeCheck:"Tra cứu trạng thái",
+    trust1:"Tiếp nhận nhanh",
+    trust2:"Hỗ trợ Việt / Nhật",
+    trust3:"Tra cứu bằng ID",
+    serviceTitle:"Dịch vụ YAMADEN",
+    service1Title:"Sửa chữa điện",
+    service1Desc:"Kiểm tra đèn, công tắc, ổ cắm, mất điện cục bộ và các sự cố tại công trình.",
+    service2Title:"Lắp đặt thiết bị",
+    service2Desc:"Hỗ trợ lắp đặt thiết bị điện, đi dây, thay thế phụ kiện và xử lý theo yêu cầu.",
+    service3Title:"Theo dõi yêu cầu",
+    service3Desc:"Mỗi yêu cầu có mã ID riêng để khách hàng kiểm tra trạng thái và phản hồi admin.",
     sideStep1:"Gửi thông tin sự cố", sideStep2:"Theo dõi trạng thái", sideStep3:"Nhận phản hồi từ admin",
     tabSend:"Gửi yêu cầu", tabCheck:"Tra cứu", sendTitle:"Gửi yêu cầu hỗ trợ", checkTitle:"Tra cứu trạng thái yêu cầu",
     name:"Họ và tên", phone:"Số điện thoại", contact:"Liên hệ", address:"Địa chỉ", content:"Nội dung yêu cầu", image:"Hình ảnh",
@@ -728,6 +924,21 @@ const texts = {
   ja: {
     welcomeTitle:"いつでもサポートします",
     welcomeText:"依頼を送信すると、担当者が早めにご連絡いたします。",
+    homeKicker:"YAMADEN SUPPORT",
+    homeTitle:"電気工事・修理の依頼をスマートフォンから簡単に",
+    homeDesc:"YAMADENでは、電気設備の修理、取付、現場確認のご依頼を受け付けています。写真を添付し、受付IDで状況や返信を確認できます。",
+    homeSend:"依頼を送信",
+    homeCheck:"状況を確認",
+    trust1:"迅速受付",
+    trust2:"ベトナム語 / 日本語",
+    trust3:"IDで確認",
+    serviceTitle:"YAMADENのサービス",
+    service1Title:"電気修理",
+    service1Desc:"照明、スイッチ、コンセント、部分停電などの電気トラブルを確認します。",
+    service2Title:"設備取付",
+    service2Desc:"電気設備、配線、小型器具の取付や交換などをサポートします。",
+    service3Title:"依頼状況確認",
+    service3Desc:"受付IDを使って、処理状況や管理者からの返信を確認できます。",
     sideStep1:"不具合内容を送信", sideStep2:"状況を確認", sideStep3:"管理者から返信を受信",
     tabSend:"依頼送信", tabCheck:"確認", sendTitle:"サポート依頼送信", checkTitle:"依頼状況確認",
     name:"お名前", phone:"電話番号", contact:"連絡先", address:"住所", content:"依頼内容", image:"画像",
@@ -782,6 +993,8 @@ function clearMyRequests() {
 }
 function renderIcons() {
   [
+    ["homeKickerIcon","zap"], ["homeSendIcon","send"], ["homeCheckIcon","search"], ["serviceTitleIcon","tool"],
+    ["service1Icon","zap"], ["service2Icon","tool"], ["service3Icon","clock"], ["tabHomeIcon","home"],
     ["sendTitleIcon","edit"], ["nameIcon","user"], ["phoneIcon","phone"], ["contactIcon","message"],
     ["addressIcon","map"], ["contentIcon","message"], ["uploadIcon","upload"], ["sendBtnIcon","send"],
     ["copyIdIcon","copy"], ["historyIcon","chart"], ["checkTitleIcon","clock"], ["checkIdIcon","file"],
@@ -795,9 +1008,25 @@ function applyLang() {
   els.language.value = lang;
   $("welcomeTitle").innerText = t.welcomeTitle;
   $("welcomeText").innerText = t.welcomeText;
+  $("homeKicker").innerText = t.homeKicker;
+  $("homeTitle").innerText = t.homeTitle;
+  $("homeDesc").innerText = t.homeDesc;
+  $("homeSendText").innerText = t.homeSend;
+  $("homeCheckText").innerText = t.homeCheck;
+  $("trust1").innerText = t.trust1;
+  $("trust2").innerText = t.trust2;
+  $("trust3").innerText = t.trust3;
+  $("serviceTitle").innerText = t.serviceTitle;
+  $("service1Title").innerText = t.service1Title;
+  $("service1Desc").innerText = t.service1Desc;
+  $("service2Title").innerText = t.service2Title;
+  $("service2Desc").innerText = t.service2Desc;
+  $("service3Title").innerText = t.service3Title;
+  $("service3Desc").innerText = t.service3Desc;
   $("sideStep1").innerText = t.sideStep1;
   $("sideStep2").innerText = t.sideStep2;
   $("sideStep3").innerText = t.sideStep3;
+  els.tabHome.querySelector("span:last-child").innerText = t.homeKicker === "YAMADEN SUPPORT" && lang === "vi" ? "Trang chủ" : "ホーム";
   els.tabSend.querySelector("span:last-child").innerText = t.tabSend;
   els.tabCheck.querySelector("span:last-child").innerText = t.tabCheck;
   $("sendTitle").innerText = t.sendTitle;
@@ -833,12 +1062,16 @@ function changeLanguage() {
   applyLang();
 }
 function showTab(tab) {
+  const isHome = tab === "home";
   const isSend = tab === "send";
+  const isCheck = tab === "check";
+  els.homeSection.classList.toggle("hidden", !isHome);
   els.sendSection.classList.toggle("hidden", !isSend);
-  els.checkSection.classList.toggle("hidden", isSend);
+  els.checkSection.classList.toggle("hidden", !isCheck);
+  els.tabHome.classList.toggle("active", isHome);
   els.tabSend.classList.toggle("active", isSend);
-  els.tabCheck.classList.toggle("active", !isSend);
-  if (!isSend) renderMyRequests();
+  els.tabCheck.classList.toggle("active", isCheck);
+  if (isCheck) renderMyRequests();
 }
 function renderMyRequests() {
   const t = texts[lang];
@@ -1035,7 +1268,7 @@ function showNotice() {
 }
 function bindElements() {
   [
-    "language","sendSection","checkSection","tabSend","tabCheck","name","phone","contact","address","content","image",
+    "language","homeSection","sendSection","checkSection","tabHome","tabSend","tabCheck","name","phone","contact","address","content","image",
     "result","checkId","checkResult","notice","myRequests","toast","sendBtn","checkBtn"
   ].forEach(id => els[id] = $(id));
   window.imageEl = els.image;
