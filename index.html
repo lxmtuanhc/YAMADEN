@@ -475,6 +475,27 @@ button, input, textarea, select { font-family:inherit; }
   gap:12px;
   margin-top:12px;
 }
+.account-card {
+  margin-top:16px;
+  border:1px solid #e5e7eb;
+  background:white;
+  border-radius:24px;
+  padding:18px;
+  box-shadow:0 12px 28px rgba(15,23,42,0.06);
+}
+.account-fields {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:12px;
+}
+.account-status {
+  margin-top:10px;
+  color:#4b5563;
+  font-size:13px;
+  font-weight:800;
+  line-height:1.5;
+}
 .service-detail-list {
   display:grid;
   gap:14px;
@@ -903,6 +924,7 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   .hero h1 { font-size:25px; }
   .secondary-row { grid-template-columns:1fr; }
   .quick-contact { grid-template-columns:1fr; }
+  .account-fields { grid-template-columns:1fr; }
   .service-detail { grid-template-columns:46px 1fr; padding:14px; }
   .service-detail-icon { width:46px; height:46px; border-radius:16px; }
   .bottom-nav { bottom:10px; width:calc(100% - 20px); }
@@ -1016,6 +1038,20 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
           <div class="utility-head"><span class="icon" id="maintenanceIcon"></span><span id="maintenanceTitle">Periodic maintenance</span></div>
           <div class="utility-text" id="maintenanceText">Keep your building stable by checking electrical and control equipment before trouble appears.</div>
         </div>
+      </div>
+
+      <div class="account-card">
+        <div class="utility-head"><span class="icon" id="accountIcon"></span><span id="accountTitle">My account</span></div>
+        <div class="utility-text" id="accountText">Login with your name and phone to keep request history across devices.</div>
+        <div class="account-fields" id="accountFields">
+          <input id="accountName" placeholder="Name">
+          <input id="accountPhone" placeholder="Phone" inputmode="tel">
+        </div>
+        <div class="secondary-row">
+          <button class="soft-btn" onclick="userLogin()"><span class="icon" id="accountLoginIcon"></span><span id="accountLoginText">Login / Save</span></button>
+          <button class="soft-btn" onclick="userLogout()"><span class="icon" id="accountLogoutIcon"></span><span id="accountLogoutText">Logout</span></button>
+        </div>
+        <div class="account-status" id="accountStatus"></div>
       </div>
 
       <div class="card">
@@ -1185,6 +1221,7 @@ let lang = localStorage.getItem("lang") || localStorage.getItem("language") || "
 let lastAdminReply = "";
 let lastCheckedId = "";
 let previewUrl = "";
+let currentUser = null;
 
 const ICONS = {
   edit:`<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
@@ -1202,6 +1239,7 @@ const ICONS = {
   check:`<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>`,
   light:`<svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2v2"/><path d="M12 8a4 4 0 0 0-2 7.46V17h4v-1.54A4 4 0 0 0 12 8Z"/></svg>`,
   bell:`<svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>`,
+  logout:`<svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 4v16"/></svg>`,
   home:`<svg viewBox="0 0 24 24"><path d="M3 10.8 12 3l9 7.8V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10.8Z"/></svg>`,
   tool:`<svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5 5L3 18v3h3l6.7-6.7a4 4 0 0 0 5-5l-2.4 2.4-2.8-2.8 2.2-2.6Z"/></svg>`,
   zap:`<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 10-13h-7l1-7Z"/></svg>`,
@@ -1256,6 +1294,14 @@ const texts = {
     detail3Title:"Bảo trì điều khiển tự động",
     detail3Text:"Kiểm tra và bảo trì hệ thống điều khiển để duy trì môi trường tòa nhà an toàn, ổn định.",
     detailBtn:"Gửi yêu cầu mục này",
+    accountTitle:"Tài khoản khách hàng",
+    accountText:"Đăng nhập bằng tên và số điện thoại để lưu lịch sử yêu cầu trên server.",
+    accountLogin:"Đăng nhập / Lưu",
+    accountLogout:"Đăng xuất",
+    accountLoggedIn:"Đang đăng nhập",
+    accountLoggedOut:"Chưa đăng nhập. Bạn vẫn có thể gửi yêu cầu, nhưng lịch sử chỉ lưu trên máy này.",
+    accountRequired:"Vui lòng nhập tên và số điện thoại.",
+    accountLoginFailed:"Đăng nhập thất bại. Vui lòng thử lại.",
     sideStep1:"Gửi thông tin sự cố", sideStep2:"Theo dõi trạng thái", sideStep3:"Nhận phản hồi từ admin",
     tabSend:"Gửi yêu cầu", tabCheck:"Yêu cầu của tôi", sendTitle:"Gửi yêu cầu hỗ trợ", checkTitle:"Yêu cầu của tôi",
     name:"Họ và tên", phone:"Số điện thoại", contact:"Liên hệ", address:"Địa chỉ", content:"Nội dung yêu cầu", image:"Hình ảnh",
@@ -1316,6 +1362,14 @@ const texts = {
     detail3Title:"自動制御設備保守",
     detail3Text:"制御システムの点検保守を通じて、安全で快適な建物環境を維持します。",
     detailBtn:"この内容で依頼",
+    accountTitle:"お客様アカウント",
+    accountText:"名前と電話番号でログインすると、依頼履歴をサーバーに保存できます。",
+    accountLogin:"ログイン / 保存",
+    accountLogout:"ログアウト",
+    accountLoggedIn:"ログイン中",
+    accountLoggedOut:"未ログインです。依頼は送信できますが、履歴はこの端末のみ保存されます。",
+    accountRequired:"名前と電話番号を入力してください。",
+    accountLoginFailed:"ログインに失敗しました。もう一度お試しください。",
     sideStep1:"不具合内容を送信", sideStep2:"状況を確認", sideStep3:"管理者から返信を受信",
     tabSend:"依頼送信", tabCheck:"自分の依頼", sendTitle:"サポート依頼送信", checkTitle:"自分の依頼",
     name:"お名前", phone:"電話番号", contact:"連絡先", address:"住所", content:"依頼内容", image:"画像",
@@ -1373,6 +1427,7 @@ function renderIcons() {
     ["homeKickerIcon","zap"], ["homeSendIcon","send"], ["homeCheckIcon","search"], ["serviceTitleIcon","tool"],
     ["service1Icon","zap"], ["service2Icon","tool"], ["service3Icon","clock"], ["gallery1Icon","map"],
     ["gallery2Icon","check"], ["companyTitleIcon","file"], ["safetyIcon","bell"], ["maintenanceIcon","clock"],
+    ["accountIcon","user"], ["accountLoginIcon","user"], ["accountLogoutIcon","logout"],
     ["callCompanyIcon","phone"], ["mapCompanyIcon","map"], ["servicesPageIcon","tool"], ["detail1Icon","zap"],
     ["detail2Icon","tool"], ["detail3Icon","clock"], ["detail1BtnIcon","send"], ["detail2BtnIcon","send"],
     ["detail3BtnIcon","send"], ["tabHomeIcon","home"], ["tabServicesIcon","tool"],
@@ -1434,6 +1489,12 @@ function applyLang() {
   $("detail1Btn").innerText = t.detailBtn;
   $("detail2Btn").innerText = t.detailBtn;
   $("detail3Btn").innerText = t.detailBtn;
+  $("accountTitle").innerText = t.accountTitle;
+  $("accountText").innerText = t.accountText;
+  $("accountName").placeholder = t.name;
+  $("accountPhone").placeholder = t.phone;
+  $("accountLoginText").innerText = t.accountLogin;
+  $("accountLogoutText").innerText = t.accountLogout;
   $("sideStep1").innerText = t.sideStep1;
   $("sideStep2").innerText = t.sideStep2;
   $("sideStep3").innerText = t.sideStep3;
@@ -1465,6 +1526,7 @@ function applyLang() {
   $("myRequestTitle").innerText = t.myRequests;
   $("clearHistoryBtn").innerText = t.clearHistory;
   localStorage.setItem("language", lang);
+  updateAccountUI();
   renderMyRequests();
 }
 function changeLanguage() {
@@ -1519,6 +1581,76 @@ function setButtonLoading(button, iconName, text, loading) {
   button.innerHTML = `<span class="icon">${icon}</span><span>${escapeHtml(text)}</span>`;
   button.disabled = loading;
 }
+function getUserToken() {
+  return localStorage.getItem("userToken") || "";
+}
+function updateAccountUI() {
+  const t = texts[lang];
+  const saved = localStorage.getItem("userProfile");
+  currentUser = saved ? JSON.parse(saved) : null;
+
+  if (currentUser) {
+    $("accountName").value = currentUser.name || "";
+    $("accountPhone").value = currentUser.phone || "";
+    $("accountStatus").innerText = `${t.accountLoggedIn}: ${currentUser.name || currentUser.phone}`;
+    els.name.value = els.name.value || currentUser.name || "";
+    els.phone.value = els.phone.value || currentUser.phone || "";
+    els.contact.value = els.contact.value || currentUser.contact || currentUser.email || "";
+    els.address.value = els.address.value || currentUser.address || "";
+  } else {
+    $("accountStatus").innerText = t.accountLoggedOut;
+  }
+}
+async function userLogin() {
+  const t = texts[lang];
+  const name = $("accountName").value.trim();
+  const phone = $("accountPhone").value.trim();
+
+  if (!name || !phone) {
+    showToast(t.accountRequired);
+    return;
+  }
+
+  try {
+    const res = await fetch(API + "/user/login", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ name, phone })
+    });
+    const data = await readJsonSafe(res);
+
+    if (!res.ok || !data.token || !data.user) throw new Error("login failed");
+
+    localStorage.setItem("userToken", data.token);
+    localStorage.setItem("userProfile", JSON.stringify(data.user));
+    updateAccountUI();
+    await loadUserRequests();
+    showToast(t.accountLoggedIn);
+  } catch (err) {
+    showToast(t.accountLoginFailed);
+  }
+}
+function userLogout() {
+  localStorage.removeItem("userToken");
+  localStorage.removeItem("userProfile");
+  currentUser = null;
+  updateAccountUI();
+}
+async function loadUserRequests() {
+  const token = getUserToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(API + "/user/requests", {
+      headers:{ Authorization:"Bearer " + token }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!Array.isArray(data)) return;
+    data.forEach(item => saveMyRequest(item.id, { name:item.name, content:item.content, time:item.createdAt ? new Date(item.createdAt).getTime() : Date.now() }));
+    renderMyRequests();
+  } catch (err) {}
+}
 async function sendRequest() {
   const t = texts[lang];
   const name = els.name.value.trim();
@@ -1546,7 +1678,10 @@ async function sendRequest() {
     formData.append("content", content);
     if (file) formData.append("image", file);
 
-    const res = await fetch(API + "/request", { method:"POST", body:formData });
+    const headers = {};
+    const token = getUserToken();
+    if (token) headers.Authorization = "Bearer " + token;
+    const res = await fetch(API + "/request", { method:"POST", headers, body:formData });
     const data = await readJsonSafe(res);
     if (!res.ok || !data.data || !data.data.id) throw new Error("send failed");
 
@@ -1707,6 +1842,8 @@ document.addEventListener("DOMContentLoaded", () => {
   bindElements();
   renderIcons();
   applyLang();
+  updateAccountUI();
+  loadUserRequests();
   bindUploadPreview();
   setInterval(() => {
     if (!els.checkSection.classList.contains("hidden") && els.checkId.value) checkStatus(true);

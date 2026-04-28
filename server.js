@@ -37,6 +37,7 @@ cloudinary.config({
 // ===== Admin Login Config =====
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const JWT_SECRET = process.env.JWT_SECRET;
+const USER_JWT_SECRET = process.env.USER_JWT_SECRET || JWT_SECRET;
 
 function requireAdmin(req, res, next) {
   const auth = req.headers.authorization || "";
@@ -54,6 +55,31 @@ function requireAdmin(req, res, next) {
   }
 }
 
+function getUserFromRequest(req) {
+  const auth = req.headers.authorization || "";
+  const token = auth.replace("Bearer ", "");
+
+  if (!token || !USER_JWT_SECRET) return null;
+
+  try {
+    const decoded = jwt.verify(token, USER_JWT_SECRET);
+    if (decoded && decoded.role === "user") return decoded;
+  } catch (err) {}
+
+  return null;
+}
+
+function requireUser(req, res, next) {
+  const user = getUserFromRequest(req);
+
+  if (!user) {
+    return res.status(401).json({ message: "User login required" });
+  }
+
+  req.user = user;
+  next();
+}
+
 // ===== MongoDB Connect =====
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected"))
@@ -62,6 +88,7 @@ mongoose.connect(process.env.MONGODB_URI)
 // ===== Schema =====
 const RequestSchema = new mongoose.Schema({
   id: mongoose.Schema.Types.Mixed,
+  userId: String,
 
   name: String,
   phone: String,
@@ -77,6 +104,23 @@ const RequestSchema = new mongoose.Schema({
 });
 
 const Request = mongoose.model("Request", RequestSchema);
+
+const UserSchema = new mongoose.Schema({
+  name: String,
+  phone: String,
+  email: String,
+  contact: String,
+  company: String,
+  address: String,
+  status: {
+    type: String,
+    default: "active"
+  },
+  createdAt: Date,
+  lastLoginAt: Date
+});
+
+const User = mongoose.model("User", UserSchema);
 
 // ===== Hỗ trợ cả ID mới String và ID cũ Number =====
 function makeIdQuery(id) {
@@ -153,10 +197,132 @@ app.post("/admin/login", (req, res) => {
   });
 });
 
+app.post("/user/login", async (req, res) => {
+  try {
+    if (!USER_JWT_SECRET) {
+      return res.status(500).json({ message: "User login is not configured" });
+    }
+
+    const phone = String(req.body.phone || "").trim();
+    const name = String(req.body.name || "").trim();
+    const email = String(req.body.email || "").trim();
+    const contact = String(req.body.contact || "").trim();
+    const company = String(req.body.company || "").trim();
+    const address = String(req.body.address || "").trim();
+
+    if (!phone || !name) {
+      return res.status(400).json({ message: "Name and phone are required" });
+    }
+
+    let user = await User.findOne({ phone });
+
+    if (!user) {
+      user = new User({
+        name,
+        phone,
+        email,
+        contact,
+        company,
+        address,
+        status: "active",
+        createdAt: new Date(),
+        lastLoginAt: new Date()
+      });
+    } else {
+      user.name = name || user.name;
+      user.email = email || user.email;
+      user.contact = contact || user.contact;
+      user.company = company || user.company;
+      user.address = address || user.address;
+      user.lastLoginAt = new Date();
+    }
+
+    await user.save();
+
+    if (user.status === "blocked") {
+      return res.status(403).json({ message: "User is blocked" });
+    }
+
+    const token = jwt.sign(
+      { role: "user", userId: String(user._id), phone: user.phone },
+      USER_JWT_SECRET,
+      { expiresIn: "180d" }
+    );
+
+    res.json({ message: "Login success", token, user });
+  } catch (error) {
+    res.status(500).json({ message: "Login failed", error: error.message });
+  }
+});
+
+app.get("/user/me", requireUser, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Read failed", error: error.message });
+  }
+});
+
+app.get("/user/requests", requireUser, async (req, res) => {
+  try {
+    const requests = await Request.find({ userId: req.user.userId }).sort({ createdAt: -1 });
+    res.json(requests);
+  } catch (error) {
+    res.status(500).json({ message: "Read failed", error: error.message });
+  }
+});
+
+app.get("/admin/users", requireAdmin, async (req, res) => {
+  try {
+    const users = await User.find().sort({ createdAt: -1 });
+    const counts = await Request.aggregate([
+      { $match: { userId: { $ne: "" } } },
+      { $group: { _id: "$userId", count: { $sum: 1 } } }
+    ]);
+    const countMap = new Map(counts.map(item => [String(item._id), item.count]));
+
+    res.json(users.map(user => {
+      const item = user.toObject();
+      item.requestCount = countMap.get(String(user._id)) || 0;
+      return item;
+    }));
+  } catch (error) {
+    res.status(500).json({ message: "Read failed", error: error.message });
+  }
+});
+
+app.get("/admin/users/:id/requests", requireAdmin, async (req, res) => {
+  try {
+    const requests = await Request.find({ userId: req.params.id }).sort({ createdAt: -1 });
+    res.json(requests);
+  } catch (error) {
+    res.status(500).json({ message: "Read failed", error: error.message });
+  }
+});
+
+app.put("/admin/users/:id", requireAdmin, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    ["name", "phone", "email", "contact", "company", "address", "status"].forEach(field => {
+      if (req.body[field] !== undefined) user[field] = req.body[field];
+    });
+
+    await user.save();
+    res.json({ message: "Updated", data: user });
+  } catch (error) {
+    res.status(500).json({ message: "Update failed", error: error.message });
+  }
+});
+
 // Tạo yêu cầu mới - khách dùng, không cần login
 app.post("/request", upload.single("image"), async (req, res) => {
   try {
     const shortId = await generateRequestId();
+    const currentUser = getUserFromRequest(req);
 
     let imageUrl = "";
 
@@ -167,6 +333,7 @@ app.post("/request", upload.single("image"), async (req, res) => {
 
     const newRequest = new Request({
       id: shortId,
+      userId: currentUser ? currentUser.userId : "",
 
       name: req.body.name || "",
       phone: req.body.phone || "",
