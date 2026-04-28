@@ -1862,7 +1862,7 @@ function applyLang() {
   $("detail1Btn").innerText = t.detailBtn;
   $("detail2Btn").innerText = t.detailBtn;
   $("detail3Btn").innerText = t.detailBtn;
-  $("accountTitle").innerText = t.accountTitle;
+  if ($("accountTitle")) $("accountTitle").innerText = t.accountTitle;
   if ($("accountBrandSub")) $("accountBrandSub").innerText = lang === "ja" ? "株式会社ワイマデン" : "Hỗ trợ khách hàng";
   if ($("accountWelcome")) $("accountWelcome").innerText = lang === "ja" ? "ようこそ" : "Chào mừng";
   $("accountText").innerText = t.accountText;
@@ -1875,7 +1875,7 @@ function applyLang() {
   $("accountProjectName").placeholder = t.accountProjectName;
   $("accountCompany").placeholder = t.accountCompany;
   $("accountLoginText").innerText = t.accountLogin;
-  $("accountLogoutText").innerText = t.accountLogout;
+  if ($("accountLogoutText")) $("accountLogoutText").innerText = t.accountLogout;
   $("quickSupportTitle").innerText = t.quickSupportTitle;
   $("quickSupportText").innerText = t.quickSupportText;
   $("quickSupportBtn").innerText = t.quickSupportBtn;
