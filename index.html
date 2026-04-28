@@ -298,6 +298,7 @@ button, input, textarea, select { font-family:inherit; }
   color:#d1d5db;
   font-size:12px;
   font-weight:800;
+  line-height:1.35;
 }
 .philosophy-card {
   margin-top:16px;
@@ -329,11 +330,11 @@ button, input, textarea, select { font-family:inherit; }
 .philosophy-visual img {
   position:absolute;
   left:50%;
-  top:50%;
-  width:116px;
-  height:116px;
+  top:38%;
+  width:98px;
+  height:98px;
   transform:translate(-50%,-50%);
-  border-radius:30px;
+  border-radius:26px;
   background:white;
   padding:8px;
   box-shadow:0 18px 48px rgba(0,0,0,0.36);
@@ -345,7 +346,7 @@ button, input, textarea, select { font-family:inherit; }
   right:18px;
   color:white;
   font-weight:950;
-  font-size:21px;
+  font-size:20px;
   line-height:1.28;
   z-index:1;
 }
@@ -800,6 +801,16 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   .company-info-grid { grid-template-columns:1fr; }
   .philosophy-visual,
   .brand-visual { min-height:210px; }
+  .philosophy-visual img {
+    top:34%;
+    width:86px;
+    height:86px;
+    border-radius:23px;
+  }
+  .philosophy-visual .visual-label {
+    font-size:18px;
+    line-height:1.25;
+  }
   .trust-row { grid-template-columns:repeat(3,1fr); gap:8px; }
   .trust-item { padding:13px 10px; border-radius:18px; }
   .trust-number { font-size:21px; }
@@ -813,7 +824,7 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   .bottom-nav { bottom:10px; width:calc(100% - 20px); }
   .bottom-nav button { font-size:12px; padding:10px 5px; }
   .home-title { font-size:25px; }
-  .trust-label { font-size:11px; }
+  .trust-label { font-size:10px; }
 }
 </style>
 </head>
@@ -1119,7 +1130,7 @@ const texts = {
     homeSend:"依頼を送信",
     homeCheck:"状況を確認",
     trust1:"迅速受付",
-    trust2:"ベトナム語 / 日本語",
+    trust2:"日越対応",
     trust3:"IDで確認",
     philosophyVisual:"Protecting people. Creating happiness.",
     philosophyKicker:"PHILOSOPHY",
