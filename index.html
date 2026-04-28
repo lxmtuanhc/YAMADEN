@@ -516,6 +516,77 @@ button, input, textarea, select { font-family:inherit; }
   font-weight:800;
   line-height:1.5;
 }
+.account-success {
+  display:none;
+  margin-bottom:14px;
+  padding:16px;
+  border-radius:22px;
+  background:#ecfdf5;
+  border:1px solid #bbf7d0;
+  color:#166534;
+  font-weight:900;
+  box-shadow:0 12px 28px rgba(22,163,74,0.10);
+}
+.profile-card {
+  display:none;
+  margin-top:0;
+  border:1px solid #e5e7eb;
+  background:white;
+  border-radius:24px;
+  padding:20px;
+  box-shadow:0 12px 28px rgba(15,23,42,0.06);
+}
+.profile-head {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:16px;
+}
+.profile-avatar {
+  width:54px;
+  height:54px;
+  border-radius:18px;
+  background:#111827;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.profile-name {
+  font-size:20px;
+  font-weight:950;
+}
+.profile-sub {
+  margin-top:3px;
+  color:#64748b;
+  font-size:13px;
+  font-weight:800;
+}
+.profile-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:14px;
+}
+.profile-item {
+  padding:13px;
+  border-radius:16px;
+  background:#f9fafb;
+  border:1px solid #e5e7eb;
+}
+.profile-label {
+  color:#64748b;
+  font-size:11px;
+  font-weight:950;
+  margin-bottom:5px;
+}
+.profile-value {
+  color:#111827;
+  font-size:14px;
+  font-weight:850;
+  line-height:1.4;
+  word-break:break-word;
+}
 .quick-support-card {
   margin-top:14px;
   padding:16px;
@@ -952,6 +1023,7 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   .secondary-row { grid-template-columns:1fr; }
   .quick-contact { grid-template-columns:1fr; }
   .account-fields { grid-template-columns:1fr; }
+  .profile-grid { grid-template-columns:1fr; }
   .service-detail { grid-template-columns:46px 1fr; padding:14px; }
   .service-detail-icon { width:46px; height:46px; border-radius:16px; }
   .bottom-nav { bottom:10px; width:calc(100% - 20px); }
@@ -994,7 +1066,32 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
     <div id="notice" class="notice"></div>
 
     <section id="accountSection">
-        <div class="account-card" style="margin-top:0;">
+      <div class="account-success" id="accountSuccess"></div>
+
+      <div class="profile-card" id="profileCard">
+        <div class="profile-head">
+          <div class="profile-avatar"><span class="icon" id="profileIcon"></span></div>
+          <div>
+            <div class="profile-name" id="profileName">Customer</div>
+            <div class="profile-sub" id="profileSub">Account active</div>
+          </div>
+        </div>
+        <div class="profile-grid">
+          <div class="profile-item"><div class="profile-label" id="profilePhoneLabel">Phone</div><div class="profile-value" id="profilePhone"></div></div>
+          <div class="profile-item"><div class="profile-label">Email</div><div class="profile-value" id="profileEmail"></div></div>
+          <div class="profile-item"><div class="profile-label" id="profileProvinceLabel">Province</div><div class="profile-value" id="profileProvince"></div></div>
+          <div class="profile-item"><div class="profile-label" id="profileProjectLabel">Project</div><div class="profile-value" id="profileProject"></div></div>
+          <div class="profile-item"><div class="profile-label" id="profileCompanyLabel">Company</div><div class="profile-value" id="profileCompany"></div></div>
+          <div class="profile-item"><div class="profile-label" id="profileRequestsLabel">Requests</div><div class="profile-value" id="profileRequests">0</div></div>
+        </div>
+        <div class="secondary-row">
+          <button class="main-btn" onclick="showTab('send')"><span class="icon" id="profileSendIcon"></span><span id="profileSendText">Send request</span></button>
+          <button class="soft-btn" onclick="showTab('check')"><span class="icon" id="profileHistoryIcon"></span><span id="profileHistoryText">My requests</span></button>
+        </div>
+        <button class="soft-btn" style="margin-top:12px;" onclick="userLogout()"><span class="icon" id="profileLogoutIcon"></span><span id="profileLogoutText">Logout</span></button>
+      </div>
+
+      <div class="account-card" id="accountFormCard" style="margin-top:0;">
         <div class="utility-head"><span class="icon" id="accountIcon"></span><span id="accountTitle">My account</span></div>
         <div class="utility-text" id="accountText">Login with your information so YAMADEN can manage your requests and contact you smoothly.</div>
         <div class="account-mode">
@@ -1346,6 +1443,14 @@ const texts = {
     accountLoggedOut:"Chưa đăng nhập. Bạn vẫn có thể gửi yêu cầu, nhưng lịch sử chỉ lưu trên máy này.",
     accountRequired:"Vui lòng nhập tên và số điện thoại.",
     accountLoginFailed:"Đăng nhập thất bại. Vui lòng thử lại.",
+    accountRegisterSuccess:"Đăng ký thành công. Tài khoản của bạn đã được lưu.",
+    accountLoginSuccess:"Đăng nhập thành công.",
+    profileActive:"Tài khoản đang hoạt động",
+    profilePhone:"Số điện thoại",
+    profileProvince:"Tỉnh / thành",
+    profileProject:"Tên công trình",
+    profileCompany:"Công ty / cá nhân",
+    profileRequests:"Yêu cầu đã gửi",
     accountTab:"Tài khoản",
     accountRegister:"Khách mới",
     accountLoginMode:"Đã có tài khoản",
@@ -1423,6 +1528,14 @@ const texts = {
     accountLoggedOut:"未ログインです。依頼は送信できますが、履歴はこの端末のみ保存されます。",
     accountRequired:"名前と電話番号を入力してください。",
     accountLoginFailed:"ログインに失敗しました。もう一度お試しください。",
+    accountRegisterSuccess:"登録が完了しました。アカウント情報を保存しました。",
+    accountLoginSuccess:"ログインしました。",
+    profileActive:"アカウント有効",
+    profilePhone:"電話番号",
+    profileProvince:"都道府県 / 市区町村",
+    profileProject:"工事名 / 建物名",
+    profileCompany:"会社名 / 個人",
+    profileRequests:"依頼数",
     accountTab:"アカウント",
     accountRegister:"新規登録",
     accountLoginMode:"登録済み",
@@ -1489,7 +1602,8 @@ function renderIcons() {
     ["homeKickerIcon","zap"], ["homeSendIcon","send"], ["homeCheckIcon","search"], ["serviceTitleIcon","tool"],
     ["service1Icon","zap"], ["service2Icon","tool"], ["service3Icon","clock"], ["gallery1Icon","map"],
     ["gallery2Icon","check"], ["companyTitleIcon","file"], ["safetyIcon","bell"], ["maintenanceIcon","clock"],
-    ["accountIcon","user"], ["accountLoginIcon","user"], ["accountLogoutIcon","logout"], ["quickSupportIcon","message"],
+    ["accountIcon","user"], ["accountLoginIcon","user"], ["accountLogoutIcon","logout"], ["profileIcon","user"],
+    ["profileSendIcon","send"], ["profileHistoryIcon","clock"], ["profileLogoutIcon","logout"], ["quickSupportIcon","message"],
     ["quickSupportBtnIcon","send"], ["tabAccountIcon","user"],
     ["callCompanyIcon","phone"], ["mapCompanyIcon","map"], ["servicesPageIcon","tool"], ["detail1Icon","zap"],
     ["detail2Icon","tool"], ["detail3Icon","clock"], ["detail1BtnIcon","send"], ["detail2BtnIcon","send"],
@@ -1567,6 +1681,15 @@ function applyLang() {
   $("quickSupportTitle").innerText = t.quickSupportTitle;
   $("quickSupportText").innerText = t.quickSupportText;
   $("quickSupportBtn").innerText = t.quickSupportBtn;
+  $("profileSub").innerText = t.profileActive;
+  $("profilePhoneLabel").innerText = t.profilePhone;
+  $("profileProvinceLabel").innerText = t.profileProvince;
+  $("profileProjectLabel").innerText = t.profileProject;
+  $("profileCompanyLabel").innerText = t.profileCompany;
+  $("profileRequestsLabel").innerText = t.profileRequests;
+  $("profileSendText").innerText = t.send;
+  $("profileHistoryText").innerText = t.tabCheck;
+  $("profileLogoutText").innerText = t.accountLogout;
   $("sideStep1").innerText = t.sideStep1;
   $("sideStep2").innerText = t.sideStep2;
   $("sideStep3").innerText = t.sideStep3;
@@ -1665,6 +1788,8 @@ function updateAccountUI() {
   currentUser = saved ? JSON.parse(saved) : null;
 
   if (currentUser) {
+    $("accountFormCard").style.display = "none";
+    $("profileCard").style.display = "block";
     $("accountName").value = currentUser.name || "";
     $("accountPhone").value = currentUser.phone || "";
     $("accountEmail").value = currentUser.email || "";
@@ -1672,11 +1797,21 @@ function updateAccountUI() {
     $("accountProjectName").value = currentUser.projectName || "";
     $("accountCompany").value = currentUser.company || "";
     $("accountStatus").innerText = `${t.accountLoggedIn}: ${currentUser.name || currentUser.phone}`;
+    $("profileName").innerText = currentUser.name || currentUser.phone || "";
+    $("profilePhone").innerText = currentUser.phone || "";
+    $("profileEmail").innerText = currentUser.email || "";
+    $("profileProvince").innerText = currentUser.province || "";
+    $("profileProject").innerText = currentUser.projectName || "";
+    $("profileCompany").innerText = currentUser.company || "";
+    $("profileRequests").innerText = getMyRequests().length;
     els.name.value = els.name.value || currentUser.name || "";
     els.phone.value = els.phone.value || currentUser.phone || "";
     els.contact.value = els.contact.value || currentUser.contact || currentUser.email || "";
     els.address.value = els.address.value || currentUser.address || "";
   } else {
+    $("accountFormCard").style.display = "block";
+    $("profileCard").style.display = "none";
+    $("accountSuccess").style.display = "none";
     $("accountStatus").innerText = t.accountLoggedOut;
   }
   setAccountMode(accountMode);
@@ -1723,7 +1858,10 @@ async function userLogin() {
     localStorage.setItem("userProfile", JSON.stringify(data.user));
     updateAccountUI();
     await loadUserRequests();
-    showToast(t.accountLoggedIn);
+    const message = accountMode === "register" ? t.accountRegisterSuccess : t.accountLoginSuccess;
+    $("accountSuccess").innerText = message;
+    $("accountSuccess").style.display = "block";
+    showToast(message);
   } catch (err) {
     showToast(t.accountLoginFailed);
   }
@@ -1747,6 +1885,7 @@ async function loadUserRequests() {
     if (!Array.isArray(data)) return;
     data.forEach(item => saveMyRequest(item.id, { name:item.name, content:item.content, time:item.createdAt ? new Date(item.createdAt).getTime() : Date.now() }));
     renderMyRequests();
+    if (currentUser) $("profileRequests").innerText = getMyRequests().length;
   } catch (err) {}
 }
 async function sendRequest() {
