@@ -130,6 +130,35 @@ button:hover { transform:translateY(-1px); }
   margin-right:6px;
   vertical-align:-3px;
 }
+.with-icon {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.with-icon .line-icon,
+.with-icon .btn-icon,
+.with-icon .badge-icon {
+  margin-right:0;
+}
+.panel-title,
+.quick-title,
+.quick-line span,
+.stat-label,
+.tabs button,
+.admin-info,
+.logout-btn {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.tabs button {
+  justify-content:center;
+}
+.stat-label .line-icon,
+.quick-line .line-icon,
+.panel-title .line-icon {
+  color:inherit;
+}
 
 .layout {
   display:grid;
@@ -770,43 +799,6 @@ button:hover { transform:translateY(-1px); }
   .req-name, .req-phone { display:block; margin-left:0; }
   .actions { grid-template-columns:1fr; }
 }
-.nav-icon-box svg,
-.stat-icon svg,
-.search-btn svg,
-.line-icon svg,
-.btn-icon svg,
-.badge-icon svg,
-.modal-icon svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-  fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.stat-icon {
-  opacity: 1 !important;
-  color: #2563eb !important;
-}
-
-.stat-icon.orange {
-  color: #f59e0b !important;
-}
-
-.stat-icon.green {
-  color: #16a34a !important;
-}
-
-.stat-icon.sky {
-  color: #06b6d4 !important;
-}
-
-.search-btn {
-  color: white !important;
-}
 </style>
 </head>
 
@@ -863,7 +855,7 @@ button:hover { transform:translateY(-1px); }
           <option value="vi">VI</option>
           <option value="ja">JP</option>
         </select>
-        <div class="admin-info"><span class="admin-dot"></span>Admin</div>
+        <div class="admin-info"><span class="admin-dot"></span><span id="adminInfoIcon" class="line-icon"></span>Admin</div>
         <button class="logout-btn" id="logoutBtn" onclick="logout()">Đăng xuất</button>
       </div>
     </div>
@@ -988,7 +980,11 @@ const ICONS = {
   map:`<svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.1 7-12a7 7 0 1 0-14 0c0 6.9 7 12 7 12Z" stroke-width="2"/><circle cx="12" cy="9" r="2.5" stroke-width="2"/></svg>`,
   edit:`<svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z" stroke-width="2" stroke-linejoin="round"/><path d="m14 8 2 2" stroke-width="2" stroke-linecap="round"/></svg>`,
   trash:`<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16" stroke-width="2" stroke-linecap="round"/><path d="M9 7V4h6v3" stroke-width="2" stroke-linejoin="round"/><path d="M6 7l1 14h10l1-14" stroke-width="2" stroke-linejoin="round"/><path d="M10 11v6m4-6v6" stroke-width="2" stroke-linecap="round"/></svg>`,
-  message:`<svg viewBox="0 0 24 24" fill="none"><path d="M5 18.5V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-4 2.5Z" stroke-width="2" stroke-linejoin="round"/></svg>`
+  message:`<svg viewBox="0 0 24 24" fill="none"><path d="M5 18.5V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-4 2.5Z" stroke-width="2" stroke-linejoin="round"/></svg>`,
+  list:`<svg viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13" stroke-width="2" stroke-linecap="round"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01" stroke-width="4" stroke-linecap="round"/></svg>`,
+  user:`<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke-width="2"/><path d="M4 21a8 8 0 0 1 16 0" stroke-width="2" stroke-linecap="round"/></svg>`,
+  logout:`<svg viewBox="0 0 24 24" fill="none"><path d="M10 17l5-5-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12H3" stroke-width="2" stroke-linecap="round"/><path d="M21 4v16" stroke-width="2" stroke-linecap="round"/></svg>`,
+  spark:`<svg viewBox="0 0 24 24" fill="none"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z" stroke-width="2" stroke-linejoin="round"/></svg>`
 };
 
 function icon(name, cls = "ui-icon") {
@@ -1098,6 +1094,7 @@ function renderStaticIcons() {
   searchInputIcon.innerHTML = ICONS.search;
   searchBtn.innerHTML = icon("search");
   modalTrashIcon.innerHTML = ICONS.trash;
+  adminInfoIcon.innerHTML = ICONS.user;
 }
 
 function applyLanguage() {
@@ -1107,17 +1104,17 @@ function applyLanguage() {
   pageTitle.innerText = t.pageTitle;
   heroTitle.innerText = t.heroTitle;
   heroDesc.innerText = t.heroDesc;
-  quickTitle.innerText = t.quickTitle;
-  requestPanelTitle.innerText = t.requestPanelTitle;
+  quickTitle.innerHTML = icon("spark", "line-icon") + t.quickTitle;
+  requestPanelTitle.innerHTML = icon("list", "line-icon") + t.requestPanelTitle;
   requestPanelSub.innerText = t.requestPanelSub;
 
-  labelTotal.innerText = t.total;
-  labelActive.innerText = t.active;
-  labelDone.innerText = t.done;
-  labelToday.innerText = t.today;
-  quickActiveLabel.innerText = t.active;
-  quickDoneLabel.innerText = t.done;
-  quickTodayLabel.innerText = t.today;
+  labelTotal.innerHTML = icon("chart", "line-icon") + t.total;
+  labelActive.innerHTML = icon("clock", "line-icon") + t.active;
+  labelDone.innerHTML = icon("check", "line-icon") + t.done;
+  labelToday.innerHTML = icon("calendar", "line-icon") + t.today;
+  quickActiveLabel.innerHTML = icon("clock", "line-icon") + t.active;
+  quickDoneLabel.innerHTML = icon("check", "line-icon") + t.done;
+  quickTodayLabel.innerHTML = icon("calendar", "line-icon") + t.today;
 
   search.placeholder = t.search;
   menuOverview.innerHTML = `<span class="nav-left"><span class="nav-icon-box">${ICONS.home}</span><span>${t.menuOverview}</span></span>`;
@@ -1126,7 +1123,7 @@ function applyLanguage() {
   menuDoneText.innerText = t.done;
   menuSettingTitle.innerText = t.menuSettingTitle;
   menuSetting.innerHTML = `<span class="nav-left"><span class="nav-icon-box">${ICONS.settings}</span><span>${t.menuSetting}</span></span>`;
-  logoutBtn.innerText = t.logout;
+  logoutBtn.innerHTML = icon("logout", "btn-icon") + t.logout;
 
   modalTitle.innerText = t.confirmTitle;
   modalCancelBtn.innerText = t.cancel;
@@ -1157,11 +1154,11 @@ function changeTab(tab) {
 function updateTabLabels(activeCount = null, doneCount = null) {
   const t = texts[currentLang];
   if (activeCount === null || doneCount === null) {
-    tabActive.innerText = t.active;
-    tabDone.innerText = t.done;
+    tabActive.innerHTML = icon("clock", "line-icon") + t.active;
+    tabDone.innerHTML = icon("check", "line-icon") + t.done;
   } else {
-    tabActive.innerText = `${t.active} (${activeCount})`;
-    tabDone.innerText = `${t.done} (${doneCount})`;
+    tabActive.innerHTML = icon("clock", "line-icon") + `${t.active} (${activeCount})`;
+    tabDone.innerHTML = icon("check", "line-icon") + `${t.done} (${doneCount})`;
     sideActive.innerText = activeCount;
     sideDone.innerText = doneCount;
   }
