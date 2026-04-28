@@ -435,6 +435,86 @@ button, input, textarea, select { font-family:inherit; }
   line-height:1.45;
   font-weight:850;
 }
+.utility-grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin-top:16px;
+}
+.utility-card {
+  border:1px solid #e5e7eb;
+  background:#ffffff;
+  border-radius:22px;
+  padding:18px;
+  box-shadow:0 12px 26px rgba(15,23,42,0.06);
+}
+.utility-head {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:15px;
+  font-weight:950;
+  margin-bottom:8px;
+}
+.utility-head .icon {
+  width:36px;
+  height:36px;
+  padding:8px;
+  border-radius:13px;
+  background:#f3f4f6;
+}
+.utility-text {
+  color:#4b5563;
+  font-size:13px;
+  line-height:1.55;
+  font-weight:750;
+}
+.quick-contact {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:12px;
+}
+.service-detail-list {
+  display:grid;
+  gap:14px;
+}
+.service-detail {
+  display:grid;
+  grid-template-columns:54px 1fr;
+  gap:14px;
+  align-items:start;
+  border:1px solid #e5e7eb;
+  border-radius:22px;
+  padding:16px;
+  background:#fff;
+  box-shadow:0 10px 24px rgba(15,23,42,0.05);
+}
+.service-detail-icon {
+  width:54px;
+  height:54px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#111827;
+  color:white;
+}
+.service-detail-title {
+  font-weight:950;
+  font-size:17px;
+  margin-bottom:6px;
+}
+.service-detail-text {
+  color:#4b5563;
+  font-size:14px;
+  line-height:1.6;
+  font-weight:750;
+}
+.service-detail .soft-btn {
+  margin-top:12px;
+  max-width:220px;
+}
 .card {
   background:white;
   border-radius:24px;
@@ -798,7 +878,8 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   .service-grid { grid-template-columns:1fr; }
   .philosophy-card,
   .brand-gallery,
-  .company-info-grid { grid-template-columns:1fr; }
+  .company-info-grid,
+  .utility-grid { grid-template-columns:1fr; }
   .philosophy-visual,
   .brand-visual { min-height:210px; }
   .philosophy-visual img {
@@ -821,6 +902,9 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   .logo-box img { width:46px; height:46px; }
   .hero h1 { font-size:25px; }
   .secondary-row { grid-template-columns:1fr; }
+  .quick-contact { grid-template-columns:1fr; }
+  .service-detail { grid-template-columns:46px 1fr; padding:14px; }
+  .service-detail-icon { width:46px; height:46px; border-radius:16px; }
   .bottom-nav { bottom:10px; width:calc(100% - 20px); }
   .bottom-nav button { font-size:12px; padding:10px 5px; }
   .home-title { font-size:25px; }
@@ -923,6 +1007,17 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
         </div>
       </div>
 
+      <div class="utility-grid">
+        <div class="utility-card">
+          <div class="utility-head"><span class="icon" id="safetyIcon"></span><span id="safetyTitle">Electrical safety today</span></div>
+          <div class="utility-text" id="safetyText">If you notice burning smell, heat, sparks, or repeated breaker trips, stop using the device and send a request with photos.</div>
+        </div>
+        <div class="utility-card">
+          <div class="utility-head"><span class="icon" id="maintenanceIcon"></span><span id="maintenanceTitle">Periodic maintenance</span></div>
+          <div class="utility-text" id="maintenanceText">Keep your building stable by checking electrical and control equipment before trouble appears.</div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-title">
           <div class="card-title-icon" id="companyTitleIcon"></div>
@@ -933,6 +1028,43 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
           <div class="company-info"><div class="company-info-label" id="companyServiceLabel">Business</div><div class="company-info-value" id="companyServiceValue">Electrical work / instrumentation / automatic control maintenance</div></div>
           <div class="company-info"><div class="company-info-label" id="companyAddressLabel">Address</div><div class="company-info-value">〒733-0851 広島県広島市西区田方2-9-23</div></div>
           <div class="company-info"><div class="company-info-label" id="companyTelLabel">TEL</div><div class="company-info-value">082-516-4423</div></div>
+        </div>
+        <div class="quick-contact">
+          <a class="soft-btn" href="tel:082-516-4423"><span class="icon" id="callCompanyIcon"></span><span id="callCompanyText">Call</span></a>
+          <a class="soft-btn" href="https://www.google.com/maps/search/?api=1&query=%E5%BA%83%E5%B3%B6%E7%9C%8C%E5%BA%83%E5%B3%B6%E5%B8%82%E8%A5%BF%E5%8C%BA%E7%94%B0%E6%96%B92-9-23" target="_blank" rel="noopener"><span class="icon" id="mapCompanyIcon"></span><span id="mapCompanyText">Map</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="card hidden" id="servicesSection">
+      <div class="card-title">
+        <div class="card-title-icon" id="servicesPageIcon"></div>
+        <h2 id="servicesPageTitle">Services</h2>
+      </div>
+      <div class="service-detail-list">
+        <div class="service-detail">
+          <div class="service-detail-icon" id="detail1Icon"></div>
+          <div>
+            <div class="service-detail-title" id="detail1Title">General electrical work</div>
+            <div class="service-detail-text" id="detail1Text">Wiring, power receiving work, lighting, outlets and electrical equipment for homes, buildings and factories.</div>
+            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="detail1BtnIcon"></span><span id="detail1Btn">Request this service</span></button>
+          </div>
+        </div>
+        <div class="service-detail">
+          <div class="service-detail-icon" id="detail2Icon"></div>
+          <div>
+            <div class="service-detail-title" id="detail2Title">Instrumentation</div>
+            <div class="service-detail-text" id="detail2Text">Measurement and control systems for building electrical and air-conditioning equipment.</div>
+            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="detail2BtnIcon"></span><span id="detail2Btn">Request this service</span></button>
+          </div>
+        </div>
+        <div class="service-detail">
+          <div class="service-detail-icon" id="detail3Icon"></div>
+          <div>
+            <div class="service-detail-title" id="detail3Title">Automatic control maintenance</div>
+            <div class="service-detail-text" id="detail3Text">Inspection and maintenance of control systems to keep building environments safe and stable.</div>
+            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="detail3BtnIcon"></span><span id="detail3Btn">Request this service</span></button>
+          </div>
         </div>
       </div>
     </section>
@@ -1039,6 +1171,7 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
 
   <nav class="bottom-nav">
     <button id="tabHome" class="active" onclick="showTab('home')"><span class="icon" id="tabHomeIcon"></span><span>Home</span></button>
+    <button id="tabServices" onclick="showTab('services')"><span class="icon" id="tabServicesIcon"></span><span>Services</span></button>
     <button id="tabSend" onclick="showTab('send')"><span class="icon" id="tabSendIcon"></span><span>Gửi yêu cầu</span></button>
     <button id="tabCheck" onclick="showTab('check')"><span class="icon" id="tabCheckIcon"></span><span>Tra cứu</span></button>
   </nav>
@@ -1108,8 +1241,23 @@ const texts = {
     companyServiceValue:"Công trình điện / đo lường điều khiển / bảo trì thiết bị điều khiển tự động",
     companyAddressLabel:"Địa chỉ",
     companyTelLabel:"Điện thoại",
+    safetyTitle:"An toàn điện hôm nay",
+    safetyText:"Nếu có mùi khét, ổ cắm nóng, tia lửa hoặc CB nhảy liên tục, hãy ngừng sử dụng thiết bị và gửi yêu cầu kèm ảnh.",
+    maintenanceTitle:"Bảo trì định kỳ",
+    maintenanceText:"Kiểm tra thiết bị điện và điều khiển trước khi có sự cố giúp công trình vận hành ổn định hơn.",
+    callCompany:"Gọi YAMADEN",
+    mapCompany:"Mở bản đồ",
+    tabServices:"Dịch vụ",
+    servicesPageTitle:"Dịch vụ chi tiết",
+    detail1Title:"Công trình điện tổng hợp",
+    detail1Text:"Thi công dây điện, kéo nguồn, chiếu sáng, ổ cắm và thiết bị điện cho nhà ở, tòa nhà, nhà máy.",
+    detail2Title:"Công trình đo lường điều khiển",
+    detail2Text:"Hỗ trợ hệ thống đo lường, điều khiển điện và điều hòa trong các công trình cần vận hành ổn định.",
+    detail3Title:"Bảo trì điều khiển tự động",
+    detail3Text:"Kiểm tra và bảo trì hệ thống điều khiển để duy trì môi trường tòa nhà an toàn, ổn định.",
+    detailBtn:"Gửi yêu cầu mục này",
     sideStep1:"Gửi thông tin sự cố", sideStep2:"Theo dõi trạng thái", sideStep3:"Nhận phản hồi từ admin",
-    tabSend:"Gửi yêu cầu", tabCheck:"Tra cứu", sendTitle:"Gửi yêu cầu hỗ trợ", checkTitle:"Tra cứu trạng thái yêu cầu",
+    tabSend:"Gửi yêu cầu", tabCheck:"Yêu cầu của tôi", sendTitle:"Gửi yêu cầu hỗ trợ", checkTitle:"Yêu cầu của tôi",
     name:"Họ và tên", phone:"Số điện thoại", contact:"Liên hệ", address:"Địa chỉ", content:"Nội dung yêu cầu", image:"Hình ảnh",
     uploadText:"Chọn ảnh hoặc chụp ảnh", chooseImage:"Chọn ảnh", fileSelected:"Đã chọn ảnh", copyId:"Copy ID", history:"Lịch sử",
     send:"Gửi yêu cầu", check:"Kiểm tra", checkPlaceholder:"Nhập mã yêu cầu", sending:"Đang gửi...", loading:"Đang tải...",
@@ -1153,8 +1301,23 @@ const texts = {
     companyServiceValue:"一般電気工事 / 計装工事 / 自動制御設備保守メンテナンス",
     companyAddressLabel:"所在地",
     companyTelLabel:"電話番号",
+    safetyTitle:"今日の電気安全",
+    safetyText:"焦げた臭い、発熱、火花、ブレーカーが何度も落ちる場合は使用を止め、写真付きで依頼してください。",
+    maintenanceTitle:"定期メンテナンス",
+    maintenanceText:"トラブルが起きる前に電気・制御設備を確認することで、建物を安定して運用できます。",
+    callCompany:"山電へ電話",
+    mapCompany:"地図を開く",
+    tabServices:"サービス",
+    servicesPageTitle:"サービス詳細",
+    detail1Title:"一般電気工事",
+    detail1Text:"住宅、ビル、工場の配線、引き込み、照明、コンセント、各種電気設備に対応します。",
+    detail2Title:"計装工事",
+    detail2Text:"建物内の電気・空調設備などの計測・制御システムを支え、安定した環境を維持します。",
+    detail3Title:"自動制御設備保守",
+    detail3Text:"制御システムの点検保守を通じて、安全で快適な建物環境を維持します。",
+    detailBtn:"この内容で依頼",
     sideStep1:"不具合内容を送信", sideStep2:"状況を確認", sideStep3:"管理者から返信を受信",
-    tabSend:"依頼送信", tabCheck:"確認", sendTitle:"サポート依頼送信", checkTitle:"依頼状況確認",
+    tabSend:"依頼送信", tabCheck:"自分の依頼", sendTitle:"サポート依頼送信", checkTitle:"自分の依頼",
     name:"お名前", phone:"電話番号", contact:"連絡先", address:"住所", content:"依頼内容", image:"画像",
     uploadText:"画像を選択または撮影", chooseImage:"画像を選択", fileSelected:"画像を選択しました", copyId:"IDコピー", history:"履歴",
     send:"送信", check:"確認", checkPlaceholder:"受付IDを入力", sending:"送信中...", loading:"読み込み中...",
@@ -1209,7 +1372,10 @@ function renderIcons() {
   [
     ["homeKickerIcon","zap"], ["homeSendIcon","send"], ["homeCheckIcon","search"], ["serviceTitleIcon","tool"],
     ["service1Icon","zap"], ["service2Icon","tool"], ["service3Icon","clock"], ["gallery1Icon","map"],
-    ["gallery2Icon","check"], ["companyTitleIcon","file"], ["tabHomeIcon","home"],
+    ["gallery2Icon","check"], ["companyTitleIcon","file"], ["safetyIcon","bell"], ["maintenanceIcon","clock"],
+    ["callCompanyIcon","phone"], ["mapCompanyIcon","map"], ["servicesPageIcon","tool"], ["detail1Icon","zap"],
+    ["detail2Icon","tool"], ["detail3Icon","clock"], ["detail1BtnIcon","send"], ["detail2BtnIcon","send"],
+    ["detail3BtnIcon","send"], ["tabHomeIcon","home"], ["tabServicesIcon","tool"],
     ["sendTitleIcon","edit"], ["nameIcon","user"], ["phoneIcon","phone"], ["contactIcon","message"],
     ["addressIcon","map"], ["contentIcon","message"], ["uploadIcon","upload"], ["sendBtnIcon","send"],
     ["copyIdIcon","copy"], ["historyIcon","chart"], ["checkTitleIcon","clock"], ["checkIdIcon","file"],
@@ -1252,10 +1418,27 @@ function applyLang() {
   $("companyServiceValue").innerText = t.companyServiceValue;
   $("companyAddressLabel").innerText = t.companyAddressLabel;
   $("companyTelLabel").innerText = t.companyTelLabel;
+  $("safetyTitle").innerText = t.safetyTitle;
+  $("safetyText").innerText = t.safetyText;
+  $("maintenanceTitle").innerText = t.maintenanceTitle;
+  $("maintenanceText").innerText = t.maintenanceText;
+  $("callCompanyText").innerText = t.callCompany;
+  $("mapCompanyText").innerText = t.mapCompany;
+  $("servicesPageTitle").innerText = t.servicesPageTitle;
+  $("detail1Title").innerText = t.detail1Title;
+  $("detail1Text").innerText = t.detail1Text;
+  $("detail2Title").innerText = t.detail2Title;
+  $("detail2Text").innerText = t.detail2Text;
+  $("detail3Title").innerText = t.detail3Title;
+  $("detail3Text").innerText = t.detail3Text;
+  $("detail1Btn").innerText = t.detailBtn;
+  $("detail2Btn").innerText = t.detailBtn;
+  $("detail3Btn").innerText = t.detailBtn;
   $("sideStep1").innerText = t.sideStep1;
   $("sideStep2").innerText = t.sideStep2;
   $("sideStep3").innerText = t.sideStep3;
   els.tabHome.querySelector("span:last-child").innerText = t.homeKicker === "YAMADEN SUPPORT" && lang === "vi" ? "Trang chủ" : "ホーム";
+  els.tabServices.querySelector("span:last-child").innerText = t.tabServices;
   els.tabSend.querySelector("span:last-child").innerText = t.tabSend;
   els.tabCheck.querySelector("span:last-child").innerText = t.tabCheck;
   $("sendTitle").innerText = t.sendTitle;
@@ -1292,12 +1475,15 @@ function changeLanguage() {
 }
 function showTab(tab) {
   const isHome = tab === "home";
+  const isServices = tab === "services";
   const isSend = tab === "send";
   const isCheck = tab === "check";
   els.homeSection.classList.toggle("hidden", !isHome);
+  els.servicesSection.classList.toggle("hidden", !isServices);
   els.sendSection.classList.toggle("hidden", !isSend);
   els.checkSection.classList.toggle("hidden", !isCheck);
   els.tabHome.classList.toggle("active", isHome);
+  els.tabServices.classList.toggle("active", isServices);
   els.tabSend.classList.toggle("active", isSend);
   els.tabCheck.classList.toggle("active", isCheck);
   if (isCheck) renderMyRequests();
@@ -1497,7 +1683,7 @@ function showNotice() {
 }
 function bindElements() {
   [
-    "language","homeSection","sendSection","checkSection","tabHome","tabSend","tabCheck","name","phone","contact","address","content","image",
+    "language","homeSection","servicesSection","sendSection","checkSection","tabHome","tabServices","tabSend","tabCheck","name","phone","contact","address","content","image",
     "result","checkId","checkResult","notice","myRequests","toast","sendBtn","checkBtn"
   ].forEach(id => els[id] = $(id));
   window.imageEl = els.image;
