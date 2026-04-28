@@ -1174,6 +1174,1193 @@ load();
     <p class="modal-text" id="modalText">
       Bạn có chắc muốn xóa yêu cầu này?
     </p>
+a<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin - YAMADEN</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="icon" type="image/png" href="/icon-admin-192.png">
+<link rel="apple-touch-icon" href="/icon-admin-192.png">
+<link rel="manifest" href="/admin-manifest.json">
+<meta name="theme-color" content="#020617">
+
+<style>
+* { box-sizing: border-box; }
+
+:root {
+  --bg:#f4f7fb;
+  --dark:#020617;
+  --dark2:#0f172a;
+  --card:#ffffff;
+  --card2:rgba(255,255,255,0.78);
+  --line:#e2e8f0;
+  --text:#0f172a;
+  --muted:#64748b;
+  --blue:#2563eb;
+  --sky:#0ea5e9;
+  --cyan:#06b6d4;
+  --green:#16a34a;
+  --orange:#f59e0b;
+  --red:#dc2626;
+  --shadow:0 22px 55px rgba(15,23,42,0.10);
+}
+
+body {
+  margin:0;
+  font-family:"Segoe UI", Arial, sans-serif;
+  color:var(--text);
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(37,99,235,0.20), transparent 32%),
+    radial-gradient(circle at 88% 4%, rgba(6,182,212,0.18), transparent 30%),
+    linear-gradient(180deg,#f8fbff 0%,#eef4fb 52%,#f8fafc 100%);
+}
+
+body::before {
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(15,23,42,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15,23,42,0.035) 1px, transparent 1px);
+  background-size:44px 44px;
+  mask-image:linear-gradient(to bottom, black 0%, transparent 80%);
+}
+
+button, select, input, textarea { font-family:inherit; }
+button { transition:0.18s ease; }
+button:hover { transform:translateY(-1px); }
+
+.layout {
+  display:grid;
+  grid-template-columns:292px 1fr;
+  min-height:100vh;
+  position:relative;
+  z-index:1;
+}
+
+.sidebar {
+  position:sticky;
+  top:0;
+  height:100vh;
+  padding:20px;
+  color:white;
+  background:
+    linear-gradient(180deg, rgba(2,6,23,0.96), rgba(15,23,42,0.94)),
+    radial-gradient(circle at top, rgba(37,99,235,0.35), transparent 42%);
+  border-right:1px solid rgba(255,255,255,0.08);
+  box-shadow:18px 0 50px rgba(2,6,23,0.22);
+  display:flex;
+  flex-direction:column;
+}
+
+.brand {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:10px;
+  border-radius:24px;
+  cursor:pointer;
+  margin-bottom:26px;
+}
+.brand:hover { background:rgba(255,255,255,0.06); }
+.brand img {
+  width:58px;
+  height:58px;
+  border-radius:18px;
+  box-shadow:0 18px 38px rgba(0,0,0,0.35);
+}
+.brand-title {
+  font-size:25px;
+  font-weight:950;
+  letter-spacing:0.9px;
+}
+.brand-sub {
+  color:#cbd5e1;
+  font-size:12px;
+  font-weight:800;
+}
+
+.menu-title {
+  margin:22px 12px 10px;
+  font-size:11px;
+  font-weight:950;
+  color:#94a3b8;
+  letter-spacing:0.9px;
+}
+.menu-item {
+  border:1px solid transparent;
+  padding:14px 15px;
+  border-radius:18px;
+  margin-bottom:9px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:#e5e7eb;
+  font-weight:900;
+  cursor:pointer;
+}
+.menu-item:hover {
+  background:rgba(255,255,255,0.08);
+  border-color:rgba(255,255,255,0.08);
+}
+.menu-item.active {
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  box-shadow:0 16px 34px rgba(37,99,235,0.34);
+  color:white;
+}
+.menu-badge {
+  min-width:34px;
+  text-align:center;
+  background:rgba(255,255,255,0.18);
+  border:1px solid rgba(255,255,255,0.16);
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+}
+.sidebar-footer {
+  margin-top:auto;
+  padding:14px 12px 4px;
+  color:#cbd5e1;
+  font-size:12px;
+  line-height:1.7;
+}
+
+.main { min-width:0; }
+
+.topbar {
+  min-height:92px;
+  position:sticky;
+  top:0;
+  z-index:50;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 32px;
+  background:rgba(255,255,255,0.74);
+  backdrop-filter:blur(22px);
+  border-bottom:1px solid rgba(226,232,240,0.85);
+}
+.topbar-left {
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.mobile-brand { display:none; }
+.mobile-brand img {
+  width:50px;
+  height:50px;
+  border-radius:16px;
+  box-shadow:0 10px 24px rgba(15,23,42,0.16);
+}
+.page-title {
+  font-size:29px;
+  font-weight:950;
+  letter-spacing:-0.7px;
+}
+.page-subtitle {
+  margin-top:4px;
+  color:var(--muted);
+  font-weight:750;
+  font-size:13px;
+}
+.top-actions {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.lang, .admin-info, .logout-btn {
+  min-height:48px;
+  border-radius:16px;
+  font-weight:950;
+}
+.lang {
+  padding:0 14px;
+  border:1px solid var(--line);
+  background:white;
+  outline:none;
+}
+.admin-info {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:0 16px;
+  background:white;
+  border:1px solid var(--line);
+  box-shadow:0 10px 24px rgba(15,23,42,0.05);
+}
+.admin-dot {
+  width:9px;
+  height:9px;
+  background:#22c55e;
+  border-radius:999px;
+  box-shadow:0 0 0 5px rgba(34,197,94,0.14);
+}
+.logout-btn {
+  border:none;
+  padding:0 18px;
+  color:white;
+  cursor:pointer;
+  background:linear-gradient(135deg,#ef4444,#b91c1c);
+  box-shadow:0 14px 30px rgba(220,38,38,0.24);
+}
+
+.content {
+  width:100%;
+  max-width:1420px;
+  margin:0 auto;
+  padding:30px;
+}
+
+.hero {
+  display:grid;
+  grid-template-columns:1.3fr 0.7fr;
+  gap:22px;
+  margin-bottom:24px;
+}
+.hero-card {
+  min-height:176px;
+  padding:28px;
+  border-radius:34px;
+  color:white;
+  background:
+    linear-gradient(135deg,rgba(15,23,42,0.98),rgba(30,64,175,0.94)),
+    radial-gradient(circle at right,rgba(6,182,212,0.42),transparent 40%);
+  box-shadow:var(--shadow);
+  position:relative;
+  overflow:hidden;
+}
+.hero-card::after {
+  content:"";
+  position:absolute;
+  right:-80px;
+  top:-80px;
+  width:230px;
+  height:230px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.09);
+}
+.hero-kicker {
+  color:#bfdbfe;
+  font-size:13px;
+  font-weight:950;
+  margin-bottom:10px;
+  letter-spacing:0.5px;
+}
+.hero-title {
+  font-size:32px;
+  font-weight:950;
+  letter-spacing:-0.7px;
+  margin-bottom:10px;
+}
+.hero-desc {
+  max-width:620px;
+  color:#dbeafe;
+  font-size:15px;
+  line-height:1.6;
+  font-weight:700;
+}
+.quick-card {
+  padding:24px;
+  border-radius:34px;
+  background:rgba(255,255,255,0.82);
+  border:1px solid rgba(255,255,255,0.86);
+  box-shadow:var(--shadow);
+}
+.quick-title {
+  font-size:17px;
+  font-weight:950;
+  margin-bottom:16px;
+}
+.quick-line {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 0;
+  border-bottom:1px solid #edf2f7;
+  font-weight:850;
+}
+.quick-line:last-child { border-bottom:none; }
+.quick-line span { color:var(--muted); font-weight:800; }
+
+.stats {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:18px;
+  margin-bottom:24px;
+}
+.stat {
+  position:relative;
+  overflow:hidden;
+  min-height:140px;
+  padding:22px;
+  border-radius:30px;
+  background:rgba(255,255,255,0.82);
+  border:1px solid rgba(255,255,255,0.86);
+  box-shadow:0 18px 44px rgba(15,23,42,0.08);
+}
+.stat::after {
+  content:"";
+  position:absolute;
+  right:-38px;
+  top:-38px;
+  width:105px;
+  height:105px;
+  border-radius:50%;
+  background:linear-gradient(135deg,rgba(37,99,235,0.16),rgba(6,182,212,0.10));
+}
+.stat-icon {
+  width:44px;
+  height:44px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:14px;
+  background:#eff6ff;
+  font-size:21px;
+}
+.stat-label {
+  color:var(--muted);
+  font-size:13px;
+  font-weight:950;
+  margin-bottom:7px;
+}
+.stat-number {
+  font-size:38px;
+  font-weight:950;
+  letter-spacing:-1px;
+}
+
+.panel {
+  overflow:hidden;
+  border-radius:34px;
+  background:rgba(255,255,255,0.82);
+  border:1px solid rgba(255,255,255,0.88);
+  box-shadow:var(--shadow);
+}
+.panel-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  padding:22px 24px;
+  border-bottom:1px solid rgba(226,232,240,0.8);
+}
+.panel-title {
+  font-size:19px;
+  font-weight:950;
+}
+.panel-subtitle {
+  color:var(--muted);
+  font-size:13px;
+  font-weight:750;
+  margin-top:3px;
+}
+.toolbar {
+  display:grid;
+  grid-template-columns:1fr 92px;
+  gap:12px;
+  min-width:420px;
+}
+.search {
+  width:100%;
+  padding:15px 18px;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:white;
+  font-size:15px;
+  outline:none;
+  font-weight:750;
+}
+.search:focus {
+  border-color:rgba(37,99,235,0.62);
+  box-shadow:0 0 0 5px rgba(37,99,235,0.10);
+}
+.search-btn {
+  border:none;
+  border-radius:18px;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  color:white;
+  font-weight:950;
+  cursor:pointer;
+  font-size:20px;
+}
+.tabs {
+  display:flex;
+  gap:26px;
+  padding:0 24px;
+  border-bottom:1px solid rgba(226,232,240,0.8);
+  overflow-x:auto;
+}
+.tabs button {
+  background:none;
+  border:none;
+  padding:19px 3px;
+  color:var(--muted);
+  font-weight:950;
+  cursor:pointer;
+  border-bottom:4px solid transparent;
+  white-space:nowrap;
+}
+.tabs button.active {
+  color:var(--blue);
+  border-bottom-color:var(--blue);
+}
+
+.request {
+  margin:18px;
+  padding:18px;
+  display:grid;
+  grid-template-columns:152px minmax(260px,1fr) 130px 190px 310px;
+  gap:18px;
+  align-items:center;
+  background:white;
+  border:1px solid #edf2f7;
+  border-radius:28px;
+  box-shadow:0 13px 28px rgba(15,23,42,0.06);
+}
+.req-img {
+  width:152px;
+  height:118px;
+  object-fit:cover;
+  border-radius:22px;
+  background:linear-gradient(135deg,#e2e8f0,#f8fafc);
+  border:1px solid #e2e8f0;
+}
+.req-id {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  color:var(--blue);
+  background:#eff6ff;
+  border:1px solid #dbeafe;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:950;
+  margin-bottom:9px;
+}
+.req-name {
+  font-size:18px;
+  font-weight:950;
+}
+.req-phone {
+  color:var(--blue);
+  font-weight:950;
+  margin-left:10px;
+}
+.req-line {
+  margin-top:7px;
+  color:#475569;
+  line-height:1.45;
+  word-break:break-word;
+  font-weight:700;
+}
+.badge {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 14px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:950;
+  white-space:nowrap;
+}
+.status-pending { background:#f1f5f9; color:#334155; }
+.status-processing { background:#fff7ed; color:#c2410c; }
+.status-completed { background:#ecfdf5; color:#166534; }
+.actions a { text-decoration:none; }
+.actions button {
+  width:100%;
+  margin-bottom:9px;
+  padding:12px;
+  border:none;
+  border-radius:16px;
+  color:white;
+  font-weight:950;
+  cursor:pointer;
+  box-shadow:0 10px 20px rgba(15,23,42,0.10);
+}
+.call { background:linear-gradient(135deg,#16a34a,#22c55e); }
+.map { background:linear-gradient(135deg,#2563eb,#06b6d4); }
+.processing { background:linear-gradient(135deg,#f59e0b,#f97316); }
+.completed { background:linear-gradient(135deg,#111827,#334155); }
+.delete { background:linear-gradient(135deg,#ef4444,#dc2626); }
+.reply-card {
+  border:1px solid #e2e8f0;
+  border-radius:24px;
+  padding:15px;
+  background:#f8fafc;
+}
+.reply-title {
+  font-weight:950;
+  margin-bottom:9px;
+}
+.reply-card textarea {
+  width:100%;
+  min-height:96px;
+  padding:13px;
+  border-radius:18px;
+  border:1px solid #cbd5e1;
+  resize:vertical;
+  font-size:14px;
+  outline:none;
+  background:white;
+}
+.reply-card textarea:focus {
+  border-color:var(--blue);
+  box-shadow:0 0 0 4px rgba(37,99,235,0.08);
+}
+.save {
+  width:100%;
+  margin-top:9px;
+  padding:12px;
+  border:none;
+  border-radius:18px;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  color:white;
+  font-weight:950;
+  cursor:pointer;
+}
+.empty {
+  padding:54px;
+  text-align:center;
+  color:var(--muted);
+  font-weight:900;
+}
+
+.modal {
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  padding:18px;
+  justify-content:center;
+  align-items:center;
+  background:rgba(2,6,23,0.62);
+  backdrop-filter:blur(10px);
+}
+.modal-box {
+  width:410px;
+  max-width:100%;
+  padding:30px;
+  border-radius:30px;
+  text-align:center;
+  background:rgba(255,255,255,0.94);
+  box-shadow:0 30px 80px rgba(0,0,0,0.30);
+  animation:modalPop 0.2s ease;
+}
+.modal-icon {
+  width:68px;
+  height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 16px;
+  border-radius:50%;
+  background:#fee2e2;
+  color:var(--red);
+  font-size:32px;
+}
+.modal-title {
+  font-size:22px;
+  font-weight:950;
+  margin-bottom:10px;
+}
+.modal-text {
+  color:#4b5563;
+  font-size:15px;
+  line-height:1.5;
+  margin:0 0 24px;
+  font-weight:700;
+}
+.modal-actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.modal-btn {
+  padding:14px;
+  border:none;
+  border-radius:18px;
+  font-weight:950;
+  cursor:pointer;
+  font-size:15px;
+}
+.modal-cancel { background:#e5e7eb; color:#111827; }
+.modal-delete { background:var(--red); color:white; }
+
+@keyframes modalPop {
+  from { transform:scale(0.92); opacity:0; }
+  to { transform:scale(1); opacity:1; }
+}
+
+@media (max-width:1420px) {
+  .request { grid-template-columns:140px minmax(240px,1fr) 120px 170px 270px; }
+  .req-img { width:140px; }
+}
+
+@media (max-width:1200px) {
+  .layout { grid-template-columns:1fr; }
+  .sidebar { display:none; }
+  .mobile-brand { display:block; }
+  .hero { grid-template-columns:1fr; }
+  .stats { grid-template-columns:repeat(2,1fr); }
+  .request { grid-template-columns:1fr; }
+  .req-img { width:100%; height:230px; }
+  .actions { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; }
+  .actions button { margin-bottom:0; }
+}
+
+@media (max-width:760px) {
+  .topbar {
+    padding:16px;
+    flex-direction:column;
+    align-items:stretch;
+    gap:14px;
+  }
+  .page-title { font-size:24px; }
+  .top-actions { display:grid; grid-template-columns:82px 1fr 118px; gap:9px; }
+  .content { padding:16px; }
+  .hero-card { padding:24px; min-height:auto; }
+  .hero-title { font-size:25px; }
+  .quick-card { display:none; }
+  .stats { grid-template-columns:1fr; gap:14px; }
+  .panel-head { flex-direction:column; align-items:stretch; }
+  .toolbar { min-width:0; grid-template-columns:1fr; }
+  .search, .search-btn { min-height:56px; }
+  .tabs { padding:0 18px; }
+  .request { margin:14px; padding:15px; }
+  .req-img { height:190px; }
+  .req-name, .req-phone { display:block; margin-left:0; }
+  .actions { grid-template-columns:1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="brand" onclick="logoReload()">
+      <img src="/icon-admin-192.png" alt="YAMADEN Admin">
+      <div>
+        <div class="brand-title">YAMADEN</div>
+        <div class="brand-sub">Admin Console</div>
+      </div>
+    </div>
+
+    <div class="menu-item active" id="menuOverview">🏠 Tổng quan</div>
+
+    <div class="menu-title" id="menuRequestTitle">QUẢN LÝ YÊU CẦU</div>
+
+    <div class="menu-item" onclick="changeTab('active')">
+      <span>🕒 <span id="menuActiveText">Đang xử lý</span></span>
+      <span class="menu-badge" id="sideActive">0</span>
+    </div>
+
+    <div class="menu-item" onclick="changeTab('done')">
+      <span>✅ <span id="menuDoneText">Hoàn thành</span></span>
+      <span class="menu-badge" id="sideDone">0</span>
+    </div>
+
+    <div class="menu-title" id="menuSettingTitle">CÀI ĐẶT</div>
+    <div class="menu-item" id="menuSetting">⚙️ Cài đặt</div>
+
+    <div class="sidebar-footer">
+      © 2026 YAMADEN<br>
+      Customer Request System
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="mobile-brand">
+          <img src="/icon-admin-192.png" alt="YAMADEN Admin">
+        </div>
+        <div>
+          <div class="page-title" id="pageTitle">Quản lý yêu cầu khách hàng</div>
+          <div class="page-subtitle">Professional admin dashboard</div>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <select class="lang" id="language" onchange="changeLanguage()">
+          <option value="vi">VI</option>
+          <option value="ja">JP</option>
+        </select>
+        <div class="admin-info"><span class="admin-dot"></span>Admin</div>
+        <button class="logout-btn" id="logoutBtn" onclick="logout()">Đăng xuất</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="hero">
+        <div class="hero-card">
+          <div class="hero-kicker">YAMADEN ADMIN</div>
+          <div class="hero-title" id="heroTitle">Trung tâm xử lý yêu cầu khách hàng</div>
+          <div class="hero-desc" id="heroDesc">
+            Theo dõi yêu cầu mới, cập nhật trạng thái xử lý, phản hồi khách hàng và quản lý lịch sử hoàn thành trong một giao diện thống nhất.
+          </div>
+        </div>
+
+        <div class="quick-card">
+          <div class="quick-title" id="quickTitle">Tổng quan nhanh</div>
+          <div class="quick-line"><span id="quickActiveLabel">Đang xử lý</span><b id="quickActive">0</b></div>
+          <div class="quick-line"><span id="quickDoneLabel">Hoàn thành</span><b id="quickDone">0</b></div>
+          <div class="quick-line"><span id="quickTodayLabel">Hôm nay</span><b id="quickToday">0</b></div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-icon">📊</div>
+          <div class="stat-label" id="labelTotal">Tổng yêu cầu</div>
+          <div class="stat-number" id="total">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon">🕒</div>
+          <div class="stat-label" id="labelActive">Đang xử lý</div>
+          <div class="stat-number" id="active">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon">✅</div>
+          <div class="stat-label" id="labelDone">Hoàn thành</div>
+          <div class="stat-number" id="done">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon">📅</div>
+          <div class="stat-label" id="labelToday">Hôm nay</div>
+          <div class="stat-number" id="today">0</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title" id="requestPanelTitle">Danh sách yêu cầu</div>
+            <div class="panel-subtitle" id="requestPanelSub">Tìm kiếm, xử lý và phản hồi yêu cầu khách hàng</div>
+          </div>
+
+          <div class="toolbar">
+            <input class="search" id="search" placeholder="🔍 Tìm theo tên, SĐT, địa chỉ...">
+            <button class="search-btn" id="searchBtn" onclick="load()">🔍</button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button id="tabActive" class="active" onclick="changeTab('active')">Đang xử lý</button>
+          <button id="tabDone" onclick="changeTab('done')">Hoàn thành</button>
+        </div>
+
+        <div id="list"></div>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<script>
+const adminToken = localStorage.getItem("adminToken");
+const loginTime = localStorage.getItem("loginTime");
+
+if (!adminToken || !loginTime || Date.now() - loginTime > 86400000) {
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("loginTime");
+  window.location.href = "/login.html";
+}
+
+function logout() {
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("loginTime");
+  window.location.href = "/login.html";
+}
+
+const API = "https://yamaden.onrender.com";
+
+function apiFetch(url, options = {}) {
+  const token = localStorage.getItem("adminToken");
+
+  options.headers = {
+    ...(options.headers || {}),
+    "Authorization": "Bearer " + token
+  };
+
+  return fetch(url, options);
+}
+
+function authFailLogout() {
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("loginTime");
+  window.location.href = "/login.html";
+}
+
+let currentLang = localStorage.getItem("language") || "vi";
+let currentTab = "active";
+let deleteId = null;
+
+const texts = {
+  vi: {
+    pageTitle: "Quản lý yêu cầu khách hàng",
+    heroTitle: "Trung tâm xử lý yêu cầu khách hàng",
+    heroDesc: "Theo dõi yêu cầu mới, cập nhật trạng thái xử lý, phản hồi khách hàng và quản lý lịch sử hoàn thành trong một giao diện thống nhất.",
+    quickTitle: "Tổng quan nhanh",
+    requestPanelTitle: "Danh sách yêu cầu",
+    requestPanelSub: "Tìm kiếm, xử lý và phản hồi yêu cầu khách hàng",
+    total: "Tổng yêu cầu",
+    active: "Đang xử lý",
+    done: "Hoàn thành",
+    today: "Hôm nay",
+    search: "🔍 Tìm theo tên, SĐT, địa chỉ...",
+    call: "📞 Gọi",
+    map: "📍 Bản đồ",
+    processing: "Đang xử lý",
+    completed: "Hoàn thành",
+    pending: "Mới tiếp nhận",
+    reply: "Phản hồi khách hàng",
+    save: "Lưu phản hồi",
+    delete: "Xóa",
+    confirmTitle: "Xác nhận xóa",
+    confirmDelete: "Bạn có chắc muốn xóa yêu cầu này?",
+    cancel: "Hủy",
+    empty: "Không có yêu cầu nào",
+    menuOverview: "Tổng quan",
+    menuRequestTitle: "QUẢN LÝ YÊU CẦU",
+    menuSettingTitle: "CÀI ĐẶT",
+    menuSetting: "Cài đặt",
+    logout: "Đăng xuất",
+    unsaved: "Bạn có phản hồi chưa lưu. Vẫn tải lại?"
+  },
+  ja: {
+    pageTitle: "お客様リクエスト管理",
+    heroTitle: "お客様依頼の管理センター",
+    heroDesc: "新規依頼の確認、処理状況の更新、お客様への返信、完了履歴の管理を一つの画面で行えます。",
+    quickTitle: "クイック概要",
+    requestPanelTitle: "依頼一覧",
+    requestPanelSub: "お客様依頼の検索・処理・返信管理",
+    total: "総依頼数",
+    active: "処理中",
+    done: "完了",
+    today: "本日",
+    search: "🔍 名前、電話番号、住所で検索...",
+    call: "📞 電話",
+    map: "📍 地図",
+    processing: "処理中",
+    completed: "完了",
+    pending: "受付済み",
+    reply: "お客様への返信",
+    save: "返信を保存",
+    delete: "削除",
+    confirmTitle: "削除の確認",
+    confirmDelete: "この依頼を削除してもよろしいですか？",
+    cancel: "キャンセル",
+    empty: "依頼はありません",
+    menuOverview: "概要",
+    menuRequestTitle: "依頼管理",
+    menuSettingTitle: "設定",
+    menuSetting: "設定",
+    logout: "ログアウト",
+    unsaved: "保存していない返信があります。再読み込みしますか？"
+  }
+};
+
+function safeId(id) {
+  return String(id).replace(/'/g, "\\'");
+}
+
+function escapeHtml(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function hasUnsavedReply() {
+  const boxes = document.querySelectorAll("textarea[id^='reply-']");
+  for (const box of boxes) {
+    if (box.dataset.original !== undefined && box.value !== box.dataset.original) return true;
+  }
+  return false;
+}
+
+function logoReload() {
+  const t = texts[currentLang];
+  if (hasUnsavedReply()) {
+    if (!confirm(t.unsaved)) return;
+  }
+  load();
+}
+
+function applyLanguage() {
+  const t = texts[currentLang];
+
+  language.value = currentLang;
+  pageTitle.innerText = t.pageTitle;
+  heroTitle.innerText = t.heroTitle;
+  heroDesc.innerText = t.heroDesc;
+  quickTitle.innerText = t.quickTitle;
+  requestPanelTitle.innerText = t.requestPanelTitle;
+  requestPanelSub.innerText = t.requestPanelSub;
+
+  labelTotal.innerText = t.total;
+  labelActive.innerText = t.active;
+  labelDone.innerText = t.done;
+  labelToday.innerText = t.today;
+  quickActiveLabel.innerText = t.active;
+  quickDoneLabel.innerText = t.done;
+  quickTodayLabel.innerText = t.today;
+
+  search.placeholder = t.search;
+  menuOverview.innerText = "🏠 " + t.menuOverview;
+  menuRequestTitle.innerText = t.menuRequestTitle;
+  menuActiveText.innerText = t.active;
+  menuDoneText.innerText = t.done;
+  menuSettingTitle.innerText = t.menuSettingTitle;
+  menuSetting.innerText = "⚙️ " + t.menuSetting;
+  logoutBtn.innerText = t.logout;
+
+  modalTitle.innerText = t.confirmTitle;
+  modalCancelBtn.innerText = t.cancel;
+  modalDeleteBtn.innerText = t.delete;
+
+  updateTabLabels();
+}
+
+function changeLanguage() {
+  currentLang = language.value;
+  localStorage.setItem("language", currentLang);
+  applyLanguage();
+  load();
+}
+
+function changeTab(tab) {
+  currentTab = tab;
+
+  tabActive.classList.remove("active");
+  tabDone.classList.remove("active");
+
+  if (tab === "active") tabActive.classList.add("active");
+  else tabDone.classList.add("active");
+
+  load();
+}
+
+function updateTabLabels(activeCount = null, doneCount = null) {
+  const t = texts[currentLang];
+
+  if (activeCount === null || doneCount === null) {
+    tabActive.innerText = t.active;
+    tabDone.innerText = t.done;
+  } else {
+    tabActive.innerText = `${t.active} (${activeCount})`;
+    tabDone.innerText = `${t.done} (${doneCount})`;
+    sideActive.innerText = activeCount;
+    sideDone.innerText = doneCount;
+  }
+}
+
+function getStatusClass(status) {
+  if (status === "processing") return "badge status-processing";
+  if (status === "completed") return "badge status-completed";
+  return "badge status-pending";
+}
+
+function getStatusText(status) {
+  const t = texts[currentLang];
+  if (status === "processing") return t.processing;
+  if (status === "completed") return t.completed;
+  return t.pending;
+}
+
+function isToday(dateString) {
+  const d = new Date(dateString);
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear()
+    && d.getMonth() === now.getMonth()
+    && d.getDate() === now.getDate();
+}
+
+async function load() {
+  const t = texts[currentLang];
+  const res = await apiFetch(API + "/requests");
+
+  if (res.status === 401) {
+    authFailLogout();
+    return;
+  }
+
+  const data = await res.json();
+
+  const activeCount = data.filter(item => item.status !== "completed").length;
+  const doneCount = data.filter(item => item.status === "completed").length;
+  const todayCount = data.filter(item => isToday(item.createdAt)).length;
+
+  total.innerText = data.length;
+  active.innerText = activeCount;
+  done.innerText = doneCount;
+  today.innerText = todayCount;
+  quickActive.innerText = activeCount;
+  quickDone.innerText = doneCount;
+  quickToday.innerText = todayCount;
+
+  updateTabLabels(activeCount, doneCount);
+
+  const keyword = search.value.toLowerCase();
+
+  const filtered = data.filter(item => {
+    const match =
+      String(item.id || "").toLowerCase().includes(keyword) ||
+      (item.name || "").toLowerCase().includes(keyword) ||
+      (item.phone || "").toLowerCase().includes(keyword) ||
+      (item.address || "").toLowerCase().includes(keyword) ||
+      (item.content || "").toLowerCase().includes(keyword);
+
+    if (currentTab === "active") return match && item.status !== "completed";
+    return match && item.status === "completed";
+  });
+
+  list.innerHTML = "";
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty">${t.empty}</div>`;
+    return;
+  }
+
+  filtered.forEach(item => {
+    const id = safeId(item.id);
+    const reply = escapeHtml(item.adminReply || "");
+    const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
+
+    list.innerHTML += `
+      <div class="request">
+        <div>
+          ${item.image ? `<img class="req-img" src="${item.image}">` : `<div class="req-img"></div>`}
+        </div>
+
+        <div>
+          <div class="req-id">ID #${item.id}</div>
+          <div>
+            <span class="req-name">${item.name || ""}</span>
+            <span class="req-phone">${item.phone || ""}</span>
+          </div>
+          <div class="req-line">📍 ${item.address || ""}</div>
+          <div class="req-line">📝 ${item.content || ""}</div>
+          <div class="req-line">🕒 ${new Date(item.createdAt).toLocaleString()}</div>
+        </div>
+
+        <div>
+          <span class="${getStatusClass(item.status)}">${getStatusText(item.status)}</span>
+        </div>
+
+        <div class="actions">
+          ${item.phone ? `<a href="tel:${item.phone}"><button class="call">${t.call}</button></a>` : ""}
+          ${item.address ? `<a href="${mapUrl}" target="_blank"><button class="map">${t.map}</button></a>` : ""}
+          ${item.status !== "completed"
+            ? `<button class="processing" onclick="updateStatus('${id}', 'processing')">${t.processing}</button>
+               <button class="completed" onclick="updateStatus('${id}', 'completed')">${t.completed}</button>`
+            : `<button class="delete" onclick="deleteRequest('${id}')">🗑️ ${t.delete}</button>`
+          }
+        </div>
+
+        <div class="reply-card">
+          <div class="reply-title">${t.reply}</div>
+          <textarea id="reply-${item.id}" data-original="${reply}">${reply}</textarea>
+          <button class="save" onclick="saveReply('${id}')">${t.save}</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+async function updateStatus(id, status) {
+  const res = await apiFetch(API + "/request/" + encodeURIComponent(id), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status })
+  });
+
+  if (res.status === 401) {
+    authFailLogout();
+    return;
+  }
+
+  load();
+}
+
+async function saveReply(id) {
+  const reply = document.getElementById("reply-" + id).value;
+
+  const res = await apiFetch(API + "/request/" + encodeURIComponent(id), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ adminReply: reply })
+  });
+
+  if (res.status === 401) {
+    authFailLogout();
+    return;
+  }
+
+  load();
+}
+
+function deleteRequest(id) {
+  const t = texts[currentLang];
+  deleteId = id;
+  modalText.innerText = t.confirmDelete;
+  modal.style.display = "flex";
+}
+
+function closeModal() {
+  modal.style.display = "none";
+  deleteId = null;
+}
+
+async function confirmDelete() {
+  if (deleteId === null) return;
+
+  const res = await apiFetch(API + "/request/" + encodeURIComponent(deleteId), {
+    method: "DELETE"
+  });
+
+  if (res.status === 401) {
+    authFailLogout();
+    return;
+  }
+
+  closeModal();
+  load();
+}
+
+search.addEventListener("input", load);
+
+applyLanguage();
+load();
+</script>
+
+<div id="modal" class="modal" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-icon">🗑️</div>
+    <div class="modal-title" id="modalTitle">Xác nhận xóa</div>
+    <p class="modal-text" id="modalText">Bạn có chắc muốn xóa yêu cầu này?</p>
+    <div class="modal-actions">
+      <button class="modal-btn modal-cancel" id="modalCancelBtn" onclick="closeModal()">Hủy</button>
+      <button class="modal-btn modal-delete" id="modalDeleteBtn" onclick="confirmDelete()">Xóa</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
 
     <div class="modal-actions">
       <button class="modal-btn modal-cancel" id="modalCancelBtn" onclick="closeModal()">

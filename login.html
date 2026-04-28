@@ -7,159 +7,544 @@
 
 <link rel="icon" type="image/png" href="/icon-admin-192.png">
 <link rel="apple-touch-icon" href="/icon-admin-192.png">
-
-<!-- QUAN TRỌNG -->
 <link rel="manifest" href="/admin-manifest.json">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#020617">
 
 <style>
 * { box-sizing: border-box; }
 
+:root {
+  --dark:#020617;
+  --dark2:#0f172a;
+  --blue:#2563eb;
+  --blue2:#1d4ed8;
+  --cyan:#06b6d4;
+  --text:#0f172a;
+  --muted:#64748b;
+  --line:#dbe3ef;
+  --red:#dc2626;
+  --white:#ffffff;
+}
+
 body {
-  margin: 0;
-  font-family: "Segoe UI", Arial, sans-serif;
-  min-height: 100vh;
-  background: #0f172a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #111827;
+  margin:0;
+  min-height:100vh;
+  font-family:"Segoe UI", Arial, sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(37,99,235,0.40), transparent 30%),
+    radial-gradient(circle at 90% 8%, rgba(6,182,212,0.26), transparent 30%),
+    linear-gradient(135deg,#020617 0%,#0f172a 50%,#111827 100%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  overflow-x:hidden;
 }
 
-.login-box {
-  width: 380px;
-  max-width: calc(100% - 32px);
-  background: white;
-  border-radius: 24px;
-  padding: 30px;
-  box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+body::before {
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+  background-size:44px 44px;
+  mask-image:linear-gradient(to bottom, black 0%, transparent 82%);
 }
 
-.top-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 26px;
+.login-shell {
+  width:1080px;
+  max-width:100%;
+  min-height:640px;
+  display:grid;
+  grid-template-columns:1.05fr 0.95fr;
+  position:relative;
+  z-index:1;
+  overflow:hidden;
+  border-radius:38px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.14);
+  box-shadow:0 35px 90px rgba(0,0,0,0.42);
+  backdrop-filter:blur(24px);
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+.left-panel {
+  position:relative;
+  overflow:hidden;
+  padding:42px;
+  color:white;
+  background:
+    linear-gradient(145deg,rgba(2,6,23,0.96),rgba(30,64,175,0.88)),
+    radial-gradient(circle at 82% 18%,rgba(6,182,212,0.36),transparent 36%);
 }
 
-.brand img {
-  width: 58px;
-  height: 58px;
-  border-radius: 14px;
-  background: white;
+.left-panel::after {
+  content:"";
+  position:absolute;
+  right:-120px;
+  bottom:-120px;
+  width:340px;
+  height:340px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.08);
+}
+
+.brand-main {
+  display:flex;
+  align-items:center;
+  gap:16px;
+  position:relative;
+  z-index:1;
+}
+
+.brand-main img {
+  width:68px;
+  height:68px;
+  border-radius:22px;
+  background:white;
+  box-shadow:0 18px 42px rgba(0,0,0,0.34);
 }
 
 .brand-title {
-  font-size: 26px;
-  font-weight: 900;
+  font-size:30px;
+  font-weight:950;
+  letter-spacing:1px;
 }
 
 .brand-sub {
-  font-size: 13px;
-  color: #64748b;
-  font-weight: 700;
+  margin-top:4px;
+  color:#bfdbfe;
+  font-size:13px;
+  font-weight:850;
+}
+
+.hero-copy {
+  margin-top:92px;
+  position:relative;
+  z-index:1;
+}
+
+.hero-kicker {
+  display:inline-flex;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.14);
+  color:#dbeafe;
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:0.7px;
+  margin-bottom:18px;
+}
+
+.hero-title {
+  max-width:470px;
+  font-size:42px;
+  line-height:1.08;
+  font-weight:950;
+  letter-spacing:-1.2px;
+}
+
+.hero-desc {
+  max-width:440px;
+  margin-top:18px;
+  color:#dbeafe;
+  line-height:1.7;
+  font-weight:700;
+}
+
+.feature-grid {
+  margin-top:44px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  position:relative;
+  z-index:1;
+}
+
+.feature-card {
+  padding:16px 12px;
+  border-radius:22px;
+  background:rgba(255,255,255,0.10);
+  border:1px solid rgba(255,255,255,0.13);
+  text-align:center;
+  backdrop-filter:blur(12px);
+}
+
+.feature-icon {
+  font-size:25px;
+  margin-bottom:9px;
+}
+
+.feature-title {
+  font-size:13px;
+  font-weight:950;
+  margin-bottom:5px;
+}
+
+.feature-sub {
+  color:#cbd5e1;
+  font-size:11px;
+  line-height:1.45;
+  font-weight:700;
+}
+
+.right-panel {
+  background:rgba(255,255,255,0.94);
+  backdrop-filter:blur(26px);
+  padding:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.login-card {
+  width:100%;
+  max-width:410px;
+}
+
+.top-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:36px;
+}
+
+.mobile-brand {
+  display:none;
+  align-items:center;
+  gap:12px;
+}
+
+.mobile-brand img {
+  width:52px;
+  height:52px;
+  border-radius:17px;
+  background:white;
+  box-shadow:0 12px 28px rgba(15,23,42,0.16);
+}
+
+.mobile-brand-title {
+  font-size:22px;
+  font-weight:950;
+}
+
+.mobile-brand-sub {
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
 }
 
 .lang {
-  padding: 9px 12px;
-  border-radius: 12px;
-  border: 1px solid #d1d5db;
-  font-weight: 900;
-  background: white;
+  padding:12px 14px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:white;
+  color:var(--text);
+  font-weight:950;
+  outline:none;
+  box-shadow:0 8px 18px rgba(15,23,42,0.05);
+}
+
+.security-badge {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:#eff6ff;
+  color:#1d4ed8;
+  font-size:12px;
+  font-weight:950;
+  margin-bottom:16px;
 }
 
 .title {
-  font-size: 22px;
-  font-weight: 900;
-  margin-bottom: 18px;
+  font-size:32px;
+  line-height:1.2;
+  font-weight:950;
+  letter-spacing:-0.8px;
+  margin-bottom:8px;
+}
+
+.subtitle {
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.6;
+  font-weight:750;
+  margin-bottom:28px;
+}
+
+.input-wrap {
+  position:relative;
+  margin-bottom:14px;
+}
+
+.input-icon {
+  position:absolute;
+  left:16px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#64748b;
+  font-size:18px;
 }
 
 input {
-  width: 100%;
-  padding: 15px;
-  border-radius: 14px;
-  border: 1px solid #d1d5db;
-  font-size: 16px;
-  outline: none;
-  margin-bottom: 14px;
+  width:100%;
+  padding:17px 48px 17px 48px;
+  border-radius:18px;
+  border:1px solid #cbd5e1;
+  font-size:16px;
+  outline:none;
+  background:white;
+  font-weight:750;
+  box-shadow:0 8px 20px rgba(15,23,42,0.04);
 }
 
 input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
+  border-color:var(--blue);
+  box-shadow:0 0 0 5px rgba(37,99,235,0.12);
 }
 
-button {
-  width: 100%;
-  padding: 15px;
-  border: none;
-  border-radius: 14px;
-  background: #2563eb;
-  color: white;
-  font-size: 16px;
-  font-weight: 900;
-  cursor: pointer;
+.eye-btn {
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  width:34px;
+  height:34px;
+  border:none;
+  border-radius:12px;
+  background:#f1f5f9;
+  cursor:pointer;
+  font-size:15px;
 }
 
-button:hover {
-  background: #1d4ed8;
+.login-btn {
+  width:100%;
+  padding:17px;
+  border:none;
+  border-radius:18px;
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  color:white;
+  font-size:16px;
+  font-weight:950;
+  cursor:pointer;
+  box-shadow:0 18px 34px rgba(37,99,235,0.28);
+  margin-top:4px;
+  transition:0.18s ease;
 }
 
-button:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
+.login-btn:hover {
+  transform:translateY(-1px);
+  box-shadow:0 22px 42px rgba(37,99,235,0.34);
+}
+
+.login-btn:disabled {
+  opacity:0.65;
+  cursor:not-allowed;
+  transform:none;
 }
 
 .error {
-  color: #dc2626;
-  font-weight: 800;
-  margin-top: 12px;
-  text-align: center;
+  min-height:22px;
+  color:var(--red);
+  font-weight:850;
+  margin-top:14px;
+  text-align:center;
 }
 
 .note {
-  margin-top: 18px;
-  font-size: 12px;
-  color: #64748b;
-  text-align: center;
+  margin-top:26px;
+  padding-top:20px;
+  border-top:1px solid var(--line);
+  font-size:12px;
+  color:var(--muted);
+  text-align:center;
+  font-weight:750;
+}
+
+/* ===== APP / MOBILE UI ===== */
+@media (max-width:900px) {
+  body {
+    padding:16px;
+    align-items:flex-start;
+    background:
+      radial-gradient(circle at top, rgba(37,99,235,0.32), transparent 36%),
+      linear-gradient(180deg,#020617 0%,#0f172a 100%);
+  }
+
+  .login-shell {
+    width:100%;
+    min-height:calc(100vh - 32px);
+    display:block;
+    border-radius:30px;
+    background:rgba(255,255,255,0.96);
+  }
+
+  .left-panel {
+    display:none;
+  }
+
+  .right-panel {
+    min-height:calc(100vh - 32px);
+    padding:24px 20px;
+    background:rgba(255,255,255,0.96);
+  }
+
+  .login-card {
+    max-width:100%;
+  }
+
+  .mobile-brand {
+    display:flex;
+  }
+
+  .top-row {
+    margin-bottom:44px;
+  }
+
+  .lang {
+    min-width:78px;
+    min-height:48px;
+  }
+
+  .security-badge {
+    margin-bottom:14px;
+  }
+
+  .title {
+    font-size:29px;
+  }
+
+  .subtitle {
+    margin-bottom:30px;
+  }
+
+  input,
+  .login-btn {
+    min-height:58px;
+    font-size:16px;
+  }
+
+  .note {
+    margin-top:34px;
+  }
+}
+
+@media (max-width:420px) {
+  body {
+    padding:0;
+  }
+
+  .login-shell {
+    min-height:100vh;
+    border-radius:0;
+    border:none;
+  }
+
+  .right-panel {
+    min-height:100vh;
+    padding:22px 18px;
+  }
+
+  .mobile-brand img {
+    width:48px;
+    height:48px;
+  }
+
+  .mobile-brand-title {
+    font-size:20px;
+  }
+
+  .title {
+    font-size:27px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="login-box">
+<div class="login-shell">
 
-  <div class="top-row">
-    <div class="brand">
-      <img src="/icon-192.png" alt="YAMADEN">
+  <!-- WEB / LAPTOP PANEL -->
+  <section class="left-panel">
+    <div class="brand-main">
+      <img src="/icon-admin-192.png" alt="YAMADEN Admin">
       <div>
         <div class="brand-title">YAMADEN</div>
         <div class="brand-sub">Admin Dashboard</div>
       </div>
     </div>
 
-    <select id="language" class="lang" onchange="changeLanguage()">
-      <option value="vi">VI</option>
-      <option value="ja">JP</option>
-    </select>
-  </div>
+    <div class="hero-copy">
+      <div class="hero-kicker">CUSTOMER REQUEST SYSTEM</div>
+      <div class="hero-title" id="heroTitle">Quản trị yêu cầu khách hàng chuyên nghiệp</div>
+      <div class="hero-desc" id="heroDesc">
+        Theo dõi yêu cầu mới, cập nhật trạng thái xử lý, phản hồi khách hàng và quản lý toàn bộ lịch sử trong một hệ thống thống nhất.
+      </div>
+    </div>
 
-  <div class="title" id="loginTitle">🔐 Đăng nhập quản trị</div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <div class="feature-title" id="feature1Title">Bảo mật</div>
+        <div class="feature-sub" id="feature1Sub">Khu vực quản trị riêng</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title" id="feature2Title">Nhanh chóng</div>
+        <div class="feature-sub" id="feature2Sub">Xử lý yêu cầu tức thì</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <div class="feature-title" id="feature3Title">Đa ngôn ngữ</div>
+        <div class="feature-sub" id="feature3Sub">Tiếng Việt / Nhật</div>
+      </div>
+    </div>
+  </section>
 
-  <input type="password" id="password" placeholder="Nhập mật khẩu" onkeydown="handleEnter(event)">
+  <!-- LOGIN FORM -->
+  <section class="right-panel">
+    <div class="login-card">
 
-  <button id="loginBtn" onclick="login()">Đăng nhập</button>
+      <div class="top-row">
+        <div class="mobile-brand">
+          <img src="/icon-admin-192.png" alt="YAMADEN Admin">
+          <div>
+            <div class="mobile-brand-title">YAMADEN</div>
+            <div class="mobile-brand-sub">Admin Dashboard</div>
+          </div>
+        </div>
 
-  <div id="error" class="error"></div>
+        <select id="language" class="lang" onchange="changeLanguage()">
+          <option value="vi">VI</option>
+          <option value="ja">JP</option>
+        </select>
+      </div>
 
-  <div class="note">Customer Request System</div>
+      <div class="security-badge" id="securityBadge">🔐 Admin secure login</div>
+      <div class="title" id="loginTitle">Đăng nhập quản trị</div>
+      <div class="subtitle" id="loginSubtitle">Vui lòng nhập mật khẩu admin để truy cập bảng điều khiển YAMADEN.</div>
+
+      <div class="input-wrap">
+        <span class="input-icon">🔑</span>
+        <input type="password" id="password" placeholder="Nhập mật khẩu" onkeydown="handleEnter(event)">
+        <button type="button" class="eye-btn" onclick="togglePassword()" id="eyeBtn">👁️</button>
+      </div>
+
+      <button class="login-btn" id="loginBtn" onclick="login()">Đăng nhập</button>
+
+      <div id="error" class="error"></div>
+
+      <div class="note">© 2026 YAMADEN · Customer Request System</div>
+    </div>
+  </section>
+
 </div>
 
 <script>
@@ -169,14 +554,34 @@ let lang = localStorage.getItem("loginLang") || localStorage.getItem("language")
 
 const texts = {
   vi: {
-    title: "🔐 Đăng nhập quản trị",
+    heroTitle: "Quản trị yêu cầu khách hàng chuyên nghiệp",
+    heroDesc: "Theo dõi yêu cầu mới, cập nhật trạng thái xử lý, phản hồi khách hàng và quản lý toàn bộ lịch sử trong một hệ thống thống nhất.",
+    feature1Title: "Bảo mật",
+    feature1Sub: "Khu vực quản trị riêng",
+    feature2Title: "Nhanh chóng",
+    feature2Sub: "Xử lý yêu cầu tức thì",
+    feature3Title: "Đa ngôn ngữ",
+    feature3Sub: "Tiếng Việt / Nhật",
+    securityBadge: "🔐 Admin secure login",
+    title: "Đăng nhập quản trị",
+    subtitle: "Vui lòng nhập mật khẩu admin để truy cập bảng điều khiển YAMADEN.",
     placeholder: "Nhập mật khẩu",
     login: "Đăng nhập",
     logging: "Đang đăng nhập...",
     wrong: "Sai mật khẩu hoặc lỗi đăng nhập!"
   },
   ja: {
-    title: "🔐 管理者ログイン",
+    heroTitle: "お客様依頼をプロフェッショナルに管理",
+    heroDesc: "新規依頼の確認、処理状況の更新、お客様への返信、履歴管理を一つのシステムで行えます。",
+    feature1Title: "安全性",
+    feature1Sub: "管理者専用エリア",
+    feature2Title: "迅速対応",
+    feature2Sub: "依頼をすぐに処理",
+    feature3Title: "多言語対応",
+    feature3Sub: "ベトナム語 / 日本語",
+    securityBadge: "🔐 管理者セキュアログイン",
+    title: "管理者ログイン",
+    subtitle: "YAMADEN管理画面にアクセスするには、管理者パスワードを入力してください。",
     placeholder: "パスワードを入力",
     login: "ログイン",
     logging: "ログイン中...",
@@ -188,7 +593,19 @@ function applyLanguage() {
   const t = texts[lang];
 
   language.value = lang;
+
+  heroTitle.innerText = t.heroTitle;
+  heroDesc.innerText = t.heroDesc;
+  feature1Title.innerText = t.feature1Title;
+  feature1Sub.innerText = t.feature1Sub;
+  feature2Title.innerText = t.feature2Title;
+  feature2Sub.innerText = t.feature2Sub;
+  feature3Title.innerText = t.feature3Title;
+  feature3Sub.innerText = t.feature3Sub;
+
+  securityBadge.innerText = t.securityBadge;
   loginTitle.innerText = t.title;
+  loginSubtitle.innerText = t.subtitle;
   password.placeholder = t.placeholder;
   loginBtn.innerText = t.login;
   error.innerText = "";
@@ -199,6 +616,16 @@ function changeLanguage() {
   localStorage.setItem("loginLang", lang);
   localStorage.setItem("language", lang);
   applyLanguage();
+}
+
+function togglePassword() {
+  if (password.type === "password") {
+    password.type = "text";
+    eyeBtn.innerText = "🙈";
+  } else {
+    password.type = "password";
+    eyeBtn.innerText = "👁️";
+  }
 }
 
 async function login() {
