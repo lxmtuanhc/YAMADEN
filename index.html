@@ -489,12 +489,20 @@ button, input, textarea, select { font-family:inherit; }
   gap:10px;
   margin-top:12px;
 }
+.account-fields .full { grid-column:1 / -1; }
 .account-status {
   margin-top:10px;
   color:#4b5563;
   font-size:13px;
   font-weight:800;
   line-height:1.5;
+}
+.quick-support-card {
+  margin-top:14px;
+  padding:16px;
+  border-radius:22px;
+  background:#f9fafb;
+  border:1px solid #e5e7eb;
 }
 .service-detail-list {
   display:grid;
@@ -966,7 +974,32 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   <main class="main">
     <div id="notice" class="notice"></div>
 
-    <section id="homeSection">
+    <section id="accountSection">
+      <div class="account-card" style="margin-top:0;">
+        <div class="utility-head"><span class="icon" id="accountIcon"></span><span id="accountTitle">My account</span></div>
+        <div class="utility-text" id="accountText">Login with your information so YAMADEN can manage your requests and contact you smoothly.</div>
+        <div class="account-fields" id="accountFields">
+          <input id="accountName" placeholder="Name">
+          <input id="accountPhone" placeholder="Phone" inputmode="tel">
+          <input id="accountCompany" placeholder="Company">
+          <input id="accountContact" placeholder="Email / LINE / Zalo">
+          <input class="full" id="accountAddress" placeholder="Address">
+        </div>
+        <div class="secondary-row">
+          <button class="main-btn" onclick="userLogin()"><span class="icon" id="accountLoginIcon"></span><span id="accountLoginText">Login / Save</span></button>
+          <button class="soft-btn" onclick="userLogout()"><span class="icon" id="accountLogoutIcon"></span><span id="accountLogoutText">Logout</span></button>
+        </div>
+        <div class="account-status" id="accountStatus"></div>
+      </div>
+
+      <div class="quick-support-card">
+        <div class="utility-head"><span class="icon" id="quickSupportIcon"></span><span id="quickSupportTitle">Need quick support?</span></div>
+        <div class="utility-text" id="quickSupportText">You can send a support request without logging in. Login is recommended if you want to keep request history.</div>
+        <button class="soft-btn" style="margin-top:12px;" onclick="showTab('send')"><span class="icon" id="quickSupportBtnIcon"></span><span id="quickSupportBtn">Send quick request</span></button>
+      </div>
+    </section>
+
+    <section class="hidden" id="homeSection">
       <div class="home-hero-card">
         <div class="home-kicker"><span class="icon" id="homeKickerIcon"></span><span id="homeKicker">YAMADEN SUPPORT</span></div>
         <div class="home-title" id="homeTitle">Electrical support for homes and businesses</div>
@@ -1038,20 +1071,6 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
           <div class="utility-head"><span class="icon" id="maintenanceIcon"></span><span id="maintenanceTitle">Periodic maintenance</span></div>
           <div class="utility-text" id="maintenanceText">Keep your building stable by checking electrical and control equipment before trouble appears.</div>
         </div>
-      </div>
-
-      <div class="account-card">
-        <div class="utility-head"><span class="icon" id="accountIcon"></span><span id="accountTitle">My account</span></div>
-        <div class="utility-text" id="accountText">Login with your name and phone to keep request history across devices.</div>
-        <div class="account-fields" id="accountFields">
-          <input id="accountName" placeholder="Name">
-          <input id="accountPhone" placeholder="Phone" inputmode="tel">
-        </div>
-        <div class="secondary-row">
-          <button class="soft-btn" onclick="userLogin()"><span class="icon" id="accountLoginIcon"></span><span id="accountLoginText">Login / Save</span></button>
-          <button class="soft-btn" onclick="userLogout()"><span class="icon" id="accountLogoutIcon"></span><span id="accountLogoutText">Logout</span></button>
-        </div>
-        <div class="account-status" id="accountStatus"></div>
       </div>
 
       <div class="card">
@@ -1206,10 +1225,10 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   </main>
 
   <nav class="bottom-nav">
-    <button id="tabHome" class="active" onclick="showTab('home')"><span class="icon" id="tabHomeIcon"></span><span>Home</span></button>
+    <button id="tabAccount" class="active" onclick="showTab('account')"><span class="icon" id="tabAccountIcon"></span><span>Account</span></button>
+    <button id="tabHome" onclick="showTab('home')"><span class="icon" id="tabHomeIcon"></span><span>Home</span></button>
     <button id="tabServices" onclick="showTab('services')"><span class="icon" id="tabServicesIcon"></span><span>Services</span></button>
     <button id="tabSend" onclick="showTab('send')"><span class="icon" id="tabSendIcon"></span><span>Gửi yêu cầu</span></button>
-    <button id="tabCheck" onclick="showTab('check')"><span class="icon" id="tabCheckIcon"></span><span>Tra cứu</span></button>
   </nav>
 </div>
 
@@ -1302,6 +1321,12 @@ const texts = {
     accountLoggedOut:"Chưa đăng nhập. Bạn vẫn có thể gửi yêu cầu, nhưng lịch sử chỉ lưu trên máy này.",
     accountRequired:"Vui lòng nhập tên và số điện thoại.",
     accountLoginFailed:"Đăng nhập thất bại. Vui lòng thử lại.",
+    accountTab:"Tài khoản",
+    accountCompany:"Công ty / cá nhân",
+    accountAddress:"Địa chỉ thường dùng",
+    quickSupportTitle:"Cần hỗ trợ nhanh?",
+    quickSupportText:"Bạn vẫn có thể gửi yêu cầu không cần đăng nhập. Đăng nhập sẽ giúp lưu lịch sử và admin quản lý thông tin của bạn tốt hơn.",
+    quickSupportBtn:"Gửi hỗ trợ nhanh",
     sideStep1:"Gửi thông tin sự cố", sideStep2:"Theo dõi trạng thái", sideStep3:"Nhận phản hồi từ admin",
     tabSend:"Gửi yêu cầu", tabCheck:"Yêu cầu của tôi", sendTitle:"Gửi yêu cầu hỗ trợ", checkTitle:"Yêu cầu của tôi",
     name:"Họ và tên", phone:"Số điện thoại", contact:"Liên hệ", address:"Địa chỉ", content:"Nội dung yêu cầu", image:"Hình ảnh",
@@ -1370,6 +1395,12 @@ const texts = {
     accountLoggedOut:"未ログインです。依頼は送信できますが、履歴はこの端末のみ保存されます。",
     accountRequired:"名前と電話番号を入力してください。",
     accountLoginFailed:"ログインに失敗しました。もう一度お試しください。",
+    accountTab:"アカウント",
+    accountCompany:"会社名 / 個人",
+    accountAddress:"よく使う住所",
+    quickSupportTitle:"すぐに依頼しますか？",
+    quickSupportText:"ログインしなくても依頼できます。ログインすると履歴保存と管理者確認がスムーズになります。",
+    quickSupportBtn:"クイック依頼を送信",
     sideStep1:"不具合内容を送信", sideStep2:"状況を確認", sideStep3:"管理者から返信を受信",
     tabSend:"依頼送信", tabCheck:"自分の依頼", sendTitle:"サポート依頼送信", checkTitle:"自分の依頼",
     name:"お名前", phone:"電話番号", contact:"連絡先", address:"住所", content:"依頼内容", image:"画像",
@@ -1427,7 +1458,8 @@ function renderIcons() {
     ["homeKickerIcon","zap"], ["homeSendIcon","send"], ["homeCheckIcon","search"], ["serviceTitleIcon","tool"],
     ["service1Icon","zap"], ["service2Icon","tool"], ["service3Icon","clock"], ["gallery1Icon","map"],
     ["gallery2Icon","check"], ["companyTitleIcon","file"], ["safetyIcon","bell"], ["maintenanceIcon","clock"],
-    ["accountIcon","user"], ["accountLoginIcon","user"], ["accountLogoutIcon","logout"],
+    ["accountIcon","user"], ["accountLoginIcon","user"], ["accountLogoutIcon","logout"], ["quickSupportIcon","message"],
+    ["quickSupportBtnIcon","send"], ["tabAccountIcon","user"],
     ["callCompanyIcon","phone"], ["mapCompanyIcon","map"], ["servicesPageIcon","tool"], ["detail1Icon","zap"],
     ["detail2Icon","tool"], ["detail3Icon","clock"], ["detail1BtnIcon","send"], ["detail2BtnIcon","send"],
     ["detail3BtnIcon","send"], ["tabHomeIcon","home"], ["tabServicesIcon","tool"],
@@ -1493,15 +1525,22 @@ function applyLang() {
   $("accountText").innerText = t.accountText;
   $("accountName").placeholder = t.name;
   $("accountPhone").placeholder = t.phone;
+  $("accountCompany").placeholder = t.accountCompany;
+  $("accountContact").placeholder = t.contact;
+  $("accountAddress").placeholder = t.accountAddress;
   $("accountLoginText").innerText = t.accountLogin;
   $("accountLogoutText").innerText = t.accountLogout;
+  $("quickSupportTitle").innerText = t.quickSupportTitle;
+  $("quickSupportText").innerText = t.quickSupportText;
+  $("quickSupportBtn").innerText = t.quickSupportBtn;
   $("sideStep1").innerText = t.sideStep1;
   $("sideStep2").innerText = t.sideStep2;
   $("sideStep3").innerText = t.sideStep3;
+  els.tabAccount.querySelector("span:last-child").innerText = t.accountTab;
   els.tabHome.querySelector("span:last-child").innerText = t.homeKicker === "YAMADEN SUPPORT" && lang === "vi" ? "Trang chủ" : "ホーム";
   els.tabServices.querySelector("span:last-child").innerText = t.tabServices;
   els.tabSend.querySelector("span:last-child").innerText = t.tabSend;
-  els.tabCheck.querySelector("span:last-child").innerText = t.tabCheck;
+  if (els.tabCheck) els.tabCheck.querySelector("span:last-child").innerText = t.tabCheck;
   $("sendTitle").innerText = t.sendTitle;
   $("checkTitle").innerText = t.checkTitle;
   $("labelName").innerText = t.name;
@@ -1536,18 +1575,20 @@ function changeLanguage() {
   applyLang();
 }
 function showTab(tab) {
+  const isAccount = tab === "account";
   const isHome = tab === "home";
   const isServices = tab === "services";
   const isSend = tab === "send";
   const isCheck = tab === "check";
+  els.accountSection.classList.toggle("hidden", !isAccount);
   els.homeSection.classList.toggle("hidden", !isHome);
   els.servicesSection.classList.toggle("hidden", !isServices);
   els.sendSection.classList.toggle("hidden", !isSend);
   els.checkSection.classList.toggle("hidden", !isCheck);
+  els.tabAccount.classList.toggle("active", isAccount);
   els.tabHome.classList.toggle("active", isHome);
   els.tabServices.classList.toggle("active", isServices);
   els.tabSend.classList.toggle("active", isSend);
-  els.tabCheck.classList.toggle("active", isCheck);
   if (isCheck) renderMyRequests();
 }
 function renderMyRequests() {
@@ -1592,6 +1633,9 @@ function updateAccountUI() {
   if (currentUser) {
     $("accountName").value = currentUser.name || "";
     $("accountPhone").value = currentUser.phone || "";
+    $("accountCompany").value = currentUser.company || "";
+    $("accountContact").value = currentUser.contact || currentUser.email || "";
+    $("accountAddress").value = currentUser.address || "";
     $("accountStatus").innerText = `${t.accountLoggedIn}: ${currentUser.name || currentUser.phone}`;
     els.name.value = els.name.value || currentUser.name || "";
     els.phone.value = els.phone.value || currentUser.phone || "";
@@ -1605,6 +1649,9 @@ async function userLogin() {
   const t = texts[lang];
   const name = $("accountName").value.trim();
   const phone = $("accountPhone").value.trim();
+  const company = $("accountCompany").value.trim();
+  const contact = $("accountContact").value.trim();
+  const address = $("accountAddress").value.trim();
 
   if (!name || !phone) {
     showToast(t.accountRequired);
@@ -1615,7 +1662,7 @@ async function userLogin() {
     const res = await fetch(API + "/user/login", {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ name, phone })
+      body:JSON.stringify({ name, phone, company, contact, address })
     });
     const data = await readJsonSafe(res);
 
@@ -1818,7 +1865,7 @@ function showNotice() {
 }
 function bindElements() {
   [
-    "language","homeSection","servicesSection","sendSection","checkSection","tabHome","tabServices","tabSend","tabCheck","name","phone","contact","address","content","image",
+    "language","accountSection","homeSection","servicesSection","sendSection","checkSection","tabAccount","tabHome","tabServices","tabSend","name","phone","contact","address","content","image",
     "result","checkId","checkResult","notice","myRequests","toast","sendBtn","checkBtn"
   ].forEach(id => els[id] = $(id));
   window.imageEl = els.image;
