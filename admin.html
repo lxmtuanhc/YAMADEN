@@ -91,8 +91,28 @@ button:hover { transform:translateY(-1px); }
 .brand { display:flex; align-items:center; gap:14px; padding:10px; border-radius:24px; cursor:pointer; margin-bottom:26px; }
 .brand:hover { background:rgba(255,255,255,0.06); }
 .brand img { width:58px; height:58px; border-radius:18px; box-shadow:0 18px 38px rgba(0,0,0,0.35); }
-.brand-title { font-size:25px; font-weight:950; letter-spacing:0.9px; }
-.brand-sub { color:#cbd5e1; font-size:12px; font-weight:800; }
+.brand-title {
+  font-size:21px;
+  font-weight:950;
+  letter-spacing:0.04em;
+  line-height:1.1;
+  white-space:nowrap;
+}
+.brand-sub {
+  margin-top:5px;
+  color:#bfdbfe;
+  font-size:10px;
+  font-weight:950;
+  letter-spacing:0.14em;
+  white-space:nowrap;
+}
+.brand-console {
+  margin-top:5px;
+  color:#94a3b8;
+  font-size:11px;
+  font-weight:850;
+  letter-spacing:0.03em;
+}
 .menu-title { margin:22px 12px 10px; font-size:11px; font-weight:950; color:#94a3b8; letter-spacing:0.9px; }
 .menu-item {
   border:1px solid transparent;
@@ -335,8 +355,9 @@ button:hover { transform:translateY(-1px); }
     <div class="brand" onclick="logoReload()">
       <img src="/icon-admin-192.png" alt="YAMADEN Admin">
       <div>
-        <div class="brand-title">YAMADEN</div>
-        <div class="brand-sub">Admin Console</div>
+        <div class="brand-title">株式会社 山電</div>
+        <div class="brand-sub">YAMADEN.CO.LTD</div>
+        <div class="brand-console">Admin Console</div>
       </div>
     </div>
     <div class="menu-item active" id="menuOverview"></div>
