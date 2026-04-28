@@ -111,6 +111,9 @@ const UserSchema = new mongoose.Schema({
   email: String,
   contact: String,
   company: String,
+  customerType: String,
+  province: String,
+  projectName: String,
   address: String,
   status: {
     type: String,
@@ -208,6 +211,9 @@ app.post("/user/login", async (req, res) => {
     const email = String(req.body.email || "").trim();
     const contact = String(req.body.contact || "").trim();
     const company = String(req.body.company || "").trim();
+    const customerType = String(req.body.customerType || "").trim();
+    const province = String(req.body.province || "").trim();
+    const projectName = String(req.body.projectName || "").trim();
     const address = String(req.body.address || "").trim();
 
     if (!phone || !name) {
@@ -217,12 +223,19 @@ app.post("/user/login", async (req, res) => {
     let user = await User.findOne({ phone });
 
     if (!user) {
+      if (!email || !province || !projectName) {
+        return res.status(400).json({ message: "Email, province and project name are required for registration" });
+      }
+
       user = new User({
         name,
         phone,
         email,
         contact,
         company,
+        customerType,
+        province,
+        projectName,
         address,
         status: "active",
         createdAt: new Date(),
@@ -233,6 +246,9 @@ app.post("/user/login", async (req, res) => {
       user.email = email || user.email;
       user.contact = contact || user.contact;
       user.company = company || user.company;
+      user.customerType = customerType || user.customerType;
+      user.province = province || user.province;
+      user.projectName = projectName || user.projectName;
       user.address = address || user.address;
       user.lastLoginAt = new Date();
     }
@@ -307,7 +323,7 @@ app.put("/admin/users/:id", requireAdmin, async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    ["name", "phone", "email", "contact", "company", "address", "status"].forEach(field => {
+    ["name", "phone", "email", "contact", "company", "customerType", "province", "projectName", "address", "status"].forEach(field => {
       if (req.body[field] !== undefined) user[field] = req.body[field];
     });
 

@@ -770,7 +770,7 @@ async function loadUsers() {
 
     const keyword = $("userSearch").value.trim().toLowerCase();
     const filtered = users.filter(user => {
-      return [user.name, user.phone, user.email, user.contact, user.company, user.address]
+      return [user.name, user.phone, user.email, user.contact, user.company, user.customerType, user.province, user.projectName, user.address]
         .some(value => String(value || "").toLowerCase().includes(keyword));
     });
 
@@ -789,6 +789,9 @@ function renderUser(user) {
   const name = escapeHtml(user.name || "");
   const phone = escapeHtml(user.phone || "");
   const company = escapeHtml(user.company || "");
+  const customerType = escapeHtml(user.customerType || "");
+  const province = escapeHtml(user.province || "");
+  const projectName = escapeHtml(user.projectName || "");
   const contact = escapeHtml(user.email || user.contact || "");
   const address = escapeHtml(user.address || "");
   const status = escapeHtml(user.status || "active");
@@ -806,8 +809,11 @@ function renderUser(user) {
       <div>
         <span class="badge ${status === "blocked" ? "status-pending" : "status-completed"}">${status}</span>
         <div class="user-line">${company}</div>
+        <div class="user-line">${customerType}</div>
       </div>
       <div>
+        <div class="user-line"><b>${projectName}</b></div>
+        <div class="user-line">${province}</div>
         <div class="user-line"><b>${count}</b> requests</div>
         <div class="user-line">${createdAt}</div>
       </div>

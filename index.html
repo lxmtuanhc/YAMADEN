@@ -490,6 +490,25 @@ button, input, textarea, select { font-family:inherit; }
   margin-top:12px;
 }
 .account-fields .full { grid-column:1 / -1; }
+.account-mode {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin:14px 0 6px;
+}
+.account-mode button {
+  border:none;
+  border-radius:14px;
+  padding:12px;
+  font-weight:950;
+  cursor:pointer;
+  background:#f3f4f6;
+  color:#4b5563;
+}
+.account-mode button.active {
+  background:#111827;
+  color:white;
+}
 .account-status {
   margin-top:10px;
   color:#4b5563;
@@ -975,14 +994,22 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
     <div id="notice" class="notice"></div>
 
     <section id="accountSection">
-      <div class="account-card" style="margin-top:0;">
+        <div class="account-card" style="margin-top:0;">
         <div class="utility-head"><span class="icon" id="accountIcon"></span><span id="accountTitle">My account</span></div>
         <div class="utility-text" id="accountText">Login with your information so YAMADEN can manage your requests and contact you smoothly.</div>
+        <div class="account-mode">
+          <button id="accountModeRegister" class="active" onclick="setAccountMode('register')">New customer</button>
+          <button id="accountModeLogin" onclick="setAccountMode('login')">Already registered</button>
+        </div>
         <div class="account-fields" id="accountFields">
           <input id="accountName" placeholder="Name">
           <input id="accountPhone" placeholder="Phone" inputmode="tel">
+          <input id="accountEmail" placeholder="Email">
+          <input id="accountProvince" placeholder="Province / City">
+          <input id="accountProjectName" placeholder="Project name">
           <input id="accountCompany" placeholder="Company">
-          <input id="accountContact" placeholder="Email / LINE / Zalo">
+          <input id="accountCustomerType" placeholder="Customer type">
+          <input id="accountContact" placeholder="LINE / Zalo">
           <input class="full" id="accountAddress" placeholder="Address">
         </div>
         <div class="secondary-row">
@@ -1241,6 +1268,7 @@ let lastAdminReply = "";
 let lastCheckedId = "";
 let previewUrl = "";
 let currentUser = null;
+let accountMode = "register";
 
 const ICONS = {
   edit:`<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
@@ -1322,7 +1350,12 @@ const texts = {
     accountRequired:"Vui lòng nhập tên và số điện thoại.",
     accountLoginFailed:"Đăng nhập thất bại. Vui lòng thử lại.",
     accountTab:"Tài khoản",
+    accountRegister:"Khách mới",
+    accountLoginMode:"Đã có tài khoản",
     accountCompany:"Công ty / cá nhân",
+    accountCustomerType:"Loại khách hàng",
+    accountProvince:"Tỉnh / thành",
+    accountProjectName:"Tên công trình",
     accountAddress:"Địa chỉ thường dùng",
     quickSupportTitle:"Cần hỗ trợ nhanh?",
     quickSupportText:"Bạn vẫn có thể gửi yêu cầu không cần đăng nhập. Đăng nhập sẽ giúp lưu lịch sử và admin quản lý thông tin của bạn tốt hơn.",
@@ -1396,7 +1429,12 @@ const texts = {
     accountRequired:"名前と電話番号を入力してください。",
     accountLoginFailed:"ログインに失敗しました。もう一度お試しください。",
     accountTab:"アカウント",
+    accountRegister:"新規登録",
+    accountLoginMode:"登録済み",
     accountCompany:"会社名 / 個人",
+    accountCustomerType:"顧客タイプ",
+    accountProvince:"都道府県 / 市区町村",
+    accountProjectName:"工事名 / 建物名",
     accountAddress:"よく使う住所",
     quickSupportTitle:"すぐに依頼しますか？",
     quickSupportText:"ログインしなくても依頼できます。ログインすると履歴保存と管理者確認がスムーズになります。",
@@ -1523,10 +1561,16 @@ function applyLang() {
   $("detail3Btn").innerText = t.detailBtn;
   $("accountTitle").innerText = t.accountTitle;
   $("accountText").innerText = t.accountText;
+  $("accountModeRegister").innerText = t.accountRegister;
+  $("accountModeLogin").innerText = t.accountLoginMode;
   $("accountName").placeholder = t.name;
   $("accountPhone").placeholder = t.phone;
+  $("accountEmail").placeholder = "Email";
+  $("accountProvince").placeholder = t.accountProvince;
+  $("accountProjectName").placeholder = t.accountProjectName;
   $("accountCompany").placeholder = t.accountCompany;
-  $("accountContact").placeholder = t.contact;
+  $("accountCustomerType").placeholder = t.accountCustomerType;
+  $("accountContact").placeholder = "LINE / Zalo";
   $("accountAddress").placeholder = t.accountAddress;
   $("accountLoginText").innerText = t.accountLogin;
   $("accountLogoutText").innerText = t.accountLogout;
@@ -1633,7 +1677,11 @@ function updateAccountUI() {
   if (currentUser) {
     $("accountName").value = currentUser.name || "";
     $("accountPhone").value = currentUser.phone || "";
+    $("accountEmail").value = currentUser.email || "";
+    $("accountProvince").value = currentUser.province || "";
+    $("accountProjectName").value = currentUser.projectName || "";
     $("accountCompany").value = currentUser.company || "";
+    $("accountCustomerType").value = currentUser.customerType || "";
     $("accountContact").value = currentUser.contact || currentUser.email || "";
     $("accountAddress").value = currentUser.address || "";
     $("accountStatus").innerText = `${t.accountLoggedIn}: ${currentUser.name || currentUser.phone}`;
@@ -1644,12 +1692,27 @@ function updateAccountUI() {
   } else {
     $("accountStatus").innerText = t.accountLoggedOut;
   }
+  setAccountMode(accountMode);
+}
+function setAccountMode(mode) {
+  accountMode = mode;
+  const isLogin = mode === "login";
+  $("accountModeRegister").classList.toggle("active", !isLogin);
+  $("accountModeLogin").classList.toggle("active", isLogin);
+  ["accountEmail", "accountProvince", "accountProjectName", "accountCompany", "accountCustomerType", "accountContact", "accountAddress"].forEach(id => {
+    const el = $(id);
+    if (el) el.classList.toggle("hidden", isLogin);
+  });
 }
 async function userLogin() {
   const t = texts[lang];
   const name = $("accountName").value.trim();
   const phone = $("accountPhone").value.trim();
+  const email = $("accountEmail").value.trim();
+  const province = $("accountProvince").value.trim();
+  const projectName = $("accountProjectName").value.trim();
   const company = $("accountCompany").value.trim();
+  const customerType = $("accountCustomerType").value.trim();
   const contact = $("accountContact").value.trim();
   const address = $("accountAddress").value.trim();
 
@@ -1657,12 +1720,16 @@ async function userLogin() {
     showToast(t.accountRequired);
     return;
   }
+  if (accountMode === "register" && (!email || !province || !projectName)) {
+    showToast(currentLang === "ja" ? "メール、地域、工事名を入力してください。" : "Vui lòng nhập email, tỉnh/thành và tên công trình.");
+    return;
+  }
 
   try {
     const res = await fetch(API + "/user/login", {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ name, phone, company, contact, address })
+      body:JSON.stringify({ name, phone, email, province, projectName, company, customerType, contact, address })
     });
     const data = await readJsonSafe(res);
 
