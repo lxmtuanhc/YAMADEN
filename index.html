@@ -85,9 +85,7 @@ button, input, textarea, select { font-family:inherit; }
   display:flex;
   align-items:center;
   gap:12px;
-  font-size:23px;
-  font-weight:950;
-  letter-spacing:0.5px;
+  min-width:0;
 }
 .logo-box img {
   width:50px;
@@ -95,6 +93,22 @@ button, input, textarea, select { font-family:inherit; }
   border-radius:16px;
   background:white;
   box-shadow:0 8px 20px rgba(0,0,0,0.25);
+}
+.logo-text { line-height:1.15; }
+.logo-jp {
+  color:white;
+  font-size:21px;
+  font-weight:950;
+  letter-spacing:0.02em;
+  white-space:nowrap;
+}
+.logo-en {
+  margin-top:4px;
+  color:#dbeafe;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.12em;
+  white-space:nowrap;
 }
 .lang-select {
   width:78px;
@@ -524,7 +538,7 @@ button, input, textarea, select { font-family:inherit; }
   z-index:1;
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:12px;
   margin-bottom:78px;
 }
 .account-brand img {
@@ -535,15 +549,19 @@ button, input, textarea, select { font-family:inherit; }
   box-shadow:0 10px 26px rgba(37,99,235,0.20);
 }
 .account-brand-title {
-  color:#2563eb;
-  font-size:22px;
+  color:#0f172a;
+  font-size:20px;
   font-weight:950;
-  letter-spacing:0.5px;
+  letter-spacing:0.03em;
+  white-space:nowrap;
 }
 .account-brand-sub {
-  color:#334155;
-  font-size:11px;
-  font-weight:900;
+  margin-top:4px;
+  color:#2563eb;
+  font-size:10px;
+  font-weight:950;
+  letter-spacing:0.14em;
+  white-space:nowrap;
 }
 .account-panel {
   position:relative;
@@ -1220,7 +1238,10 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
     <div class="top-row">
       <div class="logo-box">
         <img src="/icon-192.png" alt="YAMADEN">
-        <span>YAMADEN</span>
+        <div class="logo-text">
+          <div class="logo-jp">株式会社 山電</div>
+          <div class="logo-en">YAMADEN.CO.LTD</div>
+        </div>
       </div>
       <select id="language" class="lang-select" onchange="changeLanguage()">
         <option value="vi">VI</option>
@@ -1250,8 +1271,8 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
         <div class="account-brand">
           <img src="/icon-192.png" alt="YAMADEN">
           <div>
-            <div class="account-brand-title">YAMADEN</div>
-            <div class="account-brand-sub" id="accountBrandSub">Hỗ trợ khách hàng</div>
+            <div class="account-brand-title">株式会社 山電</div>
+            <div class="account-brand-sub" id="accountBrandSub">YAMADEN.CO.LTD</div>
           </div>
         </div>
 
@@ -1863,7 +1884,7 @@ function applyLang() {
   $("detail2Btn").innerText = t.detailBtn;
   $("detail3Btn").innerText = t.detailBtn;
   if ($("accountTitle")) $("accountTitle").innerText = t.accountTitle;
-  if ($("accountBrandSub")) $("accountBrandSub").innerText = lang === "ja" ? "株式会社ワイマデン" : "Hỗ trợ khách hàng";
+  if ($("accountBrandSub")) $("accountBrandSub").innerText = "YAMADEN.CO.LTD";
   if ($("accountWelcome")) $("accountWelcome").innerText = lang === "ja" ? "ようこそ" : "Chào mừng";
   $("accountText").innerText = t.accountText;
   $("accountModeRegister").innerText = t.accountRegister;
