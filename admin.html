@@ -37,6 +37,7 @@ body {
   align-items: center;
   gap: 12px;
   margin-bottom: 28px;
+  cursor: pointer;
 }
 
 .brand img {
@@ -186,7 +187,7 @@ body {
   font-size: 15px;
 }
 
-.reload {
+.search-btn {
   border: none;
   border-radius: 14px;
   padding: 14px 22px;
@@ -194,6 +195,7 @@ body {
   color: white;
   font-weight: 900;
   cursor: pointer;
+  font-size: 18px;
 }
 
 .tabs {
@@ -433,7 +435,7 @@ body {
 <div class="layout">
 
   <aside class="sidebar">
-    <div class="brand">
+    <div class="brand" onclick="logoReload()">
       <img src="/icon-192.png" alt="YAMADEN">
       <div>
         <div class="brand-title">YAMADEN</div>
@@ -441,14 +443,22 @@ body {
       </div>
     </div>
 
-    <div class="menu-item active">🏠 Tổng quan</div>
+    <div class="menu-item active" id="menuOverview">🏠 Tổng quan</div>
 
-    <div class="menu-title">QUẢN LÝ YÊU CẦU</div>
-    <div class="menu-item" onclick="changeTab('active')">🕒 Đang xử lý <span class="menu-badge" id="sideActive">0</span></div>
-    <div class="menu-item" onclick="changeTab('done')">✅ Hoàn thành <span class="menu-badge" id="sideDone">0</span></div>
+    <div class="menu-title" id="menuRequestTitle">QUẢN LÝ YÊU CẦU</div>
 
-    <div class="menu-title">CÀI ĐẶT</div>
-    <div class="menu-item">⚙️ Cài đặt</div>
+    <div class="menu-item" onclick="changeTab('active')">
+      🕒 <span id="menuActiveText">Đang xử lý</span>
+      <span class="menu-badge" id="sideActive">0</span>
+    </div>
+
+    <div class="menu-item" onclick="changeTab('done')">
+      ✅ <span id="menuDoneText">Hoàn thành</span>
+      <span class="menu-badge" id="sideDone">0</span>
+    </div>
+
+    <div class="menu-title" id="menuSettingTitle">CÀI ĐẶT</div>
+    <div class="menu-item" id="menuSetting">⚙️ Cài đặt</div>
 
     <div class="sidebar-footer">
       © 2026 YAMADEN<br>
@@ -466,7 +476,7 @@ body {
           <option value="ja">JP</option>
         </select>
         <div class="admin-info">Admin</div>
-        <button class="logout-btn" onclick="logout()">Đăng xuất</button>
+        <button class="logout-btn" id="logoutBtn" onclick="logout()">Đăng xuất</button>
       </div>
     </div>
 
@@ -497,7 +507,7 @@ body {
       <div class="panel">
         <div class="toolbar">
           <input class="search" id="search" placeholder="🔍 Tìm theo tên, SĐT, địa chỉ...">
-          <button class="reload" id="reloadBtn" onclick="load()">Tải lại</button>
+          <button class="search-btn" id="searchBtn" onclick="load()">🔍</button>
         </div>
 
         <div class="tabs">
@@ -514,7 +524,6 @@ body {
 </div>
 
 <script>
-// ===== CHECK LOGIN =====
 const isLogged = localStorage.getItem("adminLogged");
 const loginTime = localStorage.getItem("loginTime");
 
@@ -543,7 +552,6 @@ const texts = {
     active: "Đang xử lý",
     done: "Hoàn thành",
     today: "Hôm nay",
-    reload: "Tải lại",
     search: "🔍 Tìm theo tên, SĐT, địa chỉ...",
     call: "📞 Gọi",
     map: "📍 Bản đồ",
@@ -556,7 +564,13 @@ const texts = {
     confirmTitle: "Xác nhận xóa",
     confirmDelete: "Bạn có chắc muốn xóa yêu cầu này?",
     cancel: "Hủy",
-    empty: "Không có yêu cầu nào"
+    empty: "Không có yêu cầu nào",
+    menuOverview: "Tổng quan",
+    menuRequestTitle: "QUẢN LÝ YÊU CẦU",
+    menuSettingTitle: "CÀI ĐẶT",
+    menuSetting: "Cài đặt",
+    logout: "Đăng xuất",
+    unsaved: "Bạn có phản hồi chưa lưu. Vẫn tải lại?"
   },
   ja: {
     pageTitle: "お客様リクエスト管理",
@@ -564,7 +578,6 @@ const texts = {
     active: "処理中",
     done: "完了",
     today: "本日",
-    reload: "再読み込み",
     search: "🔍 名前、電話番号、住所で検索...",
     call: "📞 電話",
     map: "📍 地図",
@@ -577,12 +590,48 @@ const texts = {
     confirmTitle: "削除の確認",
     confirmDelete: "この依頼を削除してもよろしいですか？",
     cancel: "キャンセル",
-    empty: "依頼はありません"
+    empty: "依頼はありません",
+    menuOverview: "概要",
+    menuRequestTitle: "依頼管理",
+    menuSettingTitle: "設定",
+    menuSetting: "設定",
+    logout: "ログアウト",
+    unsaved: "保存していない返信があります。再読み込みしますか？"
   }
 };
 
 function safeId(id) {
   return String(id).replace(/'/g, "\\'");
+}
+
+function escapeHtml(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function hasUnsavedReply() {
+  const boxes = document.querySelectorAll("textarea[id^='reply-']");
+
+  for (const box of boxes) {
+    if (box.dataset.original !== undefined && box.value !== box.dataset.original) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function logoReload() {
+  const t = texts[currentLang];
+
+  if (hasUnsavedReply()) {
+    if (!confirm(t.unsaved)) return;
+  }
+
+  load();
 }
 
 function applyLanguage() {
@@ -594,8 +643,15 @@ function applyLanguage() {
   labelActive.innerText = t.active;
   labelDone.innerText = t.done;
   labelToday.innerText = t.today;
-  reloadBtn.innerText = t.reload;
   search.placeholder = t.search;
+
+  menuOverview.innerText = "🏠 " + t.menuOverview;
+  menuRequestTitle.innerText = t.menuRequestTitle;
+  menuActiveText.innerText = t.active;
+  menuDoneText.innerText = t.done;
+  menuSettingTitle.innerText = t.menuSettingTitle;
+  menuSetting.innerText = "⚙️ " + t.menuSetting;
+  logoutBtn.innerText = t.logout;
 
   modalTitle.innerText = t.confirmTitle;
   modalCancelBtn.innerText = t.cancel;
@@ -706,6 +762,7 @@ async function load() {
 
   filtered.forEach(item => {
     const id = safeId(item.id);
+    const reply = escapeHtml(item.adminReply || "");
     const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
 
     list.innerHTML += `
@@ -753,7 +810,7 @@ async function load() {
 
         <div class="reply-card">
           <div class="reply-title">${t.reply}</div>
-          <textarea id="reply-${item.id}">${item.adminReply || ""}</textarea>
+          <textarea id="reply-${item.id}" data-original="${reply}">${reply}</textarea>
           <button class="save" onclick="saveReply('${id}')">${t.save}</button>
         </div>
 
