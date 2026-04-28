@@ -113,8 +113,27 @@ button, select, input { font-family:inherit; }
   background:white;
   box-shadow:0 18px 42px rgba(0,0,0,0.34);
 }
-.brand-title { font-size:30px; font-weight:950; letter-spacing:1px; }
-.brand-sub { margin-top:4px; color:#bfdbfe; font-size:13px; font-weight:850; }
+.brand-title {
+  font-size:23px;
+  font-weight:950;
+  letter-spacing:0.04em;
+  line-height:1.1;
+  white-space:nowrap;
+}
+.brand-sub {
+  margin-top:5px;
+  color:#bfdbfe;
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:0.14em;
+  white-space:nowrap;
+}
+.brand-console {
+  margin-top:5px;
+  color:#cbd5e1;
+  font-size:12px;
+  font-weight:850;
+}
 .hero-copy { margin-top:78px; position:relative; z-index:1; }
 .hero-kicker {
   display:inline-flex;
@@ -192,8 +211,27 @@ button, select, input { font-family:inherit; }
   background:white;
   box-shadow:0 12px 28px rgba(15,23,42,0.16);
 }
-.mobile-brand-title { font-size:22px; font-weight:950; }
-.mobile-brand-sub { color:var(--muted); font-size:12px; font-weight:800; }
+.mobile-brand-title {
+  font-size:18px;
+  font-weight:950;
+  letter-spacing:0.04em;
+  line-height:1.1;
+  white-space:nowrap;
+}
+.mobile-brand-sub {
+  margin-top:4px;
+  color:#2563eb;
+  font-size:10px;
+  font-weight:950;
+  letter-spacing:0.12em;
+  white-space:nowrap;
+}
+.mobile-brand-console {
+  margin-top:4px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:850;
+}
 .lang {
   padding:12px 14px;
   border-radius:16px;
@@ -331,7 +369,7 @@ input:focus {
   .login-shell { min-height:100vh; border-radius:0; border:none; }
   .right-panel { min-height:100vh; padding:22px 18px; }
   .mobile-brand img { width:48px; height:48px; }
-  .mobile-brand-title { font-size:20px; }
+  .mobile-brand-title { font-size:17px; }
   .title { font-size:27px; }
 }
 </style>
@@ -343,8 +381,9 @@ input:focus {
     <div class="brand-main">
       <img src="/icon-admin-192.png" alt="YAMADEN Admin">
       <div>
-        <div class="brand-title">YAMADEN</div>
-        <div class="brand-sub">Admin Dashboard</div>
+        <div class="brand-title">株式会社 山電</div>
+        <div class="brand-sub">YAMADEN.CO.LTD</div>
+        <div class="brand-console">Admin Dashboard</div>
       </div>
     </div>
 
@@ -379,8 +418,9 @@ input:focus {
         <div class="mobile-brand">
           <img src="/icon-admin-192.png" alt="YAMADEN Admin">
           <div>
-            <div class="mobile-brand-title">YAMADEN</div>
-            <div class="mobile-brand-sub">Admin Dashboard</div>
+            <div class="mobile-brand-title">株式会社 山電</div>
+            <div class="mobile-brand-sub">YAMADEN.CO.LTD</div>
+            <div class="mobile-brand-console">Admin Dashboard</div>
           </div>
         </div>
         <select id="language" class="lang" onchange="changeLanguage()">
