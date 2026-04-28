@@ -209,12 +209,9 @@ app.post("/user/login", async (req, res) => {
     const phone = String(req.body.phone || "").trim();
     const name = String(req.body.name || "").trim();
     const email = String(req.body.email || "").trim();
-    const contact = String(req.body.contact || "").trim();
     const company = String(req.body.company || "").trim();
-    const customerType = String(req.body.customerType || "").trim();
     const province = String(req.body.province || "").trim();
     const projectName = String(req.body.projectName || "").trim();
-    const address = String(req.body.address || "").trim();
 
     if (!phone || !name) {
       return res.status(400).json({ message: "Name and phone are required" });
@@ -231,12 +228,9 @@ app.post("/user/login", async (req, res) => {
         name,
         phone,
         email,
-        contact,
         company,
-        customerType,
         province,
         projectName,
-        address,
         status: "active",
         createdAt: new Date(),
         lastLoginAt: new Date()
@@ -244,12 +238,9 @@ app.post("/user/login", async (req, res) => {
     } else {
       user.name = name || user.name;
       user.email = email || user.email;
-      user.contact = contact || user.contact;
       user.company = company || user.company;
-      user.customerType = customerType || user.customerType;
       user.province = province || user.province;
       user.projectName = projectName || user.projectName;
-      user.address = address || user.address;
       user.lastLoginAt = new Date();
     }
 

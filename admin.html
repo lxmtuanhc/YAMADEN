@@ -770,7 +770,7 @@ async function loadUsers() {
 
     const keyword = $("userSearch").value.trim().toLowerCase();
     const filtered = users.filter(user => {
-      return [user.name, user.phone, user.email, user.contact, user.company, user.customerType, user.province, user.projectName, user.address]
+      return [user.name, user.phone, user.email, user.company, user.province, user.projectName]
         .some(value => String(value || "").toLowerCase().includes(keyword));
     });
 
@@ -789,11 +789,9 @@ function renderUser(user) {
   const name = escapeHtml(user.name || "");
   const phone = escapeHtml(user.phone || "");
   const company = escapeHtml(user.company || "");
-  const customerType = escapeHtml(user.customerType || "");
   const province = escapeHtml(user.province || "");
   const projectName = escapeHtml(user.projectName || "");
-  const contact = escapeHtml(user.email || user.contact || "");
-  const address = escapeHtml(user.address || "");
+  const contact = escapeHtml(user.email || "");
   const status = escapeHtml(user.status || "active");
   const count = Number(user.requestCount || 0);
   const createdAt = user.createdAt ? escapeHtml(new Date(user.createdAt).toLocaleDateString()) : "";
@@ -804,12 +802,10 @@ function renderUser(user) {
         <div class="user-name">${name || phone || id}</div>
         <div class="user-line">${icon("phone","line-icon")}${phone}</div>
         <div class="user-line">${icon("message","line-icon")}${contact}</div>
-        <div class="user-line">${icon("map","line-icon")}${address}</div>
       </div>
       <div>
         <span class="badge ${status === "blocked" ? "status-pending" : "status-completed"}">${status}</span>
         <div class="user-line">${company}</div>
-        <div class="user-line">${customerType}</div>
       </div>
       <div>
         <div class="user-line"><b>${projectName}</b></div>
