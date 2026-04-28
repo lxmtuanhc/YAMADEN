@@ -1251,7 +1251,7 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
           <img src="/icon-192.png" alt="YAMADEN">
           <div>
             <div class="account-brand-title">YAMADEN</div>
-            <div class="account-brand-sub" id="accountBrandSub">YAMADEN Support</div>
+            <div class="account-brand-sub" id="accountBrandSub">Hỗ trợ khách hàng</div>
           </div>
         </div>
 
@@ -1262,46 +1262,46 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
             <div class="profile-head">
               <div class="profile-avatar"><span class="icon" id="profileIcon"></span></div>
               <div>
-                <div class="profile-name" id="profileName">Customer</div>
-                <div class="profile-sub" id="profileSub">Account active</div>
+                <div class="profile-name" id="profileName">Khách hàng</div>
+                <div class="profile-sub" id="profileSub">Tài khoản đang hoạt động</div>
               </div>
             </div>
             <div class="profile-grid">
-              <div class="profile-item"><div class="profile-label" id="profilePhoneLabel">Phone</div><div class="profile-value" id="profilePhone"></div></div>
+              <div class="profile-item"><div class="profile-label" id="profilePhoneLabel">Số điện thoại</div><div class="profile-value" id="profilePhone"></div></div>
               <div class="profile-item"><div class="profile-label">Email</div><div class="profile-value" id="profileEmail"></div></div>
-              <div class="profile-item"><div class="profile-label" id="profileProvinceLabel">Province</div><div class="profile-value" id="profileProvince"></div></div>
-              <div class="profile-item"><div class="profile-label" id="profileProjectLabel">Project</div><div class="profile-value" id="profileProject"></div></div>
-              <div class="profile-item"><div class="profile-label" id="profileCompanyLabel">Company</div><div class="profile-value" id="profileCompany"></div></div>
-              <div class="profile-item"><div class="profile-label" id="profileRequestsLabel">Requests</div><div class="profile-value" id="profileRequests">0</div></div>
+              <div class="profile-item"><div class="profile-label" id="profileProvinceLabel">Tỉnh / thành</div><div class="profile-value" id="profileProvince"></div></div>
+              <div class="profile-item"><div class="profile-label" id="profileProjectLabel">Tên công trình</div><div class="profile-value" id="profileProject"></div></div>
+              <div class="profile-item"><div class="profile-label" id="profileCompanyLabel">Công ty / cá nhân</div><div class="profile-value" id="profileCompany"></div></div>
+              <div class="profile-item"><div class="profile-label" id="profileRequestsLabel">Yêu cầu đã gửi</div><div class="profile-value" id="profileRequests">0</div></div>
             </div>
             <div class="secondary-row">
-              <button class="main-btn" onclick="showTab('send')"><span class="icon" id="profileSendIcon"></span><span id="profileSendText">Send request</span></button>
-              <button class="soft-btn" onclick="showTab('check')"><span class="icon" id="profileHistoryIcon"></span><span id="profileHistoryText">My requests</span></button>
+              <button class="main-btn" onclick="showTab('send')"><span class="icon" id="profileSendIcon"></span><span id="profileSendText">Gửi yêu cầu</span></button>
+              <button class="soft-btn" onclick="showTab('check')"><span class="icon" id="profileHistoryIcon"></span><span id="profileHistoryText">Yêu cầu của tôi</span></button>
             </div>
-            <button class="soft-btn" style="margin-top:12px;" onclick="userLogout()"><span class="icon" id="profileLogoutIcon"></span><span id="profileLogoutText">Logout</span></button>
+            <button class="soft-btn" style="margin-top:12px;" onclick="userLogout()"><span class="icon" id="profileLogoutIcon"></span><span id="profileLogoutText">Đăng xuất</span></button>
           </div>
 
           <div class="account-card" id="accountFormCard">
             <div class="account-welcome">
               <div class="account-welcome-ja" id="accountWelcome">Chào mừng</div>
               <div class="account-welcome-brand">YAMADEN</div>
-              <div class="account-welcome-sub" id="accountText">Login with your information so YAMADEN can manage your requests and contact you smoothly.</div>
+              <div class="account-welcome-sub" id="accountText">Đăng nhập bằng thông tin của bạn để YAMADEN lưu lịch sử yêu cầu và liên hệ hỗ trợ thuận tiện hơn.</div>
             </div>
             <div class="account-mode">
-              <button id="accountModeRegister" class="active" onclick="setAccountMode('register')">New customer</button>
-              <button id="accountModeLogin" onclick="setAccountMode('login')">Already registered</button>
+              <button id="accountModeRegister" class="active" onclick="setAccountMode('register')">Khách mới</button>
+              <button id="accountModeLogin" onclick="setAccountMode('login')">Đã có tài khoản</button>
             </div>
             <div class="account-fields" id="accountFields">
-              <input id="accountName" placeholder="Name">
-              <input id="accountPhone" placeholder="Phone" inputmode="tel">
+              <input id="accountName" placeholder="Họ và tên">
+              <input id="accountPhone" placeholder="Số điện thoại" inputmode="tel">
               <input id="accountEmail" placeholder="Email">
-              <input id="accountProvince" placeholder="Province / City">
-              <input id="accountProjectName" placeholder="Project name">
-              <input id="accountCompany" placeholder="Company / Individual">
+              <input id="accountProvince" placeholder="Tỉnh / thành">
+              <input id="accountProjectName" placeholder="Tên công trình">
+              <input id="accountCompany" placeholder="Công ty / cá nhân">
             </div>
-            <button class="main-btn" onclick="userLogin()"><span class="icon" id="accountLoginIcon"></span><span id="accountLoginText">Login / Save</span></button>
-            <div class="account-divider"><span id="accountDividerText">or</span></div>
-            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="quickSupportBtnIcon"></span><span id="quickSupportBtn">Send quick request</span></button>
+            <button class="main-btn" onclick="userLogin()"><span class="icon" id="accountLoginIcon"></span><span id="accountLoginText">Đăng nhập / Lưu</span></button>
+            <div class="account-divider"><span id="accountDividerText">hoặc</span></div>
+            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="quickSupportBtnIcon"></span><span id="quickSupportBtn">Gửi hỗ trợ nhanh</span></button>
             <div class="account-status" id="accountStatus"></div>
           </div>
         </div>
@@ -1319,24 +1319,24 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
     <section class="hidden" id="homeSection">
       <div class="home-hero-card">
         <div class="home-kicker"><span class="icon" id="homeKickerIcon"></span><span id="homeKicker">YAMADEN SUPPORT</span></div>
-        <div class="home-title" id="homeTitle">Electrical support for homes and businesses</div>
-        <div class="home-desc" id="homeDesc">Send a request, attach a photo, and track the repair status from your phone.</div>
+        <div class="home-title" id="homeTitle">Dịch vụ hỗ trợ điện cho gia đình và công trình</div>
+        <div class="home-desc" id="homeDesc">Gửi yêu cầu, đính kèm hình ảnh và theo dõi trạng thái xử lý từ điện thoại.</div>
         <div class="home-actions">
-          <button class="main-btn" onclick="showTab('send')"><span class="icon" id="homeSendIcon"></span><span id="homeSendText">Send request</span></button>
-          <button class="soft-btn" onclick="showTab('check')"><span class="icon" id="homeCheckIcon"></span><span id="homeCheckText">Check status</span></button>
+          <button class="main-btn" onclick="showTab('send')"><span class="icon" id="homeSendIcon"></span><span id="homeSendText">Gửi yêu cầu</span></button>
+          <button class="soft-btn" onclick="showTab('check')"><span class="icon" id="homeCheckIcon"></span><span id="homeCheckText">Tra cứu trạng thái</span></button>
         </div>
       </div>
 
       <div class="trust-row">
-        <div class="trust-item"><div class="trust-number">24h</div><div class="trust-label" id="trust1">Fast reception</div></div>
-        <div class="trust-item"><div class="trust-number">VI/JP</div><div class="trust-label" id="trust2">Bilingual support</div></div>
-        <div class="trust-item"><div class="trust-number">ID</div><div class="trust-label" id="trust3">Easy tracking</div></div>
+        <div class="trust-item"><div class="trust-number">24h</div><div class="trust-label" id="trust1">Tiếp nhận nhanh</div></div>
+        <div class="trust-item"><div class="trust-number">VI/JP</div><div class="trust-label" id="trust2">Hỗ trợ Việt / Nhật</div></div>
+        <div class="trust-item"><div class="trust-number">ID</div><div class="trust-label" id="trust3">Tra cứu bằng ID</div></div>
       </div>
 
       <div class="philosophy-card">
         <div class="philosophy-visual">
           <img src="/icon-512.png" alt="YAMADEN">
-          <div class="visual-label" id="philosophyVisual">Protecting people. Creating happiness.</div>
+          <div class="visual-label" id="philosophyVisual">Bảo vệ con người. Kiến tạo hạnh phúc.</div>
         </div>
         <div class="philosophy-copy">
           <div class="section-kicker" id="philosophyKicker">PHILOSOPHY</div>
@@ -1348,62 +1348,62 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
       <div class="card">
         <div class="card-title">
           <div class="card-title-icon" id="serviceTitleIcon"></div>
-          <h2 id="serviceTitle">Our services</h2>
+          <h2 id="serviceTitle">Dịch vụ YAMADEN</h2>
         </div>
         <div class="service-grid">
           <div class="service-card">
             <div class="service-icon" id="service1Icon"></div>
-            <div class="service-title" id="service1Title">Electrical repair</div>
-            <div class="service-desc" id="service1Desc">Troubleshooting lights, switches, outlets and electrical issues.</div>
+            <div class="service-title" id="service1Title">Sửa chữa điện</div>
+            <div class="service-desc" id="service1Desc">Xử lý sự cố đèn, công tắc, ổ cắm và các vấn đề về điện.</div>
           </div>
           <div class="service-card">
             <div class="service-icon" id="service2Icon"></div>
-            <div class="service-title" id="service2Title">Installation</div>
-            <div class="service-desc" id="service2Desc">Support for devices, wiring, small fixtures and site work.</div>
+            <div class="service-title" id="service2Title">Lắp đặt thiết bị</div>
+            <div class="service-desc" id="service2Desc">Hỗ trợ thiết bị, đi dây, hạng mục nhỏ và công việc tại hiện trường.</div>
           </div>
           <div class="service-card">
             <div class="service-icon" id="service3Icon"></div>
-            <div class="service-title" id="service3Title">Request tracking</div>
-            <div class="service-desc" id="service3Desc">Use your request ID to check status and admin replies.</div>
+            <div class="service-title" id="service3Title">Theo dõi yêu cầu</div>
+            <div class="service-desc" id="service3Desc">Dùng mã yêu cầu để kiểm tra trạng thái và phản hồi từ admin.</div>
           </div>
         </div>
       </div>
 
       <div class="brand-gallery">
         <div class="brand-visual">
-          <div class="visual-label" id="galleryMain">Electrical work, instrumentation and maintenance for safer buildings.</div>
+          <div class="visual-label" id="galleryMain">Thi công điện, đo lường điều khiển và bảo trì cho công trình an toàn hơn.</div>
         </div>
         <div class="gallery-stack">
-          <div class="gallery-tile"><span class="icon" id="gallery1Icon"></span><div class="gallery-title" id="gallery1">Reliable site response</div></div>
-          <div class="gallery-tile"><span class="icon" id="gallery2Icon"></span><div class="gallery-title" id="gallery2">Quality maintenance</div></div>
+          <div class="gallery-tile"><span class="icon" id="gallery1Icon"></span><div class="gallery-title" id="gallery1">Phản hồi linh hoạt tại hiện trường</div></div>
+          <div class="gallery-tile"><span class="icon" id="gallery2Icon"></span><div class="gallery-title" id="gallery2">Bảo trì chất lượng ổn định</div></div>
         </div>
       </div>
 
       <div class="utility-grid">
         <div class="utility-card">
-          <div class="utility-head"><span class="icon" id="safetyIcon"></span><span id="safetyTitle">Electrical safety today</span></div>
-          <div class="utility-text" id="safetyText">If you notice burning smell, heat, sparks, or repeated breaker trips, stop using the device and send a request with photos.</div>
+          <div class="utility-head"><span class="icon" id="safetyIcon"></span><span id="safetyTitle">An toàn điện hôm nay</span></div>
+          <div class="utility-text" id="safetyText">Nếu có mùi khét, phát nhiệt, tia lửa hoặc CB nhảy liên tục, hãy ngừng sử dụng thiết bị và gửi yêu cầu kèm ảnh.</div>
         </div>
         <div class="utility-card">
-          <div class="utility-head"><span class="icon" id="maintenanceIcon"></span><span id="maintenanceTitle">Periodic maintenance</span></div>
-          <div class="utility-text" id="maintenanceText">Keep your building stable by checking electrical and control equipment before trouble appears.</div>
+          <div class="utility-head"><span class="icon" id="maintenanceIcon"></span><span id="maintenanceTitle">Bảo trì định kỳ</span></div>
+          <div class="utility-text" id="maintenanceText">Kiểm tra thiết bị điện và điều khiển trước khi có sự cố giúp công trình vận hành ổn định hơn.</div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-title">
           <div class="card-title-icon" id="companyTitleIcon"></div>
-          <h2 id="companyTitle">Company</h2>
+          <h2 id="companyTitle">Thông tin công ty</h2>
         </div>
         <div class="company-info-grid">
-          <div class="company-info"><div class="company-info-label" id="companyNameLabel">Company</div><div class="company-info-value" id="companyNameValue">YAMADEN Co., Ltd.</div></div>
-          <div class="company-info"><div class="company-info-label" id="companyServiceLabel">Business</div><div class="company-info-value" id="companyServiceValue">Electrical work / instrumentation / automatic control maintenance</div></div>
-          <div class="company-info"><div class="company-info-label" id="companyAddressLabel">Address</div><div class="company-info-value">〒733-0851 広島県広島市西区田方2-9-23</div></div>
+          <div class="company-info"><div class="company-info-label" id="companyNameLabel">Tên công ty</div><div class="company-info-value" id="companyNameValue">Công ty cổ phần YAMADEN</div></div>
+          <div class="company-info"><div class="company-info-label" id="companyServiceLabel">Lĩnh vực</div><div class="company-info-value" id="companyServiceValue">Electrical work / instrumentation / automatic control maintenance</div></div>
+          <div class="company-info"><div class="company-info-label" id="companyAddressLabel">Địa chỉ</div><div class="company-info-value">〒733-0851 広島県広島市西区田方2-9-23</div></div>
           <div class="company-info"><div class="company-info-label" id="companyTelLabel">TEL</div><div class="company-info-value">082-516-4423</div></div>
         </div>
         <div class="quick-contact">
-          <a class="soft-btn" href="tel:082-516-4423"><span class="icon" id="callCompanyIcon"></span><span id="callCompanyText">Call</span></a>
-          <a class="soft-btn" href="https://www.google.com/maps/search/?api=1&query=%E5%BA%83%E5%B3%B6%E7%9C%8C%E5%BA%83%E5%B3%B6%E5%B8%82%E8%A5%BF%E5%8C%BA%E7%94%B0%E6%96%B92-9-23" target="_blank" rel="noopener"><span class="icon" id="mapCompanyIcon"></span><span id="mapCompanyText">Map</span></a>
+          <a class="soft-btn" href="tel:082-516-4423"><span class="icon" id="callCompanyIcon"></span><span id="callCompanyText">Gọi YAMADEN</span></a>
+          <a class="soft-btn" href="https://www.google.com/maps/search/?api=1&query=%E5%BA%83%E5%B3%B6%E7%9C%8C%E5%BA%83%E5%B3%B6%E5%B8%82%E8%A5%BF%E5%8C%BA%E7%94%B0%E6%96%B92-9-23" target="_blank" rel="noopener"><span class="icon" id="mapCompanyIcon"></span><span id="mapCompanyText">Mở bản đồ</span></a>
         </div>
       </div>
     </section>
@@ -1411,31 +1411,31 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
     <section class="card hidden" id="servicesSection">
       <div class="card-title">
         <div class="card-title-icon" id="servicesPageIcon"></div>
-        <h2 id="servicesPageTitle">Services</h2>
+        <h2 id="servicesPageTitle">Dịch vụ chi tiết</h2>
       </div>
       <div class="service-detail-list">
         <div class="service-detail">
           <div class="service-detail-icon" id="detail1Icon"></div>
           <div>
-            <div class="service-detail-title" id="detail1Title">General electrical work</div>
-            <div class="service-detail-text" id="detail1Text">Wiring, power receiving work, lighting, outlets and electrical equipment for homes, buildings and factories.</div>
-            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="detail1BtnIcon"></span><span id="detail1Btn">Request this service</span></button>
+            <div class="service-detail-title" id="detail1Title">Công trình điện tổng hợp</div>
+            <div class="service-detail-text" id="detail1Text">Đi dây, kéo nguồn, chiếu sáng, ổ cắm và thiết bị điện cho nhà ở, tòa nhà và nhà máy.</div>
+            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="detail1BtnIcon"></span><span id="detail1Btn">Gửi yêu cầu mục này</span></button>
           </div>
         </div>
         <div class="service-detail">
           <div class="service-detail-icon" id="detail2Icon"></div>
           <div>
-            <div class="service-detail-title" id="detail2Title">Instrumentation</div>
-            <div class="service-detail-text" id="detail2Text">Measurement and control systems for building electrical and air-conditioning equipment.</div>
-            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="detail2BtnIcon"></span><span id="detail2Btn">Request this service</span></button>
+            <div class="service-detail-title" id="detail2Title">Công trình đo lường điều khiển</div>
+            <div class="service-detail-text" id="detail2Text">Hỗ trợ hệ thống đo lường, điều khiển điện và điều hòa trong các công trình cần vận hành ổn định.</div>
+            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="detail2BtnIcon"></span><span id="detail2Btn">Gửi yêu cầu mục này</span></button>
           </div>
         </div>
         <div class="service-detail">
           <div class="service-detail-icon" id="detail3Icon"></div>
           <div>
-            <div class="service-detail-title" id="detail3Title">Automatic control maintenance</div>
-            <div class="service-detail-text" id="detail3Text">Inspection and maintenance of control systems to keep building environments safe and stable.</div>
-            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="detail3BtnIcon"></span><span id="detail3Btn">Request this service</span></button>
+            <div class="service-detail-title" id="detail3Title">Bảo trì điều khiển tự động</div>
+            <div class="service-detail-text" id="detail3Text">Kiểm tra và bảo trì hệ thống điều khiển để duy trì môi trường tòa nhà an toàn, ổn định.</div>
+            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="detail3BtnIcon"></span><span id="detail3Btn">Gửi yêu cầu mục này</span></button>
           </div>
         </div>
       </div>
@@ -1542,9 +1542,9 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   </main>
 
   <nav class="bottom-nav">
-    <button id="tabAccount" class="active" onclick="showTab('account')"><span class="icon" id="tabAccountIcon"></span><span>Account</span></button>
-    <button id="tabHome" onclick="showTab('home')"><span class="icon" id="tabHomeIcon"></span><span>Home</span></button>
-    <button id="tabServices" onclick="showTab('services')"><span class="icon" id="tabServicesIcon"></span><span>Services</span></button>
+    <button id="tabAccount" class="active" onclick="showTab('account')"><span class="icon" id="tabAccountIcon"></span><span>Tài khoản</span></button>
+    <button id="tabHome" onclick="showTab('home')"><span class="icon" id="tabHomeIcon"></span><span>Trang chủ</span></button>
+    <button id="tabServices" onclick="showTab('services')"><span class="icon" id="tabServicesIcon"></span><span>Dịch vụ</span></button>
     <button id="tabSend" onclick="showTab('send')"><span class="icon" id="tabSendIcon"></span><span>Gửi yêu cầu</span></button>
   </nav>
 </div>
