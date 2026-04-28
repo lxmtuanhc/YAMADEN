@@ -4,71 +4,134 @@
 <meta charset="UTF-8">
 <title>YAMADEN Admin Login</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="/icon-192.png">
 
 <style>
+* { box-sizing: border-box; }
+
 body {
-  margin:0;
-  font-family:Segoe UI;
-  background:#0f172a;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  height:100vh;
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  min-height: 100vh;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #111827;
 }
 
-.box {
-  background:white;
-  padding:30px;
-  border-radius:20px;
-  width:320px;
-  text-align:center;
-  box-shadow:0 20px 40px rgba(0,0,0,0.3);
+.login-box {
+  width: 380px;
+  max-width: calc(100% - 32px);
+  background: white;
+  border-radius: 24px;
+  padding: 30px;
+  box-shadow: 0 25px 70px rgba(0,0,0,0.35);
 }
 
-h2 {
-  margin-bottom:20px;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.brand img {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  background: white;
+}
+
+.brand-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: #111827;
+}
+
+.brand-sub {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 900;
+  margin-bottom: 18px;
 }
 
 input {
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  margin-bottom:15px;
+  width: 100%;
+  padding: 15px;
+  border-radius: 14px;
+  border: 1px solid #d1d5db;
+  font-size: 16px;
+  outline: none;
+  margin-bottom: 14px;
+}
+
+input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
 }
 
 button {
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:#111827;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 14px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1d4ed8;
 }
 
 .error {
-  color:red;
-  margin-top:10px;
+  color: #dc2626;
+  font-weight: 800;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.note {
+  margin-top: 18px;
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
 }
 </style>
 </head>
 
 <body>
 
-<div class="box">
-  <h2>🔐 Admin Login</h2>
+<div class="login-box">
+  <div class="brand">
+    <img src="/icon-192.png" alt="YAMADEN">
+    <div>
+      <div class="brand-title">YAMADEN</div>
+      <div class="brand-sub">Admin Dashboard</div>
+    </div>
+  </div>
 
-  <input type="password" id="password" placeholder="Nhập mật khẩu">
+  <div class="title">🔐 Đăng nhập quản trị</div>
+
+  <input type="password" id="password" placeholder="Nhập mật khẩu" onkeydown="handleEnter(event)">
 
   <button onclick="login()">Đăng nhập</button>
 
   <div id="error" class="error"></div>
+
+  <div class="note">Customer Request System</div>
 </div>
 
 <script>
-const PASSWORD = "yamadenapp"; // 👉 đổi mật khẩu tại đây
+const PASSWORD = "yamadenapp";
 
 function login() {
   const pass = document.getElementById("password").value;
@@ -76,10 +139,15 @@ function login() {
   if (pass === PASSWORD) {
     localStorage.setItem("adminLogged", "true");
     localStorage.setItem("loginTime", Date.now());
-
     window.location.href = "/admin.html";
   } else {
     document.getElementById("error").innerText = "Sai mật khẩu!";
+  }
+}
+
+function handleEnter(event) {
+  if (event.key === "Enter") {
+    login();
   }
 }
 </script>
