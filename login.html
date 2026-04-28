@@ -105,6 +105,11 @@ button:hover {
   background: #1d4ed8;
 }
 
+button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .error {
   color: #dc2626;
   font-weight: 800;
@@ -152,7 +157,7 @@ button:hover {
 </div>
 
 <script>
-const PASSWORD = "yamaden123";
+const API = "https://yamaden.onrender.com";
 
 let lang = localStorage.getItem("loginLang") || localStorage.getItem("language") || "vi";
 
@@ -161,13 +166,15 @@ const texts = {
     title: "🔐 Đăng nhập quản trị",
     placeholder: "Nhập mật khẩu",
     login: "Đăng nhập",
-    wrong: "Sai mật khẩu!"
+    logging: "Đang đăng nhập...",
+    wrong: "Sai mật khẩu hoặc lỗi đăng nhập!"
   },
   ja: {
     title: "🔐 管理者ログイン",
     placeholder: "パスワードを入力",
     login: "ログイン",
-    wrong: "パスワードが違います"
+    logging: "ログイン中...",
+    wrong: "パスワードが違うか、ログインに失敗しました"
   }
 };
 
@@ -188,17 +195,40 @@ function changeLanguage() {
   applyLanguage();
 }
 
-function login() {
+async function login() {
   const t = texts[lang];
   const pass = password.value;
 
-  if (pass === PASSWORD) {
-    localStorage.setItem("adminLogged", "true");
+  error.innerText = "";
+  loginBtn.disabled = true;
+  loginBtn.innerText = t.logging;
+
+  try {
+    const res = await fetch(API + "/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: pass })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      error.innerText = t.wrong;
+      loginBtn.disabled = false;
+      loginBtn.innerText = t.login;
+      return;
+    }
+
+    localStorage.setItem("adminToken", data.token);
     localStorage.setItem("loginTime", Date.now());
     localStorage.setItem("language", lang);
+
     window.location.href = "/admin.html";
-  } else {
+
+  } catch (err) {
     error.innerText = t.wrong;
+    loginBtn.disabled = false;
+    loginBtn.innerText = t.login;
   }
 }
 

@@ -524,22 +524,39 @@ body {
 </div>
 
 <script>
-const isLogged = localStorage.getItem("adminLogged");
+const adminToken = localStorage.getItem("adminToken");
 const loginTime = localStorage.getItem("loginTime");
 
-if (!isLogged || !loginTime || Date.now() - loginTime > 86400000) {
-  localStorage.removeItem("adminLogged");
+if (!adminToken || !loginTime || Date.now() - loginTime > 86400000) {
+  localStorage.removeItem("adminToken");
   localStorage.removeItem("loginTime");
   window.location.href = "/login.html";
 }
 
 function logout() {
-  localStorage.removeItem("adminLogged");
+  localStorage.removeItem("adminToken");
   localStorage.removeItem("loginTime");
   window.location.href = "/login.html";
 }
 
 const API = "https://yamaden.onrender.com";
+
+function apiFetch(url, options = {}) {
+  const token = localStorage.getItem("adminToken");
+
+  options.headers = {
+    ...(options.headers || {}),
+    "Authorization": "Bearer " + token
+  };
+
+  return fetch(url, options);
+}
+
+function authFailLogout() {
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("loginTime");
+  window.location.href = "/login.html";
+}
 
 let currentLang = localStorage.getItem("language") || "vi";
 let currentTab = "active";
@@ -722,7 +739,13 @@ function isToday(dateString) {
 async function load() {
   const t = texts[currentLang];
 
-  const res = await fetch(API + "/requests");
+  const res = await apiFetch(API + "/requests");
+
+  if (res.status === 401) {
+    authFailLogout();
+    return;
+  }
+
   const data = await res.json();
 
   const activeCount = data.filter(item => item.status !== "completed").length;
@@ -820,11 +843,16 @@ async function load() {
 }
 
 async function updateStatus(id, status) {
-  await fetch(API + "/request/" + encodeURIComponent(id), {
+  const res = await apiFetch(API + "/request/" + encodeURIComponent(id), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status })
   });
+
+  if (res.status === 401) {
+    authFailLogout();
+    return;
+  }
 
   load();
 }
@@ -832,11 +860,16 @@ async function updateStatus(id, status) {
 async function saveReply(id) {
   const reply = document.getElementById("reply-" + id).value;
 
-  await fetch(API + "/request/" + encodeURIComponent(id), {
+  const res = await apiFetch(API + "/request/" + encodeURIComponent(id), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ adminReply: reply })
   });
+
+  if (res.status === 401) {
+    authFailLogout();
+    return;
+  }
 
   load();
 }
@@ -857,9 +890,14 @@ function closeModal() {
 async function confirmDelete() {
   if (deleteId === null) return;
 
-  await fetch(API + "/request/" + encodeURIComponent(deleteId), {
+  const res = await apiFetch(API + "/request/" + encodeURIComponent(deleteId), {
     method: "DELETE"
   });
+
+  if (res.status === 401) {
+    authFailLogout();
+    return;
+  }
 
   closeModal();
   load();
