@@ -1,627 +1,556 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>YAMADEN Support</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <link rel="icon" type="image/png" href="/icon-192.png">
-  <link rel="apple-touch-icon" href="/icon-192.png">
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#111111">
-
-  <style>
-    * { box-sizing: border-box; }
-
-    :root {
-      --black:#0b0b0f;
-      --dark:#111827;
-      --gray:#6b7280;
-      --line:#e5e7eb;
-      --bg:#f5f6fa;
-      --blue:#2563eb;
-      --green:#16a34a;
-      --orange:#f59e0b;
-      --red:#dc2626;
-    }
-
-    body {
-      margin:0;
-      font-family:"Segoe UI", Arial, sans-serif;
-      background:linear-gradient(180deg,#eef1f6,#ffffff);
-      color:#111827;
-    }
-
-    .app {
-      max-width:480px;
-      margin:0 auto;
-      min-height:100vh;
-      background:#f7f8fb;
-      padding-bottom:105px;
-      position:relative;
-      overflow:hidden;
-    }
-
-    .top-header {
-      background:
-        radial-gradient(circle at top right, rgba(255,255,255,0.16), transparent 35%),
-        linear-gradient(145deg,#050505,#171717);
-      color:white;
-      padding:20px 18px 30px;
-      border-radius:0 0 36px 36px;
-      box-shadow:0 18px 45px rgba(0,0,0,0.28);
-    }
-
-    .top-row {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-
-    .logo-box {
-      display:flex;
-      align-items:center;
-      gap:12px;
-      font-size:22px;
-      font-weight:900;
-      letter-spacing:0.5px;
-    }
-
-    .logo-box img {
-      width:46px;
-      height:46px;
-      border-radius:14px;
-      background:white;
-      box-shadow:0 8px 20px rgba(0,0,0,0.25);
-    }
-
-    .lang-select {
-      width:78px;
-      padding:10px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,0.18);
-      background:rgba(255,255,255,0.12);
-      color:white;
-      font-weight:900;
-      outline:none;
-    }
-
-    .lang-select option { color:#111; }
-
-    .hero {
-      margin-top:24px;
-      padding:20px;
-      border-radius:26px;
-      background:rgba(255,255,255,0.1);
-      border:1px solid rgba(255,255,255,0.16);
-      backdrop-filter:blur(10px);
-    }
-
-    .hero h2 {
-      margin:0 0 10px;
-      font-size:28px;
-      line-height:1.25;
-      font-weight:950;
-    }
-
-    .hero p {
-      margin:0;
-      font-size:15px;
-      line-height:1.7;
-      color:#e5e7eb;
-    }
-
-    .container {
-      padding:18px;
-      margin-top:-12px;
-    }
-
-    .notice {
-      display:none;
-      background:#ecfdf5;
-      color:#166534;
-      padding:14px 16px;
-      border-radius:18px;
-      margin-bottom:14px;
-      font-weight:800;
-      border:1px solid #bbf7d0;
-      box-shadow:0 10px 22px rgba(22,163,74,0.12);
-    }
-
-    .card {
-      background:white;
-      border-radius:28px;
-      padding:22px;
-      box-shadow:0 18px 45px rgba(15,23,42,0.08);
-      margin-bottom:18px;
-      border:1px solid rgba(229,231,235,0.9);
-      animation: cardUp 0.35s ease;
-    }
-
-    @keyframes cardUp {
-      from { opacity:0; transform:translateY(12px); }
-      to { opacity:1; transform:translateY(0); }
-    }
-
-    .card-title {
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom:22px;
-    }
-
-    .card-title-icon {
-      width:38px;
-      height:38px;
-      border-radius:13px;
-      background:#f3f4f6;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#111827;
-    }
-
-    .card h3 {
-      margin:0;
-      color:#111827;
-      font-size:22px;
-      font-weight:950;
-    }
-
-    .field { margin-bottom:17px; }
-
-    .field label {
-      display:block;
-      font-weight:850;
-      margin-bottom:8px;
-      font-size:14px;
-      color:#111827;
-    }
-
-    .required { color:#dc2626; }
-
-    .input-wrap { position:relative; }
-
-    .input-icon {
-      position:absolute;
-      left:14px;
-      top:50%;
-      transform:translateY(-50%);
-      color:#6b7280;
-      width:22px;
-      height:22px;
-      pointer-events:none;
-    }
-
-    .textarea-icon {
-      top:18px;
-      transform:none;
-    }
-
-    input, textarea {
-      width:100%;
-      border:1px solid #d1d5db;
-      border-radius:16px;
-      padding:15px 15px 15px 46px;
-      font-size:16px;
-      outline:none;
-      background:white;
-      transition:0.18s;
-      color:#111827;
-    }
-
-    textarea {
-      min-height:130px;
-      resize:vertical;
-      line-height:1.5;
-    }
-
-    input:focus, textarea:focus {
-      border-color:#111827;
-      box-shadow:0 0 0 5px rgba(17,24,39,0.08);
-    }
-
-    .upload-box {
-      border:2px dashed #9ca3af;
-      background:linear-gradient(180deg,#ffffff,#f9fafb);
-      padding:22px 18px;
-      border-radius:22px;
-      text-align:center;
-      color:#111827;
-      font-weight:800;
-    }
-
-    .upload-icon {
-      width:54px;
-      height:54px;
-      border-radius:18px;
-      margin:0 auto 10px;
-      background:#f3f4f6;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#111827;
-    }
-
-    .upload-sub {
-      color:#6b7280;
-      font-size:13px;
-      font-weight:650;
-      margin-top:4px;
-      margin-bottom:12px;
-    }
-
-    .preview-img {
-      width:100%;
-      max-height:220px;
-      object-fit:cover;
-      border-radius:18px;
-      margin-bottom:12px;
-      box-shadow:0 10px 24px rgba(0,0,0,0.14);
-    }
-
-    .main-btn {
-      width:100%;
-      border:none;
-      border-radius:18px;
-      padding:16px;
-      background:linear-gradient(135deg,#050505,#1f2937);
-      color:white;
-      font-size:17px;
-      font-weight:950;
-      cursor:pointer;
-      box-shadow:0 12px 24px rgba(0,0,0,0.24);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:9px;
-    }
-
-    .main-btn:active { transform:scale(0.99); }
-
-    .main-btn:disabled {
-      opacity:0.65;
-      cursor:not-allowed;
-    }
-
-    .secondary-row {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-top:12px;
-    }
-
-    .soft-btn, .copy-btn, .history-btn {
-      width:100%;
-      border:none;
-      border-radius:16px;
-      padding:14px;
-      background:#f9fafb;
-      color:#111827;
-      font-size:14px;
-      font-weight:900;
-      cursor:pointer;
-      border:1px solid #e5e7eb;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-    }
-
-    .choose-image-btn {
-      margin: 0 auto;
-      max-width: 180px;
-      background:#111827;
-      color:white;
-    }
-
-    .copy-btn {
-      background:#111827;
-      color:white;
-      margin-top:14px;
-    }
-
-    .history-btn {
-      justify-content:flex-start;
-      margin-top:10px;
-      background:white;
-      box-shadow:0 8px 18px rgba(15,23,42,0.05);
-    }
-
-    .success-box {
-      background:linear-gradient(180deg,#ffffff,#f9fafb);
-      color:#111827;
-      padding:18px;
-      border-radius:22px;
-      line-height:1.8;
-      border:1px solid #e5e7eb;
-      box-shadow:0 12px 28px rgba(15,23,42,0.06);
-    }
-
-    .success-center {
-      text-align:center;
-      padding:8px 0;
-    }
-
-    .success-icon {
-      width:76px;
-      height:76px;
-      border-radius:50%;
-      background:#dcfce7;
-      color:#16a34a;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin:0 auto 16px;
-      box-shadow:0 0 0 14px rgba(22,163,74,0.08);
-    }
-
-    .success-title {
-      font-size:22px;
-      font-weight:950;
-      margin-bottom:6px;
-    }
-
-    .id-box {
-      margin:16px 0;
-      padding:18px;
-      border-radius:20px;
-      border:1px solid #e5e7eb;
-      background:white;
-      text-align:center;
-    }
-
-    .id-number {
-      font-size:34px;
-      color:#16a34a;
-      font-weight:950;
-    }
-
-    .tip-box {
-      background:#ecfdf5;
-      color:#166534;
-      padding:14px;
-      border-radius:16px;
-      border:1px solid #bbf7d0;
-      font-weight:750;
-      margin-bottom:14px;
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-    }
-
-    .result {
-      margin-top:14px;
-      font-weight:700;
-      color:#111827;
-      line-height:1.7;
-    }
-
-    .loader {
-      border:4px solid #e5e7eb;
-      border-top:4px solid #111827;
-      border-radius:50%;
-      width:32px;
-      height:32px;
-      animation:spin 1s linear infinite;
-      margin:18px auto;
-      display:none;
-    }
-
-    @keyframes spin {
-      100% { transform:rotate(360deg); }
-    }
-
-    .hidden { display:none; }
-
-    .badge {
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:7px 13px;
-      border-radius:999px;
-      font-size:13px;
-      font-weight:900;
-    }
-
-    .pending {
-      background:#f3f4f6;
-      color:#374151;
-    }
-
-    .processing {
-      background:#fff7ed;
-      color:#c2410c;
-    }
-
-    .completed {
-      background:#ecfdf5;
-      color:#166534;
-    }
-
-    .status-timeline {
-      display:grid;
-      grid-template-columns:repeat(3, 1fr);
-      gap:8px;
-      margin:18px 0;
-    }
-
-    .step {
-      text-align:center;
-      padding:10px 6px;
-      border-radius:16px;
-      background:#f3f4f6;
-      color:#6b7280;
-      font-size:12px;
-      font-weight:900;
-      line-height:1.4;
-    }
-
-    .step.active {
-      background:#111827;
-      color:white;
-    }
-
-    .step.done {
-      background:#dcfce7;
-      color:#166534;
-    }
-
-    .check-image {
-      width:100%;
-      max-width:320px;
-      border-radius:18px;
-      margin-top:8px;
-      box-shadow:0 10px 24px rgba(0,0,0,0.14);
-    }
-
-    .request-card {
-      display:flex;
-      gap:12px;
-      padding:14px;
-      border-radius:20px;
-      background:white;
-      border:1px solid #e5e7eb;
-      box-shadow:0 10px 24px rgba(15,23,42,0.06);
-      margin-bottom:12px;
-      cursor:pointer;
-    }
-
-    .request-thumb {
-      width:70px;
-      height:70px;
-      border-radius:16px;
-      background:#f3f4f6;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#6b7280;
-      flex-shrink:0;
-    }
-
-    .request-info {
-      flex:1;
-      min-width:0;
-    }
-
-    .request-id {
-      color:#2563eb;
-      font-weight:950;
-      font-size:16px;
-    }
-
-    .request-desc {
-      color:#374151;
-      font-size:13px;
-      margin-top:4px;
-    }
-
-    .bottom-nav {
-      position:fixed;
-      left:50%;
-      bottom:14px;
-      transform:translateX(-50%);
-      width:min(440px, calc(100% - 28px));
-      background:rgba(255,255,255,0.92);
-      backdrop-filter:blur(14px);
-      border-radius:24px;
-      box-shadow:0 14px 36px rgba(0,0,0,0.18);
-      display:flex;
-      padding:8px;
-      gap:8px;
-      z-index:100;
-      border:1px solid #e5e7eb;
-    }
-
-    .bottom-nav button {
-      flex:1;
-      border:none;
-      background:transparent;
-      color:#6b7280;
-      border-radius:18px;
-      padding:11px 8px;
-      font-weight:900;
-      font-size:13px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:4px;
-      cursor:pointer;
-    }
-
-    .bottom-nav button.active {
-      background:#111827;
-      color:white;
-    }
-
-    hr {
-      border:none;
-      border-top:1px solid #e5e7eb;
-      margin:16px 0;
-    }
-
-    .info-line {
-      margin:8px 0;
-      color:#374151;
-    }
-
-    .small-link {
-      margin-top:10px;
-      text-align:center;
-      color:#6b7280;
-      font-size:13px;
-      cursor:pointer;
-      text-decoration:underline;
-      font-weight:700;
-    }
-
-    .toast {
-      position:fixed;
-      top:18px;
-      left:50%;
-      transform:translateX(-50%) translateY(-20px);
-      background:#111827;
-      color:white;
-      padding:13px 18px;
-      border-radius:16px;
-      font-weight:900;
-      z-index:9999;
-      box-shadow:0 14px 35px rgba(0,0,0,0.25);
-      opacity:0;
-      pointer-events:none;
-      transition:0.25s ease;
-      max-width:calc(100% - 32px);
-      text-align:center;
-    }
-
-    .toast.show {
-      opacity:1;
-      transform:translateX(-50%) translateY(0);
-    }
-
-    svg {
-      width:21px;
-      height:21px;
-      stroke:currentColor;
-      stroke-width:2.2;
-      fill:none;
-      stroke-linecap:round;
-      stroke-linejoin:round;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>YAMADEN Support</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0b0b0f">
+
+<style>
+* { box-sizing:border-box; }
+:root {
+  --black:#0b0b0f;
+  --dark:#111827;
+  --text:#111827;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+  --bg:#f5f7fb;
+  --blue:#2563eb;
+  --green:#16a34a;
+  --orange:#f59e0b;
+  --red:#dc2626;
+  --shadow:0 18px 45px rgba(15,23,42,0.08);
+}
+body {
+  margin:0;
+  font-family:"Segoe UI", Arial, sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(37,99,235,0.13), transparent 32%),
+    radial-gradient(circle at 86% 2%, rgba(6,182,212,0.12), transparent 30%),
+    linear-gradient(180deg,#eef2f7,#ffffff);
+}
+button, input, textarea, select { font-family:inherit; }
+.icon {
+  width:21px;
+  height:21px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:none;
+  color:currentColor;
+}
+.icon svg {
+  width:100%;
+  height:100%;
+  display:block;
+  stroke:currentColor;
+  fill:none;
+  stroke-width:2.15;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.app {
+  width:min(100%, 1120px);
+  min-height:100vh;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:420px 1fr;
+  background:#f7f8fb;
+  box-shadow:0 0 80px rgba(15,23,42,0.08);
+}
+.top-header {
+  position:sticky;
+  top:0;
+  height:100vh;
+  color:white;
+  padding:26px;
+  background:
+    radial-gradient(circle at top right, rgba(255,255,255,0.16), transparent 34%),
+    linear-gradient(145deg,#050505,#171717);
+  display:flex;
+  flex-direction:column;
+}
+.top-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+}
+.logo-box {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:23px;
+  font-weight:950;
+  letter-spacing:0.5px;
+}
+.logo-box img {
+  width:50px;
+  height:50px;
+  border-radius:16px;
+  background:white;
+  box-shadow:0 8px 20px rgba(0,0,0,0.25);
+}
+.lang-select {
+  width:78px;
+  min-height:46px;
+  padding:10px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.18);
+  background:rgba(255,255,255,0.12);
+  color:white;
+  font-weight:950;
+  outline:none;
+}
+.lang-select option { color:#111; }
+.hero {
+  margin-top:44px;
+  padding:24px;
+  border-radius:26px;
+  background:rgba(255,255,255,0.10);
+  border:1px solid rgba(255,255,255,0.16);
+  backdrop-filter:blur(10px);
+}
+.hero h1 {
+  margin:0 0 12px;
+  font-size:34px;
+  line-height:1.12;
+  font-weight:950;
+  letter-spacing:-0.7px;
+}
+.hero p {
+  margin:0;
+  font-size:15px;
+  line-height:1.7;
+  color:#e5e7eb;
+  font-weight:700;
+}
+.side-steps {
+  margin-top:28px;
+  display:grid;
+  gap:12px;
+}
+.side-step {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  color:#e5e7eb;
+  font-weight:850;
+}
+.side-step .icon {
+  width:34px;
+  height:34px;
+  padding:8px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.12);
+  color:white;
+}
+.side-footer {
+  margin-top:auto;
+  color:#cbd5e1;
+  font-size:12px;
+  line-height:1.7;
+  font-weight:700;
+}
+.main {
+  min-width:0;
+  padding:24px;
+  padding-bottom:104px;
+}
+.mobile-brand { display:none; }
+.notice {
+  display:none;
+  background:#ecfdf5;
+  color:#166534;
+  padding:14px 16px;
+  border-radius:18px;
+  margin-bottom:14px;
+  font-weight:900;
+  border:1px solid #bbf7d0;
+  box-shadow:0 10px 22px rgba(22,163,74,0.12);
+}
+.card {
+  background:white;
+  border-radius:24px;
+  padding:22px;
+  box-shadow:var(--shadow);
+  margin-bottom:18px;
+  border:1px solid rgba(229,231,235,0.92);
+}
+.card-title {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:20px;
+}
+.card-title-icon {
+  width:38px;
+  height:38px;
+  border-radius:13px;
+  background:#f3f4f6;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#111827;
+}
+.card h2,.card h3 { margin:0; color:#111827; font-size:22px; font-weight:950; }
+.form-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.field { margin-bottom:16px; }
+.field.full { grid-column:1 / -1; }
+.field label {
+  display:block;
+  font-weight:900;
+  margin-bottom:8px;
+  font-size:14px;
+  color:#111827;
+}
+.required { color:var(--red); }
+.input-wrap { position:relative; }
+.input-icon {
+  position:absolute;
+  left:14px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#6b7280;
+  width:22px;
+  height:22px;
+  pointer-events:none;
+}
+.textarea-icon { top:18px; transform:none; }
+input, textarea {
+  width:100%;
+  border:1px solid #d1d5db;
+  border-radius:16px;
+  padding:15px 15px 15px 46px;
+  font-size:16px;
+  outline:none;
+  background:white;
+  transition:0.18s;
+  color:#111827;
+  font-weight:650;
+}
+textarea {
+  min-height:124px;
+  resize:vertical;
+  line-height:1.5;
+}
+input:focus, textarea:focus {
+  border-color:#111827;
+  box-shadow:0 0 0 5px rgba(17,24,39,0.08);
+}
+.upload-box {
+  border:2px dashed #9ca3af;
+  background:linear-gradient(180deg,#ffffff,#f9fafb);
+  padding:20px 18px;
+  border-radius:20px;
+  text-align:center;
+  color:#111827;
+  font-weight:850;
+}
+.upload-icon {
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  margin:0 auto 10px;
+  background:#f3f4f6;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#111827;
+}
+.upload-sub {
+  color:#6b7280;
+  font-size:13px;
+  font-weight:700;
+  margin-top:4px;
+  margin-bottom:12px;
+}
+.preview-img {
+  width:100%;
+  max-height:230px;
+  object-fit:cover;
+  border-radius:18px;
+  margin-bottom:12px;
+  box-shadow:0 10px 24px rgba(0,0,0,0.14);
+}
+.main-btn,.soft-btn,.copy-btn {
+  border:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  font-weight:950;
+}
+.main-btn {
+  width:100%;
+  border-radius:18px;
+  padding:16px;
+  background:linear-gradient(135deg,#050505,#1f2937);
+  color:white;
+  font-size:17px;
+  box-shadow:0 12px 24px rgba(0,0,0,0.24);
+}
+.main-btn:disabled { opacity:0.65; cursor:not-allowed; }
+.soft-btn,.copy-btn {
+  width:100%;
+  border-radius:16px;
+  padding:14px;
+  background:#f9fafb;
+  color:#111827;
+  font-size:14px;
+  border:1px solid #e5e7eb;
+}
+.choose-image-btn {
+  margin:0 auto;
+  max-width:180px;
+  background:#111827;
+  color:white;
+}
+.secondary-row {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:12px;
+}
+.success-box {
+  background:linear-gradient(180deg,#ffffff,#f9fafb);
+  color:#111827;
+  padding:18px;
+  border-radius:22px;
+  line-height:1.8;
+  border:1px solid #e5e7eb;
+  box-shadow:0 12px 28px rgba(15,23,42,0.06);
+}
+.success-center { text-align:center; padding:8px 0; }
+.success-icon {
+  width:72px;
+  height:72px;
+  border-radius:50%;
+  background:#dcfce7;
+  color:#16a34a;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 16px;
+  box-shadow:0 0 0 14px rgba(22,163,74,0.08);
+}
+.success-title { font-size:22px; font-weight:950; margin-bottom:6px; }
+.id-box {
+  margin:16px 0;
+  padding:18px;
+  border-radius:20px;
+  border:1px solid #e5e7eb;
+  background:white;
+  text-align:center;
+}
+.id-number { font-size:34px; color:#16a34a; font-weight:950; }
+.tip-box {
+  background:#ecfdf5;
+  color:#166534;
+  padding:14px;
+  border-radius:16px;
+  border:1px solid #bbf7d0;
+  font-weight:800;
+  margin-bottom:14px;
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+.result { margin-top:14px; font-weight:700; color:#111827; line-height:1.7; }
+.hidden { display:none; }
+.badge {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 13px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:950;
+}
+.pending { background:#f3f4f6; color:#374151; }
+.processing { background:#fff7ed; color:#c2410c; }
+.completed { background:#ecfdf5; color:#166534; }
+.status-timeline {
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:8px;
+  margin:18px 0;
+}
+.step {
+  text-align:center;
+  padding:10px 6px;
+  border-radius:16px;
+  background:#f3f4f6;
+  color:#6b7280;
+  font-size:12px;
+  font-weight:950;
+  line-height:1.4;
+}
+.step.active { background:#111827; color:white; }
+.step.done { background:#dcfce7; color:#166534; }
+.check-image {
+  width:100%;
+  max-width:360px;
+  border-radius:18px;
+  margin-top:8px;
+  box-shadow:0 10px 24px rgba(0,0,0,0.14);
+}
+.request-card {
+  display:flex;
+  gap:12px;
+  padding:14px;
+  border-radius:20px;
+  background:white;
+  border:1px solid #e5e7eb;
+  box-shadow:0 10px 24px rgba(15,23,42,0.06);
+  margin-bottom:12px;
+  cursor:pointer;
+}
+.request-thumb {
+  width:64px;
+  height:64px;
+  border-radius:16px;
+  background:#f3f4f6;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#6b7280;
+  flex-shrink:0;
+}
+.request-info { flex:1; min-width:0; }
+.request-id { color:#2563eb; font-weight:950; font-size:16px; }
+.request-desc {
+  color:#374151;
+  font-size:13px;
+  margin-top:4px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.bottom-nav {
+  position:fixed;
+  left:50%;
+  bottom:14px;
+  transform:translateX(-50%);
+  width:min(520px, calc(100% - 28px));
+  background:rgba(255,255,255,0.92);
+  backdrop-filter:blur(14px);
+  border-radius:24px;
+  box-shadow:0 14px 36px rgba(0,0,0,0.18);
+  display:flex;
+  padding:8px;
+  gap:8px;
+  z-index:100;
+  border:1px solid #e5e7eb;
+}
+.bottom-nav button {
+  flex:1;
+  border:none;
+  background:transparent;
+  color:#6b7280;
+  border-radius:18px;
+  padding:11px 8px;
+  font-weight:950;
+  font-size:13px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  cursor:pointer;
+}
+.bottom-nav button.active { background:#111827; color:white; }
+hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
+.info-line { margin:8px 0; color:#374151; }
+.small-link {
+  margin-top:10px;
+  text-align:center;
+  color:#6b7280;
+  font-size:13px;
+  cursor:pointer;
+  text-decoration:underline;
+  font-weight:800;
+}
+.toast {
+  position:fixed;
+  top:18px;
+  left:50%;
+  transform:translateX(-50%) translateY(-20px);
+  background:#111827;
+  color:white;
+  padding:13px 18px;
+  border-radius:16px;
+  font-weight:950;
+  z-index:9999;
+  box-shadow:0 14px 35px rgba(0,0,0,0.25);
+  opacity:0;
+  pointer-events:none;
+  transition:0.25s ease;
+  max-width:calc(100% - 32px);
+  text-align:center;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.spin { animation:spin 1s linear infinite; }
+@keyframes spin { 100% { transform:rotate(360deg); } }
+
+@media (max-width:860px) {
+  body { background:linear-gradient(180deg,#eef1f6,#ffffff); }
+  .app {
+    width:100%;
+    max-width:480px;
+    display:block;
+    box-shadow:none;
+  }
+  .top-header {
+    position:relative;
+    height:auto;
+    padding:20px 18px 28px;
+    border-radius:0 0 32px 32px;
+    box-shadow:0 18px 45px rgba(0,0,0,0.28);
+  }
+  .hero { margin-top:22px; padding:20px; border-radius:24px; }
+  .hero h1 { font-size:27px; }
+  .side-steps,.side-footer { display:none; }
+  .main {
+    padding:16px;
+    padding-bottom:104px;
+    margin-top:-12px;
+  }
+  .card { border-radius:24px; padding:20px; }
+  .form-grid { grid-template-columns:1fr; gap:0; }
+}
+@media (max-width:420px) {
+  .top-header { padding:18px 16px 26px; }
+  .logo-box { font-size:21px; }
+  .logo-box img { width:46px; height:46px; }
+  .hero h1 { font-size:25px; }
+  .secondary-row { grid-template-columns:1fr; }
+  .bottom-nav { bottom:10px; width:calc(100% - 20px); }
+}
+</style>
 </head>
 
 <body>
-
 <div class="app">
-
-  <div class="top-header">
+  <header class="top-header">
     <div class="top-row">
       <div class="logo-box">
         <img src="/icon-192.png" alt="YAMADEN">
         <span>YAMADEN</span>
       </div>
-
       <select id="language" class="lang-select" onchange="changeLanguage()">
         <option value="vi">VI</option>
         <option value="ja">JP</option>
@@ -629,132 +558,110 @@
     </div>
 
     <div class="hero">
-      <h2 id="welcomeTitle">Xin chào!</h2>
-      <p id="welcomeText">Gửi yêu cầu hỗ trợ và tra cứu trạng thái nhanh chóng.</p>
+      <h1 id="welcomeTitle">Chúng tôi luôn sẵn sàng hỗ trợ bạn</h1>
+      <p id="welcomeText">Gửi yêu cầu và chúng tôi sẽ liên hệ hỗ trợ bạn trong thời gian sớm nhất.</p>
     </div>
-  </div>
 
-  <div class="container">
+    <div class="side-steps">
+      <div class="side-step"><span class="icon" id="sideSendIcon"></span><span id="sideStep1">Gửi thông tin sự cố</span></div>
+      <div class="side-step"><span class="icon" id="sideTrackIcon"></span><span id="sideStep2">Theo dõi trạng thái</span></div>
+      <div class="side-step"><span class="icon" id="sideReplyIcon"></span><span id="sideStep3">Nhận phản hồi từ admin</span></div>
+    </div>
 
-    <div id="notice" class="notice">🔔 Admin đã phản hồi!</div>
+    <div class="side-footer">© 2026 YAMADEN<br>Customer Request System</div>
+  </header>
 
-    <div class="card" id="sendSection">
+  <main class="main">
+    <div id="notice" class="notice"></div>
+
+    <section class="card" id="sendSection">
       <div class="card-title">
-        <div class="card-title-icon">
-          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-        </div>
-        <h3 id="sendTitle">Gửi yêu cầu sửa điện</h3>
+        <div class="card-title-icon" id="sendTitleIcon"></div>
+        <h2 id="sendTitle">Gửi yêu cầu hỗ trợ</h2>
       </div>
 
-      <div class="field">
-        <label><span id="labelName">Tên khách</span> <span class="required">*</span></label>
-        <div class="input-wrap">
-          <div class="input-icon">
-            <svg viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+      <div class="form-grid">
+        <div class="field">
+          <label><span id="labelName">Họ và tên</span> <span class="required">*</span></label>
+          <div class="input-wrap">
+            <div class="input-icon icon" id="nameIcon"></div>
+            <input id="name" autocomplete="name" placeholder="Họ và tên">
           </div>
-          <input id="name" placeholder="Tên khách">
         </div>
-      </div>
 
-      <div class="field">
-        <label><span id="labelPhone">Số điện thoại</span> <span class="required">*</span></label>
-        <div class="input-wrap">
-          <div class="input-icon">
-            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3 5.18 2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.72c.12.9.32 1.77.6 2.6a2 2 0 0 1-.45 2.11L9 10.6a16 16 0 0 0 4.4 4.4l1.17-1.15a2 2 0 0 1 2.11-.45c.83.28 1.7.48 2.6.6A2 2 0 0 1 22 16.92Z"/></svg>
+        <div class="field">
+          <label><span id="labelPhone">Số điện thoại</span> <span class="required">*</span></label>
+          <div class="input-wrap">
+            <div class="input-icon icon" id="phoneIcon"></div>
+            <input id="phone" inputmode="tel" autocomplete="tel" placeholder="Số điện thoại">
           </div>
-          <input id="phone" placeholder="Số điện thoại">
         </div>
-      </div>
 
-      <div class="field">
-        <label id="labelContact">Liên hệ</label>
-        <div class="input-wrap">
-          <div class="input-icon">
-            <svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg>
+        <div class="field">
+          <label id="labelContact">Liên hệ</label>
+          <div class="input-wrap">
+            <div class="input-icon icon" id="contactIcon"></div>
+            <input id="contact" placeholder="Email / LINE / Zalo">
           </div>
-          <input id="contact" placeholder="Email / LINE / Zalo">
         </div>
-      </div>
 
-      <div class="field">
-        <label><span id="labelAddress">Địa chỉ công trình</span> <span class="required">*</span></label>
-        <div class="input-wrap">
-          <div class="input-icon">
-            <svg viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <div class="field">
+          <label><span id="labelAddress">Địa chỉ</span> <span class="required">*</span></label>
+          <div class="input-wrap">
+            <div class="input-icon icon" id="addressIcon"></div>
+            <input id="address" autocomplete="street-address" placeholder="Địa chỉ">
           </div>
-          <input id="address" placeholder="Địa chỉ công trình">
         </div>
-      </div>
 
-      <div class="field">
-        <label><span id="labelContent">Nội dung sự cố</span> <span class="required">*</span></label>
-        <div class="input-wrap">
-          <div class="input-icon textarea-icon">
-            <svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg>
+        <div class="field full">
+          <label><span id="labelContent">Nội dung yêu cầu</span> <span class="required">*</span></label>
+          <div class="input-wrap">
+            <div class="input-icon textarea-icon icon" id="contentIcon"></div>
+            <textarea id="content" placeholder="Nội dung yêu cầu"></textarea>
           </div>
-          <textarea id="content" placeholder="Mô tả sự cố"></textarea>
         </div>
-      </div>
 
-      <div class="field">
-        <label id="labelImage">Hình ảnh</label>
-        <div class="upload-box">
-          <div class="upload-icon">
-            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8 12 3 7 8"/><path d="M12 3v12"/></svg>
+        <div class="field full">
+          <label id="labelImage">Hình ảnh</label>
+          <div class="upload-box">
+            <div class="upload-icon" id="uploadIcon"></div>
+            <div id="uploadText">Chọn ảnh hoặc chụp ảnh</div>
+            <div class="upload-sub">JPG / PNG</div>
+            <input type="file" id="image" accept="image/*" style="display:none;">
+            <button type="button" class="soft-btn choose-image-btn" id="chooseImageBtn" onclick="imageEl.click()">Chọn ảnh</button>
           </div>
-
-          <div id="uploadText">Chọn ảnh hoặc chụp ảnh</div>
-          <div class="upload-sub">JPG / PNG</div>
-
-          <input type="file" id="image" accept="image/*" style="display:none;">
-
-          <button type="button" class="soft-btn choose-image-btn" id="chooseImageBtn" onclick="imageEl.click()">
-            Chọn ảnh
-          </button>
         </div>
       </div>
 
       <button class="main-btn" onclick="sendRequest()" id="sendBtn">
-        <svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        <span class="icon" id="sendBtnIcon"></span>
         <span id="sendBtnText">Gửi yêu cầu</span>
       </button>
 
       <div class="secondary-row">
-        <button class="soft-btn" onclick="copyLastId()">
-          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          <span id="copyIdText">Copy ID</span>
-        </button>
-
-        <button class="soft-btn" onclick="showTab('check')">
-          <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-          <span id="historyText">Lịch sử</span>
-        </button>
+        <button class="soft-btn" onclick="copyLastId()"><span class="icon" id="copyIdIcon"></span><span id="copyIdText">Copy ID</span></button>
+        <button class="soft-btn" onclick="showTab('check')"><span class="icon" id="historyIcon"></span><span id="historyText">Lịch sử</span></button>
       </div>
 
-      <div class="loader" id="loader"></div>
       <div id="result" class="result"></div>
-    </div>
+    </section>
 
-    <div class="card hidden" id="checkSection">
+    <section class="card hidden" id="checkSection">
       <div class="card-title">
-        <div class="card-title-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        </div>
-        <h3 id="checkTitle">Tra cứu trạng thái yêu cầu</h3>
+        <div class="card-title-icon" id="checkTitleIcon"></div>
+        <h2 id="checkTitle">Tra cứu trạng thái yêu cầu</h2>
       </div>
 
       <div class="field">
         <label id="labelCheckId">Mã yêu cầu</label>
         <div class="input-wrap">
-          <div class="input-icon">
-            <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
-          </div>
+          <div class="input-icon icon" id="checkIdIcon"></div>
           <input id="checkId" placeholder="Nhập mã yêu cầu">
         </div>
       </div>
 
       <button class="main-btn" onclick="checkStatus(false)" id="checkBtn">
-        <svg viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        <span class="icon" id="checkBtnIcon"></span>
         <span id="checkBtnText">Kiểm tra</span>
       </button>
 
@@ -763,592 +670,401 @@
       <h3 id="myRequestTitle">Yêu cầu của tôi</h3>
       <div id="myRequests"></div>
       <div class="small-link" id="clearHistoryBtn" onclick="clearMyRequests()">Xóa lịch sử trên máy này</div>
-
       <div id="checkResult" class="result"></div>
-    </div>
+    </section>
+  </main>
 
-  </div>
-
-  <div class="bottom-nav">
-    <button id="tabSend" class="active" onclick="showTab('send')">
-      <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
-      <span>Gửi yêu cầu</span>
-    </button>
-    <button id="tabCheck" onclick="showTab('check')">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      <span>Tra cứu</span>
-    </button>
-  </div>
-
+  <nav class="bottom-nav">
+    <button id="tabSend" class="active" onclick="showTab('send')"><span class="icon" id="tabSendIcon"></span><span>Gửi yêu cầu</span></button>
+    <button id="tabCheck" onclick="showTab('check')"><span class="icon" id="tabCheckIcon"></span><span>Tra cứu</span></button>
+  </nav>
 </div>
 
 <div id="toast" class="toast"></div>
 
 <script>
 const API = "https://yamaden.onrender.com";
-
+let lang = localStorage.getItem("lang") || localStorage.getItem("language") || "vi";
 let lastAdminReply = "";
 let lastCheckedId = "";
+let previewUrl = "";
+
+const ICONS = {
+  edit:`<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
+  user:`<svg viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>`,
+  phone:`<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3 5.18 2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.72c.12.9.32 1.77.6 2.6a2 2 0 0 1-.45 2.11L9 10.6a16 16 0 0 0 4.4 4.4l1.17-1.15a2 2 0 0 1 2.11-.45c.83.28 1.7.48 2.6.6A2 2 0 0 1 22 16.92Z"/></svg>`,
+  message:`<svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg>`,
+  map:`<svg viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  upload:`<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8 12 3 7 8"/><path d="M12 3v12"/></svg>`,
+  send:`<svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>`,
+  copy:`<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
+  chart:`<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>`,
+  clock:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`,
+  search:`<svg viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>`,
+  file:`<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>`,
+  check:`<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>`,
+  light:`<svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2v2"/><path d="M12 8a4 4 0 0 0-2 7.46V17h4v-1.54A4 4 0 0 0 12 8Z"/></svg>`,
+  bell:`<svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>`,
+  spinner:`<svg class="spin" viewBox="0 0 24 24"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>`
+};
 
 const texts = {
   vi: {
-    welcomeTitle: "Chúng tôi luôn sẵn sàng hỗ trợ bạn",
-    welcomeText: "Gửi yêu cầu và chúng tôi sẽ liên hệ hỗ trợ bạn trong thời gian sớm nhất.",
-    tabSend: "Gửi yêu cầu",
-    tabCheck: "Tra cứu",
-    sendTitle: "Gửi yêu cầu hỗ trợ",
-    checkTitle: "Tra cứu trạng thái yêu cầu",
-    name: "Họ và tên",
-    phone: "Số điện thoại",
-    contact: "Liên hệ",
-    address: "Địa chỉ",
-    content: "Nội dung yêu cầu",
-    image: "Hình ảnh",
-    uploadText: "Chọn ảnh hoặc chụp ảnh",
-    chooseImage: "Chọn ảnh",
-    fileSelected: "Đã chọn ảnh",
-    copyId: "Copy ID",
-    history: "Lịch sử",
-    send: "Gửi yêu cầu",
-    check: "Kiểm tra",
-    checkPlaceholder: "Nhập mã yêu cầu",
-    sending: "Đang gửi...",
-    loading: "Đang tải...",
-    success: "Gửi yêu cầu thành công!",
-    successSub: "Cảm ơn bạn đã gửi yêu cầu. Chúng tôi sẽ liên hệ hỗ trợ bạn sớm nhất.",
-    fail: "Gửi thất bại!",
-    required: "Vui lòng nhập đầy đủ thông tin bắt buộc!",
-    requestId: "Mã yêu cầu",
-    copy: "Sao chép ID",
-    copied: "Đã copy ID!",
-    notFound: "Không tìm thấy yêu cầu!",
-    status: "Trạng thái",
-    pending: "Mới tiếp nhận",
-    processing: "Đang xử lý",
-    completed: "Hoàn thành",
-    adminReply: "Phản hồi admin",
-    noReply: "Chưa có phản hồi",
-    noImage: "Không có hình",
-    newReply: "🔔 Admin đã phản hồi!",
-    myRequests: "Yêu cầu của tôi",
-    noHistory: "Chưa có yêu cầu nào trên máy này",
-    clearHistory: "Xóa lịch sử trên máy này",
-    saveIdTip: "Vui lòng lưu ID yêu cầu để tra cứu trạng thái sau này."
+    welcomeTitle:"Chúng tôi luôn sẵn sàng hỗ trợ bạn",
+    welcomeText:"Gửi yêu cầu và chúng tôi sẽ liên hệ hỗ trợ bạn trong thời gian sớm nhất.",
+    sideStep1:"Gửi thông tin sự cố", sideStep2:"Theo dõi trạng thái", sideStep3:"Nhận phản hồi từ admin",
+    tabSend:"Gửi yêu cầu", tabCheck:"Tra cứu", sendTitle:"Gửi yêu cầu hỗ trợ", checkTitle:"Tra cứu trạng thái yêu cầu",
+    name:"Họ và tên", phone:"Số điện thoại", contact:"Liên hệ", address:"Địa chỉ", content:"Nội dung yêu cầu", image:"Hình ảnh",
+    uploadText:"Chọn ảnh hoặc chụp ảnh", chooseImage:"Chọn ảnh", fileSelected:"Đã chọn ảnh", copyId:"Copy ID", history:"Lịch sử",
+    send:"Gửi yêu cầu", check:"Kiểm tra", checkPlaceholder:"Nhập mã yêu cầu", sending:"Đang gửi...", loading:"Đang tải...",
+    success:"Gửi yêu cầu thành công!", successSub:"Cảm ơn bạn đã gửi yêu cầu. Chúng tôi sẽ liên hệ hỗ trợ bạn sớm nhất.",
+    fail:"Gửi thất bại!", required:"Vui lòng nhập đầy đủ thông tin bắt buộc!", requestId:"Mã yêu cầu",
+    copy:"Sao chép ID", copied:"Đã copy ID!", notFound:"Không tìm thấy yêu cầu!", status:"Trạng thái",
+    pending:"Mới tiếp nhận", processing:"Đang xử lý", completed:"Hoàn thành", adminReply:"Phản hồi admin",
+    noReply:"Chưa có phản hồi", noImage:"Không có hình", newReply:"Admin đã phản hồi!", myRequests:"Yêu cầu của tôi",
+    noHistory:"Chưa có yêu cầu nào trên máy này", clearHistory:"Xóa lịch sử trên máy này",
+    saveIdTip:"Vui lòng lưu ID yêu cầu để tra cứu trạng thái sau này.", networkError:"Không kết nối được máy chủ. Vui lòng thử lại."
   },
   ja: {
-    welcomeTitle: "いつでもサポートします",
-    welcomeText: "依頼を送信すると、担当者が早めにご連絡いたします。",
-    tabSend: "依頼送信",
-    tabCheck: "確認",
-    sendTitle: "サポート依頼送信",
-    checkTitle: "依頼状況確認",
-    name: "お名前",
-    phone: "電話番号",
-    contact: "連絡先",
-    address: "住所",
-    content: "依頼内容",
-    image: "画像",
-    uploadText: "画像を選択または撮影",
-    chooseImage: "画像を選択",
-    fileSelected: "画像を選択しました",
-    copyId: "IDコピー",
-    history: "履歴",
-    send: "送信",
-    check: "確認",
-    checkPlaceholder: "受付IDを入力",
-    sending: "送信中...",
-    loading: "読み込み中...",
-    success: "送信完了！",
-    successSub: "依頼を受け付けました。担当者よりご連絡いたします。",
-    fail: "送信失敗！",
-    required: "必須項目を入力してください",
-    requestId: "受付ID",
-    copy: "IDをコピー",
-    copied: "IDをコピーしました！",
-    notFound: "見つかりませんでした",
-    status: "状態",
-    pending: "受付済み",
-    processing: "処理中",
-    completed: "完了",
-    adminReply: "管理者コメント",
-    noReply: "まだ返信はありません",
-    noImage: "画像なし",
-    newReply: "🔔 管理者から返信がありました！",
-    myRequests: "自分の依頼",
-    noHistory: "この端末には履歴がありません",
-    clearHistory: "この端末の履歴を削除",
-    saveIdTip: "あとで状況確認できるように受付IDを保存してください。"
+    welcomeTitle:"いつでもサポートします",
+    welcomeText:"依頼を送信すると、担当者が早めにご連絡いたします。",
+    sideStep1:"不具合内容を送信", sideStep2:"状況を確認", sideStep3:"管理者から返信を受信",
+    tabSend:"依頼送信", tabCheck:"確認", sendTitle:"サポート依頼送信", checkTitle:"依頼状況確認",
+    name:"お名前", phone:"電話番号", contact:"連絡先", address:"住所", content:"依頼内容", image:"画像",
+    uploadText:"画像を選択または撮影", chooseImage:"画像を選択", fileSelected:"画像を選択しました", copyId:"IDコピー", history:"履歴",
+    send:"送信", check:"確認", checkPlaceholder:"受付IDを入力", sending:"送信中...", loading:"読み込み中...",
+    success:"送信完了！", successSub:"依頼を受け付けました。担当者よりご連絡いたします。",
+    fail:"送信失敗！", required:"必須項目を入力してください", requestId:"受付ID",
+    copy:"IDをコピー", copied:"IDをコピーしました！", notFound:"見つかりませんでした", status:"状態",
+    pending:"受付済み", processing:"処理中", completed:"完了", adminReply:"管理者コメント",
+    noReply:"まだ返信はありません", noImage:"画像なし", newReply:"管理者から返信がありました！", myRequests:"自分の依頼",
+    noHistory:"この端末には履歴がありません", clearHistory:"この端末の履歴を削除",
+    saveIdTip:"あとで状況確認できるように受付IDを保存してください。", networkError:"サーバーに接続できません。もう一度お試しください。"
   }
 };
 
-let lang = localStorage.getItem("lang") || localStorage.getItem("language") || "vi";
+const $ = id => document.getElementById(id);
+const els = {};
 
-function iconCopy() {
-  return `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+function escapeHtml(text) {
+  return String(text || "").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
-
-function iconCheck() {
-  return `<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>`;
+function escapeJsString(text) {
+  return String(text || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "\\r");
 }
-
-function iconLight() {
-  return `<svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M12 2v2"/><path d="M12 8a4 4 0 0 0-2 7.46V17h4v-1.54A4 4 0 0 0 12 8Z"/></svg>`;
+function setIcon(id, svg) {
+  const el = $(id);
+  if (el) el.innerHTML = svg || "";
 }
-
-function iconSend() {
-  return `<svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>`;
-}
-
-function iconSpinner() {
-  return `<svg viewBox="0 0 24 24"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="m16.24 7.76 2.83-2.83"/></svg>`;
-}
-
 function showToast(message) {
-  toast.innerText = message;
-  toast.classList.add("show");
-
-  setTimeout(() => {
-    toast.classList.remove("show");
-  }, 2200);
+  els.toast.innerText = message;
+  els.toast.classList.add("show");
+  setTimeout(() => els.toast.classList.remove("show"), 2200);
 }
-
-function applyLang() {
-  const t = texts[lang];
-
-  language.value = lang;
-  welcomeTitle.innerText = t.welcomeTitle;
-  welcomeText.innerText = t.welcomeText;
-
-  tabSend.querySelector("span").innerText = t.tabSend;
-  tabCheck.querySelector("span").innerText = t.tabCheck;
-
-  sendTitle.innerText = t.sendTitle;
-  checkTitle.innerText = t.checkTitle;
-
-  labelName.innerText = t.name;
-  labelPhone.innerText = t.phone;
-  labelContact.innerText = t.contact;
-  labelAddress.innerText = t.address;
-  labelContent.innerText = t.content;
-  labelImage.innerText = t.image;
-  labelCheckId.innerText = t.requestId;
-
-  if (!imageEl.files[0]) {
-    uploadText.innerText = t.uploadText;
-  }
-
-  chooseImageBtn.innerText = t.chooseImage;
-  copyIdText.innerText = t.copyId;
-  historyText.innerText = t.history;
-
-  nameEl.placeholder = t.name;
-  phoneEl.placeholder = t.phone;
-  contactEl.placeholder = "Email / LINE / Zalo";
-  addressEl.placeholder = t.address;
-  contentEl.placeholder = t.content;
-
-  sendBtnText.innerText = t.send;
-  checkBtnText.innerText = t.check;
-  checkId.placeholder = t.checkPlaceholder;
-  notice.innerText = t.newReply;
-
-  myRequestTitle.innerText = t.myRequests;
-  clearHistoryBtn.innerText = t.clearHistory;
-
-  localStorage.setItem("language", lang);
-
-  renderMyRequests();
-}
-
-function changeLanguage() {
-  lang = language.value;
-  localStorage.setItem("lang", lang);
-  localStorage.setItem("language", lang);
-  applyLang();
-}
-
-function showTab(tab) {
-  if (tab === "send") {
-    sendSection.classList.remove("hidden");
-    checkSection.classList.add("hidden");
-    tabSend.classList.add("active");
-    tabCheck.classList.remove("active");
-  } else {
-    sendSection.classList.add("hidden");
-    checkSection.classList.remove("hidden");
-    tabSend.classList.remove("active");
-    tabCheck.classList.add("active");
-    renderMyRequests();
-  }
-}
-
-function showNotice() {
-  notice.innerText = texts[lang].newReply;
-  notice.style.display = "block";
-  showToast(texts[lang].newReply);
-
-  setTimeout(() => {
-    notice.style.display = "none";
-  }, 5000);
-
-  try {
-    const audio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
-    audio.play();
-  } catch (e) {}
-}
-
 function getMyRequests() {
-  return JSON.parse(localStorage.getItem("myRequests") || "[]");
-}
-
-function saveMyRequest(id) {
-  let ids = getMyRequests();
-  id = String(id);
-
-  if (!ids.includes(id)) {
-    ids.unshift(id);
+  try {
+    return JSON.parse(localStorage.getItem("myRequests") || "[]");
+  } catch (err) {
+    return [];
   }
-
-  localStorage.setItem("myRequests", JSON.stringify(ids));
 }
-
-function renderMyRequests() {
-  const t = texts[lang];
-  const ids = getMyRequests();
-
-  if (!myRequests) return;
-
-  if (ids.length === 0) {
-    myRequests.innerHTML = `<div class="success-box">${t.noHistory}</div>`;
-    return;
-  }
-
-  myRequests.innerHTML = ids.map(id => `
-    <div class="request-card" onclick="openCheck('${id}')">
-      <div class="request-thumb">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
-      </div>
-      <div class="request-info">
-        <div class="request-id">#${id}</div>
-        <div class="request-desc">${t.requestId}: ${id}</div>
-      </div>
-    </div>
-  `).join("");
+function saveMyRequest(id, meta = {}) {
+  const requestId = String(id || "").trim();
+  if (!requestId) return;
+  const list = getMyRequests().filter(item => String(item.id) !== requestId);
+  list.unshift({ id:requestId, time:Date.now(), ...meta });
+  localStorage.setItem("myRequests", JSON.stringify(list.slice(0, 20)));
 }
-
 function clearMyRequests() {
   localStorage.removeItem("myRequests");
   renderMyRequests();
   showToast(texts[lang].clearHistory);
 }
-
+function renderIcons() {
+  [
+    ["sendTitleIcon","edit"], ["nameIcon","user"], ["phoneIcon","phone"], ["contactIcon","message"],
+    ["addressIcon","map"], ["contentIcon","message"], ["uploadIcon","upload"], ["sendBtnIcon","send"],
+    ["copyIdIcon","copy"], ["historyIcon","chart"], ["checkTitleIcon","clock"], ["checkIdIcon","file"],
+    ["checkBtnIcon","search"], ["tabSendIcon","send"], ["tabCheckIcon","clock"], ["sideSendIcon","send"],
+    ["sideTrackIcon","clock"], ["sideReplyIcon","message"]
+  ].forEach(([id, name]) => setIcon(id, ICONS[name]));
+}
+function applyLang() {
+  const t = texts[lang];
+  document.documentElement.lang = lang;
+  els.language.value = lang;
+  $("welcomeTitle").innerText = t.welcomeTitle;
+  $("welcomeText").innerText = t.welcomeText;
+  $("sideStep1").innerText = t.sideStep1;
+  $("sideStep2").innerText = t.sideStep2;
+  $("sideStep3").innerText = t.sideStep3;
+  els.tabSend.querySelector("span:last-child").innerText = t.tabSend;
+  els.tabCheck.querySelector("span:last-child").innerText = t.tabCheck;
+  $("sendTitle").innerText = t.sendTitle;
+  $("checkTitle").innerText = t.checkTitle;
+  $("labelName").innerText = t.name;
+  $("labelPhone").innerText = t.phone;
+  $("labelContact").innerText = t.contact;
+  $("labelAddress").innerText = t.address;
+  $("labelContent").innerText = t.content;
+  $("labelImage").innerText = t.image;
+  $("labelCheckId").innerText = t.requestId;
+  if (!els.image.files[0]) $("uploadText").innerText = t.uploadText;
+  $("chooseImageBtn").innerText = t.chooseImage;
+  $("copyIdText").innerText = t.copyId;
+  $("historyText").innerText = t.history;
+  els.name.placeholder = t.name;
+  els.phone.placeholder = t.phone;
+  els.contact.placeholder = "Email / LINE / Zalo";
+  els.address.placeholder = t.address;
+  els.content.placeholder = t.content;
+  $("sendBtnText").innerText = t.send;
+  $("checkBtnText").innerText = t.check;
+  els.checkId.placeholder = t.checkPlaceholder;
+  $("myRequestTitle").innerText = t.myRequests;
+  $("clearHistoryBtn").innerText = t.clearHistory;
+  localStorage.setItem("language", lang);
+  renderMyRequests();
+}
+function changeLanguage() {
+  lang = els.language.value;
+  localStorage.setItem("lang", lang);
+  localStorage.setItem("language", lang);
+  applyLang();
+}
+function showTab(tab) {
+  const isSend = tab === "send";
+  els.sendSection.classList.toggle("hidden", !isSend);
+  els.checkSection.classList.toggle("hidden", isSend);
+  els.tabSend.classList.toggle("active", isSend);
+  els.tabCheck.classList.toggle("active", !isSend);
+  if (!isSend) renderMyRequests();
+}
+function renderMyRequests() {
+  const t = texts[lang];
+  const requests = getMyRequests();
+  if (requests.length === 0) {
+    els.myRequests.innerHTML = `<div class="success-box">${t.noHistory}</div>`;
+    return;
+  }
+  els.myRequests.innerHTML = requests.map(item => {
+    const id = escapeHtml(item.id);
+    const jsId = escapeJsString(item.id);
+    const desc = escapeHtml(item.content || item.name || `${t.requestId}: ${item.id}`);
+    const date = item.time ? new Date(item.time).toLocaleDateString() : "";
+    return `
+      <div class="request-card" onclick="openCheck('${jsId}')">
+        <div class="request-thumb">${ICONS.file}</div>
+        <div class="request-info">
+          <div class="request-id">#${id}</div>
+          <div class="request-desc">${desc}</div>
+          <div class="request-desc">${escapeHtml(date)}</div>
+        </div>
+      </div>`;
+  }).join("");
+}
+async function readJsonSafe(res) {
+  try { return await res.json(); } catch (err) { return {}; }
+}
+function setButtonLoading(button, iconName, text, loading) {
+  const icon = loading ? ICONS.spinner : ICONS[iconName];
+  button.innerHTML = `<span class="icon">${icon}</span><span>${escapeHtml(text)}</span>`;
+  button.disabled = loading;
+}
 async function sendRequest() {
   const t = texts[lang];
-
-  const name = nameEl.value;
-  const phone = phoneEl.value;
-  const contact = contactEl.value;
-  const address = addressEl.value;
-  const content = contentEl.value;
-  const file = imageEl.files[0];
+  const name = els.name.value.trim();
+  const phone = els.phone.value.trim();
+  const contact = els.contact.value.trim();
+  const address = els.address.value.trim();
+  const content = els.content.value.trim();
+  const file = els.image.files[0];
 
   if (!name || !phone || !address || !content) {
-    result.innerText = t.required;
+    els.result.innerText = t.required;
     showToast(t.required);
     return;
   }
 
-  loader.style.display = "block";
-  result.innerText = t.sending;
-  sendBtn.disabled = true;
-  sendBtn.innerHTML = `${iconSpinner()} <span>${t.sending}</span>`;
+  setButtonLoading(els.sendBtn, "send", t.sending, true);
+  els.result.innerText = t.sending;
 
   try {
     const formData = new FormData();
-
     formData.append("name", name);
     formData.append("phone", phone);
     formData.append("contact", contact);
     formData.append("address", address);
     formData.append("content", content);
+    if (file) formData.append("image", file);
 
-    if (file) {
-      formData.append("image", file);
-    }
+    const res = await fetch(API + "/request", { method:"POST", body:formData });
+    const data = await readJsonSafe(res);
+    if (!res.ok || !data.data || !data.data.id) throw new Error("send failed");
 
-    const res = await fetch(API + "/request", {
-      method: "POST",
-      body: formData
-    });
+    const id = String(data.data.id);
+    saveMyRequest(id, { name, content });
+    localStorage.setItem("lastRequestId", id);
+    renderMyRequests();
 
-    const data = await res.json();
-
-    if (res.ok) {
-      const id = data.data.id;
-
-      saveMyRequest(id);
-      localStorage.setItem("lastRequestId", id);
-      renderMyRequests();
-
-      result.innerHTML = `
-        <div class="success-box">
-          <div class="success-center">
-            <div class="success-icon">${iconCheck()}</div>
-            <div class="success-title">${t.success}</div>
-            <div>${t.successSub}</div>
-          </div>
-
-          <div class="id-box">
-            <div>${t.requestId}</div>
-            <div class="id-number">#${id}</div>
-          </div>
-
-          <div class="tip-box">
-            <div>${iconLight()}</div>
-            <div>${t.saveIdTip}</div>
-          </div>
-
-          <button class="copy-btn" onclick="copyId()">${iconCopy()} ${t.copy}</button>
-          <button class="soft-btn" onclick="openCheck('${id}')">🔍 ${t.tabCheck}</button>
-          <b id="reqId" style="display:none;">${id}</b>
+    els.result.innerHTML = `
+      <div class="success-box">
+        <div class="success-center">
+          <div class="success-icon">${ICONS.check}</div>
+          <div class="success-title">${escapeHtml(t.success)}</div>
+          <div>${escapeHtml(t.successSub)}</div>
         </div>
-      `;
+        <div class="id-box">
+          <div>${escapeHtml(t.requestId)}</div>
+          <div class="id-number">#${escapeHtml(id)}</div>
+        </div>
+        <div class="tip-box"><div class="icon">${ICONS.light}</div><div>${escapeHtml(t.saveIdTip)}</div></div>
+        <button class="copy-btn" onclick="copyId('${escapeJsString(id)}')"><span class="icon">${ICONS.copy}</span>${escapeHtml(t.copy)}</button>
+        <button class="soft-btn" style="margin-top:10px;" onclick="openCheck('${escapeJsString(id)}')"><span class="icon">${ICONS.search}</span>${escapeHtml(t.tabCheck)}</button>
+      </div>`;
 
-      nameEl.value = "";
-      phoneEl.value = "";
-      contactEl.value = "";
-      addressEl.value = "";
-      contentEl.value = "";
-      imageEl.value = "";
-      uploadText.innerText = t.uploadText;
-
-      showToast(t.success);
-    } else {
-      result.innerText = t.fail;
-      showToast(t.fail);
-    }
-
+    els.name.value = "";
+    els.phone.value = "";
+    els.contact.value = "";
+    els.address.value = "";
+    els.content.value = "";
+    els.image.value = "";
+    $("uploadText").innerText = t.uploadText;
+    showToast(t.success);
   } catch (err) {
-    console.log(err);
-    result.innerText = t.fail;
+    els.result.innerText = t.networkError;
     showToast(t.fail);
+  } finally {
+    setButtonLoading(els.sendBtn, "send", t.send, false);
   }
-
-  loader.style.display = "none";
-  sendBtn.disabled = false;
-  sendBtn.innerHTML = `${iconSend()} <span id="sendBtnText">${t.send}</span>`;
 }
-
-function copyId() {
+function copyId(id) {
   const t = texts[lang];
-  const el = document.getElementById("reqId");
-
-  if (!el) {
-    showToast(t.noHistory);
-    return;
-  }
-
-  const id = el.innerText;
-
-  navigator.clipboard.writeText(id).then(() => {
-    showToast(t.copied);
-  });
+  navigator.clipboard.writeText(String(id)).then(() => showToast(t.copied)).catch(() => showToast(t.fail));
 }
-
 function copyLastId() {
   const id = localStorage.getItem("lastRequestId");
-  const t = texts[lang];
-
-  if (!id) {
-    showToast(t.noHistory);
-    return;
-  }
-
-  navigator.clipboard.writeText(id).then(() => {
-    showToast(t.copied);
-  });
+  if (!id) return showToast(texts[lang].noHistory);
+  copyId(id);
 }
-
 function openCheck(id) {
   showTab("check");
-  checkId.value = id;
+  els.checkId.value = id;
   lastAdminReply = "";
   lastCheckedId = id;
   checkStatus(false);
 }
-
+function statusMeta(status) {
+  const t = texts[lang];
+  if (status === "processing") return { text:t.processing, cls:"processing" };
+  if (status === "completed") return { text:t.completed, cls:"completed" };
+  return { text:t.pending, cls:"pending" };
+}
 async function checkStatus(isAuto = false) {
   const t = texts[lang];
-  const id = checkId.value.trim();
-
+  const id = els.checkId.value.trim();
   if (!id) return;
-
   saveMyRequest(id);
   renderMyRequests();
 
   if (!isAuto) {
-    checkResult.innerText = t.loading;
-    checkBtn.disabled = true;
-    checkBtn.innerHTML = `${iconSpinner()} <span>${t.loading}</span>`;
+    els.checkResult.innerText = t.loading;
+    setButtonLoading(els.checkBtn, "search", t.loading, true);
   }
 
-  const res = await fetch(API + "/request/" + encodeURIComponent(id));
+  try {
+    const res = await fetch(API + "/request/" + encodeURIComponent(id));
+    const data = await readJsonSafe(res);
+    if (!res.ok || !data.id) {
+      if (!isAuto) {
+        els.checkResult.innerText = t.notFound;
+        showToast(t.notFound);
+      }
+      return;
+    }
 
-  if (!res.ok) {
+    if (lastCheckedId !== id) {
+      lastAdminReply = data.adminReply || "";
+      lastCheckedId = id;
+    } else {
+      if (isAuto && lastAdminReply && data.adminReply && data.adminReply !== lastAdminReply) showNotice();
+      lastAdminReply = data.adminReply || "";
+    }
+
+    const meta = statusMeta(data.status);
+    const isProcessing = data.status === "processing";
+    const isCompleted = data.status === "completed";
+    const imageHtml = data.image ? `<img src="${escapeHtml(data.image)}" class="check-image" alt="">` : escapeHtml(t.noImage);
+
+    els.checkResult.innerHTML = `
+      <div class="success-box">
+        <div><b>${escapeHtml(t.requestId)}:</b> #${escapeHtml(data.id)}</div>
+        <div class="status-timeline">
+          <div class="step ${!isProcessing && !isCompleted ? "active" : "done"}">1<br>${escapeHtml(t.pending)}</div>
+          <div class="step ${isProcessing ? "active" : isCompleted ? "done" : ""}">2<br>${escapeHtml(t.processing)}</div>
+          <div class="step ${isCompleted ? "active" : ""}">3<br>${escapeHtml(t.completed)}</div>
+        </div>
+        <div><b>${escapeHtml(t.status)}:</b> <span class="badge ${meta.cls}">${escapeHtml(meta.text)}</span></div>
+        <hr>
+        <div class="info-line"><b>${escapeHtml(t.name)}:</b> ${escapeHtml(data.name)}</div>
+        <div class="info-line"><b>${escapeHtml(t.phone)}:</b> ${escapeHtml(data.phone)}</div>
+        <div class="info-line"><b>${escapeHtml(t.contact)}:</b> ${escapeHtml(data.contact)}</div>
+        <div class="info-line"><b>${escapeHtml(t.address)}:</b> ${escapeHtml(data.address)}</div>
+        <div style="margin-top:10px;"><b>${escapeHtml(t.content)}:</b><br>${escapeHtml(data.content)}</div>
+        <div style="margin-top:12px;"><b>${escapeHtml(t.image)}:</b><br>${imageHtml}</div>
+        <hr>
+        <div><b>${escapeHtml(t.adminReply)}:</b><br>${data.adminReply ? escapeHtml(data.adminReply) : escapeHtml(t.noReply)}</div>
+      </div>`;
+  } catch (err) {
     if (!isAuto) {
-      checkResult.innerText = t.notFound;
-      showToast(t.notFound);
-      checkBtn.disabled = false;
-      checkBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><span id="checkBtnText">${t.check}</span>`;
+      els.checkResult.innerText = t.networkError;
+      showToast(t.networkError);
     }
-    return;
-  }
-
-  const data = await res.json();
-
-  if (lastCheckedId !== id) {
-    lastAdminReply = data.adminReply || "";
-    lastCheckedId = id;
-  } else {
-    if (isAuto && lastAdminReply && data.adminReply && data.adminReply !== lastAdminReply) {
-      showNotice();
-    }
-    lastAdminReply = data.adminReply || "";
-  }
-
-  let statusText = "";
-  let badgeClass = "pending";
-
-  if (data.status === "pending") {
-    statusText = t.pending;
-    badgeClass = "pending";
-  }
-
-  if (data.status === "processing") {
-    statusText = t.processing;
-    badgeClass = "processing";
-  }
-
-  if (data.status === "completed") {
-    statusText = t.completed;
-    badgeClass = "completed";
-  }
-
-  const isPending = data.status === "pending";
-  const isProcessing = data.status === "processing";
-  const isCompleted = data.status === "completed";
-
-  checkResult.innerHTML = `
-    <div class="success-box">
-      <div><b>${t.requestId}:</b> #${data.id}</div>
-
-      <div class="status-timeline">
-        <div class="step ${isPending ? "active" : "done"}">①<br>${t.pending}</div>
-        <div class="step ${isProcessing ? "active" : isCompleted ? "done" : ""}">②<br>${t.processing}</div>
-        <div class="step ${isCompleted ? "active" : ""}">③<br>${t.completed}</div>
-      </div>
-
-      <div style="margin-top:10px;">
-        <b>${t.status}:</b>
-        <span class="badge ${badgeClass}">${statusText}</span>
-      </div>
-
-      <hr>
-
-      <div class="info-line"><b>${t.name}:</b> ${data.name || ""}</div>
-      <div class="info-line"><b>${t.phone}:</b> ${data.phone || ""}</div>
-      <div class="info-line"><b>${t.contact}:</b> ${data.contact || ""}</div>
-      <div class="info-line"><b>${t.address}:</b> ${data.address || ""}</div>
-
-      <div style="margin-top:10px;">
-        <b>${t.content}:</b><br>
-        ${data.content || ""}
-      </div>
-
-      <div style="margin-top:12px;">
-        <b>${t.image}:</b><br>
-        ${
-          data.image
-          ? `<img src="${data.image}" class="check-image">`
-          : t.noImage
-        }
-      </div>
-
-      <hr>
-
-      <div>
-        <b>${t.adminReply}:</b><br>
-        ${data.adminReply ? data.adminReply : t.noReply}
-      </div>
-    </div>
-  `;
-
-  if (!isAuto) {
-    checkBtn.disabled = false;
-    checkBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><span id="checkBtnText">${t.check}</span>`;
+  } finally {
+    if (!isAuto) setButtonLoading(els.checkBtn, "search", t.check, false);
   }
 }
-
-const sendSection = document.getElementById("sendSection");
-const checkSection = document.getElementById("checkSection");
-const tabSend = document.getElementById("tabSend");
-const tabCheck = document.getElementById("tabCheck");
-
-const nameEl = document.getElementById("name");
-const phoneEl = document.getElementById("phone");
-const contactEl = document.getElementById("contact");
-const addressEl = document.getElementById("address");
-const contentEl = document.getElementById("content");
-const imageEl = document.getElementById("image");
-
-const result = document.getElementById("result");
-const loader = document.getElementById("loader");
-
-const checkId = document.getElementById("checkId");
-const checkResult = document.getElementById("checkResult");
-const notice = document.getElementById("notice");
-
-const myRequests = document.getElementById("myRequests");
-const myRequestTitle = document.getElementById("myRequestTitle");
-const clearHistoryBtn = document.getElementById("clearHistoryBtn");
-
-const uploadText = document.getElementById("uploadText");
-const chooseImageBtn = document.getElementById("chooseImageBtn");
-const copyIdText = document.getElementById("copyIdText");
-const historyText = document.getElementById("historyText");
-
-const toast = document.getElementById("toast");
-
-imageEl.addEventListener("change", () => {
-  const file = imageEl.files[0];
+function showNotice() {
   const t = texts[lang];
-
-  if (!file) {
-    uploadText.innerHTML = t.uploadText;
-    return;
-  }
-
-  const url = URL.createObjectURL(file);
-
-  uploadText.innerHTML = `
-    <img src="${url}" class="preview-img">
-    <div>✅ ${t.fileSelected}</div>
-    <div style="font-size:12px;color:#6b7280;margin-top:4px;">${file.name}</div>
-  `;
-});
-
-applyLang();
-
-setInterval(() => {
-  if (!checkSection.classList.contains("hidden") && checkId.value) {
-    checkStatus(true);
-  }
-}, 5000);
-
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/service-worker.js");
+  els.notice.innerHTML = `<span class="icon">${ICONS.bell}</span> ${escapeHtml(t.newReply)}`;
+  els.notice.style.display = "flex";
+  els.notice.style.alignItems = "center";
+  els.notice.style.gap = "8px";
+  showToast(t.newReply);
+  setTimeout(() => { els.notice.style.display = "none"; }, 5000);
 }
-</script>
+function bindElements() {
+  [
+    "language","sendSection","checkSection","tabSend","tabCheck","name","phone","contact","address","content","image",
+    "result","checkId","checkResult","notice","myRequests","toast","sendBtn","checkBtn"
+  ].forEach(id => els[id] = $(id));
+  window.imageEl = els.image;
+}
+function bindUploadPreview() {
+  els.image.addEventListener("change", () => {
+    const file = els.image.files[0];
+    const t = texts[lang];
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    if (!file) {
+      $("uploadText").innerText = t.uploadText;
+      previewUrl = "";
+      return;
+    }
+    previewUrl = URL.createObjectURL(file);
+    $("uploadText").innerHTML = `<img src="${previewUrl}" class="preview-img" alt=""><div>${escapeHtml(t.fileSelected)}</div><div style="font-size:12px;color:#6b7280;margin-top:4px;">${escapeHtml(file.name)}</div>`;
+  });
+}
 
+document.addEventListener("DOMContentLoaded", () => {
+  bindElements();
+  renderIcons();
+  applyLang();
+  bindUploadPreview();
+  setInterval(() => {
+    if (!els.checkSection.classList.contains("hidden") && els.checkId.value) checkStatus(true);
+  }, 5000);
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/service-worker.js").catch(() => {});
+});
+</script>
 </body>
 </html>
