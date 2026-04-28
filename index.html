@@ -248,13 +248,7 @@
       font-size:13px;
       font-weight:650;
       margin-top:4px;
-    }
-
-    .upload-box input {
-      border:none;
-      padding:12px 0 0;
-      background:transparent;
-      box-shadow:none;
+      margin-bottom:12px;
     }
 
     .preview-img {
@@ -312,6 +306,13 @@
       align-items:center;
       justify-content:center;
       gap:8px;
+    }
+
+    .choose-image-btn {
+      margin: 0 auto;
+      max-width: 180px;
+      background:#111827;
+      color:white;
     }
 
     .copy-btn {
@@ -701,9 +702,15 @@
           <div class="upload-icon">
             <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8 12 3 7 8"/><path d="M12 3v12"/></svg>
           </div>
+
           <div id="uploadText">Chọn ảnh hoặc chụp ảnh</div>
           <div class="upload-sub">JPG / PNG</div>
-          <input type="file" id="image" accept="image/*">
+
+          <input type="file" id="image" accept="image/*" style="display:none;">
+
+          <button type="button" class="soft-btn choose-image-btn" id="chooseImageBtn" onclick="imageEl.click()">
+            Chọn ảnh
+          </button>
         </div>
       </div>
 
@@ -715,11 +722,12 @@
       <div class="secondary-row">
         <button class="soft-btn" onclick="copyLastId()">
           <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy ID
+          <span id="copyIdText">Copy ID</span>
         </button>
+
         <button class="soft-btn" onclick="showTab('check')">
           <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-          Lịch sử
+          <span id="historyText">Lịch sử</span>
         </button>
       </div>
 
@@ -797,6 +805,10 @@ const texts = {
     content: "Nội dung yêu cầu",
     image: "Hình ảnh",
     uploadText: "Chọn ảnh hoặc chụp ảnh",
+    chooseImage: "Chọn ảnh",
+    fileSelected: "Đã chọn ảnh",
+    copyId: "Copy ID",
+    history: "Lịch sử",
     send: "Gửi yêu cầu",
     check: "Kiểm tra",
     checkPlaceholder: "Nhập mã yêu cầu",
@@ -837,6 +849,10 @@ const texts = {
     content: "依頼内容",
     image: "画像",
     uploadText: "画像を選択または撮影",
+    chooseImage: "画像を選択",
+    fileSelected: "画像を選択しました",
+    copyId: "IDコピー",
+    history: "履歴",
     send: "送信",
     check: "確認",
     checkPlaceholder: "受付IDを入力",
@@ -865,7 +881,7 @@ const texts = {
   }
 };
 
-let lang = localStorage.getItem("lang") || "vi";
+let lang = localStorage.getItem("lang") || localStorage.getItem("language") || "vi";
 
 function iconCopy() {
   return `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
@@ -921,6 +937,10 @@ function applyLang() {
     uploadText.innerText = t.uploadText;
   }
 
+  chooseImageBtn.innerText = t.chooseImage;
+  copyIdText.innerText = t.copyId;
+  historyText.innerText = t.history;
+
   nameEl.placeholder = t.name;
   phoneEl.placeholder = t.phone;
   contactEl.placeholder = "Email / LINE / Zalo";
@@ -935,12 +955,15 @@ function applyLang() {
   myRequestTitle.innerText = t.myRequests;
   clearHistoryBtn.innerText = t.clearHistory;
 
+  localStorage.setItem("language", lang);
+
   renderMyRequests();
 }
 
 function changeLanguage() {
   lang = language.value;
   localStorage.setItem("lang", lang);
+  localStorage.setItem("language", lang);
   applyLang();
 }
 
@@ -1040,17 +1063,22 @@ async function sendRequest() {
   sendBtn.disabled = true;
   sendBtn.innerHTML = `${iconSpinner()} <span>${t.sending}</span>`;
 
-  let image = "";
-
-  if (file) {
-    image = await resizeImage(file, 800, 0.6);
-  }
-
   try {
+    const formData = new FormData();
+
+    formData.append("name", name);
+    formData.append("phone", phone);
+    formData.append("contact", contact);
+    formData.append("address", address);
+    formData.append("content", content);
+
+    if (file) {
+      formData.append("image", file);
+    }
+
     const res = await fetch(API + "/request", {
       method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ name, phone, contact, address, content, image })
+      body: formData
     });
 
     const data = await res.json();
@@ -1261,39 +1289,6 @@ async function checkStatus(isAuto = false) {
   }
 }
 
-function resizeImage(file, maxWidth, quality) {
-  return new Promise(resolve => {
-    const reader = new FileReader();
-
-    reader.onload = e => {
-      const img = new Image();
-
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-
-        let w = img.width;
-        let h = img.height;
-
-        if (w > maxWidth) {
-          h = h * maxWidth / w;
-          w = maxWidth;
-        }
-
-        canvas.width = w;
-        canvas.height = h;
-
-        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-
-        resolve(canvas.toDataURL("image/jpeg", quality));
-      };
-
-      img.src = e.target.result;
-    };
-
-    reader.readAsDataURL(file);
-  });
-}
-
 const sendSection = document.getElementById("sendSection");
 const checkSection = document.getElementById("checkSection");
 const tabSend = document.getElementById("tabSend");
@@ -1318,6 +1313,10 @@ const myRequestTitle = document.getElementById("myRequestTitle");
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
 const uploadText = document.getElementById("uploadText");
+const chooseImageBtn = document.getElementById("chooseImageBtn");
+const copyIdText = document.getElementById("copyIdText");
+const historyText = document.getElementById("historyText");
+
 const toast = document.getElementById("toast");
 
 imageEl.addEventListener("change", () => {
@@ -1333,7 +1332,8 @@ imageEl.addEventListener("change", () => {
 
   uploadText.innerHTML = `
     <img src="${url}" class="preview-img">
-    <div>✅ ${file.name}</div>
+    <div>✅ ${t.fileSelected}</div>
+    <div style="font-size:12px;color:#6b7280;margin-top:4px;">${file.name}</div>
   `;
 });
 

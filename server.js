@@ -1,7 +1,11 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const mongoose = require("mongoose");
+const multer = require("multer");
+const cloudinary = require("cloudinary").v2;
 
 const app = express();
 
@@ -9,13 +13,28 @@ app.use(cors({
   origin: "*"
 }));
 
-app.use(express.json({ limit: "100mb" }));
+app.use(express.json({ limit: "10mb" }));
 
-// Cho server hiển thị index.html, admin.html, icon, manifest
+// Cho server hiển thị index.html, admin.html, login.html, icon, manifest
 app.use(express.static(__dirname));
 
+// ===== Upload ảnh bằng multer =====
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024 // tối đa 5MB
+  }
+});
+
+// ===== Cloudinary Config =====
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
 // ===== MongoDB Connect =====
-mongoose.connect("mongodb+srv://lxmtuanhc_db_user:yamadenapp@cluster0.revraqf.mongodb.net/yamaden?retryWrites=true&w=majority&appName=Cluster0")
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log("MongoDB error:", err));
 
@@ -31,6 +50,8 @@ const RequestSchema = new mongoose.Schema({
   address: String,
 
   content: String,
+
+  // Bây giờ image sẽ lưu link Cloudinary
   image: String,
 
   status: String,
@@ -64,15 +85,43 @@ async function generateRequestId() {
   return id;
 }
 
+// ===== Upload buffer ảnh lên Cloudinary =====
+function uploadImageToCloudinary(fileBuffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "yamaden_requests",
+        resource_type: "image"
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      }
+    );
+
+    stream.end(fileBuffer);
+  });
+}
+
 // Trang chính
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // Tạo yêu cầu mới
-app.post("/request", async (req, res) => {
+app.post("/request", upload.single("image"), async (req, res) => {
   try {
     const shortId = await generateRequestId();
+
+    let imageUrl = "";
+
+    if (req.file) {
+      const uploadResult = await uploadImageToCloudinary(req.file.buffer);
+      imageUrl = uploadResult.secure_url;
+    }
 
     const newRequest = new Request({
       id: shortId,
@@ -83,7 +132,7 @@ app.post("/request", async (req, res) => {
       address: req.body.address || "",
 
       content: req.body.content || "",
-      image: req.body.image || "",
+      image: imageUrl,
 
       status: "pending",
       adminReply: "",
