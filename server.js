@@ -1,245 +1,298 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>YAMADEN Admin Login</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/png" href="/icon-192.png">
+require("dotenv").config();
 
-<style>
-* { box-sizing: border-box; }
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const mongoose = require("mongoose");
+const multer = require("multer");
+const cloudinary = require("cloudinary").v2;
+const jwt = require("jsonwebtoken");
 
-body {
-  margin: 0;
-  font-family: "Segoe UI", Arial, sans-serif;
-  min-height: 100vh;
-  background: #0f172a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #111827;
-}
+const app = express();
 
-.login-box {
-  width: 380px;
-  max-width: calc(100% - 32px);
-  background: white;
-  border-radius: 24px;
-  padding: 30px;
-  box-shadow: 0 25px 70px rgba(0,0,0,0.35);
-}
+app.use(cors({
+  origin: "*"
+}));
 
-.top-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 26px;
-}
+app.use(express.json({ limit: "10mb" }));
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
+// Cho server hiển thị index.html, admin.html, login.html, icon, manifest
+app.use(express.static(__dirname));
 
-.brand img {
-  width: 58px;
-  height: 58px;
-  border-radius: 14px;
-  background: white;
-}
-
-.brand-title {
-  font-size: 26px;
-  font-weight: 900;
-}
-
-.brand-sub {
-  font-size: 13px;
-  color: #64748b;
-  font-weight: 700;
-}
-
-.lang {
-  padding: 9px 12px;
-  border-radius: 12px;
-  border: 1px solid #d1d5db;
-  font-weight: 900;
-  background: white;
-}
-
-.title {
-  font-size: 22px;
-  font-weight: 900;
-  margin-bottom: 18px;
-}
-
-input {
-  width: 100%;
-  padding: 15px;
-  border-radius: 14px;
-  border: 1px solid #d1d5db;
-  font-size: 16px;
-  outline: none;
-  margin-bottom: 14px;
-}
-
-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
-}
-
-button {
-  width: 100%;
-  padding: 15px;
-  border: none;
-  border-radius: 14px;
-  background: #2563eb;
-  color: white;
-  font-size: 16px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #1d4ed8;
-}
-
-button:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
-.error {
-  color: #dc2626;
-  font-weight: 800;
-  margin-top: 12px;
-  text-align: center;
-}
-
-.note {
-  margin-top: 18px;
-  font-size: 12px;
-  color: #64748b;
-  text-align: center;
-}
-</style>
-</head>
-
-<body>
-
-<div class="login-box">
-
-  <div class="top-row">
-    <div class="brand">
-      <img src="/icon-192.png" alt="YAMADEN">
-      <div>
-        <div class="brand-title">YAMADEN</div>
-        <div class="brand-sub">Admin Dashboard</div>
-      </div>
-    </div>
-
-    <select id="language" class="lang" onchange="changeLanguage()">
-      <option value="vi">VI</option>
-      <option value="ja">JP</option>
-    </select>
-  </div>
-
-  <div class="title" id="loginTitle">🔐 Đăng nhập quản trị</div>
-
-  <input type="password" id="password" placeholder="Nhập mật khẩu" onkeydown="handleEnter(event)">
-
-  <button id="loginBtn" onclick="login()">Đăng nhập</button>
-
-  <div id="error" class="error"></div>
-
-  <div class="note">Customer Request System</div>
-</div>
-
-<script>
-const API = "https://yamaden.onrender.com";
-
-let lang = localStorage.getItem("loginLang") || localStorage.getItem("language") || "vi";
-
-const texts = {
-  vi: {
-    title: "🔐 Đăng nhập quản trị",
-    placeholder: "Nhập mật khẩu",
-    login: "Đăng nhập",
-    logging: "Đang đăng nhập...",
-    wrong: "Sai mật khẩu hoặc lỗi đăng nhập!"
-  },
-  ja: {
-    title: "🔐 管理者ログイン",
-    placeholder: "パスワードを入力",
-    login: "ログイン",
-    logging: "ログイン中...",
-    wrong: "パスワードが違うか、ログインに失敗しました"
+// ===== Upload ảnh bằng multer =====
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024
   }
-};
+});
 
-function applyLanguage() {
-  const t = texts[lang];
+// ===== Cloudinary Config =====
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
-  language.value = lang;
-  loginTitle.innerText = t.title;
-  password.placeholder = t.placeholder;
-  loginBtn.innerText = t.login;
-  error.innerText = "";
-}
+// ===== Admin Login Config =====
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const JWT_SECRET = process.env.JWT_SECRET;
 
-function changeLanguage() {
-  lang = language.value;
-  localStorage.setItem("loginLang", lang);
-  localStorage.setItem("language", lang);
-  applyLanguage();
-}
+function requireAdmin(req, res, next) {
+  const auth = req.headers.authorization || "";
+  const token = auth.replace("Bearer ", "");
 
-async function login() {
-  const t = texts[lang];
-  const pass = password.value;
-
-  error.innerText = "";
-  loginBtn.disabled = true;
-  loginBtn.innerText = t.logging;
+  if (!token) {
+    return res.status(401).json({ message: "No token" });
+  }
 
   try {
-    const res = await fetch(API + "/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: pass })
+    req.admin = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+}
+
+// ===== MongoDB Connect =====
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.log("MongoDB error:", err));
+
+// ===== Schema =====
+const RequestSchema = new mongoose.Schema({
+  id: mongoose.Schema.Types.Mixed,
+
+  name: String,
+  phone: String,
+  contact: String,
+  address: String,
+
+  content: String,
+  image: String,
+
+  status: String,
+  adminReply: String,
+  createdAt: Date
+});
+
+const Request = mongoose.model("Request", RequestSchema);
+
+// ===== Hỗ trợ cả ID mới String và ID cũ Number =====
+function makeIdQuery(id) {
+  const query = [{ id: id }];
+
+  if (!isNaN(Number(id))) {
+    query.push({ id: Number(id) });
+  }
+
+  return { $or: query };
+}
+
+// ===== Generate short ID =====
+async function generateRequestId() {
+  let id;
+  let exists;
+
+  do {
+    id = "YD-" + Math.floor(1000 + Math.random() * 9000);
+    exists = await Request.findOne({ id });
+  } while (exists);
+
+  return id;
+}
+
+// ===== Upload buffer ảnh lên Cloudinary =====
+function uploadImageToCloudinary(fileBuffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "yamaden_requests",
+        resource_type: "image"
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+
+    stream.end(fileBuffer);
+  });
+}
+
+// Trang chính
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// ===== Admin Login API =====
+app.post("/admin/login", (req, res) => {
+  const password = req.body.password || "";
+
+  if (!ADMIN_PASSWORD || !JWT_SECRET) {
+    return res.status(500).json({
+      message: "Admin login is not configured"
     });
+  }
 
-    const data = await res.json();
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({
+      message: "Wrong password"
+    });
+  }
 
-    if (!res.ok) {
-      error.innerText = t.wrong;
-      loginBtn.disabled = false;
-      loginBtn.innerText = t.login;
-      return;
+  const token = jwt.sign(
+    { role: "admin" },
+    JWT_SECRET,
+    { expiresIn: "1d" }
+  );
+
+  res.json({
+    message: "Login success",
+    token
+  });
+});
+
+// Tạo yêu cầu mới - khách dùng, không cần login
+app.post("/request", upload.single("image"), async (req, res) => {
+  try {
+    const shortId = await generateRequestId();
+
+    let imageUrl = "";
+
+    if (req.file) {
+      const uploadResult = await uploadImageToCloudinary(req.file.buffer);
+      imageUrl = uploadResult.secure_url;
     }
 
-    localStorage.setItem("adminToken", data.token);
-    localStorage.setItem("loginTime", Date.now());
-    localStorage.setItem("language", lang);
+    const newRequest = new Request({
+      id: shortId,
 
-    window.location.href = "/admin.html";
+      name: req.body.name || "",
+      phone: req.body.phone || "",
+      contact: req.body.contact || "",
+      address: req.body.address || "",
 
-  } catch (err) {
-    error.innerText = t.wrong;
-    loginBtn.disabled = false;
-    loginBtn.innerText = t.login;
+      content: req.body.content || "",
+      image: imageUrl,
+
+      status: "pending",
+      adminReply: "",
+      createdAt: new Date()
+    });
+
+    await newRequest.save();
+
+    res.json({
+      message: "Saved to MongoDB",
+      data: newRequest
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Save failed",
+      error: error.message
+    });
   }
-}
+});
 
-function handleEnter(event) {
-  if (event.key === "Enter") {
-    login();
+// Lấy danh sách yêu cầu - admin cần login
+app.get("/requests", requireAdmin, async (req, res) => {
+  try {
+    const requests = await Request.find().sort({ createdAt: -1 });
+    res.json(requests);
+  } catch (error) {
+    res.status(500).json({
+      message: "Read failed",
+      error: error.message
+    });
   }
-}
+});
 
-applyLanguage();
-</script>
+// Tra cứu 1 yêu cầu theo ID - khách dùng, không cần login
+app.get("/request/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const item = await Request.findOne(makeIdQuery(id));
 
-</body>
-</html>
+    if (!item) {
+      return res.status(404).json({
+        message: "Not found"
+      });
+    }
+
+    res.json(item);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Read failed",
+      error: error.message
+    });
+  }
+});
+
+// Cập nhật trạng thái / phản hồi admin - admin cần login
+app.put("/request/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const item = await Request.findOne(makeIdQuery(id));
+
+    if (!item) {
+      return res.status(404).json({
+        message: "Not found"
+      });
+    }
+
+    if (req.body.status) {
+      item.status = req.body.status;
+    }
+
+    if (req.body.adminReply !== undefined) {
+      item.adminReply = req.body.adminReply;
+    }
+
+    await item.save();
+
+    res.json({
+      message: "Updated",
+      data: item
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Update failed",
+      error: error.message
+    });
+  }
+});
+
+// Xóa yêu cầu - admin cần login
+app.delete("/request/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const result = await Request.deleteOne(makeIdQuery(id));
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        message: "Not found"
+      });
+    }
+
+    res.json({
+      message: "Deleted"
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Delete failed",
+      error: error.message
+    });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});
