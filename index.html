@@ -325,33 +325,141 @@ button, input, textarea, select { font-family:inherit; }
 .brand-visual {
   position:relative;
   overflow:hidden;
-  min-height:230px;
+  min-height:250px;
   border-radius:24px;
-  background:
-    linear-gradient(145deg, rgba(17,24,39,0.84), rgba(5,5,5,0.94)),
-    repeating-linear-gradient(135deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 18px);
   box-shadow:0 16px 36px rgba(15,23,42,0.16);
 }
-.philosophy-visual::before,
+.philosophy-visual {
+  background:
+    linear-gradient(106deg, rgba(255,255,255,0.96) 0 46%, rgba(255,255,255,0.32) 46% 55%, transparent 55%),
+    linear-gradient(145deg,#eef6ff 0%,#d7e8ff 46%,#80b8ff 100%);
+}
+.philosophy-visual::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(122deg, transparent 0 52%, rgba(29,78,216,0.95) 52% 57%, transparent 57% 100%),
+    linear-gradient(116deg, transparent 0 67%, rgba(37,99,235,0.88) 67% 76%, transparent 76%),
+    radial-gradient(circle at 82% 25%, rgba(255,255,255,0.92), transparent 18%),
+    radial-gradient(circle at 74% 54%, rgba(59,130,246,0.25), transparent 36%);
+  z-index:1;
+}
+.philosophy-visual::after {
+  content:"";
+  position:absolute;
+  right:0;
+  bottom:0;
+  width:56%;
+  height:55%;
+  background:
+    linear-gradient(to top, rgba(15,23,42,0.58), transparent 78%),
+    repeating-linear-gradient(90deg, rgba(30,64,175,0.75) 0 8px, rgba(59,130,246,0.40) 8px 16px, transparent 16px 25px);
+  clip-path:polygon(9% 32%, 19% 45%, 28% 25%, 42% 44%, 52% 14%, 64% 40%, 76% 22%, 92% 38%, 100% 0, 100% 100%, 0 100%, 0 46%);
+  z-index:1;
+}
+.philosophy-visual img {
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  background:transparent;
+  padding:0;
+  box-shadow:none;
+}
+.poster-brand {
+  position:absolute;
+  left:30px;
+  top:48px;
+  z-index:2;
+  color:#0f2f66;
+}
+.poster-brand-logo {
+  width:56px;
+  height:56px;
+  margin-bottom:12px;
+}
+.poster-brand-name {
+  color:#0f2f66;
+  font-size:30px;
+  font-weight:950;
+  letter-spacing:0.02em;
+  line-height:1;
+}
+.poster-brand-line {
+  width:86px;
+  height:3px;
+  margin:11px 0 9px;
+  background:#2563eb;
+  border-radius:999px;
+}
+.poster-slogan {
+  color:#334155;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:0.08em;
+}
+.poster-slogan-sub {
+  margin-top:5px;
+  color:#64748b;
+  font-size:8px;
+  font-weight:850;
+  letter-spacing:0.08em;
+}
+.poster-company {
+  position:absolute;
+  left:32px;
+  bottom:28px;
+  z-index:2;
+  padding-left:12px;
+  border-left:3px solid #2563eb;
+  color:#0f172a;
+  font-size:11px;
+  font-weight:950;
+}
+.poster-mountain {
+  position:absolute;
+  right:58px;
+  top:36px;
+  width:150px;
+  height:82px;
+  z-index:1;
+  background:linear-gradient(145deg, transparent 0 45%, rgba(255,255,255,0.88) 46% 54%, transparent 55%),
+    linear-gradient(140deg, transparent 0 48%, rgba(37,99,235,0.28) 49% 52%, transparent 53%),
+    linear-gradient(150deg, transparent 0 43%, rgba(255,255,255,0.80) 44% 54%, transparent 55%);
+  clip-path:polygon(50% 0, 100% 100%, 0 100%);
+  opacity:0.92;
+}
+.brand-visual {
+  min-height:250px;
+  background:
+    linear-gradient(105deg, rgba(10,22,55,0.98) 0 58%, rgba(10,22,55,0.50) 58% 64%, rgba(11,39,88,0.96) 64%),
+    radial-gradient(circle at 82% 40%, rgba(96,165,250,0.42), transparent 25%),
+    linear-gradient(145deg,#06152e,#0b2758);
+}
 .brand-visual::before {
   content:"";
   position:absolute;
   inset:0;
   background:
-    radial-gradient(circle at 22% 20%, rgba(37,99,235,0.36), transparent 28%),
-    radial-gradient(circle at 86% 78%, rgba(6,182,212,0.20), transparent 30%);
+    linear-gradient(90deg, rgba(96,165,250,0.14) 0 1px, transparent 1px 22px),
+    linear-gradient(0deg, rgba(96,165,250,0.10) 0 1px, transparent 1px 22px);
+  mask-image:linear-gradient(to right, black 0%, transparent 68%);
 }
-.philosophy-visual img {
+.brand-visual::after {
+  content:"";
   position:absolute;
-  left:50%;
-  top:38%;
-  width:98px;
-  height:98px;
-  transform:translate(-50%,-50%);
-  border-radius:26px;
-  background:white;
-  padding:8px;
-  box-shadow:0 18px 48px rgba(0,0,0,0.36);
+  right:18px;
+  top:16px;
+  width:38%;
+  height:calc(100% - 32px);
+  border-radius:24px;
+  background:
+    linear-gradient(155deg, rgba(255,255,255,0.18), rgba(37,99,235,0.16)),
+    radial-gradient(circle at 52% 20%, rgba(255,255,255,0.95) 0 16%, transparent 17%),
+    linear-gradient(90deg, transparent 0 38%, rgba(15,23,42,0.95) 39% 61%, transparent 62%),
+    linear-gradient(to bottom, transparent 0 34%, #1e3a8a 35% 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.16);
+  clip-path:polygon(18% 0,100% 0,100% 100%,0 100%,0 18%);
 }
 .visual-label {
   position:absolute;
@@ -362,7 +470,7 @@ button, input, textarea, select { font-family:inherit; }
   font-weight:950;
   font-size:20px;
   line-height:1.28;
-  z-index:1;
+  z-index:2;
 }
 .philosophy-copy {
   background:white;
@@ -397,10 +505,46 @@ button, input, textarea, select { font-family:inherit; }
   margin-top:16px;
 }
 .brand-visual {
-  min-height:210px;
+  min-height:250px;
 }
 .brand-visual .visual-label {
+  left:24px;
+  right:44%;
+  bottom:94px;
   font-size:19px;
+  line-height:1.45;
+}
+.service-rail {
+  position:absolute;
+  left:24px;
+  right:44%;
+  bottom:24px;
+  z-index:2;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.service-pill {
+  min-height:54px;
+  border-radius:18px;
+  padding:10px 8px;
+  background:rgba(15,23,42,0.36);
+  border:1px solid rgba(96,165,250,0.28);
+  color:white;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  backdrop-filter:blur(10px);
+}
+.service-pill b {
+  font-size:13px;
+  line-height:1.1;
+}
+.service-pill span {
+  margin-top:3px;
+  color:#cbd5e1;
+  font-size:10px;
+  font-weight:850;
 }
 .gallery-stack {
   display:grid;
@@ -1198,17 +1342,26 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   .company-info-grid,
   .utility-grid { grid-template-columns:1fr; }
   .philosophy-visual,
-  .brand-visual { min-height:210px; }
-  .philosophy-visual img {
-    top:34%;
-    width:86px;
-    height:86px;
-    border-radius:23px;
-  }
+  .brand-visual { min-height:260px; }
+  .poster-brand { left:22px; top:38px; }
+  .poster-brand-logo { width:48px; height:48px; }
+  .poster-brand-name { font-size:26px; }
+  .poster-mountain { right:38px; top:36px; width:126px; height:72px; }
   .philosophy-visual .visual-label {
-    font-size:18px;
+    font-size:17px;
     line-height:1.25;
   }
+  .brand-visual::after {
+    width:42%;
+    right:12px;
+  }
+  .brand-visual .visual-label {
+    right:35%;
+    font-size:17px;
+    bottom:92px;
+  }
+  .service-rail { right:35%; }
+  .service-pill { min-height:42px; }
   .trust-row { grid-template-columns:repeat(3,1fr); gap:8px; }
   .trust-item { padding:13px 10px; border-radius:18px; }
   .trust-number { font-size:21px; }
@@ -1356,8 +1509,15 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
 
       <div class="philosophy-card">
         <div class="philosophy-visual">
-          <img src="/icon-512.png" alt="YAMADEN">
-          <div class="visual-label" id="philosophyVisual">Bảo vệ con người. Kiến tạo hạnh phúc.</div>
+          <div class="poster-brand">
+            <img class="poster-brand-logo" src="/icon-512.png" alt="YAMADEN">
+            <div class="poster-brand-name">YAMADEN</div>
+            <div class="poster-brand-line"></div>
+            <div class="poster-slogan">人を守り、幸せを創る。</div>
+            <div class="poster-slogan-sub">PROTECTING PEOPLE. CREATING HAPPINESS.</div>
+          </div>
+          <div class="poster-mountain"></div>
+          <div class="poster-company" id="philosophyVisual">Công ty TNHH YAMADEN</div>
         </div>
         <div class="philosophy-copy">
           <div class="section-kicker" id="philosophyKicker">PHILOSOPHY</div>
@@ -1393,6 +1553,11 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
       <div class="brand-gallery">
         <div class="brand-visual">
           <div class="visual-label" id="galleryMain">Thi công điện, đo lường điều khiển và bảo trì cho công trình an toàn hơn.</div>
+          <div class="service-rail">
+            <div class="service-pill"><b>電気工事</b><span>Electric</span></div>
+            <div class="service-pill"><b>計装工事</b><span>Control</span></div>
+            <div class="service-pill"><b>保守</b><span>Care</span></div>
+          </div>
         </div>
         <div class="gallery-stack">
           <div class="gallery-tile"><span class="icon" id="gallery1Icon"></span><div class="gallery-title" id="gallery1">Phản hồi linh hoạt tại hiện trường</div></div>
