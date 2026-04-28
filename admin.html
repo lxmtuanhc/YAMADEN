@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
 <meta charset="UTF-8">
 <title>Admin - YAMADEN</title>
@@ -11,8 +11,7 @@
 <meta name="theme-color" content="#020617">
 
 <style>
-* { box-sizing: border-box; }
-
+* { box-sizing:border-box; }
 :root {
   --bg:#f4f7fb;
   --dark:#020617;
@@ -22,14 +21,12 @@
   --text:#0f172a;
   --muted:#64748b;
   --blue:#2563eb;
-  --sky:#0ea5e9;
   --cyan:#06b6d4;
   --green:#16a34a;
   --orange:#f59e0b;
   --red:#dc2626;
   --shadow:0 22px 55px rgba(15,23,42,0.10);
 }
-
 body {
   margin:0;
   font-family:"Segoe UI", Arial, sans-serif;
@@ -40,7 +37,6 @@ body {
     radial-gradient(circle at 88% 4%, rgba(6,182,212,0.18), transparent 30%),
     linear-gradient(180deg,#f8fbff 0%,#eef4fb 52%,#f8fafc 100%);
 }
-
 body::before {
   content:"";
   position:fixed;
@@ -52,172 +48,51 @@ body::before {
   background-size:44px 44px;
   mask-image:linear-gradient(to bottom, black 0%, transparent 80%);
 }
-
 button, select, input, textarea { font-family:inherit; }
 button { transition:0.18s ease; }
 button:hover { transform:translateY(-1px); }
 
-/* ===== SVG ICON SYSTEM ===== */
-.ui-icon {
-  width:20px;
-  height:20px;
+.ui-icon,.btn-icon,.line-icon,.badge-icon {
   display:inline-flex;
   align-items:center;
   justify-content:center;
   flex:none;
   color:currentColor;
 }
-.ui-icon svg {
+.ui-icon { width:20px; height:20px; }
+.btn-icon { width:18px; height:18px; margin-right:7px; vertical-align:-4px; }
+.line-icon { width:17px; height:17px; margin-right:7px; color:#64748b; vertical-align:-3px; }
+.badge-icon { width:15px; height:15px; margin-right:6px; vertical-align:-3px; }
+.ui-icon svg,.nav-icon-box svg,.stat-icon svg,.btn-icon svg,.line-icon svg,.badge-icon svg,.modal-icon svg,.search-btn svg {
   width:100%;
   height:100%;
   display:block;
   stroke:currentColor;
-}
-.nav-left {
-  display:flex;
-  align-items:center;
-  gap:12px;
-  min-width:0;
-}
-.nav-icon-box {
-  width:34px;
-  height:34px;
-  border-radius:13px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(255,255,255,0.08);
-  border:1px solid rgba(255,255,255,0.10);
-  color:#dbeafe;
-  transition:0.22s ease;
-}
-.menu-item:hover .nav-icon-box {
-  color:#ffffff;
-  background:rgba(37,99,235,0.22);
-  box-shadow:0 0 0 5px rgba(37,99,235,0.10);
-}
-.menu-item.active .nav-icon-box {
-  color:white;
-  background:rgba(255,255,255,0.18);
-  box-shadow:0 0 22px rgba(255,255,255,0.24);
-}
-.stat-icon svg,
-.btn-icon svg,
-.line-icon svg,
-.badge-icon svg {
-  width:100%;
-  height:100%;
-}
-.btn-icon {
-  width:18px;
-  height:18px;
-  display:inline-flex;
-  margin-right:7px;
-  vertical-align:-4px;
-}
-.line-icon {
-  width:17px;
-  height:17px;
-  display:inline-flex;
-  margin-right:7px;
-  color:#64748b;
-  vertical-align:-3px;
-}
-.badge-icon {
-  width:15px;
-  height:15px;
-  display:inline-flex;
-  margin-right:6px;
-  vertical-align:-3px;
-}
-.with-icon {
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-}
-.with-icon .line-icon,
-.with-icon .btn-icon,
-.with-icon .badge-icon {
-  margin-right:0;
-}
-.panel-title,
-.quick-title,
-.quick-line span,
-.stat-label,
-.tabs button,
-.admin-info,
-.logout-btn {
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.tabs button {
-  justify-content:center;
-}
-.stat-label .line-icon,
-.quick-line .line-icon,
-.panel-title .line-icon {
-  color:inherit;
+  fill:none;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
 }
 
-.layout {
-  display:grid;
-  grid-template-columns:292px 1fr;
-  min-height:100vh;
-  position:relative;
-  z-index:1;
-}
-
+.layout { display:grid; grid-template-columns:292px 1fr; min-height:100vh; position:relative; z-index:1; }
 .sidebar {
   position:sticky;
   top:0;
   height:100vh;
   padding:20px;
   color:white;
-  background:
-    linear-gradient(180deg, rgba(2,6,23,0.96), rgba(15,23,42,0.94)),
-    radial-gradient(circle at top, rgba(37,99,235,0.35), transparent 42%);
+  background:linear-gradient(180deg, rgba(2,6,23,0.96), rgba(15,23,42,0.94));
   border-right:1px solid rgba(255,255,255,0.08);
   box-shadow:18px 0 50px rgba(2,6,23,0.22);
   display:flex;
   flex-direction:column;
 }
-
-.brand {
-  display:flex;
-  align-items:center;
-  gap:14px;
-  padding:10px;
-  border-radius:24px;
-  cursor:pointer;
-  margin-bottom:26px;
-  transition:0.18s ease;
-}
+.brand { display:flex; align-items:center; gap:14px; padding:10px; border-radius:24px; cursor:pointer; margin-bottom:26px; }
 .brand:hover { background:rgba(255,255,255,0.06); }
-.brand img {
-  width:58px;
-  height:58px;
-  border-radius:18px;
-  box-shadow:0 18px 38px rgba(0,0,0,0.35);
-}
-.brand-title {
-  font-size:25px;
-  font-weight:950;
-  letter-spacing:0.9px;
-}
-.brand-sub {
-  color:#cbd5e1;
-  font-size:12px;
-  font-weight:800;
-}
-
-.menu-title {
-  margin:22px 12px 10px;
-  font-size:11px;
-  font-weight:950;
-  color:#94a3b8;
-  letter-spacing:0.9px;
-}
+.brand img { width:58px; height:58px; border-radius:18px; box-shadow:0 18px 38px rgba(0,0,0,0.35); }
+.brand-title { font-size:25px; font-weight:950; letter-spacing:0.9px; }
+.brand-sub { color:#cbd5e1; font-size:12px; font-weight:800; }
+.menu-title { margin:22px 12px 10px; font-size:11px; font-weight:950; color:#94a3b8; letter-spacing:0.9px; }
 .menu-item {
   border:1px solid transparent;
   padding:12px 13px;
@@ -229,37 +104,25 @@ button:hover { transform:translateY(-1px); }
   color:#e5e7eb;
   font-weight:900;
   cursor:pointer;
-  transition:0.22s ease;
 }
-.menu-item:hover {
+.menu-item:hover { background:rgba(255,255,255,0.08); transform:translateX(3px); }
+.menu-item.active { background:linear-gradient(135deg,#2563eb,#06b6d4); box-shadow:0 16px 34px rgba(37,99,235,0.34); color:white; }
+.nav-left { display:flex; align-items:center; gap:12px; min-width:0; }
+.nav-icon-box {
+  width:34px;
+  height:34px;
+  border-radius:13px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   background:rgba(255,255,255,0.08);
-  border-color:rgba(255,255,255,0.08);
-  transform:translateX(3px);
+  color:#dbeafe;
+  padding:7px;
 }
-.menu-item.active {
-  background:linear-gradient(135deg,#2563eb,#06b6d4);
-  box-shadow:0 16px 34px rgba(37,99,235,0.34), 0 0 34px rgba(6,182,212,0.12);
-  color:white;
-}
-.menu-badge {
-  min-width:34px;
-  text-align:center;
-  background:rgba(255,255,255,0.18);
-  border:1px solid rgba(255,255,255,0.16);
-  padding:4px 10px;
-  border-radius:999px;
-  font-size:12px;
-}
-.sidebar-footer {
-  margin-top:auto;
-  padding:14px 12px 4px;
-  color:#cbd5e1;
-  font-size:12px;
-  line-height:1.7;
-}
+.menu-badge { min-width:34px; text-align:center; background:rgba(255,255,255,0.18); padding:4px 10px; border-radius:999px; font-size:12px; }
+.sidebar-footer { margin-top:auto; padding:14px 12px 4px; color:#cbd5e1; font-size:12px; line-height:1.7; }
 
 .main { min-width:0; }
-
 .topbar {
   min-height:92px;
   position:sticky;
@@ -273,292 +136,61 @@ button:hover { transform:translateY(-1px); }
   backdrop-filter:blur(22px);
   border-bottom:1px solid rgba(226,232,240,0.85);
 }
-.topbar-left {
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
+.topbar-left,.top-actions,.admin-info,.logout-btn,.panel-title,.quick-title,.stat-label,.tabs button { display:flex; align-items:center; gap:8px; }
+.topbar-left { gap:14px; }
 .mobile-brand { display:none; }
-.mobile-brand img {
-  width:50px;
-  height:50px;
-  border-radius:16px;
-  box-shadow:0 10px 24px rgba(15,23,42,0.16);
-}
-.page-title {
-  font-size:29px;
-  font-weight:950;
-  letter-spacing:-0.7px;
-}
-.page-subtitle {
-  margin-top:4px;
-  color:var(--muted);
-  font-weight:750;
-  font-size:13px;
-}
-.top-actions {
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-.lang, .admin-info, .logout-btn {
-  min-height:48px;
-  border-radius:16px;
-  font-weight:950;
-}
-.lang {
-  padding:0 14px;
-  border:1px solid var(--line);
-  background:white;
-  outline:none;
-}
-.admin-info {
-  display:flex;
-  align-items:center;
-  gap:9px;
-  padding:0 16px;
-  background:white;
-  border:1px solid var(--line);
-  box-shadow:0 10px 24px rgba(15,23,42,0.05);
-}
-.admin-dot {
-  width:9px;
-  height:9px;
-  background:#22c55e;
-  border-radius:999px;
-  box-shadow:0 0 0 5px rgba(34,197,94,0.14);
-}
-.logout-btn {
-  border:none;
-  padding:0 18px;
-  color:white;
-  cursor:pointer;
-  background:linear-gradient(135deg,#ef4444,#b91c1c);
-  box-shadow:0 14px 30px rgba(220,38,38,0.24);
-}
+.mobile-brand img { width:50px; height:50px; border-radius:16px; box-shadow:0 10px 24px rgba(15,23,42,0.16); }
+.page-title { font-size:29px; font-weight:950; letter-spacing:-0.7px; }
+.page-subtitle { margin-top:4px; color:var(--muted); font-weight:750; font-size:13px; }
+.top-actions { gap:12px; }
+.lang,.admin-info,.logout-btn { min-height:48px; border-radius:16px; font-weight:950; }
+.lang { padding:0 14px; border:1px solid var(--line); background:white; outline:none; }
+.admin-info { padding:0 16px; background:white; border:1px solid var(--line); box-shadow:0 10px 24px rgba(15,23,42,0.05); }
+.admin-dot { width:9px; height:9px; background:#22c55e; border-radius:999px; box-shadow:0 0 0 5px rgba(34,197,94,0.14); }
+.logout-btn { border:none; padding:0 18px; color:white; cursor:pointer; background:linear-gradient(135deg,#ef4444,#b91c1c); box-shadow:0 14px 30px rgba(220,38,38,0.24); }
 
-.content {
-  width:100%;
-  max-width:1420px;
-  margin:0 auto;
-  padding:30px;
-}
-
-.hero {
-  display:grid;
-  grid-template-columns:1.3fr 0.7fr;
-  gap:22px;
-  margin-bottom:24px;
-}
+.content { width:100%; max-width:1420px; margin:0 auto; padding:30px; }
+.hero { display:grid; grid-template-columns:1.3fr 0.7fr; gap:22px; margin-bottom:24px; }
+.hero-card,.quick-card,.stat,.panel { background:rgba(255,255,255,0.82); border:1px solid rgba(255,255,255,0.88); box-shadow:var(--shadow); }
 .hero-card {
   min-height:176px;
   padding:28px;
   border-radius:34px;
   color:white;
-  background:
-    linear-gradient(135deg,rgba(15,23,42,0.98),rgba(30,64,175,0.94)),
-    radial-gradient(circle at right,rgba(6,182,212,0.42),transparent 40%);
-  box-shadow:var(--shadow);
+  background:linear-gradient(135deg,rgba(15,23,42,0.98),rgba(30,64,175,0.94));
   position:relative;
   overflow:hidden;
 }
-.hero-card::after {
-  content:"";
-  position:absolute;
-  right:-80px;
-  top:-80px;
-  width:230px;
-  height:230px;
-  border-radius:50%;
-  background:rgba(255,255,255,0.09);
-}
-.hero-kicker {
-  color:#bfdbfe;
-  font-size:13px;
-  font-weight:950;
-  margin-bottom:10px;
-  letter-spacing:0.5px;
-}
-.hero-title {
-  font-size:32px;
-  font-weight:950;
-  letter-spacing:-0.7px;
-  margin-bottom:10px;
-}
-.hero-desc {
-  max-width:620px;
-  color:#dbeafe;
-  font-size:15px;
-  line-height:1.6;
-  font-weight:700;
-}
-.quick-card {
-  padding:24px;
-  border-radius:34px;
-  background:rgba(255,255,255,0.82);
-  border:1px solid rgba(255,255,255,0.86);
-  box-shadow:var(--shadow);
-}
-.quick-title {
-  font-size:17px;
-  font-weight:950;
-  margin-bottom:16px;
-}
-.quick-line {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 0;
-  border-bottom:1px solid #edf2f7;
-  font-weight:850;
-}
+.hero-card::after { content:""; position:absolute; right:-80px; top:-80px; width:230px; height:230px; border-radius:50%; background:rgba(255,255,255,0.09); }
+.hero-kicker { color:#bfdbfe; font-size:13px; font-weight:950; margin-bottom:10px; letter-spacing:0.5px; }
+.hero-title { font-size:32px; font-weight:950; letter-spacing:-0.7px; margin-bottom:10px; }
+.hero-desc { max-width:620px; color:#dbeafe; font-size:15px; line-height:1.6; font-weight:700; }
+.quick-card { padding:24px; border-radius:34px; }
+.quick-title { font-size:17px; font-weight:950; margin-bottom:16px; }
+.quick-line { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid #edf2f7; font-weight:850; }
 .quick-line:last-child { border-bottom:none; }
-.quick-line span { color:var(--muted); font-weight:800; }
-
-.stats {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:18px;
-  margin-bottom:24px;
-}
-.stat {
-  position:relative;
-  overflow:hidden;
-  min-height:140px;
-  padding:22px;
-  border-radius:30px;
-  background:rgba(255,255,255,0.82);
-  border:1px solid rgba(255,255,255,0.86);
-  box-shadow:0 18px 44px rgba(15,23,42,0.08);
-  transition:0.22s ease;
-}
-.stat:hover {
-  transform:translateY(-3px);
-  box-shadow:0 24px 54px rgba(15,23,42,0.12);
-}
-.stat::after {
-  content:"";
-  position:absolute;
-  right:-38px;
-  top:-38px;
-  width:105px;
-  height:105px;
-  border-radius:50%;
-  background:linear-gradient(135deg,rgba(37,99,235,0.16),rgba(6,182,212,0.10));
-}
-.stat-icon {
-  width:44px;
-  height:44px;
-  border-radius:16px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin-bottom:14px;
-  background:#eff6ff;
-  color:var(--blue);
-  padding:11px;
-}
+.quick-line span { display:flex; align-items:center; gap:8px; color:var(--muted); font-weight:800; }
+.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:24px; }
+.stat { position:relative; overflow:hidden; min-height:140px; padding:22px; border-radius:30px; transition:0.22s ease; }
+.stat:hover { transform:translateY(-3px); box-shadow:0 24px 54px rgba(15,23,42,0.12); }
+.stat-icon { width:44px; height:44px; border-radius:16px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; background:#eff6ff; color:var(--blue); padding:11px; }
 .stat-icon.orange { background:#fff7ed; color:var(--orange); }
 .stat-icon.green { background:#ecfdf5; color:var(--green); }
 .stat-icon.sky { background:#ecfeff; color:var(--cyan); }
-.stat-label {
-  color:var(--muted);
-  font-size:13px;
-  font-weight:950;
-  margin-bottom:7px;
-}
-.stat-number {
-  font-size:38px;
-  font-weight:950;
-  letter-spacing:-1px;
-}
-
-.panel {
-  overflow:hidden;
-  border-radius:34px;
-  background:rgba(255,255,255,0.82);
-  border:1px solid rgba(255,255,255,0.88);
-  box-shadow:var(--shadow);
-}
-.panel-head {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:14px;
-  padding:22px 24px;
-  border-bottom:1px solid rgba(226,232,240,0.8);
-}
-.panel-title {
-  font-size:19px;
-  font-weight:950;
-}
-.panel-subtitle {
-  color:var(--muted);
-  font-size:13px;
-  font-weight:750;
-  margin-top:3px;
-}
-.toolbar {
-  display:grid;
-  grid-template-columns:1fr 92px;
-  gap:12px;
-  min-width:420px;
-}
+.stat-label { color:var(--muted); font-size:13px; font-weight:950; margin-bottom:7px; }
+.stat-number { font-size:38px; font-weight:950; letter-spacing:-1px; }
+.panel { overflow:hidden; border-radius:34px; }
+.panel-head { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:22px 24px; border-bottom:1px solid rgba(226,232,240,0.8); }
+.panel-title { font-size:19px; font-weight:950; }
+.panel-subtitle { color:var(--muted); font-size:13px; font-weight:750; margin-top:3px; }
+.toolbar { display:grid; grid-template-columns:1fr 92px; gap:12px; min-width:420px; }
 .search-wrap { position:relative; }
-.search-wrap .line-icon {
-  position:absolute;
-  left:17px;
-  top:50%;
-  transform:translateY(-50%);
-  margin:0;
-  color:#94a3b8;
-}
-.search {
-  width:100%;
-  padding:15px 18px 15px 46px;
-  border-radius:18px;
-  border:1px solid var(--line);
-  background:white;
-  font-size:15px;
-  outline:none;
-  font-weight:750;
-}
-.search:focus {
-  border-color:rgba(37,99,235,0.62);
-  box-shadow:0 0 0 5px rgba(37,99,235,0.10);
-}
-.search-btn {
-  border:none;
-  border-radius:18px;
-  background:linear-gradient(135deg,#0f172a,#1e293b);
-  color:white;
-  font-weight:950;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.tabs {
-  display:flex;
-  gap:26px;
-  padding:0 24px;
-  border-bottom:1px solid rgba(226,232,240,0.8);
-  overflow-x:auto;
-}
-.tabs button {
-  background:none;
-  border:none;
-  padding:19px 3px;
-  color:var(--muted);
-  font-weight:950;
-  cursor:pointer;
-  border-bottom:4px solid transparent;
-  white-space:nowrap;
-}
-.tabs button.active {
-  color:var(--blue);
-  border-bottom-color:var(--blue);
-}
+.search-wrap .line-icon { position:absolute; left:17px; top:50%; transform:translateY(-50%); margin:0; color:#94a3b8; }
+.search { width:100%; padding:15px 18px 15px 46px; border-radius:18px; border:1px solid var(--line); background:white; font-size:15px; outline:none; font-weight:750; }
+.search-btn { border:none; border-radius:18px; background:linear-gradient(135deg,#0f172a,#1e293b); color:white; font-weight:950; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.tabs { display:flex; gap:26px; padding:0 24px; border-bottom:1px solid rgba(226,232,240,0.8); overflow-x:auto; }
+.tabs button { justify-content:center; background:none; border:none; padding:19px 3px; color:var(--muted); font-weight:950; cursor:pointer; border-bottom:4px solid transparent; white-space:nowrap; }
+.tabs button.active { color:var(--blue); border-bottom-color:var(--blue); }
 
 .request {
   margin:18px;
@@ -571,199 +203,44 @@ button:hover { transform:translateY(-1px); }
   border:1px solid #edf2f7;
   border-radius:28px;
   box-shadow:0 13px 28px rgba(15,23,42,0.06);
-  transition:0.2s ease;
 }
-.request:hover {
-  transform:translateY(-2px);
-  box-shadow:0 18px 38px rgba(15,23,42,0.09);
-}
-.req-img {
-  width:152px;
-  height:118px;
-  object-fit:cover;
-  border-radius:22px;
-  background:linear-gradient(135deg,#e2e8f0,#f8fafc);
-  border:1px solid #e2e8f0;
-}
-.req-id {
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  color:var(--blue);
-  background:#eff6ff;
-  border:1px solid #dbeafe;
-  padding:5px 10px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:950;
-  margin-bottom:9px;
-}
-.req-name {
-  font-size:18px;
-  font-weight:950;
-}
-.req-phone {
-  color:var(--blue);
-  font-weight:950;
-  margin-left:10px;
-}
-.req-line {
-  margin-top:7px;
-  color:#475569;
-  line-height:1.45;
-  word-break:break-word;
-  font-weight:700;
-}
-.badge {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:10px 14px;
-  border-radius:999px;
-  font-size:13px;
-  font-weight:950;
-  white-space:nowrap;
-}
+.req-img { width:152px; height:118px; object-fit:cover; border-radius:22px; background:linear-gradient(135deg,#e2e8f0,#f8fafc); border:1px solid #e2e8f0; }
+.req-id { display:inline-flex; align-items:center; gap:6px; color:var(--blue); background:#eff6ff; border:1px solid #dbeafe; padding:5px 10px; border-radius:999px; font-size:12px; font-weight:950; margin-bottom:9px; }
+.req-name { font-size:18px; font-weight:950; }
+.req-phone { color:var(--blue); font-weight:950; margin-left:10px; }
+.req-line { margin-top:7px; color:#475569; line-height:1.45; word-break:break-word; font-weight:700; }
+.badge { display:inline-flex; align-items:center; justify-content:center; padding:10px 14px; border-radius:999px; font-size:13px; font-weight:950; white-space:nowrap; }
 .status-pending { background:#f1f5f9; color:#334155; }
 .status-processing { background:#fff7ed; color:#c2410c; }
 .status-completed { background:#ecfdf5; color:#166534; }
 .actions a { text-decoration:none; }
-.actions button {
-  width:100%;
-  margin-bottom:9px;
-  padding:12px;
-  border:none;
-  border-radius:16px;
-  color:white;
-  font-weight:950;
-  cursor:pointer;
-  box-shadow:0 10px 20px rgba(15,23,42,0.10);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
+.actions button,.save { width:100%; padding:12px; border:none; border-radius:16px; color:white; font-weight:950; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.actions button { margin-bottom:9px; box-shadow:0 10px 20px rgba(15,23,42,0.10); }
 .call { background:linear-gradient(135deg,#16a34a,#22c55e); }
 .map { background:linear-gradient(135deg,#2563eb,#06b6d4); }
 .processing { background:linear-gradient(135deg,#f59e0b,#f97316); }
 .completed { background:linear-gradient(135deg,#111827,#334155); }
 .delete { background:linear-gradient(135deg,#ef4444,#dc2626); }
-.reply-card {
-  border:1px solid #e2e8f0;
-  border-radius:24px;
-  padding:15px;
-  background:#f8fafc;
-}
-.reply-title {
-  font-weight:950;
-  margin-bottom:9px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.reply-card textarea {
-  width:100%;
-  min-height:96px;
-  padding:13px;
-  border-radius:18px;
-  border:1px solid #cbd5e1;
-  resize:vertical;
-  font-size:14px;
-  outline:none;
-  background:white;
-}
-.reply-card textarea:focus {
-  border-color:var(--blue);
-  box-shadow:0 0 0 4px rgba(37,99,235,0.08);
-}
-.save {
-  width:100%;
-  margin-top:9px;
-  padding:12px;
-  border:none;
-  border-radius:18px;
-  background:linear-gradient(135deg,#0f172a,#1e293b);
-  color:white;
-  font-weight:950;
-  cursor:pointer;
-}
-.empty {
-  padding:54px;
-  text-align:center;
-  color:var(--muted);
-  font-weight:900;
-}
+.reply-card { border:1px solid #e2e8f0; border-radius:24px; padding:15px; background:#f8fafc; }
+.reply-title { font-weight:950; margin-bottom:9px; display:flex; align-items:center; gap:8px; }
+.reply-card textarea { width:100%; min-height:96px; padding:13px; border-radius:18px; border:1px solid #cbd5e1; resize:vertical; font-size:14px; outline:none; background:white; }
+.save { margin-top:9px; border-radius:18px; background:linear-gradient(135deg,#0f172a,#1e293b); }
+.empty { padding:54px; text-align:center; color:var(--muted); font-weight:900; }
 
-.modal {
-  display:none;
-  position:fixed;
-  inset:0;
-  z-index:9999;
-  padding:18px;
-  justify-content:center;
-  align-items:center;
-  background:rgba(2,6,23,0.62);
-  backdrop-filter:blur(10px);
-}
-.modal-box {
-  width:410px;
-  max-width:100%;
-  padding:30px;
-  border-radius:30px;
-  text-align:center;
-  background:rgba(255,255,255,0.94);
-  box-shadow:0 30px 80px rgba(0,0,0,0.30);
-  animation:modalPop 0.2s ease;
-}
-.modal-icon {
-  width:68px;
-  height:68px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin:0 auto 16px;
-  border-radius:50%;
-  background:#fee2e2;
-  color:var(--red);
-  padding:18px;
-}
-.modal-title {
-  font-size:22px;
-  font-weight:950;
-  margin-bottom:10px;
-}
-.modal-text {
-  color:#4b5563;
-  font-size:15px;
-  line-height:1.5;
-  margin:0 0 24px;
-  font-weight:700;
-}
-.modal-actions {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-.modal-btn {
-  padding:14px;
-  border:none;
-  border-radius:18px;
-  font-weight:950;
-  cursor:pointer;
-  font-size:15px;
-}
+.modal { display:none; position:fixed; inset:0; z-index:9999; padding:18px; justify-content:center; align-items:center; background:rgba(2,6,23,0.62); backdrop-filter:blur(10px); }
+.modal-box { width:410px; max-width:100%; padding:30px; border-radius:30px; text-align:center; background:rgba(255,255,255,0.94); box-shadow:0 30px 80px rgba(0,0,0,0.30); }
+.modal-icon { width:68px; height:68px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; border-radius:50%; background:#fee2e2; color:var(--red); padding:18px; }
+.modal-title { font-size:22px; font-weight:950; margin-bottom:10px; }
+.modal-text { color:#4b5563; font-size:15px; line-height:1.5; margin:0 0 24px; font-weight:700; }
+.modal-actions { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.modal-btn { padding:14px; border:none; border-radius:18px; font-weight:950; cursor:pointer; font-size:15px; }
 .modal-cancel { background:#e5e7eb; color:#111827; }
-.modal-delete { background:var(--red); color:white; }
-
-@keyframes modalPop {
-  from { transform:scale(0.92); opacity:0; }
-  to { transform:scale(1); opacity:1; }
-}
+.modal-delete { background:var(--red); color:white; display:flex; align-items:center; justify-content:center; }
 
 @media (max-width:1420px) {
   .request { grid-template-columns:140px minmax(240px,1fr) 125px 170px 270px; }
   .req-img { width:140px; }
 }
-
 @media (max-width:1200px) {
   .layout { grid-template-columns:1fr; }
   .sidebar { display:none; }
@@ -775,14 +252,8 @@ button:hover { transform:translateY(-1px); }
   .actions { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; }
   .actions button { margin-bottom:0; }
 }
-
 @media (max-width:760px) {
-  .topbar {
-    padding:16px;
-    flex-direction:column;
-    align-items:stretch;
-    gap:14px;
-  }
+  .topbar { padding:16px; flex-direction:column; align-items:stretch; gap:14px; }
   .page-title { font-size:24px; }
   .top-actions { display:grid; grid-template-columns:82px 1fr 118px; gap:9px; }
   .content { padding:16px; }
@@ -792,20 +263,18 @@ button:hover { transform:translateY(-1px); }
   .stats { grid-template-columns:1fr; gap:14px; }
   .panel-head { flex-direction:column; align-items:stretch; }
   .toolbar { min-width:0; grid-template-columns:1fr; }
-  .search, .search-btn { min-height:56px; }
+  .search,.search-btn { min-height:56px; }
   .tabs { padding:0 18px; }
   .request { margin:14px; padding:15px; }
   .req-img { height:190px; }
-  .req-name, .req-phone { display:block; margin-left:0; }
+  .req-name,.req-phone { display:block; margin-left:0; }
   .actions { grid-template-columns:1fr; }
 }
 </style>
 </head>
 
 <body>
-
 <div class="layout">
-
   <aside class="sidebar">
     <div class="brand" onclick="logoReload()">
       <img src="/icon-admin-192.png" alt="YAMADEN Admin">
@@ -814,42 +283,30 @@ button:hover { transform:translateY(-1px); }
         <div class="brand-sub">Admin Console</div>
       </div>
     </div>
-
     <div class="menu-item active" id="menuOverview"></div>
-
     <div class="menu-title" id="menuRequestTitle">QUẢN LÝ YÊU CẦU</div>
-
     <div class="menu-item" onclick="changeTab('active')" id="menuActiveItem">
       <span class="nav-left"><span class="nav-icon-box" id="iconMenuActive"></span><span id="menuActiveText">Đang xử lý</span></span>
       <span class="menu-badge" id="sideActive">0</span>
     </div>
-
     <div class="menu-item" onclick="changeTab('done')" id="menuDoneItem">
       <span class="nav-left"><span class="nav-icon-box" id="iconMenuDone"></span><span id="menuDoneText">Hoàn thành</span></span>
       <span class="menu-badge" id="sideDone">0</span>
     </div>
-
     <div class="menu-title" id="menuSettingTitle">CÀI ĐẶT</div>
     <div class="menu-item" id="menuSetting"></div>
-
-    <div class="sidebar-footer">
-      © 2026 YAMADEN<br>
-      Customer Request System
-    </div>
+    <div class="sidebar-footer">© 2026 YAMADEN<br>Customer Request System</div>
   </aside>
 
   <main class="main">
     <div class="topbar">
       <div class="topbar-left">
-        <div class="mobile-brand">
-          <img src="/icon-admin-192.png" alt="YAMADEN Admin">
-        </div>
+        <div class="mobile-brand"><img src="/icon-admin-192.png" alt="YAMADEN Admin"></div>
         <div>
           <div class="page-title" id="pageTitle">Quản lý yêu cầu khách hàng</div>
           <div class="page-subtitle">Professional admin dashboard</div>
         </div>
       </div>
-
       <div class="top-actions">
         <select class="lang" id="language" onchange="changeLanguage()">
           <option value="vi">VI</option>
@@ -861,16 +318,12 @@ button:hover { transform:translateY(-1px); }
     </div>
 
     <div class="content">
-
       <div class="hero">
         <div class="hero-card">
           <div class="hero-kicker">YAMADEN ADMIN</div>
           <div class="hero-title" id="heroTitle">Trung tâm xử lý yêu cầu khách hàng</div>
-          <div class="hero-desc" id="heroDesc">
-            Theo dõi yêu cầu mới, cập nhật trạng thái xử lý, phản hồi khách hàng và quản lý lịch sử hoàn thành trong một giao diện thống nhất.
-          </div>
+          <div class="hero-desc" id="heroDesc">Theo dõi yêu cầu mới, cập nhật trạng thái xử lý, phản hồi khách hàng và quản lý lịch sử hoàn thành trong một giao diện thống nhất.</div>
         </div>
-
         <div class="quick-card">
           <div class="quick-title" id="quickTitle">Tổng quan nhanh</div>
           <div class="quick-line"><span id="quickActiveLabel">Đang xử lý</span><b id="quickActive">0</b></div>
@@ -880,26 +333,10 @@ button:hover { transform:translateY(-1px); }
       </div>
 
       <div class="stats">
-        <div class="stat">
-          <div class="stat-icon" id="statTotalIcon"></div>
-          <div class="stat-label" id="labelTotal">Tổng yêu cầu</div>
-          <div class="stat-number" id="total">0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-icon orange" id="statActiveIcon"></div>
-          <div class="stat-label" id="labelActive">Đang xử lý</div>
-          <div class="stat-number" id="active">0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-icon green" id="statDoneIcon"></div>
-          <div class="stat-label" id="labelDone">Hoàn thành</div>
-          <div class="stat-number" id="done">0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-icon sky" id="statTodayIcon"></div>
-          <div class="stat-label" id="labelToday">Hôm nay</div>
-          <div class="stat-number" id="today">0</div>
-        </div>
+        <div class="stat"><div class="stat-icon" id="statTotalIcon"></div><div class="stat-label" id="labelTotal">Tổng yêu cầu</div><div class="stat-number" id="total">0</div></div>
+        <div class="stat"><div class="stat-icon orange" id="statActiveIcon"></div><div class="stat-label" id="labelActive">Đang xử lý</div><div class="stat-number" id="active">0</div></div>
+        <div class="stat"><div class="stat-icon green" id="statDoneIcon"></div><div class="stat-label" id="labelDone">Hoàn thành</div><div class="stat-number" id="done">0</div></div>
+        <div class="stat"><div class="stat-icon sky" id="statTodayIcon"></div><div class="stat-label" id="labelToday">Hôm nay</div><div class="stat-number" id="today">0</div></div>
       </div>
 
       <div class="panel">
@@ -908,446 +345,23 @@ button:hover { transform:translateY(-1px); }
             <div class="panel-title" id="requestPanelTitle">Danh sách yêu cầu</div>
             <div class="panel-subtitle" id="requestPanelSub">Tìm kiếm, xử lý và phản hồi yêu cầu khách hàng</div>
           </div>
-
           <div class="toolbar">
             <div class="search-wrap">
               <span class="line-icon" id="searchInputIcon"></span>
               <input class="search" id="search" placeholder="Tìm theo tên, SĐT, địa chỉ...">
             </div>
-            <button class="search-btn" id="searchBtn" onclick="load()"></button>
+            <button class="search-btn" id="searchBtn" onclick="loadRequests()"></button>
           </div>
         </div>
-
         <div class="tabs">
           <button id="tabActive" class="active" onclick="changeTab('active')">Đang xử lý</button>
           <button id="tabDone" onclick="changeTab('done')">Hoàn thành</button>
         </div>
-
         <div id="list"></div>
       </div>
-
     </div>
   </main>
-
 </div>
-
-<script>
-const adminToken = localStorage.getItem("adminToken");
-const loginTime = localStorage.getItem("loginTime");
-
-if (!adminToken || !loginTime || Date.now() - loginTime > 86400000) {
-  localStorage.removeItem("adminToken");
-  localStorage.removeItem("loginTime");
-  window.location.href = "/login.html";
-}
-
-function logout() {
-  localStorage.removeItem("adminToken");
-  localStorage.removeItem("loginTime");
-  window.location.href = "/login.html";
-}
-
-const API = "https://yamaden.onrender.com";
-
-function apiFetch(url, options = {}) {
-  const token = localStorage.getItem("adminToken");
-  options.headers = {
-    ...(options.headers || {}),
-    "Authorization": "Bearer " + token
-  };
-  return fetch(url, options);
-}
-
-function authFailLogout() {
-  localStorage.removeItem("adminToken");
-  localStorage.removeItem("loginTime");
-  window.location.href = "/login.html";
-}
-
-let currentLang = localStorage.getItem("language") || "vi";
-let currentTab = "active";
-let deleteId = null;
-
-const ICONS = {
-  home:`<svg viewBox="0 0 24 24" fill="none"><path d="M3 10.8 12 3l9 7.8V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10.8Z" stroke-width="2" stroke-linejoin="round"/></svg>`,
-  clock:`<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke-width="2"/><path d="M12 7v5l3 3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  check:`<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke-width="2"/><path d="m8 12 2.5 2.5L16.5 9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  settings:`<svg viewBox="0 0 24 24" fill="none"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" stroke-width="2"/><path d="M4 12H2m20 0h-2M12 4V2m0 20v-2M5.6 5.6 4.2 4.2m15.6 15.6-1.4-1.4m0-12.8 1.4-1.4M4.2 19.8l1.4-1.4" stroke-width="2" stroke-linecap="round"/></svg>`,
-  chart:`<svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5" stroke-width="2" stroke-linecap="round"/><path d="M4 19h16" stroke-width="2" stroke-linecap="round"/><path d="M8 16v-5m4 5V8m4 8v-7" stroke-width="2" stroke-linecap="round"/></svg>`,
-  calendar:`<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="3" stroke-width="2"/><path d="M8 3v4m8-4v4M4 10h16" stroke-width="2" stroke-linecap="round"/></svg>`,
-  search:`<svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke-width="2"/><path d="m20 20-3.2-3.2" stroke-width="2" stroke-linecap="round"/></svg>`,
-  phone:`<svg viewBox="0 0 24 24" fill="none"><path d="M8.5 5.5 6.8 3.8A2 2 0 0 0 3.5 5c0 8.6 6.9 15.5 15.5 15.5a2 2 0 0 0 1.2-3.3l-1.7-1.7a2 2 0 0 0-2.2-.4l-2.1.9a12.2 12.2 0 0 1-6.2-6.2l.9-2.1a2 2 0 0 0-.4-2.2Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  map:`<svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.1 7-12a7 7 0 1 0-14 0c0 6.9 7 12 7 12Z" stroke-width="2"/><circle cx="12" cy="9" r="2.5" stroke-width="2"/></svg>`,
-  edit:`<svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z" stroke-width="2" stroke-linejoin="round"/><path d="m14 8 2 2" stroke-width="2" stroke-linecap="round"/></svg>`,
-  trash:`<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16" stroke-width="2" stroke-linecap="round"/><path d="M9 7V4h6v3" stroke-width="2" stroke-linejoin="round"/><path d="M6 7l1 14h10l1-14" stroke-width="2" stroke-linejoin="round"/><path d="M10 11v6m4-6v6" stroke-width="2" stroke-linecap="round"/></svg>`,
-  message:`<svg viewBox="0 0 24 24" fill="none"><path d="M5 18.5V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-4 2.5Z" stroke-width="2" stroke-linejoin="round"/></svg>`,
-  list:`<svg viewBox="0 0 24 24" fill="none"><path d="M8 6h13M8 12h13M8 18h13" stroke-width="2" stroke-linecap="round"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01" stroke-width="4" stroke-linecap="round"/></svg>`,
-  user:`<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke-width="2"/><path d="M4 21a8 8 0 0 1 16 0" stroke-width="2" stroke-linecap="round"/></svg>`,
-  logout:`<svg viewBox="0 0 24 24" fill="none"><path d="M10 17l5-5-5-5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12H3" stroke-width="2" stroke-linecap="round"/><path d="M21 4v16" stroke-width="2" stroke-linecap="round"/></svg>`,
-  spark:`<svg viewBox="0 0 24 24" fill="none"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z" stroke-width="2" stroke-linejoin="round"/></svg>`
-};
-
-function icon(name, cls = "ui-icon") {
-  return `<span class="${cls}">${ICONS[name] || ""}</span>`;
-}
-
-const texts = {
-  vi: {
-    pageTitle: "Quản lý yêu cầu khách hàng",
-    heroTitle: "Trung tâm xử lý yêu cầu khách hàng",
-    heroDesc: "Theo dõi yêu cầu mới, cập nhật trạng thái xử lý, phản hồi khách hàng và quản lý lịch sử hoàn thành trong một giao diện thống nhất.",
-    quickTitle: "Tổng quan nhanh",
-    requestPanelTitle: "Danh sách yêu cầu",
-    requestPanelSub: "Tìm kiếm, xử lý và phản hồi yêu cầu khách hàng",
-    total: "Tổng yêu cầu",
-    active: "Đang xử lý",
-    done: "Hoàn thành",
-    today: "Hôm nay",
-    search: "Tìm theo tên, SĐT, địa chỉ...",
-    call: "Gọi",
-    map: "Bản đồ",
-    processing: "Đang xử lý",
-    completed: "Hoàn thành",
-    pending: "Mới tiếp nhận",
-    reply: "Phản hồi khách hàng",
-    save: "Lưu phản hồi",
-    delete: "Xóa",
-    confirmTitle: "Xác nhận xóa",
-    confirmDelete: "Bạn có chắc muốn xóa yêu cầu này?",
-    cancel: "Hủy",
-    empty: "Không có yêu cầu nào",
-    menuOverview: "Tổng quan",
-    menuRequestTitle: "QUẢN LÝ YÊU CẦU",
-    menuSettingTitle: "CÀI ĐẶT",
-    menuSetting: "Cài đặt",
-    logout: "Đăng xuất",
-    unsaved: "Bạn có phản hồi chưa lưu. Vẫn tải lại?"
-  },
-  ja: {
-    pageTitle: "お客様リクエスト管理",
-    heroTitle: "お客様依頼の管理センター",
-    heroDesc: "新規依頼の確認、処理状況の更新、お客様への返信、完了履歴の管理を一つの画面で行えます。",
-    quickTitle: "クイック概要",
-    requestPanelTitle: "依頼一覧",
-    requestPanelSub: "お客様依頼の検索・処理・返信管理",
-    total: "総依頼数",
-    active: "処理中",
-    done: "完了",
-    today: "本日",
-    search: "名前、電話番号、住所で検索...",
-    call: "電話",
-    map: "地図",
-    processing: "処理中",
-    completed: "完了",
-    pending: "受付済み",
-    reply: "お客様への返信",
-    save: "返信を保存",
-    delete: "削除",
-    confirmTitle: "削除の確認",
-    confirmDelete: "この依頼を削除してもよろしいですか？",
-    cancel: "キャンセル",
-    empty: "依頼はありません",
-    menuOverview: "概要",
-    menuRequestTitle: "依頼管理",
-    menuSettingTitle: "設定",
-    menuSetting: "設定",
-    logout: "ログアウト",
-    unsaved: "保存していない返信があります。再読み込みしますか？"
-  }
-};
-
-function safeId(id) {
-  return String(id).replace(/'/g, "\\'");
-}
-
-function escapeHtml(text) {
-  return String(text || "")
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
-function hasUnsavedReply() {
-  const boxes = document.querySelectorAll("textarea[id^='reply-']");
-  for (const box of boxes) {
-    if (box.dataset.original !== undefined && box.value !== box.dataset.original) return true;
-  }
-  return false;
-}
-
-function logoReload() {
-  const t = texts[currentLang];
-  if (hasUnsavedReply()) {
-    if (!confirm(t.unsaved)) return;
-  }
-  load();
-}
-
-function renderStaticIcons() {
-  iconMenuActive.innerHTML = ICONS.clock;
-  iconMenuDone.innerHTML = ICONS.check;
-  statTotalIcon.innerHTML = ICONS.chart;
-  statActiveIcon.innerHTML = ICONS.clock;
-  statDoneIcon.innerHTML = ICONS.check;
-  statTodayIcon.innerHTML = ICONS.calendar;
-  searchInputIcon.innerHTML = ICONS.search;
-  searchBtn.innerHTML = icon("search");
-  modalTrashIcon.innerHTML = ICONS.trash;
-  adminInfoIcon.innerHTML = ICONS.user;
-}
-
-function applyLanguage() {
-  const t = texts[currentLang];
-
-  language.value = currentLang;
-  pageTitle.innerText = t.pageTitle;
-  heroTitle.innerText = t.heroTitle;
-  heroDesc.innerText = t.heroDesc;
-  quickTitle.innerHTML = icon("spark", "line-icon") + t.quickTitle;
-  requestPanelTitle.innerHTML = icon("list", "line-icon") + t.requestPanelTitle;
-  requestPanelSub.innerText = t.requestPanelSub;
-
-  labelTotal.innerHTML = icon("chart", "line-icon") + t.total;
-  labelActive.innerHTML = icon("clock", "line-icon") + t.active;
-  labelDone.innerHTML = icon("check", "line-icon") + t.done;
-  labelToday.innerHTML = icon("calendar", "line-icon") + t.today;
-  quickActiveLabel.innerHTML = icon("clock", "line-icon") + t.active;
-  quickDoneLabel.innerHTML = icon("check", "line-icon") + t.done;
-  quickTodayLabel.innerHTML = icon("calendar", "line-icon") + t.today;
-
-  search.placeholder = t.search;
-  menuOverview.innerHTML = `<span class="nav-left"><span class="nav-icon-box">${ICONS.home}</span><span>${t.menuOverview}</span></span>`;
-  menuRequestTitle.innerText = t.menuRequestTitle;
-  menuActiveText.innerText = t.active;
-  menuDoneText.innerText = t.done;
-  menuSettingTitle.innerText = t.menuSettingTitle;
-  menuSetting.innerHTML = `<span class="nav-left"><span class="nav-icon-box">${ICONS.settings}</span><span>${t.menuSetting}</span></span>`;
-  logoutBtn.innerHTML = icon("logout", "btn-icon") + t.logout;
-
-  modalTitle.innerText = t.confirmTitle;
-  modalCancelBtn.innerText = t.cancel;
-  modalDeleteBtn.innerHTML = icon("trash", "btn-icon") + t.delete;
-
-  updateTabLabels();
-  renderStaticIcons();
-}
-
-function changeLanguage() {
-  currentLang = language.value;
-  localStorage.setItem("language", currentLang);
-  applyLanguage();
-  load();
-}
-
-function changeTab(tab) {
-  currentTab = tab;
-  tabActive.classList.remove("active");
-  tabDone.classList.remove("active");
-
-  if (tab === "active") tabActive.classList.add("active");
-  else tabDone.classList.add("active");
-
-  load();
-}
-
-function updateTabLabels(activeCount = null, doneCount = null) {
-  const t = texts[currentLang];
-  if (activeCount === null || doneCount === null) {
-    tabActive.innerHTML = icon("clock", "line-icon") + t.active;
-    tabDone.innerHTML = icon("check", "line-icon") + t.done;
-  } else {
-    tabActive.innerHTML = icon("clock", "line-icon") + `${t.active} (${activeCount})`;
-    tabDone.innerHTML = icon("check", "line-icon") + `${t.done} (${doneCount})`;
-    sideActive.innerText = activeCount;
-    sideDone.innerText = doneCount;
-  }
-}
-
-function getStatusClass(status) {
-  if (status === "processing") return "badge status-processing";
-  if (status === "completed") return "badge status-completed";
-  return "badge status-pending";
-}
-
-function getStatusText(status) {
-  const t = texts[currentLang];
-  if (status === "processing") return t.processing;
-  if (status === "completed") return t.completed;
-  return t.pending;
-}
-
-function getStatusIcon(status) {
-  if (status === "processing") return icon("clock", "badge-icon");
-  if (status === "completed") return icon("check", "badge-icon");
-  return icon("message", "badge-icon");
-}
-
-function isToday(dateString) {
-  const d = new Date(dateString);
-  const now = new Date();
-  return d.getFullYear() === now.getFullYear()
-    && d.getMonth() === now.getMonth()
-    && d.getDate() === now.getDate();
-}
-
-async function load() {
-  const t = texts[currentLang];
-  const res = await apiFetch(API + "/requests");
-
-  if (res.status === 401) {
-    authFailLogout();
-    return;
-  }
-
-  const data = await res.json();
-
-  const activeCount = data.filter(item => item.status !== "completed").length;
-  const doneCount = data.filter(item => item.status === "completed").length;
-  const todayCount = data.filter(item => isToday(item.createdAt)).length;
-
-  total.innerText = data.length;
-  active.innerText = activeCount;
-  done.innerText = doneCount;
-  today.innerText = todayCount;
-  quickActive.innerText = activeCount;
-  quickDone.innerText = doneCount;
-  quickToday.innerText = todayCount;
-
-  updateTabLabels(activeCount, doneCount);
-
-  const keyword = search.value.toLowerCase();
-
-  const filtered = data.filter(item => {
-    const match =
-      String(item.id || "").toLowerCase().includes(keyword) ||
-      (item.name || "").toLowerCase().includes(keyword) ||
-      (item.phone || "").toLowerCase().includes(keyword) ||
-      (item.address || "").toLowerCase().includes(keyword) ||
-      (item.content || "").toLowerCase().includes(keyword);
-
-    if (currentTab === "active") return match && item.status !== "completed";
-    return match && item.status === "completed";
-  });
-
-  list.innerHTML = "";
-
-  if (filtered.length === 0) {
-    list.innerHTML = `<div class="empty">${t.empty}</div>`;
-    return;
-  }
-
-  filtered.forEach(item => {
-    const id = safeId(item.id);
-    const reply = escapeHtml(item.adminReply || "");
-    const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
-
-    list.innerHTML += `
-      <div class="request">
-        <div>
-          ${item.image ? `<img class="req-img" src="${item.image}">` : `<div class="req-img"></div>`}
-        </div>
-
-        <div>
-          <div class="req-id">ID #${item.id}</div>
-          <div>
-            <span class="req-name">${item.name || ""}</span>
-            <span class="req-phone">${item.phone || ""}</span>
-          </div>
-          <div class="req-line">${icon("map", "line-icon")}${item.address || ""}</div>
-          <div class="req-line">${icon("message", "line-icon")}${item.content || ""}</div>
-          <div class="req-line">${icon("clock", "line-icon")}${new Date(item.createdAt).toLocaleString()}</div>
-        </div>
-
-        <div>
-          <span class="${getStatusClass(item.status)}">${getStatusIcon(item.status)}${getStatusText(item.status)}</span>
-        </div>
-
-        <div class="actions">
-          ${item.phone ? `<a href="tel:${item.phone}"><button class="call">${icon("phone", "btn-icon")}${t.call}</button></a>` : ""}
-          ${item.address ? `<a href="${mapUrl}" target="_blank"><button class="map">${icon("map", "btn-icon")}${t.map}</button></a>` : ""}
-          ${item.status !== "completed"
-            ? `<button class="processing" onclick="updateStatus('${id}', 'processing')">${icon("clock", "btn-icon")}${t.processing}</button>
-               <button class="completed" onclick="updateStatus('${id}', 'completed')">${icon("check", "btn-icon")}${t.completed}</button>`
-            : `<button class="delete" onclick="deleteRequest('${id}')">${icon("trash", "btn-icon")}${t.delete}</button>`
-          }
-        </div>
-
-        <div class="reply-card">
-          <div class="reply-title">${icon("message", "line-icon")}${t.reply}</div>
-          <textarea id="reply-${item.id}" data-original="${reply}">${reply}</textarea>
-          <button class="save" onclick="saveReply('${id}')">${icon("edit", "btn-icon")}${t.save}</button>
-        </div>
-      </div>
-    `;
-  });
-}
-
-async function updateStatus(id, status) {
-  const res = await apiFetch(API + "/request/" + encodeURIComponent(id), {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status })
-  });
-
-  if (res.status === 401) {
-    authFailLogout();
-    return;
-  }
-
-  load();
-}
-
-async function saveReply(id) {
-  const reply = document.getElementById("reply-" + id).value;
-
-  const res = await apiFetch(API + "/request/" + encodeURIComponent(id), {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ adminReply: reply })
-  });
-
-  if (res.status === 401) {
-    authFailLogout();
-    return;
-  }
-
-  load();
-}
-
-function deleteRequest(id) {
-  const t = texts[currentLang];
-  deleteId = id;
-  modalText.innerText = t.confirmDelete;
-  modal.style.display = "flex";
-}
-
-function closeModal() {
-  modal.style.display = "none";
-  deleteId = null;
-}
-
-async function confirmDelete() {
-  if (deleteId === null) return;
-
-  const res = await apiFetch(API + "/request/" + encodeURIComponent(deleteId), {
-    method: "DELETE"
-  });
-
-  if (res.status === 401) {
-    authFailLogout();
-    return;
-  }
-
-  closeModal();
-  load();
-}
-
-search.addEventListener("input", load);
-
-applyLanguage();
-load();
-</script>
 
 <div id="modal" class="modal" onclick="closeModal()">
   <div class="modal-box" onclick="event.stopPropagation()">
@@ -1361,5 +375,306 @@ load();
   </div>
 </div>
 
+<script>
+const API = "https://yamaden.onrender.com";
+const TOKEN_MAX_AGE = 86400000;
+
+let currentLang = localStorage.getItem("language") || "vi";
+let currentTab = "active";
+let deleteId = null;
+let loading = false;
+
+const ICONS = {
+  home:`<svg viewBox="0 0 24 24"><path d="M3 10.8 12 3l9 7.8V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10.8Z"/></svg>`,
+  clock:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`,
+  check:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16.5 9"/></svg>`,
+  settings:`<svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M4 12H2m20 0h-2M12 4V2m0 20v-2M5.6 5.6 4.2 4.2m15.6 15.6-1.4-1.4m0-12.8 1.4-1.4M4.2 19.8l1.4-1.4"/></svg>`,
+  chart:`<svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5m4 5V8m4 8v-7"/></svg>`,
+  calendar:`<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4m8-4v4M4 10h16"/></svg>`,
+  search:`<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>`,
+  phone:`<svg viewBox="0 0 24 24"><path d="M8.5 5.5 6.8 3.8A2 2 0 0 0 3.5 5c0 8.6 6.9 15.5 15.5 15.5a2 2 0 0 0 1.2-3.3l-1.7-1.7a2 2 0 0 0-2.2-.4l-2.1.9a12.2 12.2 0 0 1-6.2-6.2l.9-2.1a2 2 0 0 0-.4-2.2Z"/></svg>`,
+  map:`<svg viewBox="0 0 24 24"><path d="M12 21s7-5.1 7-12a7 7 0 1 0-14 0c0 6.9 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>`,
+  edit:`<svg viewBox="0 0 24 24"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="m14 8 2 2"/></svg>`,
+  trash:`<svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 14h10l1-14"/><path d="M10 11v6m4-6v6"/></svg>`,
+  message:`<svg viewBox="0 0 24 24"><path d="M5 18.5V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-4 2.5Z"/></svg>`,
+  list:`<svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>`,
+  user:`<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>`,
+  logout:`<svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 4v16"/></svg>`,
+  spark:`<svg viewBox="0 0 24 24"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z"/></svg>`
+};
+
+const texts = {
+  vi: {
+    pageTitle:"Quản lý yêu cầu khách hàng", heroTitle:"Trung tâm xử lý yêu cầu khách hàng",
+    heroDesc:"Theo dõi yêu cầu mới, cập nhật trạng thái xử lý, phản hồi khách hàng và quản lý lịch sử hoàn thành trong một giao diện thống nhất.",
+    quickTitle:"Tổng quan nhanh", requestPanelTitle:"Danh sách yêu cầu", requestPanelSub:"Tìm kiếm, xử lý và phản hồi yêu cầu khách hàng",
+    total:"Tổng yêu cầu", active:"Đang xử lý", done:"Hoàn thành", today:"Hôm nay", search:"Tìm theo tên, SĐT, địa chỉ...",
+    call:"Gọi", map:"Bản đồ", processing:"Đang xử lý", completed:"Hoàn thành", pending:"Mới tiếp nhận",
+    reply:"Phản hồi khách hàng", save:"Lưu phản hồi", delete:"Xóa", confirmTitle:"Xác nhận xóa",
+    confirmDelete:"Bạn có chắc muốn xóa yêu cầu này?", cancel:"Hủy", empty:"Không có yêu cầu nào",
+    menuOverview:"Tổng quan", menuRequestTitle:"QUẢN LÝ YÊU CẦU", menuSettingTitle:"CÀI ĐẶT", menuSetting:"Cài đặt",
+    logout:"Đăng xuất", unsaved:"Bạn có phản hồi chưa lưu. Vẫn tải lại?", loadError:"Không tải được danh sách yêu cầu."
+  },
+  ja: {
+    pageTitle:"お客様リクエスト管理", heroTitle:"お客様依頼の管理センター",
+    heroDesc:"新規依頼の確認、処理状況の更新、お客様への返信、完了履歴の管理を一つの画面で行えます。",
+    quickTitle:"クイック概要", requestPanelTitle:"依頼一覧", requestPanelSub:"お客様依頼の検索・処理・返信管理",
+    total:"総依頼数", active:"処理中", done:"完了", today:"本日", search:"名前、電話番号、住所で検索...",
+    call:"電話", map:"地図", processing:"処理中", completed:"完了", pending:"受付済み",
+    reply:"お客様への返信", save:"返信を保存", delete:"削除", confirmTitle:"削除の確認",
+    confirmDelete:"この依頼を削除してもよろしいですか？", cancel:"キャンセル", empty:"依頼はありません",
+    menuOverview:"概要", menuRequestTitle:"依頼管理", menuSettingTitle:"設定", menuSetting:"設定",
+    logout:"ログアウト", unsaved:"保存していない返信があります。再読み込みしますか？", loadError:"依頼一覧を読み込めませんでした。"
+  }
+};
+
+const $ = id => document.getElementById(id);
+
+function icon(name, cls = "ui-icon") {
+  return `<span class="${cls}" aria-hidden="true">${ICONS[name] || ""}</span>`;
+}
+function setIcon(id, svg) {
+  const el = $(id);
+  if (el) el.innerHTML = svg || "";
+}
+function escapeHtml(text) {
+  return String(text || "").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function checkAuth() {
+  const token = localStorage.getItem("adminToken");
+  const loginTime = Number(localStorage.getItem("loginTime") || 0);
+  if (!token || !loginTime || Date.now() - loginTime > TOKEN_MAX_AGE) authFailLogout();
+}
+function logout() {
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("loginTime");
+  window.location.href = "/login.html";
+}
+function authFailLogout() {
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("loginTime");
+  window.location.href = "/login.html";
+}
+function apiFetch(url, options = {}) {
+  const token = localStorage.getItem("adminToken");
+  return fetch(url, {
+    ...options,
+    headers: { ...(options.headers || {}), Authorization:"Bearer " + token }
+  });
+}
+function hasUnsavedReply() {
+  return Array.from(document.querySelectorAll("textarea[id^='reply-']")).some(box => box.dataset.original !== undefined && box.value !== box.dataset.original);
+}
+function logoReload() {
+  if (hasUnsavedReply() && !confirm(texts[currentLang].unsaved)) return;
+  loadRequests();
+}
+function renderStaticIcons() {
+  setIcon("iconMenuActive", ICONS.clock);
+  setIcon("iconMenuDone", ICONS.check);
+  setIcon("statTotalIcon", ICONS.chart);
+  setIcon("statActiveIcon", ICONS.clock);
+  setIcon("statDoneIcon", ICONS.check);
+  setIcon("statTodayIcon", ICONS.calendar);
+  setIcon("searchInputIcon", ICONS.search);
+  setIcon("modalTrashIcon", ICONS.trash);
+  setIcon("adminInfoIcon", ICONS.user);
+  if ($("searchBtn")) $("searchBtn").innerHTML = icon("search");
+}
+function applyLanguage() {
+  const t = texts[currentLang];
+  document.documentElement.lang = currentLang;
+  $("language").value = currentLang;
+  $("pageTitle").innerText = t.pageTitle;
+  $("heroTitle").innerText = t.heroTitle;
+  $("heroDesc").innerText = t.heroDesc;
+  $("quickTitle").innerHTML = icon("spark","line-icon") + t.quickTitle;
+  $("requestPanelTitle").innerHTML = icon("list","line-icon") + t.requestPanelTitle;
+  $("requestPanelSub").innerText = t.requestPanelSub;
+  $("labelTotal").innerHTML = icon("chart","line-icon") + t.total;
+  $("labelActive").innerHTML = icon("clock","line-icon") + t.active;
+  $("labelDone").innerHTML = icon("check","line-icon") + t.done;
+  $("labelToday").innerHTML = icon("calendar","line-icon") + t.today;
+  $("quickActiveLabel").innerHTML = icon("clock","line-icon") + t.active;
+  $("quickDoneLabel").innerHTML = icon("check","line-icon") + t.done;
+  $("quickTodayLabel").innerHTML = icon("calendar","line-icon") + t.today;
+  $("search").placeholder = t.search;
+  $("menuOverview").innerHTML = `<span class="nav-left"><span class="nav-icon-box">${ICONS.home}</span><span>${t.menuOverview}</span></span>`;
+  $("menuRequestTitle").innerText = t.menuRequestTitle;
+  $("menuActiveText").innerText = t.active;
+  $("menuDoneText").innerText = t.done;
+  $("menuSettingTitle").innerText = t.menuSettingTitle;
+  $("menuSetting").innerHTML = `<span class="nav-left"><span class="nav-icon-box">${ICONS.settings}</span><span>${t.menuSetting}</span></span>`;
+  $("logoutBtn").innerHTML = icon("logout","btn-icon") + t.logout;
+  $("modalTitle").innerText = t.confirmTitle;
+  $("modalCancelBtn").innerText = t.cancel;
+  $("modalDeleteBtn").innerHTML = icon("trash","btn-icon") + t.delete;
+  updateTabLabels();
+  renderStaticIcons();
+}
+function changeLanguage() {
+  currentLang = $("language").value;
+  localStorage.setItem("language", currentLang);
+  applyLanguage();
+  loadRequests();
+}
+function changeTab(tab) {
+  currentTab = tab;
+  $("tabActive").classList.toggle("active", tab === "active");
+  $("tabDone").classList.toggle("active", tab === "done");
+  loadRequests();
+}
+function updateTabLabels(activeCount = null, doneCount = null) {
+  const t = texts[currentLang];
+  $("tabActive").innerHTML = icon("clock","line-icon") + (activeCount === null ? t.active : `${t.active} (${activeCount})`);
+  $("tabDone").innerHTML = icon("check","line-icon") + (doneCount === null ? t.done : `${t.done} (${doneCount})`);
+  if (activeCount !== null) $("sideActive").innerText = activeCount;
+  if (doneCount !== null) $("sideDone").innerText = doneCount;
+}
+function getStatusClass(status) {
+  if (status === "processing") return "badge status-processing";
+  if (status === "completed") return "badge status-completed";
+  return "badge status-pending";
+}
+function getStatusText(status) {
+  const t = texts[currentLang];
+  if (status === "processing") return t.processing;
+  if (status === "completed") return t.completed;
+  return t.pending;
+}
+function getStatusIcon(status) {
+  if (status === "processing") return icon("clock","badge-icon");
+  if (status === "completed") return icon("check","badge-icon");
+  return icon("message","badge-icon");
+}
+function isToday(dateString) {
+  const d = new Date(dateString);
+  if (Number.isNaN(d.getTime())) return false;
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+}
+async function loadRequests() {
+  if (loading) return;
+  loading = true;
+  const t = texts[currentLang];
+  try {
+    const res = await apiFetch(API + "/requests");
+    if (res.status === 401) return authFailLogout();
+    if (!res.ok) throw new Error("Load failed");
+    const data = await res.json();
+    const items = Array.isArray(data) ? data : [];
+    const activeCount = items.filter(item => item.status !== "completed").length;
+    const doneCount = items.filter(item => item.status === "completed").length;
+    const todayCount = items.filter(item => isToday(item.createdAt)).length;
+
+    $("total").innerText = items.length;
+    $("active").innerText = activeCount;
+    $("done").innerText = doneCount;
+    $("today").innerText = todayCount;
+    $("quickActive").innerText = activeCount;
+    $("quickDone").innerText = doneCount;
+    $("quickToday").innerText = todayCount;
+    updateTabLabels(activeCount, doneCount);
+
+    const keyword = $("search").value.trim().toLowerCase();
+    const filtered = items.filter(item => {
+      const match = [item.id, item.name, item.phone, item.address, item.content].some(value => String(value || "").toLowerCase().includes(keyword));
+      return currentTab === "active" ? match && item.status !== "completed" : match && item.status === "completed";
+    });
+
+    if (filtered.length === 0) {
+      $("list").innerHTML = `<div class="empty">${t.empty}</div>`;
+      return;
+    }
+    $("list").innerHTML = filtered.map(renderRequest).join("");
+  } catch (err) {
+    $("list").innerHTML = `<div class="empty">${t.loadError}</div>`;
+  } finally {
+    loading = false;
+  }
+}
+function renderRequest(item) {
+  const t = texts[currentLang];
+  const id = String(item.id || "");
+  const safeId = escapeHtml(id);
+  const reply = escapeHtml(item.adminReply || "");
+  const address = escapeHtml(item.address || "");
+  const phone = escapeHtml(item.phone || "");
+  const name = escapeHtml(item.name || "");
+  const content = escapeHtml(item.content || "");
+  const createdAt = item.createdAt ? new Date(item.createdAt).toLocaleString() : "";
+  const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
+  const image = item.image ? `<img class="req-img" src="${escapeHtml(item.image)}" alt="">` : `<div class="req-img"></div>`;
+
+  return `
+    <div class="request">
+      <div>${image}</div>
+      <div>
+        <div class="req-id">ID #${safeId}</div>
+        <div><span class="req-name">${name}</span><span class="req-phone">${phone}</span></div>
+        <div class="req-line">${icon("map","line-icon")}${address}</div>
+        <div class="req-line">${icon("message","line-icon")}${content}</div>
+        <div class="req-line">${icon("clock","line-icon")}${escapeHtml(createdAt)}</div>
+      </div>
+      <div><span class="${getStatusClass(item.status)}">${getStatusIcon(item.status)}${getStatusText(item.status)}</span></div>
+      <div class="actions">
+        ${item.phone ? `<a href="tel:${phone}"><button class="call">${icon("phone","btn-icon")}${t.call}</button></a>` : ""}
+        ${item.address ? `<a href="${mapUrl}" target="_blank" rel="noopener"><button class="map">${icon("map","btn-icon")}${t.map}</button></a>` : ""}
+        ${item.status !== "completed"
+          ? `<button class="processing" onclick="updateStatus('${safeId}', 'processing')">${icon("clock","btn-icon")}${t.processing}</button>
+             <button class="completed" onclick="updateStatus('${safeId}', 'completed')">${icon("check","btn-icon")}${t.completed}</button>`
+          : `<button class="delete" onclick="deleteRequest('${safeId}')">${icon("trash","btn-icon")}${t.delete}</button>`}
+      </div>
+      <div class="reply-card">
+        <div class="reply-title">${icon("message","line-icon")}${t.reply}</div>
+        <textarea id="reply-${safeId}" data-original="${reply}">${reply}</textarea>
+        <button class="save" onclick="saveReply('${safeId}')">${icon("edit","btn-icon")}${t.save}</button>
+      </div>
+    </div>`;
+}
+async function updateStatus(id, status) {
+  const res = await apiFetch(API + "/request/" + encodeURIComponent(id), {
+    method:"PUT",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ status })
+  });
+  if (res.status === 401) return authFailLogout();
+  loadRequests();
+}
+async function saveReply(id) {
+  const box = $("reply-" + id);
+  const reply = box ? box.value : "";
+  const res = await apiFetch(API + "/request/" + encodeURIComponent(id), {
+    method:"PUT",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ adminReply:reply })
+  });
+  if (res.status === 401) return authFailLogout();
+  loadRequests();
+}
+function deleteRequest(id) {
+  deleteId = id;
+  $("modalText").innerText = texts[currentLang].confirmDelete;
+  $("modal").style.display = "flex";
+}
+function closeModal() {
+  $("modal").style.display = "none";
+  deleteId = null;
+}
+async function confirmDelete() {
+  if (deleteId === null) return;
+  const res = await apiFetch(API + "/request/" + encodeURIComponent(deleteId), { method:"DELETE" });
+  if (res.status === 401) return authFailLogout();
+  closeModal();
+  loadRequests();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  checkAuth();
+  applyLanguage();
+  $("search").addEventListener("input", loadRequests);
+  loadRequests();
+});
+</script>
 </body>
 </html>

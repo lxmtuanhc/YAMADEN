@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
 <meta charset="UTF-8">
 <title>YAMADEN Admin Login</title>
@@ -11,21 +11,16 @@
 <meta name="theme-color" content="#020617">
 
 <style>
-* { box-sizing: border-box; }
-
+* { box-sizing:border-box; }
 :root {
   --dark:#020617;
-  --dark2:#0f172a;
   --blue:#2563eb;
-  --blue2:#1d4ed8;
   --cyan:#06b6d4;
   --text:#0f172a;
   --muted:#64748b;
   --line:#dbe3ef;
   --red:#dc2626;
-  --white:#ffffff;
 }
-
 body {
   margin:0;
   min-height:100vh;
@@ -41,7 +36,6 @@ body {
   padding:24px;
   overflow-x:hidden;
 }
-
 body::before {
   content:"";
   position:fixed;
@@ -53,7 +47,26 @@ body::before {
   background-size:44px 44px;
   mask-image:linear-gradient(to bottom, black 0%, transparent 82%);
 }
-
+button, select, input { font-family:inherit; }
+.icon {
+  width:20px;
+  height:20px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:none;
+  color:currentColor;
+}
+.icon svg {
+  width:100%;
+  height:100%;
+  display:block;
+  stroke:currentColor;
+  fill:none;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
 .login-shell {
   width:1080px;
   max-width:100%;
@@ -69,17 +82,13 @@ body::before {
   box-shadow:0 35px 90px rgba(0,0,0,0.42);
   backdrop-filter:blur(24px);
 }
-
 .left-panel {
   position:relative;
   overflow:hidden;
   padding:42px;
   color:white;
-  background:
-    linear-gradient(145deg,rgba(2,6,23,0.96),rgba(30,64,175,0.88)),
-    radial-gradient(circle at 82% 18%,rgba(6,182,212,0.36),transparent 36%);
+  background:linear-gradient(145deg,rgba(2,6,23,0.96),rgba(30,64,175,0.88));
 }
-
 .left-panel::after {
   content:"";
   position:absolute;
@@ -90,15 +99,13 @@ body::before {
   border-radius:50%;
   background:rgba(255,255,255,0.08);
 }
-
-.brand-main {
+.brand-main,.mobile-brand {
   display:flex;
   align-items:center;
   gap:16px;
   position:relative;
   z-index:1;
 }
-
 .brand-main img {
   width:68px;
   height:68px;
@@ -106,28 +113,13 @@ body::before {
   background:white;
   box-shadow:0 18px 42px rgba(0,0,0,0.34);
 }
-
-.brand-title {
-  font-size:30px;
-  font-weight:950;
-  letter-spacing:1px;
-}
-
-.brand-sub {
-  margin-top:4px;
-  color:#bfdbfe;
-  font-size:13px;
-  font-weight:850;
-}
-
-.hero-copy {
-  margin-top:92px;
-  position:relative;
-  z-index:1;
-}
-
+.brand-title { font-size:30px; font-weight:950; letter-spacing:1px; }
+.brand-sub { margin-top:4px; color:#bfdbfe; font-size:13px; font-weight:850; }
+.hero-copy { margin-top:92px; position:relative; z-index:1; }
 .hero-kicker {
   display:inline-flex;
+  align-items:center;
+  gap:8px;
   padding:8px 12px;
   border-radius:999px;
   background:rgba(255,255,255,0.12);
@@ -138,7 +130,6 @@ body::before {
   letter-spacing:0.7px;
   margin-bottom:18px;
 }
-
 .hero-title {
   max-width:470px;
   font-size:42px;
@@ -146,7 +137,6 @@ body::before {
   font-weight:950;
   letter-spacing:-1.2px;
 }
-
 .hero-desc {
   max-width:440px;
   margin-top:18px;
@@ -154,7 +144,6 @@ body::before {
   line-height:1.7;
   font-weight:700;
 }
-
 .feature-grid {
   margin-top:44px;
   display:grid;
@@ -163,7 +152,6 @@ body::before {
   position:relative;
   z-index:1;
 }
-
 .feature-card {
   padding:16px 12px;
   border-radius:22px;
@@ -172,25 +160,14 @@ body::before {
   text-align:center;
   backdrop-filter:blur(12px);
 }
-
-.feature-icon {
-  font-size:25px;
-  margin-bottom:9px;
+.feature-card .icon {
+  width:28px;
+  height:28px;
+  margin:0 auto 9px;
+  color:#dbeafe;
 }
-
-.feature-title {
-  font-size:13px;
-  font-weight:950;
-  margin-bottom:5px;
-}
-
-.feature-sub {
-  color:#cbd5e1;
-  font-size:11px;
-  line-height:1.45;
-  font-weight:700;
-}
-
+.feature-title { font-size:13px; font-weight:950; margin-bottom:5px; }
+.feature-sub { color:#cbd5e1; font-size:11px; line-height:1.45; font-weight:700; }
 .right-panel {
   background:rgba(255,255,255,0.94);
   backdrop-filter:blur(26px);
@@ -199,12 +176,7 @@ body::before {
   align-items:center;
   justify-content:center;
 }
-
-.login-card {
-  width:100%;
-  max-width:410px;
-}
-
+.login-card { width:100%; max-width:410px; }
 .top-row {
   display:flex;
   align-items:center;
@@ -212,13 +184,7 @@ body::before {
   gap:14px;
   margin-bottom:36px;
 }
-
-.mobile-brand {
-  display:none;
-  align-items:center;
-  gap:12px;
-}
-
+.mobile-brand { display:none; gap:12px; }
 .mobile-brand img {
   width:52px;
   height:52px;
@@ -226,18 +192,8 @@ body::before {
   background:white;
   box-shadow:0 12px 28px rgba(15,23,42,0.16);
 }
-
-.mobile-brand-title {
-  font-size:22px;
-  font-weight:950;
-}
-
-.mobile-brand-sub {
-  color:var(--muted);
-  font-size:12px;
-  font-weight:800;
-}
-
+.mobile-brand-title { font-size:22px; font-weight:950; }
+.mobile-brand-sub { color:var(--muted); font-size:12px; font-weight:800; }
 .lang {
   padding:12px 14px;
   border-radius:16px;
@@ -248,7 +204,6 @@ body::before {
   outline:none;
   box-shadow:0 8px 18px rgba(15,23,42,0.05);
 }
-
 .security-badge {
   display:inline-flex;
   align-items:center;
@@ -261,7 +216,6 @@ body::before {
   font-weight:950;
   margin-bottom:16px;
 }
-
 .title {
   font-size:32px;
   line-height:1.2;
@@ -269,7 +223,6 @@ body::before {
   letter-spacing:-0.8px;
   margin-bottom:8px;
 }
-
 .subtitle {
   color:var(--muted);
   font-size:14px;
@@ -277,21 +230,14 @@ body::before {
   font-weight:750;
   margin-bottom:28px;
 }
-
-.input-wrap {
-  position:relative;
-  margin-bottom:14px;
-}
-
+.input-wrap { position:relative; margin-bottom:14px; }
 .input-icon {
   position:absolute;
   left:16px;
   top:50%;
   transform:translateY(-50%);
   color:#64748b;
-  font-size:18px;
 }
-
 input {
   width:100%;
   padding:17px 48px 17px 48px;
@@ -303,12 +249,10 @@ input {
   font-weight:750;
   box-shadow:0 8px 20px rgba(15,23,42,0.04);
 }
-
 input:focus {
   border-color:var(--blue);
   box-shadow:0 0 0 5px rgba(37,99,235,0.12);
 }
-
 .eye-btn {
   position:absolute;
   right:12px;
@@ -319,10 +263,12 @@ input:focus {
   border:none;
   border-radius:12px;
   background:#f1f5f9;
+  color:#334155;
   cursor:pointer;
-  font-size:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-
 .login-btn {
   width:100%;
   padding:17px;
@@ -337,18 +283,8 @@ input:focus {
   margin-top:4px;
   transition:0.18s ease;
 }
-
-.login-btn:hover {
-  transform:translateY(-1px);
-  box-shadow:0 22px 42px rgba(37,99,235,0.34);
-}
-
-.login-btn:disabled {
-  opacity:0.65;
-  cursor:not-allowed;
-  transform:none;
-}
-
+.login-btn:hover { transform:translateY(-1px); box-shadow:0 22px 42px rgba(37,99,235,0.34); }
+.login-btn:disabled { opacity:0.65; cursor:not-allowed; transform:none; }
 .error {
   min-height:22px;
   color:var(--red);
@@ -356,7 +292,6 @@ input:focus {
   margin-top:14px;
   text-align:center;
 }
-
 .note {
   margin-top:26px;
   padding-top:20px;
@@ -366,8 +301,6 @@ input:focus {
   text-align:center;
   font-weight:750;
 }
-
-/* ===== APP / MOBILE UI ===== */
 @media (max-width:900px) {
   body {
     padding:16px;
@@ -376,7 +309,6 @@ input:focus {
       radial-gradient(circle at top, rgba(37,99,235,0.32), transparent 36%),
       linear-gradient(180deg,#020617 0%,#0f172a 100%);
   }
-
   .login-shell {
     width:100%;
     min-height:calc(100vh - 32px);
@@ -384,94 +316,29 @@ input:focus {
     border-radius:30px;
     background:rgba(255,255,255,0.96);
   }
-
-  .left-panel {
-    display:none;
-  }
-
-  .right-panel {
-    min-height:calc(100vh - 32px);
-    padding:24px 20px;
-    background:rgba(255,255,255,0.96);
-  }
-
-  .login-card {
-    max-width:100%;
-  }
-
-  .mobile-brand {
-    display:flex;
-  }
-
-  .top-row {
-    margin-bottom:44px;
-  }
-
-  .lang {
-    min-width:78px;
-    min-height:48px;
-  }
-
-  .security-badge {
-    margin-bottom:14px;
-  }
-
-  .title {
-    font-size:29px;
-  }
-
-  .subtitle {
-    margin-bottom:30px;
-  }
-
-  input,
-  .login-btn {
-    min-height:58px;
-    font-size:16px;
-  }
-
-  .note {
-    margin-top:34px;
-  }
+  .left-panel { display:none; }
+  .right-panel { min-height:calc(100vh - 32px); padding:24px 20px; background:rgba(255,255,255,0.96); }
+  .login-card { max-width:100%; }
+  .mobile-brand { display:flex; }
+  .top-row { margin-bottom:44px; }
+  .lang { min-width:78px; min-height:48px; }
+  .title { font-size:29px; }
+  input,.login-btn { min-height:58px; font-size:16px; }
+  .note { margin-top:34px; }
 }
-
 @media (max-width:420px) {
-  body {
-    padding:0;
-  }
-
-  .login-shell {
-    min-height:100vh;
-    border-radius:0;
-    border:none;
-  }
-
-  .right-panel {
-    min-height:100vh;
-    padding:22px 18px;
-  }
-
-  .mobile-brand img {
-    width:48px;
-    height:48px;
-  }
-
-  .mobile-brand-title {
-    font-size:20px;
-  }
-
-  .title {
-    font-size:27px;
-  }
+  body { padding:0; }
+  .login-shell { min-height:100vh; border-radius:0; border:none; }
+  .right-panel { min-height:100vh; padding:22px 18px; }
+  .mobile-brand img { width:48px; height:48px; }
+  .mobile-brand-title { font-size:20px; }
+  .title { font-size:27px; }
 }
 </style>
 </head>
 
 <body>
-
 <div class="login-shell">
-
-  <!-- WEB / LAPTOP PANEL -->
   <section class="left-panel">
     <div class="brand-main">
       <img src="/icon-admin-192.png" alt="YAMADEN Admin">
@@ -482,36 +349,32 @@ input:focus {
     </div>
 
     <div class="hero-copy">
-      <div class="hero-kicker">CUSTOMER REQUEST SYSTEM</div>
+      <div class="hero-kicker"><span id="heroKickerIcon" class="icon"></span>CUSTOMER REQUEST SYSTEM</div>
       <div class="hero-title" id="heroTitle">Quản trị yêu cầu khách hàng chuyên nghiệp</div>
-      <div class="hero-desc" id="heroDesc">
-        Theo dõi yêu cầu mới, cập nhật trạng thái xử lý, phản hồi khách hàng và quản lý toàn bộ lịch sử trong một hệ thống thống nhất.
-      </div>
+      <div class="hero-desc" id="heroDesc">Theo dõi yêu cầu mới, cập nhật trạng thái xử lý, phản hồi khách hàng và quản lý toàn bộ lịch sử trong một hệ thống thống nhất.</div>
     </div>
 
     <div class="feature-grid">
       <div class="feature-card">
-        <div class="feature-icon">🔐</div>
+        <span id="feature1Icon" class="icon"></span>
         <div class="feature-title" id="feature1Title">Bảo mật</div>
         <div class="feature-sub" id="feature1Sub">Khu vực quản trị riêng</div>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">⚡</div>
+        <span id="feature2Icon" class="icon"></span>
         <div class="feature-title" id="feature2Title">Nhanh chóng</div>
         <div class="feature-sub" id="feature2Sub">Xử lý yêu cầu tức thì</div>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">🌐</div>
+        <span id="feature3Icon" class="icon"></span>
         <div class="feature-title" id="feature3Title">Đa ngôn ngữ</div>
         <div class="feature-sub" id="feature3Sub">Tiếng Việt / Nhật</div>
       </div>
     </div>
   </section>
 
-  <!-- LOGIN FORM -->
   <section class="right-panel">
     <div class="login-card">
-
       <div class="top-row">
         <div class="mobile-brand">
           <img src="/icon-admin-192.png" alt="YAMADEN Admin">
@@ -520,159 +383,176 @@ input:focus {
             <div class="mobile-brand-sub">Admin Dashboard</div>
           </div>
         </div>
-
         <select id="language" class="lang" onchange="changeLanguage()">
           <option value="vi">VI</option>
           <option value="ja">JP</option>
         </select>
       </div>
 
-      <div class="security-badge" id="securityBadge">🔐 Admin secure login</div>
+      <div class="security-badge"><span id="securityIcon" class="icon"></span><span id="securityBadge">Admin secure login</span></div>
       <div class="title" id="loginTitle">Đăng nhập quản trị</div>
       <div class="subtitle" id="loginSubtitle">Vui lòng nhập mật khẩu admin để truy cập bảng điều khiển YAMADEN.</div>
 
       <div class="input-wrap">
-        <span class="input-icon">🔑</span>
-        <input type="password" id="password" placeholder="Nhập mật khẩu" onkeydown="handleEnter(event)">
-        <button type="button" class="eye-btn" onclick="togglePassword()" id="eyeBtn">👁️</button>
+        <span class="input-icon icon" id="passwordIcon"></span>
+        <input type="password" id="password" placeholder="Nhập mật khẩu" autocomplete="current-password" onkeydown="handleEnter(event)">
+        <button type="button" class="eye-btn" onclick="togglePassword()" id="eyeBtn" aria-label="Show password"></button>
       </div>
 
       <button class="login-btn" id="loginBtn" onclick="login()">Đăng nhập</button>
-
       <div id="error" class="error"></div>
-
       <div class="note">© 2026 YAMADEN · Customer Request System</div>
     </div>
   </section>
-
 </div>
 
 <script>
 const API = "https://yamaden.onrender.com";
+const TOKEN_MAX_AGE = 86400000;
 
 let lang = localStorage.getItem("loginLang") || localStorage.getItem("language") || "vi";
 
+const ICONS = {
+  shield:`<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-5"/></svg>`,
+  key:`<svg viewBox="0 0 24 24"><circle cx="7.5" cy="14.5" r="4.5"/><path d="M11 11 21 1"/><path d="m16 6 2 2"/><path d="m19 3 2 2"/></svg>`,
+  eye:`<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>`,
+  eyeOff:`<svg viewBox="0 0 24 24"><path d="m3 3 18 18"/><path d="M10.6 10.6A3 3 0 0 0 14 14"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a17.4 17.4 0 0 1-3.2 4.2"/><path d="M6.1 6.8C3.5 8.6 2 12 2 12s3.5 7 10 7a10.9 10.9 0 0 0 4-.8"/></svg>`,
+  bolt:`<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg>`,
+  globe:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 0 20"/><path d="M12 2a15.3 15.3 0 0 0 0 20"/></svg>`,
+  spark:`<svg viewBox="0 0 24 24"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z"/></svg>`
+};
+
 const texts = {
   vi: {
-    heroTitle: "Quản trị yêu cầu khách hàng chuyên nghiệp",
-    heroDesc: "Theo dõi yêu cầu mới, cập nhật trạng thái xử lý, phản hồi khách hàng và quản lý toàn bộ lịch sử trong một hệ thống thống nhất.",
-    feature1Title: "Bảo mật",
-    feature1Sub: "Khu vực quản trị riêng",
-    feature2Title: "Nhanh chóng",
-    feature2Sub: "Xử lý yêu cầu tức thì",
-    feature3Title: "Đa ngôn ngữ",
-    feature3Sub: "Tiếng Việt / Nhật",
-    securityBadge: "🔐 Admin secure login",
-    title: "Đăng nhập quản trị",
-    subtitle: "Vui lòng nhập mật khẩu admin để truy cập bảng điều khiển YAMADEN.",
-    placeholder: "Nhập mật khẩu",
-    login: "Đăng nhập",
-    logging: "Đang đăng nhập...",
-    wrong: "Sai mật khẩu hoặc lỗi đăng nhập!"
+    heroTitle:"Quản trị yêu cầu khách hàng chuyên nghiệp",
+    heroDesc:"Theo dõi yêu cầu mới, cập nhật trạng thái xử lý, phản hồi khách hàng và quản lý toàn bộ lịch sử trong một hệ thống thống nhất.",
+    feature1Title:"Bảo mật", feature1Sub:"Khu vực quản trị riêng",
+    feature2Title:"Nhanh chóng", feature2Sub:"Xử lý yêu cầu tức thì",
+    feature3Title:"Đa ngôn ngữ", feature3Sub:"Tiếng Việt / Nhật",
+    securityBadge:"Admin secure login",
+    title:"Đăng nhập quản trị",
+    subtitle:"Vui lòng nhập mật khẩu admin để truy cập bảng điều khiển YAMADEN.",
+    placeholder:"Nhập mật khẩu",
+    login:"Đăng nhập",
+    logging:"Đang đăng nhập...",
+    wrong:"Sai mật khẩu hoặc lỗi đăng nhập!"
   },
   ja: {
-    heroTitle: "お客様依頼をプロフェッショナルに管理",
-    heroDesc: "新規依頼の確認、処理状況の更新、お客様への返信、履歴管理を一つのシステムで行えます。",
-    feature1Title: "安全性",
-    feature1Sub: "管理者専用エリア",
-    feature2Title: "迅速対応",
-    feature2Sub: "依頼をすぐに処理",
-    feature3Title: "多言語対応",
-    feature3Sub: "ベトナム語 / 日本語",
-    securityBadge: "🔐 管理者セキュアログイン",
-    title: "管理者ログイン",
-    subtitle: "YAMADEN管理画面にアクセスするには、管理者パスワードを入力してください。",
-    placeholder: "パスワードを入力",
-    login: "ログイン",
-    logging: "ログイン中...",
-    wrong: "パスワードが違うか、ログインに失敗しました"
+    heroTitle:"お客様依頼をプロフェッショナルに管理",
+    heroDesc:"新規依頼の確認、処理状況の更新、お客様への返信、履歴管理を一つのシステムで行えます。",
+    feature1Title:"安全性", feature1Sub:"管理者専用エリア",
+    feature2Title:"迅速対応", feature2Sub:"依頼をすぐに処理",
+    feature3Title:"多言語対応", feature3Sub:"ベトナム語 / 日本語",
+    securityBadge:"管理者セキュアログイン",
+    title:"管理者ログイン",
+    subtitle:"YAMADEN管理画面にアクセスするには、管理者パスワードを入力してください。",
+    placeholder:"パスワードを入力",
+    login:"ログイン",
+    logging:"ログイン中...",
+    wrong:"パスワードが違うか、ログインに失敗しました"
   }
 };
 
+const $ = id => document.getElementById(id);
+
+function setIcon(id, svg) {
+  const el = $(id);
+  if (el) el.innerHTML = svg || "";
+}
+function renderIcons() {
+  setIcon("heroKickerIcon", ICONS.spark);
+  setIcon("feature1Icon", ICONS.shield);
+  setIcon("feature2Icon", ICONS.bolt);
+  setIcon("feature3Icon", ICONS.globe);
+  setIcon("securityIcon", ICONS.shield);
+  setIcon("passwordIcon", ICONS.key);
+  setIcon("eyeBtn", $("password").type === "password" ? ICONS.eye : ICONS.eyeOff);
+}
 function applyLanguage() {
   const t = texts[lang];
-
-  language.value = lang;
-
-  heroTitle.innerText = t.heroTitle;
-  heroDesc.innerText = t.heroDesc;
-  feature1Title.innerText = t.feature1Title;
-  feature1Sub.innerText = t.feature1Sub;
-  feature2Title.innerText = t.feature2Title;
-  feature2Sub.innerText = t.feature2Sub;
-  feature3Title.innerText = t.feature3Title;
-  feature3Sub.innerText = t.feature3Sub;
-
-  securityBadge.innerText = t.securityBadge;
-  loginTitle.innerText = t.title;
-  loginSubtitle.innerText = t.subtitle;
-  password.placeholder = t.placeholder;
-  loginBtn.innerText = t.login;
-  error.innerText = "";
+  document.documentElement.lang = lang;
+  $("language").value = lang;
+  $("heroTitle").innerText = t.heroTitle;
+  $("heroDesc").innerText = t.heroDesc;
+  $("feature1Title").innerText = t.feature1Title;
+  $("feature1Sub").innerText = t.feature1Sub;
+  $("feature2Title").innerText = t.feature2Title;
+  $("feature2Sub").innerText = t.feature2Sub;
+  $("feature3Title").innerText = t.feature3Title;
+  $("feature3Sub").innerText = t.feature3Sub;
+  $("securityBadge").innerText = t.securityBadge;
+  $("loginTitle").innerText = t.title;
+  $("loginSubtitle").innerText = t.subtitle;
+  $("password").placeholder = t.placeholder;
+  $("loginBtn").innerText = t.login;
+  $("error").innerText = "";
+  renderIcons();
 }
-
 function changeLanguage() {
-  lang = language.value;
+  lang = $("language").value;
   localStorage.setItem("loginLang", lang);
   localStorage.setItem("language", lang);
   applyLanguage();
 }
-
 function togglePassword() {
-  if (password.type === "password") {
-    password.type = "text";
-    eyeBtn.innerText = "🙈";
-  } else {
-    password.type = "password";
-    eyeBtn.innerText = "👁️";
+  $("password").type = $("password").type === "password" ? "text" : "password";
+  renderIcons();
+}
+async function readJsonSafe(res) {
+  try {
+    return await res.json();
+  } catch (err) {
+    return {};
   }
 }
-
 async function login() {
   const t = texts[lang];
-  const pass = password.value;
+  if ($("loginBtn").disabled) return;
 
-  error.innerText = "";
-  loginBtn.disabled = true;
-  loginBtn.innerText = t.logging;
+  $("error").innerText = "";
+  $("loginBtn").disabled = true;
+  $("loginBtn").innerText = t.logging;
 
   try {
     const res = await fetch(API + "/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: pass })
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ password:$("password").value })
     });
+    const data = await readJsonSafe(res);
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      error.innerText = t.wrong;
-      loginBtn.disabled = false;
-      loginBtn.innerText = t.login;
+    if (!res.ok || !data.token) {
+      $("error").innerText = t.wrong;
+      $("loginBtn").disabled = false;
+      $("loginBtn").innerText = t.login;
       return;
     }
 
     localStorage.setItem("adminToken", data.token);
     localStorage.setItem("loginTime", Date.now());
     localStorage.setItem("language", lang);
-
     window.location.href = "/admin.html";
-
   } catch (err) {
-    error.innerText = t.wrong;
-    loginBtn.disabled = false;
-    loginBtn.innerText = t.login;
+    $("error").innerText = t.wrong;
+    $("loginBtn").disabled = false;
+    $("loginBtn").innerText = t.login;
   }
 }
-
 function handleEnter(event) {
-  if (event.key === "Enter") {
-    login();
+  if (event.key === "Enter") login();
+}
+function redirectIfLoggedIn() {
+  const token = localStorage.getItem("adminToken");
+  const loginTime = Number(localStorage.getItem("loginTime") || 0);
+  if (token && loginTime && Date.now() - loginTime <= TOKEN_MAX_AGE) {
+    window.location.href = "/admin.html";
   }
 }
 
-applyLanguage();
+document.addEventListener("DOMContentLoaded", () => {
+  redirectIfLoggedIn();
+  applyLanguage();
+});
 </script>
-
 </body>
 </html>
