@@ -299,6 +299,141 @@ button, input, textarea, select { font-family:inherit; }
   font-size:12px;
   font-weight:800;
 }
+.philosophy-card {
+  margin-top:16px;
+  display:grid;
+  grid-template-columns:0.92fr 1.08fr;
+  gap:16px;
+  align-items:stretch;
+}
+.philosophy-visual,
+.brand-visual {
+  position:relative;
+  overflow:hidden;
+  min-height:230px;
+  border-radius:24px;
+  background:
+    linear-gradient(145deg, rgba(17,24,39,0.84), rgba(5,5,5,0.94)),
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 18px);
+  box-shadow:0 16px 36px rgba(15,23,42,0.16);
+}
+.philosophy-visual::before,
+.brand-visual::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 22% 20%, rgba(37,99,235,0.36), transparent 28%),
+    radial-gradient(circle at 86% 78%, rgba(6,182,212,0.20), transparent 30%);
+}
+.philosophy-visual img {
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:116px;
+  height:116px;
+  transform:translate(-50%,-50%);
+  border-radius:30px;
+  background:white;
+  padding:8px;
+  box-shadow:0 18px 48px rgba(0,0,0,0.36);
+}
+.visual-label {
+  position:absolute;
+  left:18px;
+  bottom:18px;
+  right:18px;
+  color:white;
+  font-weight:950;
+  font-size:21px;
+  line-height:1.28;
+  z-index:1;
+}
+.philosophy-copy {
+  background:white;
+  border:1px solid rgba(229,231,235,0.94);
+  border-radius:24px;
+  padding:22px;
+  box-shadow:0 12px 28px rgba(15,23,42,0.06);
+}
+.section-kicker {
+  color:#2563eb;
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:0.6px;
+  margin-bottom:8px;
+}
+.section-title {
+  font-size:24px;
+  line-height:1.25;
+  font-weight:950;
+  margin-bottom:12px;
+}
+.section-text {
+  color:#4b5563;
+  font-size:14px;
+  line-height:1.75;
+  font-weight:750;
+}
+.brand-gallery {
+  display:grid;
+  grid-template-columns:1.15fr 0.85fr;
+  gap:12px;
+  margin-top:16px;
+}
+.brand-visual {
+  min-height:210px;
+}
+.brand-visual .visual-label {
+  font-size:19px;
+}
+.gallery-stack {
+  display:grid;
+  gap:12px;
+}
+.gallery-tile {
+  min-height:99px;
+  border-radius:22px;
+  padding:16px;
+  color:white;
+  background:linear-gradient(145deg,#111827,#374151);
+  box-shadow:0 12px 26px rgba(15,23,42,0.12);
+}
+.gallery-tile .icon {
+  width:32px;
+  height:32px;
+  padding:7px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.14);
+  margin-bottom:10px;
+}
+.gallery-title {
+  font-weight:950;
+  line-height:1.25;
+}
+.company-info-grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+.company-info {
+  border:1px solid #e5e7eb;
+  border-radius:18px;
+  padding:14px;
+  background:#f9fafb;
+}
+.company-info-label {
+  color:#6b7280;
+  font-size:12px;
+  font-weight:900;
+  margin-bottom:5px;
+}
+.company-info-value {
+  color:#111827;
+  font-size:14px;
+  line-height:1.45;
+  font-weight:850;
+}
 .card {
   background:white;
   border-radius:24px;
@@ -660,6 +795,11 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   .home-title { font-size:28px; }
   .home-actions { grid-template-columns:1fr; }
   .service-grid { grid-template-columns:1fr; }
+  .philosophy-card,
+  .brand-gallery,
+  .company-info-grid { grid-template-columns:1fr; }
+  .philosophy-visual,
+  .brand-visual { min-height:210px; }
   .trust-row { grid-template-columns:repeat(3,1fr); gap:8px; }
   .trust-item { padding:13px 10px; border-radius:18px; }
   .trust-number { font-size:21px; }
@@ -726,6 +866,18 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
         <div class="trust-item"><div class="trust-number">ID</div><div class="trust-label" id="trust3">Easy tracking</div></div>
       </div>
 
+      <div class="philosophy-card">
+        <div class="philosophy-visual">
+          <img src="/icon-512.png" alt="YAMADEN">
+          <div class="visual-label" id="philosophyVisual">Protecting people. Creating happiness.</div>
+        </div>
+        <div class="philosophy-copy">
+          <div class="section-kicker" id="philosophyKicker">PHILOSOPHY</div>
+          <div class="section-title" id="philosophyTitle">人を守り、幸せを創る</div>
+          <div class="section-text" id="philosophyText">YAMADEN values people, local trust and reliable technology.</div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-title">
           <div class="card-title-icon" id="serviceTitleIcon"></div>
@@ -747,6 +899,29 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
             <div class="service-title" id="service3Title">Request tracking</div>
             <div class="service-desc" id="service3Desc">Use your request ID to check status and admin replies.</div>
           </div>
+        </div>
+      </div>
+
+      <div class="brand-gallery">
+        <div class="brand-visual">
+          <div class="visual-label" id="galleryMain">Electrical work, instrumentation and maintenance for safer buildings.</div>
+        </div>
+        <div class="gallery-stack">
+          <div class="gallery-tile"><span class="icon" id="gallery1Icon"></span><div class="gallery-title" id="gallery1">Reliable site response</div></div>
+          <div class="gallery-tile"><span class="icon" id="gallery2Icon"></span><div class="gallery-title" id="gallery2">Quality maintenance</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-icon" id="companyTitleIcon"></div>
+          <h2 id="companyTitle">Company</h2>
+        </div>
+        <div class="company-info-grid">
+          <div class="company-info"><div class="company-info-label" id="companyNameLabel">Company</div><div class="company-info-value" id="companyNameValue">YAMADEN Co., Ltd.</div></div>
+          <div class="company-info"><div class="company-info-label" id="companyServiceLabel">Business</div><div class="company-info-value" id="companyServiceValue">Electrical work / instrumentation / automatic control maintenance</div></div>
+          <div class="company-info"><div class="company-info-label" id="companyAddressLabel">Address</div><div class="company-info-value">〒733-0851 広島県広島市西区田方2-9-23</div></div>
+          <div class="company-info"><div class="company-info-label" id="companyTelLabel">TEL</div><div class="company-info-value">082-516-4423</div></div>
         </div>
       </div>
     </section>
@@ -901,13 +1076,27 @@ const texts = {
     trust1:"Tiếp nhận nhanh",
     trust2:"Hỗ trợ Việt / Nhật",
     trust3:"Tra cứu bằng ID",
+    philosophyVisual:"Bảo vệ con người. Kiến tạo hạnh phúc.",
+    philosophyKicker:"TRIẾT LÝ",
+    philosophyTitle:"人を守り、幸せを創る",
+    philosophyText:"Từ Hiroshima, YAMADEN đặt con người, khách hàng và cộng đồng ở trung tâm. Mỗi công trình được xử lý bằng tinh thần trách nhiệm, chất lượng chắc chắn và sự phản hồi linh hoạt.",
     serviceTitle:"Dịch vụ YAMADEN",
-    service1Title:"Sửa chữa điện",
-    service1Desc:"Kiểm tra đèn, công tắc, ổ cắm, mất điện cục bộ và các sự cố tại công trình.",
-    service2Title:"Lắp đặt thiết bị",
-    service2Desc:"Hỗ trợ lắp đặt thiết bị điện, đi dây, thay thế phụ kiện và xử lý theo yêu cầu.",
-    service3Title:"Theo dõi yêu cầu",
-    service3Desc:"Mỗi yêu cầu có mã ID riêng để khách hàng kiểm tra trạng thái và phản hồi admin.",
+    service1Title:"Công trình điện tổng hợp",
+    service1Desc:"Thi công điện cho nhà ở, tòa nhà, nhà máy, kéo dây, thiết bị và xử lý sự cố tại công trình.",
+    service2Title:"Công trình đo lường điều khiển",
+    service2Desc:"Hỗ trợ hệ thống điều khiển, thiết bị điện và không khí trong các công trình cần vận hành ổn định.",
+    service3Title:"Bảo trì điều khiển tự động",
+    service3Desc:"Kiểm tra, bảo dưỡng và quản lý thiết bị để duy trì môi trường tòa nhà an toàn, ổn định.",
+    galleryMain:"Điện công trình, đo lường điều khiển và bảo trì thiết bị cho môi trường an toàn hơn.",
+    gallery1:"Phản hồi linh hoạt tại hiện trường",
+    gallery2:"Chất lượng ổn định sau thi công",
+    companyTitle:"Thông tin công ty",
+    companyNameLabel:"Tên công ty",
+    companyNameValue:"Công ty cổ phần YAMADEN",
+    companyServiceLabel:"Lĩnh vực",
+    companyServiceValue:"Công trình điện / đo lường điều khiển / bảo trì thiết bị điều khiển tự động",
+    companyAddressLabel:"Địa chỉ",
+    companyTelLabel:"Điện thoại",
     sideStep1:"Gửi thông tin sự cố", sideStep2:"Theo dõi trạng thái", sideStep3:"Nhận phản hồi từ admin",
     tabSend:"Gửi yêu cầu", tabCheck:"Tra cứu", sendTitle:"Gửi yêu cầu hỗ trợ", checkTitle:"Tra cứu trạng thái yêu cầu",
     name:"Họ và tên", phone:"Số điện thoại", contact:"Liên hệ", address:"Địa chỉ", content:"Nội dung yêu cầu", image:"Hình ảnh",
@@ -932,13 +1121,27 @@ const texts = {
     trust1:"迅速受付",
     trust2:"ベトナム語 / 日本語",
     trust3:"IDで確認",
+    philosophyVisual:"Protecting people. Creating happiness.",
+    philosophyKicker:"PHILOSOPHY",
+    philosophyTitle:"人を守り、幸せを創る",
+    philosophyText:"山電は、仲間・家族・お客様・地域を守るという想いを大切にしています。確かな品質、誠実な対応、柔軟なフットワークで、安心と信頼につながる仕事を積み重ねます。",
     serviceTitle:"YAMADENのサービス",
-    service1Title:"電気修理",
-    service1Desc:"照明、スイッチ、コンセント、部分停電などの電気トラブルを確認します。",
-    service2Title:"設備取付",
-    service2Desc:"電気設備、配線、小型器具の取付や交換などをサポートします。",
-    service3Title:"依頼状況確認",
-    service3Desc:"受付IDを使って、処理状況や管理者からの返信を確認できます。",
+    service1Title:"一般電気工事",
+    service1Desc:"建物内配線、引き込み工事、住宅から工場・ビルまで幅広い電気設備に対応します。",
+    service2Title:"計装工事",
+    service2Desc:"建物内の電気・空調設備などの制御装置を計測・管理し、安定した環境を支えます。",
+    service3Title:"自動制御設備保守",
+    service3Desc:"空調設備の制御システムをはじめ、設備の点検保守管理に柔軟に対応します。",
+    galleryMain:"電気工事、計装工事、自動制御設備保守メンテナンスで、安全な建物環境を支えます。",
+    gallery1:"現場ニーズに柔軟対応",
+    gallery2:"施工後まで品質管理",
+    companyTitle:"会社情報",
+    companyNameLabel:"会社名",
+    companyNameValue:"株式会社山電",
+    companyServiceLabel:"事業内容",
+    companyServiceValue:"一般電気工事 / 計装工事 / 自動制御設備保守メンテナンス",
+    companyAddressLabel:"所在地",
+    companyTelLabel:"電話番号",
     sideStep1:"不具合内容を送信", sideStep2:"状況を確認", sideStep3:"管理者から返信を受信",
     tabSend:"依頼送信", tabCheck:"確認", sendTitle:"サポート依頼送信", checkTitle:"依頼状況確認",
     name:"お名前", phone:"電話番号", contact:"連絡先", address:"住所", content:"依頼内容", image:"画像",
@@ -994,7 +1197,8 @@ function clearMyRequests() {
 function renderIcons() {
   [
     ["homeKickerIcon","zap"], ["homeSendIcon","send"], ["homeCheckIcon","search"], ["serviceTitleIcon","tool"],
-    ["service1Icon","zap"], ["service2Icon","tool"], ["service3Icon","clock"], ["tabHomeIcon","home"],
+    ["service1Icon","zap"], ["service2Icon","tool"], ["service3Icon","clock"], ["gallery1Icon","map"],
+    ["gallery2Icon","check"], ["companyTitleIcon","file"], ["tabHomeIcon","home"],
     ["sendTitleIcon","edit"], ["nameIcon","user"], ["phoneIcon","phone"], ["contactIcon","message"],
     ["addressIcon","map"], ["contentIcon","message"], ["uploadIcon","upload"], ["sendBtnIcon","send"],
     ["copyIdIcon","copy"], ["historyIcon","chart"], ["checkTitleIcon","clock"], ["checkIdIcon","file"],
@@ -1016,6 +1220,10 @@ function applyLang() {
   $("trust1").innerText = t.trust1;
   $("trust2").innerText = t.trust2;
   $("trust3").innerText = t.trust3;
+  $("philosophyVisual").innerText = t.philosophyVisual;
+  $("philosophyKicker").innerText = t.philosophyKicker;
+  $("philosophyTitle").innerText = t.philosophyTitle;
+  $("philosophyText").innerText = t.philosophyText;
   $("serviceTitle").innerText = t.serviceTitle;
   $("service1Title").innerText = t.service1Title;
   $("service1Desc").innerText = t.service1Desc;
@@ -1023,6 +1231,16 @@ function applyLang() {
   $("service2Desc").innerText = t.service2Desc;
   $("service3Title").innerText = t.service3Title;
   $("service3Desc").innerText = t.service3Desc;
+  $("galleryMain").innerText = t.galleryMain;
+  $("gallery1").innerText = t.gallery1;
+  $("gallery2").innerText = t.gallery2;
+  $("companyTitle").innerText = t.companyTitle;
+  $("companyNameLabel").innerText = t.companyNameLabel;
+  $("companyNameValue").innerText = t.companyNameValue;
+  $("companyServiceLabel").innerText = t.companyServiceLabel;
+  $("companyServiceValue").innerText = t.companyServiceValue;
+  $("companyAddressLabel").innerText = t.companyAddressLabel;
+  $("companyTelLabel").innerText = t.companyTelLabel;
   $("sideStep1").innerText = t.sideStep1;
   $("sideStep2").innerText = t.sideStep2;
   $("sideStep3").innerText = t.sideStep3;
