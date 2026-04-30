@@ -45,6 +45,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const JWT_SECRET = process.env.JWT_SECRET;
 const USER_JWT_SECRET = process.env.USER_JWT_SECRET || JWT_SECRET;
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || "";
+const SLACK_ENABLED = process.env.SLACK_ENABLED === "true";
 const ADMIN_URL = process.env.ADMIN_URL || "https://yamaden.onrender.com/admin.html";
 
 function requireAdmin(req, res, next) {
@@ -94,7 +95,7 @@ function truncateText(text, max = 220) {
 }
 
 function postSlackMessage(text) {
-  if (!SLACK_WEBHOOK_URL) return Promise.resolve();
+  if (!SLACK_ENABLED || !SLACK_WEBHOOK_URL) return Promise.resolve();
 
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify({ text });
@@ -667,3 +668,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
+
