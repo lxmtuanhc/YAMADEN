@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const https = require("https");
 const mongoose = require("mongoose");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
@@ -43,6 +44,8 @@ cloudinary.config({
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const JWT_SECRET = process.env.JWT_SECRET;
 const USER_JWT_SECRET = process.env.USER_JWT_SECRET || JWT_SECRET;
+const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || "";
+const ADMIN_URL = process.env.ADMIN_URL || "https://yamaden.onrender.com/admin.html";
 
 function requireAdmin(req, res, next) {
   const auth = req.headers.authorization || "";
@@ -83,6 +86,46 @@ function requireUser(req, res, next) {
 
   req.user = user;
   next();
+}
+
+function truncateText(text, max = 220) {
+  const value = String(text || "").trim();
+  return value.length > max ? value.slice(0, max - 3) + "..." : value;
+}
+
+function postSlackMessage(text) {
+  if (!SLACK_WEBHOOK_URL) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify({ text });
+    const url = new URL(SLACK_WEBHOOK_URL);
+
+    const req = https.request({
+      method: "POST",
+      hostname: url.hostname,
+      path: url.pathname + url.search,
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(payload)
+      }
+    }, res => {
+      res.resume();
+      res.on("end", () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) resolve();
+        else reject(new Error("Slack webhook failed: " + res.statusCode));
+      });
+    });
+
+    req.on("error", reject);
+    req.write(payload);
+    req.end();
+  });
+}
+
+function notifySlack(text) {
+  postSlackMessage(text).catch(error => {
+    console.log("Slack notify error:", error.message);
+  });
 }
 
 // ===== MongoDB Connect =====
@@ -251,6 +294,13 @@ app.post("/user/register", async (req, res) => {
     user.lastLoginAt = new Date();
     await user.save();
 
+    notifySlack(
+      "*YAMADEN - User mới đăng ký*\n" +
+      "SĐT: " + user.phone + "\n" +
+      "Trạng thái: " + (user.status || "pending") + "\n" +
+      "Admin: " + ADMIN_URL
+    );
+
     const token = jwt.sign(
       { role: "user", userId: String(user._id), phone: user.phone },
       USER_JWT_SECRET,
@@ -316,6 +366,19 @@ app.put("/user/profile", requireUser, async (req, res) => {
 
     user.profileCompleted = Boolean(user.name && user.email && user.province && user.projectName);
     await user.save();
+
+    notifySlack(
+      "*YAMADEN - Khách hàng cập nhật hồ sơ*\n" +
+      "Tên: " + (user.name || "-") + "\n" +
+      "SĐT: " + (user.phone || "-") + "\n" +
+      "Email: " + (user.email || "-") + "\n" +
+      "Khu vực: " + (user.province || "-") + "\n" +
+      "Công trình: " + (user.projectName || "-") + "\n" +
+      "Công ty/cá nhân: " + (user.company || "-") + "\n" +
+      "Trạng thái: " + (user.status || "pending") + "\n" +
+      "Admin: " + ADMIN_URL
+    );
+
     res.json({ message: "Profile updated", user: publicUser(user) });
   } catch (error) {
     res.status(500).json({ message: "Update failed", error: error.message });
@@ -456,6 +519,22 @@ app.post("/request", upload.array("image", 8), async (req, res) => {
     });
 
     await newRequest.save();
+
+    const mediaSummary = mediaFiles.length > 0
+      ? mediaFiles.length + " file (" + mediaFiles.map(file => file.type).join(", ") + ")"
+      : "Không có";
+
+    notifySlack(
+      "*YAMADEN - Yêu cầu mới*\n" +
+      "ID: " + shortId + "\n" +
+      "Nguồn: " + (requestUserId ? "Tài khoản khách hàng" : "Gửi nhanh") + "\n" +
+      "Tên: " + (newRequest.name || "-") + "\n" +
+      "SĐT: " + (newRequest.phone || "-") + "\n" +
+      "Địa chỉ: " + (newRequest.address || "-") + "\n" +
+      "Nội dung: " + truncateText(newRequest.content) + "\n" +
+      "Ảnh/video: " + mediaSummary + "\n" +
+      "Admin: " + ADMIN_URL
+    );
 
     res.json({
       message: "Saved to MongoDB",
