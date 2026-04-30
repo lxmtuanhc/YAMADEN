@@ -291,6 +291,53 @@ button:hover { transform:translateY(-1px); }
 .detail-item { padding:14px; border-radius:18px; border:1px solid #e2e8f0; background:#f8fafc; }
 .detail-label { color:#64748b; font-size:12px; font-weight:950; margin-bottom:6px; }
 .detail-value { color:#0f172a; font-size:16px; font-weight:900; line-height:1.45; word-break:break-word; }
+.dashboard-grid {
+  display:grid;
+  grid-template-columns:minmax(0,1.25fr) minmax(340px,0.75fr);
+  gap:18px;
+  margin-bottom:24px;
+}
+.dashboard-queue-panel,.dashboard-kpi-panel { min-height:100%; }
+.dashboard-queue-list { padding:12px 16px 18px; display:grid; gap:10px; }
+.dashboard-queue-item {
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:14px;
+  align-items:center;
+  padding:14px;
+  border-radius:20px;
+  background:white;
+  border:1px solid #e2e8f0;
+  box-shadow:0 10px 24px rgba(15,23,42,0.05);
+}
+.queue-main { min-width:0; }
+.queue-title { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-weight:950; color:#0f172a; }
+.queue-meta { margin-top:6px; color:#475569; font-size:13px; font-weight:800; line-height:1.45; }
+.queue-actions { display:grid; gap:8px; min-width:142px; }
+.queue-action-btn {
+  border:none;
+  border-radius:14px;
+  padding:11px 12px;
+  color:white;
+  font-weight:950;
+  cursor:pointer;
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+}
+.queue-assignee { color:#0f172a; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 10px; border-radius:12px; font-weight:950; text-align:center; }
+.dashboard-kpis { padding:16px; display:grid; gap:10px; }
+.kpi-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-height:54px;
+  padding:12px 14px;
+  border-radius:18px;
+  background:white;
+  border:1px solid #e2e8f0;
+}
+.kpi-row span { color:#64748b; font-weight:950; }
+.kpi-row b { color:#0f172a; font-size:20px; font-weight:950; }
 .hidden { display:none !important; }
 .request:hover { box-shadow:0 16px 32px rgba(15,23,42,0.08); transform:translateY(-1px); }
 .req-img { width:128px; height:104px; object-fit:cover; border-radius:18px; background:linear-gradient(135deg,#e2e8f0,#f8fafc); border:1px solid #e2e8f0; }
@@ -429,6 +476,7 @@ button:hover { transform:translateY(-1px); }
   .req-media-grid .req-img-btn,.req-media-grid .req-img,.req-media-grid .req-video,.req-media-count { width:56px; height:46px; }
 }
 @media (max-width:1200px) {
+  .dashboard-grid { grid-template-columns:1fr; }
   .layout { grid-template-columns:1fr; }
   .sidebar { display:none; }
   .mobile-brand { display:block; }
@@ -504,7 +552,7 @@ button:hover { transform:translateY(-1px); }
         <div class="brand-console">Admin Console</div>
       </div>
     </div>
-    <div class="menu-item active" id="menuOverview"></div>
+    <div class="menu-item active" onclick="showAdminView('dashboard')" id="menuOverview"></div>
     <div class="menu-title" id="menuRequestTitle">QUẢN LÝ YÊU CẦU</div>
     <div class="menu-item" onclick="changeTab('active')" id="menuActiveItem">
       <span class="nav-left"><span class="nav-icon-box" id="iconMenuActive"></span><span id="menuActiveText">Đang xử lý</span></span>
@@ -543,6 +591,7 @@ button:hover { transform:translateY(-1px); }
     </div>
 
     <div class="content">
+      <section id="dashboardPanel">
       <div class="hero">
         <div class="hero-card">
           <div class="hero-kicker">YAMADEN ADMIN</div>
@@ -564,7 +613,35 @@ button:hover { transform:translateY(-1px); }
         <div class="stat"><div class="stat-icon sky" id="statTodayIcon"></div><div class="stat-label" id="labelToday">Hôm nay</div><div class="stat-number" id="today">0</div></div>
       </div>
 
-      <div class="panel" id="requestsPanel">
+      <div class="dashboard-grid">
+        <div class="panel dashboard-queue-panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title"><span class="line-icon" id="dashboardQueueIcon"></span><span id="dashboardQueueTitle">Queue</span></div>
+              <div class="panel-subtitle" id="dashboardQueueSub">Priority requests</div>
+            </div>
+          </div>
+          <div id="dashboardQueue"></div>
+        </div>
+
+        <div class="panel dashboard-kpi-panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title"><span class="line-icon" id="dashboardKpiIcon"></span><span id="dashboardKpiTitle">KPI</span></div>
+              <div class="panel-subtitle" id="dashboardKpiSub">Operation metrics</div>
+            </div>
+          </div>
+          <div class="dashboard-kpis">
+            <div class="kpi-row"><span id="kpiFirstResponseLabel">First response</span><b id="kpiFirstResponse">-</b></div>
+            <div class="kpi-row"><span id="kpiOldestLabel">Oldest open</span><b id="kpiOldest">-</b></div>
+            <div class="kpi-row"><span id="kpiOrderRateLabel">Order rate</span><b id="kpiOrderRate">-</b></div>
+            <div class="kpi-row"><span id="kpiClaimLabel">Claim rate</span><b id="kpiClaimRate">-</b></div>
+          </div>
+        </div>
+      </div>
+      </section>
+
+      <div class="panel hidden" id="requestsPanel">
         <div class="panel-head">
           <div>
             <div class="panel-title" id="requestPanelTitle">Danh sách yêu cầu</div>
@@ -640,7 +717,7 @@ const TOKEN_MAX_AGE = 86400000;
 
 let currentLang = localStorage.getItem("language") || "ja";
 let currentTab = "active";
-let currentView = "requests";
+let currentView = "dashboard";
 let deleteId = null;
 let deleteMode = "request";
 let loading = false;
@@ -739,6 +816,8 @@ function renderStaticIcons() {
   setIcon("usersPanelIcon", ICONS.user);
   setIcon("userSearchIcon", ICONS.search);
   setIcon("userSearchBtnIcon", ICONS.search);
+  setIcon("dashboardQueueIcon", ICONS.clock);
+  setIcon("dashboardKpiIcon", ICONS.chart);
   setIcon("statTotalIcon", ICONS.chart);
   setIcon("statActiveIcon", ICONS.clock);
   setIcon("statDoneIcon", ICONS.check);
@@ -773,7 +852,15 @@ function applyLanguage() {
   $("menuUsersText").innerText = currentLang === "ja" ? "顧客" : "Khách hàng";
   $("usersPanelTitle").innerText = currentLang === "ja" ? "顧客一覧" : "Danh sách khách hàng";
   $("usersPanelSub").innerText = currentLang === "ja" ? "顧客アカウントと依頼履歴を管理" : "Quản lý tài khoản khách hàng và lịch sử yêu cầu";
-  $("userSearch").placeholder = currentLang === "ja" ? "名前、電話番号、会社で検索..." : "Tìm theo tên, SĐT, công ty...";
+  $("userSearch").placeholder = currentLang === "ja" ? "\u540d\u524d\u3001\u96fb\u8a71\u756a\u53f7\u3001\u4f1a\u793e\u3067\u691c\u7d22..." : "T\u00ecm theo t\u00ean, S\u0110T, c\u00f4ng ty...";
+  $("dashboardQueueTitle").innerText = currentLang === "ja" ? "\u4eca\u3059\u3050\u5bfe\u5fdc" : "C\u1ea7n x\u1eed l\u00fd ngay";
+  $("dashboardQueueSub").innerText = currentLang === "ja" ? "\u672a\u5bfe\u5fdc\u306e\u4f9d\u983c\u3092\u53e4\u3044\u9806\u306b\u8868\u793a" : "C\u00e1c y\u00eau c\u1ea7u ch\u01b0a ph\u1ea3n h\u1ed3i, \u01b0u ti\u00ean x\u1eed l\u00fd tr\u01b0\u1edbc";
+  $("dashboardKpiTitle").innerText = currentLang === "ja" ? "\u904b\u7528KPI" : "KPI v\u1eadn h\u00e0nh";
+  $("dashboardKpiSub").innerText = currentLang === "ja" ? "\u521d\u52d5\u5bfe\u5fdc\u3001\u898b\u7a4d\u3001\u53d7\u6ce8\u3092\u78ba\u8a8d" : "Theo d\u00f5i ph\u1ea3n h\u1ed3i, b\u00e1o gi\u00e1 v\u00e0 \u0111\u01a1n h\u00e0ng";
+  $("kpiFirstResponseLabel").innerText = currentLang === "ja" ? "\u521d\u52d5\u5bfe\u5fdc" : "Ph\u1ea3n h\u1ed3i \u0111\u1ea7u";
+  $("kpiOldestLabel").innerText = currentLang === "ja" ? "\u6700\u9577\u672a\u5bfe\u5fdc" : "Ch\u1edd l\u00e2u nh\u1ea5t";
+  $("kpiOrderRateLabel").innerText = currentLang === "ja" ? "\u53d7\u6ce8\u7387" : "T\u1ec9 l\u1ec7 nh\u1eadn \u0111\u01a1n";
+  $("kpiClaimLabel").innerText = currentLang === "ja" ? "\u30af\u30ec\u30fc\u30e0\u7387" : "T\u1ec9 l\u1ec7 khi\u1ebfu n\u1ea1i";
   $("menuSettingTitle").innerText = t.menuSettingTitle;
   $("menuSetting").innerHTML = `<span class="nav-left"><span class="nav-icon-box">${ICONS.settings}</span><span>${t.menuSetting}</span></span>`;
   $("logoutBtn").innerHTML = icon("logout","btn-icon") + t.logout;
@@ -792,20 +879,26 @@ function changeLanguage() {
 }
 function showAdminView(view) {
   currentView = view;
+  const isDashboard = view === "dashboard";
   const isUsers = view === "users";
-  $("requestsPanel").classList.toggle("hidden", isUsers);
+  const isRequests = view === "requests";
+  $("dashboardPanel").classList.toggle("hidden", !isDashboard);
+  $("requestsPanel").classList.toggle("hidden", !isRequests);
   $("usersPanel").classList.toggle("hidden", !isUsers);
+  $("menuOverview").classList.toggle("active", isDashboard);
   $("menuUsersItem").classList.toggle("active", isUsers);
-  $("menuActiveItem").classList.toggle("active", !isUsers && currentTab === "active");
-  $("menuDoneItem").classList.toggle("active", !isUsers && currentTab === "done");
+  $("menuActiveItem").classList.toggle("active", isRequests && currentTab === "active");
+  $("menuDoneItem").classList.toggle("active", isRequests && currentTab === "done");
   if (isUsers) loadUsers();
   else loadRequests();
 }
 function changeTab(tab) {
   currentView = "requests";
   currentTab = tab;
+  $("dashboardPanel").classList.add("hidden");
   $("requestsPanel").classList.remove("hidden");
   $("usersPanel").classList.add("hidden");
+  $("menuOverview").classList.remove("active");
   $("menuUsersItem").classList.remove("active");
   $("menuActiveItem").classList.toggle("active", tab === "active");
   $("menuDoneItem").classList.toggle("active", tab === "done");
@@ -875,6 +968,55 @@ function formatElapsedFrom(dateString) {
   if (days > 0) return days + "d " + restHours + "h";
   return hours + "h";
 }
+function minutesBetween(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
+  const diff = end.getTime() - start.getTime();
+  return diff >= 0 ? Math.round(diff / 60000) : null;
+}
+function formatMinutes(minutes) {
+  if (minutes === null || minutes === undefined || Number.isNaN(minutes)) return "-";
+  if (minutes < 60) return minutes + "m";
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest ? hours + "h " + rest + "m" : hours + "h";
+}
+function suggestedAssignee(item) {
+  const text = [item.address, item.province, item.content].join(" ").toLowerCase();
+  if (text.includes("hiroshima") || text.includes("\u5e83\u5cf6")) return "\u5c0f\u8349";
+  return "\u5b9a\u4e95";
+}
+function renderDashboard(items) {
+  if (!$("dashboardQueue")) return;
+  const untreated = items.filter(item => normalizeRequestStatus(item.status) === "untreated").sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  const queue = untreated.slice(0, 5);
+  if (queue.length === 0) {
+    $("dashboardQueue").innerHTML = "<div class=\"empty\">" + (currentLang === "ja" ? "\u672a\u5bfe\u5fdc\u306e\u4f9d\u983c\u306f\u3042\u308a\u307e\u305b\u3093" : "Kh\u00f4ng c\u00f3 y\u00eau c\u1ea7u ch\u01b0a x\u1eed l\u00fd") + "</div>";
+  } else {
+    $("dashboardQueue").innerHTML = "<div class=\"dashboard-queue-list\">" + queue.map(item => {
+      const id = escapeHtml(item.id || "");
+      const name = escapeHtml(item.name || (currentLang === "ja" ? "\u540d\u524d\u672a\u5165\u529b" : "Ch\u01b0a c\u00f3 t\u00ean"));
+      const address = escapeHtml(item.address || "");
+      const elapsed = formatElapsedFrom(item.createdAt);
+      const assignee = suggestedAssignee(item);
+      const urgentLabel = currentLang === "ja" ? "\u672a\u5bfe\u5fdc " + elapsed : "Ch\u01b0a x\u1eed l\u00fd " + elapsed;
+      return "<div class=\"dashboard-queue-item\"><div class=\"queue-main\"><div class=\"queue-title\"><span class=\"req-id\">ID #" + id + "</span><span>" + name + "</span><span class=\"badge status-urgent\">" + urgentLabel + "</span></div><div class=\"queue-meta\">" + (address || (currentLang === "ja" ? "\u4f4f\u6240\u672a\u5165\u529b" : "Ch\u01b0a c\u00f3 \u0111\u1ecba ch\u1ec9")) + "</div></div><div class=\"queue-actions\"><div class=\"queue-assignee\">" + (currentLang === "ja" ? "\u62c5\u5f53" : "Ph\u1ee5 tr\u00e1ch") + ": " + assignee + "</div><button class=\"queue-action-btn\" onclick=\"changeTab(\'active\')\">" + (currentLang === "ja" ? "\u4f9d\u983c\u3092\u958b\u304f" : "M\u1edf y\u00eau c\u1ea7u") + "</button></div></div>";
+    }).join("") + "</div>";
+  }
+  const responseTimes = items.map(item => minutesBetween(item.createdAt, item.firstResponseAt || item.contactedAt || item.adminReplyAt)).filter(value => value !== null);
+  const avgFirstResponse = responseTimes.length ? Math.round(responseTimes.reduce((sum, value) => sum + value, 0) / responseTimes.length) : null;
+  const oldestUntreated = untreated.length ? formatElapsedFrom(untreated[0].createdAt) : "-";
+  const quoted = items.filter(item => ["quoted", "ordered", "completed"].includes(normalizeRequestStatus(item.status))).length;
+  const ordered = items.filter(item => ["ordered", "completed"].includes(normalizeRequestStatus(item.status))).length;
+  const orderRate = quoted ? Math.round((ordered / quoted) * 100) + "%" : "-";
+  const claims = items.filter(item => String(item.content || "").toLowerCase().includes("claim") || String(item.content || "").includes("\u30af\u30ec\u30fc\u30e0") || String(item.content || "").includes("khi\u1ebfu n\u1ea1i")).length;
+  const claimRate = items.length ? Math.round((claims / items.length) * 100) + "%" : "-";
+  $("kpiFirstResponse").innerText = formatMinutes(avgFirstResponse);
+  $("kpiOldest").innerText = oldestUntreated;
+  $("kpiOrderRate").innerText = orderRate;
+  $("kpiClaimRate").innerText = claimRate;
+}
 function isToday(dateString) {
   const d = new Date(dateString);
   if (Number.isNaN(d.getTime())) return false;
@@ -905,6 +1047,7 @@ async function loadRequests() {
     $("quickDone").innerText = doneCount;
     $("quickToday").innerText = todayCount;
     updateTabLabels(activeCount, doneCount);
+    renderDashboard(items);
     $("tabGuest").innerHTML = icon("message","line-icon") + `${currentLang === "ja" ? "クイック依頼" : "Gửi nhanh"} (${guestCount})`;
     $("tabAccount").innerHTML = icon("user","line-icon") + `${currentLang === "ja" ? "アカウント" : "Có tài khoản"} (${accountCount})`;
 
@@ -1237,7 +1380,7 @@ document.addEventListener("DOMContentLoaded", () => {
   applyLanguage();
   $("search").addEventListener("input", loadRequests);
   $("userSearch").addEventListener("input", loadUsers);
-  loadRequests();
+  showAdminView("dashboard");
 });
 </script>
 </body>
