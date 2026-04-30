@@ -2214,12 +2214,11 @@ function showTab(tab) {
   if (isCheck) renderMyRequests();
 }
 function showInitialScreen() {
-  const saved = localStorage.getItem("userProfile");
-  const user = saved ? JSON.parse(saved) : null;
-  if (user && user.profileCompleted) {
-    showTab("home");
-    return;
-  }
+  localStorage.removeItem("userToken");
+  localStorage.removeItem("userProfile");
+  currentUser = null;
+  accountMode = "register";
+  updateAccountUI();
   showTab("account");
 }
 function renderMyRequests() {
