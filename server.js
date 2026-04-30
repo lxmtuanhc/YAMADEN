@@ -107,7 +107,9 @@ const RequestSchema = new mongoose.Schema({
   mediaFiles: [
     {
       url: String,
-      type: String
+      type: {
+        type: String
+      }
     }
   ],
 
