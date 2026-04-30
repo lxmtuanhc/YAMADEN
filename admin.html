@@ -212,6 +212,9 @@ button:hover { transform:translateY(-1px); }
 .tabs { display:flex; gap:22px; padding:0 20px; border-bottom:1px solid rgba(226,232,240,0.8); overflow-x:auto; }
 .tabs button { justify-content:center; background:none; border:none; padding:16px 3px; color:var(--muted); font-weight:950; cursor:pointer; border-bottom:4px solid transparent; white-space:nowrap; }
 .tabs button.active { color:var(--blue); border-bottom-color:var(--blue); }
+.status-tabs { gap:10px; padding:12px 20px; background:rgba(248,250,252,0.82); }
+.status-tabs button { border:1px solid #dbe3ef; border-radius:999px; padding:10px 13px; background:white; color:#475569; border-bottom-width:1px; }
+.status-tabs button.active { color:white; background:#0f172a; border-color:#0f172a; }
 
 .request {
   margin:12px 16px;
@@ -574,11 +577,11 @@ button:hover { transform:translateY(-1px); }
     </div>
     <div class="menu-item active" onclick="showAdminView('dashboard')" id="menuOverview"></div>
     <div class="menu-title" id="menuRequestTitle">QUẢN LÝ YÊU CẦU</div>
-    <div class="menu-item" onclick="changeTab('active')" id="menuActiveItem">
+    <div class="menu-item" onclick="changeStatusShortcut('untreated')" id="menuActiveItem">
       <span class="nav-left"><span class="nav-icon-box" id="iconMenuActive"></span><span id="menuActiveText">Đang xử lý</span></span>
       <span class="menu-badge" id="sideActive">0</span>
     </div>
-    <div class="menu-item" onclick="changeTab('done')" id="menuDoneItem">
+    <div class="menu-item" onclick="changeStatusShortcut('completed')" id="menuDoneItem">
       <span class="nav-left"><span class="nav-icon-box" id="iconMenuDone"></span><span id="menuDoneText">Hoàn thành</span></span>
       <span class="menu-badge" id="sideDone">0</span>
     </div>
@@ -679,12 +682,12 @@ button:hover { transform:translateY(-1px); }
             <button class="search-btn" id="searchBtn" onclick="loadRequests()"></button>
           </div>
         </div>
-        <div class="tabs">
-          <button id="tabActive" class="active" onclick="changeTab('active')">Đang xử lý</button>
-          <button id="tabDone" onclick="changeTab('done')">Hoàn thành</button>
-          <button id="tabGuest" onclick="changeTab('guest')">Gửi nhanh</button>
-          <button id="tabAccount" onclick="changeTab('account')">Có tài khoản</button>
+        <div class="tabs main-tabs">
+          <button id="tabAll" class="active" onclick="changeTab('all')">All</button>
+          <button id="tabGuest" onclick="changeTab('guest')">Quick</button>
+          <button id="tabAccount" onclick="changeTab('account')">Account</button>
         </div>
+        <div class="tabs status-tabs" id="statusTabs"></div>
         <div id="list"></div>
       </div>
 
@@ -763,7 +766,8 @@ const API = "https://yamaden.onrender.com";
 const TOKEN_MAX_AGE = 86400000;
 
 let currentLang = localStorage.getItem("language") || "ja";
-let currentTab = "active";
+let currentTab = "all";
+let currentStatusTab = "all";
 let currentView = "dashboard";
 let deleteId = null;
 let deleteMode = "request";
@@ -898,7 +902,7 @@ function applyLanguage() {
   $("menuRequestTitle").innerText = t.menuRequestTitle;
   $("menuActiveText").innerText = t.active;
   $("menuDoneText").innerText = t.done;
-  $("menuUsersText").innerText = currentLang === "ja" ? "??" : "Kh?ch h?ng";
+  $("menuUsersText").innerText = currentLang === "ja" ? "\u9867\u5ba2" : "Kh\u00e1ch h\u00e0ng";
   $("menuStaffText").innerText = currentLang === "ja" ? "\u62c5\u5f53\u8005" : "Ph\u1ee5 tr\u00e1ch";
   $("staffPanelTitle").innerText = currentLang === "ja" ? "\u62c5\u5f53\u8005\u7ba1\u7406" : "Ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch";
   $("staffPanelSub").innerText = currentLang === "ja" ? "\u30a8\u30ea\u30a2\u3068\u5c02\u9580\u5206\u91ce\u3067\u81ea\u52d5\u5272\u5f53\u306e\u57fa\u790e\u3092\u4f5c\u6210" : "T\u1ea1o h\u1ed3 s\u01a1 ph\u1ee5 tr\u00e1ch \u0111\u1ec3 ph\u00e2n c\u00f4ng t\u1ef1 \u0111\u1ed9ng";
@@ -949,15 +953,14 @@ function showAdminView(view) {
   $("menuOverview").classList.toggle("active", isDashboard);
   $("menuUsersItem").classList.toggle("active", isUsers);
   $("menuStaffItem").classList.toggle("active", isStaff);
-  $("menuActiveItem").classList.toggle("active", isRequests && currentTab === "active");
-  $("menuDoneItem").classList.toggle("active", isRequests && currentTab === "done");
+  $("menuActiveItem").classList.toggle("active", isRequests && currentStatusTab === "untreated");
+  $("menuDoneItem").classList.toggle("active", isRequests && currentStatusTab === "completed");
   if (isUsers) loadUsers();
   else if (isStaff) loadStaff();
   else loadRequests();
 }
-function changeTab(tab) {
+function openRequestsView() {
   currentView = "requests";
-  currentTab = tab;
   $("dashboardPanel").classList.add("hidden");
   $("requestsPanel").classList.remove("hidden");
   $("usersPanel").classList.add("hidden");
@@ -965,22 +968,50 @@ function changeTab(tab) {
   $("menuOverview").classList.remove("active");
   $("menuUsersItem").classList.remove("active");
   $("menuStaffItem").classList.remove("active");
-  $("menuActiveItem").classList.toggle("active", tab === "active");
-  $("menuDoneItem").classList.toggle("active", tab === "done");
-  $("tabActive").classList.toggle("active", tab === "active");
-  $("tabDone").classList.toggle("active", tab === "done");
-  $("tabGuest").classList.toggle("active", tab === "guest");
-  $("tabAccount").classList.toggle("active", tab === "account");
+}
+function changeTab(tab) {
+  openRequestsView();
+  currentTab = tab;
+  ["tabAll", "tabGuest", "tabAccount"].forEach(id => { if ($(id)) $(id).classList.remove("active"); });
+  const target = tab === "guest" ? "tabGuest" : tab === "account" ? "tabAccount" : "tabAll";
+  if ($(target)) $(target).classList.add("active");
   loadRequests();
 }
-function updateTabLabels(activeCount = null, doneCount = null) {
-  const t = texts[currentLang];
-  $("tabActive").innerHTML = icon("clock","line-icon") + (activeCount === null ? t.active : `${t.active} (${activeCount})`);
-  $("tabDone").innerHTML = icon("check","line-icon") + (doneCount === null ? t.done : `${t.done} (${doneCount})`);
-  if ($("tabGuest")) $("tabGuest").innerHTML = icon("message","line-icon") + (currentLang === "ja" ? "クイック依頼" : "Gửi nhanh");
-  if ($("tabAccount")) $("tabAccount").innerHTML = icon("user","line-icon") + (currentLang === "ja" ? "アカウント" : "Có tài khoản");
+function changeStatusTab(status) {
+  openRequestsView();
+  currentStatusTab = status;
+  renderStatusTabs();
+  loadRequests();
+}
+function changeStatusShortcut(status) {
+  currentTab = "all";
+  currentStatusTab = status;
+  changeTab("all");
+  renderStatusTabs();
+}
+function sourceLabel(tab) {
+  if (tab === "guest") return currentLang === "ja" ? "\u30af\u30a4\u30c3\u30af\u4f9d\u983c" : "G\u1eedi nhanh";
+  if (tab === "account") return currentLang === "ja" ? "\u30a2\u30ab\u30a6\u30f3\u30c8" : "C\u00f3 t\u00e0i kho\u1ea3n";
+  return currentLang === "ja" ? "\u3059\u3079\u3066" : "T\u1ea5t c\u1ea3";
+}
+function renderStatusTabs(counts = {}) {
+  if (!$("statusTabs")) return;
+  const allLabel = currentLang === "ja" ? "\u3059\u3079\u3066" : "T\u1ea5t c\u1ea3";
+  const tabs = [{ key:"all", label:allLabel }].concat(REQUEST_STATUSES.map(key => ({ key, label:getStatusText(key) })));
+  $("statusTabs").innerHTML = tabs.map(tab => {
+    const count = counts[tab.key];
+    const label = count === undefined ? tab.label : tab.label + " (" + count + ")";
+    const active = currentStatusTab === tab.key ? "active" : "";
+    return "<button class=\"" + active + "\" onclick=\"changeStatusTab(\'" + tab.key + "\')\">" + label + "</button>";
+  }).join("");
+}
+function updateTabLabels(activeCount = null, doneCount = null, guestCount = null, accountCount = null, statusCounts = null) {
+  if ($("tabAll")) $("tabAll").innerHTML = icon("list","line-icon") + sourceLabel("all");
+  if ($("tabGuest")) $("tabGuest").innerHTML = icon("message","line-icon") + (guestCount === null ? sourceLabel("guest") : sourceLabel("guest") + " (" + guestCount + ")");
+  if ($("tabAccount")) $("tabAccount").innerHTML = icon("user","line-icon") + (accountCount === null ? sourceLabel("account") : sourceLabel("account") + " (" + accountCount + ")");
   if (activeCount !== null) $("sideActive").innerText = activeCount;
   if (doneCount !== null) $("sideDone").innerText = doneCount;
+  renderStatusTabs(statusCounts || {});
 }
 const REQUEST_STATUSES = ["untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"];
 const STATUS_TEXT = {
@@ -1119,11 +1150,9 @@ async function loadRequests() {
     const keyword = $("search").value.trim().toLowerCase();
     const filtered = items.filter(item => {
       const match = [item.id, item.name, item.phone, item.address, item.content].some(value => String(value || "").toLowerCase().includes(keyword));
-      if (currentTab === "active") return match && !isClosedStatus(item.status);
-      if (currentTab === "done") return match && isClosedStatus(item.status);
-      if (currentTab === "guest") return match && !item.userId;
-      if (currentTab === "account") return match && item.userId;
-      return match;
+      const sourceMatch = currentTab === "guest" ? !item.userId : currentTab === "account" ? Boolean(item.userId) : true;
+      const statusMatch = currentStatusTab === "all" ? true : normalizeRequestStatus(item.status) === currentStatusTab;
+      return match && sourceMatch && statusMatch;
     });
 
     if (filtered.length === 0) {
