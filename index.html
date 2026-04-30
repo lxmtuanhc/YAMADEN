@@ -2437,7 +2437,9 @@ async function sendRequest() {
     if (token && currentUser && currentUser.status === "active") headers.Authorization = "Bearer " + token;
     const res = await fetch(API + "/request", { method:"POST", headers, body:formData });
     const data = await readJsonSafe(res);
-    if (!res.ok || !data.data || !data.data.id) throw new Error("send failed");
+    if (!res.ok || !data.data || !data.data.id) {
+      throw new Error(data.error || data.message || t.networkError);
+    }
 
     const id = String(data.data.id);
     saveMyRequest(id, { name, content });
@@ -2469,7 +2471,8 @@ async function sendRequest() {
     clearSelectedMedia();
     showToast(t.success);
   } catch (err) {
-    els.result.innerText = t.networkError;
+    const detail = err && err.message && err.message !== "Failed to fetch" ? err.message : t.networkError;
+    els.result.innerText = detail;
     showToast(t.fail);
   } finally {
     setButtonLoading(els.sendBtn, "send", t.send, false);

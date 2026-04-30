@@ -416,12 +416,19 @@ app.post("/request", upload.array("image", 8), async (req, res) => {
     const files = Array.isArray(req.files) ? req.files : [];
 
     for (const file of files) {
-      const uploadResult = await uploadMediaToCloudinary(file.buffer);
-      const type = (uploadResult.resource_type === "video" || (file.mimetype || "").startsWith("video/")) ? "video" : "image";
-      mediaFiles.push({
-        url: uploadResult.secure_url,
-        type
-      });
+      try {
+        const uploadResult = await uploadMediaToCloudinary(file.buffer);
+        const type = (uploadResult.resource_type === "video" || (file.mimetype || "").startsWith("video/")) ? "video" : "image";
+        mediaFiles.push({
+          url: uploadResult.secure_url,
+          type
+        });
+      } catch (uploadError) {
+        return res.status(500).json({
+          message: "Media upload failed",
+          error: uploadError.message
+        });
+      }
     }
 
     const firstMedia = mediaFiles[0] || { url: "", type: "" };
@@ -554,6 +561,24 @@ app.delete("/request/:id", requireAdmin, async (req, res) => {
       error: error.message
     });
   }
+});
+
+app.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    return res.status(400).json({
+      message: "Upload failed",
+      error: error.message
+    });
+  }
+
+  if (error) {
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message
+    });
+  }
+
+  next();
 });
 
 const PORT = process.env.PORT || 3000;
