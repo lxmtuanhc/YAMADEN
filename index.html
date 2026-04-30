@@ -2197,8 +2197,8 @@ function updateAccountUI() {
     const statusText = currentUser.status === "active"
       ? t.profileActive
       : currentUser.status === "blocked"
-        ? (lang === "ja" ? "????????" : "T?i kho?n ?ang b? kh?a")
-        : (lang === "ja" ? "???????" : "T?i kho?n ?ang ch? admin duy?t");
+        ? (lang === "ja" ? "アカウント停止中" : "Tài khoản đang bị khóa")
+        : (lang === "ja" ? "管理者承認待ち" : "Tài khoản đang chờ admin duyệt");
 
     $("accountFormCard").style.display = profileDone ? "none" : "block";
     $("profileCard").style.display = "block";
@@ -2249,10 +2249,10 @@ function setAccountMode(mode) {
   $("accountPin").classList.toggle("hidden", isProfile);
   $("accountPinConfirm").classList.toggle("hidden", isLogin || isProfile);
   $("accountLoginText").innerText = isProfile
-    ? (lang === "ja" ? "???????" : "L?u th?ng tin kh?ch h?ng")
-    : (isLogin ? (lang === "ja" ? "????" : "??ng nh?p") : (lang === "ja" ? "??" : "??ng k?"));
+    ? (lang === "ja" ? "顧客情報を保存" : "Lưu thông tin khách hàng")
+    : (isLogin ? (lang === "ja" ? "ログイン" : "Đăng nhập") : (lang === "ja" ? "登録" : "Đăng ký"));
   $("accountText").innerText = isProfile
-    ? (lang === "ja" ? "????????????????????" : "Vui l?ng b? sung th?ng tin kh?ch h?ng ?? admin duy?t t?i kho?n.")
+    ? (lang === "ja" ? "承認のため、顧客情報を入力してください。" : "Vui lòng bổ sung thông tin khách hàng để admin duyệt tài khoản.")
     : t.accountText;
 }
 async function userLogin() {
@@ -2267,15 +2267,15 @@ async function userLogin() {
   const company = $("accountCompany").value.trim();
 
   if (accountMode !== "profile" && (!phone || !/^\d{4,6}$/.test(pin))) {
-    showToast(lang === "ja" ? "?????4?6??PIN??????????" : "Vui l?ng nh?p S?T v? m? PIN 4-6 s?.");
+    showToast(lang === "ja" ? "電話番号と4〜6桁のPINを入力してください。" : "Vui lòng nhập SĐT và mã PIN 4-6 số.");
     return;
   }
   if (accountMode === "register" && pin !== pinConfirm) {
-    showToast(lang === "ja" ? "PIN????????" : "M? PIN nh?p l?i kh?ng kh?p.");
+    showToast(lang === "ja" ? "PINが一致しません。" : "Mã PIN nhập lại không khớp.");
     return;
   }
   if (accountMode === "profile" && (!name || !email || !province || !projectName)) {
-    showToast(lang === "ja" ? "???????????????????????" : "Vui l?ng nh?p h? t?n, email, t?nh/th?nh v? t?n c?ng tr?nh.");
+    showToast(lang === "ja" ? "名前、メール、地域、工事名を入力してください。" : "Vui lòng nhập họ tên, email, tỉnh/thành và tên công trình.");
     return;
   }
 
@@ -2296,9 +2296,9 @@ async function userLogin() {
     updateAccountUI();
     await loadUserRequests();
     const message = accountMode === "register"
-      ? (lang === "ja" ? "?????????????????????" : "??ng k? th?nh c?ng. Vui l?ng b? sung th?ng tin kh?ch h?ng.")
+      ? (lang === "ja" ? "登録しました。顧客情報を入力してください。" : "Đăng ký thành công. Vui lòng bổ sung thông tin khách hàng.")
       : accountMode === "profile"
-        ? (lang === "ja" ? "???????????????????????" : "?? l?u th?ng tin kh?ch h?ng. Vui l?ng ch? admin duy?t.")
+        ? (lang === "ja" ? "顧客情報を保存しました。承認をお待ちください。" : "Đã lưu thông tin khách hàng. Vui lòng chờ admin duyệt.")
         : t.accountLoginSuccess;
     $("accountSuccess").innerText = message;
     $("accountSuccess").style.display = "block";
