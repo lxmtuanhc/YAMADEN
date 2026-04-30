@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -323,6 +323,30 @@ button:hover { transform:translateY(-1px); }
 .req-img-btn .req-video {
   transition:0.2s ease;
 }
+.req-media-grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:6px;
+  width:128px;
+}
+.req-media-grid .req-img-btn,
+.req-media-grid .req-img,
+.req-media-grid .req-video {
+  width:61px;
+  height:49px;
+  border-radius:12px;
+}
+.req-media-count {
+  width:61px;
+  height:49px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  background:#0f172a;
+  font-weight:950;
+}
 .req-id { display:inline-flex; align-items:center; gap:6px; color:var(--blue); background:#eff6ff; border:1px solid #dbeafe; padding:5px 10px; border-radius:999px; font-size:12px; font-weight:950; margin-bottom:9px; }
 .req-name { font-size:18px; font-weight:950; }
 .req-phone { color:var(--blue); font-weight:950; margin-left:10px; }
@@ -401,6 +425,8 @@ button:hover { transform:translateY(-1px); }
 @media (max-width:1420px) {
   .request { grid-template-columns:118px minmax(240px,1fr) 122px 158px 250px; }
   .req-img,.req-video,.req-img-btn { width:118px; height:98px; }
+  .req-media-grid { width:118px; }
+  .req-media-grid .req-img-btn,.req-media-grid .req-img,.req-media-grid .req-video,.req-media-count { width:56px; height:46px; }
 }
 @media (max-width:1200px) {
   .layout { grid-template-columns:1fr; }
@@ -412,6 +438,8 @@ button:hover { transform:translateY(-1px); }
   .user-card { grid-template-columns:1fr; }
   .user-profile-grid { grid-template-columns:1fr 1fr; }
   .req-img,.req-video,.req-img-btn { width:100%; height:230px; }
+  .req-media-grid { width:100%; grid-template-columns:repeat(4,1fr); }
+  .req-media-grid .req-img-btn,.req-media-grid .req-img,.req-media-grid .req-video,.req-media-count { width:100%; height:110px; }
   .actions { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; }
   .actions button { margin-bottom:0; }
 }
@@ -446,6 +474,8 @@ button:hover { transform:translateY(-1px); }
   .user-card { margin:10px; padding:14px; border-radius:20px; }
   .user-profile-grid,.user-detail-grid { grid-template-columns:1fr; }
   .req-img,.req-video,.req-img-btn { height:190px; }
+  .req-media-grid { grid-template-columns:repeat(2,1fr); }
+  .req-media-grid .req-img-btn,.req-media-grid .req-img,.req-media-grid .req-video,.req-media-count { height:92px; }
   .req-name,.req-phone { display:block; margin-left:0; }
   .badge { justify-content:flex-start; width:100%; border-radius:16px; }
   .actions { grid-template-columns:1fr; }
@@ -875,14 +905,21 @@ function renderRequest(item) {
   const content = escapeHtml(item.content || "");
   const createdAt = item.createdAt ? new Date(item.createdAt).toLocaleString() : "";
   const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
-  const mediaUrl = item.mediaUrl || item.image || "";
-  const mediaType = item.mediaType || (/\.(mp4|mov|webm|m4v)(\?|$)/i.test(mediaUrl) ? "video" : "image");
-  const image = mediaUrl
-    ? `<button class="req-img-btn" type="button" onclick="openImageModal('${encodeURIComponent(mediaUrl)}','${mediaType}')">${
-        mediaType === "video"
-          ? `<video class="req-video" src="${escapeHtml(mediaUrl)}" muted playsinline></video>`
-          : `<img class="req-img" src="${escapeHtml(mediaUrl)}" alt="">`
-      }</button>`
+  const mediaFiles = Array.isArray(item.mediaFiles) && item.mediaFiles.length
+    ? item.mediaFiles
+    : (item.mediaUrl || item.image
+      ? [{ url:item.mediaUrl || item.image, type:item.mediaType || (/\.(mp4|mov|webm|m4v)(\?|$)/i.test(item.mediaUrl || item.image) ? "video" : "image") }]
+      : []);
+  const image = mediaFiles.length
+    ? `<div class="req-media-grid">${mediaFiles.slice(0, 3).map(file => {
+        const url = file.url || "";
+        const type = file.type || (/\.(mp4|mov|webm|m4v)(\?|$)/i.test(url) ? "video" : "image");
+        return `<button class="req-img-btn" type="button" onclick="openImageModal('${encodeURIComponent(url)}','${type}')">${
+          type === "video"
+            ? `<video class="req-video" src="${escapeHtml(url)}" muted playsinline></video>`
+            : `<img class="req-img" src="${escapeHtml(url)}" alt="">`
+        }</button>`;
+      }).join("")}${mediaFiles.length > 3 ? `<div class="req-media-count">+${mediaFiles.length - 3}</div>` : ""}</div>`
     : `<div class="req-img"></div>`;
   const hasAccount = Boolean(item.userId);
   const sourceText = hasAccount
@@ -1168,4 +1205,5 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 

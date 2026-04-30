@@ -1092,6 +1092,26 @@ input:focus, textarea:focus {
   background:#0f172a;
   box-shadow:0 10px 24px rgba(0,0,0,0.14);
 }
+.preview-grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-bottom:12px;
+}
+.preview-grid .preview-img,
+.preview-grid .preview-video {
+  width:100%;
+  height:112px;
+  max-height:none;
+  margin-bottom:0;
+  object-fit:cover;
+}
+.preview-count {
+  font-size:13px;
+  color:#6b7280;
+  font-weight:800;
+  margin-top:4px;
+}
 .main-btn,.soft-btn,.copy-btn {
   border:none;
   cursor:pointer;
@@ -1222,6 +1242,21 @@ input:focus, textarea:focus {
   margin-top:8px;
   background:#0f172a;
   box-shadow:0 10px 24px rgba(0,0,0,0.14);
+}
+.media-gallery {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:10px;
+}
+.media-gallery img,
+.media-gallery video {
+  width:100%;
+  height:150px;
+  object-fit:cover;
+  border-radius:16px;
+  background:#0f172a;
+  box-shadow:0 10px 22px rgba(0,0,0,0.12);
 }
 .request-card {
   display:flex;
@@ -1697,8 +1732,8 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
           <div class="upload-box">
             <div class="upload-icon" id="uploadIcon"></div>
             <div id="uploadText">Chọn ảnh hoặc chụp ảnh</div>
-            <div class="upload-sub">JPG / PNG</div>
-            <input type="file" id="image" accept="image/*,video/*" style="display:none;">
+            <div class="upload-sub">Tối đa 8 file · JPG / PNG / MP4</div>
+            <input type="file" id="image" accept="image/*,video/*" multiple style="display:none;">
             <button type="button" class="soft-btn choose-image-btn" id="chooseImageBtn" onclick="imageEl.click()">Chọn ảnh</button>
           </div>
         </div>
@@ -1760,7 +1795,7 @@ const API = "https://yamaden.onrender.com";
 let lang = localStorage.getItem("lang") || localStorage.getItem("language") || "ja";
 let lastAdminReply = "";
 let lastCheckedId = "";
-let previewUrl = "";
+let previewUrls = [];
 let currentUser = null;
 let accountMode = "register";
 
@@ -1863,7 +1898,7 @@ const texts = {
     sideStep1:"Gửi thông tin sự cố", sideStep2:"Theo dõi trạng thái", sideStep3:"Nhận phản hồi từ admin",
     tabSend:"Gửi yêu cầu", tabCheck:"Yêu cầu của tôi", sendTitle:"Gửi yêu cầu hỗ trợ", checkTitle:"Yêu cầu của tôi",
     name:"Họ và tên", phone:"Số điện thoại", contact:"Liên hệ", address:"Địa chỉ", content:"Nội dung yêu cầu", image:"Hình ảnh",
-    uploadText:"Chọn ảnh hoặc chụp ảnh", chooseImage:"Chọn ảnh", fileSelected:"Đã chọn ảnh", copyId:"Copy ID", history:"Lịch sử",
+    uploadText:"Chọn ảnh/video hoặc chụp ảnh", chooseImage:"Chọn file", fileSelected:"Đã chọn file", copyId:"Copy ID", history:"Lịch sử",
     send:"Gửi yêu cầu", check:"Kiểm tra", checkPlaceholder:"Nhập mã yêu cầu", sending:"Đang gửi...", loading:"Đang tải...",
     success:"Gửi yêu cầu thành công!", successSub:"Cảm ơn bạn đã gửi yêu cầu. Chúng tôi sẽ liên hệ hỗ trợ bạn sớm nhất.",
     fail:"Gửi thất bại!", required:"Vui lòng nhập đầy đủ thông tin bắt buộc!", requestId:"Mã yêu cầu",
@@ -1948,7 +1983,7 @@ const texts = {
     sideStep1:"不具合内容を送信", sideStep2:"状況を確認", sideStep3:"管理者から返信を受信",
     tabSend:"依頼送信", tabCheck:"自分の依頼", sendTitle:"サポート依頼送信", checkTitle:"自分の依頼",
     name:"お名前", phone:"電話番号", contact:"連絡先", address:"住所", content:"依頼内容", image:"画像",
-    uploadText:"画像を選択または撮影", chooseImage:"画像を選択", fileSelected:"画像を選択しました", copyId:"IDコピー", history:"履歴",
+    uploadText:"画像/動画を選択または撮影", chooseImage:"ファイル選択", fileSelected:"ファイルを選択しました", copyId:"IDコピー", history:"履歴",
     send:"送信", check:"確認", checkPlaceholder:"受付IDを入力", sending:"送信中...", loading:"読み込み中...",
     success:"送信完了！", successSub:"依頼を受け付けました。担当者よりご連絡いたします。",
     fail:"送信失敗！", required:"必須項目を入力してください", requestId:"受付ID",
@@ -2336,7 +2371,7 @@ async function sendRequest() {
   const contact = els.contact.value.trim();
   const address = els.address.value.trim();
   const content = els.content.value.trim();
-  const file = els.image.files[0];
+  const files = Array.from(els.image.files || []).slice(0, 8);
 
   if (!name || !phone || !address || !content) {
     els.result.innerText = t.required;
@@ -2354,7 +2389,7 @@ async function sendRequest() {
     formData.append("contact", contact);
     formData.append("address", address);
     formData.append("content", content);
-    if (file) formData.append("image", file);
+    files.forEach(file => formData.append("image", file));
 
     const headers = {};
     const token = getUserToken();
@@ -2390,6 +2425,8 @@ async function sendRequest() {
     els.address.value = "";
     els.content.value = "";
     els.image.value = "";
+    previewUrls.forEach(url => URL.revokeObjectURL(url));
+    previewUrls = [];
     $("uploadText").innerText = t.uploadText;
     showToast(t.success);
   } catch (err) {
@@ -2455,12 +2492,19 @@ async function checkStatus(isAuto = false) {
     const meta = statusMeta(data.status);
     const isProcessing = data.status === "processing";
     const isCompleted = data.status === "completed";
-    const mediaUrl = data.mediaUrl || data.image || "";
-    const mediaType = data.mediaType || (/\.(mp4|mov|webm|m4v)(\?|$)/i.test(mediaUrl) ? "video" : "image");
-    const imageHtml = mediaUrl
-      ? (mediaType === "video"
-        ? `<video src="${escapeHtml(mediaUrl)}" class="check-video" controls playsinline></video>`
-        : `<img src="${escapeHtml(mediaUrl)}" class="check-image" alt="">`)
+    const mediaFiles = Array.isArray(data.mediaFiles) && data.mediaFiles.length
+      ? data.mediaFiles
+      : (data.mediaUrl || data.image
+        ? [{ url:data.mediaUrl || data.image, type:data.mediaType || (/\.(mp4|mov|webm|m4v)(\?|$)/i.test(data.mediaUrl || data.image) ? "video" : "image") }]
+        : []);
+    const imageHtml = mediaFiles.length
+      ? `<div class="media-gallery">${mediaFiles.map(file => {
+          const url = escapeHtml(file.url || "");
+          const type = file.type || (/\.(mp4|mov|webm|m4v)(\?|$)/i.test(file.url || "") ? "video" : "image");
+          return type === "video"
+            ? `<video src="${url}" controls playsinline></video>`
+            : `<img src="${url}" alt="">`;
+        }).join("")}</div>`
       : escapeHtml(t.noImage);
 
     els.checkResult.innerHTML = `
@@ -2509,19 +2553,30 @@ function bindElements() {
 }
 function bindUploadPreview() {
   els.image.addEventListener("change", () => {
-    const file = els.image.files[0];
     const t = texts[lang];
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    if (!file) {
+    previewUrls.forEach(url => URL.revokeObjectURL(url));
+    previewUrls = [];
+
+    const files = Array.from(els.image.files || []).slice(0, 8);
+    if (files.length === 0) {
       $("uploadText").innerText = t.uploadText;
-      previewUrl = "";
       return;
     }
-    previewUrl = URL.createObjectURL(file);
-    const preview = file.type && file.type.startsWith("video/")
-      ? `<video src="${previewUrl}" class="preview-video" controls playsinline></video>`
-      : `<img src="${previewUrl}" class="preview-img" alt="">`;
-    $("uploadText").innerHTML = `${preview}<div>${escapeHtml(t.fileSelected)}</div><div style="font-size:12px;color:#6b7280;margin-top:4px;">${escapeHtml(file.name)}</div>`;
+
+    const preview = files.map(file => {
+      const url = URL.createObjectURL(file);
+      previewUrls.push(url);
+      return file.type && file.type.startsWith("video/")
+        ? `<video src="${url}" class="preview-video" controls playsinline></video>`
+        : `<img src="${url}" class="preview-img" alt="">`;
+    }).join("");
+
+    const names = files.map(file => escapeHtml(file.name)).join(", ");
+    $("uploadText").innerHTML = `
+      <div class="preview-grid">${preview}</div>
+      <div>${escapeHtml(t.fileSelected)}</div>
+      <div class="preview-count">${files.length}/8 file</div>
+      <div style="font-size:12px;color:#6b7280;margin-top:4px;">${names}</div>`;
   });
 }
 

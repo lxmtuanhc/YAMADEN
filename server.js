@@ -104,6 +104,12 @@ const RequestSchema = new mongoose.Schema({
   image: String,
   mediaUrl: String,
   mediaType: String,
+  mediaFiles: [
+    {
+      url: String,
+      type: String
+    }
+  ],
 
   status: String,
   adminReply: String,
@@ -393,7 +399,7 @@ app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
 });
 
 // Tạo yêu cầu mới - khách dùng, không cần login
-app.post("/request", upload.single("image"), async (req, res) => {
+app.post("/request", upload.array("image", 8), async (req, res) => {
   try {
     const shortId = await generateRequestId();
     const currentUser = getUserFromRequest(req);
@@ -406,14 +412,19 @@ app.post("/request", upload.single("image"), async (req, res) => {
       }
     }
 
-    let mediaUrl = "";
-    let mediaType = "";
+    const mediaFiles = [];
+    const files = Array.isArray(req.files) ? req.files : [];
 
-    if (req.file) {
-      const uploadResult = await uploadMediaToCloudinary(req.file.buffer);
-      mediaUrl = uploadResult.secure_url;
-      mediaType = (uploadResult.resource_type === "video" || (req.file.mimetype || "").startsWith("video/")) ? "video" : "image";
+    for (const file of files) {
+      const uploadResult = await uploadMediaToCloudinary(file.buffer);
+      const type = (uploadResult.resource_type === "video" || (file.mimetype || "").startsWith("video/")) ? "video" : "image";
+      mediaFiles.push({
+        url: uploadResult.secure_url,
+        type
+      });
     }
+
+    const firstMedia = mediaFiles[0] || { url: "", type: "" };
 
     const newRequest = new Request({
       id: shortId,
@@ -425,9 +436,10 @@ app.post("/request", upload.single("image"), async (req, res) => {
       address: req.body.address || "",
 
       content: req.body.content || "",
-      image: mediaType === "image" ? mediaUrl : "",
-      mediaUrl,
-      mediaType,
+      image: firstMedia.type === "image" ? firstMedia.url : "",
+      mediaUrl: firstMedia.url,
+      mediaType: firstMedia.type,
+      mediaFiles,
 
       status: "pending",
       adminReply: "",
