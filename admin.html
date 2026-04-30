@@ -291,6 +291,25 @@ button:hover { transform:translateY(-1px); }
 .detail-item { padding:14px; border-radius:18px; border:1px solid #e2e8f0; background:#f8fafc; }
 .detail-label { color:#64748b; font-size:12px; font-weight:950; margin-bottom:6px; }
 .detail-value { color:#0f172a; font-size:16px; font-weight:900; line-height:1.45; word-break:break-word; }
+.staff-editor { display:grid; grid-template-columns:repeat(3,1fr) 150px; gap:10px; padding:16px; border-bottom:1px solid #e2e8f0; }
+.staff-input { min-height:48px; border:1px solid #dbe3ef; border-radius:16px; padding:0 14px; background:white; font-weight:850; outline:none; }
+.staff-save { border:none; border-radius:16px; color:white; font-weight:950; cursor:pointer; background:linear-gradient(135deg,#2563eb,#06b6d4); }
+.staff-card { margin:12px 16px; padding:16px; display:grid; grid-template-columns:minmax(220px,1fr) minmax(260px,1fr) 180px; gap:14px; align-items:center; background:white; border:1px solid #edf2f7; border-radius:22px; box-shadow:0 10px 22px rgba(15,23,42,0.05); }
+.staff-name { font-size:19px; font-weight:950; color:#0f172a; }
+.staff-line { margin-top:6px; color:#475569; font-weight:800; line-height:1.45; word-break:break-word; }
+.staff-tag-row { display:flex; flex-wrap:wrap; gap:8px; }
+.assignee-box { margin-top:10px; padding:10px; border-radius:16px; background:#f8fafc; border:1px solid #e2e8f0; }
+.assignee-label { color:#64748b; font-size:12px; font-weight:950; margin-bottom:7px; }
+.assignee-row { display:grid; grid-template-columns:1fr 86px; gap:8px; }
+.assignee-select { min-height:40px; border:1px solid #dbe3ef; border-radius:12px; padding:0 10px; font-weight:850; background:white; min-width:0; }
+.assignee-btn { border:none; border-radius:12px; color:white; font-weight:950; cursor:pointer; background:#0f172a; }
+.request { grid-template-columns:150px minmax(360px,1fr) 220px 320px; align-items:stretch; padding:18px; gap:18px; }
+.request > div { align-self:center; }
+.request .actions { align-self:stretch; display:flex; flex-direction:column; justify-content:center; }
+.status-actions { display:grid; gap:8px; }
+.status-actions button { min-height:44px; }
+.reply-card { align-self:stretch; display:flex; flex-direction:column; justify-content:center; }
+.reply-card textarea { min-height:92px; }
 .dashboard-grid {
   display:grid;
   grid-template-columns:minmax(0,1.25fr) minmax(340px,0.75fr);
@@ -477,6 +496,7 @@ button:hover { transform:translateY(-1px); }
 }
 @media (max-width:1200px) {
   .dashboard-grid { grid-template-columns:1fr; }
+  .staff-editor,.staff-card { grid-template-columns:1fr; }
   .layout { grid-template-columns:1fr; }
   .sidebar { display:none; }
   .mobile-brand { display:block; }
@@ -565,6 +585,10 @@ button:hover { transform:translateY(-1px); }
     <div class="menu-item" onclick="showAdminView('users')" id="menuUsersItem">
       <span class="nav-left"><span class="nav-icon-box" id="iconMenuUsers"></span><span id="menuUsersText">Khách hàng</span></span>
       <span class="menu-badge" id="sideUsers">0</span>
+    </div>
+    <div class="menu-item" onclick="showAdminView('staff')" id="menuStaffItem">
+      <span class="nav-left"><span class="nav-icon-box" id="iconMenuStaff"></span><span id="menuStaffText">Staff</span></span>
+      <span class="menu-badge" id="sideStaff">0</span>
     </div>
     <div class="menu-title" id="menuSettingTitle">CÀI ĐẶT</div>
     <div class="menu-item" id="menuSetting"></div>
@@ -664,6 +688,29 @@ button:hover { transform:translateY(-1px); }
         <div id="list"></div>
       </div>
 
+      <div class="panel hidden" id="staffPanel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title"><span class="line-icon" id="staffPanelIcon"></span><span id="staffPanelTitle">Staff</span></div>
+            <div class="panel-subtitle" id="staffPanelSub">Staff assignment profiles</div>
+          </div>
+        </div>
+        <div class="staff-editor">
+          <input class="staff-input" id="staffName" placeholder="Name">
+          <input class="staff-input" id="staffPhone" placeholder="Phone">
+          <input class="staff-input" id="staffEmail" placeholder="Email">
+          <input class="staff-input" id="staffAreas" placeholder="Area">
+          <input class="staff-input" id="staffSkills" placeholder="Skill">
+          <select class="staff-input" id="staffStatus">
+            <option value="active">active</option>
+            <option value="busy">busy</option>
+            <option value="off">off</option>
+          </select>
+          <button class="staff-save" onclick="saveStaffProfile()" id="staffSaveBtn">Save</button>
+        </div>
+        <div id="staffList"></div>
+      </div>
+
       <div class="panel hidden" id="usersPanel">
         <div class="panel-head">
           <div>
@@ -722,6 +769,7 @@ let deleteId = null;
 let deleteMode = "request";
 let loading = false;
 let currentUsers = [];
+let currentStaff = [];
 
 const ICONS = {
   home:`<svg viewBox="0 0 24 24"><path d="M3 10.8 12 3l9 7.8V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10.8Z"/></svg>`,
@@ -807,6 +855,7 @@ function hasUnsavedReply() {
 function logoReload() {
   if (hasUnsavedReply() && !confirm(texts[currentLang].unsaved)) return;
   if (currentView === "users") loadUsers();
+  else if (currentView === "staff") loadStaff();
   else loadRequests();
 }
 function renderStaticIcons() {
@@ -849,7 +898,16 @@ function applyLanguage() {
   $("menuRequestTitle").innerText = t.menuRequestTitle;
   $("menuActiveText").innerText = t.active;
   $("menuDoneText").innerText = t.done;
-  $("menuUsersText").innerText = currentLang === "ja" ? "顧客" : "Khách hàng";
+  $("menuUsersText").innerText = currentLang === "ja" ? "??" : "Kh?ch h?ng";
+  $("menuStaffText").innerText = currentLang === "ja" ? "\u62c5\u5f53\u8005" : "Ph\u1ee5 tr\u00e1ch";
+  $("staffPanelTitle").innerText = currentLang === "ja" ? "\u62c5\u5f53\u8005\u7ba1\u7406" : "Ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch";
+  $("staffPanelSub").innerText = currentLang === "ja" ? "\u30a8\u30ea\u30a2\u3068\u5c02\u9580\u5206\u91ce\u3067\u81ea\u52d5\u5272\u5f53\u306e\u57fa\u790e\u3092\u4f5c\u6210" : "T\u1ea1o h\u1ed3 s\u01a1 ph\u1ee5 tr\u00e1ch \u0111\u1ec3 ph\u00e2n c\u00f4ng t\u1ef1 \u0111\u1ed9ng";
+  $("staffName").placeholder = currentLang === "ja" ? "\u540d\u524d" : "T\u00ean";
+  $("staffPhone").placeholder = currentLang === "ja" ? "\u96fb\u8a71\u756a\u53f7" : "S\u0110T";
+  $("staffEmail").placeholder = "Email";
+  $("staffAreas").placeholder = currentLang === "ja" ? "\u62c5\u5f53\u30a8\u30ea\u30a2" : "Khu v\u1ef1c ph\u1ee5 tr\u00e1ch";
+  $("staffSkills").placeholder = currentLang === "ja" ? "\u5c02\u9580\u5206\u91ce" : "Chuy\u00ean m\u00f4n";
+  $("staffSaveBtn").innerText = currentLang === "ja" ? "\u4fdd\u5b58" : "L\u01b0u h\u1ed3 s\u01a1";
   $("usersPanelTitle").innerText = currentLang === "ja" ? "顧客一覧" : "Danh sách khách hàng";
   $("usersPanelSub").innerText = currentLang === "ja" ? "顧客アカウントと依頼履歴を管理" : "Quản lý tài khoản khách hàng và lịch sử yêu cầu";
   $("userSearch").placeholder = currentLang === "ja" ? "\u540d\u524d\u3001\u96fb\u8a71\u756a\u53f7\u3001\u4f1a\u793e\u3067\u691c\u7d22..." : "T\u00ecm theo t\u00ean, S\u0110T, c\u00f4ng ty...";
@@ -875,6 +933,7 @@ function changeLanguage() {
   localStorage.setItem("language", currentLang);
   applyLanguage();
   if (currentView === "users") loadUsers();
+  else if (currentView === "staff") loadStaff();
   else loadRequests();
 }
 function showAdminView(view) {
@@ -882,14 +941,18 @@ function showAdminView(view) {
   const isDashboard = view === "dashboard";
   const isUsers = view === "users";
   const isRequests = view === "requests";
+  const isStaff = view === "staff";
   $("dashboardPanel").classList.toggle("hidden", !isDashboard);
   $("requestsPanel").classList.toggle("hidden", !isRequests);
   $("usersPanel").classList.toggle("hidden", !isUsers);
+  $("staffPanel").classList.toggle("hidden", !isStaff);
   $("menuOverview").classList.toggle("active", isDashboard);
   $("menuUsersItem").classList.toggle("active", isUsers);
+  $("menuStaffItem").classList.toggle("active", isStaff);
   $("menuActiveItem").classList.toggle("active", isRequests && currentTab === "active");
   $("menuDoneItem").classList.toggle("active", isRequests && currentTab === "done");
   if (isUsers) loadUsers();
+  else if (isStaff) loadStaff();
   else loadRequests();
 }
 function changeTab(tab) {
@@ -898,8 +961,10 @@ function changeTab(tab) {
   $("dashboardPanel").classList.add("hidden");
   $("requestsPanel").classList.remove("hidden");
   $("usersPanel").classList.add("hidden");
+  $("staffPanel").classList.add("hidden");
   $("menuOverview").classList.remove("active");
   $("menuUsersItem").classList.remove("active");
+  $("menuStaffItem").classList.remove("active");
   $("menuActiveItem").classList.toggle("active", tab === "active");
   $("menuDoneItem").classList.toggle("active", tab === "done");
   $("tabActive").classList.toggle("active", tab === "active");
@@ -1107,6 +1172,10 @@ function renderRequest(item) {
     ? (currentLang === "ja" ? "アカウント" : "Tài khoản")
     : (currentLang === "ja" ? "クイック依頼" : "Gửi nhanh");
   const sourceClass = hasAccount ? "source-account" : "source-guest";
+  const suggested = bestStaffForRequest(item);
+  const assignedName = item.assigneeName || (suggested ? suggested.name : "");
+  const assigneeLabel = currentLang === "ja" ? "\u62c5\u5f53\u8005" : "Ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch";
+  const assigneeSave = currentLang === "ja" ? "\u4fdd\u5b58" : "L\u01b0u";
 
   return `
     <div class="request">
@@ -1120,8 +1189,15 @@ function renderRequest(item) {
         <div class="req-line">${icon("map","line-icon")}${address}</div>
         <div class="req-line">${icon("message","line-icon")}${content}</div>
         <div class="req-line">${icon("clock","line-icon")}${escapeHtml(createdAt)}</div>
+        <div class="req-line"><span class="${getStatusClass(item.status)}">${getStatusIcon(item.status)}${getStatusText(item.status)}</span>${elapsedLabel ? `<span class="elapsed-line">${escapeHtml(elapsedLabel)}</span>` : ""}</div>
+        <div class="assignee-box">
+          <div class="assignee-label">${assigneeLabel}${assignedName ? `: ${escapeHtml(assignedName)}` : ""}</div>
+          <div class="assignee-row">
+            <select class="assignee-select" id="assignee-${safeId}">${staffOptions(item.assigneeId, suggested ? suggested.name : "")}</select>
+            <button class="assignee-btn" onclick="saveAssignee('${safeId}')">${assigneeSave}</button>
+          </div>
+        </div>
       </div>
-      <div><span class="${getStatusClass(item.status)}">${getStatusIcon(item.status)}${getStatusText(item.status)}</span>${elapsedLabel ? `<div class="elapsed-line">${escapeHtml(elapsedLabel)}</div>` : ""}</div>
       <div class="actions">
         ${item.phone ? `<a href="tel:${phone}"><button class="call">${icon("phone","btn-icon")}${t.call}</button></a>` : ""}
         ${item.address ? `<a href="${mapUrl}" target="_blank" rel="noopener"><button class="map">${icon("map","btn-icon")}${t.map}</button></a>` : ""}
@@ -1136,6 +1212,119 @@ function renderRequest(item) {
       </div>
     </div>`;
 }
+function staffText() {
+  return currentLang === "ja"
+    ? { active:"\u5bfe\u5fdc\u53ef", busy:"\u5bfe\u5fdc\u4e2d", off:"\u505c\u6b62", areas:"\u62c5\u5f53\u30a8\u30ea\u30a2", skills:"\u5c02\u9580\u5206\u91ce", phone:"\u96fb\u8a71", email:"\u30e1\u30fc\u30eb", save:"\u4fdd\u5b58", delete:"\u524a\u9664", empty:"\u62c5\u5f53\u8005\u304c\u672a\u767b\u9332\u3067\u3059", assign:"\u62c5\u5f53", auto:"\u5019\u88dc", noStaff:"\u672a\u5272\u5f53" }
+    : { active:"C\u00f3 th\u1ec3 nh\u1eadn", busy:"\u0110ang b\u1eadn", off:"T\u1ea1m ngh\u1ec9", areas:"Khu v\u1ef1c", skills:"Chuy\u00ean m\u00f4n", phone:"S\u0110T", email:"Email", save:"L\u01b0u", delete:"X\u00f3a", empty:"Ch\u01b0a c\u00f3 ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch", assign:"Ph\u1ee5 tr\u00e1ch", auto:"\u0110\u1ec1 xu\u1ea5t", noStaff:"Ch\u01b0a ph\u00e2n c\u00f4ng" };
+}
+function staffStatusText(status) {
+  const t = staffText();
+  return t[status] || t.active;
+}
+function staffOptions(selectedId, suggestionName) {
+  const t = staffText();
+  const options = ['<option value="">' + t.noStaff + '</option>'];
+  currentStaff.filter(staff => staff.status !== "off").forEach(staff => {
+    const value = escapeHtml(staff._id || "");
+    const name = escapeHtml(staff.name || "");
+    const selected = String(selectedId || "") === String(staff._id || "") ? " selected" : "";
+    const suggest = !selectedId && suggestionName && staff.name === suggestionName ? " ? " + t.auto : "";
+    options.push('<option value="' + value + '"' + selected + '>' + name + suggest + '</option>');
+  });
+  return options.join("");
+}
+async function loadStaff(silent = false) {
+  try {
+    const res = await apiFetch(API + "/admin/staff");
+    if (res.status === 401) return authFailLogout();
+    if (!res.ok) throw new Error("Load staff failed");
+    currentStaff = await res.json();
+    if ($("sideStaff")) $("sideStaff").innerText = currentStaff.length;
+    if (!silent && $("staffList")) {
+      renderStaffList();
+    }
+  } catch (err) {
+    if (!silent && $("staffList")) $("staffList").innerHTML = '<div class="empty">' + staffText().empty + '</div>';
+  }
+}
+function renderStaffList() {
+  const t = staffText();
+  if (!currentStaff.length) {
+    $("staffList").innerHTML = '<div class="empty">' + t.empty + '</div>';
+    return;
+  }
+  $("staffList").innerHTML = currentStaff.map(staff => {
+    const id = escapeHtml(staff._id || "");
+    const name = escapeHtml(staff.name || "");
+    const phone = escapeHtml(staff.phone || "");
+    const email = escapeHtml(staff.email || "");
+    const areas = escapeHtml(staff.areas || "");
+    const skills = escapeHtml(staff.skills || "");
+    const status = escapeHtml(staff.status || "active");
+    return '<div class="staff-card"><div><div class="staff-name">' + (name || id) + '</div><div class="staff-line">' + icon("phone","line-icon") + (phone || t.phone) + '</div><div class="staff-line">' + icon("message","line-icon") + (email || t.email) + '</div></div><div><div class="staff-tag-row"><span class="badge source-account">' + t.areas + ': ' + (areas || '-') + '</span><span class="badge source-guest">' + t.skills + ': ' + (skills || '-') + '</span></div><div class="staff-line">' + staffStatusText(status) + '</div></div><div class="user-actions"><button onclick="fillStaffForm(\'' + id + '\')">' + t.save + '</button><button class="delete" onclick="deleteStaffProfile(\'' + id + '\')">' + t.delete + '</button></div></div>';
+  }).join("");
+}
+function fillStaffForm(id) {
+  const staff = currentStaff.find(item => String(item._id || "") === String(id));
+  if (!staff) return;
+  $("staffName").value = staff.name || "";
+  $("staffPhone").value = staff.phone || "";
+  $("staffEmail").value = staff.email || "";
+  $("staffAreas").value = staff.areas || "";
+  $("staffSkills").value = staff.skills || "";
+  $("staffStatus").value = staff.status || "active";
+  $("staffSaveBtn").dataset.editId = staff._id || "";
+}
+async function saveStaffProfile() {
+  const id = $("staffSaveBtn").dataset.editId || "";
+  const body = {
+    name: $("staffName").value.trim(),
+    phone: $("staffPhone").value.trim(),
+    email: $("staffEmail").value.trim(),
+    areas: $("staffAreas").value.trim(),
+    skills: $("staffSkills").value.trim(),
+    status: $("staffStatus").value
+  };
+  if (!body.name) return;
+  const res = await apiFetch(API + "/admin/staff" + (id ? "/" + encodeURIComponent(id) : ""), {
+    method: id ? "PUT" : "POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify(body)
+  });
+  if (res.status === 401) return authFailLogout();
+  ["staffName","staffPhone","staffEmail","staffAreas","staffSkills"].forEach(field => $(field).value = "");
+  $("staffStatus").value = "active";
+  $("staffSaveBtn").dataset.editId = "";
+  loadStaff();
+}
+async function deleteStaffProfile(id) {
+  const res = await apiFetch(API + "/admin/staff/" + encodeURIComponent(id), { method:"DELETE" });
+  if (res.status === 401) return authFailLogout();
+  loadStaff();
+}
+function bestStaffForRequest(item) {
+  if (!currentStaff.length) return null;
+  const haystack = [item.address, item.content, item.province].join(" ").toLowerCase();
+  const activeStaff = currentStaff.filter(staff => staff.status !== "off");
+  return activeStaff.find(staff => {
+    const areas = String(staff.areas || "").toLowerCase().split(/[\u3001,\s]+/).filter(Boolean);
+    const skills = String(staff.skills || "").toLowerCase().split(/[\u3001,\s]+/).filter(Boolean);
+    return areas.some(word => haystack.includes(word)) || skills.some(word => haystack.includes(word));
+  }) || activeStaff[0] || null;
+}
+async function saveAssignee(id) {
+  const select = $("assignee-" + id);
+  if (!select) return;
+  const staff = currentStaff.find(item => String(item._id || "") === String(select.value || ""));
+  const res = await apiFetch(API + "/request/" + encodeURIComponent(id), {
+    method:"PUT",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ assigneeId: staff ? staff._id : "", assigneeName: staff ? staff.name : "" })
+  });
+  if (res.status === 401) return authFailLogout();
+  loadRequests();
+}
+
 async function loadUsers() {
   try {
     const res = await apiFetch(API + "/admin/users");
@@ -1380,6 +1569,7 @@ document.addEventListener("DOMContentLoaded", () => {
   applyLanguage();
   $("search").addEventListener("input", loadRequests);
   $("userSearch").addEventListener("input", loadUsers);
+  loadStaff(true);
   showAdminView("dashboard");
 });
 </script>

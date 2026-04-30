@@ -192,7 +192,9 @@ const RequestSchema = new mongoose.Schema({
   quotedAt: Date,
   orderedAt: Date,
   completedAt: Date,
-  lostAt: Date
+  lostAt: Date,
+  assigneeId: String,
+  assigneeName: String
 });
 
 const Request = mongoose.model("Request", RequestSchema);
@@ -221,6 +223,21 @@ const UserSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model("User", UserSchema);
+
+const StaffSchema = new mongoose.Schema({
+  name: String,
+  phone: String,
+  email: String,
+  areas: String,
+  skills: String,
+  status: {
+    type: String,
+    default: "active"
+  },
+  createdAt: Date
+});
+
+const Staff = mongoose.model("Staff", StaffSchema);
 
 function publicUser(user) {
   const item = user.toObject ? user.toObject() : { ...user };
@@ -438,6 +455,59 @@ app.get("/user/requests", requireUser, async (req, res) => {
   }
 });
 
+app.get("/admin/staff", requireAdmin, async (req, res) => {
+  try {
+    const staff = await Staff.find().sort({ createdAt: -1 });
+    res.json(staff);
+  } catch (error) {
+    res.status(500).json({ message: "Staff load failed", error: error.message });
+  }
+});
+
+app.post("/admin/staff", requireAdmin, async (req, res) => {
+  try {
+    const staff = new Staff({
+      name: req.body.name || "",
+      phone: req.body.phone || "",
+      email: req.body.email || "",
+      areas: req.body.areas || "",
+      skills: req.body.skills || "",
+      status: req.body.status || "active",
+      createdAt: new Date()
+    });
+    await staff.save();
+    res.json(staff);
+  } catch (error) {
+    res.status(500).json({ message: "Staff create failed", error: error.message });
+  }
+});
+
+app.put("/admin/staff/:id", requireAdmin, async (req, res) => {
+  try {
+    const staff = await Staff.findById(req.params.id);
+    if (!staff) return res.status(404).json({ message: "Staff not found" });
+    ["name", "phone", "email", "areas", "skills", "status"].forEach(field => {
+      if (req.body[field] !== undefined) staff[field] = req.body[field];
+    });
+    await staff.save();
+    res.json(staff);
+  } catch (error) {
+    res.status(500).json({ message: "Staff update failed", error: error.message });
+  }
+});
+
+app.delete("/admin/staff/:id", requireAdmin, async (req, res) => {
+  try {
+    const staff = await Staff.findById(req.params.id);
+    if (!staff) return res.status(404).json({ message: "Staff not found" });
+    await Staff.deleteOne({ _id: req.params.id });
+    await Request.updateMany({ assigneeId: req.params.id }, { $set: { assigneeId: "", assigneeName: "" } });
+    res.json({ message: "Deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Staff delete failed", error: error.message });
+  }
+});
+
 app.get("/admin/users", requireAdmin, async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });
@@ -634,6 +704,9 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
       item.status = normalizeRequestStatus(req.body.status);
       applyStatusTimestamps(item, item.status);
     }
+
+    if (req.body.assigneeId !== undefined) item.assigneeId = req.body.assigneeId;
+    if (req.body.assigneeName !== undefined) item.assigneeName = req.body.assigneeName;
 
     if (req.body.adminReply !== undefined) {
       item.adminReply = req.body.adminReply;
