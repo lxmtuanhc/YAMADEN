@@ -377,6 +377,21 @@ app.put("/admin/users/:id", requireAdmin, async (req, res) => {
   }
 });
 
+app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    await Request.updateMany({ userId }, { $set: { userId: "" } });
+    await User.deleteOne({ _id: userId });
+
+    res.json({ message: "User deleted, requests kept" });
+  } catch (error) {
+    res.status(500).json({ message: "Delete failed", error: error.message });
+  }
+});
+
 // Tạo yêu cầu mới - khách dùng, không cần login
 app.post("/request", upload.single("image"), async (req, res) => {
   try {

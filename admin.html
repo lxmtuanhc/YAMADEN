@@ -560,6 +560,7 @@ let currentLang = localStorage.getItem("language") || "ja";
 let currentTab = "active";
 let currentView = "requests";
 let deleteId = null;
+let deleteMode = "request";
 let loading = false;
 
 const ICONS = {
@@ -902,8 +903,8 @@ function renderUser(user) {
   const count = Number(user.requestCount || 0);
   const createdAt = user.createdAt ? escapeHtml(new Date(user.createdAt).toLocaleDateString(currentLang === "ja" ? "ja-JP" : "vi-VN")) : "";
   const userText = currentLang === "ja"
-    ? { active:"有効", pending:"承認待ち", blocked:"停止中", requests:"件", block:"ユーザー停止", unblock:"停止解除", approve:"有効化", individual:"個人", company:"法人" }
-    : { active:"active", pending:"Chờ duyệt", blocked:"blocked", requests:"requests", block:"Khóa user", unblock:"Mở khóa", approve:"Kích hoạt", individual:"Cá nhân", company:"Công ty" };
+    ? { active:"有効", pending:"承認待ち", blocked:"停止中", requests:"件", block:"ユーザー停止", unblock:"停止解除", approve:"有効化", deleteUser:"削除", individual:"個人", company:"法人" }
+    : { active:"active", pending:"Chờ duyệt", blocked:"blocked", requests:"requests", block:"Khóa user", unblock:"Mở khóa", approve:"Kích hoạt", deleteUser:"Xóa user", individual:"Cá nhân", company:"Công ty" };
   const companyValue = (() => {
     const lower = rawCompany.toLowerCase();
     if (currentLang === "ja" && (lower.includes("cá nhân") || lower.includes("ca nhan"))) return userText.individual;
@@ -935,6 +936,7 @@ function renderUser(user) {
       </div>
       <div class="user-actions">
         <button onclick="toggleUserStatus('${id}', '${nextStatus}')">${actionText}</button>
+        <button class="delete" onclick="deleteUser('${id}')">${userText.deleteUser}</button>
       </div>
     </div>`;
 }
@@ -969,12 +971,22 @@ async function saveReply(id) {
 }
 function deleteRequest(id) {
   deleteId = id;
+  deleteMode = "request";
   $("modalText").innerText = texts[currentLang].confirmDelete;
+  $("modal").style.display = "flex";
+}
+function deleteUser(id) {
+  deleteId = id;
+  deleteMode = "user";
+  $("modalText").innerText = currentLang === "ja"
+    ? "このユーザーを完全に削除しますか？依頼履歴は削除されず、クイック依頼として残ります。"
+    : "Bạn có chắc muốn xóa vĩnh viễn user này? Lịch sử yêu cầu vẫn được giữ lại.";
   $("modal").style.display = "flex";
 }
 function closeModal() {
   $("modal").style.display = "none";
   deleteId = null;
+  deleteMode = "request";
 }
 function openImageModal(encodedSrc, mediaType = "image") {
   const src = decodeURIComponent(encodedSrc || "");
@@ -1004,10 +1016,14 @@ function closeImageModal() {
 }
 async function confirmDelete() {
   if (deleteId === null) return;
-  const res = await apiFetch(API + "/request/" + encodeURIComponent(deleteId), { method:"DELETE" });
+  const url = deleteMode === "user"
+    ? API + "/admin/users/" + encodeURIComponent(deleteId)
+    : API + "/request/" + encodeURIComponent(deleteId);
+  const res = await apiFetch(url, { method:"DELETE" });
   if (res.status === 401) return authFailLogout();
   closeModal();
-  loadRequests();
+  if (currentView === "users") loadUsers();
+  else loadRequests();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
