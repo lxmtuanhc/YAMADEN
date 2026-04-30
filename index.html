@@ -1084,6 +1084,14 @@ input:focus, textarea:focus {
   margin-bottom:12px;
   box-shadow:0 10px 24px rgba(0,0,0,0.14);
 }
+.preview-video {
+  width:100%;
+  max-height:260px;
+  border-radius:18px;
+  margin-bottom:12px;
+  background:#0f172a;
+  box-shadow:0 10px 24px rgba(0,0,0,0.14);
+}
 .main-btn,.soft-btn,.copy-btn {
   border:none;
   cursor:pointer;
@@ -1205,6 +1213,14 @@ input:focus, textarea:focus {
   max-width:360px;
   border-radius:18px;
   margin-top:8px;
+  box-shadow:0 10px 24px rgba(0,0,0,0.14);
+}
+.check-video {
+  width:100%;
+  max-width:420px;
+  border-radius:18px;
+  margin-top:8px;
+  background:#0f172a;
   box-shadow:0 10px 24px rgba(0,0,0,0.14);
 }
 .request-card {
@@ -1680,7 +1696,7 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
             <div class="upload-icon" id="uploadIcon"></div>
             <div id="uploadText">Chọn ảnh hoặc chụp ảnh</div>
             <div class="upload-sub">JPG / PNG</div>
-            <input type="file" id="image" accept="image/*" style="display:none;">
+            <input type="file" id="image" accept="image/*,video/*" style="display:none;">
             <button type="button" class="soft-btn choose-image-btn" id="chooseImageBtn" onclick="imageEl.click()">Chọn ảnh</button>
           </div>
         </div>
@@ -2399,7 +2415,13 @@ async function checkStatus(isAuto = false) {
     const meta = statusMeta(data.status);
     const isProcessing = data.status === "processing";
     const isCompleted = data.status === "completed";
-    const imageHtml = data.image ? `<img src="${escapeHtml(data.image)}" class="check-image" alt="">` : escapeHtml(t.noImage);
+    const mediaUrl = data.mediaUrl || data.image || "";
+    const mediaType = data.mediaType || (/\.(mp4|mov|webm|m4v)(\?|$)/i.test(mediaUrl) ? "video" : "image");
+    const imageHtml = mediaUrl
+      ? (mediaType === "video"
+        ? `<video src="${escapeHtml(mediaUrl)}" class="check-video" controls playsinline></video>`
+        : `<img src="${escapeHtml(mediaUrl)}" class="check-image" alt="">`)
+      : escapeHtml(t.noImage);
 
     els.checkResult.innerHTML = `
       <div class="success-box">
@@ -2456,7 +2478,10 @@ function bindUploadPreview() {
       return;
     }
     previewUrl = URL.createObjectURL(file);
-    $("uploadText").innerHTML = `<img src="${previewUrl}" class="preview-img" alt=""><div>${escapeHtml(t.fileSelected)}</div><div style="font-size:12px;color:#6b7280;margin-top:4px;">${escapeHtml(file.name)}</div>`;
+    const preview = file.type && file.type.startsWith("video/")
+      ? `<video src="${previewUrl}" class="preview-video" controls playsinline></video>`
+      : `<img src="${previewUrl}" class="preview-img" alt="">`;
+    $("uploadText").innerHTML = `${preview}<div>${escapeHtml(t.fileSelected)}</div><div style="font-size:12px;color:#6b7280;margin-top:4px;">${escapeHtml(file.name)}</div>`;
   });
 }
 

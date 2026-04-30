@@ -19,11 +19,15 @@ app.use(express.json({ limit: "10mb" }));
 // Cho server hiển thị index.html, admin.html, login.html, icon, manifest
 app.use(express.static(__dirname));
 
-// ===== Upload ảnh bằng multer =====
+// ===== Upload media bằng multer =====
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 5 * 1024 * 1024
+    fileSize: 50 * 1024 * 1024
+  },
+  fileFilter: (req, file, cb) => {
+    const ok = /^image\/|^video\//.test(file.mimetype || "");
+    cb(ok ? null : new Error("Only image or video files are allowed"), ok);
   }
 });
 
@@ -97,6 +101,8 @@ const RequestSchema = new mongoose.Schema({
 
   content: String,
   image: String,
+  mediaUrl: String,
+  mediaType: String,
 
   status: String,
   adminReply: String,
@@ -149,13 +155,13 @@ async function generateRequestId() {
   return id;
 }
 
-// ===== Upload buffer ảnh lên Cloudinary =====
-function uploadImageToCloudinary(fileBuffer) {
+// ===== Upload buffer media lên Cloudinary =====
+function uploadMediaToCloudinary(fileBuffer) {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
         folder: "yamaden_requests",
-        resource_type: "image"
+        resource_type: "auto"
       },
       (error, result) => {
         if (error) reject(error);
@@ -331,11 +337,13 @@ app.post("/request", upload.single("image"), async (req, res) => {
     const shortId = await generateRequestId();
     const currentUser = getUserFromRequest(req);
 
-    let imageUrl = "";
+    let mediaUrl = "";
+    let mediaType = "";
 
     if (req.file) {
-      const uploadResult = await uploadImageToCloudinary(req.file.buffer);
-      imageUrl = uploadResult.secure_url;
+      const uploadResult = await uploadMediaToCloudinary(req.file.buffer);
+      mediaUrl = uploadResult.secure_url;
+      mediaType = (uploadResult.resource_type === "video" || (req.file.mimetype || "").startsWith("video/")) ? "video" : "image";
     }
 
     const newRequest = new Request({
@@ -348,7 +356,9 @@ app.post("/request", upload.single("image"), async (req, res) => {
       address: req.body.address || "",
 
       content: req.body.content || "",
-      image: imageUrl,
+      image: mediaType === "image" ? mediaUrl : "",
+      mediaUrl,
+      mediaType,
 
       status: "pending",
       adminReply: "",

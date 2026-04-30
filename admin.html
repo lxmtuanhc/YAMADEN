@@ -252,6 +252,15 @@ button:hover { transform:translateY(-1px); }
 .hidden { display:none !important; }
 .request:hover { box-shadow:0 16px 32px rgba(15,23,42,0.08); transform:translateY(-1px); }
 .req-img { width:128px; height:104px; object-fit:cover; border-radius:18px; background:linear-gradient(135deg,#e2e8f0,#f8fafc); border:1px solid #e2e8f0; }
+.req-video {
+  width:128px;
+  height:104px;
+  object-fit:cover;
+  border-radius:18px;
+  background:#0f172a;
+  border:1px solid #1e293b;
+  display:block;
+}
 .req-img-btn {
   width:128px;
   height:104px;
@@ -263,11 +272,13 @@ button:hover { transform:translateY(-1px); }
   display:block;
   overflow:hidden;
 }
-.req-img-btn:hover .req-img {
+.req-img-btn:hover .req-img,
+.req-img-btn:hover .req-video {
   transform:scale(1.04);
   filter:saturate(1.08);
 }
-.req-img-btn .req-img {
+.req-img-btn .req-img,
+.req-img-btn .req-video {
   transition:0.2s ease;
 }
 .req-id { display:inline-flex; align-items:center; gap:6px; color:var(--blue); background:#eff6ff; border:1px solid #dbeafe; padding:5px 10px; border-radius:999px; font-size:12px; font-weight:950; margin-bottom:9px; }
@@ -321,6 +332,14 @@ button:hover { transform:translateY(-1px); }
   display:block;
   background:#0f172a;
 }
+.image-modal-box video {
+  width:100%;
+  max-height:82vh;
+  object-fit:contain;
+  border-radius:18px;
+  display:none;
+  background:#0f172a;
+}
 .image-close {
   position:absolute;
   right:10px;
@@ -339,7 +358,7 @@ button:hover { transform:translateY(-1px); }
 
 @media (max-width:1420px) {
   .request { grid-template-columns:118px minmax(240px,1fr) 122px 158px 250px; }
-  .req-img,.req-img-btn { width:118px; height:98px; }
+  .req-img,.req-video,.req-img-btn { width:118px; height:98px; }
 }
 @media (max-width:1200px) {
   .layout { grid-template-columns:1fr; }
@@ -349,7 +368,7 @@ button:hover { transform:translateY(-1px); }
   .stats { grid-template-columns:repeat(2,1fr); }
   .request { grid-template-columns:1fr; }
   .user-card { grid-template-columns:1fr; }
-  .req-img,.req-img-btn { width:100%; height:230px; }
+  .req-img,.req-video,.req-img-btn { width:100%; height:230px; }
   .actions { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; }
   .actions button { margin-bottom:0; }
 }
@@ -381,7 +400,7 @@ button:hover { transform:translateY(-1px); }
     backdrop-filter:blur(18px);
   }
   .request { margin:10px; padding:12px; border-radius:20px; gap:12px; }
-  .req-img,.req-img-btn { height:190px; }
+  .req-img,.req-video,.req-img-btn { height:190px; }
   .req-name,.req-phone { display:block; margin-left:0; }
   .badge { justify-content:flex-start; width:100%; border-radius:16px; }
   .actions { grid-template-columns:1fr; }
@@ -529,6 +548,7 @@ button:hover { transform:translateY(-1px); }
   <div class="image-modal-box" onclick="event.stopPropagation()">
     <button class="image-close" type="button" onclick="closeImageModal()">×</button>
     <img id="imageModalImg" src="" alt="">
+    <video id="imageModalVideo" src="" controls playsinline></video>
   </div>
 </div>
 
@@ -801,8 +821,14 @@ function renderRequest(item) {
   const content = escapeHtml(item.content || "");
   const createdAt = item.createdAt ? new Date(item.createdAt).toLocaleString() : "";
   const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
-  const image = item.image
-    ? `<button class="req-img-btn" type="button" onclick="openImageModal('${encodeURIComponent(item.image)}')"><img class="req-img" src="${escapeHtml(item.image)}" alt=""></button>`
+  const mediaUrl = item.mediaUrl || item.image || "";
+  const mediaType = item.mediaType || (/\.(mp4|mov|webm|m4v)(\?|$)/i.test(mediaUrl) ? "video" : "image");
+  const image = mediaUrl
+    ? `<button class="req-img-btn" type="button" onclick="openImageModal('${encodeURIComponent(mediaUrl)}','${mediaType}')">${
+        mediaType === "video"
+          ? `<video class="req-video" src="${escapeHtml(mediaUrl)}" muted playsinline></video>`
+          : `<img class="req-img" src="${escapeHtml(mediaUrl)}" alt="">`
+      }</button>`
     : `<div class="req-img"></div>`;
   const hasAccount = Boolean(item.userId);
   const sourceText = hasAccount
@@ -948,15 +974,31 @@ function closeModal() {
   $("modal").style.display = "none";
   deleteId = null;
 }
-function openImageModal(encodedSrc) {
+function openImageModal(encodedSrc, mediaType = "image") {
   const src = decodeURIComponent(encodedSrc || "");
   if (!src) return;
-  $("imageModalImg").src = src;
+  const img = $("imageModalImg");
+  const video = $("imageModalVideo");
+  if (mediaType === "video") {
+    img.style.display = "none";
+    img.src = "";
+    video.style.display = "block";
+    video.src = src;
+  } else {
+    video.pause();
+    video.style.display = "none";
+    video.src = "";
+    img.style.display = "block";
+    img.src = src;
+  }
   $("imageModal").style.display = "flex";
 }
 function closeImageModal() {
+  const video = $("imageModalVideo");
+  video.pause();
   $("imageModal").style.display = "none";
   $("imageModalImg").src = "";
+  video.src = "";
 }
 async function confirmDelete() {
   if (deleteId === null) return;
