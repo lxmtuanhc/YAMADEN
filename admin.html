@@ -227,18 +227,32 @@ button:hover { transform:translateY(-1px); }
 }
 .user-card {
   margin:12px 16px;
-  padding:16px;
+  padding:18px 20px;
   display:grid;
-  grid-template-columns:minmax(240px,1fr) 150px 170px 150px;
-  gap:14px;
+  grid-template-columns:minmax(260px,1.15fr) minmax(240px,1fr) 190px;
+  gap:18px;
   align-items:center;
   background:white;
   border:1px solid #edf2f7;
   border-radius:22px;
   box-shadow:0 10px 22px rgba(15,23,42,0.05);
+  cursor:pointer;
+  transition:0.18s ease;
 }
-.user-name { font-size:18px; font-weight:950; }
+.user-card:hover {
+  border-color:#bfdbfe;
+  box-shadow:0 18px 38px rgba(15,23,42,0.09);
+  transform:translateY(-1px);
+}
+.user-main { min-width:0; }
+.user-name { font-size:19px; font-weight:950; color:#0f172a; }
 .user-line { margin-top:6px; color:#475569; font-weight:750; line-height:1.45; word-break:break-word; }
+.user-profile-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.user-profile-item { min-height:58px; padding:10px 12px; border-radius:16px; background:#f8fafc; border:1px solid #edf2f7; }
+.user-profile-label { color:#64748b; font-size:11px; font-weight:950; margin-bottom:4px; }
+.user-profile-value { color:#1e293b; font-weight:950; line-height:1.35; word-break:break-word; }
+.user-status-stack { display:grid; gap:10px; }
+.user-actions { display:grid; gap:8px; }
 .user-actions button {
   width:100%;
   padding:12px;
@@ -249,6 +263,34 @@ button:hover { transform:translateY(-1px); }
   cursor:pointer;
   background:linear-gradient(135deg,#111827,#334155);
 }
+.user-detail-box {
+  width:min(720px, 96vw);
+  max-height:90vh;
+  overflow:auto;
+  padding:24px;
+  border-radius:28px;
+  background:rgba(255,255,255,0.98);
+  box-shadow:0 30px 90px rgba(0,0,0,0.34);
+  position:relative;
+}
+.user-detail-head { display:flex; align-items:center; gap:14px; padding-right:46px; margin-bottom:20px; }
+.user-detail-avatar {
+  width:62px;
+  height:62px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  box-shadow:0 18px 34px rgba(37,99,235,0.24);
+}
+.user-detail-title { font-size:24px; font-weight:950; color:#0f172a; }
+.user-detail-sub { margin-top:4px; color:#64748b; font-weight:850; }
+.user-detail-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.detail-item { padding:14px; border-radius:18px; border:1px solid #e2e8f0; background:#f8fafc; }
+.detail-label { color:#64748b; font-size:12px; font-weight:950; margin-bottom:6px; }
+.detail-value { color:#0f172a; font-size:16px; font-weight:900; line-height:1.45; word-break:break-word; }
 .hidden { display:none !important; }
 .request:hover { box-shadow:0 16px 32px rgba(15,23,42,0.08); transform:translateY(-1px); }
 .req-img { width:128px; height:104px; object-fit:cover; border-radius:18px; background:linear-gradient(135deg,#e2e8f0,#f8fafc); border:1px solid #e2e8f0; }
@@ -368,6 +410,7 @@ button:hover { transform:translateY(-1px); }
   .stats { grid-template-columns:repeat(2,1fr); }
   .request { grid-template-columns:1fr; }
   .user-card { grid-template-columns:1fr; }
+  .user-profile-grid { grid-template-columns:1fr 1fr; }
   .req-img,.req-video,.req-img-btn { width:100%; height:230px; }
   .actions { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; }
   .actions button { margin-bottom:0; }
@@ -400,6 +443,8 @@ button:hover { transform:translateY(-1px); }
     backdrop-filter:blur(18px);
   }
   .request { margin:10px; padding:12px; border-radius:20px; gap:12px; }
+  .user-card { margin:10px; padding:14px; border-radius:20px; }
+  .user-profile-grid,.user-detail-grid { grid-template-columns:1fr; }
   .req-img,.req-video,.req-img-btn { height:190px; }
   .req-name,.req-phone { display:block; margin-left:0; }
   .badge { justify-content:flex-start; width:100%; border-radius:16px; }
@@ -552,6 +597,13 @@ button:hover { transform:translateY(-1px); }
   </div>
 </div>
 
+<div id="userDetailModal" class="modal" onclick="closeUserDetail()">
+  <div class="user-detail-box" onclick="event.stopPropagation()">
+    <button class="image-close" type="button" onclick="closeUserDetail()">×</button>
+    <div id="userDetailContent"></div>
+  </div>
+</div>
+
 <script>
 const API = "https://yamaden.onrender.com";
 const TOKEN_MAX_AGE = 86400000;
@@ -562,6 +614,7 @@ let currentView = "requests";
 let deleteId = null;
 let deleteMode = "request";
 let loading = false;
+let currentUsers = [];
 
 const ICONS = {
   home:`<svg viewBox="0 0 24 24"><path d="M3 10.8 12 3l9 7.8V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10.8Z"/></svg>`,
@@ -873,6 +926,7 @@ async function loadUsers() {
     if (!res.ok) throw new Error("Load users failed");
     const data = await res.json();
     const users = Array.isArray(data) ? data : [];
+    currentUsers = users;
     $("sideUsers").innerText = users.length;
 
     const keyword = $("userSearch").value.trim().toLowerCase();
@@ -891,54 +945,132 @@ async function loadUsers() {
     $("usersList").innerHTML = `<div class="empty">${currentLang === "ja" ? "顧客一覧を読み込めませんでした" : "Không tải được danh sách khách hàng"}</div>`;
   }
 }
+function userText() {
+  return currentLang === "ja"
+    ? {
+      active:"有効", pending:"承認待ち", blocked:"停止中", requests:"件",
+      block:"ユーザー停止", unblock:"停止解除", approve:"有効化", deleteUser:"削除",
+      individual:"個人", company:"法人", phone:"電話番号", email:"メール",
+      companyLabel:"会社 / 個人", province:"都道府県 / 市区町村", project:"工事名",
+      createdAt:"登録日", userId:"ユーザーID", detailTitle:"顧客詳細", noData:"未入力"
+    }
+    : {
+      active:"Đang hoạt động", pending:"Chờ duyệt", blocked:"Đã khóa", requests:"yêu cầu",
+      block:"Khóa user", unblock:"Mở khóa", approve:"Duyệt user", deleteUser:"Xóa user",
+      individual:"Cá nhân", company:"Công ty", phone:"Số điện thoại", email:"Email",
+      companyLabel:"Công ty / cá nhân", province:"Tỉnh / thành", project:"Tên công trình",
+      createdAt:"Ngày đăng ký", userId:"User ID", detailTitle:"Chi tiết khách hàng", noData:"Chưa nhập"
+    };
+}
+function userCompanyLabel(rawCompany, t) {
+  const value = String(rawCompany || "").trim();
+  const lower = value.toLowerCase();
+  if (!value) return "";
+  if (currentLang === "ja" && (lower.includes("cá nhân") || lower.includes("ca nhan") || lower.includes("個人"))) return t.individual;
+  if (currentLang === "ja" && (lower.includes("công ty") || lower.includes("cong ty") || lower.includes("法人"))) return t.company;
+  return value;
+}
+function userDate(date) {
+  if (!date) return "";
+  return new Date(date).toLocaleDateString(currentLang === "ja" ? "ja-JP" : "vi-VN");
+}
 function renderUser(user) {
   const id = escapeHtml(user._id || "");
+  const t = userText();
   const name = escapeHtml(user.name || "");
   const phone = escapeHtml(user.phone || "");
-  const rawCompany = String(user.company || "");
   const province = escapeHtml(user.province || "");
   const projectName = escapeHtml(user.projectName || "");
   const contact = escapeHtml(user.email || "");
   const status = escapeHtml(user.status || "active");
   const count = Number(user.requestCount || 0);
-  const createdAt = user.createdAt ? escapeHtml(new Date(user.createdAt).toLocaleDateString(currentLang === "ja" ? "ja-JP" : "vi-VN")) : "";
-  const userText = currentLang === "ja"
-    ? { active:"有効", pending:"承認待ち", blocked:"停止中", requests:"件", block:"ユーザー停止", unblock:"停止解除", approve:"有効化", deleteUser:"削除", individual:"個人", company:"法人" }
-    : { active:"active", pending:"Chờ duyệt", blocked:"blocked", requests:"requests", block:"Khóa user", unblock:"Mở khóa", approve:"Kích hoạt", deleteUser:"Xóa user", individual:"Cá nhân", company:"Công ty" };
-  const companyValue = (() => {
-    const lower = rawCompany.toLowerCase();
-    if (currentLang === "ja" && (lower.includes("cá nhân") || lower.includes("ca nhan"))) return userText.individual;
-    if (currentLang === "ja" && (lower.includes("công ty") || lower.includes("cong ty"))) return userText.company;
-    return rawCompany;
-  })();
-  const company = escapeHtml(companyValue);
-  const statusText = status === "blocked" ? userText.blocked : status === "pending" ? userText.pending : userText.active;
-  const actionText = status === "blocked" ? userText.unblock : status === "pending" ? userText.approve : userText.block;
+  const createdAt = escapeHtml(userDate(user.createdAt));
+  const company = escapeHtml(userCompanyLabel(user.company, t));
+  const statusText = status === "blocked" ? t.blocked : status === "pending" ? t.pending : t.active;
+  const actionText = status === "blocked" ? t.unblock : status === "pending" ? t.approve : t.block;
   const nextStatus = status === "active" ? "blocked" : "active";
   const statusClass = status === "active" ? "status-completed" : "status-pending";
 
   return `
-    <div class="user-card">
-      <div>
+    <div class="user-card" onclick="openUserDetail('${id}')">
+      <div class="user-main">
         <div class="user-name">${name || phone || id}</div>
-        <div class="user-line">${icon("phone","line-icon")}${phone}</div>
-        <div class="user-line">${icon("message","line-icon")}${contact}</div>
+        <div class="user-line">${icon("phone","line-icon")}${phone || t.noData}</div>
+        <div class="user-line">${icon("message","line-icon")}${contact || t.noData}</div>
       </div>
-      <div>
+      <div class="user-profile-grid">
+        <div class="user-profile-item">
+          <div class="user-profile-label">${t.companyLabel}</div>
+          <div class="user-profile-value">${company || t.noData}</div>
+        </div>
+        <div class="user-profile-item">
+          <div class="user-profile-label">${t.province}</div>
+          <div class="user-profile-value">${province || t.noData}</div>
+        </div>
+        <div class="user-profile-item">
+          <div class="user-profile-label">${t.project}</div>
+          <div class="user-profile-value">${projectName || t.noData}</div>
+        </div>
+        <div class="user-profile-item">
+          <div class="user-profile-label">${t.requests}</div>
+          <div class="user-profile-value">${count}</div>
+        </div>
+      </div>
+      <div class="user-status-stack">
         <span class="badge ${statusClass}">${statusText}</span>
-        <div class="user-line">${company}</div>
-      </div>
-      <div>
-        <div class="user-line"><b>${projectName}</b></div>
-        <div class="user-line">${province}</div>
-        <div class="user-line"><b>${count}</b> ${userText.requests}</div>
-        <div class="user-line">${createdAt}</div>
-      </div>
-      <div class="user-actions">
-        <button onclick="toggleUserStatus('${id}', '${nextStatus}')">${actionText}</button>
-        <button class="delete" onclick="deleteUser('${id}')">${userText.deleteUser}</button>
+        <div class="user-line">${createdAt || t.noData}</div>
+        <div class="user-actions">
+          <button onclick="event.stopPropagation(); toggleUserStatus('${id}', '${nextStatus}')">${actionText}</button>
+          <button class="delete" onclick="event.stopPropagation(); deleteUser('${id}')">${t.deleteUser}</button>
+        </div>
       </div>
     </div>`;
+}
+function detailItem(label, value) {
+  return `
+    <div class="detail-item">
+      <div class="detail-label">${label}</div>
+      <div class="detail-value">${value || userText().noData}</div>
+    </div>`;
+}
+function openUserDetail(id) {
+  const user = currentUsers.find(item => String(item._id || "") === String(id));
+  if (!user) return;
+  const t = userText();
+  const status = user.status || "active";
+  const statusText = status === "blocked" ? t.blocked : status === "pending" ? t.pending : t.active;
+  const statusClass = status === "active" ? "status-completed" : "status-pending";
+  const name = escapeHtml(user.name || user.phone || id);
+  const phone = escapeHtml(user.phone || "");
+  const email = escapeHtml(user.email || "");
+  const company = escapeHtml(userCompanyLabel(user.company, t));
+  const province = escapeHtml(user.province || "");
+  const projectName = escapeHtml(user.projectName || "");
+  const createdAt = escapeHtml(userDate(user.createdAt));
+  const count = escapeHtml(Number(user.requestCount || 0));
+
+  $("userDetailContent").innerHTML = `
+    <div class="user-detail-head">
+      <div class="user-detail-avatar">${icon("user")}</div>
+      <div>
+        <div class="user-detail-title">${name}</div>
+        <div class="user-detail-sub">${t.detailTitle} · <span class="badge ${statusClass}">${statusText}</span></div>
+      </div>
+    </div>
+    <div class="user-detail-grid">
+      ${detailItem(t.phone, phone)}
+      ${detailItem(t.email, email)}
+      ${detailItem(t.companyLabel, company)}
+      ${detailItem(t.province, province)}
+      ${detailItem(t.project, projectName)}
+      ${detailItem(t.requests, count)}
+      ${detailItem(t.createdAt, createdAt)}
+      ${detailItem(t.userId, escapeHtml(id))}
+    </div>`;
+  $("userDetailModal").style.display = "flex";
+}
+function closeUserDetail() {
+  $("userDetailModal").style.display = "none";
 }
 async function toggleUserStatus(id, status) {
   const res = await apiFetch(API + "/admin/users/" + encodeURIComponent(id), {
@@ -1036,3 +1168,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
