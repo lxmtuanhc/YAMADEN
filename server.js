@@ -129,6 +129,32 @@ function notifySlack(text) {
   });
 }
 
+const REQUEST_STATUS_TIMESTAMPS = {
+  contacted: ["firstResponseAt", "contactedAt"],
+  site_done: ["siteVisitedAt"],
+  quoted: ["quotedAt"],
+  ordered: ["orderedAt"],
+  completed: ["completedAt"],
+  lost: ["lostAt"]
+};
+
+function normalizeRequestStatus(status) {
+  if (status === "pending") return "untreated";
+  if (status === "processing") return "contacted";
+  if (status === "completed") return "completed";
+  return status || "untreated";
+}
+
+function applyStatusTimestamps(item, nextStatus) {
+  const normalized = normalizeRequestStatus(nextStatus);
+  const now = new Date();
+  const fields = REQUEST_STATUS_TIMESTAMPS[normalized] || [];
+
+  fields.forEach(field => {
+    if (!item[field]) item[field] = now;
+  });
+}
+
 // ===== MongoDB Connect =====
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected"))
@@ -159,7 +185,14 @@ const RequestSchema = new mongoose.Schema({
 
   status: String,
   adminReply: String,
-  createdAt: Date
+  createdAt: Date,
+  firstResponseAt: Date,
+  contactedAt: Date,
+  siteVisitedAt: Date,
+  quotedAt: Date,
+  orderedAt: Date,
+  completedAt: Date,
+  lostAt: Date
 });
 
 const Request = mongoose.model("Request", RequestSchema);
@@ -514,7 +547,7 @@ app.post("/request", upload.array("image", 8), async (req, res) => {
       mediaType: firstMedia.type,
       mediaFiles,
 
-      status: "pending",
+      status: "untreated",
       adminReply: "",
       createdAt: new Date()
     });
@@ -598,11 +631,15 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
     }
 
     if (req.body.status) {
-      item.status = req.body.status;
+      item.status = normalizeRequestStatus(req.body.status);
+      applyStatusTimestamps(item, item.status);
     }
 
     if (req.body.adminReply !== undefined) {
       item.adminReply = req.body.adminReply;
+      if (!item.firstResponseAt && String(req.body.adminReply || "").trim()) {
+        item.firstResponseAt = new Date();
+      }
     }
 
     await item.save();
@@ -668,4 +705,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
-

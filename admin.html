@@ -824,21 +824,56 @@ function updateTabLabels(activeCount = null, doneCount = null) {
   if (activeCount !== null) $("sideActive").innerText = activeCount;
   if (doneCount !== null) $("sideDone").innerText = doneCount;
 }
+const REQUEST_STATUSES = ["untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"];
+const STATUS_TEXT = {
+  vi: {
+    untreated:"Ch\u01b0a x\u1eed l\u00fd", contacted:"\u0110\u00e3 li\u00ean h\u1ec7", site_done:"\u0110\u00e3 \u0111\u1ebfn hi\u1ec7n tr\u01b0\u1eddng", quoted:"\u0110\u00e3 b\u00e1o gi\u00e1", ordered:"\u0110\u00e3 nh\u1eadn \u0111\u01a1n", completed:"Ho\u00e0n th\u00e0nh", lost:"M\u1ea5t \u0111\u01a1n"
+  },
+  ja: {
+    untreated:"\u672a\u5bfe\u5fdc", contacted:"\u9023\u7d61\u6e08", site_done:"\u73fe\u5730\u6e08", quoted:"\u898b\u7a4d", ordered:"\u53d7\u6ce8", completed:"\u5b8c\u4e86", lost:"\u5931\u6ce8"
+  }
+};
+const STATUS_CLASS = {
+  untreated:"badge status-urgent",
+  contacted:"badge status-contacted",
+  site_done:"badge status-site",
+  quoted:"badge status-quoted",
+  ordered:"badge status-ordered",
+  completed:"badge status-completed",
+  lost:"badge status-lost"
+};
+function normalizeRequestStatus(status) {
+  if (status === "pending") return "untreated";
+  if (status === "processing") return "contacted";
+  if (status === "completed") return "completed";
+  return status || "untreated";
+}
+function isClosedStatus(status) {
+  const normalized = normalizeRequestStatus(status);
+  return normalized === "completed" || normalized === "lost";
+}
 function getStatusClass(status) {
-  if (status === "processing") return "badge status-processing";
-  if (status === "completed") return "badge status-completed";
-  return "badge status-pending";
+  return STATUS_CLASS[normalizeRequestStatus(status)] || "badge status-pending";
 }
 function getStatusText(status) {
-  const t = texts[currentLang];
-  if (status === "processing") return t.processing;
-  if (status === "completed") return t.completed;
-  return t.pending;
+  return STATUS_TEXT[currentLang][normalizeRequestStatus(status)] || STATUS_TEXT[currentLang].untreated;
 }
 function getStatusIcon(status) {
-  if (status === "processing") return icon("clock","badge-icon");
-  if (status === "completed") return icon("check","badge-icon");
+  const normalized = normalizeRequestStatus(status);
+  if (normalized === "completed" || normalized === "ordered") return icon("check","badge-icon");
+  if (normalized === "untreated") return icon("clock","badge-icon");
   return icon("message","badge-icon");
+}
+function formatElapsedFrom(dateString) {
+  const start = new Date(dateString);
+  if (Number.isNaN(start.getTime())) return "";
+  const diffMs = Date.now() - start.getTime();
+  if (diffMs < 0) return "0h";
+  const hours = Math.floor(diffMs / 3600000);
+  const days = Math.floor(hours / 24);
+  const restHours = hours % 24;
+  if (days > 0) return days + "d " + restHours + "h";
+  return hours + "h";
 }
 function isToday(dateString) {
   const d = new Date(dateString);
@@ -856,8 +891,8 @@ async function loadRequests() {
     if (!res.ok) throw new Error("Load failed");
     const data = await res.json();
     const items = Array.isArray(data) ? data : [];
-    const activeCount = items.filter(item => item.status !== "completed").length;
-    const doneCount = items.filter(item => item.status === "completed").length;
+    const activeCount = items.filter(item => !isClosedStatus(item.status)).length;
+    const doneCount = items.filter(item => isClosedStatus(item.status)).length;
     const guestCount = items.filter(item => !item.userId).length;
     const accountCount = items.filter(item => item.userId).length;
     const todayCount = items.filter(item => isToday(item.createdAt)).length;
@@ -876,8 +911,8 @@ async function loadRequests() {
     const keyword = $("search").value.trim().toLowerCase();
     const filtered = items.filter(item => {
       const match = [item.id, item.name, item.phone, item.address, item.content].some(value => String(value || "").toLowerCase().includes(keyword));
-      if (currentTab === "active") return match && item.status !== "completed";
-      if (currentTab === "done") return match && item.status === "completed";
+      if (currentTab === "active") return match && !isClosedStatus(item.status);
+      if (currentTab === "done") return match && isClosedStatus(item.status);
       if (currentTab === "guest") return match && !item.userId;
       if (currentTab === "account") return match && item.userId;
       return match;
@@ -904,6 +939,9 @@ function renderRequest(item) {
   const name = escapeHtml(item.name || "");
   const content = escapeHtml(item.content || "");
   const createdAt = item.createdAt ? new Date(item.createdAt).toLocaleString() : "";
+  const status = normalizeRequestStatus(item.status);
+  const elapsed = status === "untreated" ? formatElapsedFrom(item.createdAt) : "";
+  const elapsedLabel = elapsed ? (currentLang === "ja" ? `\u672a\u5bfe\u5fdc ${elapsed}` : `Ch\u01b0a x\u1eed l\u00fd ${elapsed}`) : "";
   const mapUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.address || "");
   const mediaFiles = Array.isArray(item.mediaFiles) && item.mediaFiles.length
     ? item.mediaFiles
@@ -940,13 +978,12 @@ function renderRequest(item) {
         <div class="req-line">${icon("message","line-icon")}${content}</div>
         <div class="req-line">${icon("clock","line-icon")}${escapeHtml(createdAt)}</div>
       </div>
-      <div><span class="${getStatusClass(item.status)}">${getStatusIcon(item.status)}${getStatusText(item.status)}</span></div>
+      <div><span class="${getStatusClass(item.status)}">${getStatusIcon(item.status)}${getStatusText(item.status)}</span>${elapsedLabel ? `<div class="elapsed-line">${escapeHtml(elapsedLabel)}</div>` : ""}</div>
       <div class="actions">
         ${item.phone ? `<a href="tel:${phone}"><button class="call">${icon("phone","btn-icon")}${t.call}</button></a>` : ""}
         ${item.address ? `<a href="${mapUrl}" target="_blank" rel="noopener"><button class="map">${icon("map","btn-icon")}${t.map}</button></a>` : ""}
-        ${item.status !== "completed"
-          ? `<button class="processing" onclick="updateStatus('${safeId}', 'processing')">${icon("clock","btn-icon")}${t.processing}</button>
-             <button class="completed" onclick="updateStatus('${safeId}', 'completed')">${icon("check","btn-icon")}${t.completed}</button>`
+        ${!isClosedStatus(item.status)
+          ? `<div class="status-actions">${REQUEST_STATUSES.filter(next => next !== status).map(next => `<button class="${next === "completed" || next === "lost" ? "completed" : "processing"}" onclick="updateStatus('${safeId}', '${next}')">${getStatusText(next)}</button>`).join("")}</div>`
           : `<button class="delete" onclick="deleteRequest('${safeId}')">${icon("trash","btn-icon")}${t.delete}</button>`}
       </div>
       <div class="reply-card">

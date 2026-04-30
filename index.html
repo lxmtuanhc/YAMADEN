@@ -1236,7 +1236,7 @@ input:focus, textarea:focus {
 .completed { background:#ecfdf5; color:#166534; }
 .status-timeline {
   display:grid;
-  grid-template-columns:repeat(3, 1fr);
+  grid-template-columns:repeat(4, 1fr);
   gap:8px;
   margin:18px 0;
 }
@@ -2494,11 +2494,26 @@ function openCheck(id) {
   lastCheckedId = id;
   checkStatus(false);
 }
+function normalizeRequestStatus(status) {
+  if (status === "pending") return "untreated";
+  if (status === "processing") return "contacted";
+  if (status === "completed") return "completed";
+  return status || "untreated";
+}
 function statusMeta(status) {
-  const t = texts[lang];
-  if (status === "processing") return { text:t.processing, cls:"processing" };
-  if (status === "completed") return { text:t.completed, cls:"completed" };
-  return { text:t.pending, cls:"pending" };
+  const normalized = normalizeRequestStatus(status);
+  const labels = lang === "ja"
+    ? { untreated:"\u53d7\u4ed8\u6e08\u307f", contacted:"\u78ba\u8a8d\u4e2d", site_done:"\u73fe\u5730\u78ba\u8a8d\u6e08\u307f", quoted:"\u898b\u7a4d", ordered:"\u5bfe\u5fdc\u4e2d", completed:"\u5b8c\u4e86", lost:"\u7d42\u4e86" }
+    : { untreated:"\u0110\u00e3 ti\u1ebfp nh\u1eadn", contacted:"\u0110ang x\u00e1c nh\u1eadn", site_done:"\u0110\u00e3 kh\u1ea3o s\u00e1t", quoted:"B\u00e1o gi\u00e1", ordered:"\u0110ang x\u1eed l\u00fd", completed:"Ho\u00e0n th\u00e0nh", lost:"K\u1ebft th\u00fac" };
+  const cls = normalized === "completed" || normalized === "ordered" ? "completed" : normalized === "untreated" ? "pending" : "processing";
+  return { text: labels[normalized] || labels.untreated, cls, normalized };
+}
+function progressStep(status) {
+  const normalized = normalizeRequestStatus(status);
+  if (normalized === "completed" || normalized === "lost") return 4;
+  if (normalized === "quoted" || normalized === "ordered") return 3;
+  if (normalized === "contacted" || normalized === "site_done") return 2;
+  return 1;
 }
 async function checkStatus(isAuto = false) {
   const t = texts[lang];
@@ -2532,8 +2547,7 @@ async function checkStatus(isAuto = false) {
     }
 
     const meta = statusMeta(data.status);
-    const isProcessing = data.status === "processing";
-    const isCompleted = data.status === "completed";
+    const step = progressStep(data.status);
     const mediaFiles = Array.isArray(data.mediaFiles) && data.mediaFiles.length
       ? data.mediaFiles
       : (data.mediaUrl || data.image
@@ -2553,9 +2567,10 @@ async function checkStatus(isAuto = false) {
       <div class="success-box">
         <div><b>${escapeHtml(t.requestId)}:</b> #${escapeHtml(data.id)}</div>
         <div class="status-timeline">
-          <div class="step ${!isProcessing && !isCompleted ? "active" : "done"}">1<br>${escapeHtml(t.pending)}</div>
-          <div class="step ${isProcessing ? "active" : isCompleted ? "done" : ""}">2<br>${escapeHtml(t.processing)}</div>
-          <div class="step ${isCompleted ? "active" : ""}">3<br>${escapeHtml(t.completed)}</div>
+          <div class="step ${step === 1 ? "active" : "done"}">1<br>${escapeHtml(t.pending)}</div>
+          <div class="step ${step === 2 ? "active" : step > 2 ? "done" : ""}">2<br>${escapeHtml(t.processing)}</div>
+          <div class="step ${step === 3 ? "active" : step > 3 ? "done" : ""}">3<br>${escapeHtml(lang === "ja" ? "\u898b\u7a4d/\u5bfe\u5fdc\u4e2d" : "B\u00e1o gi\u00e1/X\u1eed l\u00fd")}</div>
+          <div class="step ${step === 4 ? "active" : ""}">4<br>${escapeHtml(t.completed)}</div>
         </div>
         <div><b>${escapeHtml(t.status)}:</b> <span class="badge ${meta.cls}">${escapeHtml(meta.text)}</span></div>
         <hr>
