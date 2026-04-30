@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
@@ -121,15 +122,26 @@ const UserSchema = new mongoose.Schema({
   province: String,
   projectName: String,
   address: String,
+  pinHash: String,
+  profileCompleted: {
+    type: Boolean,
+    default: false
+  },
   status: {
     type: String,
-    default: "active"
+    default: "pending"
   },
   createdAt: Date,
   lastLoginAt: Date
 });
 
 const User = mongoose.model("User", UserSchema);
+
+function publicUser(user) {
+  const item = user.toObject ? user.toObject() : { ...user };
+  delete item.pinHash;
+  return item;
+}
 
 // ===== Hỗ trợ cả ID mới String và ID cũ Number =====
 function makeIdQuery(id) {
@@ -206,55 +218,30 @@ app.post("/admin/login", (req, res) => {
   });
 });
 
-app.post("/user/login", async (req, res) => {
+app.post("/user/register", async (req, res) => {
   try {
     if (!USER_JWT_SECRET) {
       return res.status(500).json({ message: "User login is not configured" });
     }
 
     const phone = String(req.body.phone || "").trim();
-    const name = String(req.body.name || "").trim();
-    const email = String(req.body.email || "").trim();
-    const company = String(req.body.company || "").trim();
-    const province = String(req.body.province || "").trim();
-    const projectName = String(req.body.projectName || "").trim();
+    const pin = String(req.body.pin || "").trim();
 
-    if (!phone || !name) {
-      return res.status(400).json({ message: "Name and phone are required" });
+    if (!phone || !/^\d{4,6}$/.test(pin)) {
+      return res.status(400).json({ message: "Phone and 4-6 digit PIN are required" });
     }
 
-    let user = await User.findOne({ phone });
-
-    if (!user) {
-      if (!email || !province || !projectName) {
-        return res.status(400).json({ message: "Email, province and project name are required for registration" });
-      }
-
-      user = new User({
-        name,
-        phone,
-        email,
-        company,
-        province,
-        projectName,
-        status: "active",
-        createdAt: new Date(),
-        lastLoginAt: new Date()
-      });
-    } else {
-      user.name = name || user.name;
-      user.email = email || user.email;
-      user.company = company || user.company;
-      user.province = province || user.province;
-      user.projectName = projectName || user.projectName;
-      user.lastLoginAt = new Date();
+    const exists = await User.findOne({ phone });
+    if (exists && exists.pinHash) {
+      return res.status(409).json({ message: "Phone is already registered" });
     }
 
+    const user = exists || new User({ phone, createdAt: new Date() });
+    user.pinHash = await bcrypt.hash(pin, 10);
+    user.status = user.status || "pending";
+    user.profileCompleted = Boolean(user.name && user.email && user.province && user.projectName);
+    user.lastLoginAt = new Date();
     await user.save();
-
-    if (user.status === "blocked") {
-      return res.status(403).json({ message: "User is blocked" });
-    }
 
     const token = jwt.sign(
       { role: "user", userId: String(user._id), phone: user.phone },
@@ -262,9 +249,68 @@ app.post("/user/login", async (req, res) => {
       { expiresIn: "180d" }
     );
 
-    res.json({ message: "Login success", token, user });
+    res.json({ message: "Register success", token, user: publicUser(user) });
+  } catch (error) {
+    res.status(500).json({ message: "Register failed", error: error.message });
+  }
+});
+
+app.post("/user/login", async (req, res) => {
+  try {
+    if (!USER_JWT_SECRET) {
+      return res.status(500).json({ message: "User login is not configured" });
+    }
+
+    const phone = String(req.body.phone || "").trim();
+    const pin = String(req.body.pin || "").trim();
+
+    if (!phone || !pin) {
+      return res.status(400).json({ message: "Phone and PIN are required" });
+    }
+
+    const user = await User.findOne({ phone });
+    if (!user || !user.pinHash) {
+      return res.status(401).json({ message: "Invalid phone or PIN" });
+    }
+
+    const ok = await bcrypt.compare(pin, user.pinHash);
+    if (!ok) {
+      return res.status(401).json({ message: "Invalid phone or PIN" });
+    }
+
+    if (user.status === "blocked") {
+      return res.status(403).json({ message: "User is blocked" });
+    }
+
+    user.lastLoginAt = new Date();
+    await user.save();
+
+    const token = jwt.sign(
+      { role: "user", userId: String(user._id), phone: user.phone },
+      USER_JWT_SECRET,
+      { expiresIn: "180d" }
+    );
+
+    res.json({ message: "Login success", token, user: publicUser(user) });
   } catch (error) {
     res.status(500).json({ message: "Login failed", error: error.message });
+  }
+});
+
+app.put("/user/profile", requireUser, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    ["name", "email", "company", "province", "projectName", "address", "contact"].forEach(field => {
+      if (req.body[field] !== undefined) user[field] = String(req.body[field] || "").trim();
+    });
+
+    user.profileCompleted = Boolean(user.name && user.email && user.province && user.projectName);
+    await user.save();
+    res.json({ message: "Profile updated", user: publicUser(user) });
+  } catch (error) {
+    res.status(500).json({ message: "Update failed", error: error.message });
   }
 });
 
@@ -272,7 +318,7 @@ app.get("/user/me", requireUser, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
+    res.json(publicUser(user));
   } catch (error) {
     res.status(500).json({ message: "Read failed", error: error.message });
   }
@@ -297,7 +343,7 @@ app.get("/admin/users", requireAdmin, async (req, res) => {
     const countMap = new Map(counts.map(item => [String(item._id), item.count]));
 
     res.json(users.map(user => {
-      const item = user.toObject();
+      const item = publicUser(user);
       item.requestCount = countMap.get(String(user._id)) || 0;
       return item;
     }));
@@ -325,7 +371,7 @@ app.put("/admin/users/:id", requireAdmin, async (req, res) => {
     });
 
     await user.save();
-    res.json({ message: "Updated", data: user });
+    res.json({ message: "Updated", data: publicUser(user) });
   } catch (error) {
     res.status(500).json({ message: "Update failed", error: error.message });
   }
@@ -336,6 +382,14 @@ app.post("/request", upload.single("image"), async (req, res) => {
   try {
     const shortId = await generateRequestId();
     const currentUser = getUserFromRequest(req);
+    let requestUserId = "";
+
+    if (currentUser) {
+      const user = await User.findById(currentUser.userId);
+      if (user && user.status === "active") {
+        requestUserId = String(user._id);
+      }
+    }
 
     let mediaUrl = "";
     let mediaType = "";
@@ -348,7 +402,7 @@ app.post("/request", upload.single("image"), async (req, res) => {
 
     const newRequest = new Request({
       id: shortId,
-      userId: currentUser ? currentUser.userId : "",
+      userId: requestUserId,
 
       name: req.body.name || "",
       phone: req.body.phone || "",

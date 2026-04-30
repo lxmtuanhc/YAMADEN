@@ -1484,6 +1484,8 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
             <div class="account-fields" id="accountFields">
               <input id="accountName" placeholder="Họ và tên">
               <input id="accountPhone" placeholder="Số điện thoại" inputmode="tel">
+              <input id="accountPin" type="password" placeholder="Mã PIN 4-6 số" inputmode="numeric" maxlength="6">
+              <input id="accountPinConfirm" type="password" placeholder="Nhập lại mã PIN" inputmode="numeric" maxlength="6">
               <input id="accountEmail" placeholder="Email">
               <input id="accountProvince" placeholder="Tỉnh / thành">
               <input id="accountProjectName" placeholder="Tên công trình">
@@ -2072,6 +2074,8 @@ function applyLang() {
   $("accountModeLogin").innerText = t.accountLoginMode;
   $("accountName").placeholder = t.name;
   $("accountPhone").placeholder = t.phone;
+  $("accountPin").placeholder = lang === "ja" ? "4〜6桁のPIN" : "Mã PIN 4-6 số";
+  $("accountPinConfirm").placeholder = lang === "ja" ? "PINを再入力" : "Nhập lại mã PIN";
   $("accountEmail").placeholder = "Email";
   $("accountProvince").placeholder = t.accountProvince;
   $("accountProjectName").placeholder = t.accountProjectName;
@@ -2189,15 +2193,25 @@ function updateAccountUI() {
   currentUser = saved ? JSON.parse(saved) : null;
 
   if (currentUser) {
-    $("accountFormCard").style.display = "none";
+    const profileDone = Boolean(currentUser.profileCompleted);
+    const statusText = currentUser.status === "active"
+      ? t.profileActive
+      : currentUser.status === "blocked"
+        ? (lang === "ja" ? "????????" : "T?i kho?n ?ang b? kh?a")
+        : (lang === "ja" ? "???????" : "T?i kho?n ?ang ch? admin duy?t");
+
+    $("accountFormCard").style.display = profileDone ? "none" : "block";
     $("profileCard").style.display = "block";
     $("accountName").value = currentUser.name || "";
     $("accountPhone").value = currentUser.phone || "";
+    $("accountPin").value = "";
+    $("accountPinConfirm").value = "";
     $("accountEmail").value = currentUser.email || "";
     $("accountProvince").value = currentUser.province || "";
     $("accountProjectName").value = currentUser.projectName || "";
     $("accountCompany").value = currentUser.company || "";
-    $("accountStatus").innerText = `${t.accountLoggedIn}: ${currentUser.name || currentUser.phone}`;
+    $("accountStatus").innerText = statusText + ": " + (currentUser.phone || "");
+    $("profileSub").innerText = statusText;
     $("profileName").innerText = currentUser.name || currentUser.phone || "";
     $("profilePhone").innerText = currentUser.phone || "";
     $("profileEmail").innerText = currentUser.email || "";
@@ -2209,57 +2223,83 @@ function updateAccountUI() {
     els.phone.value = els.phone.value || currentUser.phone || "";
     els.contact.value = els.contact.value || currentUser.contact || currentUser.email || "";
     els.address.value = els.address.value || currentUser.address || "";
+    setAccountMode(profileDone ? accountMode : "profile");
   } else {
     $("accountFormCard").style.display = "block";
     $("profileCard").style.display = "none";
     $("accountSuccess").style.display = "none";
     $("accountStatus").innerText = t.accountLoggedOut;
+    setAccountMode(accountMode === "profile" ? "register" : accountMode);
   }
-  setAccountMode(accountMode);
 }
 function setAccountMode(mode) {
   accountMode = mode;
+  const t = texts[lang];
   const isLogin = mode === "login";
-  $("accountModeRegister").classList.toggle("active", !isLogin);
+  const isProfile = mode === "profile";
+  $("accountModeRegister").classList.toggle("active", !isLogin && !isProfile);
   $("accountModeLogin").classList.toggle("active", isLogin);
-  ["accountEmail", "accountProvince", "accountProjectName", "accountCompany"].forEach(id => {
+  $("accountModeRegister").style.display = isProfile ? "none" : "";
+  $("accountModeLogin").style.display = isProfile ? "none" : "";
+  ["accountName", "accountEmail", "accountProvince", "accountProjectName", "accountCompany"].forEach(id => {
     const el = $(id);
-    if (el) el.classList.toggle("hidden", isLogin);
+    if (el) el.classList.toggle("hidden", !isProfile);
   });
+  $("accountPhone").classList.toggle("hidden", isProfile);
+  $("accountPin").classList.toggle("hidden", isProfile);
+  $("accountPinConfirm").classList.toggle("hidden", isLogin || isProfile);
+  $("accountLoginText").innerText = isProfile
+    ? (lang === "ja" ? "???????" : "L?u th?ng tin kh?ch h?ng")
+    : (isLogin ? (lang === "ja" ? "????" : "??ng nh?p") : (lang === "ja" ? "??" : "??ng k?"));
+  $("accountText").innerText = isProfile
+    ? (lang === "ja" ? "????????????????????" : "Vui l?ng b? sung th?ng tin kh?ch h?ng ?? admin duy?t t?i kho?n.")
+    : t.accountText;
 }
 async function userLogin() {
   const t = texts[lang];
   const name = $("accountName").value.trim();
   const phone = $("accountPhone").value.trim();
+  const pin = $("accountPin").value.trim();
+  const pinConfirm = $("accountPinConfirm").value.trim();
   const email = $("accountEmail").value.trim();
   const province = $("accountProvince").value.trim();
   const projectName = $("accountProjectName").value.trim();
   const company = $("accountCompany").value.trim();
 
-  if (!name || !phone) {
-    showToast(t.accountRequired);
+  if (accountMode !== "profile" && (!phone || !/^\d{4,6}$/.test(pin))) {
+    showToast(lang === "ja" ? "?????4?6??PIN??????????" : "Vui l?ng nh?p S?T v? m? PIN 4-6 s?.");
     return;
   }
-  if (accountMode === "register" && (!email || !province || !projectName)) {
-    showToast(lang === "ja" ? "メール、地域、工事名を入力してください。" : "Vui lòng nhập email, tỉnh/thành và tên công trình.");
+  if (accountMode === "register" && pin !== pinConfirm) {
+    showToast(lang === "ja" ? "PIN????????" : "M? PIN nh?p l?i kh?ng kh?p.");
+    return;
+  }
+  if (accountMode === "profile" && (!name || !email || !province || !projectName)) {
+    showToast(lang === "ja" ? "???????????????????????" : "Vui l?ng nh?p h? t?n, email, t?nh/th?nh v? t?n c?ng tr?nh.");
     return;
   }
 
   try {
-    const res = await fetch(API + "/user/login", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ name, phone, email, province, projectName, company })
-    });
+    const endpoint = accountMode === "register" ? "/user/register" : accountMode === "profile" ? "/user/profile" : "/user/login";
+    const headers = { "Content-Type":"application/json" };
+    const token = getUserToken();
+    if (accountMode === "profile" && token) headers.Authorization = "Bearer " + token;
+    const body = accountMode === "profile" ? { name, email, province, projectName, company } : { phone, pin };
+    const method = accountMode === "profile" ? "PUT" : "POST";
+    const res = await fetch(API + endpoint, { method, headers, body:JSON.stringify(body) });
     const data = await readJsonSafe(res);
 
-    if (!res.ok || !data.token || !data.user) throw new Error("login failed");
+    if (!res.ok || !data.user || (accountMode !== "profile" && !data.token)) throw new Error("login failed");
 
-    localStorage.setItem("userToken", data.token);
+    if (data.token) localStorage.setItem("userToken", data.token);
     localStorage.setItem("userProfile", JSON.stringify(data.user));
     updateAccountUI();
     await loadUserRequests();
-    const message = accountMode === "register" ? t.accountRegisterSuccess : t.accountLoginSuccess;
+    const message = accountMode === "register"
+      ? (lang === "ja" ? "?????????????????????" : "??ng k? th?nh c?ng. Vui l?ng b? sung th?ng tin kh?ch h?ng.")
+      : accountMode === "profile"
+        ? (lang === "ja" ? "???????????????????????" : "?? l?u th?ng tin kh?ch h?ng. Vui l?ng ch? admin duy?t.")
+        : t.accountLoginSuccess;
     $("accountSuccess").innerText = message;
     $("accountSuccess").style.display = "block";
     showToast(message);
@@ -2318,7 +2358,7 @@ async function sendRequest() {
 
     const headers = {};
     const token = getUserToken();
-    if (token) headers.Authorization = "Bearer " + token;
+    if (token && currentUser && currentUser.status === "active") headers.Authorization = "Bearer " + token;
     const res = await fetch(API + "/request", { method:"POST", headers, body:formData });
     const data = await readJsonSafe(res);
     if (!res.ok || !data.data || !data.data.id) throw new Error("send failed");
