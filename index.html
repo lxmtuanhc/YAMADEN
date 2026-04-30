@@ -1106,6 +1106,30 @@ input:focus, textarea:focus {
   margin-bottom:0;
   object-fit:cover;
 }
+.preview-item {
+  position:relative;
+  overflow:hidden;
+  border-radius:18px;
+}
+.remove-media-btn {
+  position:absolute;
+  right:7px;
+  top:7px;
+  width:30px;
+  height:30px;
+  border:none;
+  border-radius:999px;
+  background:rgba(15,23,42,0.88);
+  color:white;
+  font-size:18px;
+  font-weight:950;
+  line-height:1;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 8px 18px rgba(0,0,0,0.24);
+}
 .preview-count {
   font-size:13px;
   color:#6b7280;
@@ -1796,6 +1820,7 @@ let lang = localStorage.getItem("lang") || localStorage.getItem("language") || "
 let lastAdminReply = "";
 let lastCheckedId = "";
 let previewUrls = [];
+let selectedMediaFiles = [];
 let currentUser = null;
 let accountMode = "register";
 
@@ -2147,7 +2172,7 @@ function applyLang() {
   $("labelContent").innerText = t.content;
   $("labelImage").innerText = t.image;
   $("labelCheckId").innerText = t.requestId;
-  if (!els.image.files[0]) $("uploadText").innerText = t.uploadText;
+  if (selectedMediaFiles.length === 0) $("uploadText").innerText = t.uploadText;
   $("chooseImageBtn").innerText = t.chooseImage;
   $("copyIdText").innerText = t.copyId;
   $("historyText").innerText = t.history;
@@ -2371,7 +2396,7 @@ async function sendRequest() {
   const contact = els.contact.value.trim();
   const address = els.address.value.trim();
   const content = els.content.value.trim();
-  const files = Array.from(els.image.files || []).slice(0, 8);
+  const files = selectedMediaFiles.slice(0, 8);
 
   if (!name || !phone || !address || !content) {
     els.result.innerText = t.required;
@@ -2389,7 +2414,8 @@ async function sendRequest() {
     formData.append("contact", contact);
     formData.append("address", address);
     formData.append("content", content);
-    files.forEach(file => formData.append("image", file));
+    const uploadFiles = await Promise.all(files.map(prepareUploadFile));
+    uploadFiles.forEach(file => formData.append("image", file));
 
     const headers = {};
     const token = getUserToken();
@@ -2425,9 +2451,7 @@ async function sendRequest() {
     els.address.value = "";
     els.content.value = "";
     els.image.value = "";
-    previewUrls.forEach(url => URL.revokeObjectURL(url));
-    previewUrls = [];
-    $("uploadText").innerText = t.uploadText;
+    clearSelectedMedia();
     showToast(t.success);
   } catch (err) {
     els.result.innerText = t.networkError;
@@ -2553,22 +2577,41 @@ function bindElements() {
 }
 function bindUploadPreview() {
   els.image.addEventListener("change", () => {
+    const incoming = Array.from(els.image.files || []);
+    selectedMediaFiles = selectedMediaFiles.concat(incoming).slice(0, 8);
+    els.image.value = "";
+    renderSelectedMedia();
+  });
+}
+function clearSelectedMedia() {
+  previewUrls.forEach(url => URL.revokeObjectURL(url));
+  previewUrls = [];
+  selectedMediaFiles = [];
+  if (els.image) els.image.value = "";
+  $("uploadText").innerText = texts[lang].uploadText;
+}
+function removeSelectedMedia(index) {
+  selectedMediaFiles.splice(index, 1);
+  renderSelectedMedia();
+}
+function renderSelectedMedia() {
     const t = texts[lang];
     previewUrls.forEach(url => URL.revokeObjectURL(url));
     previewUrls = [];
 
-    const files = Array.from(els.image.files || []).slice(0, 8);
+    const files = selectedMediaFiles.slice(0, 8);
     if (files.length === 0) {
       $("uploadText").innerText = t.uploadText;
       return;
     }
 
-    const preview = files.map(file => {
+    const preview = files.map((file, index) => {
       const url = URL.createObjectURL(file);
       previewUrls.push(url);
-      return file.type && file.type.startsWith("video/")
+      const media = file.type && file.type.startsWith("video/")
         ? `<video src="${url}" class="preview-video" controls playsinline></video>`
         : `<img src="${url}" class="preview-img" alt="">`;
+      return `<div class="preview-item">${media}<button type="button" class="remove-media-btn" onclick="removeSelectedMedia(${index})">×</button></div>`;
     }).join("");
 
     const names = files.map(file => escapeHtml(file.name)).join(", ");
@@ -2577,6 +2620,47 @@ function bindUploadPreview() {
       <div>${escapeHtml(t.fileSelected)}</div>
       <div class="preview-count">${files.length}/8 file</div>
       <div style="font-size:12px;color:#6b7280;margin-top:4px;">${names}</div>`;
+}
+function prepareUploadFile(file) {
+  if (!file || !file.type || !file.type.startsWith("image/") || file.type === "image/gif" || file.type === "image/svg+xml") {
+    return Promise.resolve(file);
+  }
+
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const maxSide = 1600;
+      const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+
+      if (scale >= 1 && file.size < 1200000) {
+        resolve(file);
+        return;
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(img.width * scale));
+      canvas.height = Math.max(1, Math.round(img.height * scale));
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(blob => {
+        if (!blob) {
+          resolve(file);
+          return;
+        }
+        const baseName = file.name.replace(/\.[^.]+$/, "") || "yamaden-image";
+        resolve(new File([blob], `${baseName}.jpg`, {
+          type:"image/jpeg",
+          lastModified:Date.now()
+        }));
+      }, "image/jpeg", 0.78);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file);
+    };
+    img.src = url;
   });
 }
 
