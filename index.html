@@ -2213,6 +2213,15 @@ function showTab(tab) {
   els.tabSend.classList.toggle("active", isSend);
   if (isCheck) renderMyRequests();
 }
+function showInitialScreen() {
+  const saved = localStorage.getItem("userProfile");
+  const user = saved ? JSON.parse(saved) : null;
+  if (user && user.profileCompleted) {
+    showTab("home");
+    return;
+  }
+  showTab("account");
+}
 function renderMyRequests() {
   const t = texts[lang];
   const requests = getMyRequests();
@@ -2261,7 +2270,7 @@ function updateAccountUI() {
         : (lang === "ja" ? "管理者承認待ち" : "Tài khoản đang chờ admin duyệt");
 
     $("accountFormCard").style.display = profileDone ? "none" : "block";
-    $("profileCard").style.display = "block";
+    $("profileCard").style.display = profileDone ? "block" : "none";
     $("accountName").value = currentUser.name || "";
     $("accountPhone").value = currentUser.phone || "";
     $("accountPin").value = "";
@@ -2317,6 +2326,7 @@ function setAccountMode(mode) {
 }
 async function userLogin() {
   const t = texts[lang];
+  const submitMode = accountMode;
   const name = $("accountName").value.trim();
   const phone = $("accountPhone").value.trim();
   const pin = $("accountPin").value.trim();
@@ -2326,43 +2336,48 @@ async function userLogin() {
   const projectName = $("accountProjectName").value.trim();
   const company = $("accountCompany").value.trim();
 
-  if (accountMode !== "profile" && (!phone || !/^\d{4,6}$/.test(pin))) {
+  if (submitMode !== "profile" && (!phone || !/^\d{4,6}$/.test(pin))) {
     showToast(lang === "ja" ? "電話番号と4〜6桁のPINを入力してください。" : "Vui lòng nhập SĐT và mã PIN 4-6 số.");
     return;
   }
-  if (accountMode === "register" && pin !== pinConfirm) {
+  if (submitMode === "register" && pin !== pinConfirm) {
     showToast(lang === "ja" ? "PINが一致しません。" : "Mã PIN nhập lại không khớp.");
     return;
   }
-  if (accountMode === "profile" && (!name || !email || !province || !projectName)) {
+  if (submitMode === "profile" && (!name || !email || !province || !projectName)) {
     showToast(lang === "ja" ? "名前、メール、地域、工事名を入力してください。" : "Vui lòng nhập họ tên, email, tỉnh/thành và tên công trình.");
     return;
   }
 
   try {
-    const endpoint = accountMode === "register" ? "/user/register" : accountMode === "profile" ? "/user/profile" : "/user/login";
+    const endpoint = submitMode === "register" ? "/user/register" : submitMode === "profile" ? "/user/profile" : "/user/login";
     const headers = { "Content-Type":"application/json" };
     const token = getUserToken();
-    if (accountMode === "profile" && token) headers.Authorization = "Bearer " + token;
-    const body = accountMode === "profile" ? { name, email, province, projectName, company } : { phone, pin };
-    const method = accountMode === "profile" ? "PUT" : "POST";
+    if (submitMode === "profile" && token) headers.Authorization = "Bearer " + token;
+    const body = submitMode === "profile" ? { name, email, province, projectName, company } : { phone, pin };
+    const method = submitMode === "profile" ? "PUT" : "POST";
     const res = await fetch(API + endpoint, { method, headers, body:JSON.stringify(body) });
     const data = await readJsonSafe(res);
 
-    if (!res.ok || !data.user || (accountMode !== "profile" && !data.token)) throw new Error("login failed");
+    if (!res.ok || !data.user || (submitMode !== "profile" && !data.token)) throw new Error("login failed");
 
     if (data.token) localStorage.setItem("userToken", data.token);
     localStorage.setItem("userProfile", JSON.stringify(data.user));
     updateAccountUI();
     await loadUserRequests();
-    const message = accountMode === "register"
+    const message = submitMode === "register"
       ? (lang === "ja" ? "登録しました。顧客情報を入力してください。" : "Đăng ký thành công. Vui lòng bổ sung thông tin khách hàng.")
-      : accountMode === "profile"
+      : submitMode === "profile"
         ? (lang === "ja" ? "顧客情報を保存しました。承認をお待ちください。" : "Đã lưu thông tin khách hàng. Vui lòng chờ admin duyệt.")
         : t.accountLoginSuccess;
     $("accountSuccess").innerText = message;
     $("accountSuccess").style.display = "block";
     showToast(message);
+    if (submitMode === "login" && data.user.profileCompleted) {
+      showTab("home");
+    } else {
+      showTab("account");
+    }
   } catch (err) {
     showToast(t.accountLoginFailed);
   }
@@ -2372,6 +2387,7 @@ function userLogout() {
   localStorage.removeItem("userProfile");
   currentUser = null;
   updateAccountUI();
+  showTab("account");
 }
 async function loadUserRequests() {
   const token = getUserToken();
@@ -2669,6 +2685,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderIcons();
   applyLang();
   updateAccountUI();
+  showInitialScreen();
   loadUserRequests();
   bindUploadPreview();
   setInterval(() => {
