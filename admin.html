@@ -625,5 +625,114 @@ html,body{height:100%!important;overflow:hidden!important}
 })();
 </script>
 
+
+<!-- yamaden-customer-modal-polish-v7 -->
+<style id="yamaden-customer-modal-polish-v7-style">
+.user-modal-box{width:min(1060px,94vw)!important;height:min(760px,90vh)!important;max-height:90vh!important;border-radius:16px!important;display:flex!important;flex-direction:column!important}
+.user-modal-top{flex:0 0 74px!important;height:74px!important;padding:0 28px!important;background:#fff!important}
+.user-modal-body{flex:1 1 auto!important;min-height:0!important;overflow:auto!important;padding:26px 32px 32px!important;background:#fff!important}
+.user-modal-tab{min-width:128px!important;height:44px!important;border-radius:8px!important;border:1px solid #e2e8f0!important;background:#fff!important;color:#94a3b8!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:14px!important;font-weight:950!important;box-shadow:0 10px 22px rgba(15,23,42,.04)!important}
+.user-modal-tab.active{color:#111827!important;border-color:#111827!important;background:#fff!important;box-shadow:none!important}
+.user-modal-close{width:42px!important;height:42px!important;border-radius:10px!important;border:0!important;background:#ef4444!important;color:#fff!important;font-size:0!important;display:flex!important;align-items:center!important;justify-content:center!important;line-height:1!important;box-shadow:0 12px 24px rgba(239,68,68,.24)!important;position:relative!important}
+.user-modal-close::before,.user-modal-close::after{content:""!important;position:absolute!important;width:18px!important;height:3px!important;border-radius:99px!important;background:#fff!important;left:50%!important;top:50%!important;transform-origin:center!important}
+.user-modal-close::before{transform:translate(-50%,-50%) rotate(45deg)!important}.user-modal-close::after{transform:translate(-50%,-50%) rotate(-45deg)!important}
+.user-profile-head{padding:4px 0 24px!important;margin-bottom:22px!important}.user-info-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}.user-info-item{min-height:86px!important;padding:16px 0!important}.user-history-modal{min-height:360px!important;background:#fff!important}.user-history-modal-row{grid-template-columns:140px minmax(0,1fr) 140px 140px!important;min-height:58px!important}.user-modal-pane{min-height:560px!important}.user-section-title{font-size:18px!important;margin:22px 0 14px!important}.user-modal-pane#userPaneHistory{padding-top:28px!important}@media(max-width:780px){.user-modal-box{width:96vw!important;height:90vh!important}.user-modal-body{padding:18px!important}.user-info-grid{grid-template-columns:1fr 1fr!important}.user-history-modal-row{grid-template-columns:1fr!important}.user-modal-tab{min-width:110px!important}}
+</style>
+<script id="yamaden-customer-modal-polish-v7-script">
+(function(){
+  function polishCustomerModal(){
+    const close=document.querySelector('.user-modal-close');
+    if(close){close.textContent='';close.setAttribute('aria-label','Close');}
+    const box=document.querySelector('.user-modal-box');
+    if(box)box.style.height='min(760px, 90vh)';
+  }
+  const oldOpenUserDetail=window.openUserDetail;
+  window.openUserDetail=async function(id){
+    if(oldOpenUserDetail) await oldOpenUserDetail(id);
+    setTimeout(polishCustomerModal,0);
+  };
+  const oldSwitchUserTab=window.switchUserModalTab;
+  window.switchUserModalTab=function(tab){oldSwitchUserTab&&oldSwitchUserTab(tab);setTimeout(polishCustomerModal,0)};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(polishCustomerModal,300));
+})();
+</script>
+
+
+<!-- yamaden-staff-profile-v8 -->
+<style id="yamaden-staff-profile-v8-style">
+.staff-profile-shell{padding:16px}.staff-profile-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.staff-profile-title{font-size:18px;font-weight:950}.staff-add-btn{height:42px;border:0;border-radius:10px;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:#fff;font-weight:950;padding:0 18px;box-shadow:0 12px 26px rgba(37,99,235,.22)}.staff-profile-list{display:grid;gap:10px}.staff-profile-row{display:grid;grid-template-columns:1.1fr .9fr 1.4fr auto;gap:12px;align-items:center;border:1px solid #e5eaf2;border-radius:12px;background:#fff;padding:14px}.staff-profile-row b{font-size:15px}.staff-profile-meta{color:#64748b;font-size:12px;font-weight:800;margin-top:5px}.staff-dept-pill{display:inline-flex;align-items:center;height:30px;border-radius:999px;background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-weight:950;padding:0 12px}.staff-work-text{font-weight:850;color:#334155;line-height:1.45}.staff-form-modal{display:none;position:fixed;inset:0;background:rgba(2,6,23,.62);z-index:150;align-items:center;justify-content:center;padding:18px}.staff-form-modal.show{display:flex}.staff-form-box{width:min(560px,94vw);background:#fff;border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.34);overflow:hidden}.staff-form-head{height:64px;border-bottom:1px solid #e5eaf2;display:flex;align-items:center;justify-content:space-between;padding:0 20px}.staff-form-title{font-size:18px;font-weight:950}.staff-form-close{width:38px;height:38px;border:0;border-radius:10px;background:#ef4444;color:#fff;font-size:22px;font-weight:950;line-height:1}.staff-form-body{padding:18px;display:grid;gap:12px}.staff-field{display:grid;gap:6px}.staff-field label{font-size:12px;font-weight:950;color:#475569}.staff-field input,.staff-field select,.staff-field textarea{width:100%;border:1px solid #dbe4ef;border-radius:10px;padding:12px;font-weight:850;background:#fff}.staff-field textarea{min-height:110px;resize:vertical;line-height:1.5}.staff-form-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}.staff-form-actions button{height:42px;border-radius:10px;font-weight:950}.staff-save-profile{border:0;background:#111827;color:#fff}.staff-cancel-profile{border:1px solid #e2e8f0;background:#fff;color:#334155}@media(max-width:850px){.staff-profile-row{grid-template-columns:1fr}.staff-profile-head{align-items:stretch;flex-direction:column}.staff-add-btn{width:100%}}
+</style>
+<script id="yamaden-staff-profile-v8-script">
+(function(){
+  const staffWords={
+    ja:{title:'スタッフプロフィール',add:'新しいプロフィールを追加',name:'名前',email:'メール',department:'部署',work:'業務内容',save:'保存',cancel:'キャンセル',edit:'編集',delete:'削除',empty:'スタッフプロフィールがありません',modalTitle:'スタッフプロフィール登録'},
+    vi:{title:'Hồ sơ nhân viên',add:'Thêm hồ sơ mới',name:'Tên',email:'Email',department:'Bộ phận làm việc',work:'Nội dung công việc',save:'Lưu',cancel:'Hủy',edit:'Sửa',delete:'Xóa',empty:'Chưa có hồ sơ nhân viên',modalTitle:'Thêm hồ sơ nhân viên'}
+  };
+  const departments={
+    ja:['電気工事','計装工事','自動制御設備','保守メンテナンス','営業・見積','事務・管理'],
+    vi:['Điện công trình','Kế trang / thiết bị đo','Tự động điều khiển','Bảo trì - maintenance','Kinh doanh - báo giá','Văn phòng - quản lý']
+  };
+  const sw=k=>(staffWords[currentLang||'ja']&&staffWords[currentLang||'ja'][k])||staffWords.ja[k]||k;
+  const deptList=()=>departments[currentLang||'ja']||departments.ja;
+  function staffId(s){return s._id||s.id||''}
+  function ensureStaffModal(){
+    if(document.getElementById('staffFormModal'))return;
+    const modal=document.createElement('div'); modal.id='staffFormModal'; modal.className='staff-form-modal'; modal.onclick=e=>{if(e.target===modal)closeStaffProfileForm()};
+    modal.innerHTML='<div class="staff-form-box"><div class="staff-form-head"><div class="staff-form-title" id="staffFormTitle"></div><button class="staff-form-close" onclick="closeStaffProfileForm()">×</button></div><div class="staff-form-body"><input type="hidden" id="staffProfileId"><div class="staff-field"><label id="staffProfileNameLabel"></label><input id="staffProfileName"></div><div class="staff-field"><label id="staffProfileEmailLabel"></label><input id="staffProfileEmail" type="email"></div><div class="staff-field"><label id="staffProfileDeptLabel"></label><select id="staffProfileDept"></select></div><div class="staff-field"><label id="staffProfileWorkLabel"></label><textarea id="staffProfileWork"></textarea></div><div class="staff-form-actions"><button class="staff-cancel-profile" onclick="closeStaffProfileForm()" id="staffProfileCancel"></button><button class="staff-save-profile" onclick="saveStaffProfileV8()" id="staffProfileSave"></button></div></div></div>';
+    document.body.appendChild(modal);
+  }
+  function applyStaffLabels(){
+    ensureStaffModal();
+    const map={staffFormTitle:'modalTitle',staffProfileNameLabel:'name',staffProfileEmailLabel:'email',staffProfileDeptLabel:'department',staffProfileWorkLabel:'work',staffProfileCancel:'cancel',staffProfileSave:'save'};
+    Object.entries(map).forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.textContent=sw(k)});
+    const sel=document.getElementById('staffProfileDept'); if(sel){const current=sel.value; sel.innerHTML=deptList().map(d=>'<option value="'+esc(d)+'">'+esc(d)+'</option>').join(''); if(current)sel.value=current;}
+  }
+  function staffDept(s){return s.department||s.areas||s.dept||'-'}
+  function staffWork(s){return s.workContent||s.work||s.skills||'-'}
+  window.openStaffProfileForm=function(id=''){
+    ensureStaffModal(); applyStaffLabels();
+    const s=(currentStaff||[]).find(x=>String(staffId(x))===String(id));
+    document.getElementById('staffProfileId').value=id||'';
+    document.getElementById('staffProfileName').value=s?.name||'';
+    document.getElementById('staffProfileEmail').value=s?.email||'';
+    document.getElementById('staffProfileDept').value=staffDept(s||{})==='-'?deptList()[0]:staffDept(s||{});
+    document.getElementById('staffProfileWork').value=staffWork(s||{})==='-'?'':staffWork(s||{});
+    document.getElementById('staffFormModal').classList.add('show');
+  };
+  window.closeStaffProfileForm=function(){document.getElementById('staffFormModal')?.classList.remove('show')};
+  window.saveStaffProfileV8=async function(){
+    const id=document.getElementById('staffProfileId').value;
+    const body={
+      name:document.getElementById('staffProfileName').value.trim(),
+      email:document.getElementById('staffProfileEmail').value.trim(),
+      phone:'',
+      areas:document.getElementById('staffProfileDept').value,
+      department:document.getElementById('staffProfileDept').value,
+      skills:document.getElementById('staffProfileWork').value.trim(),
+      workContent:document.getElementById('staffProfileWork').value.trim(),
+      status:'active'
+    };
+    if(!body.name)return;
+    const res=await apiFetch(API+'/admin/staff'+(id?'/'+encodeURIComponent(id):''),{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(res.status===401)return authFailLogout();
+    closeStaffProfileForm();
+    loadStaff();
+  };
+  window.renderStaff=function(){
+    const root=document.getElementById('staffView'); if(!root)return;
+    root.innerHTML='<div class="panel"><div class="staff-profile-shell"><div class="staff-profile-head"><div><div class="staff-profile-title">'+sw('title')+'</div><div class="muted" style="font-size:12px;font-weight:750;margin-top:4px">'+sw('department')+' / '+sw('work')+'</div></div><button class="staff-add-btn" onclick="openStaffProfileForm()">+ '+sw('add')+'</button></div><div class="staff-profile-list" id="staffProfileList"></div></div></div>';
+    const list=document.getElementById('staffProfileList');
+    list.innerHTML=(currentStaff||[]).length?(currentStaff||[]).map(s=>{
+      const id=staffId(s);
+      return '<div class="staff-profile-row"><div><b>'+esc(s.name||'-')+'</b><div class="staff-profile-meta">'+esc(s.email||'-')+'</div></div><div><span class="staff-dept-pill">'+esc(staffDept(s))+'</span></div><div class="staff-work-text">'+esc(staffWork(s))+'</div><div class="action-row"><button class="small-btn done" onclick="openStaffProfileForm(\''+esc(id)+'\')">'+sw('edit')+'</button><button class="small-btn" style="color:#ef4444" onclick="deleteStaffProfile(\''+esc(id)+'\')">'+sw('delete')+'</button></div></div>';
+    }).join(''):'<div class="muted" style="padding:24px;text-align:center">'+sw('empty')+'</div>';
+    const count=document.getElementById('finalStaffCount'); if(count)count.textContent=(currentStaff||[]).length;
+  };
+  const oldApplyStaff=window.applyLanguage;
+  window.applyLanguage=function(){oldApplyStaff&&oldApplyStaff();applyStaffLabels();if(currentView==='staff')renderStaff()};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{ensureStaffModal();applyStaffLabels();if(currentView==='staff')renderStaff()},320));
+})();
+</script>
+
 </body>
 </html>
