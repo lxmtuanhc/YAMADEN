@@ -522,5 +522,69 @@ body{background:#202020!important}.shell{width:min(1560px,calc(100vw - 28px))!im
 })();
 </script>
 
+
+<!-- yamaden-canonical-nav-v4 -->
+<style id="yamaden-canonical-nav-v4-style">
+.final-nav-btn.active{background:linear-gradient(135deg,#1d4ed8,#08a9d6)!important;color:#fff!important;box-shadow:0 12px 28px rgba(37,99,235,.28)!important}
+.final-nav-btn:not(.active){background:transparent!important;color:#d7e2f0!important;box-shadow:none!important}
+.final-nav-btn:not(.active):hover{background:rgba(255,255,255,.07)!important}
+</style>
+<script id="yamaden-canonical-nav-v4-script">
+(function(){
+  const titleMap={dashboard:'dashboard',requests:'requestManage',users:'users',staff:'staffManage',quotes:'makeQuote',settings:'setting'};
+  function label(k){return (dict[currentLang]&&dict[currentLang][k])||k}
+  function ensureSettings(){
+    if(document.getElementById('settingsView'))return;
+    const content=document.querySelector('.content'); if(!content)return;
+    const sec=document.createElement('section'); sec.id='settingsView'; sec.className='settings-view';
+    sec.innerHTML='<div class="panel"><div class="panel-head"><div class="panel-title">'+label('setting')+'</div></div><div class="settings-grid"><div class="settings-item"><b>'+label('general')+'</b><p>Language, company profile, display rules.</p></div><div class="settings-item"><b>'+label('security')+'</b><p>Admin permissions and account security.</p></div><div class="settings-item"><b>'+label('backup')+'</b><p>Request and customer data backup.</p></div><div class="settings-item"><b>'+label('system')+'</b><p>API, app version, and maintenance notes.</p></div></div></div>';
+    content.appendChild(sec);
+  }
+  function navActive(view){
+    document.querySelectorAll('.final-nav-btn').forEach(btn=>btn.classList.remove('active'));
+    const id={dashboard:'finalNavDashboard',requests:'finalNavRequests',users:'finalNavUsers',staff:'finalNavStaff',quotes:'finalNavQuotes',settings:'finalNavSettings'}[view]||'finalNavDashboard';
+    document.getElementById(id)?.classList.add('active');
+  }
+  function showSection(view){
+    ensureSettings();
+    const dash=document.getElementById('dashboardView'), users=document.getElementById('usersView'), staff=document.getElementById('staffView'), settings=document.getElementById('settingsView'), quote=document.getElementById('quoteView');
+    [dash,users,staff,settings,quote].forEach(el=>el&&el.classList.add('hidden'));
+    document.body.classList.remove('dashboard-mode','requests-mode','users-mode','staff-mode','settings-mode','quote-view-active');
+    if(view==='dashboard'||view==='requests'){dash&&dash.classList.remove('hidden');document.body.classList.add(view==='dashboard'?'dashboard-mode':'requests-mode');}
+    if(view==='users'){users&&users.classList.remove('hidden');document.body.classList.add('users-mode');}
+    if(view==='staff'){staff&&staff.classList.remove('hidden');document.body.classList.add('staff-mode');}
+    if(view==='settings'){settings&&settings.classList.remove('hidden');document.body.classList.add('settings-mode');}
+    if(view==='quotes'){quote&&quote.classList.remove('hidden');document.body.classList.add('quote-view-active');}
+  }
+  function syncHeader(view){
+    currentView=view;
+    const p=document.getElementById('pageTitle'); if(p)p.textContent=label(titleMap[view]||'dashboard');
+    const s=document.getElementById('pageSub'); if(s)s.textContent=label('pageSub');
+    navActive(view);
+  }
+  const previous=window.showView;
+  window.showView=function(view){
+    view=view||'dashboard';
+    if(view==='quotes' && previous){ previous('quotes'); }
+    showSection(view);
+    syncHeader(view);
+    if(view==='dashboard'){currentTab='all';currentStatusTab='all'; if(window.renderDashboard)renderDashboard(); if(window.renderRequests)renderRequests();}
+    if(view==='requests'){currentTab='all'; if(!currentStatusTab)currentStatusTab='all'; if(window.renderRequests)renderRequests();}
+    if(view==='users' && window.renderUsers)renderUsers();
+    if(view==='staff' && window.renderStaff)renderStaff();
+  };
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest('.final-nav-btn'); if(!btn)return;
+    const map={finalNavDashboard:'dashboard',finalNavRequests:'requests',finalNavUsers:'users',finalNavStaff:'staff',finalNavQuotes:'quotes',finalNavSettings:'settings'};
+    const view=map[btn.id]; if(!view)return;
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+    window.showView(view);
+  },true);
+  const oldApply=window.applyLanguage;
+  window.applyLanguage=function(){oldApply&&oldApply();setTimeout(()=>{syncHeader(currentView||'dashboard');showSection(currentView||'dashboard');},0)};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>window.showView(currentView||'dashboard'),260));
+})();
+</script>
+
 </body>
 </html>
