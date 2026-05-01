@@ -883,5 +883,40 @@ html,body{height:100%!important;overflow:hidden!important}
 })();
 </script>
 
+
+<!-- yamaden-user-history-layout-v12 -->
+<style id="yamaden-user-history-layout-v12-style">
+.user-modal-body{display:flex!important;flex-direction:column!important}
+.user-modal-pane{min-height:0!important;width:100%!important}
+#userPaneHistory.active{display:flex!important;flex-direction:column!important;min-height:0!important;height:100%!important;padding-top:18px!important}
+#userPaneHistory .user-section-title{flex:0 0 auto!important;margin:0 0 14px!important}
+.user-history-modal{flex:1 1 auto!important;min-height:260px!important;max-height:calc(90vh - 190px)!important;height:auto!important;overflow:auto!important;border-radius:12px!important;background:#fff!important}
+.user-history-modal-row{grid-template-columns:140px minmax(0,1fr) 140px 140px!important;min-height:58px!important;align-items:center!important}
+.user-history-modal-row:not(.user-history-modal-head):hover{background:#f8fbff!important}
+.user-history-modal-head{position:sticky!important;top:0!important;z-index:2!important;background:#f8fafc!important}
+.user-history-modal > .muted,.user-history-modal > div[style*="padding"]{min-height:210px!important;display:flex!important;align-items:flex-start!important;padding:18px!important}
+@media(max-width:760px){.user-history-modal{max-height:calc(90vh - 170px)!important}.user-history-modal-row{grid-template-columns:1fr!important;gap:6px!important}}
+</style>
+
+
+<!-- yamaden-user-close-restore-v13 -->
+<style id="yamaden-user-close-restore-v13-style">
+.user-modal-close{width:42px!important;height:42px!important;min-width:42px!important;border-radius:10px!important;background:#ef4444!important;color:transparent!important;border:0!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0!important;position:relative!important;font-size:0!important;line-height:0!important;box-shadow:0 12px 24px rgba(239,68,68,.24)!important;overflow:hidden!important}
+.user-modal-close::before,.user-modal-close::after{display:block!important;content:""!important;position:absolute!important;left:50%!important;top:50%!important;width:18px!important;height:3px!important;border-radius:999px!important;background:#fff!important;transform-origin:center!important}
+.user-modal-close::before{transform:translate(-50%,-50%) rotate(45deg)!important}.user-modal-close::after{transform:translate(-50%,-50%) rotate(-45deg)!important}
+</style>
+<script id="yamaden-user-close-restore-v13-script">
+(function(){
+  function restoreClose(){
+    document.querySelectorAll('.user-modal-close').forEach(btn=>{btn.textContent='';btn.setAttribute('aria-label','Close')});
+  }
+  const oldOpenUserV13=window.openUserDetail;
+  window.openUserDetail=async function(id){if(oldOpenUserV13)await oldOpenUserV13(id);setTimeout(restoreClose,0)};
+  const oldSwitchV13=window.switchUserModalTab;
+  window.switchUserModalTab=function(tab){oldSwitchV13&&oldSwitchV13(tab);setTimeout(restoreClose,0)};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(restoreClose,420));
+})();
+</script>
+
 </body>
 </html>
