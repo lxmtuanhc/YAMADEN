@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>YAMADEN Support</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
 <link rel="icon" type="image/png" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -3243,6 +3243,28 @@ html:has(.app.auth-login-mode),body.auth-login-body{min-height:100%;background:#
   const oldChange=window.changeLanguage;window.changeLanguage=function(){if(oldChange)oldChange();ensureAuthLanguage();const sel=document.getElementById('authLanguage');if(sel)sel.value=current()};
   document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{ensureAuthLanguage();const main=document.getElementById('language');if(main&&!main.value){main.value='ja'}},200));
   setTimeout(ensureAuthLanguage,0);
+})();
+</script>
+
+
+
+<!-- yamaden-app-stable-viewport-v11 -->
+<style id="yamaden-app-stable-viewport-v11-style">
+html,body{width:100%;max-width:100%;min-height:100%;overflow-x:hidden!important;overscroll-behavior:none;-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;touch-action:manipulation}body{position:relative}.app{width:min(100%,480px);max-width:480px;min-width:0;margin:0 auto;overflow-x:hidden!important;transform:none!important;zoom:1!important}input,textarea,select,button{font-size:16px!important;touch-action:manipulation}input,textarea,select{-webkit-user-select:text;user-select:text}.bottom-nav{touch-action:manipulation}.auth-language-select{font-size:16px!important}@media(display-mode:standalone){html,body{height:100%;overflow:hidden}.app{min-height:100dvh}}@media(max-width:520px){.app{width:100%!important;max-width:100%!important}.app.auth-login-mode{width:100%!important;max-width:100%!important}}
+</style>
+<script id="yamaden-app-stable-viewport-v11-script">
+(function(){
+  function lockViewport(){
+    let meta=document.querySelector('meta[name="viewport"]');
+    if(!meta){meta=document.createElement('meta');meta.name='viewport';document.head.appendChild(meta)}
+    meta.setAttribute('content','width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover');
+  }
+  lockViewport();
+  let lastTouchEnd=0;
+  document.addEventListener('touchend',function(e){const now=Date.now();if(now-lastTouchEnd<=300){e.preventDefault()}lastTouchEnd=now},{passive:false});
+  document.addEventListener('gesturestart',function(e){e.preventDefault()},{passive:false});
+  document.addEventListener('gesturechange',function(e){e.preventDefault()},{passive:false});
+  document.addEventListener('gestureend',function(e){e.preventDefault()},{passive:false});
 })();
 </script>
 
