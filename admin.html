@@ -253,5 +253,34 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
   window.addEventListener('load',()=>setTimeout(finalRepair,50));
 })();
 </script>
+
+<style id="yamaden-admin-top-level-actions-style">
+/* make quote/settings true top-level sidebar tabs */
+.sidebar .top-level-action{height:58px!important;margin:12px 2px 6px!important;border-radius:12px!important;font-size:17px!important;font-weight:950!important;padding:0 16px!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important}.sidebar .top-level-action .menu-left{gap:12px!important}.sidebar .top-level-action .menu-left span:first-child{width:22px!important;text-align:center!important}.sidebar #menuQuotes.top-level-action{background:linear-gradient(135deg,#2563eb,#7c3aed)!important;color:#fff!important;box-shadow:0 18px 36px rgba(124,58,237,.28)!important}.sidebar #menuSettings.top-level-action{background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.08)!important;color:#eef5ff!important;box-shadow:none!important}.sidebar #menuSettings.top-level-action:hover{background:rgba(255,255,255,.09)!important}.sidebar #menuQuotes.top-level-action:hover,.sidebar #menuSettings.top-level-action:hover{transform:translateY(-1px)}.top-level-separator{height:8px;flex:none}
+</style>
+<script id="yamaden-admin-top-level-actions-script">
+(function(){
+  function moveTopLevelActions(){
+    const sidebar=document.querySelector('.sidebar'); if(!sidebar) return;
+    const sideCard=document.querySelector('.side-card');
+    const quote=document.getElementById('menuQuotes');
+    const settings=document.getElementById('menuSettings');
+    [quote,settings].forEach(btn=>{ if(!btn)return; btn.classList.add('top-level-action'); });
+    if(quote){ quote.innerHTML='<span class="menu-left"><span>Q</span><span data-i="makeQuote">'+t('makeQuote')+'</span></span>'; }
+    if(settings){ settings.innerHTML='<span class="menu-left"><span>SET</span><span data-i="setting">'+t('setting')+'</span></span>'; }
+    let sep=document.getElementById('topLevelSeparator');
+    if(!sep){ sep=document.createElement('div'); sep.id='topLevelSeparator'; sep.className='top-level-separator'; }
+    if(sideCard){
+      if(quote && quote.parentElement!==sidebar) sidebar.insertBefore(quote, sideCard);
+      if(settings && settings.parentElement!==sidebar) sidebar.insertBefore(settings, sideCard);
+      if(quote && settings){ sidebar.insertBefore(quote, sideCard); sidebar.insertBefore(settings, sideCard); sidebar.insertBefore(sep, quote); }
+    }
+  }
+  const prevApply=window.applyLanguage;
+  window.applyLanguage=function(){ if(prevApply) prevApply(); moveTopLevelActions(); };
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(moveTopLevelActions,30));
+  window.addEventListener('load',()=>setTimeout(moveTopLevelActions,80));
+})();
+</script>
 </body>
 </html>
