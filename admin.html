@@ -734,5 +734,36 @@ html,body{height:100%!important;overflow:hidden!important}
 })();
 </script>
 
+
+<!-- yamaden-close-dept-fix-v9 -->
+<style id="yamaden-close-dept-fix-v9-style">
+.user-modal-close{width:42px!important;height:42px!important;border-radius:10px!important;background:#ef4444!important;color:#fff!important;border:0!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:28px!important;font-weight:950!important;line-height:42px!important;text-align:center!important;padding:0!important;font-family:Arial,sans-serif!important;box-shadow:0 12px 24px rgba(239,68,68,.24)!important}
+.user-modal-close::before,.user-modal-close::after{display:none!important;content:none!important}
+</style>
+<script id="yamaden-close-dept-fix-v9-script">
+(function(){
+  const deptsVi=['Bộ thiết kế','Bộ công vụ','Bộ kinh doanh','Bộ công sự','Bộ FS','Bộ nhân sự và kế toán','Giám đốc'];
+  const deptsJa=['設計部','工務部','営業部','工事部','FS部','人事・経理部','社長'];
+  function fixCloseButton(){
+    document.querySelectorAll('.user-modal-close').forEach(btn=>{btn.textContent='×';btn.style.fontSize='28px';btn.style.lineHeight='42px'});
+  }
+  function setDeptOptions(){
+    const sel=document.getElementById('staffProfileDept'); if(!sel)return;
+    const current=sel.value;
+    const list=currentLang==='ja'?deptsJa:deptsVi;
+    sel.innerHTML=list.map(d=>'<option value="'+esc(d)+'">'+esc(d)+'</option>').join('');
+    if(current && list.includes(current)) sel.value=current;
+  }
+  const oldOpenStaff=window.openStaffProfileForm;
+  window.openStaffProfileForm=function(id=''){
+    oldOpenStaff&&oldOpenStaff(id);
+    setTimeout(setDeptOptions,0);
+  };
+  const oldApplyV9=window.applyLanguage;
+  window.applyLanguage=function(){oldApplyV9&&oldApplyV9();setTimeout(()=>{fixCloseButton();setDeptOptions()},0)};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{fixCloseButton();setDeptOptions()},360));
+})();
+</script>
+
 </body>
 </html>
