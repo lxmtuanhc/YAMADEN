@@ -1461,9 +1461,564 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   .trust-label { font-size:10px; }
 }
 </style>
+
+<!-- ===== YAMADEN MOBILE FIX + INTRO v10 ===== -->
+<style id="yamaden-mobile-fix-intro-v10">
+/* ===== INTRO SCREEN ===== */
+#introScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: #171917;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .36s ease, visibility .36s ease;
+}
+#introScreen.hide {
+  opacity: 0;
+  visibility: hidden;
+}
+#introVideo {
+  width: min(72vw, 360px);
+  height: min(72vw, 360px);
+  object-fit: contain;
+  display: block;
+}
+#introFallbackLogo {
+  width: 116px;
+  height: 116px;
+  border-radius: 28px;
+  display: none;
+  animation: introFallback 1.2s ease forwards;
+}
+@keyframes introFallback {
+  0% { opacity: 0; transform: scale(.9); }
+  55% { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ===== MOBILE LAYOUT FIX ===== */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+body {
+  -webkit-text-size-adjust: 100%;
+}
+img, video {
+  max-width: 100%;
+}
+.app, .main, .card, .account-landing, .account-panel {
+  max-width: 100%;
+}
+
+@media (max-width: 860px) {
+  body {
+    background: #f6f8fc !important;
+  }
+
+  .app {
+    width: 100% !important;
+    max-width: 480px !important;
+    min-height: 100dvh !important;
+    margin: 0 auto !important;
+    display: block !important;
+    overflow-x: hidden !important;
+    background: #f6f8fc !important;
+    box-shadow: none !important;
+  }
+
+  .top-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 90 !important;
+    height: auto !important;
+    min-height: 68px !important;
+    padding: 8px 12px !important;
+    border-radius: 0 !important;
+    box-shadow: 0 8px 22px rgba(0,0,0,.18) !important;
+    background: linear-gradient(135deg,#0b0f14,#171917) !important;
+  }
+
+  .top-row {
+    min-height: 52px !important;
+    gap: 8px !important;
+  }
+
+  .logo-box {
+    flex: 1 !important;
+    min-width: 0 !important;
+    gap: 9px !important;
+  }
+
+  .logo-box img {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+  }
+
+  .logo-jp {
+    font-size: 14px !important;
+    line-height: 1.12 !important;
+    max-width: 190px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .logo-en {
+    margin-top: 3px !important;
+    font-size: 9px !important;
+    letter-spacing: .10em !important;
+  }
+
+  .lang-select {
+    width: 62px !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    padding: 7px 8px !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
+  }
+
+  .top-header .hero,
+  .top-header .side-steps,
+  .top-header .side-footer {
+    display: none !important;
+  }
+
+  .main {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-top: 0 !important;
+    padding: 12px 12px 88px !important;
+  }
+
+  .notice {
+    margin: 0 0 10px !important;
+    padding: 11px 12px !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
+  }
+
+  /* Account/Profile screen */
+  .account-landing {
+    min-height: auto !important;
+    border-radius: 20px !important;
+    padding: 14px 10px 18px !important;
+    overflow: hidden !important;
+    box-shadow: 0 10px 28px rgba(15,23,42,.08) !important;
+  }
+
+  .account-landing::before {
+    top: 58px !important;
+    height: 110px !important;
+    opacity: .30 !important;
+  }
+
+  .account-landing::after {
+    width: 82px !important;
+    opacity: .42 !important;
+  }
+
+  .account-brand {
+    margin: 0 0 16px !important;
+    gap: 10px !important;
+  }
+
+  .account-brand img {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 13px !important;
+  }
+
+  .account-brand-title {
+    font-size: 20px !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+  }
+
+  .account-brand-sub {
+    font-size: 10px !important;
+    letter-spacing: .13em !important;
+  }
+
+  .account-panel {
+    width: 100% !important;
+    max-width: 360px !important;
+    margin: 0 auto !important;
+    padding: 16px 14px !important;
+    border-radius: 22px !important;
+    box-shadow: 0 12px 34px rgba(15,23,42,.12) !important;
+  }
+
+  .account-welcome {
+    margin-bottom: 12px !important;
+  }
+
+  .account-welcome-ja {
+    font-size: 20px !important;
+  }
+
+  .account-welcome-brand {
+    font-size: 24px !important;
+  }
+
+  .account-welcome-sub {
+    font-size: 11px !important;
+    line-height: 1.45 !important;
+  }
+
+  .account-mode {
+    gap: 7px !important;
+    margin: 10px 0 8px !important;
+  }
+
+  .account-mode button {
+    padding: 10px 8px !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+  }
+
+  .account-fields {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    margin-top: 8px !important;
+  }
+
+  input,
+  textarea {
+    min-height: 44px !important;
+    padding: 12px 12px 12px 40px !important;
+    border-radius: 14px !important;
+    font-size: 14px !important;
+  }
+
+  .account-panel input {
+    min-height: 43px !important;
+    padding: 11px 12px !important;
+    border-radius: 12px !important;
+  }
+
+  textarea {
+    min-height: 98px !important;
+  }
+
+  .input-icon {
+    left: 12px !important;
+    width: 19px !important;
+    height: 19px !important;
+  }
+
+  .field {
+    margin-bottom: 12px !important;
+  }
+
+  .field label {
+    margin-bottom: 6px !important;
+    font-size: 13px !important;
+  }
+
+  .main-btn,
+  .soft-btn,
+  .copy-btn {
+    min-height: 44px !important;
+    padding: 12px !important;
+    border-radius: 14px !important;
+    font-size: 14px !important;
+  }
+
+  .account-panel .main-btn,
+  .account-panel .soft-btn {
+    border-radius: 12px !important;
+  }
+
+  .account-divider {
+    margin: 12px 0 !important;
+  }
+
+  .account-status {
+    font-size: 12px !important;
+  }
+
+  .emergency-card {
+    width: 100% !important;
+    max-width: 360px !important;
+    margin: 12px auto 0 !important;
+    padding: 12px 14px !important;
+    border-radius: 16px !important;
+  }
+
+  .emergency-icon {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .emergency-title {
+    font-size: 14px !important;
+  }
+
+  .emergency-sub {
+    font-size: 11px !important;
+  }
+
+  .profile-card {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .profile-head {
+    gap: 10px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .profile-avatar {
+    width: 46px !important;
+    height: 46px !important;
+    border-radius: 15px !important;
+  }
+
+  .profile-name {
+    font-size: 17px !important;
+    line-height: 1.25 !important;
+    word-break: break-word !important;
+  }
+
+  .profile-sub {
+    font-size: 12px !important;
+    margin-top: 2px !important;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .profile-item {
+    min-height: auto !important;
+    padding: 10px 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .profile-label {
+    font-size: 10.5px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .profile-value {
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+    word-break: break-word !important;
+  }
+
+  .secondary-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+  }
+
+  /* Other pages compact */
+  .card {
+    margin-bottom: 12px !important;
+    padding: 16px !important;
+    border-radius: 20px !important;
+  }
+
+  .card-title {
+    margin-bottom: 14px !important;
+    gap: 8px !important;
+  }
+
+  .card-title-icon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 12px !important;
+  }
+
+  .card h2,
+  .card h3 {
+    font-size: 18px !important;
+  }
+
+  .home-hero-card {
+    min-height: auto !important;
+    padding: 18px !important;
+    border-radius: 22px !important;
+  }
+
+  .home-title {
+    font-size: 23px !important;
+    margin: 14px 0 8px !important;
+  }
+
+  .home-desc {
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+  }
+
+  .home-actions {
+    gap: 9px !important;
+    margin-top: 16px !important;
+  }
+
+  .service-card,
+  .utility-card,
+  .company-info,
+  .request-card {
+    border-radius: 18px !important;
+    padding: 14px !important;
+  }
+
+  .trust-row {
+    gap: 8px !important;
+    margin: 12px 0 !important;
+  }
+
+  .trust-item {
+    padding: 11px 8px !important;
+    border-radius: 16px !important;
+  }
+
+  .trust-number {
+    font-size: 19px !important;
+  }
+
+  .trust-label {
+    font-size: 10px !important;
+  }
+
+  .preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .preview-grid .preview-img,
+  .preview-grid .preview-video {
+    height: 92px !important;
+  }
+
+  .media-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .media-gallery img,
+  .media-gallery video {
+    height: 110px !important;
+    border-radius: 14px !important;
+  }
+
+  .status-timeline {
+    gap: 6px !important;
+  }
+
+  .step {
+    padding: 8px 4px !important;
+    border-radius: 12px !important;
+    font-size: 10.5px !important;
+  }
+
+  .bottom-nav {
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+    border-radius: 18px 18px 0 0 !important;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom)) !important;
+    gap: 6px !important;
+    background: rgba(255,255,255,.96) !important;
+  }
+
+  .bottom-nav button {
+    min-width: 0 !important;
+    padding: 8px 4px !important;
+    border-radius: 14px !important;
+    font-size: 11px !important;
+    gap: 2px !important;
+  }
+
+  .bottom-nav .icon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .app {
+    max-width: 100% !important;
+  }
+
+  .main {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .top-header {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .logo-jp {
+    font-size: 13px !important;
+    max-width: 150px !important;
+  }
+
+  .logo-en {
+    font-size: 8.5px !important;
+  }
+
+  .account-landing {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .account-panel {
+    padding: 14px 12px !important;
+    max-width: 340px !important;
+  }
+
+  .account-brand-title {
+    font-size: 18px !important;
+  }
+
+  .profile-name {
+    font-size: 16px !important;
+  }
+
+  .profile-value {
+    font-size: 13.5px !important;
+  }
+
+  .secondary-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .bottom-nav button span:not(.icon) {
+    font-size: 10px !important;
+  }
+}
+</style>
+
 </head>
 
 <body>
+
+<!-- INTRO -->
+<div id="introScreen" aria-label="YAMADEN intro">
+  <video id="introVideo" autoplay muted playsinline preload="auto">
+    <source src="intro.mp4" type="video/mp4">
+  </video>
+  <img id="introFallbackLogo" src="/icon-512.png" alt="YAMADEN">
+</div>
+
 <div class="app">
   <header class="top-header">
     <div class="top-row">
@@ -3507,6 +4062,50 @@ body.yamaden-app-active .app.auth-app-mode{top:0!important;bottom:0!important;gr
   if(!localStorage.getItem('language')&&!localStorage.getItem('lang'))setLang('ja',true);else setLang(current(),true);
   document.addEventListener('DOMContentLoaded',()=>setTimeout(syncLanguageUI,900));
   setInterval(syncLanguageUI,1500);
+})();
+</script>
+
+
+<script id="yamaden-intro-script-v10">
+(function () {
+  function closeIntro() {
+    const intro = document.getElementById("introScreen");
+    if (!intro) return;
+    intro.classList.add("hide");
+    setTimeout(() => intro.remove(), 420);
+  }
+
+  window.addEventListener("load", function () {
+    const intro = document.getElementById("introScreen");
+    const video = document.getElementById("introVideo");
+    const fallback = document.getElementById("introFallbackLogo");
+    if (!intro || !video) return;
+
+    let closed = false;
+    function safeClose() {
+      if (closed) return;
+      closed = true;
+      closeIntro();
+    }
+
+    video.addEventListener("ended", safeClose);
+    video.addEventListener("error", function () {
+      video.style.display = "none";
+      if (fallback) fallback.style.display = "block";
+      setTimeout(safeClose, 1300);
+    });
+
+    const playPromise = video.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(function () {
+        video.style.display = "none";
+        if (fallback) fallback.style.display = "block";
+        setTimeout(safeClose, 1300);
+      });
+    }
+
+    setTimeout(safeClose, 2600);
+  });
 })();
 </script>
 
