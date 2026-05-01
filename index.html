@@ -8,7 +8,10 @@
 <link rel="icon" type="image/png" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0b0b0f">
+<meta name="theme-color" content="#171917">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="YAMADEN">
 
 <style>
 * { box-sizing:border-box; }
@@ -3398,6 +3401,33 @@ body.yamaden-app-active,body.yamaden-app-active html{overflow:hidden!important;h
   setInterval(syncAppShellClass,1000);
 })();
 </script>
+
+
+
+<!-- yamaden-pwa-polish-v20 -->
+<style id="yamaden-pwa-polish-v20-style">
+.app-splash{position:fixed;inset:0;z-index:99999;background:#121312;color:#fff;display:flex;align-items:center;justify-content:center;transition:opacity .35s ease,visibility .35s ease}.app-splash.hide{opacity:0;visibility:hidden}.splash-card{display:flex;flex-direction:column;align-items:center;gap:14px}.splash-logo{width:86px;height:86px;border-radius:24px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 24px 60px rgba(0,0,0,.34);overflow:hidden}.splash-logo img{width:100%;height:100%;object-fit:cover}.splash-title{font-size:24px;font-weight:950;letter-spacing:.04em}.splash-sub{font-size:12px;color:#cbd5e1;font-weight:900;letter-spacing:.12em}.offline-banner{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translate(-50%,-120%);z-index:99998;width:min(420px,calc(100% - 28px));min-height:48px;border-radius:16px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;box-shadow:0 18px 42px rgba(15,23,42,.18);display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;font-weight:950;transition:.24s ease}.offline-banner.show{transform:translate(-50%,0)}.offline-dot{width:10px;height:10px;border-radius:50%;background:#f97316;box-shadow:0 0 0 5px rgba(249,115,22,.16)}.app.auth-app-mode .card,.app.auth-app-mode .utility-card,.app.auth-app-mode .company-card,.app.auth-app-mode .service-detail,.app.auth-app-mode .settings-section-card{box-shadow:0 12px 26px rgba(0,0,0,.18)!important;border-color:rgba(255,255,255,.08)!important}.app.auth-app-mode input,.app.auth-app-mode textarea,.app.auth-app-mode select{font-size:16px!important}.app.auth-app-mode .toast{top:calc(86px + env(safe-area-inset-top))!important}.app.auth-login-mode .toast{top:18px!important}@media(display-mode:standalone){.app-splash{padding-top:env(safe-area-inset-top)}}
+</style>
+<div id="appSplash" class="app-splash"><div class="splash-card"><div class="splash-logo"><img src="/icon-192.png" alt="YAMADEN"></div><div class="splash-title">YAMADEN</div><div class="splash-sub">YAMADEN.CO.LTD</div></div></div>
+<div id="offlineBanner" class="offline-banner"><span class="offline-dot"></span><span id="offlineBannerText">通信できません。接続を確認してください。</span></div>
+<script id="yamaden-pwa-polish-v20-script">
+(function(){
+  function langNow(){try{return lang==='vi'?'vi':'ja'}catch(e){return String(localStorage.getItem('language')||'ja').startsWith('vi')?'vi':'ja'}}
+  function offlineText(){return langNow()==='ja'?'通信できません。接続を確認してください。':'Không có kết nối. Vui lòng kiểm tra mạng.'}
+  function syncOnline(){const banner=document.getElementById('offlineBanner');const text=document.getElementById('offlineBannerText');if(text)text.textContent=offlineText();if(banner)banner.classList.toggle('show',!navigator.onLine)}
+  window.addEventListener('online',syncOnline);window.addEventListener('offline',syncOnline);
+  const oldApply=window.applyLang;window.applyLang=function(){if(oldApply)oldApply();setTimeout(syncOnline,0)};
+  document.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>document.getElementById('appSplash')?.classList.add('hide'),850);syncOnline();if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js').catch(()=>{})}});
+  window.addEventListener('load',()=>setTimeout(()=>document.getElementById('appSplash')?.classList.add('hide'),350));
+})();
+</script>
+
+
+
+<!-- yamaden-logo-reveal-v21 -->
+<style id="yamaden-logo-reveal-v21-style">
+.app-splash{background:#303030!important}.splash-card{width:min(320px,88vw)!important;height:120px!important;position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-direction:row!important;gap:0!important}.splash-logo{position:absolute!important;left:50%!important;top:50%!important;width:78px!important;height:78px!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important;transform:translate(-50%,-50%)!important;animation:yamadenLogoSlide 1.55s cubic-bezier(.2,.8,.2,1) .28s forwards!important}.splash-logo img{width:78px!important;height:78px!important;object-fit:contain!important;filter:brightness(0) invert(1)!important;animation:yamadenLogoFlash 1.2s ease .12s forwards!important}.splash-logo::after{content:"";position:absolute;inset:-18px;background:linear-gradient(115deg,transparent 0 36%,rgba(255,255,255,.95) 48%,transparent 62%);transform:translateX(-130%);animation:yamadenShine 1.25s ease .18s forwards;mix-blend-mode:screen;pointer-events:none}.splash-title,.splash-sub{display:none!important}.splash-card::before{content:"株式会社 山電";position:absolute;left:106px;top:28px;color:#fff;font-family:"Times New Roman","Yu Mincho","Hiragino Mincho ProN",serif;font-size:25px;letter-spacing:.08em;white-space:nowrap;opacity:0;transform:translateX(26px);animation:yamadenTextIn .7s ease 1.25s forwards}.splash-card::after{content:"YAMADEN.CO.LTD";position:absolute;left:107px;top:68px;color:#fff;font-family:"Times New Roman",serif;font-size:14px;letter-spacing:.13em;white-space:nowrap;opacity:0;transform:translateX(26px);animation:yamadenTextIn .7s ease 1.38s forwards}@keyframes yamadenLogoFlash{0%{filter:brightness(0) invert(1) drop-shadow(0 0 0 rgba(255,255,255,0));transform:scale(.96)}35%{filter:brightness(0) invert(1) drop-shadow(0 0 28px rgba(255,255,255,.95));transform:scale(1.08)}100%{filter:brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,.35));transform:scale(1)}}@keyframes yamadenShine{0%{transform:translateX(-140%);opacity:0}20%{opacity:1}72%{opacity:.95}100%{transform:translateX(140%);opacity:0}}@keyframes yamadenLogoSlide{0%{left:50%;transform:translate(-50%,-50%) scale(1)}100%{left:28px;transform:translate(0,-50%) scale(.92)}}@keyframes yamadenTextIn{to{opacity:1;transform:translateX(0)}}@media(max-width:380px){.splash-card{width:290px!important}.splash-logo{width:70px!important;height:70px!important}.splash-logo img{width:70px!important;height:70px!important}.splash-card::before{left:96px;top:31px;font-size:22px}.splash-card::after{left:97px;top:67px;font-size:12px}}
+</style>
 
 </body>
 </html>

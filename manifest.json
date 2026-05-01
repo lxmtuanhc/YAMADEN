@@ -1,22 +1,33 @@
 {
   "name": "YAMADEN Support",
   "short_name": "YAMADEN",
-  "start_url": "/",
+  "description": "YAMADEN customer support app",
+  "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0b3d91",
-  "theme_color": "#0b3d91",
-  "description": "YAMADEN customer support app",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait",
+  "background_color": "#121312",
+  "theme_color": "#171917",
+  "categories": [
+    "business",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
