@@ -194,7 +194,9 @@ const RequestSchema = new mongoose.Schema({
   completedAt: Date,
   lostAt: Date,
   assigneeId: String,
-  assigneeName: String
+  assigneeName: String,
+  issueTags: [String],
+  quoteRequested: Boolean
 });
 
 const Request = mongoose.model("Request", RequestSchema);
@@ -230,6 +232,9 @@ const StaffSchema = new mongoose.Schema({
   email: String,
   areas: String,
   skills: String,
+  department: String,
+  workContent: String,
+  workTags: [String],
   status: {
     type: String,
     default: "active"
@@ -243,6 +248,49 @@ function publicUser(user) {
   const item = user.toObject ? user.toObject() : { ...user };
   delete item.pinHash;
   return item;
+}
+
+
+function parseRequestTags(value) {
+  if (Array.isArray(value)) return value.map(item => String(item || "").trim()).filter(Boolean);
+  const raw = String(value || "").trim();
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.map(item => String(item || "").trim()).filter(Boolean);
+  } catch (err) {}
+  return raw.split(/[,、\n]/).map(item => item.trim()).filter(Boolean);
+}
+
+function staffTags(staff) {
+  const fromArray = Array.isArray(staff.workTags) ? staff.workTags : [];
+  const fromText = [staff.skills, staff.workContent, staff.areas, staff.department]
+    .join(",")
+    .split(/[,、\n]/)
+    .map(item => item.trim())
+    .filter(Boolean);
+  return Array.from(new Set(fromArray.concat(fromText).map(item => String(item || "").trim()).filter(Boolean)));
+}
+
+async function findBestAssignee(issueTags) {
+  const tags = parseRequestTags(issueTags);
+  if (!tags.length) return null;
+
+  const staffList = await Staff.find();
+  let best = null;
+  let bestScore = 0;
+
+  staffList.forEach(staff => {
+    const list = staffTags(staff);
+    const score = tags.filter(tag => list.includes(tag)).length;
+    if (score > bestScore) {
+      bestScore = score;
+      best = staff;
+    }
+  });
+
+  if (!best || bestScore <= 0) return null;
+  return best;
 }
 
 // ===== Hỗ trợ cả ID mới String và ID cũ Number =====
@@ -568,7 +616,7 @@ app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
 });
 
 // Tạo yêu cầu mới - khách dùng, không cần login
-app.post("/request", upload.array("image", 8), async (req, res) => {
+app.post("/request", upload.array("image", 12), async (req, res) => {
   try {
     const shortId = await generateRequestId();
     const currentUser = getUserFromRequest(req);
@@ -601,6 +649,8 @@ app.post("/request", upload.array("image", 8), async (req, res) => {
     }
 
     const firstMedia = mediaFiles[0] || { url: "", type: "" };
+    const issueTags = parseRequestTags(req.body.issueTags);
+    const bestAssignee = await findBestAssignee(issueTags);
 
     const newRequest = new Request({
       id: shortId,
@@ -616,6 +666,10 @@ app.post("/request", upload.array("image", 8), async (req, res) => {
       mediaUrl: firstMedia.url,
       mediaType: firstMedia.type,
       mediaFiles,
+      issueTags,
+      quoteRequested: req.body.quoteRequested === "true" || req.body.quoteRequested === true,
+      assigneeId: bestAssignee ? String(bestAssignee._id) : "",
+      assigneeName: bestAssignee ? bestAssignee.name : "",
 
       status: "untreated",
       adminReply: "",

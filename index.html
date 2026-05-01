@@ -1756,7 +1756,7 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
           <div class="upload-box">
             <div class="upload-icon" id="uploadIcon"></div>
             <div id="uploadText">Chọn ảnh hoặc chụp ảnh</div>
-            <div class="upload-sub">Tối đa 8 file · JPG / PNG / MP4</div>
+            <div class="upload-sub">Tối đa 12 file · JPG / PNG / MP4</div>
             <input type="file" id="image" accept="image/*,video/*" multiple style="display:none;">
             <button type="button" class="soft-btn choose-image-btn" id="chooseImageBtn" onclick="imageEl.click()">Chọn ảnh</button>
           </div>
@@ -2411,7 +2411,7 @@ async function sendRequest() {
   const contact = els.contact.value.trim();
   const address = els.address.value.trim();
   const content = els.content.value.trim();
-  const files = selectedMediaFiles.slice(0, 8);
+  const files = selectedMediaFiles.slice(0, 12);
 
   if (!name || !phone || !address || !content) {
     els.result.innerText = t.required;
@@ -2611,7 +2611,7 @@ function bindElements() {
 function bindUploadPreview() {
   els.image.addEventListener("change", () => {
     const incoming = Array.from(els.image.files || []);
-    selectedMediaFiles = selectedMediaFiles.concat(incoming).slice(0, 8);
+    selectedMediaFiles = selectedMediaFiles.concat(incoming).slice(0, 12);
     els.image.value = "";
     renderSelectedMedia();
   });
@@ -2632,7 +2632,7 @@ function renderSelectedMedia() {
     previewUrls.forEach(url => URL.revokeObjectURL(url));
     previewUrls = [];
 
-    const files = selectedMediaFiles.slice(0, 8);
+    const files = selectedMediaFiles.slice(0, 12);
     if (files.length === 0) {
       $("uploadText").innerText = t.uploadText;
       return;
@@ -2651,7 +2651,7 @@ function renderSelectedMedia() {
     $("uploadText").innerHTML = `
       <div class="preview-grid">${preview}</div>
       <div>${escapeHtml(t.fileSelected)}</div>
-      <div class="preview-count">${files.length}/8 file</div>
+      <div class="preview-count">${files.length}/12 file</div>
       <div style="font-size:12px;color:#6b7280;margin-top:4px;">${names}</div>`;
 }
 function prepareUploadFile(file) {
@@ -2711,5 +2711,197 @@ document.addEventListener("DOMContentLoaded", () => {
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("/service-worker.js").catch(() => {});
 });
 </script>
+
+<!-- yamaden-customer-ux-v1 -->
+<style id="yamaden-customer-ux-v1-style">
+.quick-request-top{display:grid;gap:10px;margin:0 0 16px}.one-request-btn{width:100%;height:58px;border:0;border-radius:18px;background:linear-gradient(135deg,#050505,#1f2937);color:#fff;font-size:17px;font-weight:950;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 16px 32px rgba(0,0,0,.24)}.issue-panel{border:1px solid #e5eaf2;border-radius:22px;background:#fff;padding:16px;margin-bottom:17px;box-shadow:0 12px 26px rgba(15,23,42,.06)}.issue-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.issue-title{font-size:16px;font-weight:950}.issue-sub{font-size:12px;color:#64748b;font-weight:800;margin-top:4px}.issue-dept-select{height:42px;border:1px solid #dbe4ef;border-radius:12px;background:#fff;padding:0 12px;font-weight:900;color:#334155}.issue-chip-list{display:flex;flex-wrap:wrap;gap:8px}.issue-chip{min-height:38px;border:1px solid #e2e8f0;background:#f8fafc;border-radius:999px;padding:8px 12px;display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:900;color:#334155}.issue-chip input{width:16px;height:16px;accent-color:#111827}.issue-chip:has(input:checked){background:#111827;color:#fff;border-color:#111827}.ai-chat-box{border:1px solid #dbeafe;background:#eff6ff;border-radius:18px;padding:14px;margin-bottom:17px}.ai-chat-title{font-weight:950;color:#1d4ed8;margin-bottom:8px}.ai-chat-row{display:flex;gap:8px;flex-wrap:wrap}.ai-chat-chip{border:1px solid #bfdbfe;background:#fff;color:#1d4ed8;border-radius:999px;padding:8px 11px;font-weight:900;font-size:12px}.assignee-card{display:flex;align-items:center;gap:12px;background:#f8fafc;border:1px solid #e5eaf2;border-radius:16px;padding:12px;margin:12px 0}.assignee-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:950}.assignee-info b{display:block}.quote-request-btn{margin-top:10px;width:100%;height:44px;border:0;border-radius:14px;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:#fff;font-weight:950}.quote-option{display:flex;align-items:center;gap:9px;border:1px solid #e5eaf2;border-radius:16px;background:#fff;padding:12px 14px;font-weight:900;margin-bottom:14px}.quote-option input{width:18px;height:18px;accent-color:#2563eb}.preview-count{font-weight:950;color:#111827}.upload-sub strong{color:#111827}@media(max-width:700px){.issue-head{align-items:stretch;flex-direction:column}.issue-dept-select{width:100%}}
+</style>
+<script id="yamaden-customer-ux-v1-script">
+(function(){
+  const maxUploadFiles=12;
+  const words={
+    ja:{requestNow:'依頼する',issueTitle:'依頼内容を選択',issueSub:'該当する項目を選ぶと、担当者の自動選定に使われます。',dept:'部門',aiTitle:'AIチャット受付',aiSub:'近い内容を選ぶと本文に追加されます。',quote:'見積を希望する',assignee:'担当者',assigneePending:'担当者を確認中',quoteButton:'見積を依頼する',contactAuto:'連絡先・住所を自動入力しました',maxFiles:'最大12 file ・ JPG / PNG / MP4'},
+    vi:{requestNow:'Yêu cầu hỗ trợ',issueTitle:'Chọn vấn đề yêu cầu',issueSub:'Các mục này sẽ dùng để tự động chọn người phụ trách phù hợp.',dept:'Bộ phận',aiTitle:'Tiếp nhận dạng AI chat',aiSub:'Chọn nội dung gần đúng để tự thêm vào mô tả.',quote:'Tôi muốn nhận báo giá',assignee:'Người phụ trách',assigneePending:'Đang xác nhận người phụ trách',quoteButton:'Yêu cầu báo giá',contactAuto:'Đã tự điền liên hệ và địa chỉ',maxFiles:'Tối đa 12 file ・ JPG / PNG / MP4'}
+  };
+  const issueMap={
+    vi:{
+      'Bộ thiết kế':['Thiết kế bản vẽ điện','Thiết kế tủ điện','Thiết kế chiếu sáng','Tính tải điện','Bóc tách vật tư','Lập bản vẽ hoàn công','Kiểm tra bản vẽ'],
+      'Bộ công vụ':['Chuẩn bị vật tư','Điều phối công trình','Quản lý tiến độ','Đặt hàng vật tư','Kiểm tra tồn kho','Sắp xếp lịch thi công','Hỗ trợ hiện trường'],
+      'Bộ kinh doanh':['Tư vấn khách hàng','Báo giá','Theo dõi hợp đồng','Chăm sóc khách hàng','Khảo sát nhu cầu','Gửi đề xuất','Theo dõi thanh toán'],
+      'Bộ công sự':['Thi công điện','Đi dây điện','Lắp ổ cắm','Lắp đèn','Lắp tủ điện','Xử lý mất điện','Xử lý rò điện','Kiểm tra hiện trường','Sửa breaker'],
+      'Bộ FS':['Bảo trì định kỳ','Kiểm tra sau thi công','Xử lý sự cố','Bảo hành','Kiểm tra thiết bị','Hỗ trợ khách hàng','Bảo trì tủ điện'],
+      'Bộ nhân sự và kế toán':['Quản lý nhân sự','Chấm công','Tính lương','Kế toán công trình','Xuất hóa đơn','Quản lý chứng từ','Theo dõi chi phí'],
+      'Giám đốc':['Duyệt báo giá','Duyệt hợp đồng','Phân công quản lý','Kiểm tra KPI','Quyết định nhân sự','Duyệt chi phí','Quản lý chiến lược']
+    },
+    ja:{
+      '設計部':['電気図面設計','盤設計','照明設計','電気容量計算','材料拾い出し','竣工図作成','図面チェック'],
+      '工務部':['材料準備','現場調整','工程管理','材料発注','在庫確認','施工スケジュール','現場サポート'],
+      '営業部':['顧客相談','見積作成','契約フォロー','顧客対応','ニーズ確認','提案送付','入金確認'],
+      '工事部':['電気工事','配線工事','コンセント取付','照明取付','分電盤工事','停電対応','漏電対応','現場確認','ブレーカー修理'],
+      'FS部':['定期メンテナンス','施工後点検','トラブル対応','保証対応','設備点検','顧客サポート','分電盤メンテナンス'],
+      '人事・経理部':['人事管理','勤怠管理','給与計算','現場会計','請求書発行','書類管理','原価管理'],
+      '社長':['見積承認','契約承認','管理者割当','KPI確認','人事決裁','経費承認','経営戦略']
+    }
+  };
+  function tx(k){return (words[lang]&&words[lang][k])||words.ja[k]||k}
+  function deptMap(){return issueMap[lang==='ja'?'ja':'vi']}
+  function selectedIssues(){return [...document.querySelectorAll('#issueChipList input:checked')].map(x=>x.value)}
+  function ensureCustomerUx(){
+    const send=document.getElementById('sendSection'); if(!send)return;
+    if(!document.getElementById('quickRequestTop')){
+      const top=document.createElement('div'); top.id='quickRequestTop'; top.className='quick-request-top';
+      top.innerHTML='<button type="button" class="one-request-btn" onclick="showTab(\'send\')"><span class="icon">'+ICONS.send+'</span><span id="oneRequestText"></span></button>';
+      const home=document.getElementById('homeSection'); if(home)home.insertBefore(top,home.firstChild);
+    }
+    if(!document.getElementById('issuePanel')){
+      const panel=document.createElement('div'); panel.id='issuePanel'; panel.className='issue-panel';
+      panel.innerHTML='<div class="issue-head"><div><div class="issue-title" id="issueTitle"></div><div class="issue-sub" id="issueSub"></div></div><select class="issue-dept-select" id="issueDept" onchange="renderIssueChips()"></select></div><div class="issue-chip-list" id="issueChipList"></div>';
+      const grid=send.querySelector('.form-grid'); if(grid)send.insertBefore(panel,grid);
+    }
+    if(!document.getElementById('aiChatBox')){
+      const ai=document.createElement('div'); ai.id='aiChatBox'; ai.className='ai-chat-box';
+      ai.innerHTML='<div class="ai-chat-title" id="aiChatTitle"></div><div class="issue-sub" id="aiChatSub"></div><div class="ai-chat-row" id="aiChatRow"></div>';
+      const panel=document.getElementById('issuePanel'); if(panel)panel.after(ai);
+    }
+    if(!document.getElementById('quoteOption')){
+      const q=document.createElement('label'); q.id='quoteOption'; q.className='quote-option';
+      q.innerHTML='<input type="checkbox" id="quoteRequested"><span id="quoteOptionText"></span>';
+      const upload=document.querySelector('#image')?.closest('.field'); if(upload)upload.after(q);
+    }
+  }
+  window.renderIssueChips=function(){
+    const sel=document.getElementById('issueDept'), box=document.getElementById('issueChipList'); if(!sel||!box)return;
+    const items=deptMap()[sel.value]||[];
+    const old=new Set(selectedIssues());
+    box.innerHTML=items.map(item=>'<label class="issue-chip"><input type="checkbox" value="'+escapeHtml(item)+'" '+(old.has(item)?'checked':'')+' onchange="syncIssueContent()"><span>'+escapeHtml(item)+'</span></label>').join('');
+    renderAiChips();
+  };
+  window.syncIssueContent=function(){
+    const issues=selectedIssues();
+    const content=document.getElementById('content'); if(!content||!issues.length)return;
+    const prefix=lang==='ja'?'依頼内容: ':'Vấn đề: ';
+    const line=prefix+issues.join(', ');
+    const raw=content.value.trim();
+    if(!raw)content.value=line;
+    else if(!raw.includes(line))content.value=line+'\n'+raw.replace(/^依頼内容:.*\n?|^Vấn đề:.*\n?/,'');
+  };
+  function renderAiChips(){
+    const row=document.getElementById('aiChatRow'), sel=document.getElementById('issueDept'); if(!row||!sel)return;
+    row.innerHTML=(deptMap()[sel.value]||[]).slice(0,5).map(item=>'<button type="button" class="ai-chat-chip" onclick="addAiIssue(\''+escapeJsString(item)+'\')">'+escapeHtml(item)+'</button>').join('');
+  }
+  window.addAiIssue=function(item){
+    [...document.querySelectorAll('#issueChipList input')].forEach(input=>{if(input.value===item)input.checked=true});
+    syncIssueContent();
+  };
+  function applyCustomerUxLang(){
+    ensureCustomerUx();
+    const ids={oneRequestText:'requestNow',issueTitle:'issueTitle',issueSub:'issueSub',aiChatTitle:'aiTitle',aiChatSub:'aiSub',quoteOptionText:'quote'};
+    Object.entries(ids).forEach(([id,k])=>{const el=document.getElementById(id); if(el)el.textContent=tx(k)});
+    const sel=document.getElementById('issueDept'); if(sel){const cur=sel.value; const keys=Object.keys(deptMap()); sel.innerHTML=keys.map(k=>'<option value="'+escapeHtml(k)+'">'+escapeHtml(k)+'</option>').join(''); if(cur&&keys.includes(cur))sel.value=cur;}
+    const sub=document.querySelector('.upload-sub'); if(sub)sub.textContent=tx('maxFiles');
+    renderIssueChips();
+  }
+  function autoFillContact(){
+    if(!currentUser)return;
+    const contact=document.getElementById('contact'), address=document.getElementById('address'), name=document.getElementById('name'), phone=document.getElementById('phone');
+    let changed=false;
+    if(name&&!name.value&&currentUser.name){name.value=currentUser.name;changed=true}
+    if(phone&&!phone.value&&currentUser.phone){phone.value=currentUser.phone;changed=true}
+    if(contact&&!contact.value&&(currentUser.contact||currentUser.email)){contact.value=currentUser.contact||currentUser.email;changed=true}
+    if(address&&!address.value&&(currentUser.address||currentUser.projectName||currentUser.province)){address.value=currentUser.address||[currentUser.projectName,currentUser.province].filter(Boolean).join(' - ');changed=true}
+    if(changed)showToast(tx('contactAuto'));
+  }
+  const oldShow=window.showTab;
+  window.showTab=function(tab){oldShow&&oldShow(tab);if(tab==='send')setTimeout(autoFillContact,0)};
+  const oldApply=window.applyLang;
+  window.applyLang=function(){oldApply&&oldApply();applyCustomerUxLang()};
+  const oldBind=window.bindUploadPreview;
+  window.bindUploadPreview=function(){
+    els.image.addEventListener('change',()=>{const incoming=Array.from(els.image.files||[]);selectedMediaFiles=selectedMediaFiles.concat(incoming).slice(0,maxUploadFiles);els.image.value='';renderSelectedMedia()});
+  };
+  window.renderSelectedMedia=function(){
+    const t=texts[lang]; previewUrls.forEach(url=>URL.revokeObjectURL(url)); previewUrls=[];
+    const files=selectedMediaFiles.slice(0,maxUploadFiles); if(files.length===0){document.getElementById('uploadText').innerText=t.uploadText;return;}
+    const preview=files.map((file,index)=>{const url=URL.createObjectURL(file);previewUrls.push(url);const media=file.type&&file.type.startsWith('video/')?'<video src="'+url+'" class="preview-video" controls playsinline></video>':'<img src="'+url+'" class="preview-img" alt="">';return '<div class="preview-item">'+media+'<button type="button" class="remove-media-btn" onclick="removeSelectedMedia('+index+')">×</button></div>'}).join('');
+    const names=files.map(file=>escapeHtml(file.name)).join(', ');
+    document.getElementById('uploadText').innerHTML='<div class="preview-grid">'+preview+'</div><div>'+escapeHtml(t.fileSelected)+'</div><div class="preview-count">'+files.length+'/'+maxUploadFiles+' file</div><div style="font-size:12px;color:#6b7280;margin-top:4px;">'+names+'</div>';
+  };
+  const oldSend=window.sendRequest;
+  window.sendRequest=async function(){
+    const originalFetch=window.fetch;
+    window.fetch=function(url,opt={}){
+      if(String(url).includes('/request')&&opt&&opt.body instanceof FormData){
+        const issues=selectedIssues();
+        opt.body.set('issueTags',JSON.stringify(issues));
+        opt.body.set('quoteRequested',document.getElementById('quoteRequested')?.checked?'true':'false');
+      }
+      return originalFetch(url,opt);
+    };
+    try{return await oldSend()}finally{window.fetch=originalFetch}
+  };
+  const oldCheck=window.checkStatus;
+  window.checkStatus=async function(isAuto=false){
+    await oldCheck(isAuto);
+    const box=document.querySelector('#checkResult .success-box'); if(!box)return;
+    if(!document.getElementById('assigneeInfoCard')){
+      const name=(lastCheckedId&&window.__lastAssigneeName)||'';
+      const div=document.createElement('div'); div.id='assigneeInfoCard'; div.className='assignee-card';
+      div.innerHTML='<div class="assignee-avatar">Y</div><div class="assignee-info"><b>'+tx('assignee')+'</b><span>'+(name||tx('assigneePending'))+'</span></div>';
+      const hr=box.querySelector('hr'); if(hr)hr.before(div);
+    }
+    if(!document.getElementById('quoteRequestBtn')){
+      const btn=document.createElement('button'); btn.id='quoteRequestBtn'; btn.className='quote-request-btn'; btn.textContent=tx('quoteButton'); btn.onclick=()=>showToast(tx('quote'));
+      box.appendChild(btn);
+    }
+  };
+  const oldRead=window.readJsonSafe;
+  if(oldRead){window.readJsonSafe=async function(res){const data=await oldRead(res); if(data&&data.assigneeName)window.__lastAssigneeName=data.assigneeName; return data};}
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{ensureCustomerUx();applyCustomerUxLang();},250));
+})();
+</script>
+
+
+<!-- yamaden-issue-description-v2 -->
+<style id="yamaden-issue-description-v2-style">
+.issue-panel{order:-2}.ai-chat-box{order:-1}.issue-free-note{font-size:12px;color:#64748b;font-weight:800;margin-top:6px}.field.free-description label::after{content:""}.issue-panel.required-missing{border-color:#fecaca!important;background:#fff7f7!important}.issue-required-text{display:none;color:#dc2626;font-size:12px;font-weight:900;margin-top:8px}.issue-panel.required-missing .issue-required-text{display:block}
+</style>
+<script id="yamaden-issue-description-v2-script">
+(function(){
+  const issueWords={ja:{freeDesc:'自由記入欄：状況、場所、困っていることを入力してください。',required:'依頼内容を1つ以上選択してください。',contentLabel:'自由記入・詳細説明'},vi:{freeDesc:'Ô mô tả tự do: hãy nhập tình trạng, vị trí và điều bạn cần hỗ trợ.',required:'Vui lòng chọn ít nhất 1 vấn đề yêu cầu.',contentLabel:'Mô tả tự do / chi tiết yêu cầu'}};
+  const iw=k=>(issueWords[lang]&&issueWords[lang][k])||issueWords.ja[k]||k;
+  function selectedIssueTagsV2(){return [...document.querySelectorAll('#issueChipList input:checked')].map(x=>x.value)}
+  function ensureFreeDescriptionMode(){
+    const content=document.getElementById('content'); if(!content)return;
+    const field=content.closest('.field'); if(field)field.classList.add('free-description');
+    const label=document.getElementById('labelContent'); if(label)label.textContent=iw('contentLabel');
+    if(!document.getElementById('issueFreeNote')){
+      const note=document.createElement('div'); note.id='issueFreeNote'; note.className='issue-free-note'; note.textContent=iw('freeDesc');
+      content.parentElement.after(note);
+    } else document.getElementById('issueFreeNote').textContent=iw('freeDesc');
+    const panel=document.getElementById('issuePanel');
+    if(panel&&!document.getElementById('issueRequiredText')){
+      const req=document.createElement('div'); req.id='issueRequiredText'; req.className='issue-required-text'; req.textContent=iw('required');
+      panel.appendChild(req);
+    } else if(document.getElementById('issueRequiredText')) document.getElementById('issueRequiredText').textContent=iw('required');
+  }
+  window.syncIssueContent=function(){
+    document.getElementById('issuePanel')?.classList.remove('required-missing');
+  };
+  const oldSendV2=window.sendRequest;
+  window.sendRequest=async function(){
+    const issues=selectedIssueTagsV2();
+    if(!issues.length){
+      document.getElementById('issuePanel')?.classList.add('required-missing');
+      showToast(iw('required'));
+      return;
+    }
+    return oldSendV2&&oldSendV2();
+  };
+  const oldApplyV2=window.applyLang;
+  window.applyLang=function(){oldApplyV2&&oldApplyV2();setTimeout(ensureFreeDescriptionMode,0)};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(ensureFreeDescriptionMode,350));
+})();
+</script>
+
 </body>
 </html>
