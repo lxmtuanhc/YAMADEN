@@ -514,12 +514,19 @@ app.get("/admin/staff", requireAdmin, async (req, res) => {
 
 app.post("/admin/staff", requireAdmin, async (req, res) => {
   try {
+    const workTags = Array.isArray(req.body.workTags)
+      ? req.body.workTags.map(item => String(item || "").trim()).filter(Boolean)
+      : parseRequestTags(req.body.workTags);
+
     const staff = new Staff({
       name: req.body.name || "",
       phone: req.body.phone || "",
       email: req.body.email || "",
-      areas: req.body.areas || "",
-      skills: req.body.skills || "",
+      areas: req.body.areas || req.body.department || "",
+      skills: req.body.skills || req.body.workContent || workTags.join(", "),
+      department: req.body.department || req.body.areas || "",
+      workContent: req.body.workContent || req.body.skills || workTags.join(", "),
+      workTags,
       status: req.body.status || "active",
       createdAt: new Date()
     });
@@ -534,9 +541,14 @@ app.put("/admin/staff/:id", requireAdmin, async (req, res) => {
   try {
     const staff = await Staff.findById(req.params.id);
     if (!staff) return res.status(404).json({ message: "Staff not found" });
-    ["name", "phone", "email", "areas", "skills", "status"].forEach(field => {
+    ["name", "phone", "email", "areas", "skills", "department", "workContent", "status"].forEach(field => {
       if (req.body[field] !== undefined) staff[field] = req.body[field];
     });
+    if (req.body.workTags !== undefined) {
+      staff.workTags = Array.isArray(req.body.workTags)
+        ? req.body.workTags.map(item => String(item || "").trim()).filter(Boolean)
+        : parseRequestTags(req.body.workTags);
+    }
     await staff.save();
     res.json(staff);
   } catch (error) {
@@ -622,12 +634,18 @@ app.post("/request", upload.array("image", 12), async (req, res) => {
     const currentUser = getUserFromRequest(req);
     let requestUserId = "";
 
-    if (currentUser) {
-      const user = await User.findById(currentUser.userId);
-      if (user && user.status === "active") {
-        requestUserId = String(user._id);
-      }
+    if (!currentUser) {
+      return res.status(401).json({ message: "Login required" });
     }
+
+    const user = await User.findById(currentUser.userId);
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+    if (user.status !== "active") {
+      return res.status(403).json({ message: "Account is waiting for admin approval" });
+    }
+    requestUserId = String(user._id);
 
     const mediaFiles = [];
     const files = Array.isArray(req.files) ? req.files : [];

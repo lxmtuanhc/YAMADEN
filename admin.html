@@ -1135,5 +1135,102 @@ html,body{height:100%!important;overflow:hidden!important}
 })();
 </script>
 
+
+
+<!-- yamaden-staff-detail-history-v18 -->
+<style id="yamaden-staff-detail-history-v18-style">
+.staff-profile-row{cursor:pointer}.staff-profile-row:hover{background:#f8fbff}.staff-profile-row .action-row{cursor:auto}.staff-detail-modal{display:none;position:fixed;inset:0;z-index:140;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:18px}.staff-detail-modal.show{display:flex}.staff-detail-box{width:min(980px,96vw);max-height:92vh;background:#fff;border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.35);overflow:hidden;display:flex;flex-direction:column}.staff-detail-top{height:72px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;padding:0 26px}.staff-detail-tabs{display:flex;gap:10px}.staff-detail-tab{height:42px;padding:0 22px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;color:#94a3b8;font-weight:950}.staff-detail-tab.active{color:#111827;border-color:#111827;box-shadow:0 5px 16px rgba(15,23,42,.06)}.staff-detail-close{width:42px;height:42px;border:0;border-radius:10px;background:#ef4444;color:#fff;font-size:0;position:relative;box-shadow:0 12px 24px rgba(239,68,68,.24)}.staff-detail-close:before,.staff-detail-close:after{content:"";position:absolute;left:50%;top:50%;width:18px;height:3px;border-radius:999px;background:#fff}.staff-detail-close:before{transform:translate(-50%,-50%) rotate(45deg)}.staff-detail-close:after{transform:translate(-50%,-50%) rotate(-45deg)}.staff-detail-body{overflow:auto;padding:28px}.staff-detail-pane{display:none}.staff-detail-pane.active{display:block}.staff-profile-center{text-align:center;padding:6px 0 24px;border-bottom:1px solid #e5e7eb;margin-bottom:22px}.staff-avatar-large{width:76px;height:76px;border-radius:50%;margin:0 auto 12px;background:linear-gradient(180deg,#eff6ff,#dbeafe);border:3px solid #2563eb;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:950;color:#1d4ed8}.staff-profile-name{font-size:22px;font-weight:950}.staff-profile-role{color:#64748b;font-weight:900;margin-top:4px}.staff-info-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid #e5e7eb}.staff-info-item{min-height:82px;padding:14px 0;border-bottom:1px solid #e5e7eb}.staff-info-item b{display:block;color:#94a3b8;font-size:13px;margin-bottom:7px}.staff-info-item span{font-weight:900;color:#111827}.staff-detail-section-title{font-size:18px;font-weight:950;margin:20px 0 12px}.staff-history-table{border:1px solid #e5e7eb;border-radius:12px;overflow:auto}.staff-history-row{display:grid;grid-template-columns:130px minmax(0,1fr) 130px 130px;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid #eef2f7}.staff-history-row:last-child{border-bottom:0}.staff-history-head{position:sticky;top:0;background:#f8fafc;color:#64748b;font-weight:950;z-index:1}.staff-history-row:not(.staff-history-head):hover{background:#f8fbff}@media(max-width:760px){.staff-info-grid{grid-template-columns:1fr 1fr}.staff-history-row{grid-template-columns:1fr}.staff-detail-body{padding:18px}.staff-detail-top{padding:0 16px}.staff-detail-tab{padding:0 12px}}
+</style>
+<script id="yamaden-staff-detail-history-v18-script">
+(function(){
+  const pairs={
+    'Bộ thiết kế':'設計部','Bộ công vụ':'工務部','Bộ kinh doanh':'営業部','Bộ công sự':'工事部','Bộ FS':'FS部','Bộ nhân sự và kế toán':'人事・経理部','Giám đốc':'社長',
+    'Thiết kế bản vẽ điện':'電気図面設計','Thiết kế tủ điện':'盤設計','Thiết kế chiếu sáng':'照明設計','Tính tải điện':'電気容量計算','Bóc tách vật tư':'材料拾い出し','Lập bản vẽ hoàn công':'竣工図作成','Kiểm tra bản vẽ':'図面チェック',
+    'Chuẩn bị vật tư':'材料準備','Điều phối công trình':'現場調整','Quản lý tiến độ':'工程管理','Đặt hàng vật tư':'材料発注','Kiểm tra tồn kho':'在庫確認','Sắp xếp lịch thi công':'施工スケジュール','Hỗ trợ hiện trường':'現場サポート',
+    'Tư vấn khách hàng':'顧客相談','Báo giá':'見積作成','Theo dõi hợp đồng':'契約フォロー','Chăm sóc khách hàng':'顧客対応','Khảo sát nhu cầu':'ニーズ確認','Gửi đề xuất':'提案送付','Theo dõi thanh toán':'入金確認',
+    'Thi công điện':'電気工事','Đi dây điện':'配線工事','Lắp ổ cắm':'コンセント取付','Lắp đèn':'照明取付','Lắp tủ điện':'分電盤工事','Xử lý mất điện':'停電対応','Xử lý rò điện':'漏電対応','Kiểm tra hiện trường':'現場確認','Sửa breaker':'ブレーカー修理',
+    'Bảo trì định kỳ':'定期メンテナンス','Kiểm tra sau thi công':'施工後点検','Xử lý sự cố':'トラブル対応','Bảo hành':'保証対応','Kiểm tra thiết bị':'設備点検','Hỗ trợ khách hàng':'顧客サポート','Bảo trì tủ điện':'分電盤メンテナンス',
+    'Quản lý nhân sự':'人事管理','Chấm công':'勤怠管理','Tính lương':'給与計算','Kế toán công trình':'現場会計','Xuất hóa đơn':'請求書発行','Quản lý chứng từ':'書類管理','Theo dõi chi phí':'原価管理',
+    'Duyệt báo giá':'見積承認','Duyệt hợp đồng':'契約承認','Phân công quản lý':'管理者割当','Kiểm tra KPI':'KPI確認','Quyết định nhân sự':'人事決裁','Duyệt chi phí':'経費承認','Quản lý chiến lược':'経営戦略'
+  };
+  const reverse=Object.fromEntries(Object.entries(pairs).map(([vi,ja])=>[ja,vi]));
+  const words={
+    ja:{title:'スタッフプロフィール',sub:'部署 / 担当作業内容',add:'新規プロフィール追加',edit:'編集',delete:'削除',basic:'基本情報',history:'対応履歴',profile:'プロフィール',name:'氏名',email:'メール',dept:'部署',work:'担当作業内容',requestCount:'対応件数',created:'登録日',status:'ステータス',noData:'データがありません',id:'ID',content:'内容',requestStatus:'ステータス',elapsed:'待機時間'},
+    vi:{title:'Hồ sơ nhân viên',sub:'Bộ phận / Nội dung công việc',add:'Thêm hồ sơ mới',edit:'Sửa',delete:'Xóa',basic:'Thông tin cơ bản',history:'Lịch sử xử lý yêu cầu',profile:'Hồ sơ',name:'Tên',email:'Email',dept:'Bộ phận',work:'Nội dung công việc phụ trách',requestCount:'Số yêu cầu đã phụ trách',created:'Ngày tạo',status:'Trạng thái',noData:'Không có dữ liệu',id:'ID',content:'Nội dung',requestStatus:'Trạng thái',elapsed:'Thời gian chờ'}
+  };
+  function langNow(){try{return currentLang==='vi'?'vi':'ja'}catch(e){return 'ja'}}
+  function W(k){return (words[langNow()]&&words[langNow()][k])||words.ja[k]||k}
+  function sid(s){return s?._id||s?.id||''}
+  function rid(r){return r?.id||r?._id||''}
+  function tr(v){v=String(v||'').trim(); if(!v)return '-'; return langNow()==='ja'?(pairs[v]||v):(reverse[v]||v)}
+  function parseTags(s){if(Array.isArray(s?.workTags))return s.workTags;if(Array.isArray(s?.tags))return s.tags;return String(s?.workContent||s?.work||s?.skills||'').split(/[,、\n]/).map(x=>x.trim()).filter(Boolean)}
+  function staffDept(s){return s?.department||s?.areas||s?.dept||'-'}
+  function staffRequests(s){const id=String(sid(s));return (requests||[]).filter(r=>String(r.assigneeId||'')===id || (!!s.name&&r.assigneeName===s.name))}
+  function dateText(d){if(!d)return '-';const x=new Date(d);return isNaN(x)?'-':x.toLocaleDateString(langNow()==='ja'?'ja-JP':'vi-VN')}
+  window.ensureStaffDetailModal=function(){
+    if(document.getElementById('staffDetailModal'))return;
+    const modal=document.createElement('div'); modal.id='staffDetailModal'; modal.className='staff-detail-modal'; modal.onclick=e=>{if(e.target===modal)closeStaffDetailModal()};
+    modal.innerHTML='<div class="staff-detail-box"><div class="staff-detail-top"><div class="staff-detail-tabs"><button class="staff-detail-tab active" id="staffDetailTabBasic" onclick="switchStaffDetailTab(\'basic\')"></button><button class="staff-detail-tab" id="staffDetailTabHistory" onclick="switchStaffDetailTab(\'history\')"></button></div><button class="staff-detail-close" onclick="closeStaffDetailModal()"></button></div><div class="staff-detail-body"><div id="staffDetailPaneBasic" class="staff-detail-pane active"><div class="staff-profile-center"><div class="staff-avatar-large" id="staffDetailAvatar"></div><div class="staff-profile-name" id="staffDetailName"></div><div class="staff-profile-role" id="staffDetailRole"></div></div><div class="staff-detail-section-title" id="staffDetailBasicTitle"></div><div class="staff-info-grid" id="staffDetailGrid"></div><div class="staff-detail-section-title" id="staffDetailWorkTitle"></div><div class="staff-tag-list" id="staffDetailTags"></div></div><div id="staffDetailPaneHistory" class="staff-detail-pane"><div class="staff-detail-section-title" id="staffDetailHistoryTitle"></div><div class="staff-history-table" id="staffDetailHistoryList"></div></div></div></div>';
+    document.body.appendChild(modal);
+  };
+  window.switchStaffDetailTab=function(tab){ensureStaffDetailModal();document.getElementById('staffDetailTabBasic').classList.toggle('active',tab==='basic');document.getElementById('staffDetailTabHistory').classList.toggle('active',tab==='history');document.getElementById('staffDetailPaneBasic').classList.toggle('active',tab==='basic');document.getElementById('staffDetailPaneHistory').classList.toggle('active',tab==='history')};
+  window.closeStaffDetailModal=function(){document.getElementById('staffDetailModal')?.classList.remove('show')};
+  window.openStaffDetail=function(id){
+    ensureStaffDetailModal(); const s=(currentStaff||[]).find(x=>String(sid(x))===String(id)); if(!s)return;
+    document.getElementById('staffDetailTabBasic').textContent=W('basic'); document.getElementById('staffDetailTabHistory').textContent=W('history');
+    document.getElementById('staffDetailName').textContent=s.name||'-'; document.getElementById('staffDetailAvatar').textContent=(s.name||'?').trim().slice(0,1).toUpperCase(); document.getElementById('staffDetailRole').textContent=tr(staffDept(s));
+    document.getElementById('staffDetailBasicTitle').textContent=W('basic'); document.getElementById('staffDetailWorkTitle').textContent=W('work'); document.getElementById('staffDetailHistoryTitle').textContent=W('history');
+    const reqs=staffRequests(s);
+    const fields=[[W('name'),s.name],[W('email'),s.email],[W('dept'),tr(staffDept(s))],[W('requestCount'),reqs.length],[W('status'),s.status||'active'],[W('created'),dateText(s.createdAt)]];
+    document.getElementById('staffDetailGrid').innerHTML=fields.map(([k,v])=>'<div class="staff-info-item"><b>'+esc(k)+'</b><span>'+esc(v||'-')+'</span></div>').join('');
+    const tags=parseTags(s); document.getElementById('staffDetailTags').innerHTML=tags.length?tags.map(tag=>'<span class="staff-tag">'+esc(tr(tag))+'</span>').join(''):'<span class="muted">-</span>';
+    const hist=document.getElementById('staffDetailHistoryList');
+    hist.innerHTML='<div class="staff-history-row staff-history-head"><div>'+W('id')+'</div><div>'+W('content')+'</div><div>'+W('requestStatus')+'</div><div>'+W('elapsed')+'</div></div>'+(reqs.length?reqs.map(r=>'<div class="staff-history-row" onclick="openRequestDetail(\''+esc(rid(r))+'\')"><div class="idline">'+esc(r.requestId||rid(r)||'-')+'</div><div><b>'+esc(requestTitle(r))+'</b><div class="muted">'+esc(address(r))+'</div></div><div><span class="pill '+statusClass(normalizeStatus(r.status))+'">'+statusLabel(r.status)+'</span></div><div>'+elapsed(r.createdAt)+'</div></div>').join(''):'<div style="padding:16px" class="muted">'+W('noData')+'</div>');
+    switchStaffDetailTab('basic'); document.getElementById('staffDetailModal').classList.add('show');
+  };
+  window.renderStaff=function(){
+    const root=document.getElementById('staffView'); if(!root)return;
+    root.innerHTML='<div class="panel"><div class="staff-profile-shell"><div class="staff-profile-head"><div><div class="staff-profile-title">'+W('title')+'</div><div class="muted" style="font-size:12px;font-weight:750;margin-top:4px">'+W('sub')+'</div></div><button class="staff-add-btn" onclick="openStaffProfileForm()">+ '+W('add')+'</button></div><div class="staff-profile-list" id="staffProfileList"></div></div></div>';
+    const list=document.getElementById('staffProfileList');
+    list.innerHTML=(currentStaff||[]).length?(currentStaff||[]).map(s=>{const id=sid(s),tags=parseTags(s),reqs=staffRequests(s);return '<div class="staff-profile-row" onclick="openStaffDetail(\''+esc(id)+'\')"><div><b>'+esc(s.name||'-')+'</b><div class="staff-profile-meta">'+esc(s.email||'-')+'</div></div><div><span class="staff-dept-pill">'+esc(tr(staffDept(s)))+'</span></div><div class="staff-work-text">'+(tags.length?'<div class="staff-tag-list">'+tags.slice(0,4).map(tag=>'<span class="staff-tag">'+esc(tr(tag))+'</span>').join('')+(tags.length>4?'<span class="staff-tag">+'+(tags.length-4)+'</span>':'')+'</div>':'<span class="empty">-</span>')+'</div><div class="muted" style="font-weight:950">'+reqs.length+'</div><div class="action-row" onclick="event.stopPropagation()"><button class="small-btn done" onclick="openStaffProfileForm(\''+esc(id)+'\')">'+W('edit')+'</button><button class="small-btn" style="color:#ef4444" onclick="deleteStaffProfile(\''+esc(id)+'\')">'+W('delete')+'</button></div></div>'}).join(''):'<div class="muted" style="padding:24px;text-align:center">'+W('noData')+'</div>';
+    const count=document.getElementById('finalStaffCount'); if(count)count.textContent=(currentStaff||[]).length;
+  };
+  const oldApplyStaffDetail=window.applyLanguage; window.applyLanguage=function(){if(oldApplyStaffDetail)oldApplyStaffDetail();setTimeout(()=>{if(currentView==='staff')renderStaff(); const m=document.getElementById('staffDetailModal'); if(m?.classList.contains('show')){const name=document.getElementById('staffDetailName')?.textContent; const s=(currentStaff||[]).find(x=>x.name===name); if(s)openStaffDetail(sid(s));}},0)};
+  const oldChangeStaffDetail=window.changeLanguage; window.changeLanguage=function(){if(oldChangeStaffDetail)oldChangeStaffDetail();setTimeout(()=>{if(currentView==='staff')renderStaff(); const m=document.getElementById('staffDetailModal'); if(m?.classList.contains('show')){const name=document.getElementById('staffDetailName')?.textContent; const s=(currentStaff||[]).find(x=>x.name===name); if(s)openStaffDetail(sid(s));}},0)};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{if(currentView==='staff')renderStaff()},760));
+})();
+</script>
+
+
+
+<!-- yamaden-user-approval-clean-v19 -->
+<style id="yamaden-user-approval-clean-v19-style">
+.pending-user{border-color:#fed7aa!important;background:#fffaf0!important}.user-actions .approve{background:#16a34a!important;color:#fff!important;border-color:#16a34a!important}.user-actions .block{background:#1e293b!important;color:#fff!important;border-color:#1e293b!important}.user-actions .delete{background:#ef4444!important;color:#fff!important;border-color:#ef4444!important}.user-card-click{cursor:pointer}.user-card-click:hover{border-color:#bfdbfe;box-shadow:0 12px 28px rgba(37,99,235,.10)}
+</style>
+<script id="yamaden-user-approval-clean-v19-script">
+(function(){
+  const words={ja:{approve:'承認',block:'停止',unblock:'解除',delete:'削除',requests:'依頼数',pending:'承認待ち',active:'有効',blocked:'停止中',noData:'データがありません'},vi:{approve:'Duyệt',block:'Khóa',unblock:'Mở khóa',delete:'Xóa',requests:'yêu cầu',pending:'Chờ duyệt',active:'active',blocked:'Đã khóa',noData:'Không có dữ liệu'}};
+  function langNow(){try{return currentLang==='vi'?'vi':'ja'}catch(e){return 'ja'}}
+  function U(k){return (words[langNow()]&&words[langNow()][k])||words.ja[k]||k}
+  function uid(user){return user?._id||user?.id||user?.userId||''}
+  function statusText(st){st=st||'pending';return U(st)||st}
+  window.renderUsers=function(){
+    const box=document.getElementById('usersList');if(!box)return;
+    const kw=(document.getElementById('userSearch')?.value||'').toLowerCase();
+    const list=(currentUsers||[]).filter(user=>[user.name,user.phone,user.email,user.company,user.province,user.projectName,user.status].join(' ').toLowerCase().includes(kw));
+    box.innerHTML=list.length?list.map(user=>{
+      const id=uid(user), st=user.status||'pending', pending=st==='pending', blocked=st==='blocked';
+      const approve=pending?'<button class="small-btn approve" data-action="approve" data-id="'+esc(id)+'">'+U('approve')+'</button>':'';
+      return '<div class="card-row user-card-click '+(pending?'pending-user':'')+'" data-user-id="'+esc(id)+'"><div><b>'+esc(user.name||user.phone||'-')+'</b><div class="muted">'+esc(user.phone||'')+' / '+esc(user.email||'')+'</div><div class="muted">'+esc(user.projectName||user.company||'')+'</div></div><div><span class="pill '+(pending?'orange':blocked?'red':'green')+'">'+esc(statusText(st))+'</span> <span class="pill blue">'+esc(user.province||'-')+'</span><div class="muted">'+(user.requestCount||0)+' '+U('requests')+'</div></div><div class="user-actions">'+approve+'<button class="small-btn block" data-action="block" data-id="'+esc(id)+'" data-next="'+(blocked?'active':'blocked')+'">'+(blocked?U('unblock'):U('block'))+'</button><button class="small-btn delete" data-action="delete" data-id="'+esc(id)+'">'+U('delete')+'</button></div></div>';
+    }).join(''):'<div class="muted" style="padding:20px">'+U('noData')+'</div>';
+    box.querySelectorAll('.user-card-click').forEach(card=>card.addEventListener('click',()=>openUserDetail(card.dataset.userId)));
+    box.querySelectorAll('.user-actions').forEach(actions=>actions.addEventListener('click',event=>{event.stopPropagation();const btn=event.target.closest('button');if(!btn)return;const id=btn.dataset.id;if(btn.dataset.action==='approve')toggleUserStatus(id,'active');if(btn.dataset.action==='block')toggleUserStatus(id,btn.dataset.next);if(btn.dataset.action==='delete')deleteUser(id);}));
+    const side=document.getElementById('sideUsers');if(side)side.textContent=(currentUsers||[]).length;
+  };
+  const prevApplyUsers=window.applyLanguage;window.applyLanguage=function(){if(prevApplyUsers)prevApplyUsers();if(currentView==='users')renderUsers()};
+  const prevChangeUsers=window.changeLanguage;window.changeLanguage=function(){if(prevChangeUsers)prevChangeUsers();setTimeout(()=>{if(currentView==='users')renderUsers()},0)};
+})();
+</script>
+
 </body>
 </html>

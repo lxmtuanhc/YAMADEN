@@ -3072,5 +3072,33 @@ button[onclick='showTab("send")']:not(#tabSend),
 })();
 </script>
 
+
+
+<!-- yamaden-disable-quick-request-v7 -->
+<style id="yamaden-disable-quick-request-v7-style">
+#accountDividerText,.account-divider,#quickSupportBtn,#quickSupportBtnIcon,.emergency-card,#quickRequestTop,#oneRequestBtn,.quick-request-top{display:none!important}
+button[onclick="showTab('send')"]:not(#tabSend),button[onclick='showTab("send")']:not(#tabSend){display:none!important}
+</style>
+<script id="yamaden-disable-quick-request-v7-script">
+(function(){
+  const msg={ja:'依頼を送信するには、ログイン済みで管理者承認済みのアカウントが必要です。',vi:'Để gửi yêu cầu, tài khoản cần đăng nhập và được admin duyệt.'};
+  function langNow(){try{return lang==='vi'?'vi':'ja'}catch(e){return 'ja'}}
+  function canSend(){return !!(currentUser&&currentUser.status==='active'&&localStorage.getItem('userToken'))}
+  const oldSendGuard=window.sendRequest;
+  window.sendRequest=async function(){
+    if(!canSend()){
+      const text=msg[langNow()]||msg.ja;
+      const result=document.getElementById('result');if(result)result.textContent=text;
+      if(window.showToast)showToast(text);
+      showTab('account');
+      return;
+    }
+    return oldSendGuard&&oldSendGuard();
+  };
+  function removeQuick(){document.querySelectorAll('.account-divider,.emergency-card,#quickRequestTop,#oneRequestBtn').forEach(el=>el.remove());}
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(removeQuick,300));setTimeout(removeQuick,0);
+})();
+</script>
+
 </body>
 </html>
