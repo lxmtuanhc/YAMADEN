@@ -586,5 +586,26 @@ body{background:#202020!important}.shell{width:min(1560px,calc(100vw - 28px))!im
 })();
 </script>
 
+
+<!-- yamaden-fixed-shell-v5 -->
+<style id="yamaden-fixed-shell-v5-style">
+html,body{height:100%!important;overflow:hidden!important}
+.shell{height:calc(100vh - 28px)!important;min-height:0!important;overflow:hidden!important}
+.sidebar{position:relative!important;top:0!important;height:100%!important;min-height:0!important;overflow:hidden!important}
+.main{height:100%!important;min-height:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+.topbar{flex:0 0 70px!important;position:relative!important;z-index:20!important}
+.content{flex:1 1 auto!important;min-height:0!important;overflow:auto!important;scrollbar-gutter:stable!important;padding-bottom:22px!important}
+.quote-view-panel .panel{min-height:calc(100vh - 150px)!important}
+.users-mode .content,.staff-mode .content,.settings-mode .content,.requests-mode .content,.dashboard-mode .content{scrollbar-gutter:stable!important}
+</style>
+<script id="yamaden-fixed-shell-v5-script">
+(function(){
+  function resetContentScroll(){const c=document.querySelector('.content'); if(c)c.scrollTop=0; window.scrollTo(0,0)}
+  const oldShowFixed=window.showView;
+  window.showView=function(v){oldShowFixed&&oldShowFixed(v);setTimeout(resetContentScroll,0)};
+  document.addEventListener('click',function(e){if(e.target.closest('.final-nav-btn'))setTimeout(resetContentScroll,0)},true);
+})();
+</script>
+
 </body>
 </html>
