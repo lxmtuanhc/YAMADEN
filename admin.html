@@ -607,5 +607,23 @@ html,body{height:100%!important;overflow:hidden!important}
 })();
 </script>
 
+
+<!-- yamaden-id-label-v6 -->
+<script id="yamaden-id-label-v6-script">
+(function(){
+  function fixIdLabel(){
+    try{ if(window.dict){dict.ja.requestId='ID';dict.vi.requestId='ID';} }catch(e){}
+    document.querySelectorAll('.request-panel .data-table thead th:first-child,.queue-table thead th:first-child').forEach(th=>{
+      if(/requestid|依頼ID|yêu cầu/i.test((th.textContent||'').trim())) th.textContent='ID';
+    });
+  }
+  const oldRenderId=window.renderRequests;
+  window.renderRequests=function(){oldRenderId&&oldRenderId();fixIdLabel()};
+  const oldApplyId=window.applyLanguage;
+  window.applyLanguage=function(){oldApplyId&&oldApplyId();setTimeout(fixIdLabel,0)};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(fixIdLabel,300));
+})();
+</script>
+
 </body>
 </html>
