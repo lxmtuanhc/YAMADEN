@@ -3351,5 +3351,53 @@ body:not(.auth-login-body){background:#0f1110!important}.app.auth-app-mode{heigh
 .app.auth-app-mode{grid-template-rows:72px 1fr 58px!important}.app.auth-app-mode .bottom-nav{height:58px!important;padding:5px 14px calc(5px + env(safe-area-inset-bottom))!important;align-items:center!important}.app.auth-app-mode .bottom-nav button{height:46px!important;border-radius:14px!important;padding:0!important;align-items:center!important;justify-content:center!important}.app.auth-app-mode .bottom-nav button span:last-child{display:none!important}.app.auth-app-mode .bottom-nav button .icon,.app.auth-app-mode .bottom-nav button .icon svg{width:25px!important;height:25px!important}.app.auth-app-mode .bottom-nav button.active{background:rgba(255,90,31,.12)!important}.app.auth-app-mode .bottom-nav button.active .icon{color:#ff5a1f!important;filter:none!important}@media(max-width:380px){.app.auth-app-mode .bottom-nav{padding-left:10px!important;padding-right:10px!important}.app.auth-app-mode .bottom-nav button .icon,.app.auth-app-mode .bottom-nav button .icon svg{width:24px!important;height:24px!important}}
 </style>
 
+
+
+<!-- yamaden-header-overflow-fix-v17 -->
+<style id="yamaden-header-overflow-fix-v17-style">
+.app.auth-app-mode .top-header{overflow:hidden!important}.app.auth-app-mode .top-row{grid-template-columns:minmax(0,1fr) 58px 46px!important;gap:8px!important;width:100%!important;max-width:100%!important}.app.auth-app-mode .logo-box{min-width:0!important;overflow:hidden!important}.app.auth-app-mode .logo-box img{flex:0 0 36px!important;width:36px!important;height:36px!important}.app.auth-app-mode .logo-text{min-width:0!important;overflow:hidden!important}.app.auth-app-mode .logo-jp{max-width:100%!important;font-size:12px!important}.app.auth-app-mode .logo-en{max-width:100%!important;font-size:9px!important}.app.auth-app-mode .lang-select{width:58px!important;min-width:58px!important;height:38px!important;padding:0 5px!important;border-radius:14px!important;text-align:center!important;text-align-last:center!important;appearance:none!important;-webkit-appearance:none!important;background:#272a27!important}.app.auth-app-mode .app-logout-btn{width:46px!important;min-width:46px!important;height:38px!important;border-radius:14px!important;font-size:0!important;position:relative!important;padding:0!important;overflow:hidden!important}.app.auth-app-mode .app-logout-btn::before{content:"↪";font-size:21px!important;line-height:1;color:#fff;font-weight:950}.app.auth-app-mode .container{padding-top:12px!important}@media(min-width:430px){.app.auth-app-mode .top-row{grid-template-columns:minmax(0,1fr) 66px 84px!important}.app.auth-app-mode .lang-select{width:66px!important;min-width:66px!important}.app.auth-app-mode .app-logout-btn{width:84px!important;min-width:84px!important;font-size:12px!important}.app.auth-app-mode .app-logout-btn::before{content:"";display:none}}
+</style>
+<script id="yamaden-header-overflow-fix-v17-script">
+(function(){
+  function shortLabels(){
+    const main=document.getElementById('language');
+    if(main){[...main.options].forEach(o=>{o.textContent=o.value==='ja'?'JP':'VN'});const saved=String(localStorage.getItem('language')||localStorage.getItem('lang')||'ja');main.value=saved.startsWith('vi')?'vi':'ja'}
+    const auth=document.getElementById('authLanguage');
+    if(auth){[...auth.options].forEach(o=>{o.textContent=o.value==='ja'?'JP':'VN'})}
+  }
+  const oldApply=window.applyLang;window.applyLang=function(){if(oldApply)oldApply();setTimeout(shortLabels,0)};
+  const oldChange=window.changeLanguage;window.changeLanguage=function(){if(oldChange)oldChange();setTimeout(shortLabels,0)};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(shortLabels,900));setTimeout(shortLabels,0);
+})();
+</script>
+
+
+
+<!-- yamaden-bottom-bar-compact-v18 -->
+<style id="yamaden-bottom-bar-compact-v18-style">
+.app.auth-app-mode{grid-template-rows:72px 1fr 54px!important}.app.auth-app-mode .bottom-nav{height:54px!important;min-height:54px!important;padding:4px 18px calc(4px + env(safe-area-inset-bottom))!important;gap:0!important;align-items:center!important;justify-content:space-between!important;background:#171917!important}.app.auth-app-mode .bottom-nav button{height:44px!important;max-width:64px!important;flex:1 1 0!important;border-radius:0!important;background:transparent!important;color:#e5e7eb!important;opacity:.82!important;padding:0!important;position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important}.app.auth-app-mode .bottom-nav button.active{background:transparent!important;color:#ff5a1f!important;opacity:1!important}.app.auth-app-mode .bottom-nav button.active::after{content:"";position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#ff5a1f}.app.auth-app-mode .bottom-nav button .icon,.app.auth-app-mode .bottom-nav button .icon svg{width:23px!important;height:23px!important;stroke-width:2.15!important}.app.auth-app-mode .bottom-nav button.active .icon{filter:none!important}.app.auth-app-mode .main{padding-bottom:0!important}.app.auth-app-mode .container{padding-bottom:14px!important}@media(max-width:380px){.app.auth-app-mode .bottom-nav{padding-left:14px!important;padding-right:14px!important}.app.auth-app-mode .bottom-nav button{max-width:56px!important}.app.auth-app-mode .bottom-nav button .icon,.app.auth-app-mode .bottom-nav button .icon svg{width:22px!important;height:22px!important}}
+</style>
+
+
+
+<!-- yamaden-true-app-shell-v19 -->
+<style id="yamaden-true-app-shell-v19-style">
+body.yamaden-app-active,body.yamaden-app-active html{overflow:hidden!important;height:100dvh!important;max-height:100dvh!important;background:#0f1110!important;overscroll-behavior:none!important}body.yamaden-app-active .app.auth-app-mode{position:fixed!important;inset:0!important;width:min(100vw,480px)!important;max-width:480px!important;height:100dvh!important;max-height:100dvh!important;margin:0 auto!important;left:50%!important;transform:translateX(-50%)!important;display:grid!important;grid-template-rows:72px minmax(0,1fr) 56px!important;overflow:hidden!important;background:#121312!important}body.yamaden-app-active .app.auth-app-mode .top-header{grid-row:1!important;position:relative!important;z-index:40!important;flex:0 0 72px!important;height:72px!important;min-height:72px!important;max-height:72px!important;overflow:hidden!important}body.yamaden-app-active .app.auth-app-mode .main{grid-row:2!important;min-height:0!important;height:100%!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;touch-action:pan-y!important}body.yamaden-app-active .app.auth-app-mode .container{min-height:100%!important;height:auto!important;overflow:visible!important;padding-bottom:18px!important}body.yamaden-app-active .app.auth-app-mode .bottom-nav{grid-row:3!important;position:relative!important;z-index:40!important;flex:0 0 56px!important;height:56px!important;min-height:56px!important;max-height:56px!important;overflow:hidden!important}body.yamaden-app-active .app.auth-app-mode .bottom-nav button{height:46px!important;max-width:68px!important;border-radius:16px!important;transition:.16s ease!important}body.yamaden-app-active .app.auth-app-mode .bottom-nav button.active{background:rgba(255,90,31,.16)!important;color:#ff5a1f!important;box-shadow:inset 0 0 0 1px rgba(255,90,31,.16)!important}body.yamaden-app-active .app.auth-app-mode .bottom-nav button.active::after{bottom:4px!important;width:5px!important;height:5px!important;background:#ff5a1f!important}body.yamaden-app-active .app.auth-app-mode .bottom-nav button.active .icon,body.yamaden-app-active .app.auth-app-mode .bottom-nav button.active .icon svg{color:#ff5a1f!important;stroke:#ff5a1f!important}.app.auth-app-mode .top-header,.app.auth-app-mode .bottom-nav{user-select:none!important;-webkit-user-select:none!important}.app.auth-app-mode .main::-webkit-scrollbar{width:0;height:0}
+</style>
+<script id="yamaden-true-app-shell-v19-script">
+(function(){
+  function syncAppShellClass(){
+    const app=document.querySelector('.app');
+    const active=!!(app&&app.classList.contains('auth-app-mode'));
+    document.body.classList.toggle('yamaden-app-active',active);
+  }
+  const oldShow=window.showTab;window.showTab=function(tab){if(oldShow)oldShow(tab);setTimeout(syncAppShellClass,0)};
+  const oldUpdate=window.updateAccountUI;window.updateAccountUI=function(){if(oldUpdate)oldUpdate();setTimeout(syncAppShellClass,0)};
+  const oldApply=window.applyLang;window.applyLang=function(){if(oldApply)oldApply();setTimeout(syncAppShellClass,0)};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(syncAppShellClass,900));
+  setInterval(syncAppShellClass,1000);
+})();
+</script>
+
 </body>
 </html>
