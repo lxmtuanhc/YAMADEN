@@ -3100,5 +3100,74 @@ button[onclick="showTab('send')"]:not(#tabSend),button[onclick='showTab("send")'
 })();
 </script>
 
+
+
+<!-- yamaden-auth-gate-v8 -->
+<style id="yamaden-auth-gate-v8-style">
+.app.auth-login-mode{width:min(100%,1120px);grid-template-columns:420px minmax(0,1fr);background:#f8fbff}.app.auth-login-mode .bottom-nav{display:none!important}.app.auth-login-mode #homeSection,.app.auth-login-mode #servicesSection,.app.auth-login-mode #sendSection,.app.auth-login-mode #checkSection,.app.auth-login-mode #settingsSection{display:none!important}.app.auth-login-mode .main{padding-bottom:0!important;display:flex;align-items:center;justify-content:center;min-height:100vh}.app.auth-login-mode #accountSection{display:block!important;width:100%}.app.auth-login-mode .account-landing{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:34px;background:linear-gradient(135deg,#f8fbff 0%,#eef6ff 48%,#dbeafe 100%);position:relative;overflow:hidden}.app.auth-login-mode .account-landing::before{content:"";position:absolute;inset:0;background:linear-gradient(118deg,rgba(255,255,255,.96) 0 33%,rgba(255,255,255,.36) 33% 45%,transparent 45%),linear-gradient(135deg,transparent 0 62%,rgba(37,99,235,.90) 62% 72%,rgba(30,64,175,.95) 72% 100%);pointer-events:none}.app.auth-login-mode .account-landing::after{content:"";position:absolute;right:8%;top:0;width:52%;height:44%;background:linear-gradient(rgba(37,99,235,.10),rgba(37,99,235,.02));clip-path:polygon(14% 0,100% 0,100% 70%,0 100%);pointer-events:none}.app.auth-login-mode .account-brand{position:absolute;left:42px;top:34px;z-index:2}.app.auth-login-mode .account-brand img{width:58px;height:58px;border-radius:18px;box-shadow:0 18px 38px rgba(37,99,235,.14)}.app.auth-login-mode .account-brand-title{font-size:22px;color:#1d4ed8;font-weight:950}.app.auth-login-mode .account-brand-sub{font-size:11px;color:#334155;font-weight:950;letter-spacing:.08em}.app.auth-login-mode .account-panel{position:relative;z-index:2;width:min(430px,100%);margin:0 auto}.app.auth-login-mode .account-card,.app.auth-login-mode .profile-card{border-radius:22px;background:rgba(255,255,255,.94);box-shadow:0 24px 70px rgba(15,23,42,.18);border:1px solid rgba(255,255,255,.75);backdrop-filter:blur(18px);padding:28px}.app.auth-login-mode .account-welcome{text-align:center;margin-bottom:20px}.app.auth-login-mode .account-welcome-ja{font-size:24px;font-weight:950;color:#111827}.app.auth-login-mode .account-welcome-brand{font-size:34px;line-height:1;color:#2563eb;font-weight:950;letter-spacing:.02em;margin-top:4px}.app.auth-login-mode .account-welcome-sub{max-width:320px;margin:12px auto 0;color:#64748b;font-size:13px;line-height:1.55;font-weight:850}.app.auth-login-mode .account-mode{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0 14px;padding:4px;border-radius:18px;background:#f2f4f8}.app.auth-login-mode .account-mode button{height:44px;border-radius:14px;border:0;background:transparent;font-weight:950;color:#64748b}.app.auth-login-mode .account-mode button.active{background:#0f172a;color:#fff}.app.auth-login-mode .account-fields{display:grid;gap:10px}.app.auth-login-mode .account-fields input{height:54px;border-radius:12px;border:1px solid #dbe4ef;background:#fff;text-align:center;font-size:15px;font-weight:850}.app.auth-login-mode .account-card .main-btn{height:56px;border-radius:12px;background:linear-gradient(135deg,#2563eb,#0ea5e9);box-shadow:0 18px 34px rgba(37,99,235,.28);margin-top:12px}.app.auth-login-mode .account-divider,.app.auth-login-mode #quickSupportBtn,.app.auth-login-mode .emergency-card{display:none!important}.app.auth-app-mode .bottom-nav{display:flex!important}.auth-required-note{margin-top:14px;padding:12px 14px;border-radius:14px;background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;font-weight:900;font-size:13px;line-height:1.45;text-align:center}@media(max-width:900px){.app.auth-login-mode{display:block;width:100%;box-shadow:none}.app.auth-login-mode .top-header{display:none}.app.auth-login-mode .main{min-height:100vh}.app.auth-login-mode .account-landing{padding:84px 18px 26px}.app.auth-login-mode .account-brand{left:22px;top:20px}.app.auth-login-mode .account-card,.app.auth-login-mode .profile-card{padding:22px}.app.auth-login-mode .account-welcome-brand{font-size:30px}}
+</style>
+<script id="yamaden-auth-gate-v8-script">
+(function(){
+  const gateText={ja:{need:'依頼機能を利用するには、ログイン済みで管理者承認済みのアカウントが必要です。',pending:'登録ありがとうございます。管理者の承認後、アプリをご利用いただけます。',profile:'続けるにはお客様情報を入力してください。'},vi:{need:'Để sử dụng app và gửi yêu cầu, tài khoản cần đăng nhập và được admin duyệt.',pending:'Đăng ký thành công. Vui lòng chờ admin duyệt trước khi sử dụng app.',profile:'Vui lòng nhập thông tin khách hàng để tiếp tục.'}};
+  function langNow(){try{return lang==='vi'?'vi':'ja'}catch(e){return 'ja'}}
+  function G(k){return (gateText[langNow()]&&gateText[langNow()][k])||gateText.ja[k]||k}
+  function getStoredUser(){try{return JSON.parse(localStorage.getItem('userProfile')||'null')}catch(e){return null}}
+  function isReadyUser(user){return !!(user&&user.status==='active'&&user.profileCompleted&&localStorage.getItem('userToken'))}
+  function syncAuthMode(){
+    const app=document.querySelector('.app'); if(!app)return;
+    currentUser=getStoredUser();
+    const ready=isReadyUser(currentUser);
+    app.classList.toggle('auth-login-mode',!ready);
+    app.classList.toggle('auth-app-mode',ready);
+    document.body.classList.toggle('auth-login-body',!ready);
+    const noteId='authRequiredNote';
+    let note=document.getElementById(noteId);
+    if(!ready){
+      if(!note){note=document.createElement('div');note.id=noteId;note.className='auth-required-note';document.getElementById('accountFormCard')?.appendChild(note)}
+      note.textContent=currentUser&&!currentUser.profileCompleted?G('profile'):currentUser&&currentUser.status==='pending'?G('pending'):G('need');
+      ['homeSection','servicesSection','sendSection','checkSection','settingsSection'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
+      document.getElementById('accountSection')?.classList.remove('hidden');
+      document.querySelectorAll('.bottom-nav button').forEach(btn=>btn.classList.remove('active'));
+      document.getElementById('tabAccount')?.classList.add('active');
+    } else if(note){note.remove()}
+    return ready;
+  }
+  window.showInitialScreen=function(){
+    updateAccountUI();
+    if(syncAuthMode()) showTab('home'); else showTab('account');
+  };
+  const previousShowTab=window.showTab;
+  window.showTab=function(tab){
+    if(tab==='services')tab='settings';
+    const ready=syncAuthMode();
+    if(!ready && tab!=='account'){
+      if(window.showToast)showToast(G('need'));
+      tab='account';
+    }
+    if(previousShowTab)previousShowTab(tab==='settings'?'services':tab);
+    if(tab==='settings'){
+      document.getElementById('settingsSection')?.classList.remove('hidden');
+      ['accountSection','homeSection','servicesSection','sendSection','checkSection'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
+    }
+    syncAuthMode();
+  };
+  const previousUpdateAccount=window.updateAccountUI;
+  window.updateAccountUI=function(){if(previousUpdateAccount)previousUpdateAccount();setTimeout(syncAuthMode,0)};
+  const previousUserLogin=window.userLogin;
+  window.userLogin=async function(){
+    const before=localStorage.getItem('userToken');
+    await previousUserLogin?.();
+    updateAccountUI();
+    const ready=syncAuthMode();
+    if(ready) showTab('home'); else showTab('account');
+  };
+  const previousLogout=window.userLogout;
+  window.userLogout=function(){if(previousLogout)previousLogout();localStorage.removeItem('userToken');localStorage.removeItem('userProfile');currentUser=null;updateAccountUI();syncAuthMode();showTab('account')};
+  const previousApplyGate=window.applyLang;
+  window.applyLang=function(){if(previousApplyGate)previousApplyGate();setTimeout(syncAuthMode,0)};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{updateAccountUI();syncAuthMode();if(isReadyUser(currentUser))showTab('home');else showTab('account')},900));
+})();
+</script>
+
 </body>
 </html>

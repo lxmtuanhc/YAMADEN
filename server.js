@@ -228,6 +228,7 @@ const User = mongoose.model("User", UserSchema);
 
 const StaffSchema = new mongoose.Schema({
   name: String,
+  avatar: String,
   phone: String,
   email: String,
   areas: String,
@@ -512,14 +513,22 @@ app.get("/admin/staff", requireAdmin, async (req, res) => {
   }
 });
 
-app.post("/admin/staff", requireAdmin, async (req, res) => {
+app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res) => {
   try {
     const workTags = Array.isArray(req.body.workTags)
       ? req.body.workTags.map(item => String(item || "").trim()).filter(Boolean)
       : parseRequestTags(req.body.workTags);
 
+    let avatar = req.body.avatar || "";
+    const staffAvatarUpload = req.file;
+    if (staffAvatarUpload) {
+      const uploadResult = await uploadMediaToCloudinary(staffAvatarUpload.buffer);
+      avatar = uploadResult.secure_url || "";
+    }
+
     const staff = new Staff({
       name: req.body.name || "",
+      avatar,
       phone: req.body.phone || "",
       email: req.body.email || "",
       areas: req.body.areas || req.body.department || "",
@@ -537,7 +546,7 @@ app.post("/admin/staff", requireAdmin, async (req, res) => {
   }
 });
 
-app.put("/admin/staff/:id", requireAdmin, async (req, res) => {
+app.put("/admin/staff/:id", requireAdmin, upload.single("avatar"), async (req, res) => {
   try {
     const staff = await Staff.findById(req.params.id);
     if (!staff) return res.status(404).json({ message: "Staff not found" });
@@ -548,6 +557,11 @@ app.put("/admin/staff/:id", requireAdmin, async (req, res) => {
       staff.workTags = Array.isArray(req.body.workTags)
         ? req.body.workTags.map(item => String(item || "").trim()).filter(Boolean)
         : parseRequestTags(req.body.workTags);
+    }
+    if (req.body.avatar !== undefined) staff.avatar = req.body.avatar || "";
+    if (req.file) {
+      const uploadResult = await uploadMediaToCloudinary(req.file.buffer);
+      staff.avatar = uploadResult.secure_url || "";
     }
     await staff.save();
     res.json(staff);
