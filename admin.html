@@ -918,5 +918,97 @@ html,body{height:100%!important;overflow:hidden!important}
 })();
 </script>
 
+
+<!-- yamaden-staff-worktags-v14 -->
+<style id="yamaden-staff-worktags-v14-style">
+.work-tag-box{border:1px solid #dbe4ef;border-radius:12px;background:#f8fafc;padding:10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:250px;overflow:auto}.work-tag-item{min-height:38px;border:1px solid #e2e8f0;background:#fff;border-radius:10px;display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:12px;font-weight:900;color:#334155;cursor:pointer}.work-tag-item input{width:16px;height:16px;accent-color:#2563eb;flex:none}.work-tag-item:has(input:checked){border-color:#bfdbfe;background:#eff6ff;color:#1d4ed8}.staff-tag-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.staff-tag{display:inline-flex;align-items:center;min-height:24px;border-radius:999px;background:#f8fafc;border:1px solid #dbe4ef;color:#475569;font-size:11px;font-weight:900;padding:3px 8px}.staff-work-text{display:block}.staff-work-text .empty{color:#94a3b8;font-weight:800}@media(max-width:620px){.work-tag-box{grid-template-columns:1fr}}
+</style>
+<script id="yamaden-staff-worktags-v14-script">
+(function(){
+  const staffLang={
+    ja:{title:'スタッフプロフィール',add:'新しいプロフィールを追加',name:'名前',email:'メール',department:'部署',work:'担当業務',save:'保存',cancel:'キャンセル',edit:'編集',delete:'削除',empty:'スタッフプロフィールがありません',modalTitle:'スタッフプロフィール登録',chooseWork:'担当する業務を選択してください'},
+    vi:{title:'Hồ sơ nhân viên',add:'Thêm hồ sơ mới',name:'Tên',email:'Email',department:'Bộ phận làm việc',work:'Nội dung công việc phụ trách',save:'Lưu',cancel:'Hủy',edit:'Sửa',delete:'Xóa',empty:'Chưa có hồ sơ nhân viên',modalTitle:'Thêm hồ sơ nhân viên',chooseWork:'Chọn các công việc nhân viên phụ trách'}
+  };
+  const deptMap={
+    vi:{
+      'Bộ thiết kế':['Thiết kế bản vẽ điện','Thiết kế tủ điện','Thiết kế chiếu sáng','Tính tải điện','Bóc tách vật tư','Lập bản vẽ hoàn công','Kiểm tra bản vẽ'],
+      'Bộ công vụ':['Chuẩn bị vật tư','Điều phối công trình','Quản lý tiến độ','Đặt hàng vật tư','Kiểm tra tồn kho','Sắp xếp lịch thi công','Hỗ trợ hiện trường'],
+      'Bộ kinh doanh':['Tư vấn khách hàng','Báo giá','Theo dõi hợp đồng','Chăm sóc khách hàng','Khảo sát nhu cầu','Gửi đề xuất','Theo dõi thanh toán'],
+      'Bộ công sự':['Thi công điện','Đi dây điện','Lắp ổ cắm','Lắp đèn','Lắp tủ điện','Xử lý mất điện','Xử lý rò điện','Kiểm tra hiện trường','Sửa breaker'],
+      'Bộ FS':['Bảo trì định kỳ','Kiểm tra sau thi công','Xử lý sự cố','Bảo hành','Kiểm tra thiết bị','Hỗ trợ khách hàng','Bảo trì tủ điện'],
+      'Bộ nhân sự và kế toán':['Quản lý nhân sự','Chấm công','Tính lương','Kế toán công trình','Xuất hóa đơn','Quản lý chứng từ','Theo dõi chi phí'],
+      'Giám đốc':['Duyệt báo giá','Duyệt hợp đồng','Phân công quản lý','Kiểm tra KPI','Quyết định nhân sự','Duyệt chi phí','Quản lý chiến lược']
+    },
+    ja:{
+      '設計部':['電気図面設計','盤設計','照明設計','電気容量計算','材料拾い出し','竣工図作成','図面チェック'],
+      '工務部':['材料準備','現場調整','工程管理','材料発注','在庫確認','施工スケジュール','現場サポート'],
+      '営業部':['顧客相談','見積作成','契約フォロー','顧客対応','ニーズ確認','提案送付','入金確認'],
+      '工事部':['電気工事','配線工事','コンセント取付','照明取付','分電盤工事','停電対応','漏電対応','現場確認','ブレーカー修理'],
+      'FS部':['定期メンテナンス','施工後点検','トラブル対応','保証対応','設備点検','顧客サポート','分電盤メンテナンス'],
+      '人事・経理部':['人事管理','勤怠管理','給与計算','現場会計','請求書発行','書類管理','原価管理'],
+      '社長':['見積承認','契約承認','管理者割当','KPI確認','人事決裁','経費承認','経営戦略']
+    }
+  };
+  const depts=()=>Object.keys(deptMap[currentLang==='ja'?'ja':'vi']);
+  const sl=k=>(staffLang[currentLang||'ja']&&staffLang[currentLang||'ja'][k])||staffLang.ja[k]||k;
+  function sid(s){return s._id||s.id||''}
+  function staffDeptV14(s){return s.department||s.areas||s.dept||depts()[0]}
+  function parseTags(s){
+    if(Array.isArray(s?.workTags))return s.workTags;
+    if(Array.isArray(s?.tags))return s.tags;
+    const raw=s?.workContent||s?.work||s?.skills||'';
+    return String(raw).split(/[,、\n]/).map(x=>x.trim()).filter(Boolean);
+  }
+  function tagOptions(dept){return (deptMap[currentLang==='ja'?'ja':'vi'][dept]||[])}
+  function ensureStaffModalV14(){
+    let old=document.getElementById('staffFormModal');
+    if(old)old.remove();
+    const modal=document.createElement('div');modal.id='staffFormModal';modal.className='staff-form-modal';modal.onclick=e=>{if(e.target===modal)closeStaffProfileForm()};
+    modal.innerHTML='<div class="staff-form-box"><div class="staff-form-head"><div class="staff-form-title" id="staffFormTitle"></div><button class="staff-form-close" onclick="closeStaffProfileForm()">×</button></div><div class="staff-form-body"><input type="hidden" id="staffProfileId"><div class="staff-field"><label id="staffProfileNameLabel"></label><input id="staffProfileName"></div><div class="staff-field"><label id="staffProfileEmailLabel"></label><input id="staffProfileEmail" type="email"></div><div class="staff-field"><label id="staffProfileDeptLabel"></label><select id="staffProfileDept" onchange="renderWorkTagOptionsV14()"></select></div><div class="staff-field"><label id="staffProfileWorkLabel"></label><div class="muted" style="font-size:12px;font-weight:800" id="staffWorkHint"></div><div class="work-tag-box" id="staffWorkTagBox"></div></div><div class="staff-form-actions"><button class="staff-cancel-profile" onclick="closeStaffProfileForm()" id="staffProfileCancel"></button><button class="staff-save-profile" onclick="saveStaffProfileV8()" id="staffProfileSave"></button></div></div></div>';
+    document.body.appendChild(modal);
+  }
+  function applyStaffV14Labels(){
+    const map={staffFormTitle:'modalTitle',staffProfileNameLabel:'name',staffProfileEmailLabel:'email',staffProfileDeptLabel:'department',staffProfileWorkLabel:'work',staffProfileCancel:'cancel',staffProfileSave:'save',staffWorkHint:'chooseWork'};
+    Object.entries(map).forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.textContent=sl(k)});
+    const sel=document.getElementById('staffProfileDept'); if(sel){const current=sel.value;sel.innerHTML=depts().map(d=>'<option value="'+esc(d)+'">'+esc(d)+'</option>').join('');if(current&&depts().includes(current))sel.value=current;}
+  }
+  window.renderWorkTagOptionsV14=function(selected=[]){
+    const box=document.getElementById('staffWorkTagBox'); const sel=document.getElementById('staffProfileDept'); if(!box||!sel)return;
+    const chosen=new Set(Array.isArray(selected)?selected:[]);
+    box.innerHTML=tagOptions(sel.value).map(tag=>'<label class="work-tag-item"><input type="checkbox" value="'+esc(tag)+'" '+(chosen.has(tag)?'checked':'')+'> <span>'+esc(tag)+'</span></label>').join('')||'<div class="muted">-</div>';
+  };
+  window.openStaffProfileForm=function(id=''){
+    ensureStaffModalV14(); applyStaffV14Labels();
+    const s=(currentStaff||[]).find(x=>String(sid(x))===String(id));
+    document.getElementById('staffProfileId').value=id||'';
+    document.getElementById('staffProfileName').value=s?.name||'';
+    document.getElementById('staffProfileEmail').value=s?.email||'';
+    const dept=staffDeptV14(s||{}); document.getElementById('staffProfileDept').value=depts().includes(dept)?dept:depts()[0];
+    renderWorkTagOptionsV14(parseTags(s||{}));
+    document.getElementById('staffFormModal').classList.add('show');
+  };
+  window.closeStaffProfileForm=function(){document.getElementById('staffFormModal')?.classList.remove('show')};
+  window.saveStaffProfileV8=async function(){
+    const id=document.getElementById('staffProfileId').value;
+    const tags=[...document.querySelectorAll('#staffWorkTagBox input:checked')].map(x=>x.value);
+    const dept=document.getElementById('staffProfileDept').value;
+    const body={name:document.getElementById('staffProfileName').value.trim(),email:document.getElementById('staffProfileEmail').value.trim(),phone:'',areas:dept,department:dept,skills:tags.join(', '),workContent:tags.join(', '),workTags:tags,status:'active'};
+    if(!body.name)return;
+    const res=await apiFetch(API+'/admin/staff'+(id?'/'+encodeURIComponent(id):''),{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(res.status===401)return authFailLogout();closeStaffProfileForm();loadStaff();
+  };
+  window.renderStaff=function(){
+    const root=document.getElementById('staffView'); if(!root)return;
+    root.innerHTML='<div class="panel"><div class="staff-profile-shell"><div class="staff-profile-head"><div><div class="staff-profile-title">'+sl('title')+'</div><div class="muted" style="font-size:12px;font-weight:750;margin-top:4px">'+sl('department')+' / '+sl('work')+'</div></div><button class="staff-add-btn" onclick="openStaffProfileForm()">+ '+sl('add')+'</button></div><div class="staff-profile-list" id="staffProfileList"></div></div></div>';
+    const list=document.getElementById('staffProfileList');
+    list.innerHTML=(currentStaff||[]).length?(currentStaff||[]).map(s=>{const id=sid(s),tags=parseTags(s);return '<div class="staff-profile-row"><div><b>'+esc(s.name||'-')+'</b><div class="staff-profile-meta">'+esc(s.email||'-')+'</div></div><div><span class="staff-dept-pill">'+esc(staffDeptV14(s))+'</span></div><div class="staff-work-text">'+(tags.length?'<div class="staff-tag-list">'+tags.map(tag=>'<span class="staff-tag">'+esc(tag)+'</span>').join('')+'</div>':'<span class="empty">-</span>')+'</div><div class="action-row"><button class="small-btn done" onclick="openStaffProfileForm(\''+esc(id)+'\')">'+sl('edit')+'</button><button class="small-btn" style="color:#ef4444" onclick="deleteStaffProfile(\''+esc(id)+'\')">'+sl('delete')+'</button></div></div>'}).join(''):'<div class="muted" style="padding:24px;text-align:center">'+sl('empty')+'</div>';
+    const count=document.getElementById('finalStaffCount'); if(count)count.textContent=(currentStaff||[]).length;
+  };
+  const oldApplyV14=window.applyLanguage;
+  window.applyLanguage=function(){oldApplyV14&&oldApplyV14();if(currentView==='staff')renderStaff()};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{if(currentView==='staff')renderStaff()},420));
+})();
+</script>
+
 </body>
 </html>
