@@ -4253,7 +4253,53 @@ html,body{width:100%!important;max-width:100%!important;margin:0!important;overf
   document.addEventListener('change',e=>{if(e.target&&e.target.matches('#language,#authLanguage'))setLanguage(e.target.value)});
   if(!localStorage.getItem('language')&&!localStorage.getItem('lang'))setLanguage('ja');else applyHardLang();
   document.addEventListener('DOMContentLoaded',()=>setTimeout(applyHardLang,900));
-  setInterval(applyHardLang,900);
+  /* disabled v25 mojibake language loop */
+})();
+</script>
+
+<!-- yamaden-customer-language-unicode-final-v26 -->
+<script id="yamaden-customer-language-unicode-final-v26-script">
+(function(){
+  const TEXT={
+    ja:{
+      home:'\u30db\u30fc\u30e0',account:'\u30a2\u30ab\u30a6\u30f3\u30c8',send:'\u4f9d\u983c',settings:'\u8a2d\u5b9a',logout:'\u30ed\u30b0\u30a2\u30a6\u30c8',logo:'\u682a\u5f0f\u4f1a\u793e \u5c71\u96fb',welcome:'\u3088\u3046\u3053\u305d',brand:'YAMADEN',sub:'\u96fb\u8a71\u756a\u53f7\u3068PIN\u3067\u30ed\u30b0\u30a4\u30f3\u3057\u3066\u304f\u3060\u3055\u3044\u3002\u521d\u56de\u767b\u9332\u5f8c\u306f\u7ba1\u7406\u8005\u306e\u627f\u8a8d\u3092\u304a\u5f85\u3061\u304f\u3060\u3055\u3044\u3002',register:'\u65b0\u898f\u767b\u9332',login:'\u30ed\u30b0\u30a4\u30f3',loginBtn:'\u30ed\u30b0\u30a4\u30f3',registerBtn:'\u767b\u9332\u3059\u308b',saveProfile:'\u304a\u5ba2\u69d8\u60c5\u5831\u3092\u4fdd\u5b58',need:'\u4f9d\u983c\u6a5f\u80fd\u3092\u5229\u7528\u3059\u308b\u306b\u306f\u3001\u30ed\u30b0\u30a4\u30f3\u6e08\u307f\u3067\u7ba1\u7406\u8005\u627f\u8a8d\u6e08\u307f\u306e\u30a2\u30ab\u30a6\u30f3\u30c8\u304c\u5fc5\u8981\u3067\u3059\u3002',pending:'\u767b\u9332\u3042\u308a\u304c\u3068\u3046\u3054\u3056\u3044\u307e\u3059\u3002\u7ba1\u7406\u8005\u306e\u627f\u8a8d\u5f8c\u3001\u30a2\u30d7\u30ea\u3092\u3054\u5229\u7528\u3044\u305f\u3060\u3051\u307e\u3059\u3002',profile:'\u7d9a\u3051\u308b\u306b\u306f\u304a\u5ba2\u69d8\u60c5\u5831\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002',pin:'PIN 4\u301c6\u6841',pinConfirm:'PIN\u3092\u518d\u5165\u529b',name:'\u304a\u540d\u524d',phone:'\u96fb\u8a71\u756a\u53f7',email:'\u30e1\u30fc\u30eb',province:'\u90fd\u9053\u5e9c\u770c\u30fb\u5e02\u533a\u753a\u6751',project:'\u5de5\u4e8b\u4ef6\u540d',company:'\u4f1a\u793e\u540d / \u500b\u4eba\u540d',sendTitle:'\u30b5\u30dd\u30fc\u30c8\u4f9d\u983c\u3092\u9001\u4fe1',issueTitle:'\u4f9d\u983c\u5185\u5bb9\u3092\u9078\u629e',issueSub:'\u8a72\u5f53\u3059\u308b\u4f5c\u696d\u5185\u5bb9\u3092\u9078\u629e\u3057\u3001\u4e0b\u306b\u8a73\u7d30\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002',issuePlaceholder:'\u4f5c\u696d\u5185\u5bb9\u3092\u691c\u7d22\u3057\u3066\u9078\u629e',content:'\u81ea\u7531\u8a18\u5165\u30fb\u8a73\u7d30\u8aac\u660e',image:'\u5199\u771f\u30fb\u52d5\u753b',choose:'\u30d5\u30a1\u30a4\u30eb\u3092\u9078\u629e',upload:'\u5199\u771f\u30fb\u52d5\u753b\u3092\u9078\u629e',max:'\u6700\u592712\u30d5\u30a1\u30a4\u30eb\u30fbJPG / PNG / MP4',history:'\u4f9d\u983c\u5c65\u6b74',copy:'ID\u30b3\u30d4\u30fc',myRequests:'\u81ea\u5206\u306e\u4f9d\u983c',check:'\u78ba\u8a8d\u3059\u308b',checkTitle:'\u4f9d\u983c\u72b6\u6cc1\u3092\u78ba\u8a8d',requestId:'\u53d7\u4ed8ID',clearHistory:'\u3053\u306e\u7aef\u672b\u306e\u5c65\u6b74\u3092\u524a\u9664'
+    },
+    vi:{
+      home:'Trang ch\u1ee7',account:'T\u00e0i kho\u1ea3n',send:'Y\u00eau c\u1ea7u',settings:'C\u00e0i \u0111\u1eb7t',logout:'\u0110\u0103ng xu\u1ea5t',logo:'YAMADEN',welcome:'Ch\u00e0o m\u1eebng',brand:'YAMADEN',sub:'\u0110\u0103ng nh\u1eadp b\u1eb1ng s\u1ed1 \u0111i\u1ec7n tho\u1ea1i v\u00e0 m\u00e3 PIN. N\u1ebfu \u0111\u0103ng k\u00fd m\u1edbi, vui l\u00f2ng ch\u1edd admin duy\u1ec7t.',register:'\u0110\u0103ng k\u00fd m\u1edbi',login:'\u0110\u0103ng nh\u1eadp',loginBtn:'\u0110\u0103ng nh\u1eadp',registerBtn:'\u0110\u0103ng k\u00fd',saveProfile:'L\u01b0u th\u00f4ng tin kh\u00e1ch h\u00e0ng',need:'\u0110\u1ec3 s\u1eed d\u1ee5ng app, t\u00e0i kho\u1ea3n c\u1ea7n \u0111\u0103ng nh\u1eadp v\u00e0 \u0111\u01b0\u1ee3c admin duy\u1ec7t.',pending:'\u0110\u0103ng k\u00fd th\u00e0nh c\u00f4ng. Vui l\u00f2ng ch\u1edd admin duy\u1ec7t tr\u01b0\u1edbc khi s\u1eed d\u1ee5ng app.',profile:'Vui l\u00f2ng nh\u1eadp th\u00f4ng tin kh\u00e1ch h\u00e0ng \u0111\u1ec3 ti\u1ebfp t\u1ee5c.',pin:'M\u00e3 PIN 4-6 s\u1ed1',pinConfirm:'Nh\u1eadp l\u1ea1i m\u00e3 PIN',name:'H\u1ecd v\u00e0 t\u00ean',phone:'S\u1ed1 \u0111i\u1ec7n tho\u1ea1i',email:'Email',province:'T\u1ec9nh / th\u00e0nh',project:'T\u00ean c\u00f4ng tr\u00ecnh',company:'C\u00f4ng ty / c\u00e1 nh\u00e2n',sendTitle:'G\u1eedi y\u00eau c\u1ea7u h\u1ed7 tr\u1ee3',issueTitle:'Ch\u1ecdn v\u1ea5n \u0111\u1ec1 y\u00eau c\u1ea7u',issueSub:'Ch\u1ecdn n\u1ed9i dung c\u00f4ng vi\u1ec7c ph\u00f9 h\u1ee3p, sau \u0111\u00f3 m\u00f4 t\u1ea3 chi ti\u1ebft b\u00ean d\u01b0\u1edbi.',issuePlaceholder:'T\u00ecm v\u00e0 ch\u1ecdn n\u1ed9i dung c\u00f4ng vi\u1ec7c',content:'M\u00f4 t\u1ea3 t\u1ef1 do / chi ti\u1ebft y\u00eau c\u1ea7u',image:'H\u00ecnh \u1ea3nh / Video',choose:'Ch\u1ecdn file',upload:'Ch\u1ecdn \u1ea3nh ho\u1eb7c video',max:'T\u1ed1i \u0111a 12 file - JPG / PNG / MP4',history:'L\u1ecbch s\u1eed',copy:'Copy ID',myRequests:'Y\u00eau c\u1ea7u c\u1ee7a t\u00f4i',check:'Ki\u1ec3m tra',checkTitle:'Tra c\u1ee9u tr\u1ea1ng th\u00e1i y\u00eau c\u1ea7u',requestId:'M\u00e3 y\u00eau c\u1ea7u',clearHistory:'X\u00f3a l\u1ecbch s\u1eed tr\u00ean m\u00e1y n\u00e0y'
+    }
+  };
+  function lang(){const raw=String(localStorage.getItem('language')||localStorage.getItem('lang')||'ja');return raw.indexOf('vi')===0?'vi':'ja'}
+  function D(){return TEXT[lang()]||TEXT.ja}
+  function by(id){return document.getElementById(id)}
+  function set(id,k){const el=by(id);if(el)el.textContent=D()[k]||''}
+  function ph(id,k){const el=by(id);if(el)el.placeholder=D()[k]||''}
+  function setSelect(id){const el=by(id);if(!el)return;el.innerHTML='<option value="ja">JP</option><option value="vi">VN</option>';el.value=lang()}
+  function mode(){try{return accountMode||'register'}catch(e){return 'register'}}
+  window.yamadenApplyUnicodeLanguage=function(){
+    document.documentElement.lang=lang();
+    try{window.lang=lang()}catch(e){}
+    setSelect('language');setSelect('authLanguage');
+    const logo=document.querySelector('.logo-jp');if(logo)logo.textContent=D().logo;
+    const en=document.querySelector('.logo-en');if(en)en.textContent='YAMADEN.CO.LTD';
+    const logout=by('appLogoutBtn');if(logout)logout.textContent=D().logout;
+    const nav={tabHome:'home',tabAccount:'account',tabSend:'send',tabServices:'settings'};Object.entries(nav).forEach(([id,k])=>{const el=document.querySelector('#'+id+' span:last-child');if(el)el.textContent=D()[k]});
+    set('accountWelcome','welcome');set('accountModeRegister','register');set('accountModeLogin','login');
+    ph('accountPhone','phone');ph('accountPin','pin');ph('accountPinConfirm','pinConfirm');ph('accountName','name');ph('accountEmail','email');ph('accountProvince','province');ph('accountProjectName','project');ph('accountCompanyType','company');
+    const loginText=by('accountLoginText');if(loginText)loginText.textContent=mode()==='profile'?D().saveProfile:(mode()==='login'?D().loginBtn:D().registerBtn);
+    const accountText=by('accountText');if(accountText)accountText.textContent=mode()==='profile'?D().profile:D().sub;
+    const note=by('authRequiredNote');if(note){let user=null;try{user=JSON.parse(localStorage.getItem('userProfile')||'null')}catch(e){}note.textContent=user&&!user.profileCompleted?D().profile:user&&user.status==='pending'?D().pending:D().need;}
+    set('sendTitle','sendTitle');set('checkTitle','checkTitle');set('issueTitle','issueTitle');set('issueSub','issueSub');set('labelContent','content');set('labelImage','image');set('chooseImageBtn','choose');set('copyIdText','copy');set('historyText','history');set('myRequestTitle','myRequests');set('clearHistoryBtn','clearHistory');set('checkBtnText','check');set('labelCheckId','requestId');
+    ph('issueSearchInput','issuePlaceholder');ph('content','content');ph('checkId','requestId');
+    const upload=by('uploadText');if(upload&&!upload.querySelector('.preview-grid'))upload.textContent=D().upload;
+    const sub=document.querySelector('.upload-sub');if(sub)sub.textContent=D().max;
+  };
+  function choose(v){v=String(v||'ja').indexOf('vi')===0?'vi':'ja';localStorage.setItem('language',v);localStorage.setItem('lang',v);try{window.lang=v}catch(e){}window.yamadenApplyUnicodeLanguage()}
+  window.changeLanguage=function(){choose(by('language')?.value||by('authLanguage')?.value||lang())};
+  const oldMode=window.setAccountMode;window.setAccountMode=function(m){if(oldMode)oldMode(m);setTimeout(window.yamadenApplyUnicodeLanguage,0)};
+  document.addEventListener('change',e=>{if(e.target&&e.target.matches('#language,#authLanguage'))choose(e.target.value)});
+  if(!localStorage.getItem('language')&&!localStorage.getItem('lang'))choose('ja');else window.yamadenApplyUnicodeLanguage();
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(window.yamadenApplyUnicodeLanguage,500));
+  setInterval(window.yamadenApplyUnicodeLanguage,500);
 })();
 </script>
 
