@@ -4100,7 +4100,7 @@ body.yamaden-app-active .app.auth-app-mode{top:0!important;bottom:0!important;gr
   document.addEventListener('change',e=>{if(e.target&&e.target.matches('#language,#authLanguage'))setLang(e.target.value,true)});
   if(!localStorage.getItem('language')&&!localStorage.getItem('lang'))setLang('ja',true);else setLang(current(),true);
   document.addEventListener('DOMContentLoaded',()=>setTimeout(syncLanguageUI,900));
-  setInterval(syncLanguageUI,1500);
+  /* disabled old broken language loop */
 })();
 </script>
 
@@ -4210,7 +4210,7 @@ html,body{width:100%!important;max-width:100%!important;margin:0!important;overf
   const oldShow=window.showTab; window.showTab=function(tab){if(oldShow)oldShow(tab);setTimeout(sync,0)};
   document.addEventListener('change',e=>{if(e.target&&e.target.matches('#language,#authLanguage'))setLanguage(e.target.value)});
   if(!localStorage.getItem('language')&&!localStorage.getItem('lang'))setLanguage('ja'); else setLanguage(current());
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(sync,700)); setInterval(sync,1400);
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(sync,700)); /* disabled old broken language loop */
 })();
 </script>
 
