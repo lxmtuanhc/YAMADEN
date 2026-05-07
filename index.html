@@ -4006,24 +4006,24 @@ body.yamaden-app-active .app.auth-app-mode{top:0!important;bottom:0!important;gr
 (function(){
   const uiText={
     ja:{
-      home:'???',account:'?????',send:'??',settings:'??',logout:'?????',
-      loginWelcome:'????',
-      loginSub:'?????PIN????????????????????????????',
-      register:'????',loginMode:'????',loginBtn:'??',registerBtn:'????',saveProfile:'????????',
-      need:'??????????????????????????????????????',
-      pending:'???????????????????????????????????',
-      profile:'????????????????????',
-      pin:'PIN 4?6?',pinConfirm:'PIN??',phone:'????',logo:'???? ??'
+      home:'\u30db\u30fc\u30e0',account:'\u30a2\u30ab\u30a6\u30f3\u30c8',send:'\u4f9d\u983c',settings:'\u8a2d\u5b9a',logout:'\u30ed\u30b0\u30a2\u30a6\u30c8',
+      loginWelcome:'\u3088\u3046\u3053\u305d',
+      loginSub:'\u96fb\u8a71\u756a\u53f7\u3068PIN\u3067\u30ed\u30b0\u30a4\u30f3\u3057\u3066\u304f\u3060\u3055\u3044\u3002\u627f\u8a8d\u5f8c\u306b\u4f9d\u983c\u6a5f\u80fd\u3092\u5229\u7528\u3067\u304d\u307e\u3059\u3002',
+      register:'\u65b0\u898f\u767b\u9332',loginMode:'\u30ed\u30b0\u30a4\u30f3',loginBtn:'\u30ed\u30b0\u30a4\u30f3',registerBtn:'\u767b\u9332\u3059\u308b',saveProfile:'\u304a\u5ba2\u69d8\u60c5\u5831\u3092\u4fdd\u5b58',
+      need:'\u4f9d\u983c\u6a5f\u80fd\u3092\u5229\u7528\u3059\u308b\u306b\u306f\u3001\u30ed\u30b0\u30a4\u30f3\u6e08\u307f\u3067\u7ba1\u7406\u8005\u627f\u8a8d\u6e08\u307f\u306e\u30a2\u30ab\u30a6\u30f3\u30c8\u304c\u5fc5\u8981\u3067\u3059\u3002',
+      pending:'\u767b\u9332\u3042\u308a\u304c\u3068\u3046\u3054\u3056\u3044\u307e\u3059\u3002\u7ba1\u7406\u8005\u306e\u627f\u8a8d\u5f8c\u3001\u30a2\u30d7\u30ea\u3092\u3054\u5229\u7528\u3044\u305f\u3060\u3051\u307e\u3059\u3002',
+      profile:'\u7d9a\u3051\u308b\u306b\u306f\u304a\u5ba2\u69d8\u60c5\u5831\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002',
+      pin:'PIN 4\u301c6\u6841',pinConfirm:'PIN\u78ba\u8a8d',phone:'\u96fb\u8a71\u756a\u53f7',logo:'\u682a\u5f0f\u4f1a\u793e \u5c71\u96fb'
     },
     vi:{
-      home:'Trang ch?',account:'T?i kho?n',send:'Y?u c?u',settings:'C?i ??t',logout:'??ng xu?t',
-      loginWelcome:'Ch?o m?ng',
-      loginSub:'??ng nh?p b?ng s? ?i?n tho?i v? m? PIN. Sau khi admin duy?t, b?n c? th? s? d?ng app.',
-      register:'??ng k?',loginMode:'??ng nh?p',loginBtn:'??ng nh?p',registerBtn:'??ng k?',saveProfile:'L?u th?ng tin kh?ch h?ng',
-      need:'?? s? d?ng app, t?i kho?n c?n ??ng nh?p v? ???c admin duy?t.',
-      pending:'??ng k? th?nh c?ng. Vui l?ng ch? admin duy?t tr??c khi s? d?ng app.',
-      profile:'Vui l?ng nh?p th?ng tin kh?ch h?ng ?? ti?p t?c.',
-      pin:'M? PIN 4-6 s?',pinConfirm:'Nh?p l?i m? PIN',phone:'S? ?i?n tho?i',logo:'YAMADEN'
+      home:'Trang ch\u1ee7',account:'T\u00e0i kho\u1ea3n',send:'Y\u00eau c\u1ea7u',settings:'C\u00e0i \u0111\u1eb7t',logout:'\u0110\u0103ng xu\u1ea5t',
+      loginWelcome:'Ch\u00e0o m\u1eebng',
+      loginSub:'\u0110\u0103ng nh\u1eadp b\u1eb1ng s\u1ed1 \u0111i\u1ec7n tho\u1ea1i v\u00e0 m\u00e3 PIN. Sau khi admin duy\u1ec7t, b\u1ea1n c\u00f3 th\u1ec3 s\u1eed d\u1ee5ng app.',
+      register:'\u0110\u0103ng k\u00fd',loginMode:'\u0110\u0103ng nh\u1eadp',loginBtn:'\u0110\u0103ng nh\u1eadp',registerBtn:'\u0110\u0103ng k\u00fd',saveProfile:'L\u01b0u th\u00f4ng tin kh\u00e1ch h\u00e0ng',
+      need:'\u0110\u1ec3 s\u1eed d\u1ee5ng app, t\u00e0i kho\u1ea3n c\u1ea7n \u0111\u0103ng nh\u1eadp v\u00e0 \u0111\u01b0\u1ee3c admin duy\u1ec7t.',
+      pending:'\u0110\u0103ng k\u00fd th\u00e0nh c\u00f4ng. Vui l\u00f2ng ch\u1edd admin duy\u1ec7t tr\u01b0\u1edbc khi s\u1eed d\u1ee5ng app.',
+      profile:'Vui l\u00f2ng nh\u1eadp th\u00f4ng tin kh\u00e1ch h\u00e0ng \u0111\u1ec3 ti\u1ebfp t\u1ee5c.',
+      pin:'M\u00e3 PIN 4-6 s\u1ed1',pinConfirm:'Nh\u1eadp l\u1ea1i m\u00e3 PIN',phone:'S\u1ed1 \u0111i\u1ec7n tho\u1ea1i',logo:'YAMADEN'
     }
   };
   function current(){
@@ -4039,29 +4039,15 @@ body.yamaden-app-active .app.auth-app-mode{top:0!important;bottom:0!important;gr
     localStorage.setItem('language',v);
     document.documentElement.lang=v;
     syncLanguageUI();
-    if(!skipApply){
-      try{if(window.applyLang)window.applyLang()}catch(e){}
-      setTimeout(syncLanguageUI,0);
-    }
+    if(!skipApply){try{if(window.applyLang)window.applyLang()}catch(e){}setTimeout(syncLanguageUI,0)}
   }
   function text(k){return (uiText[current()]&&uiText[current()][k])||uiText.ja[k]||k}
   function set(id,value){const el=document.getElementById(id);if(el&&el.textContent!==value)el.textContent=value}
   function ph(id,value){const el=document.getElementById(id);if(el&&el.placeholder!==value)el.placeholder=value}
-  function syncSelect(id){
-    const el=document.getElementById(id);if(!el)return;
-    if(el.options.length<2||el.options[0].value!=='ja'||el.options[1].value!=='vi'){
-      el.innerHTML='<option value="ja">JP</option><option value="vi">VN</option>';
-    }
-    el.options[0].textContent='JP';
-    el.options[1].textContent='VN';
-    el.value=current();
-  }
+  function syncSelect(id){const el=document.getElementById(id);if(!el)return;if(el.options.length<2||el.options[0].value!=='ja'||el.options[1].value!=='vi'){el.innerHTML='<option value="ja">JP</option><option value="vi">VN</option>'}el.options[0].textContent='JP';el.options[1].textContent='VN';el.value=current()}
   function accountModeNow(){try{return accountMode||'register'}catch(e){return 'register'}}
   function syncLanguageUI(){
-    const v=current();
-    document.documentElement.lang=v;
-    syncSelect('language');
-    syncSelect('authLanguage');
+    const v=current();document.documentElement.lang=v;syncSelect('language');syncSelect('authLanguage');
     const logo=document.querySelector('.logo-jp');if(logo)logo.textContent=text('logo');
     const en=document.querySelector('.logo-en');if(en)en.textContent='YAMADEN.CO.LTD';
     const logout=document.getElementById('appLogoutBtn');if(logout)logout.textContent=text('logout');
@@ -4073,29 +4059,15 @@ body.yamaden-app-active .app.auth-app-mode{top:0!important;bottom:0!important;gr
     set('accountModeRegister',text('register'));
     set('accountModeLogin',text('loginMode'));
     set('accountLoginText',mode==='profile'?text('saveProfile'):(mode==='login'?text('loginBtn'):text('registerBtn')));
-    ph('accountPhone',text('phone'));
-    ph('accountPin',text('pin'));
-    ph('accountPinConfirm',text('pinConfirm'));
+    ph('accountPhone',text('phone'));ph('accountPin',text('pin'));ph('accountPinConfirm',text('pinConfirm'));
     const note=document.getElementById('authRequiredNote');
     if(note){let user=null;try{user=JSON.parse(localStorage.getItem('userProfile')||'null')}catch(e){}note.textContent=user&&!user.profileCompleted?text('profile'):user&&user.status==='pending'?text('pending'):text('need')}
   }
   const oldChange=window.changeLanguage;
-  window.changeLanguage=function(){
-    const main=document.getElementById('language');
-    const auth=document.getElementById('authLanguage');
-    const v=(main&&document.activeElement===main)?main.value:(auth&&document.activeElement===auth)?auth.value:(main?.value||auth?.value||current());
-    try{lang=String(v).startsWith('vi')?'vi':'ja'}catch(e){}
-    localStorage.setItem('lang',String(v).startsWith('vi')?'vi':'ja');
-    localStorage.setItem('language',String(v).startsWith('vi')?'vi':'ja');
-    if(oldChange)oldChange();
-    setTimeout(syncLanguageUI,0);
-  };
-  const oldApply=window.applyLang;
-  window.applyLang=function(){if(oldApply)oldApply();setTimeout(syncLanguageUI,0)};
-  const oldSetMode=window.setAccountMode;
-  window.setAccountMode=function(mode){if(oldSetMode)oldSetMode(mode);setTimeout(syncLanguageUI,0)};
-  const oldUpdate=window.updateAccountUI;
-  window.updateAccountUI=function(){if(oldUpdate)oldUpdate();setTimeout(syncLanguageUI,0)};
+  window.changeLanguage=function(){const main=document.getElementById('language');const auth=document.getElementById('authLanguage');const v=(main&&document.activeElement===main)?main.value:(auth&&document.activeElement===auth)?auth.value:(main?.value||auth?.value||current());try{lang=String(v).startsWith('vi')?'vi':'ja'}catch(e){}localStorage.setItem('lang',String(v).startsWith('vi')?'vi':'ja');localStorage.setItem('language',String(v).startsWith('vi')?'vi':'ja');if(oldChange)oldChange();setTimeout(syncLanguageUI,0)};
+  const oldApply=window.applyLang;window.applyLang=function(){if(oldApply)oldApply();setTimeout(syncLanguageUI,0)};
+  const oldSetMode=window.setAccountMode;window.setAccountMode=function(mode){if(oldSetMode)oldSetMode(mode);setTimeout(syncLanguageUI,0)};
+  const oldUpdate=window.updateAccountUI;window.updateAccountUI=function(){if(oldUpdate)oldUpdate();setTimeout(syncLanguageUI,0)};
   document.addEventListener('change',e=>{if(e.target&&e.target.matches('#language,#authLanguage'))setLang(e.target.value,true)});
   if(!localStorage.getItem('language')&&!localStorage.getItem('lang'))setLang('ja',true);else setLang(current(),true);
   document.addEventListener('DOMContentLoaded',()=>setTimeout(syncLanguageUI,900));
@@ -4213,8 +4185,8 @@ body.yamaden-app-active{position:fixed!important;inset:0 auto auto 0!important;w
 .app.auth-app-mode .top-row{width:100%!important;max-width:100%!important;min-width:0!important;height:48px!important;display:grid!important;grid-template-columns:minmax(0,1fr) 54px!important;gap:8px!important;align-items:center!important;overflow:hidden!important}.app.auth-app-mode .logo-box{min-width:0!important;width:100%!important;display:flex!important;align-items:center!important;gap:8px!important;overflow:hidden!important}.app.auth-app-mode .logo-box img{width:36px!important;height:36px!important;min-width:36px!important;max-width:36px!important;flex:0 0 36px!important;border-radius:12px!important}.app.auth-app-mode .logo-text{min-width:0!important;overflow:hidden!important}.app.auth-app-mode .logo-jp,.app.auth-app-mode .logo-en{display:block!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}.app.auth-app-mode .logo-jp{font-size:13px!important;line-height:1.15!important}.app.auth-app-mode .logo-en{font-size:9px!important;line-height:1.15!important;letter-spacing:.06em!important}.app.auth-app-mode .lang-select{width:54px!important;min-width:54px!important;max-width:54px!important;height:38px!important;padding:0!important;border-radius:13px!important;text-align:center!important;text-align-last:center!important}.app.auth-app-mode .app-logout-btn{display:none!important}
 .app.auth-app-mode .main{grid-row:2!important;width:100%!important;max-width:100%!important;min-width:0!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;background:#f5f7fb!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important}.app.auth-app-mode .container{width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:12px 12px 18px!important;overflow-x:hidden!important;background:#f5f7fb!important}.app.auth-app-mode section,.app.auth-app-mode .card,.app.auth-app-mode .home-hero-card,.app.auth-app-mode .trust-row,.app.auth-app-mode .brand-visual,.app.auth-app-mode .company-card,.app.auth-app-mode .utility-card,.app.auth-app-mode .service-detail,.app.auth-app-mode .settings-section-card,.app.auth-app-mode .profile-card,.app.auth-app-mode .account-panel,.app.auth-app-mode .account-card,.app.auth-app-mode .success-box,.app.auth-app-mode .upload-box{width:100%!important;max-width:100%!important;min-width:0!important;margin-left:0!important;margin-right:0!important;overflow:hidden!important}.app.auth-app-mode .settings-row{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:10px!important;align-items:center!important;width:100%!important;max-width:100%!important}.app.auth-app-mode .settings-row>*{min-width:0!important}.app.auth-app-mode .settings-row strong,.app.auth-app-mode .settings-row p{overflow-wrap:anywhere!important}
 .app.auth-app-mode .bottom-nav{grid-row:3!important;position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;transform:none!important;width:100%!important;max-width:100%!important;height:calc(70px + env(safe-area-inset-bottom))!important;min-height:calc(70px + env(safe-area-inset-bottom))!important;max-height:calc(70px + env(safe-area-inset-bottom))!important;margin:0!important;padding:8px 18px calc(10px + env(safe-area-inset-bottom))!important;border-radius:0!important;background:#171917!important;display:flex!important;align-items:center!important;justify-content:space-between!important;overflow:hidden!important;z-index:30!important}.app.auth-app-mode .bottom-nav button{flex:1 1 0!important;width:auto!important;max-width:64px!important;min-width:0!important;height:48px!important;border-radius:16px!important;padding:0!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important}.app.auth-app-mode .bottom-nav button span:not(.icon){display:none!important}.app.auth-app-mode .bottom-nav button .icon,.app.auth-app-mode .bottom-nav button .icon svg{width:24px!important;height:24px!important}.app.auth-app-mode .bottom-nav button.active{background:rgba(255,90,31,.16)!important;color:#ff5a1f!important;box-shadow:inset 0 0 0 1px rgba(255,90,31,.16)!important}
-html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-height:100svh!important;overflow:hidden!important;background:#f8fbff!important}.app.auth-login-mode{width:var(--yamaden-stable-width,100%)!important;max-width:480px!important;min-width:0!important;height:100svh!important;max-height:100svh!important;margin:0 auto!important;display:block!important;background:#f8fbff!important;box-shadow:none!important;overflow:hidden!important}.app.auth-login-mode .top-header,.app.auth-login-mode .bottom-nav{display:none!important}.app.auth-login-mode .main,.app.auth-login-mode .container,.app.auth-login-mode #accountSection{width:100%!important;max-width:100%!important;height:100svh!important;min-height:100svh!important;max-height:100svh!important;margin:0!important;padding:0!important;overflow:hidden!important}.app.auth-login-mode .account-landing{height:100svh!important;min-height:100svh!important;max-height:100svh!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;padding:calc(76px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;background:linear-gradient(135deg,#f8fbff 0%,#eef6ff 52%,#dbeafe 100%)!important}.app.auth-login-mode .account-brand{position:relative!important;left:auto!important;top:auto!important;z-index:2!important;width:min(330px,100%)!important;margin:0 auto 14px!important;display:flex!important;align-items:center!important;gap:12px!important;flex:0 0 auto!important}.app.auth-login-mode .account-brand img{width:48px!important;height:48px!important;border-radius:15px!important}.app.auth-login-mode .account-panel{z-index:2!important;width:min(330px,100%)!important;margin:0 auto!important;flex:0 0 auto!important;transform:none!important}.app.auth-login-mode .account-card,.app.auth-login-mode .profile-card{max-height:none!important;overflow:visible!important;border-radius:24px!important;background:rgba(255,255,255,.96)!important;box-shadow:0 18px 50px rgba(15,23,42,.14)!important;border:1px solid rgba(255,255,255,.82)!important;padding:18px!important}.app.auth-login-mode .account-mode{height:46px!important;margin:12px 0!important;padding:4px!important;border-radius:18px!important}.app.auth-login-mode .account-mode button{height:38px!important;border-radius:14px!important;font-size:12px!important;line-height:1.1!important}.app.auth-login-mode .account-fields{gap:9px!important;margin-top:0!important}.app.auth-login-mode .account-fields input{height:48px!important;min-height:48px!important;border-radius:13px!important;text-align:center!important;font-size:14px!important;font-weight:850!important;padding:0 14px!important}.app.auth-login-mode .account-card .main-btn{height:52px!important;min-height:52px!important;border-radius:14px!important;margin-top:10px!important;font-size:16px!important}.app.auth-login-mode .auth-required-note{margin-top:10px!important;padding:10px 12px!important;border-radius:14px!important;font-size:12px!important;line-height:1.4!important;text-align:center!important}.toast{top:calc(54px + env(safe-area-inset-top))!important;max-width:calc(100% - 28px)!important;z-index:100000!important}
-@media(max-height:620px){.app.auth-login-mode .account-landing{padding-top:calc(64px + env(safe-area-inset-top))!important;padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}.app.auth-login-mode .account-brand{margin-bottom:10px!important}.app.auth-login-mode .account-card,.app.auth-login-mode .profile-card{padding:14px!important}.app.auth-login-mode .account-welcome{margin-bottom:8px!important}.app.auth-login-mode .account-mode{margin:8px 0!important}}
+html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-height:100svh!important;overflow:hidden!important;background:#f8fbff!important}.app.auth-login-mode{width:var(--yamaden-stable-width,100%)!important;max-width:480px!important;min-width:0!important;height:100svh!important;max-height:100svh!important;margin:0 auto!important;display:block!important;background:#f8fbff!important;box-shadow:none!important;overflow:hidden!important}.app.auth-login-mode .top-header,.app.auth-login-mode .bottom-nav{display:none!important}.app.auth-login-mode .main,.app.auth-login-mode .container,.app.auth-login-mode #accountSection{width:100%!important;max-width:100%!important;height:100svh!important;min-height:100svh!important;max-height:100svh!important;margin:0!important;padding:0!important;overflow:hidden!important}.app.auth-login-mode .account-landing{height:100svh!important;min-height:100svh!important;max-height:100svh!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;padding:calc(82px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom))!important;overflow:hidden!important;background:linear-gradient(135deg,#f8fbff 0%,#eef6ff 52%,#dbeafe 100%)!important}.app.auth-login-mode .account-brand{position:relative!important;left:auto!important;top:auto!important;z-index:2!important;width:min(330px,100%)!important;margin:0 auto 12px!important;display:flex!important;align-items:center!important;gap:12px!important;flex:0 0 auto!important}.app.auth-login-mode .account-brand img{width:46px!important;height:46px!important;border-radius:15px!important}.app.auth-login-mode .account-panel{z-index:2!important;width:min(330px,100%)!important;margin:0 auto!important;flex:0 0 auto!important;transform:none!important}.app.auth-login-mode .account-card,.app.auth-login-mode .profile-card{max-height:none!important;overflow:hidden!important;border-radius:24px!important;background:rgba(255,255,255,.96)!important;box-shadow:0 18px 50px rgba(15,23,42,.14)!important;border:1px solid rgba(255,255,255,.82)!important;padding:16px!important}.app.auth-login-mode .account-mode{height:44px!important;margin:10px 0!important;padding:4px!important;border-radius:18px!important}.app.auth-login-mode .account-mode button{height:36px!important;border-radius:14px!important;font-size:12px!important;line-height:1.1!important}.app.auth-login-mode .account-fields{gap:8px!important;margin-top:0!important}.app.auth-login-mode .account-fields input{height:46px!important;min-height:46px!important;border-radius:13px!important;text-align:center!important;font-size:14px!important;font-weight:850!important;padding:0 14px!important}.app.auth-login-mode .account-card .main-btn{height:50px!important;min-height:50px!important;border-radius:14px!important;margin-top:9px!important;font-size:16px!important}.app.auth-login-mode .auth-required-note{margin-top:9px!important;padding:9px 10px!important;border-radius:14px!important;font-size:11px!important;line-height:1.35!important;text-align:center!important}.toast{top:calc(54px + env(safe-area-inset-top))!important;max-width:calc(100% - 28px)!important;z-index:100000!important}
+@media(max-height:620px){.app.auth-login-mode .account-landing{padding-top:calc(74px + env(safe-area-inset-top))!important;padding-bottom:calc(14px + env(safe-area-inset-bottom))!important}.app.auth-login-mode .account-brand{margin-bottom:8px!important}.app.auth-login-mode .account-brand img{width:42px!important;height:42px!important}.app.auth-login-mode .account-card,.app.auth-login-mode .profile-card{padding:13px!important}.app.auth-login-mode .account-welcome{margin-bottom:7px!important}.app.auth-login-mode .account-mode{margin:7px 0!important}.app.auth-login-mode .account-fields input{height:42px!important;min-height:42px!important}.app.auth-login-mode .account-card .main-btn{height:46px!important;min-height:46px!important}}
 @media(max-width:380px){.app.auth-app-mode .container{padding-left:10px!important;padding-right:10px!important}.app.auth-app-mode .bottom-nav{padding-left:12px!important;padding-right:12px!important}.app.auth-login-mode .account-landing{padding-left:14px!important;padding-right:14px!important}.app.auth-login-mode .account-panel,.app.auth-login-mode .account-brand{width:min(320px,100%)!important}}
 </style>
 <script id="yamaden-customer-mobile-layout-v39-script">
