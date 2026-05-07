@@ -252,25 +252,76 @@ function publicUser(user) {
 }
 
 
+const ASSIGNMENT_TAG_MAP = Object.freeze({
+  "Thiết kế bản vẽ điện":"電気図面設計", "電気図面設計":"電気図面設計",
+  "Thiết kế tủ điện":"盤設計", "盤設計":"盤設計",
+  "Thiết kế chiếu sáng":"照明設計", "照明設計":"照明設計",
+  "Tính tải điện":"電気容量計算", "電気容量計算":"電気容量計算",
+  "Bóc tách vật tư":"材料拾い出し", "材料拾い出し":"材料拾い出し",
+  "Lập bản vẽ hoàn công":"竣工図作成", "竣工図作成":"竣工図作成",
+  "Kiểm tra bản vẽ":"図面チェック", "図面チェック":"図面チェック",
+  "Chuẩn bị vật tư":"材料準備", "材料準備":"材料準備",
+  "Điều phối công trình":"現場調整", "現場調整":"現場調整",
+  "Quản lý tiến độ":"工程管理", "工程管理":"工程管理",
+  "Đặt hàng vật tư":"材料発注", "材料発注":"材料発注",
+  "Kiểm tra tồn kho":"在庫確認", "在庫確認":"在庫確認",
+  "Sắp xếp lịch thi công":"施工スケジュール", "施工スケジュール":"施工スケジュール",
+  "Hỗ trợ hiện trường":"現場サポート", "現場サポート":"現場サポート",
+  "Tư vấn khách hàng":"顧客相談", "顧客相談":"顧客相談",
+  "Báo giá":"見積作成", "見積作成":"見積作成",
+  "Theo dõi hợp đồng":"契約フォロー", "契約フォロー":"契約フォロー",
+  "Chăm sóc khách hàng":"顧客対応", "顧客対応":"顧客対応",
+  "Khảo sát nhu cầu":"ニーズ確認", "ニーズ確認":"ニーズ確認",
+  "Gửi đề xuất":"提案送付", "提案送付":"提案送付",
+  "Theo dõi thanh toán":"入金確認", "入金確認":"入金確認",
+  "Thi công điện":"電気工事", "電気工事":"電気工事",
+  "Đi dây điện":"配線工事", "配線工事":"配線工事",
+  "Lắp ổ cắm":"コンセント取付", "コンセント取付":"コンセント取付",
+  "Lắp đèn":"照明取付", "照明取付":"照明取付",
+  "Lắp tủ điện":"分電盤工事", "分電盤工事":"分電盤工事",
+  "Xử lý mất điện":"停電対応", "停電対応":"停電対応",
+  "Xử lý rò điện":"漏電対応", "漏電対応":"漏電対応",
+  "Kiểm tra hiện trường":"現場確認", "現場確認":"現場確認",
+  "Sửa breaker":"ブレーカー修理", "ブレーカー修理":"ブレーカー修理",
+  "Bảo trì định kỳ":"定期メンテナンス", "定期メンテナンス":"定期メンテナンス",
+  "Kiểm tra sau thi công":"施工後点検", "施工後点検":"施工後点検",
+  "Xử lý sự cố":"トラブル対応", "トラブル対応":"トラブル対応",
+  "Bảo hành":"保証対応", "保証対応":"保証対応",
+  "Kiểm tra thiết bị":"設備点検", "設備点検":"設備点検",
+  "Hỗ trợ khách hàng":"顧客サポート", "顧客サポート":"顧客サポート",
+  "Bảo trì tủ điện":"分電盤メンテナンス", "分電盤メンテナンス":"分電盤メンテナンス"
+});
+
+function normalizeAssignmentTag(tag) {
+  const clean = String(tag || "").trim();
+  return ASSIGNMENT_TAG_MAP[clean] || clean;
+}
+
+function normalizeTagList(list) {
+  const values = (Array.isArray(list) ? list : [])
+    .map(normalizeAssignmentTag)
+    .map(item => String(item || "").trim())
+    .filter(Boolean);
+  return Array.from(new Set(values));
+}
+
 function parseRequestTags(value) {
-  if (Array.isArray(value)) return value.map(item => String(item || "").trim()).filter(Boolean);
+  if (Array.isArray(value)) return normalizeTagList(value);
   const raw = String(value || "").trim();
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) return parsed.map(item => String(item || "").trim()).filter(Boolean);
+    if (Array.isArray(parsed)) return normalizeTagList(parsed);
   } catch (err) {}
-  return raw.split(/[,、\n]/).map(item => item.trim()).filter(Boolean);
+  return normalizeTagList(raw.split(/[,、\n]/));
 }
 
 function staffTags(staff) {
   const fromArray = Array.isArray(staff.workTags) ? staff.workTags : [];
   const fromText = [staff.skills, staff.workContent, staff.areas, staff.department]
     .join(",")
-    .split(/[,、\n]/)
-    .map(item => item.trim())
-    .filter(Boolean);
-  return Array.from(new Set(fromArray.concat(fromText).map(item => String(item || "").trim()).filter(Boolean)));
+    .split(/[,、\n]/);
+  return normalizeTagList(fromArray.concat(fromText));
 }
 
 async function findBestAssignee(issueTags) {
