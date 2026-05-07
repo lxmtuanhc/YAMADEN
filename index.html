@@ -2811,12 +2811,8 @@ function showTab(tab) {
   if (isCheck) renderMyRequests();
 }
 function showInitialScreen() {
-  localStorage.removeItem("userToken");
-  localStorage.removeItem("userProfile");
-  currentUser = null;
-  accountMode = "register";
   updateAccountUI();
-  showTab("account");
+  showTab(getUserToken() && currentUser && currentUser.status === "active" && currentUser.profileCompleted ? "home" : "account");
 }
 function renderMyRequests() {
   const t = texts[lang];
@@ -3879,6 +3875,72 @@ html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-
   var oldShow=window.showTab;window.showTab=function(tab){var result=oldShow&&oldShow(tab);setTimeout(syncMode,0);return result};
   var oldUpdate=window.updateAccountUI;window.updateAccountUI=function(){if(oldUpdate)oldUpdate();setTimeout(syncMode,0)};
   document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){applyWidth(true);syncMode()},100)});
+})();
+</script>
+
+<!-- yamaden-auth-state-controller-v40 -->
+<script id="yamaden-auth-state-controller-v40-script">
+(function(){
+  function storedUser(){
+    try{return JSON.parse(localStorage.getItem('userProfile')||'null')}catch(e){return null}
+  }
+  function isReady(){
+    var user=storedUser();
+    return !!(localStorage.getItem('userToken')&&user&&user.status==='active'&&user.profileCompleted);
+  }
+  function syncAuthState(preferredTab){
+    var app=document.querySelector('.app');
+    if(!app)return false;
+    var ready=isReady();
+    app.classList.toggle('auth-login-mode',!ready);
+    app.classList.toggle('auth-app-mode',ready);
+    document.body.classList.toggle('auth-login-body',!ready);
+    document.body.classList.toggle('yamaden-app-active',ready);
+    if(!ready){
+      document.getElementById('accountSection')?.classList.remove('hidden');
+      ['homeSection','servicesSection','sendSection','checkSection'].forEach(function(id){
+        document.getElementById(id)?.classList.add('hidden');
+      });
+      document.querySelectorAll('.bottom-nav button').forEach(function(btn){btn.classList.remove('active')});
+      document.getElementById('tabAccount')?.classList.add('active');
+      document.getElementById('profileCard')&&(document.getElementById('profileCard').style.display='none');
+      document.getElementById('accountFormCard')&&(document.getElementById('accountFormCard').style.display='block');
+    }
+    return ready;
+  }
+  var baseShowTab=window.showTab;
+  window.showTab=function(tab){
+    var ready=syncAuthState(tab);
+    if(!ready)tab='account';
+    if(baseShowTab)baseShowTab(tab);
+    syncAuthState(tab);
+  };
+  var baseInitial=window.showInitialScreen;
+  window.showInitialScreen=function(){
+    if(baseInitial)baseInitial();
+    window.showTab(isReady()?'home':'account');
+  };
+  var baseUpdate=window.updateAccountUI;
+  window.updateAccountUI=function(){
+    if(baseUpdate)baseUpdate();
+    setTimeout(syncAuthState,0);
+  };
+  var baseLogin=window.userLogin;
+  window.userLogin=async function(){
+    var result=await baseLogin?.apply(this,arguments);
+    setTimeout(function(){window.showTab(isReady()?'home':'account')},0);
+    return result;
+  };
+  var baseLogout=window.userLogout;
+  window.userLogout=function(){
+    if(baseLogout)baseLogout();
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('userProfile');
+    setTimeout(function(){window.showTab('account')},0);
+  };
+  document.addEventListener('DOMContentLoaded',function(){
+    setTimeout(function(){window.showTab(isReady()?'home':'account')},120);
+  });
 })();
 </script>
 </body>
