@@ -1316,5 +1316,89 @@ html,body{height:100%!important;overflow:hidden!important}
 </script>
 
 <!-- yamaden-admin-stability-repair-v22 -->
+
+<style id="yamaden-admin-final-customer-fix-v23-style">
+.customer-detail-modal{display:none;position:fixed;inset:0;background:rgba(2,6,23,.62);z-index:150;align-items:center;justify-content:center;padding:20px}.customer-detail-modal.show{display:flex}.customer-detail-box{width:min(920px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.35)}.customer-detail-top{height:68px;padding:0 22px;border-bottom:1px solid #e5eaf2;display:flex;align-items:center;justify-content:space-between}.customer-detail-close{width:42px;height:42px;border-radius:10px;background:#ef4444;color:#fff;font-size:24px;line-height:1;font-weight:950}.customer-detail-tabs{display:flex;gap:10px;padding:16px 22px 0}.customer-detail-tabs button{height:42px;border-radius:10px;border:1px solid #e5eaf2;background:#fff;padding:0 18px;font-weight:950}.customer-detail-tabs button.active{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}.customer-detail-body{padding:22px}.customer-detail-head{text-align:center;padding:8px 0 22px;border-bottom:1px solid #e5eaf2;margin-bottom:18px}.customer-avatar{width:74px;height:74px;margin:0 auto 10px;border-radius:50%;background:#eef2f7;border:3px solid #2563eb;display:flex;align-items:center;justify-content:center;font-size:28px;color:#64748b}.customer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid #e5eaf2}.customer-field{padding:14px 12px;border-bottom:1px solid #e5eaf2}.customer-field span{display:block;color:#94a3b8;font-size:12px;font-weight:950;margin-bottom:7px}.customer-field b{font-size:15px}.customer-history-table{width:100%;border-collapse:collapse;border:1px solid #e5eaf2;border-radius:12px;overflow:hidden}.customer-history-table th,.customer-history-table td{padding:12px;border-bottom:1px solid #edf2f7;text-align:left}.customer-history-table th{background:#f8fafc;color:#64748b;font-size:12px}.card-row.user-card-click{cursor:pointer}.card-row.user-card-click:hover{border-color:#bfdbfe;box-shadow:0 10px 24px rgba(37,99,235,.08)}.settings-grid .settings-item p{margin:8px 0 0;color:#64748b;font-weight:850;line-height:1.45}@media(max-width:820px){.customer-grid{grid-template-columns:1fr 1fr}.customer-detail-box{max-height:94vh}.customer-detail-body{padding:16px}}
+</style>
+<script id="yamaden-admin-final-customer-fix-v23-script">
+(function(){
+  const labels={
+    ja:{general:'基本設定',generalSub:'言語、会社情報、画面表示ルールを管理します。',security:'権限とセキュリティ',securitySub:'管理者権限とアカウント保護を管理します。',backup:'データバックアップ',backupSub:'依頼データと顧客データのバックアップを管理します。',system:'システム情報',systemSub:'API、アプリバージョン、メンテナンス情報を確認します。',basic:'基本情報',history:'依頼履歴',contact:'連絡先',name:'氏名',phone:'電話番号',email:'メール',company:'会社 / 個人',area:'地域',project:'工事件名',status:'ステータス',created:'登録日',lastLogin:'最終ログイン',requests:'依頼数',noHistory:'履歴がありません',close:'閉じる',approve:'承認',delete:'削除',block:'停止',unblock:'解除'},
+    vi:{general:'Cài đặt chung',generalSub:'Quản lý ngôn ngữ, thông tin công ty và quy tắc hiển thị.',security:'Quyền và bảo mật',securitySub:'Quản lý quyền admin và bảo vệ tài khoản.',backup:'Sao lưu dữ liệu',backupSub:'Sao lưu dữ liệu yêu cầu và dữ liệu khách hàng.',system:'Thông tin hệ thống',systemSub:'Kiểm tra API, phiên bản app và thông tin bảo trì.',basic:'Thông tin cơ bản',history:'Lịch sử yêu cầu',contact:'Liên hệ',name:'Họ tên',phone:'Số điện thoại',email:'Email',company:'Công ty / cá nhân',area:'Khu vực',project:'Tên công trình',status:'Trạng thái',created:'Ngày đăng ký',lastLogin:'Lần đăng nhập cuối',requests:'Số yêu cầu',noHistory:'Không có lịch sử',close:'Đóng',approve:'Duyệt',delete:'Xóa',block:'Khóa',unblock:'Mở khóa'}
+  };
+  function lang(){return String(window.currentLang||localStorage.getItem('language')||'ja').startsWith('vi')?'vi':'ja'}
+  function L(k){return (labels[lang()]&&labels[lang()][k])||k}
+  function safe(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function val(u,...keys){for(const k of keys){if(u&&u[k]!=null&&u[k]!== '')return u[k]}return ''}
+  function idOf(u){return val(u,'_id','id','userId')}
+  function fmt(d){if(!d)return '-';const x=new Date(d);return isNaN(x)?'-':x.toLocaleDateString(lang()==='ja'?'ja-JP':'vi-VN')}
+  function statusText(s){if(window.t){try{return t(s)||s}catch(e){}}return s||'-'}
+  function userRequestCount(u){return val(u,'requestCount','requestsCount','totalRequests')||0}
+  function patchSettings(){
+    const items=[...document.querySelectorAll('.settings-grid .settings-item')];
+    const data=[['general','generalSub'],['security','securitySub'],['backup','backupSub'],['system','systemSub']];
+    items.forEach((item,i)=>{const b=item.querySelector('b'),p=item.querySelector('p');if(data[i]){if(b)b.textContent=L(data[i][0]);if(p)p.textContent=L(data[i][1]);}});
+  }
+  function ensureCustomerModal(){
+    if(document.getElementById('customerDetailModal'))return;
+    const modal=document.createElement('div');modal.id='customerDetailModal';modal.className='customer-detail-modal';
+    modal.innerHTML='<div class="customer-detail-box"><div class="customer-detail-top"><strong id="customerModalTitle"></strong><button class="customer-detail-close" id="customerModalClose">×</button></div><div class="customer-detail-tabs"><button id="customerBasicTab" class="active"></button><button id="customerHistoryTab"></button></div><div class="customer-detail-body" id="customerDetailBody"></div></div>';
+    document.body.appendChild(modal);
+    document.getElementById('customerModalClose').onclick=()=>modal.classList.remove('show');
+    modal.onclick=e=>{if(e.target===modal)modal.classList.remove('show')};
+  }
+  function drawBasic(u){
+    document.getElementById('customerBasicTab').classList.add('active');document.getElementById('customerHistoryTab').classList.remove('active');
+    const body=document.getElementById('customerDetailBody');
+    const name=val(u,'name','customerName')||val(u,'phone')||'-';
+    body.innerHTML='<div class="customer-detail-head"><div class="customer-avatar">👤</div><h2 style="margin:0">'+safe(name)+'</h2><div class="muted">'+safe(val(u,'status')||'pending')+'</div></div><h3>'+L('basic')+'</h3><div class="customer-grid">'+
+      [[L('name'),name],[L('phone'),val(u,'phone')],[L('email'),val(u,'email')],[L('company'),val(u,'company')],[L('area'),val(u,'province','city','area')],[L('project'),val(u,'projectName','project')],[L('status'),val(u,'status')||'pending'],[L('requests'),userRequestCount(u)],[L('created'),fmt(val(u,'createdAt'))],[L('lastLogin'),fmt(val(u,'lastLoginAt','lastLogin'))]].map(x=>'<div class="customer-field"><span>'+safe(x[0])+'</span><b>'+safe(x[1]||'-')+'</b></div>').join('')+'</div>';
+  }
+  async function drawHistory(u){
+    document.getElementById('customerHistoryTab').classList.add('active');document.getElementById('customerBasicTab').classList.remove('active');
+    const body=document.getElementById('customerDetailBody');body.innerHTML='<h3>'+L('history')+'</h3><div class="muted">Loading...</div>';
+    let arr=[];try{const res=await apiFetch(API+'/admin/users/'+encodeURIComponent(idOf(u))+'/requests');const data=await res.json();arr=Array.isArray(data)?data:(data.requests||[])}catch(e){arr=[]}
+    body.innerHTML='<h3>'+L('history')+'</h3><table class="customer-history-table"><thead><tr><th>ID</th><th>'+(window.t?t('content'):'Content')+'</th><th>'+(window.t?t('status'):'Status')+'</th><th>'+(window.t?t('assignee'):'Assignee')+'</th></tr></thead><tbody>'+(arr.length?arr.map(r=>'<tr><td>'+safe(r.requestId||r.id||r._id||'-')+'</td><td>'+safe(r.content||r.title||'-')+'</td><td>'+safe(statusText(r.status))+'</td><td>'+safe(r.assigneeName||'-')+'</td></tr>').join(''):'<tr><td colspan="4" class="muted">'+L('noHistory')+'</td></tr>')+'</tbody></table>';
+  }
+  window.openUserDetail=function(id){ensureCustomerModal();const u=(window.currentUsers||currentUsers||[]).find(x=>String(idOf(x))===String(id));if(!u)return;const modal=document.getElementById('customerDetailModal');document.getElementById('customerModalTitle').textContent=val(u,'name','phone')||'-';document.getElementById('customerBasicTab').textContent=L('basic');document.getElementById('customerHistoryTab').textContent=L('history');document.getElementById('customerBasicTab').onclick=()=>drawBasic(u);document.getElementById('customerHistoryTab').onclick=()=>drawHistory(u);drawBasic(u);modal.classList.add('show')};
+  const originalRenderUsers=window.renderUsers;
+  window.renderUsers=function(){
+    const box=document.getElementById('usersList');
+    if(!box){if(originalRenderUsers)originalRenderUsers();return;}
+    const kw=(document.getElementById('userSearch')?.value||'').toLowerCase();
+    const list=(window.currentUsers||currentUsers||[]).filter(u=>[u.name,u.phone,u.email,u.company,u.province,u.projectName].join(' ').toLowerCase().includes(kw));
+    box.innerHTML=list.length?list.map(u=>{
+      const id=idOf(u);const blocked=u.status==='blocked';
+      return '<div class="card-row user-card-click" data-user-id="'+safe(id)+'"><div><b>'+safe(val(u,'name','phone')||'-')+'</b><div class="muted">'+safe(val(u,'phone'))+' / '+safe(val(u,'email'))+'</div><div class="muted">'+safe(val(u,'projectName','project'))+'</div></div><div><span class="pill blue">'+safe(val(u,'company')||'-')+'</span> <span class="pill '+(blocked?'red':'green')+'">'+safe(val(u,'status')||'active')+'</span></div><div class="action-row"><button class="small-btn done user-toggle" data-id="'+safe(id)+'">'+(blocked?L('unblock'):L('block'))+'</button><button class="small-btn user-delete" data-id="'+safe(id)+'" style="color:#ef4444">🗑</button></div></div>';
+    }).join(''):'<div class="muted" style="padding:20px">'+(window.t?t('noData'):'No data')+'</div>';
+    box.querySelectorAll('.user-card-click').forEach(card=>card.onclick=e=>{if(e.target.closest('button'))return;openUserDetail(card.dataset.userId)});
+    box.querySelectorAll('.user-toggle').forEach(btn=>btn.onclick=e=>{e.stopPropagation();const u=(window.currentUsers||currentUsers||[]).find(x=>String(idOf(x))===String(btn.dataset.id));if(window.toggleUserStatus)toggleUserStatus(btn.dataset.id,u&&u.status==='blocked'?'active':'blocked')});
+    box.querySelectorAll('.user-delete').forEach(btn=>btn.onclick=e=>{e.stopPropagation();if(window.deleteUser)deleteUser(btn.dataset.id)});
+  };
+  function applyFix(){patchSettings();ensureCustomerModal();if(String(window.currentView||'')==='users')window.renderUsers();}
+  const oldApply=window.applyLanguage;window.applyLanguage=function(){if(oldApply)oldApply();setTimeout(applyFix,0)};
+  const oldChange=window.changeLanguage;window.changeLanguage=function(){if(oldChange)oldChange();setTimeout(applyFix,0)};
+  const oldShow=window.showView;window.showView=function(v){if(oldShow)oldShow(v);setTimeout(applyFix,0)};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(applyFix,180));
+})();
+</script>
+<script id="yamaden-admin-delete-user-direct-v24-script">
+(function(){
+  function lang(){return String(window.currentLang||localStorage.getItem('language')||'ja').startsWith('vi')?'vi':'ja'}
+  function msg(k){const m={ja:{confirm:'このユーザーを完全に削除しますか？依頼履歴は残ります。',fail:'ユーザー削除に失敗しました。'},vi:{confirm:'Bạn có chắc muốn xóa vĩnh viễn user này? Lịch sử yêu cầu vẫn được giữ lại.',fail:'Xóa user thất bại.'}};return m[lang()][k]}
+  window.deleteUser=async function(id){
+    if(!id)return;
+    if(!confirm(msg('confirm')))return;
+    try{
+      const res=await apiFetch(API+'/admin/users/'+encodeURIComponent(id),{method:'DELETE'});
+      if(res.status===401)return authFailLogout();
+      if(!res.ok){let data={};try{data=await res.json()}catch(e){};alert(data.message||msg('fail'));return;}
+      if(window.closeModal)closeModal();
+      const detail=document.getElementById('customerDetailModal');if(detail)detail.classList.remove('show');
+      await loadUsers();
+    }catch(e){alert(msg('fail'))}
+  };
+})();
+</script>
 </body>
 </html>
