@@ -383,7 +383,7 @@ body{background:#202020!important}.shell{width:min(1560px,calc(100vw - 28px))!im
     ja:{dashboard:'ダッシュボード',requestManage:'管理要求',untreated:'未対応',processing:'対応中',estimating:'見積中',quoted:'見積済み',ordered:'受注済み',completed:'完了',lost:'未成約',users:'顧客管理',staffManage:'スタッフプロフィール',staffList:'スタッフプロフィール',setting:'設定',makeQuote:'見積作成',urgentNeed:'未対応',urgentSub:'未対応',todaySales:'本日の売上',todayOrders:'今週の受注',quoteRate:'見積→受注率',avgTime:'平均対応時間',claimRate:'クレーム率',top5:'TOP 5 すぐ対応すべき依頼',currentRequests:'現在の依頼',seeAll:'すべて見る',priority:'緊急度',content:'内容',elapsed:'待機時間',assignee:'担当者',action:'操作',customer:'顧客',status:'ステータス',reply:'返信',pageSub:'依頼と対応状況を管理できます',logout:'ログアウト',all:'すべて',urgent:'緊急',high:'高',normal:'通常',save:'保存',delete:'削除',call:'電話',map:'地図',noData:'データがありません',confirmDelete:'この依頼を削除してもよろしいですか？',confirmUserDelete:'このユーザーを削除しますか？',cancel:'キャンセル',adminRole:'管理者',aiRecommend:'AI推奨',allStaff:'全担当者',urgency:'緊急度',image:'画像',video:'動画',edit:'編集',lock:'停止',unlock:'解除',approve:'承認',detail:'詳細',basic:'基本情報',history:'依頼履歴',addStaff:'スタッフを追加',settingsTitle:'設定',general:'基本設定',security:'権限・セキュリティ',backup:'バックアップ',system:'システム情報'},
     vi:{dashboard:'Trang chủ',requestManage:'Quản lý yêu cầu',untreated:'Chưa xử lý',processing:'Đang xử lý',estimating:'Đang báo giá',quoted:'Đã báo giá',ordered:'Đã nhận đơn',completed:'Hoàn thành',lost:'Không hoàn thành',users:'Khách hàng',staffManage:'Hồ sơ nhân viên',staffList:'Hồ sơ nhân viên',setting:'Cài đặt',makeQuote:'Tạo báo giá',urgentNeed:'Chưa xử lý',urgentSub:'Chưa xử lý',todaySales:'Doanh thu hôm nay',todayOrders:'Đơn tuần này',quoteRate:'Tỉ lệ báo giá→đơn',avgTime:'TG xử lý TB',claimRate:'Tỉ lệ claim',top5:'TOP 5 yêu cầu cần xử lý',currentRequests:'Các yêu cầu hiện có',seeAll:'Xem tất cả',priority:'Độ khẩn',content:'Nội dung',elapsed:'Thời gian chờ',assignee:'Phụ trách',action:'Thao tác',customer:'Khách hàng',status:'Trạng thái',reply:'Phản hồi',pageSub:'Quản lý yêu cầu và tiến độ xử lý',logout:'Đăng xuất',all:'Tất cả',urgent:'Khẩn cấp',high:'Cao',normal:'Thường',save:'Lưu',delete:'Xóa',call:'Gọi',map:'Bản đồ',noData:'Không có dữ liệu',confirmDelete:'Bạn có chắc muốn xóa yêu cầu này?',confirmUserDelete:'Bạn có chắc muốn xóa user này?',cancel:'Hủy',adminRole:'Admin',aiRecommend:'AI đề xuất',allStaff:'Tất cả phụ trách',urgency:'Độ khẩn',image:'Ảnh',video:'Video',edit:'Sửa',lock:'Khóa',unlock:'Mở khóa',approve:'Duyệt',detail:'Chi tiết',basic:'Thông tin cơ bản',history:'Lịch sử yêu cầu',addStaff:'Thêm hồ sơ',settingsTitle:'Cài đặt',general:'Cài đặt chung',security:'Quyền và bảo mật',backup:'Sao lưu dữ liệu',system:'Thông tin hệ thống'}
   };
-  try{dict.ja=Object.assign({},dict.ja,cleanDict.ja);dict.vi=Object.assign({},dict.vi,cleanDict.vi);}catch(e){} 
+  try{dict.ja=Object.assign({},dict.ja,cleanDict.ja);dict.vi=Object.assign({},dict.vi,cleanDict.vi);}catch(e){}
   function ft(k){return (dict[currentLang]&&dict[currentLang][k])||cleanDict.ja[k]||k}
   window.normalizeStatus=function(s){s=String(s||'untreated').toLowerCase();if(['done','complete','completed'].includes(s))return'completed';if(['lost','cancel','canceled','cancelled','failed'].includes(s))return'lost';if(['estimating','estimate_pending','quoting'].includes(s))return'estimating';if(['quote','quoted','estimate'].includes(s))return'quoted';if(['order','ordered','accepted'].includes(s))return'ordered';if(['processing','contacted','site','visited'].includes(s))return'processing';return'untreated'};
   window.statusClass=function(s){return{untreated:'red',processing:'blue',estimating:'orange',quoted:'purple',ordered:'green',completed:'green',lost:'orange'}[normalizeStatus(s)]||'blue'};
@@ -1011,7 +1011,6 @@ html,body{height:100%!important;overflow:hidden!important}
 </script>
 
 
-
 <!-- yamaden-admin-final-language-clean-v15 -->
 <style id="yamaden-admin-final-language-clean-v15-style">
 .staff-form-close,.user-modal-close{font-family:Arial,sans-serif!important}.staff-form-close{font-size:0!important;position:relative!important}.staff-form-close::before,.staff-form-close::after{content:""!important;position:absolute!important;left:50%!important;top:50%!important;width:16px!important;height:3px!important;background:#fff!important;border-radius:999px!important}.staff-form-close::before{transform:translate(-50%,-50%) rotate(45deg)!important}.staff-form-close::after{transform:translate(-50%,-50%) rotate(-45deg)!important}.final-nav-btn span,.staff-tag,.work-tag-item span{word-break:normal}.status-select,.filter-select{font-family:inherit!important}
@@ -1050,7 +1049,6 @@ html,body{height:100%!important;overflow:hidden!important}
 </script>
 
 
-
 <!-- yamaden-user-history-assignee-v16 -->
 <style id="yamaden-user-history-assignee-v16-style">
 .user-history-modal-row{grid-template-columns:130px minmax(0,1fr) 120px 130px 120px!important}.user-history-assignee{font-weight:900;color:#334155}.user-history-assignee .muted{font-size:11px}@media(max-width:760px){.user-history-modal-row{grid-template-columns:1fr!important}}
@@ -1085,7 +1083,6 @@ html,body{height:100%!important;overflow:hidden!important}
   };
 })();
 </script>
-
 
 
 <!-- yamaden-manual-assignee-v17 -->
@@ -1134,7 +1131,6 @@ html,body{height:100%!important;overflow:hidden!important}
   window.applyLanguage=function(){if(oldApplyV17)oldApplyV17();const modal=document.getElementById('requestDetailModal');if(modal?.classList.contains('show')){const title=document.getElementById('requestDetailTitle')?.textContent||'';const match=title.match(/REQ-[\w-]+|YD-[\w-]+|[a-f0-9]{12,}/i);const r=(requests||[]).find(x=>title.includes(x.requestId||String(rid(x)).slice(-6)));if(r)setTimeout(()=>injectManualAssignee(rid(r)),0)}};
 })();
 </script>
-
 
 
 <!-- yamaden-staff-detail-history-v18 -->
@@ -1202,7 +1198,6 @@ html,body{height:100%!important;overflow:hidden!important}
 </script>
 
 
-
 <!-- yamaden-user-approval-clean-v19 -->
 <style id="yamaden-user-approval-clean-v19-style">
 .pending-user{border-color:#fed7aa!important;background:#fffaf0!important}.user-actions .approve{background:#16a34a!important;color:#fff!important;border-color:#16a34a!important}.user-actions .block{background:#1e293b!important;color:#fff!important;border-color:#1e293b!important}.user-actions .delete{background:#ef4444!important;color:#fff!important;border-color:#ef4444!important}.user-card-click{cursor:pointer}.user-card-click:hover{border-color:#bfdbfe;box-shadow:0 12px 28px rgba(37,99,235,.10)}
@@ -1231,7 +1226,6 @@ html,body{height:100%!important;overflow:hidden!important}
   const prevChangeUsers=window.changeLanguage;window.changeLanguage=function(){if(prevChangeUsers)prevChangeUsers();setTimeout(()=>{if(currentView==='users')renderUsers()},0)};
 })();
 </script>
-
 
 
 <!-- yamaden-staff-avatar-layout-v20 -->
@@ -1280,7 +1274,6 @@ html,body{height:100%!important;overflow:hidden!important}
   const oldChange=window.changeLanguage;window.changeLanguage=function(){if(oldChange)oldChange();setTimeout(()=>{if((typeof currentView!=='undefined'?currentView:window.currentView)==='staff')renderStaff()},0)};
 })();
 </script>
-
 
 
 <!-- yamaden-final-stats-charts-v21 -->
