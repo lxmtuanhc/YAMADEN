@@ -3943,5 +3943,51 @@ html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-
   });
 })();
 </script>
+
+<!-- yamaden-auth-language-switch-v41 -->
+<script id="yamaden-auth-language-switch-v41-script">
+(function(){
+  function currentLang(){
+    var value='ja';
+    try{value=window.lang==='vi'?'vi':'ja'}catch(e){}
+    value=String(localStorage.getItem('language')||localStorage.getItem('lang')||value||'ja');
+    return value.indexOf('vi')===0?'vi':'ja';
+  }
+  function ensureSwitch(){
+    var wrap=document.getElementById('authLanguageSwitch');
+    if(!wrap){
+      wrap=document.createElement('div');
+      wrap.id='authLanguageSwitch';
+      wrap.className='auth-language-switch';
+      wrap.innerHTML='<select id="authLanguage" class="auth-language-select" aria-label="Language"><option value="ja">JP</option><option value="vi">VN</option></select>';
+      document.body.appendChild(wrap);
+      document.getElementById('authLanguage').addEventListener('change',function(e){
+        var next=e.target.value==='vi'?'vi':'ja';
+        try{window.lang=next}catch(err){}
+        localStorage.setItem('lang',next);
+        localStorage.setItem('language',next);
+        var main=document.getElementById('language');
+        if(main)main.value=next;
+        if(window.applyLang)window.applyLang();
+        if(window.__yamadenSyncLanguageUI)window.__yamadenSyncLanguageUI();
+      });
+    }
+    var select=document.getElementById('authLanguage');
+    if(select)select.value=currentLang();
+  }
+  document.addEventListener('DOMContentLoaded',ensureSwitch);
+  var oldApply=window.applyLang;
+  window.applyLang=function(){
+    if(oldApply)oldApply();
+    setTimeout(ensureSwitch,0);
+  };
+  var oldChange=window.changeLanguage;
+  window.changeLanguage=function(){
+    if(oldChange)oldChange();
+    setTimeout(ensureSwitch,0);
+  };
+  ensureSwitch();
+})();
+</script>
 </body>
 </html>
