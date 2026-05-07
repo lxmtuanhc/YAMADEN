@@ -12,35 +12,25 @@ const bcrypt = require("bcrypt");
 
 const app = express();
 
-app.use(cors({
-  origin: "*"
-}));
-
+app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: "10mb" }));
-
-// Cho server hiển thị index.html, admin.html, login.html, icon, manifest
 app.use(express.static(__dirname));
 
-// ===== Upload media bằng multer =====
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 50 * 1024 * 1024
-  },
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const ok = /^image\/|^video\//.test(file.mimetype || "");
     cb(ok ? null : new Error("Only image or video files are allowed"), ok);
   }
 });
 
-// ===== Cloudinary Config =====
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// ===== Admin Login Config =====
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const JWT_SECRET = process.env.JWT_SECRET;
 const USER_JWT_SECRET = process.env.USER_JWT_SECRET || JWT_SECRET;
@@ -48,43 +38,37 @@ const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || "";
 const SLACK_ENABLED = process.env.SLACK_ENABLED === "true";
 const ADMIN_URL = process.env.ADMIN_URL || "https://yamaden.onrender.com/admin.html";
 
-function requireAdmin(req, res, next) {
-  const auth = req.headers.authorization || "";
-  const token = auth.replace("Bearer ", "");
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.log("MongoDB error:", err));
 
-  if (!token) {
-    return res.status(401).json({ message: "No token" });
-  }
+function requireAdmin(req, res, next) {
+  const token = (req.headers.authorization || "").replace("Bearer ", "");
+  if (!token) return res.status(401).json({ message: "No token" });
 
   try {
     req.admin = jwt.verify(token, JWT_SECRET);
     next();
-  } catch (err) {
+  } catch {
     return res.status(401).json({ message: "Invalid token" });
   }
 }
 
 function getUserFromRequest(req) {
-  const auth = req.headers.authorization || "";
-  const token = auth.replace("Bearer ", "");
-
+  const token = (req.headers.authorization || "").replace("Bearer ", "");
   if (!token || !USER_JWT_SECRET) return null;
 
   try {
     const decoded = jwt.verify(token, USER_JWT_SECRET);
     if (decoded && decoded.role === "user") return decoded;
-  } catch (err) {}
+  } catch {}
 
   return null;
 }
 
 function requireUser(req, res, next) {
   const user = getUserFromRequest(req);
-
-  if (!user) {
-    return res.status(401).json({ message: "User login required" });
-  }
-
+  if (!user) return res.status(401).json({ message: "User login required" });
   req.user = user;
   next();
 }
@@ -129,60 +113,18 @@ function notifySlack(text) {
   });
 }
 
-const REQUEST_STATUS_TIMESTAMPS = {
-  contacted: ["firstResponseAt", "contactedAt"],
-  site_done: ["siteVisitedAt"],
-  quoted: ["quotedAt"],
-  ordered: ["orderedAt"],
-  completed: ["completedAt"],
-  lost: ["lostAt"]
-};
-
-function normalizeRequestStatus(status) {
-  if (status === "pending") return "untreated";
-  if (status === "processing") return "contacted";
-  if (status === "completed") return "completed";
-  return status || "untreated";
-}
-
-function applyStatusTimestamps(item, nextStatus) {
-  const normalized = normalizeRequestStatus(nextStatus);
-  const now = new Date();
-  const fields = REQUEST_STATUS_TIMESTAMPS[normalized] || [];
-
-  fields.forEach(field => {
-    if (!item[field]) item[field] = now;
-  });
-}
-
-// ===== MongoDB Connect =====
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch(err => console.log("MongoDB error:", err));
-
-// ===== Schema =====
 const RequestSchema = new mongoose.Schema({
   id: mongoose.Schema.Types.Mixed,
   userId: String,
-
   name: String,
   phone: String,
   contact: String,
   address: String,
-
   content: String,
   image: String,
   mediaUrl: String,
   mediaType: String,
-  mediaFiles: [
-    {
-      url: String,
-      type: {
-        type: String
-      }
-    }
-  ],
-
+  mediaFiles: [{ url: String, type: { type: String } }],
   status: String,
   adminReply: String,
   createdAt: Date,
@@ -199,8 +141,6 @@ const RequestSchema = new mongoose.Schema({
   quoteRequested: Boolean
 });
 
-const Request = mongoose.model("Request", RequestSchema);
-
 const UserSchema = new mongoose.Schema({
   name: String,
   phone: String,
@@ -212,19 +152,11 @@ const UserSchema = new mongoose.Schema({
   projectName: String,
   address: String,
   pinHash: String,
-  profileCompleted: {
-    type: Boolean,
-    default: false
-  },
-  status: {
-    type: String,
-    default: "pending"
-  },
+  profileCompleted: { type: Boolean, default: false },
+  status: { type: String, default: "pending" },
   createdAt: Date,
   lastLoginAt: Date
 });
-
-const User = mongoose.model("User", UserSchema);
 
 const StaffSchema = new mongoose.Schema({
   name: String,
@@ -236,13 +168,12 @@ const StaffSchema = new mongoose.Schema({
   department: String,
   workContent: String,
   workTags: [String],
-  status: {
-    type: String,
-    default: "active"
-  },
+  status: { type: String, default: "active" },
   createdAt: Date
 });
 
+const Request = mongoose.model("Request", RequestSchema);
+const User = mongoose.model("User", UserSchema);
 const Staff = mongoose.model("Staff", StaffSchema);
 
 function publicUser(user) {
@@ -251,45 +182,132 @@ function publicUser(user) {
   return item;
 }
 
+function makeIdQuery(id) {
+  const query = [{ id }];
+  if (!isNaN(Number(id))) query.push({ id: Number(id) });
+  return { $or: query };
+}
+
+async function generateRequestId() {
+  let id;
+  let exists;
+
+  do {
+    id = "YD-" + Math.floor(1000 + Math.random() * 9000);
+    exists = await Request.findOne({ id });
+  } while (exists);
+
+  return id;
+}
+
+function uploadMediaToCloudinary(fileBuffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "yamaden_requests", resource_type: "auto" },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+
+    stream.end(fileBuffer);
+  });
+}
+
+function normalizeRequestStatus(status) {
+  if (status === "pending") return "untreated";
+  if (status === "processing") return "contacted";
+  if (status === "completed") return "completed";
+  return status || "untreated";
+}
+
+const REQUEST_STATUS_TIMESTAMPS = {
+  contacted: ["firstResponseAt", "contactedAt"],
+  site_done: ["siteVisitedAt"],
+  quoted: ["quotedAt"],
+  ordered: ["orderedAt"],
+  completed: ["completedAt"],
+  lost: ["lostAt"]
+};
+
+function applyStatusTimestamps(item, nextStatus) {
+  const normalized = normalizeRequestStatus(nextStatus);
+  const now = new Date();
+  const fields = REQUEST_STATUS_TIMESTAMPS[normalized] || [];
+  fields.forEach(field => {
+    if (!item[field]) item[field] = now;
+  });
+}
 
 const ASSIGNMENT_TAG_MAP = Object.freeze({
-  "Thiết kế bản vẽ điện":"電気図面設計", "電気図面設計":"電気図面設計",
-  "Thiết kế tủ điện":"盤設計", "盤設計":"盤設計",
-  "Thiết kế chiếu sáng":"照明設計", "照明設計":"照明設計",
-  "Tính tải điện":"電気容量計算", "電気容量計算":"電気容量計算",
-  "Bóc tách vật tư":"材料拾い出し", "材料拾い出し":"材料拾い出し",
-  "Lập bản vẽ hoàn công":"竣工図作成", "竣工図作成":"竣工図作成",
-  "Kiểm tra bản vẽ":"図面チェック", "図面チェック":"図面チェック",
-  "Chuẩn bị vật tư":"材料準備", "材料準備":"材料準備",
-  "Điều phối công trình":"現場調整", "現場調整":"現場調整",
-  "Quản lý tiến độ":"工程管理", "工程管理":"工程管理",
-  "Đặt hàng vật tư":"材料発注", "材料発注":"材料発注",
-  "Kiểm tra tồn kho":"在庫確認", "在庫確認":"在庫確認",
-  "Sắp xếp lịch thi công":"施工スケジュール", "施工スケジュール":"施工スケジュール",
-  "Hỗ trợ hiện trường":"現場サポート", "現場サポート":"現場サポート",
-  "Tư vấn khách hàng":"顧客相談", "顧客相談":"顧客相談",
-  "Báo giá":"見積作成", "見積作成":"見積作成",
-  "Theo dõi hợp đồng":"契約フォロー", "契約フォロー":"契約フォロー",
-  "Chăm sóc khách hàng":"顧客対応", "顧客対応":"顧客対応",
-  "Khảo sát nhu cầu":"ニーズ確認", "ニーズ確認":"ニーズ確認",
-  "Gửi đề xuất":"提案送付", "提案送付":"提案送付",
-  "Theo dõi thanh toán":"入金確認", "入金確認":"入金確認",
-  "Thi công điện":"電気工事", "電気工事":"電気工事",
-  "Đi dây điện":"配線工事", "配線工事":"配線工事",
-  "Lắp ổ cắm":"コンセント取付", "コンセント取付":"コンセント取付",
-  "Lắp đèn":"照明取付", "照明取付":"照明取付",
-  "Lắp tủ điện":"分電盤工事", "分電盤工事":"分電盤工事",
-  "Xử lý mất điện":"停電対応", "停電対応":"停電対応",
-  "Xử lý rò điện":"漏電対応", "漏電対応":"漏電対応",
-  "Kiểm tra hiện trường":"現場確認", "現場確認":"現場確認",
-  "Sửa breaker":"ブレーカー修理", "ブレーカー修理":"ブレーカー修理",
-  "Bảo trì định kỳ":"定期メンテナンス", "定期メンテナンス":"定期メンテナンス",
-  "Kiểm tra sau thi công":"施工後点検", "施工後点検":"施工後点検",
-  "Xử lý sự cố":"トラブル対応", "トラブル対応":"トラブル対応",
-  "Bảo hành":"保証対応", "保証対応":"保証対応",
-  "Kiểm tra thiết bị":"設備点検", "設備点検":"設備点検",
-  "Hỗ trợ khách hàng":"顧客サポート", "顧客サポート":"顧客サポート",
-  "Bảo trì tủ điện":"分電盤メンテナンス", "分電盤メンテナンス":"分電盤メンテナンス"
+  "Thiết kế bản vẽ điện": "電気図面設計",
+  "電気図面設計": "電気図面設計",
+  "Thiết kế tủ điện": "盤設計",
+  "盤設計": "盤設計",
+  "Thiết kế chiếu sáng": "照明設計",
+  "照明設計": "照明設計",
+  "Tính tải điện": "電気容量計算",
+  "電気容量計算": "電気容量計算",
+  "Bóc tách vật tư": "材料拾い出し",
+  "材料拾い出し": "材料拾い出し",
+  "Lập bản vẽ hoàn công": "竣工図作成",
+  "竣工図作成": "竣工図作成",
+  "Kiểm tra bản vẽ": "図面チェック",
+  "図面チェック": "図面チェック",
+  "Chuẩn bị vật tư": "材料準備",
+  "材料準備": "材料準備",
+  "Điều phối công trình": "現場調整",
+  "現場調整": "現場調整",
+  "Quản lý tiến độ": "工程管理",
+  "工程管理": "工程管理",
+  "Đặt hàng vật tư": "材料発注",
+  "材料発注": "材料発注",
+  "Kiểm tra tồn kho": "在庫確認",
+  "在庫確認": "在庫確認",
+  "Sắp xếp lịch thi công": "施工スケジュール",
+  "施工スケジュール": "施工スケジュール",
+  "Hỗ trợ hiện trường": "現場サポート",
+  "現場サポート": "現場サポート",
+  "Tư vấn khách hàng": "顧客相談",
+  "顧客相談": "顧客相談",
+  "Báo giá": "見積作成",
+  "見積作成": "見積作成",
+  "Theo dõi hợp đồng": "契約フォロー",
+  "契約フォロー": "契約フォロー",
+  "Chăm sóc khách hàng": "顧客対応",
+  "顧客対応": "顧客対応",
+  "Thi công điện": "電気工事",
+  "電気工事": "電気工事",
+  "Đi dây điện": "配線工事",
+  "配線工事": "配線工事",
+  "Lắp ổ cắm": "コンセント取付",
+  "コンセント取付": "コンセント取付",
+  "Lắp đèn": "照明取付",
+  "照明取付": "照明取付",
+  "Lắp tủ điện": "分電盤工事",
+  "分電盤工事": "分電盤工事",
+  "Xử lý mất điện": "停電対応",
+  "停電対応": "停電対応",
+  "Xử lý rò điện": "漏電対応",
+  "漏電対応": "漏電対応",
+  "Kiểm tra hiện trường": "現場確認",
+  "現場確認": "現場確認",
+  "Sửa breaker": "ブレーカー修理",
+  "ブレーカー修理": "ブレーカー修理",
+  "Bảo trì định kỳ": "定期メンテナンス",
+  "定期メンテナンス": "定期メンテナンス",
+  "Kiểm tra sau thi công": "施工後点検",
+  "施工後点検": "施工後点検",
+  "Xử lý sự cố": "トラブル対応",
+  "トラブル対応": "トラブル対応",
+  "Bảo hành": "保証対応",
+  "保証対応": "保証対応",
+  "Kiểm tra thiết bị": "設備点検",
+  "設備点検": "設備点検",
+  "Hỗ trợ khách hàng": "顧客サポート",
+  "顧客サポート": "顧客サポート",
+  "Bảo trì tủ điện": "分電盤メンテナンス",
+  "分電盤メンテナンス": "分電盤メンテナンス"
 });
 
 function normalizeAssignmentTag(tag) {
@@ -302,17 +320,21 @@ function normalizeTagList(list) {
     .map(normalizeAssignmentTag)
     .map(item => String(item || "").trim())
     .filter(Boolean);
+
   return Array.from(new Set(values));
 }
 
 function parseRequestTags(value) {
   if (Array.isArray(value)) return normalizeTagList(value);
+
   const raw = String(value || "").trim();
   if (!raw) return [];
+
   try {
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) return normalizeTagList(parsed);
-  } catch (err) {}
+  } catch {}
+
   return normalizeTagList(raw.split(/[,、\n]/));
 }
 
@@ -321,6 +343,7 @@ function staffTags(staff) {
   const fromText = [staff.skills, staff.workContent, staff.areas, staff.department]
     .join(",")
     .split(/[,、\n]/);
+
   return normalizeTagList(fromArray.concat(fromText));
 }
 
@@ -335,6 +358,7 @@ async function findBestAssignee(issueTags) {
   staffList.forEach(staff => {
     const list = staffTags(staff);
     const score = tags.filter(tag => list.includes(tag)).length;
+
     if (score > bestScore) {
       bestScore = score;
       best = staff;
@@ -345,79 +369,23 @@ async function findBestAssignee(issueTags) {
   return best;
 }
 
-// ===== Hỗ trợ cả ID mới String và ID cũ Number =====
-function makeIdQuery(id) {
-  const query = [{ id: id }];
-
-  if (!isNaN(Number(id))) {
-    query.push({ id: Number(id) });
-  }
-
-  return { $or: query };
-}
-
-// ===== Generate short ID =====
-async function generateRequestId() {
-  let id;
-  let exists;
-
-  do {
-    id = "YD-" + Math.floor(1000 + Math.random() * 9000);
-    exists = await Request.findOne({ id });
-  } while (exists);
-
-  return id;
-}
-
-// ===== Upload buffer media lên Cloudinary =====
-function uploadMediaToCloudinary(fileBuffer) {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder: "yamaden_requests",
-        resource_type: "auto"
-      },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
-      }
-    );
-
-    stream.end(fileBuffer);
-  });
-}
-
-// Trang chính
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// ===== Admin Login API =====
 app.post("/admin/login", (req, res) => {
   const password = req.body.password || "";
 
   if (!ADMIN_PASSWORD || !JWT_SECRET) {
-    return res.status(500).json({
-      message: "Admin login is not configured"
-    });
+    return res.status(500).json({ message: "Admin login is not configured" });
   }
 
   if (password !== ADMIN_PASSWORD) {
-    return res.status(401).json({
-      message: "Wrong password"
-    });
+    return res.status(401).json({ message: "Wrong password" });
   }
 
-  const token = jwt.sign(
-    { role: "admin" },
-    JWT_SECRET,
-    { expiresIn: "1d" }
-  );
-
-  res.json({
-    message: "Login success",
-    token
-  });
+  const token = jwt.sign({ role: "admin" }, JWT_SECRET, { expiresIn: "1d" });
+  res.json({ message: "Login success", token });
 });
 
 app.post("/user/register", async (req, res) => {
@@ -430,19 +398,46 @@ app.post("/user/register", async (req, res) => {
     const pin = String(req.body.pin || "").trim();
 
     if (!phone || !/^\d{4,6}$/.test(pin)) {
-      return res.status(400).json({ message: "Phone and 4-6 digit PIN are required" });
+      return res.status(400).json({
+        message: "Phone and 4-6 digit PIN are required"
+      });
     }
 
-    const exists = await User.findOne({ phone });
-    if (exists && exists.pinHash) {
-      return res.status(409).json({ message: "Phone is already registered" });
+    let user = await User.findOne({ phone });
+
+    if (user && user.pinHash) {
+      const ok = await bcrypt.compare(pin, user.pinHash);
+
+      if (!ok) {
+        return res.status(409).json({
+          message: "Phone is already registered"
+        });
+      }
+
+      user.lastLoginAt = new Date();
+      await user.save();
+
+      const token = jwt.sign(
+        { role: "user", userId: String(user._id), phone: user.phone },
+        USER_JWT_SECRET,
+        { expiresIn: "180d" }
+      );
+
+      return res.json({
+        message: "Already registered",
+        token,
+        user: publicUser(user)
+      });
     }
 
-    const user = exists || new User({ phone, createdAt: new Date() });
+    user = user || new User({ phone, createdAt: new Date() });
+
+    user.phone = phone;
     user.pinHash = await bcrypt.hash(pin, 10);
     user.status = user.status || "pending";
     user.profileCompleted = Boolean(user.name && user.email && user.province && user.projectName);
     user.lastLoginAt = new Date();
+
     await user.save();
 
     notifySlack(
@@ -458,9 +453,18 @@ app.post("/user/register", async (req, res) => {
       { expiresIn: "180d" }
     );
 
-    res.json({ message: "Register success", token, user: publicUser(user) });
+    res.json({
+      message: "Register success",
+      token,
+      user: publicUser(user)
+    });
+
   } catch (error) {
-    res.status(500).json({ message: "Register failed", error: error.message });
+    console.log("REGISTER ERROR:", error);
+    res.status(500).json({
+      message: "Register failed",
+      error: error.message
+    });
   }
 });
 
@@ -478,6 +482,7 @@ app.post("/user/login", async (req, res) => {
     }
 
     const user = await User.findOne({ phone });
+
     if (!user || !user.pinHash) {
       return res.status(401).json({ message: "Invalid phone or PIN" });
     }
@@ -500,9 +505,17 @@ app.post("/user/login", async (req, res) => {
       { expiresIn: "180d" }
     );
 
-    res.json({ message: "Login success", token, user: publicUser(user) });
+    res.json({
+      message: "Login success",
+      token,
+      user: publicUser(user)
+    });
+
   } catch (error) {
-    res.status(500).json({ message: "Login failed", error: error.message });
+    res.status(500).json({
+      message: "Login failed",
+      error: error.message
+    });
   }
 });
 
@@ -512,7 +525,9 @@ app.put("/user/profile", requireUser, async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     ["name", "email", "company", "province", "projectName", "address", "contact"].forEach(field => {
-      if (req.body[field] !== undefined) user[field] = String(req.body[field] || "").trim();
+      if (req.body[field] !== undefined) {
+        user[field] = String(req.body[field] || "").trim();
+      }
     });
 
     user.profileCompleted = Boolean(user.name && user.email && user.province && user.projectName);
@@ -530,9 +545,16 @@ app.put("/user/profile", requireUser, async (req, res) => {
       "Admin: " + ADMIN_URL
     );
 
-    res.json({ message: "Profile updated", user: publicUser(user) });
+    res.json({
+      message: "Profile updated",
+      user: publicUser(user)
+    });
+
   } catch (error) {
-    res.status(500).json({ message: "Update failed", error: error.message });
+    res.status(500).json({
+      message: "Update failed",
+      error: error.message
+    });
   }
 });
 
@@ -542,7 +564,10 @@ app.get("/user/me", requireUser, async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(publicUser(user));
   } catch (error) {
-    res.status(500).json({ message: "Read failed", error: error.message });
+    res.status(500).json({
+      message: "Read failed",
+      error: error.message
+    });
   }
 });
 
@@ -551,7 +576,91 @@ app.get("/user/requests", requireUser, async (req, res) => {
     const requests = await Request.find({ userId: req.user.userId }).sort({ createdAt: -1 });
     res.json(requests);
   } catch (error) {
-    res.status(500).json({ message: "Read failed", error: error.message });
+    res.status(500).json({
+      message: "Read failed",
+      error: error.message
+    });
+  }
+});
+
+app.get("/admin/users", requireAdmin, async (req, res) => {
+  try {
+    const users = await User.find().sort({ createdAt: -1 });
+
+    const counts = await Request.aggregate([
+      { $match: { userId: { $ne: "" } } },
+      { $group: { _id: "$userId", count: { $sum: 1 } } }
+    ]);
+
+    const countMap = new Map(counts.map(item => [String(item._id), item.count]));
+
+    res.json(users.map(user => {
+      const item = publicUser(user);
+      item.requestCount = countMap.get(String(user._id)) || 0;
+      return item;
+    }));
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Read failed",
+      error: error.message
+    });
+  }
+});
+
+app.get("/admin/users/:id/requests", requireAdmin, async (req, res) => {
+  try {
+    const requests = await Request.find({ userId: req.params.id }).sort({ createdAt: -1 });
+    res.json(requests);
+  } catch (error) {
+    res.status(500).json({
+      message: "Read failed",
+      error: error.message
+    });
+  }
+});
+
+app.put("/admin/users/:id", requireAdmin, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    ["name", "phone", "email", "contact", "company", "customerType", "province", "projectName", "address", "status"].forEach(field => {
+      if (req.body[field] !== undefined) user[field] = req.body[field];
+    });
+
+    await user.save();
+
+    res.json({
+      message: "Updated",
+      data: publicUser(user)
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Update failed",
+      error: error.message
+    });
+  }
+});
+
+app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    await Request.updateMany({ userId }, { $set: { userId: "" } });
+    await User.deleteOne({ _id: userId });
+
+    res.json({ message: "User deleted, requests kept" });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Delete failed",
+      error: error.message
+    });
   }
 });
 
@@ -560,7 +669,10 @@ app.get("/admin/staff", requireAdmin, async (req, res) => {
     const staff = await Staff.find().sort({ createdAt: -1 });
     res.json(staff);
   } catch (error) {
-    res.status(500).json({ message: "Staff load failed", error: error.message });
+    res.status(500).json({
+      message: "Staff load failed",
+      error: error.message
+    });
   }
 });
 
@@ -571,9 +683,9 @@ app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res)
       : parseRequestTags(req.body.workTags);
 
     let avatar = req.body.avatar || "";
-    const staffAvatarUpload = req.file;
-    if (staffAvatarUpload) {
-      const uploadResult = await uploadMediaToCloudinary(staffAvatarUpload.buffer);
+
+    if (req.file) {
+      const uploadResult = await uploadMediaToCloudinary(req.file.buffer);
       avatar = uploadResult.secure_url || "";
     }
 
@@ -590,10 +702,15 @@ app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res)
       status: req.body.status || "active",
       createdAt: new Date()
     });
+
     await staff.save();
     res.json(staff);
+
   } catch (error) {
-    res.status(500).json({ message: "Staff create failed", error: error.message });
+    res.status(500).json({
+      message: "Staff create failed",
+      error: error.message
+    });
   }
 });
 
@@ -601,23 +718,32 @@ app.put("/admin/staff/:id", requireAdmin, upload.single("avatar"), async (req, r
   try {
     const staff = await Staff.findById(req.params.id);
     if (!staff) return res.status(404).json({ message: "Staff not found" });
+
     ["name", "phone", "email", "areas", "skills", "department", "workContent", "status"].forEach(field => {
       if (req.body[field] !== undefined) staff[field] = req.body[field];
     });
+
     if (req.body.workTags !== undefined) {
       staff.workTags = Array.isArray(req.body.workTags)
         ? req.body.workTags.map(item => String(item || "").trim()).filter(Boolean)
         : parseRequestTags(req.body.workTags);
     }
+
     if (req.body.avatar !== undefined) staff.avatar = req.body.avatar || "";
+
     if (req.file) {
       const uploadResult = await uploadMediaToCloudinary(req.file.buffer);
       staff.avatar = uploadResult.secure_url || "";
     }
+
     await staff.save();
     res.json(staff);
+
   } catch (error) {
-    res.status(500).json({ message: "Staff update failed", error: error.message });
+    res.status(500).json({
+      message: "Staff update failed",
+      error: error.message
+    });
   }
 });
 
@@ -625,92 +751,35 @@ app.delete("/admin/staff/:id", requireAdmin, async (req, res) => {
   try {
     const staff = await Staff.findById(req.params.id);
     if (!staff) return res.status(404).json({ message: "Staff not found" });
+
     await Staff.deleteOne({ _id: req.params.id });
-    await Request.updateMany({ assigneeId: req.params.id }, { $set: { assigneeId: "", assigneeName: "" } });
+    await Request.updateMany(
+      { assigneeId: req.params.id },
+      { $set: { assigneeId: "", assigneeName: "" } }
+    );
+
     res.json({ message: "Deleted" });
+
   } catch (error) {
-    res.status(500).json({ message: "Staff delete failed", error: error.message });
-  }
-});
-
-app.get("/admin/users", requireAdmin, async (req, res) => {
-  try {
-    const users = await User.find().sort({ createdAt: -1 });
-    const counts = await Request.aggregate([
-      { $match: { userId: { $ne: "" } } },
-      { $group: { _id: "$userId", count: { $sum: 1 } } }
-    ]);
-    const countMap = new Map(counts.map(item => [String(item._id), item.count]));
-
-    res.json(users.map(user => {
-      const item = publicUser(user);
-      item.requestCount = countMap.get(String(user._id)) || 0;
-      return item;
-    }));
-  } catch (error) {
-    res.status(500).json({ message: "Read failed", error: error.message });
-  }
-});
-
-app.get("/admin/users/:id/requests", requireAdmin, async (req, res) => {
-  try {
-    const requests = await Request.find({ userId: req.params.id }).sort({ createdAt: -1 });
-    res.json(requests);
-  } catch (error) {
-    res.status(500).json({ message: "Read failed", error: error.message });
-  }
-});
-
-app.put("/admin/users/:id", requireAdmin, async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    ["name", "phone", "email", "contact", "company", "customerType", "province", "projectName", "address", "status"].forEach(field => {
-      if (req.body[field] !== undefined) user[field] = req.body[field];
+    res.status(500).json({
+      message: "Staff delete failed",
+      error: error.message
     });
-
-    await user.save();
-    res.json({ message: "Updated", data: publicUser(user) });
-  } catch (error) {
-    res.status(500).json({ message: "Update failed", error: error.message });
   }
 });
 
-app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
-  try {
-    const userId = req.params.id;
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    await Request.updateMany({ userId }, { $set: { userId: "" } });
-    await User.deleteOne({ _id: userId });
-
-    res.json({ message: "User deleted, requests kept" });
-  } catch (error) {
-    res.status(500).json({ message: "Delete failed", error: error.message });
-  }
-});
-
-// Tạo yêu cầu mới - khách dùng, không cần login
-app.post("/request", upload.array("image", 12), async (req, res) => {
+app.post("/request", requireUser, upload.array("image", 12), async (req, res) => {
   try {
     const shortId = await generateRequestId();
-    const currentUser = getUserFromRequest(req);
-    let requestUserId = "";
 
-    if (!currentUser) {
-      return res.status(401).json({ message: "Login required" });
-    }
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(401).json({ message: "User not found" });
 
-    const user = await User.findById(currentUser.userId);
-    if (!user) {
-      return res.status(401).json({ message: "User not found" });
-    }
     if (user.status !== "active") {
-      return res.status(403).json({ message: "Account is waiting for admin approval" });
+      return res.status(403).json({
+        message: "Account is waiting for admin approval"
+      });
     }
-    requestUserId = String(user._id);
 
     const mediaFiles = [];
     const files = Array.isArray(req.files) ? req.files : [];
@@ -718,11 +787,15 @@ app.post("/request", upload.array("image", 12), async (req, res) => {
     for (const file of files) {
       try {
         const uploadResult = await uploadMediaToCloudinary(file.buffer);
-        const type = (uploadResult.resource_type === "video" || (file.mimetype || "").startsWith("video/")) ? "video" : "image";
+        const type = uploadResult.resource_type === "video" || (file.mimetype || "").startsWith("video/")
+          ? "video"
+          : "image";
+
         mediaFiles.push({
           url: uploadResult.secure_url,
           type
         });
+
       } catch (uploadError) {
         return res.status(500).json({
           message: "Media upload failed",
@@ -737,13 +810,11 @@ app.post("/request", upload.array("image", 12), async (req, res) => {
 
     const newRequest = new Request({
       id: shortId,
-      userId: requestUserId,
-
-      name: req.body.name || "",
-      phone: req.body.phone || "",
-      contact: req.body.contact || "",
-      address: req.body.address || "",
-
+      userId: String(user._id),
+      name: req.body.name || user.name || "",
+      phone: req.body.phone || user.phone || "",
+      contact: req.body.contact || user.contact || "",
+      address: req.body.address || user.address || "",
       content: req.body.content || "",
       image: firstMedia.type === "image" ? firstMedia.url : "",
       mediaUrl: firstMedia.url,
@@ -753,7 +824,6 @@ app.post("/request", upload.array("image", 12), async (req, res) => {
       quoteRequested: req.body.quoteRequested === "true" || req.body.quoteRequested === true,
       assigneeId: bestAssignee ? String(bestAssignee._id) : "",
       assigneeName: bestAssignee ? bestAssignee.name : "",
-
       status: "untreated",
       adminReply: "",
       createdAt: new Date()
@@ -768,7 +838,7 @@ app.post("/request", upload.array("image", 12), async (req, res) => {
     notifySlack(
       "*YAMADEN - Yêu cầu mới*\n" +
       "ID: " + shortId + "\n" +
-      "Nguồn: " + (requestUserId ? "Tài khoản khách hàng" : "Gửi nhanh") + "\n" +
+      "Nguồn: Tài khoản khách hàng\n" +
       "Tên: " + (newRequest.name || "-") + "\n" +
       "SĐT: " + (newRequest.phone || "-") + "\n" +
       "Địa chỉ: " + (newRequest.address || "-") + "\n" +
@@ -790,7 +860,18 @@ app.post("/request", upload.array("image", 12), async (req, res) => {
   }
 });
 
-// Lấy danh sách yêu cầu - admin cần login
+app.get("/user/requests", requireUser, async (req, res) => {
+  try {
+    const requests = await Request.find({ userId: req.user.userId }).sort({ createdAt: -1 });
+    res.json(requests);
+  } catch (error) {
+    res.status(500).json({
+      message: "Read failed",
+      error: error.message
+    });
+  }
+});
+
 app.get("/requests", requireAdmin, async (req, res) => {
   try {
     const requests = await Request.find().sort({ createdAt: -1 });
@@ -803,16 +884,12 @@ app.get("/requests", requireAdmin, async (req, res) => {
   }
 });
 
-// Tra cứu 1 yêu cầu theo ID - khách dùng, không cần login
 app.get("/request/:id", async (req, res) => {
   try {
-    const id = req.params.id;
-    const item = await Request.findOne(makeIdQuery(id));
+    const item = await Request.findOne(makeIdQuery(req.params.id));
 
     if (!item) {
-      return res.status(404).json({
-        message: "Not found"
-      });
+      return res.status(404).json({ message: "Not found" });
     }
 
     res.json(item);
@@ -825,16 +902,12 @@ app.get("/request/:id", async (req, res) => {
   }
 });
 
-// Cập nhật trạng thái / phản hồi admin - admin cần login
 app.put("/request/:id", requireAdmin, async (req, res) => {
   try {
-    const id = req.params.id;
-    const item = await Request.findOne(makeIdQuery(id));
+    const item = await Request.findOne(makeIdQuery(req.params.id));
 
     if (!item) {
-      return res.status(404).json({
-        message: "Not found"
-      });
+      return res.status(404).json({ message: "Not found" });
     }
 
     if (req.body.status) {
@@ -847,6 +920,7 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
 
     if (req.body.adminReply !== undefined) {
       item.adminReply = req.body.adminReply;
+
       if (!item.firstResponseAt && String(req.body.adminReply || "").trim()) {
         item.firstResponseAt = new Date();
       }
@@ -867,22 +941,15 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
   }
 });
 
-// Xóa yêu cầu - admin cần login
 app.delete("/request/:id", requireAdmin, async (req, res) => {
   try {
-    const id = req.params.id;
-
-    const result = await Request.deleteOne(makeIdQuery(id));
+    const result = await Request.deleteOne(makeIdQuery(req.params.id));
 
     if (result.deletedCount === 0) {
-      return res.status(404).json({
-        message: "Not found"
-      });
+      return res.status(404).json({ message: "Not found" });
     }
 
-    res.json({
-      message: "Deleted"
-    });
+    res.json({ message: "Deleted" });
 
   } catch (error) {
     res.status(500).json({
