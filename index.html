@@ -3888,10 +3888,14 @@ html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-
     var user=storedUser();
     return !!(localStorage.getItem('userToken')&&user&&user.status==='active'&&user.profileCompleted);
   }
+  function hasSession(){
+    return !!(localStorage.getItem('userToken')&&storedUser());
+  }
   function syncAuthState(preferredTab){
     var app=document.querySelector('.app');
     if(!app)return false;
     var ready=isReady();
+    var session=hasSession();
     app.classList.toggle('auth-login-mode',!ready);
     app.classList.toggle('auth-app-mode',ready);
     document.body.classList.toggle('auth-login-body',!ready);
@@ -3903,8 +3907,10 @@ html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-
       });
       document.querySelectorAll('.bottom-nav button').forEach(function(btn){btn.classList.remove('active')});
       document.getElementById('tabAccount')?.classList.add('active');
-      document.getElementById('profileCard')&&(document.getElementById('profileCard').style.display='none');
-      document.getElementById('accountFormCard')&&(document.getElementById('accountFormCard').style.display='block');
+      if(!session){
+        document.getElementById('profileCard')&&(document.getElementById('profileCard').style.display='none');
+        document.getElementById('accountFormCard')&&(document.getElementById('accountFormCard').style.display='block');
+      }
     }
     return ready;
   }
