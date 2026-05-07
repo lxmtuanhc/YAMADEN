@@ -2953,6 +2953,17 @@ async function userLogin() {
 
     if (!res.ok || !data.user || (submitMode === "login" && !data.token)) throw new Error(data.message || "auth failed");
 
+    if (submitMode === "register" && !data.token) {
+      try {
+        const loginRes = await fetch(API + "/user/login", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body:JSON.stringify({ phone, pin })
+        });
+        const loginData = await readJsonSafe(loginRes);
+        if (loginRes.ok && loginData.token) Object.assign(data, loginData);
+      } catch(e) {}
+    }
     if (data.token) localStorage.setItem("userToken", data.token);
     localStorage.setItem("userProfile", JSON.stringify(data.user));
     updateAccountUI();
@@ -4047,6 +4058,25 @@ html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-
     if(data.user)localStorage.setItem('userProfile',JSON.stringify(data.user));
     try{currentUser=data.user||currentUser}catch(e){}
   }
+  async function ensureTokenAfterRegister(phone,pin,data){
+    // Some servers create the user on /user/register but do not return a token.
+    // Without a token, /user/profile cannot save the customer's profile,
+    // so the account never appears in admin approval list.
+    if(data&&data.token)return data;
+    try{
+      var loginRes=await fetch(API+'/user/login',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({phone:phone,pin:pin})
+      });
+      var loginData=await readJsonSafe(loginRes);
+      if(loginRes.ok&&loginData&&loginData.token){
+        saveAuth(loginData);
+        return loginData;
+      }
+    }catch(e){}
+    return data||{};
+  }
   function showProfileForm(){
     if(window.updateAccountUI)window.updateAccountUI();
     if(window.setAccountMode)window.setAccountMode('profile');
@@ -4102,12 +4132,14 @@ html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-
       var data=await readJsonSafe(res);
       if(!res.ok||!data.user||(mode==='login'&&!data.token))throw new Error(data.message||'auth failed');
 
-      saveAuth(data);
       if(mode==='register'){
+        data=await ensureTokenAfterRegister(phone,pin,data);
+        saveAuth(data);
         if(window.showToast)showToast(msg('registered'));
         showProfileForm();
         return;
       }
+      saveAuth(data);
       if(mode==='profile'){
         if(window.showToast)showToast(data.user.status==='active'?msg('profileSaved'):msg('profileSaved'));
         if(data.user.status==='active'&&data.user.profileCompleted)window.showTab('home');
@@ -4124,7 +4156,11 @@ html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-
         showWaiting();
       }
     }catch(err){
-      if(window.showToast)showToast(msg('loginFailed'));
+      if(window.showToast){
+        if(mode==='register')showToast(langNow()==='ja'?'登録に失敗しました。もう一度お試しください。':'Đăng ký thất bại. Vui lòng thử lại.');
+        else if(mode==='profile')showToast(langNow()==='ja'?'お客様情報の保存に失敗しました。ログインし直してからお試しください。':'Lưu thông tin thất bại. Hãy đăng nhập lại rồi thử lại.');
+        else showToast(msg('loginFailed'));
+      }
     }
   };
 })();
