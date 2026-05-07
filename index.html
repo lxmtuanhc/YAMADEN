@@ -2951,7 +2951,7 @@ async function userLogin() {
     const res = await fetch(API + endpoint, { method, headers, body:JSON.stringify(body) });
     const data = await readJsonSafe(res);
 
-    if (!res.ok || !data.user || (submitMode !== "profile" && !data.token)) throw new Error("login failed");
+    if (!res.ok || !data.user || (submitMode === "login" && !data.token)) throw new Error(data.message || "auth failed");
 
     if (data.token) localStorage.setItem("userToken", data.token);
     localStorage.setItem("userProfile", JSON.stringify(data.user));
@@ -3743,6 +3743,7 @@ body.yamaden-app-active .app.auth-app-mode{top:0!important;bottom:0!important;gr
   if(!localStorage.getItem('language')&&!localStorage.getItem('lang'))setLang('ja',true);else setLang(current(),true);
   document.addEventListener('DOMContentLoaded',()=>setTimeout(syncLanguageUI,900));
   window.__yamadenSyncLanguageUI=syncLanguageUI;
+  if(!window.__yamadenLangSyncTimer){window.__yamadenLangSyncTimer=setInterval(syncLanguageUI,1500);}
 })();
 </script>
 
@@ -4099,7 +4100,7 @@ html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-
       if(mode==='profile'&&token)headers.Authorization='Bearer '+token;
       var res=await fetch(API+endpoint,{method:method,headers:headers,body:JSON.stringify(body)});
       var data=await readJsonSafe(res);
-      if(!res.ok||!data.user||(mode!=='profile'&&!data.token))throw new Error(data.message||'auth failed');
+      if(!res.ok||!data.user||(mode==='login'&&!data.token))throw new Error(data.message||'auth failed');
 
       saveAuth(data);
       if(mode==='register'){
