@@ -3998,5 +3998,135 @@ html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-
   ensureSwitch();
 })();
 </script>
+
+<!-- yamaden-auth-submit-flow-v42 -->
+<style id="yamaden-auth-submit-flow-v42-style">
+.app.auth-login-mode #profileCard .secondary-row,
+.app.auth-login-mode .account-divider,
+.app.auth-login-mode .account-status,
+.app.auth-login-mode #quickSupportBtn,
+.app.auth-login-mode #quickSupportBtnIcon,
+.app.auth-login-mode .soft-btn[onclick*="showTab('send')"]{display:none!important}
+</style>
+<script id="yamaden-auth-submit-flow-v42-script">
+(function(){
+  function langNow(){
+    try{return lang==='vi'?'vi':'ja'}catch(e){return String(localStorage.getItem('language')||'ja').indexOf('vi')===0?'vi':'ja'}
+  }
+  function msg(key){
+    var l=langNow();
+    var words={
+      ja:{
+        phone:'電話番号と4〜6桁のPINを入力してください。',
+        pinMatch:'PINが一致しません。',
+        profileRequired:'お名前、メール、地域、工事名を入力してください。',
+        registered:'登録しました。続けてお客様情報を入力してください。',
+        profileSaved:'お客様情報を送信しました。管理者の承認をお待ちください。',
+        pending:'管理者の承認後、アプリをご利用いただけます。',
+        loginFailed:'ログインに失敗しました。もう一度お試しください。'
+      },
+      vi:{
+        phone:'Vui lòng nhập số điện thoại và mã PIN 4-6 số.',
+        pinMatch:'Mã PIN nhập lại không khớp.',
+        profileRequired:'Vui lòng nhập họ tên, email, tỉnh/thành và tên công trình.',
+        registered:'Đăng ký thành công. Vui lòng nhập thông tin cá nhân.',
+        profileSaved:'Đã gửi thông tin cá nhân. Vui lòng chờ admin duyệt.',
+        pending:'Sau khi admin duyệt, bạn có thể sử dụng app.',
+        loginFailed:'Đăng nhập thất bại. Vui lòng thử lại.'
+      }
+    };
+    return (words[l]&&words[l][key])||words.ja[key]||key;
+  }
+  function value(id){
+    var el=document.getElementById(id);
+    return el?String(el.value||'').trim():'';
+  }
+  function saveAuth(data){
+    if(data.token)localStorage.setItem('userToken',data.token);
+    if(data.user)localStorage.setItem('userProfile',JSON.stringify(data.user));
+    try{currentUser=data.user||currentUser}catch(e){}
+  }
+  function showProfileForm(){
+    if(window.updateAccountUI)window.updateAccountUI();
+    if(window.setAccountMode)window.setAccountMode('profile');
+    var form=document.getElementById('accountFormCard');
+    var profile=document.getElementById('profileCard');
+    if(form)form.style.display='block';
+    if(profile)profile.style.display='none';
+    if(window.showTab)window.showTab('account');
+    if(window.__yamadenSyncLanguageUI)window.__yamadenSyncLanguageUI();
+  }
+  function showWaiting(){
+    if(window.updateAccountUI)window.updateAccountUI();
+    var form=document.getElementById('accountFormCard');
+    var profile=document.getElementById('profileCard');
+    if(form)form.style.display='none';
+    if(profile)profile.style.display='block';
+    if(window.showTab)window.showTab('account');
+    if(window.__yamadenSyncLanguageUI)window.__yamadenSyncLanguageUI();
+  }
+  window.userLogin=async function(){
+    var mode='register';
+    try{mode=accountMode||'register'}catch(e){}
+    var phone=value('accountPhone');
+    var pin=value('accountPin');
+    var pinConfirm=value('accountPinConfirm');
+    var name=value('accountName');
+    var email=value('accountEmail');
+    var province=value('accountProvince');
+    var projectName=value('accountProjectName');
+    var company=value('accountCompany');
+
+    if(mode!=='profile'&&(!phone||!/^\d{4,6}$/.test(pin))){
+      if(window.showToast)showToast(msg('phone'));
+      return;
+    }
+    if(mode==='register'&&pin!==pinConfirm){
+      if(window.showToast)showToast(msg('pinMatch'));
+      return;
+    }
+    if(mode==='profile'&&(!name||!email||!province||!projectName)){
+      if(window.showToast)showToast(msg('profileRequired'));
+      return;
+    }
+
+    try{
+      var endpoint=mode==='register'?'/user/register':mode==='profile'?'/user/profile':'/user/login';
+      var headers={'Content-Type':'application/json'};
+      var body=mode==='profile'?{name:name,email:email,province:province,projectName:projectName,company:company}:{phone:phone,pin:pin};
+      var method=mode==='profile'?'PUT':'POST';
+      var token=localStorage.getItem('userToken')||'';
+      if(mode==='profile'&&token)headers.Authorization='Bearer '+token;
+      var res=await fetch(API+endpoint,{method:method,headers:headers,body:JSON.stringify(body)});
+      var data=await readJsonSafe(res);
+      if(!res.ok||!data.user||(mode!=='profile'&&!data.token))throw new Error(data.message||'auth failed');
+
+      saveAuth(data);
+      if(mode==='register'){
+        if(window.showToast)showToast(msg('registered'));
+        showProfileForm();
+        return;
+      }
+      if(mode==='profile'){
+        if(window.showToast)showToast(data.user.status==='active'?msg('profileSaved'):msg('profileSaved'));
+        if(data.user.status==='active'&&data.user.profileCompleted)window.showTab('home');
+        else showWaiting();
+        return;
+      }
+      if(data.user.status==='active'&&data.user.profileCompleted){
+        if(window.updateAccountUI)window.updateAccountUI();
+        window.showTab('home');
+      }else if(!data.user.profileCompleted){
+        showProfileForm();
+      }else{
+        if(window.showToast)showToast(msg('pending'));
+        showWaiting();
+      }
+    }catch(err){
+      if(window.showToast)showToast(msg('loginFailed'));
+    }
+  };
+})();
+</script>
 </body>
 </html>
