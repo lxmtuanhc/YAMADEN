@@ -4274,8 +4274,8 @@ html,body{margin:0!important;padding:0!important;width:100%!important;max-width:
 })();
 </script>
 
-<!-- yamaden-customer-visual-viewport-clamp-v34 -->
-<style id="yamaden-customer-visual-viewport-clamp-v34-style">
+<!-- yamaden-customer-stable-viewport-clamp-v35 -->
+<style id="yamaden-customer-stable-viewport-clamp-v35-style">
 html,body{
   width:100%!important;
   max-width:100%!important;
@@ -4285,8 +4285,8 @@ html,body{
 body.yamaden-app-active{
   left:0!important;
   right:auto!important;
-  width:var(--yamaden-visual-width,100%)!important;
-  max-width:var(--yamaden-visual-width,100%)!important;
+  width:var(--yamaden-stable-width,100%)!important;
+  max-width:var(--yamaden-stable-width,100%)!important;
   min-width:0!important;
   overflow:hidden!important;
 }
@@ -4295,8 +4295,8 @@ body.yamaden-app-active .app.auth-app-mode,
   left:0!important;
   right:auto!important;
   transform:none!important;
-  width:var(--yamaden-visual-width,100%)!important;
-  max-width:var(--yamaden-visual-width,100%)!important;
+  width:var(--yamaden-stable-width,100%)!important;
+  max-width:var(--yamaden-stable-width,100%)!important;
   min-width:0!important;
   margin:0!important;
   overflow:hidden!important;
@@ -4328,30 +4328,139 @@ body.yamaden-app-active .app.auth-app-mode .settings-row p{
 @media(min-width:430px){
   body.yamaden-app-active .app.auth-app-mode,
   .app.auth-login-mode{
-    width:min(var(--yamaden-visual-width,100%),480px)!important;
-    max-width:min(var(--yamaden-visual-width,100%),480px)!important;
+    width:min(var(--yamaden-stable-width,100%),480px)!important;
+    max-width:min(var(--yamaden-stable-width,100%),480px)!important;
     margin:0 auto!important;
   }
 }
 </style>
-<script id="yamaden-customer-visual-viewport-clamp-v34-script">
+<script id="yamaden-customer-stable-viewport-clamp-v35-script">
 (function(){
-  function syncVisualWidth(){
-    var viewport=window.visualViewport;
-    var width=Math.floor((viewport&&viewport.width)||window.innerWidth||document.documentElement.clientWidth||0);
-    if(width>0){
-      document.documentElement.style.setProperty('--yamaden-visual-width',width+'px');
-    }
+  var lastWidth=0;
+  var timer=0;
+  function measuredWidth(){
+    var docWidth=document.documentElement.clientWidth||0;
+    var winWidth=window.innerWidth||0;
+    var visualWidth=window.visualViewport&&window.visualViewport.width ? Math.floor(window.visualViewport.width) : 0;
+    var candidates=[docWidth,winWidth,visualWidth].filter(function(value){return value>0});
+    return candidates.length ? Math.min.apply(Math,candidates) : 0;
   }
-  syncVisualWidth();
-  window.addEventListener('resize',syncVisualWidth,{passive:true});
-  window.addEventListener('orientationchange',function(){setTimeout(syncVisualWidth,120)},{passive:true});
+  function applyStableWidth(force){
+    var width=measuredWidth();
+    if(width<=0)return;
+    if(!force&&lastWidth&&Math.abs(width-lastWidth)<6)return;
+    lastWidth=width;
+    document.documentElement.style.setProperty('--yamaden-stable-width',width+'px');
+  }
+  function scheduleStableWidth(force){
+    clearTimeout(timer);
+    timer=setTimeout(function(){
+      applyStableWidth(!!force);
+    },force?40:180);
+  }
+  applyStableWidth(true);
+  window.addEventListener('resize',function(){
+    scheduleStableWidth(false);
+  },{passive:true});
+  window.addEventListener('orientationchange',function(){
+    lastWidth=0;
+    scheduleStableWidth(true);
+    setTimeout(function(){applyStableWidth(true)},360);
+  },{passive:true});
   if(window.visualViewport){
-    window.visualViewport.addEventListener('resize',syncVisualWidth,{passive:true});
-    window.visualViewport.addEventListener('scroll',syncVisualWidth,{passive:true});
+    window.visualViewport.addEventListener('resize',function(){
+      scheduleStableWidth(false);
+    },{passive:true});
   }
-  document.addEventListener('DOMContentLoaded',syncVisualWidth);
+  document.addEventListener('DOMContentLoaded',function(){
+    applyStableWidth(true);
+  });
+  document.addEventListener('visibilitychange',function(){
+    if(!document.hidden){
+      applyStableWidth(true);
+    }
+  });
 })();
 </script>
+
+<!-- yamaden-customer-login-safe-area-v36 -->
+<style id="yamaden-customer-login-safe-area-v36-style">
+.toast{
+  top:calc(14px + env(safe-area-inset-top))!important;
+  max-width:calc(100% - 28px)!important;
+  z-index:100000!important;
+}
+html:has(.app.auth-login-mode),
+body.auth-login-body{
+  min-height:100svh!important;
+  height:100svh!important;
+  overflow:hidden!important;
+}
+.app.auth-login-mode,
+.app.auth-login-mode .main,
+.app.auth-login-mode .container,
+.app.auth-login-mode #accountSection{
+  min-height:100svh!important;
+  height:100svh!important;
+  max-height:100svh!important;
+  overflow:hidden!important;
+}
+.app.auth-login-mode .account-landing{
+  min-height:100svh!important;
+  height:100svh!important;
+  max-height:100svh!important;
+  justify-content:flex-start!important;
+  padding-top:calc(48px + env(safe-area-inset-top))!important;
+  padding-right:16px!important;
+  padding-bottom:calc(22px + env(safe-area-inset-bottom))!important;
+  padding-left:16px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  scrollbar-width:none!important;
+}
+.app.auth-login-mode .account-landing::-webkit-scrollbar{
+  display:none!important;
+}
+.app.auth-login-mode .account-brand{
+  width:min(330px,100%)!important;
+  margin:0 auto 14px!important;
+  flex:0 0 auto!important;
+}
+.app.auth-login-mode .account-panel{
+  width:min(330px,100%)!important;
+  margin:0 auto!important;
+  flex:0 0 auto!important;
+  transform:none!important;
+}
+.app.auth-login-mode .account-card,
+.app.auth-login-mode .profile-card{
+  max-height:none!important;
+  overflow:visible!important;
+}
+@media(max-height:720px){
+  .app.auth-login-mode .account-landing{
+    padding-top:calc(40px + env(safe-area-inset-top))!important;
+    padding-bottom:calc(16px + env(safe-area-inset-bottom))!important;
+  }
+  .app.auth-login-mode .account-brand{
+    margin-bottom:10px!important;
+  }
+}
+@media(max-height:620px){
+  .app.auth-login-mode .account-landing{
+    padding-top:calc(30px + env(safe-area-inset-top))!important;
+  }
+  .app.auth-login-mode .account-card,
+  .app.auth-login-mode .profile-card{
+    padding:14px!important;
+  }
+  .app.auth-login-mode .account-welcome{
+    margin-bottom:8px!important;
+  }
+  .app.auth-login-mode .account-mode{
+    margin:8px 0!important;
+  }
+}
+</style>
 </body>
 </html>
