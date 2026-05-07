@@ -18,8 +18,10 @@ app.use(cors({
 
 app.use(express.json({ limit: "10mb" }));
 
+// Cho server hiển thị index.html, admin.html, login.html, icon, manifest
 app.use(express.static(__dirname));
 
+// ===== Upload media bằng multer =====
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -31,12 +33,14 @@ const upload = multer({
   }
 });
 
+// ===== Cloudinary Config =====
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// ===== Admin Login Config =====
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const JWT_SECRET = process.env.JWT_SECRET;
 const USER_JWT_SECRET = process.env.USER_JWT_SECRET || JWT_SECRET;
@@ -48,7 +52,9 @@ function requireAdmin(req, res, next) {
   const auth = req.headers.authorization || "";
   const token = auth.replace("Bearer ", "");
 
-  if (!token) return res.status(401).json({ message: "No token" });
+  if (!token) {
+    return res.status(401).json({ message: "No token" });
+  }
 
   try {
     req.admin = jwt.verify(token, JWT_SECRET);
@@ -149,17 +155,21 @@ function applyStatusTimestamps(item, nextStatus) {
   });
 }
 
+// ===== MongoDB Connect =====
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log("MongoDB error:", err));
 
+// ===== Schema =====
 const RequestSchema = new mongoose.Schema({
   id: mongoose.Schema.Types.Mixed,
   userId: String,
+
   name: String,
   phone: String,
   contact: String,
   address: String,
+
   content: String,
   image: String,
   mediaUrl: String,
@@ -172,6 +182,7 @@ const RequestSchema = new mongoose.Schema({
       }
     }
   ],
+
   status: String,
   adminReply: String,
   createdAt: Date,
@@ -240,6 +251,7 @@ function publicUser(user) {
   return item;
 }
 
+
 function parseRequestTags(value) {
   if (Array.isArray(value)) return value.map(item => String(item || "").trim()).filter(Boolean);
   const raw = String(value || "").trim();
@@ -282,6 +294,7 @@ async function findBestAssignee(issueTags) {
   return best;
 }
 
+// ===== Hỗ trợ cả ID mới String và ID cũ Number =====
 function makeIdQuery(id) {
   const query = [{ id: id }];
 
@@ -292,6 +305,7 @@ function makeIdQuery(id) {
   return { $or: query };
 }
 
+// ===== Generate short ID =====
 async function generateRequestId() {
   let id;
   let exists;
@@ -304,6 +318,7 @@ async function generateRequestId() {
   return id;
 }
 
+// ===== Upload buffer media lên Cloudinary =====
 function uploadMediaToCloudinary(fileBuffer) {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
@@ -321,10 +336,12 @@ function uploadMediaToCloudinary(fileBuffer) {
   });
 }
 
+// Trang chính
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+// ===== Admin Login API =====
 app.post("/admin/login", (req, res) => {
   const password = req.body.password || "";
 
@@ -421,10 +438,6 @@ app.post("/user/login", async (req, res) => {
 
     if (user.status === "blocked") {
       return res.status(403).json({ message: "User is blocked" });
-    }
-
-    if (user.status !== "active") {
-      return res.status(403).json({ message: "Account is waiting for admin approval" });
     }
 
     user.lastLoginAt = new Date();
@@ -526,7 +539,6 @@ app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res)
       status: req.body.status || "active",
       createdAt: new Date()
     });
-
     await staff.save();
     res.json(staff);
   } catch (error) {
@@ -538,24 +550,19 @@ app.put("/admin/staff/:id", requireAdmin, upload.single("avatar"), async (req, r
   try {
     const staff = await Staff.findById(req.params.id);
     if (!staff) return res.status(404).json({ message: "Staff not found" });
-
     ["name", "phone", "email", "areas", "skills", "department", "workContent", "status"].forEach(field => {
       if (req.body[field] !== undefined) staff[field] = req.body[field];
     });
-
     if (req.body.workTags !== undefined) {
       staff.workTags = Array.isArray(req.body.workTags)
         ? req.body.workTags.map(item => String(item || "").trim()).filter(Boolean)
         : parseRequestTags(req.body.workTags);
     }
-
     if (req.body.avatar !== undefined) staff.avatar = req.body.avatar || "";
-
     if (req.file) {
       const uploadResult = await uploadMediaToCloudinary(req.file.buffer);
       staff.avatar = uploadResult.secure_url || "";
     }
-
     await staff.save();
     res.json(staff);
   } catch (error) {
@@ -567,10 +574,8 @@ app.delete("/admin/staff/:id", requireAdmin, async (req, res) => {
   try {
     const staff = await Staff.findById(req.params.id);
     if (!staff) return res.status(404).json({ message: "Staff not found" });
-
     await Staff.deleteOne({ _id: req.params.id });
     await Request.updateMany({ assigneeId: req.params.id }, { $set: { assigneeId: "", assigneeName: "" } });
-
     res.json({ message: "Deleted" });
   } catch (error) {
     res.status(500).json({ message: "Staff delete failed", error: error.message });
@@ -605,39 +610,6 @@ app.get("/admin/users/:id/requests", requireAdmin, async (req, res) => {
   }
 });
 
-app.post("/admin/users/:id/approve", requireAdmin, async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found"
-      });
-    }
-
-    user.status = "active";
-    await user.save();
-
-    notifySlack(
-      "*YAMADEN - User approved*\n" +
-      "Tên: " + (user.name || "-") + "\n" +
-      "SĐT: " + (user.phone || "-") + "\n" +
-      "Email: " + (user.email || "-") + "\n" +
-      "Trạng thái: active"
-    );
-
-    res.json({
-      message: "User approved",
-      data: publicUser(user)
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Approve failed",
-      error: error.message
-    });
-  }
-});
-
 app.put("/admin/users/:id", requireAdmin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -669,6 +641,7 @@ app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
   }
 });
 
+// Tạo yêu cầu mới - khách dùng, không cần login
 app.post("/request", upload.array("image", 12), async (req, res) => {
   try {
     const shortId = await generateRequestId();
@@ -680,15 +653,12 @@ app.post("/request", upload.array("image", 12), async (req, res) => {
     }
 
     const user = await User.findById(currentUser.userId);
-
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }
-
     if (user.status !== "active") {
       return res.status(403).json({ message: "Account is waiting for admin approval" });
     }
-
     requestUserId = String(user._id);
 
     const mediaFiles = [];
@@ -717,10 +687,12 @@ app.post("/request", upload.array("image", 12), async (req, res) => {
     const newRequest = new Request({
       id: shortId,
       userId: requestUserId,
+
       name: req.body.name || "",
       phone: req.body.phone || "",
       contact: req.body.contact || "",
       address: req.body.address || "",
+
       content: req.body.content || "",
       image: firstMedia.type === "image" ? firstMedia.url : "",
       mediaUrl: firstMedia.url,
@@ -730,6 +702,7 @@ app.post("/request", upload.array("image", 12), async (req, res) => {
       quoteRequested: req.body.quoteRequested === "true" || req.body.quoteRequested === true,
       assigneeId: bestAssignee ? String(bestAssignee._id) : "",
       assigneeName: bestAssignee ? bestAssignee.name : "",
+
       status: "untreated",
       adminReply: "",
       createdAt: new Date()
@@ -744,7 +717,7 @@ app.post("/request", upload.array("image", 12), async (req, res) => {
     notifySlack(
       "*YAMADEN - Yêu cầu mới*\n" +
       "ID: " + shortId + "\n" +
-      "Nguồn: Tài khoản khách hàng\n" +
+      "Nguồn: " + (requestUserId ? "Tài khoản khách hàng" : "Gửi nhanh") + "\n" +
       "Tên: " + (newRequest.name || "-") + "\n" +
       "SĐT: " + (newRequest.phone || "-") + "\n" +
       "Địa chỉ: " + (newRequest.address || "-") + "\n" +
@@ -757,6 +730,7 @@ app.post("/request", upload.array("image", 12), async (req, res) => {
       message: "Saved to MongoDB",
       data: newRequest
     });
+
   } catch (error) {
     res.status(500).json({
       message: "Save failed",
@@ -765,6 +739,7 @@ app.post("/request", upload.array("image", 12), async (req, res) => {
   }
 });
 
+// Lấy danh sách yêu cầu - admin cần login
 app.get("/requests", requireAdmin, async (req, res) => {
   try {
     const requests = await Request.find().sort({ createdAt: -1 });
@@ -777,6 +752,7 @@ app.get("/requests", requireAdmin, async (req, res) => {
   }
 });
 
+// Tra cứu 1 yêu cầu theo ID - khách dùng, không cần login
 app.get("/request/:id", async (req, res) => {
   try {
     const id = req.params.id;
@@ -789,6 +765,7 @@ app.get("/request/:id", async (req, res) => {
     }
 
     res.json(item);
+
   } catch (error) {
     res.status(500).json({
       message: "Read failed",
@@ -797,6 +774,7 @@ app.get("/request/:id", async (req, res) => {
   }
 });
 
+// Cập nhật trạng thái / phản hồi admin - admin cần login
 app.put("/request/:id", requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
@@ -829,6 +807,7 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
       message: "Updated",
       data: item
     });
+
   } catch (error) {
     res.status(500).json({
       message: "Update failed",
@@ -837,9 +816,11 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
   }
 });
 
+// Xóa yêu cầu - admin cần login
 app.delete("/request/:id", requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
+
     const result = await Request.deleteOne(makeIdQuery(id));
 
     if (result.deletedCount === 0) {
@@ -851,6 +832,7 @@ app.delete("/request/:id", requireAdmin, async (req, res) => {
     res.json({
       message: "Deleted"
     });
+
   } catch (error) {
     res.status(500).json({
       message: "Delete failed",
