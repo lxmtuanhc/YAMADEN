@@ -1573,5 +1573,377 @@ document.addEventListener("DOMContentLoaded",()=>{
   initIntro(); if("serviceWorker" in navigator) navigator.serviceWorker.register("/service-worker.js").catch(()=>{});
 });
 </script>
+<style id="yamaden-auth-final-v1">
+@media (max-width: 860px) {
+  .app.auth-login-mode .account-landing {
+    padding: calc(26px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom)) !important;
+    background:
+      linear-gradient(116deg, rgba(255,255,255,.98) 0 45%, rgba(255,255,255,.42) 45% 53%, transparent 53%),
+      linear-gradient(132deg, transparent 0 67%, rgba(37,99,235,.22) 67% 74%, rgba(37,99,235,.48) 74% 82%, transparent 82%),
+      linear-gradient(180deg, #f8fbff 0%, #eef6ff 54%, #dcecff 100%) !important;
+  }
+  .app.auth-login-mode .account-brand {
+    width: min(100%, 360px) !important;
+    margin: 0 auto 16px !important;
+    display: grid !important;
+    grid-template-columns: 54px minmax(0, 1fr) 62px !important;
+    gap: 10px !important;
+    align-items: center !important;
+  }
+  .app.auth-login-mode .account-brand img {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 10px 24px rgba(15,23,42,.16) !important;
+  }
+  .app.auth-login-mode .account-brand-title {
+    color: #2563eb !important;
+    font-size: 17px !important;
+    line-height: 1.12 !important;
+    font-weight: 950 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .app.auth-login-mode .account-brand-sub {
+    margin-top: 4px !important;
+    color: #0f172a !important;
+    font-size: 10px !important;
+    letter-spacing: .14em !important;
+    font-weight: 950 !important;
+  }
+  .auth-language-select {
+    width: 60px !important;
+    height: 40px !important;
+    border: 1px solid rgba(15,23,42,.12) !important;
+    border-radius: 14px !important;
+    background: rgba(255,255,255,.92) !important;
+    color: #111827 !important;
+    font-weight: 950 !important;
+    text-align: center !important;
+    text-align-last: center !important;
+    box-shadow: 0 10px 22px rgba(15,23,42,.10) !important;
+  }
+  .app.auth-login-mode .account-panel {
+    width: min(100%, 360px) !important;
+    padding: 14px !important;
+    border-radius: 24px !important;
+    background: rgba(255,255,255,.74) !important;
+    box-shadow: 0 20px 48px rgba(15,23,42,.12) !important;
+    border: 1px solid rgba(255,255,255,.86) !important;
+  }
+  .app.auth-login-mode .account-card {
+    padding: 18px !important;
+    border-radius: 22px !important;
+    background: rgba(255,255,255,.94) !important;
+    box-shadow: 0 10px 28px rgba(15,23,42,.055) !important;
+  }
+  .app.auth-login-mode .account-welcome {
+    margin-bottom: 16px !important;
+  }
+  .app.auth-login-mode .account-welcome-ja {
+    font-size: 22px !important;
+    line-height: 1.1 !important;
+    color: #111827 !important;
+    font-weight: 950 !important;
+  }
+  .app.auth-login-mode .account-welcome-brand {
+    margin-top: 3px !important;
+    font-size: 30px !important;
+    line-height: 1 !important;
+    color: #2563eb !important;
+    font-weight: 950 !important;
+  }
+  .app.auth-login-mode .account-welcome-sub {
+    max-width: 270px !important;
+    margin: 10px auto 0 !important;
+    color: #64748b !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    font-weight: 900 !important;
+  }
+  .app.auth-login-mode .account-mode {
+    height: 46px !important;
+    margin: 14px 0 12px !important;
+    padding: 4px !important;
+    border-radius: 18px !important;
+    background: #f4f2f7 !important;
+    gap: 4px !important;
+  }
+  .app.auth-login-mode .account-mode button {
+    min-height: 38px !important;
+    height: 38px !important;
+    border-radius: 15px !important;
+    color: #64748b !important;
+    background: transparent !important;
+    font-size: 13px !important;
+    font-weight: 950 !important;
+  }
+  .app.auth-login-mode .account-mode button.active {
+    background: #101828 !important;
+    color: #fff !important;
+    box-shadow: 0 8px 18px rgba(15,23,42,.18) !important;
+  }
+  .app.auth-login-mode .account-fields {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    margin-top: 0 !important;
+  }
+  .app.auth-login-mode .account-fields input {
+    height: 48px !important;
+    min-height: 48px !important;
+    border-radius: 14px !important;
+    padding: 0 16px !important;
+    text-align: center !important;
+    font-size: 15px !important;
+    font-weight: 850 !important;
+    color: #111827 !important;
+    border: 1px solid #dbe4ef !important;
+    background: #fff !important;
+    box-shadow: 0 6px 14px rgba(15,23,42,.035) !important;
+  }
+  .app.auth-login-mode .account-fields input::placeholder {
+    color: #a3a3a3 !important;
+    opacity: 1 !important;
+  }
+  .app.auth-login-mode .account-card .main-btn {
+    height: 54px !important;
+    min-height: 54px !important;
+    margin-top: 18px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #2563eb, #0ea5e9) !important;
+    color: #fff !important;
+    box-shadow: 0 16px 30px rgba(37,99,235,.24) !important;
+  }
+  .app.auth-login-mode .account-divider,
+  .app.auth-login-mode .approval-state,
+  .app.auth-login-mode .account-status,
+  .app.auth-login-mode .emergency-card,
+  .app.auth-login-mode #quickSupportBtn,
+  .app.auth-login-mode #quickSupportBtnIcon,
+  .app.auth-login-mode .soft-btn[onclick*="showTab('send')"] {
+    display: none !important;
+  }
+  .auth-state-note {
+    display: none;
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 950;
+  }
+  .auth-state-note.show {
+    display: block;
+  }
+}
+</style>
+<script id="yamaden-auth-final-v1-script">
+(function(){
+  var WORDS={
+    ja:{
+      brand:"\u682a\u5f0f\u4f1a\u793e \u5c71\u96fb",
+      welcome:"\u3088\u3046\u3053\u305d",
+      sub:"\u96fb\u8a71\u756a\u53f7\u3068PIN\u3067\u30ed\u30b0\u30a4\u30f3\u3057\u3066\u304f\u3060\u3055\u3044\u3002\u627f\u8a8d\u5f8c\u306b\u4f9d\u983c\u6a5f\u80fd\u3092\u5229\u7528\u3067\u304d\u307e\u3059\u3002",
+      reg:"\u65b0\u898f\u767b\u9332",
+      login:"\u30ed\u30b0\u30a4\u30f3",
+      phone:"\u96fb\u8a71\u756a\u53f7",
+      pin:"PIN 4\u301c6\u6841",
+      pin2:"PIN\u78ba\u8a8d",
+      submitReg:"\u767b\u9332\u3059\u308b",
+      submitLogin:"\u30ed\u30b0\u30a4\u30f3",
+      profileTitle:"\u304a\u5ba2\u69d8\u60c5\u5831",
+      profileSub:"\u7ba1\u7406\u8005\u627f\u8a8d\u306e\u305f\u3081\u3001\u8a73\u7d30\u60c5\u5831\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+      name:"\u304a\u540d\u524d",
+      email:"Email",
+      province:"\u90fd\u9053\u5e9c\u770c\u30fb\u5e02\u533a\u753a\u6751",
+      project:"\u5de5\u4e8b\u540d",
+      company:"\u4f1a\u793e\u540d / \u500b\u4eba\u540d",
+      save:"\u4fdd\u5b58\u3059\u308b",
+      pending:"\u7ba1\u7406\u8005\u627f\u8a8d\u5f85\u3061\u3067\u3059\u3002\u627f\u8a8d\u5f8c\u306b\u30a2\u30d7\u30ea\u3092\u5229\u7528\u3067\u304d\u307e\u3059\u3002",
+      approved:"\u627f\u8a8d\u6e08\u307f\u3067\u3059\u3002\u30a2\u30d7\u30ea\u3092\u958b\u304d\u307e\u3059\u3002",
+      required:"\u5fc5\u9808\u9805\u76ee\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+      pinMatch:"PIN\u304c\u4e00\u81f4\u3057\u307e\u305b\u3093\u3002",
+      registered:"\u767b\u9332\u3057\u307e\u3057\u305f\u3002\u7d9a\u3051\u3066\u304a\u5ba2\u69d8\u60c5\u5831\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+      saved:"\u304a\u5ba2\u69d8\u60c5\u5831\u3092\u9001\u4fe1\u3057\u307e\u3057\u305f\u3002"
+    },
+    vi:{
+      brand:"YAMADEN",
+      welcome:"Ch\u00e0o m\u1eebng",
+      sub:"\u0110\u0103ng nh\u1eadp b\u1eb1ng s\u1ed1 \u0111i\u1ec7n tho\u1ea1i v\u00e0 m\u00e3 PIN. Sau khi admin duy\u1ec7t, b\u1ea1n c\u00f3 th\u1ec3 s\u1eed d\u1ee5ng app.",
+      reg:"\u0110\u0103ng k\u00fd",
+      login:"\u0110\u0103ng nh\u1eadp",
+      phone:"S\u1ed1 \u0111i\u1ec7n tho\u1ea1i",
+      pin:"M\u00e3 PIN 4-6 s\u1ed1",
+      pin2:"X\u00e1c nh\u1eadn PIN",
+      submitReg:"\u0110\u0103ng k\u00fd",
+      submitLogin:"\u0110\u0103ng nh\u1eadp",
+      profileTitle:"Th\u00f4ng tin kh\u00e1ch h\u00e0ng",
+      profileSub:"Vui l\u00f2ng nh\u1eadp th\u00f4ng tin chi ti\u1ebft \u0111\u1ec3 admin duy\u1ec7t t\u00e0i kho\u1ea3n.",
+      name:"H\u1ecd v\u00e0 t\u00ean",
+      email:"Email",
+      province:"T\u1ec9nh / th\u00e0nh",
+      project:"T\u00ean c\u00f4ng tr\u00ecnh",
+      company:"C\u00f4ng ty / c\u00e1 nh\u00e2n",
+      save:"L\u01b0u th\u00f4ng tin",
+      pending:"T\u00e0i kho\u1ea3n \u0111ang ch\u1edd admin duy\u1ec7t. Sau khi \u0111\u01b0\u1ee3c duy\u1ec7t b\u1ea1n m\u1edbi c\u00f3 th\u1ec3 v\u00e0o app.",
+      approved:"T\u00e0i kho\u1ea3n \u0111\u00e3 \u0111\u01b0\u1ee3c duy\u1ec7t. \u0110ang m\u1edf app.",
+      required:"Vui l\u00f2ng nh\u1eadp \u0111\u1ea7y \u0111\u1ee7 th\u00f4ng tin.",
+      pinMatch:"M\u00e3 PIN kh\u00f4ng kh\u1edbp.",
+      registered:"\u0110\u0103ng k\u00fd th\u00e0nh c\u00f4ng. Vui l\u00f2ng nh\u1eadp th\u00f4ng tin chi ti\u1ebft.",
+      saved:"\u0110\u00e3 g\u1eedi th\u00f4ng tin. Vui l\u00f2ng ch\u1edd admin duy\u1ec7t."
+    }
+  };
+  function currentLang(){return (localStorage.getItem("language")||window.lang||"ja")==="vi"?"vi":"ja";}
+  function w(k){return WORDS[currentLang()][k]||WORDS.ja[k]||k;}
+  function el(id){return document.getElementById(id);}
+  function toast(message){if(typeof showToast==="function")showToast(message);}
+  function token(){return localStorage.getItem("userToken")||"";}
+  function storedUser(){try{return JSON.parse(localStorage.getItem("userProfile")||"null")}catch(e){return null}}
+  function readyUser(){var u=storedUser();return !!(token()&&u&&u.status==="active"&&u.profileCompleted);}
+  function syncSelects(){
+    var value=currentLang();
+    ["language","authLanguage"].forEach(function(id){var s=el(id);if(s)s.value=value;});
+    try{window.lang=value;}catch(e){}
+    document.documentElement.lang=value;
+  }
+  function setField(id,value){var input=el(id);if(input)input.placeholder=value;}
+  function applyAuthText(){
+    syncSelects();
+    var brand=document.querySelector(".account-brand-title"); if(brand)brand.textContent=w("brand");
+    var sub=el("accountBrandSub"); if(sub)sub.textContent="YAMADEN.CO.LTD";
+    var mode=window.accountMode||"register";
+    var profile=mode==="profile";
+    el("accountWelcome").textContent=profile?w("profileTitle"):w("welcome");
+    el("accountText").textContent=profile?w("profileSub"):w("sub");
+    el("accountModeRegister").textContent=w("reg");
+    el("accountModeLogin").textContent=w("login");
+    setField("accountPhone",w("phone"));
+    setField("accountPin",w("pin"));
+    setField("accountPinConfirm",w("pin2"));
+    setField("accountName",w("name"));
+    setField("accountEmail",w("email"));
+    setField("accountProvince",w("province"));
+    setField("accountProjectName",w("project"));
+    setField("accountCompany",w("company"));
+    el("accountLoginText").textContent=profile?w("save"):(mode==="login"?w("submitLogin"):w("submitReg"));
+  }
+  function ensureAuthDom(){
+    var brand=document.querySelector(".account-brand");
+    if(brand&&!el("authLanguage")){
+      var wrap=document.createElement("div");
+      wrap.className="auth-language-wrap";
+      wrap.innerHTML='<select id="authLanguage" class="auth-language-select" aria-label="Language"><option value="ja">JP</option><option value="vi">VN</option></select>';
+      brand.appendChild(wrap);
+      el("authLanguage").addEventListener("change",function(e){
+        localStorage.setItem("language",e.target.value);
+        try{window.lang=e.target.value;}catch(err){}
+        var main=el("language"); if(main)main.value=e.target.value;
+        applyAuthText();
+        if(typeof applyLanguage==="function")try{applyLanguage()}catch(err){}
+        applyAuthText();
+      });
+    }
+    var note=el("authStateNote");
+    if(!note){
+      note=document.createElement("div");
+      note.id="authStateNote";
+      note.className="auth-state-note";
+      var button=el("accountLoginText")?.closest("button");
+      if(button)button.after(note);
+    }
+  }
+  window.setAccountMode=function(mode){
+    window.accountMode=mode;
+    var isLogin=mode==="login", isProfile=mode==="profile", isRegister=mode==="register";
+    el("accountModeRegister").classList.toggle("active",isRegister);
+    el("accountModeLogin").classList.toggle("active",isLogin);
+    ["accountName","accountEmail","accountProvince","accountProjectName","accountCompany"].forEach(function(id){el(id)?.classList.toggle("hidden",!isProfile);});
+    el("accountPhone").classList.toggle("hidden",isProfile);
+    el("accountPin").classList.toggle("hidden",isProfile);
+    el("accountPinConfirm").classList.toggle("hidden",isLogin||isProfile);
+    var note=el("authStateNote"); if(note){note.classList.remove("show"); note.textContent="";}
+    applyAuthText();
+  };
+  window.updateAccountUI=function(){
+    var u=storedUser();
+    var ready=readyUser();
+    el("accountFormCard").style.display=ready?"none":"block";
+    el("profileCard").style.display=ready?"block":"none";
+    if(u){
+      if(el("profileName"))el("profileName").textContent=u.name||u.phone||"";
+      if(el("profilePhone"))el("profilePhone").textContent=u.phone||"";
+      if(el("profileEmail"))el("profileEmail").textContent=u.email||"";
+      if(el("profileProvince"))el("profileProvince").textContent=u.province||"";
+      if(el("profileProject"))el("profileProject").textContent=u.projectName||"";
+      if(el("profileCompany"))el("profileCompany").textContent=u.company||"";
+      if(el("accountName"))el("accountName").value=u.name||"";
+      if(el("accountPhone"))el("accountPhone").value=u.phone||"";
+      if(el("accountEmail"))el("accountEmail").value=u.email||"";
+      if(el("accountProvince"))el("accountProvince").value=u.province||"";
+      if(el("accountProjectName"))el("accountProjectName").value=u.projectName||"";
+      if(el("accountCompany"))el("accountCompany").value=u.company||"";
+    }
+    if(!ready&&u&&u.profileCompleted) window.setAccountMode("login");
+    else window.setAccountMode(window.accountMode||"register");
+  };
+  window.userLogin=async function(){
+    var mode=window.accountMode||"register";
+    var phone=el("accountPhone").value.trim();
+    var pin=el("accountPin").value.trim();
+    var pin2=el("accountPinConfirm").value.trim();
+    var name=el("accountName").value.trim();
+    var email=el("accountEmail").value.trim();
+    var province=el("accountProvince").value.trim();
+    var projectName=el("accountProjectName").value.trim();
+    var company=el("accountCompany").value.trim();
+    var note=el("authStateNote");
+    if(mode!=="profile"&&(!phone||!/^[0-9]{4,6}$/.test(pin))){toast(w("required"));return;}
+    if(mode==="register"&&pin!==pin2){toast(w("pinMatch"));return;}
+    if(mode==="profile"&&(!name||!email||!province||!projectName)){toast(w("required"));return;}
+    try{
+      var endpoint=mode==="register"?"/user/register":mode==="profile"?"/user/profile":"/user/login";
+      var headers={"Content-Type":"application/json"};
+      var body=mode==="profile"?{name:name,email:email,province:province,projectName:projectName,company:company}:{phone:phone,pin:pin};
+      if(mode==="profile"&&token())headers.Authorization="Bearer "+token();
+      var res=await fetch(API+endpoint,{method:mode==="profile"?"PUT":"POST",headers:headers,body:JSON.stringify(body)});
+      var data=await res.json();
+      if(!res.ok||!data.user)throw new Error("auth failed");
+      if(mode==="register"&&!data.token){
+        var loginRes=await fetch(API+"/user/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone:phone,pin:pin})});
+        var loginData=await loginRes.json();
+        if(loginData.token)data=Object.assign(data,loginData);
+      }
+      if(data.token)localStorage.setItem("userToken",data.token);
+      localStorage.setItem("userProfile",JSON.stringify(data.user));
+      if(mode==="register"){window.setAccountMode("profile");toast(w("registered"));return;}
+      if(data.user.status==="active"&&data.user.profileCompleted){if(note){note.textContent=w("approved");note.classList.add("show");}toast(w("approved"));showTab("home");return;}
+      if(mode==="profile"){if(note){note.textContent=w("pending");note.classList.add("show");}toast(w("saved"));return;}
+      if(!data.user.profileCompleted){window.setAccountMode("profile");toast(w("profileSub"));return;}
+      if(note){note.textContent=w("pending");note.classList.add("show");}
+      toast(w("pending"));
+    }catch(e){toast(w("required"));}
+  };
+  var oldChange=window.changeLanguage;
+  window.changeLanguage=function(){
+    var value=el("language")?.value||currentLang();
+    localStorage.setItem("language",value);
+    try{window.lang=value;}catch(e){}
+    if(oldChange)try{oldChange()}catch(e){}
+    applyAuthText();
+  };
+  document.addEventListener("DOMContentLoaded",function(){
+    ensureAuthDom();
+    syncSelects();
+    window.updateAccountUI();
+    applyAuthText();
+  });
+})();
+</script>
 </body>
 </html>
