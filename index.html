@@ -515,8 +515,15 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
 
   .app:not(.auth-login-mode) .bottom-nav button.active {
     background: rgba(255, 90, 31, 0.16);
-    color: #ff5a1f;
+    color: #ffffff;
     box-shadow: inset 0 0 0 1px rgba(255, 90, 31, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .app:not(.auth-login-mode) .bottom-nav button.active .icon {
+    margin: auto;
   }
 
   .app:not(.auth-login-mode) section,
@@ -866,52 +873,153 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
       <div class="account-landing">
         <div class="account-brand">
           <img src="/icon-192.png" alt="YAMADEN">
-          <div><div class="account-brand-title">株式会社 山電</div><div class="account-brand-sub">YAMADEN.CO.LTD</div></div>
+          <div>
+            <div class="account-brand-title">???? ??</div>
+            <div class="account-brand-sub" id="accountBrandSub">YAMADEN.CO.LTD</div>
+          </div>
         </div>
+
         <div class="account-panel">
           <div class="account-success" id="accountSuccess"></div>
+
           <div class="profile-card" id="profileCard">
-            <div class="profile-head"><div class="profile-avatar"><span class="icon" id="profileIcon"></span></div><div><div class="profile-name" id="profileName">Khách hàng</div><div class="profile-sub" id="profileSub">Tài khoản đang hoạt động</div></div></div>
+            <div class="profile-head">
+              <div class="profile-avatar"><span class="icon" id="profileIcon"></span></div>
+              <div>
+                <div class="profile-name" id="profileName">Kh?ch h?ng</div>
+                <div class="profile-sub" id="profileSub">T?i kho?n ?ang ho?t ??ng</div>
+              </div>
+            </div>
             <div class="profile-grid">
-              <div class="profile-item"><div class="profile-label" id="profilePhoneLabel">Số điện thoại</div><div class="profile-value" id="profilePhone"></div></div>
+              <div class="profile-item"><div class="profile-label" id="profilePhoneLabel">S? ?i?n tho?i</div><div class="profile-value" id="profilePhone"></div></div>
               <div class="profile-item"><div class="profile-label">Email</div><div class="profile-value" id="profileEmail"></div></div>
-              <div class="profile-item"><div class="profile-label" id="profileProvinceLabel">Tỉnh / thành</div><div class="profile-value" id="profileProvince"></div></div>
-              <div class="profile-item"><div class="profile-label" id="profileProjectLabel">Tên công trình</div><div class="profile-value" id="profileProject"></div></div>
-              <div class="profile-item"><div class="profile-label" id="profileCompanyLabel">Công ty / cá nhân</div><div class="profile-value" id="profileCompany"></div></div>
-              <div class="profile-item"><div class="profile-label" id="profileRequestsLabel">Yêu cầu đã gửi</div><div class="profile-value" id="profileRequests">0</div></div>
+              <div class="profile-item"><div class="profile-label" id="profileProvinceLabel">T?nh / th?nh</div><div class="profile-value" id="profileProvince"></div></div>
+              <div class="profile-item"><div class="profile-label" id="profileProjectLabel">T?n c?ng tr?nh</div><div class="profile-value" id="profileProject"></div></div>
+              <div class="profile-item"><div class="profile-label" id="profileCompanyLabel">C?ng ty / c? nh?n</div><div class="profile-value" id="profileCompany"></div></div>
+              <div class="profile-item"><div class="profile-label" id="profileRequestsLabel">Y?u c?u ?? g?i</div><div class="profile-value" id="profileRequests">0</div></div>
             </div>
-            <div class="secondary-row"><button class="main-btn" onclick="showTab('send')"><span class="icon" id="profileSendIcon"></span><span id="profileSendText">Gửi yêu cầu</span></button><button class="soft-btn" onclick="showTab('check')"><span class="icon" id="profileHistoryIcon"></span><span id="profileHistoryText">Yêu cầu của tôi</span></button></div>
-            <button class="soft-btn" style="margin-top:12px;" onclick="userLogout()"><span class="icon" id="profileLogoutIcon"></span><span id="profileLogoutText">Đăng xuất</span></button>
+            <div class="secondary-row">
+              <button class="main-btn" onclick="showTab('send')"><span class="icon" id="profileSendIcon"></span><span id="profileSendText">G?i y?u c?u</span></button>
+              <button class="soft-btn" onclick="showTab('check')"><span class="icon" id="profileHistoryIcon"></span><span id="profileHistoryText">Y?u c?u c?a t?i</span></button>
+            </div>
+            <button class="soft-btn" style="margin-top:12px;" onclick="userLogout()"><span class="icon" id="profileLogoutIcon"></span><span id="profileLogoutText">??ng xu?t</span></button>
           </div>
+
           <div class="account-card" id="accountFormCard">
-            <div class="account-welcome"><div class="account-welcome-ja" id="accountWelcome">Chào mừng</div><div class="account-welcome-brand">YAMADEN</div><div class="account-welcome-sub" id="accountText">Đăng nhập bằng thông tin của bạn để YAMADEN lưu lịch sử yêu cầu và liên hệ hỗ trợ thuận tiện hơn.</div></div>
-            <div class="account-mode"><button id="accountModeRegister" class="active" onclick="setAccountMode('register')">Khách mới</button><button id="accountModeLogin" onclick="setAccountMode('login')">Đã có tài khoản</button></div>
-            <div class="account-fields" id="accountFields">
-              <input id="accountName" placeholder="Họ và tên"><input id="accountPhone" placeholder="Số điện thoại" inputmode="tel">
-              <input id="accountPin" type="password" placeholder="Mã PIN 4-6 số" inputmode="numeric" maxlength="6">
-              <input id="accountPinConfirm" type="password" placeholder="Nhập lại mã PIN" inputmode="numeric" maxlength="6">
-              <input id="accountEmail" placeholder="Email"><input id="accountProvince" placeholder="Tỉnh / thành">
-              <input id="accountProjectName" placeholder="Tên công trình"><input id="accountCompany" placeholder="Công ty / cá nhân">
+            <div class="account-welcome">
+              <div class="account-welcome-ja" id="accountWelcome">Ch?o m?ng</div>
+              <div class="account-welcome-brand">YAMADEN</div>
+              <div class="account-welcome-sub" id="accountText">??ng nh?p b?ng th?ng tin c?a b?n ?? YAMADEN l?u l?ch s? y?u c?u v? li?n h? h? tr? thu?n ti?n h?n.</div>
             </div>
-            <button class="main-btn" onclick="userLogin()"><span class="icon" id="accountLoginIcon"></span><span id="accountLoginText">Đăng nhập / Lưu</span></button>
-            <div class="account-divider"><span id="accountDividerText">hoặc</span></div>
-            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="quickSupportBtnIcon"></span><span id="quickSupportBtn">Gửi hỗ trợ nhanh</span></button>
+            <div class="account-mode">
+              <button id="accountModeRegister" class="active" onclick="setAccountMode('register')">Kh?ch m?i</button>
+              <button id="accountModeLogin" onclick="setAccountMode('login')">?? c? t?i kho?n</button>
+            </div>
+            <div class="account-fields" id="accountFields">
+              <input id="accountName" placeholder="H? v? t?n" autocomplete="name">
+              <input id="accountPhone" placeholder="S? ?i?n tho?i" inputmode="tel" autocomplete="tel">
+              <input id="accountPin" type="password" placeholder="M? PIN 4-6 s?" inputmode="numeric" maxlength="6">
+              <input id="accountPinConfirm" type="password" placeholder="Nh?p l?i m? PIN" inputmode="numeric" maxlength="6">
+              <input id="accountEmail" placeholder="Email" autocomplete="email">
+              <input id="accountProvince" placeholder="T?nh / th?nh">
+              <input id="accountProjectName" placeholder="T?n c?ng tr?nh">
+              <input id="accountCompany" placeholder="C?ng ty / c? nh?n">
+            </div>
+            <button class="main-btn" onclick="userLogin()"><span class="icon" id="accountLoginIcon"></span><span id="accountLoginText">??ng nh?p / L?u</span></button>
+            <div class="account-divider"><span id="accountDividerText">ho?c</span></div>
+            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="quickSupportBtnIcon"></span><span id="quickSupportBtn">G?i h? tr? nhanh</span></button>
             <div class="account-status" id="accountStatus"></div>
           </div>
         </div>
-        <div class="emergency-card"><div class="emergency-icon"><span class="icon" id="quickSupportIcon"></span></div><div><div class="emergency-title" id="quickSupportTitle">Need quick support?</div><div class="emergency-sub" id="quickSupportText">You can send a support request without logging in.</div></div></div>
+
+        <div class="emergency-card">
+          <div class="emergency-icon"><span class="icon" id="quickSupportIcon"></span></div>
+          <div>
+            <div class="emergency-title" id="quickSupportTitle">Need quick support?</div>
+            <div class="emergency-sub" id="quickSupportText">You can send a support request without logging in.</div>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- HOME SECTION -->
     <section id="homeSection" class="hidden">
-      <div class="home-hero-card"><div class="home-kicker"><span class="icon" id="homeKickerIcon"></span><span id="homeKicker">YAMADEN SUPPORT</span></div><div class="home-title" id="homeTitle">Dịch vụ hỗ trợ điện cho gia đình và công trình</div><div class="home-desc" id="homeDesc">Gửi yêu cầu, đính kèm hình ảnh và theo dõi trạng thái xử lý từ điện thoại.</div><div class="home-actions"><button class="main-btn" onclick="showTab('send')"><span class="icon" id="homeSendIcon"></span><span id="homeSendText">Gửi yêu cầu</span></button><button class="soft-btn" onclick="showTab('check')"><span class="icon" id="homeCheckIcon"></span><span id="homeCheckText">Tra cứu trạng thái</span></button></div></div>
-      <div class="trust-row"><div class="trust-item"><div class="trust-number">24h</div><div class="trust-label" id="trust1">Tiếp nhận nhanh</div></div><div class="trust-item"><div class="trust-number">VI/JP</div><div class="trust-label" id="trust2">Hỗ trợ Việt / Nhật</div></div><div class="trust-item"><div class="trust-number">ID</div><div class="trust-label" id="trust3">Tra cứu bằng ID</div></div></div>
-      <div class="philosophy-card"><div class="philosophy-visual"><div class="poster-brand"><img class="poster-brand-logo" src="/icon-512.png" alt="YAMADEN"><div class="poster-brand-name">YAMADEN</div><div class="poster-brand-line"></div><div class="poster-slogan">人を守り、幸せを創る。</div><div class="poster-slogan-sub">PROTECTING PEOPLE. CREATING HAPPINESS.</div></div><div class="poster-mountain"></div><div class="poster-company" id="philosophyVisual">Công ty TNHH YAMADEN</div></div><div class="philosophy-copy"><div class="section-kicker" id="philosophyKicker">PHILOSOPHY</div><div class="section-title" id="philosophyTitle">人を守り、幸せを創る</div><div class="section-text" id="philosophyText">YAMADEN values people, local trust and reliable technology.</div></div></div>
-      <div class="card"><div class="card-title"><div class="card-title-icon" id="serviceTitleIcon"></div><h2 id="serviceTitle">Dịch vụ YAMADEN</h2></div><div class="service-grid"><div class="service-card"><div class="service-icon" id="service1Icon"></div><div class="service-title" id="service1Title">Sửa chữa điện</div><div class="service-desc" id="service1Desc">Xử lý sự cố đèn, công tắc, ổ cắm và các vấn đề về điện.</div></div><div class="service-card"><div class="service-icon" id="service2Icon"></div><div class="service-title" id="service2Title">Lắp đặt thiết bị</div><div class="service-desc" id="service2Desc">Hỗ trợ thiết bị, đi dây, hạng mục nhỏ và công việc tại hiện trường.</div></div><div class="service-card"><div class="service-icon" id="service3Icon"></div><div class="service-title" id="service3Title">Theo dõi yêu cầu</div><div class="service-desc" id="service3Desc">Dùng mã yêu cầu để kiểm tra trạng thái và phản hồi từ admin.</div></div></div></div>
-      <div class="brand-gallery"><div class="brand-visual"><div class="visual-label" id="galleryMain">Thi công điện, đo lường điều khiển và bảo trì cho công trình an toàn hơn.</div><div class="service-rail"><div class="service-pill"><b>電気工事</b><span>Electric</span></div><div class="service-pill"><b>計装工事</b><span>Control</span></div><div class="service-pill"><b>保守</b><span>Care</span></div></div></div><div class="gallery-stack"><div class="gallery-tile"><span class="icon" id="gallery1Icon"></span><div class="gallery-title" id="gallery1">Phản hồi linh hoạt tại hiện trường</div></div><div class="gallery-tile"><span class="icon" id="gallery2Icon"></span><div class="gallery-title" id="gallery2">Bảo trì chất lượng ổn định</div></div></div></div>
-      <div class="utility-grid"><div class="utility-card"><div class="utility-head"><span class="icon" id="safetyIcon"></span><span id="safetyTitle">An toàn điện hôm nay</span></div><div class="utility-text" id="safetyText">Nếu có mùi khét, phát nhiệt, tia lửa hoặc CB nhảy liên tục, hãy ngừng sử dụng thiết bị và gửi yêu cầu kèm ảnh.</div></div><div class="utility-card"><div class="utility-head"><span class="icon" id="maintenanceIcon"></span><span id="maintenanceTitle">Bảo trì định kỳ</span></div><div class="utility-text" id="maintenanceText">Kiểm tra thiết bị điện và điều khiển trước khi có sự cố giúp công trình vận hành ổn định hơn.</div></div></div>
-      <div class="card"><div class="card-title"><div class="card-title-icon" id="companyTitleIcon"></div><h2 id="companyTitle">Thông tin công ty</h2></div><div class="company-info-grid"><div class="company-info"><div class="company-info-label" id="companyNameLabel">Tên công ty</div><div class="company-info-value" id="companyNameValue">Công ty cổ phần YAMADEN</div></div><div class="company-info"><div class="company-info-label" id="companyServiceLabel">Lĩnh vực</div><div class="company-info-value" id="companyServiceValue">Electrical work / instrumentation / automatic control maintenance</div></div><div class="company-info"><div class="company-info-label" id="companyAddressLabel">Địa chỉ</div><div class="company-info-value">〒733-0851 広島県広島市西区田方2-9-23</div></div><div class="company-info"><div class="company-info-label" id="companyTelLabel">TEL</div><div class="company-info-value">082-516-4423</div></div></div><div class="quick-contact"><a class="soft-btn" href="tel:082-516-4423"><span class="icon" id="callCompanyIcon"></span><span id="callCompanyText">Gọi YAMADEN</span></a><a class="soft-btn" href="https://www.google.com/maps/search/?api=1&query=%E5%BA%83%E5%B3%B6%E7%9C%8C%E5%BA%83%E5%B3%B6%E5%B8%82%E8%A5%BF%E5%8C%BA%E7%94%B0%E6%96%B92-9-23" target="_blank"><span class="icon" id="mapCompanyIcon"></span><span id="mapCompanyText">Mở bản đồ</span></a></div></div>
+      <div class="home-hero-card">
+        <div class="home-kicker"><span class="icon" id="homeKickerIcon"></span><span id="homeKicker">YAMADEN SUPPORT</span></div>
+        <div class="home-title" id="homeTitle">YAMADEN Support</div>
+        <div class="home-desc" id="homeDesc">Send a request, attach photos and track status from your phone.</div>
+        <div class="home-actions">
+          <button class="main-btn" onclick="showTab('send')"><span class="icon" id="homeSendIcon"></span><span id="homeSendText">Send request</span></button>
+          <button class="soft-btn" onclick="showTab('check')"><span class="icon" id="homeCheckIcon"></span><span id="homeCheckText">Check status</span></button>
+        </div>
+      </div>
+
+      <div class="trust-row">
+        <div class="trust-item"><div class="trust-number">24h</div><div class="trust-label" id="trust1">Fast intake</div></div>
+        <div class="trust-item"><div class="trust-number">VI/JP</div><div class="trust-label" id="trust2">Vietnamese / Japanese</div></div>
+        <div class="trust-item"><div class="trust-number">ID</div><div class="trust-label" id="trust3">Track by ID</div></div>
+      </div>
+
+      <div class="philosophy-card">
+        <div class="philosophy-visual">
+          <div class="poster-brand">
+            <img class="poster-brand-logo" src="/icon-512.png" alt="YAMADEN">
+            <div class="poster-brand-name">YAMADEN</div>
+            <div class="poster-brand-line"></div>
+            <div class="poster-slogan">People first. Reliable work.</div>
+            <div class="poster-slogan-sub">PROTECTING PEOPLE. CREATING HAPPINESS.</div>
+          </div>
+          <div class="poster-company" id="philosophyVisual">YAMADEN</div>
+        </div>
+        <div class="philosophy-copy">
+          <div class="section-kicker" id="philosophyKicker">PHILOSOPHY</div>
+          <div class="section-title" id="philosophyTitle">Protecting people. Creating happiness.</div>
+          <div class="section-text" id="philosophyText">YAMADEN values people, local trust and reliable technology.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-title-icon" id="serviceTitleIcon"></div><h2 id="serviceTitle">YAMADEN services</h2></div>
+        <div class="service-grid">
+          <div class="service-card"><div class="service-icon" id="service1Icon"></div><div class="service-title" id="service1Title">Electrical work</div><div class="service-desc" id="service1Desc">Wiring, lighting, outlets and electrical troubleshooting.</div></div>
+          <div class="service-card"><div class="service-icon" id="service2Icon"></div><div class="service-title" id="service2Title">Installation</div><div class="service-desc" id="service2Desc">Equipment installation and on-site support.</div></div>
+          <div class="service-card"><div class="service-icon" id="service3Icon"></div><div class="service-title" id="service3Title">Request tracking</div><div class="service-desc" id="service3Desc">Check status and admin replies by request ID.</div></div>
+        </div>
+      </div>
+
+      <div class="brand-gallery">
+        <div class="brand-visual">
+          <div class="visual-label" id="galleryMain">Electrical work, instrumentation and maintenance for safer sites.</div>
+          <div class="service-rail">
+            <div class="service-pill"><b>Electric</b><span>Work</span></div>
+            <div class="service-pill"><b>Control</b><span>Measure</span></div>
+            <div class="service-pill"><b>Care</b><span>Maintenance</span></div>
+          </div>
+        </div>
+        <div class="gallery-stack">
+          <div class="gallery-tile"><span class="icon" id="gallery1Icon"></span><div class="gallery-title" id="gallery1">Flexible on-site response</div></div>
+          <div class="gallery-tile"><span class="icon" id="gallery2Icon"></span><div class="gallery-title" id="gallery2">Stable quality after work</div></div>
+        </div>
+      </div>
+
+      <div class="utility-grid">
+        <div class="utility-card"><div class="utility-head"><span class="icon" id="safetyIcon"></span><span id="safetyTitle">Electrical safety</span></div><div class="utility-text" id="safetyText">If there is heat, smell, sparks or repeated breaker trips, stop using the device and send a request.</div></div>
+        <div class="utility-card"><div class="utility-head"><span class="icon" id="maintenanceIcon"></span><span id="maintenanceTitle">Regular maintenance</span></div><div class="utility-text" id="maintenanceText">Checking electrical and control equipment before trouble keeps buildings stable.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-title-icon" id="companyTitleIcon"></div><h2 id="companyTitle">Company info</h2></div>
+        <div class="company-info-grid">
+          <div class="company-info"><div class="company-info-label" id="companyNameLabel">Company</div><div class="company-info-value" id="companyNameValue">YAMADEN</div></div>
+          <div class="company-info"><div class="company-info-label" id="companyServiceLabel">Services</div><div class="company-info-value" id="companyServiceValue">Electrical work / instrumentation / maintenance</div></div>
+          <div class="company-info"><div class="company-info-label" id="companyAddressLabel">Address</div><div class="company-info-value">733-0851 Hiroshima, Nishi-ku, Tagata 2-9-23</div></div>
+          <div class="company-info"><div class="company-info-label" id="companyTelLabel">TEL</div><div class="company-info-value">082-516-4423</div></div>
+        </div>
+        <div class="quick-contact">
+          <a class="soft-btn" href="tel:082-516-4423"><span class="icon" id="callCompanyIcon"></span><span id="callCompanyText">Call</span></a>
+          <a class="soft-btn" href="https://www.google.com/maps/search/?api=1&query=%E5%BA%83%E5%B3%B6%E7%9C%8C%E5%BA%83%E5%B3%B6%E5%B8%82%E8%A5%BF%E5%8C%BA%E7%94%B0%E6%96%B92-9-23" target="_blank" rel="noopener"><span class="icon" id="mapCompanyIcon"></span><span id="mapCompanyText">Map</span></a>
+        </div>
+      </div>
     </section>
 
     <!-- SERVICES SECTION -->
@@ -989,6 +1097,129 @@ const texts = {
   vi: { welcomeTitle:"Chúng tôi luôn sẵn sàng hỗ trợ bạn", welcomeText:"Gửi yêu cầu và chúng tôi sẽ liên hệ hỗ trợ bạn.", homeSend:"Gửi yêu cầu", homeCheck:"Tra cứu trạng thái", trust1:"Tiếp nhận nhanh", trust2:"Hỗ trợ Việt / Nhật", trust3:"Tra cứu bằng ID", name:"Họ và tên", phone:"Số điện thoại", contact:"Liên hệ", address:"Địa chỉ", content:"Nội dung yêu cầu", image:"Hình ảnh", send:"Gửi yêu cầu", check:"Kiểm tra", success:"Thành công!", fail:"Thất bại!", required:"Vui lòng nhập đầy đủ thông tin!", requestId:"Mã yêu cầu", copy:"Sao chép ID", copied:"Đã copy ID!", notFound:"Không tìm thấy!", status:"Trạng thái", pending:"Chờ xử lý", processing:"Đang xử lý", completed:"Hoàn thành", adminReply:"Phản hồi admin", noReply:"Chưa có phản hồi", noImage:"Không có hình", newReply:"Admin đã phản hồi!", myRequests:"Yêu cầu của tôi", noHistory:"Chưa có lịch sử", clearHistory:"Xóa lịch sử", saveIdTip:"Vui lòng lưu ID để tra cứu sau.", networkError:"Lỗi kết nối", issueTitle:"Chọn vấn đề", issueSub:"Tìm và chọn nội dung công việc", issueRequired:"Chọn ít nhất 1 vấn đề", freeDesc:"Mô tả chi tiết tình trạng", quote:"Muốn nhận báo giá", settingsTitle:"Cài đặt", language:"Ngôn ngữ", languageSub:"日本語 / Tiếng Việt", accountText:"Đăng nhập để lưu lịch sử.", accountLogin:"Đăng nhập", accountLogout:"Đăng xuất", profileActive:"Hoạt động", profilePhone:"Số điện thoại", profileProvince:"Tỉnh/thành", profileProject:"Công trình", profileCompany:"Công ty", profileRequests:"Yêu cầu", accountTab:"Tài khoản", accountRegister:"Khách mới", accountLoginMode:"Đã có TK", quickSupportTitle:"Cần hỗ trợ?", quickSupportText:"Gửi yêu cầu không cần đăng nhập", quickSupportBtn:"Gửi nhanh", sideStep1:"Gửi sự cố", sideStep2:"Theo dõi", sideStep3:"Nhận phản hồi", tabSend:"Gửi yêu cầu", tabCheck:"Tra cứu", uploadText:"Chọn ảnh/video", chooseImage:"Chọn file", fileSelected:"Đã chọn", copyId:"Copy ID", history:"Lịch sử", sending:"Đang gửi...", loading:"Đang tải...", successSub:"Cảm ơn bạn!", copyIdText:"Copy ID", historyText:"Lịch sử", tabServices:"Dịch vụ", servicesPageTitle:"Dịch vụ chi tiết", detail1Title:"Điện tổng hợp", detail1Text:"Thi công điện cho nhà ở, tòa nhà", detail2Title:"Đo lường điều khiển", detail2Text:"Hỗ trợ hệ thống điều khiển", detail3Title:"Bảo trì tự động", detail3Text:"Kiểm tra bảo trì hệ thống", detailBtn:"Gửi yêu cầu", companyTitle:"Thông tin công ty", companyNameLabel:"Tên công ty", companyNameValue:"Công ty TNHH YAMADEN", companyServiceLabel:"Lĩnh vực", companyServiceValue:"Điện / Điều khiển / Bảo trì", companyAddressLabel:"Địa chỉ", companyTelLabel:"Điện thoại", callCompany:"Gọi", mapCompany:"Bản đồ", safetyTitle:"An toàn điện", safetyText:"Nếu có mùi khét, ổ cắm nóng, hãy ngừng sử dụng và gửi yêu cầu.", maintenanceTitle:"Bảo trì định kỳ", maintenanceText:"Kiểm tra thiết bị định kỳ để vận hành ổn định.", galleryMain:"Điện công trình, đo lường điều khiển và bảo trì", gallery1:"Phản hồi linh hoạt", gallery2:"Chất lượng ổn định", serviceTitle:"Dịch vụ", service1Title:"Sửa chữa điện", service1Desc:"Xử lý sự cố đèn, ổ cắm", service2Title:"Lắp đặt thiết bị", service2Desc:"Hỗ trợ thiết bị, đi dây", service3Title:"Theo dõi yêu cầu", service3Desc:"Kiểm tra trạng thái bằng ID", philosophyKicker:"TRIẾT LÝ", philosophyTitle:"Bảo vệ con người", philosophyText:"YAMADEN đặt con người ở trung tâm.", philosophyVisual:"Công ty TNHH YAMADEN", homeKicker:"YAMADEN SUPPORT", homeTitle:"Dịch vụ hỗ trợ điện", homeDesc:"Gửi yêu cầu, đính kèm ảnh và theo dõi trạng thái." },
   ja: { welcomeTitle:"いつでもサポートします", welcomeText:"依頼を送信すると、担当者がご連絡します。", homeSend:"依頼を送信", homeCheck:"状況を確認", trust1:"迅速受付", trust2:"日越対応", trust3:"IDで確認", name:"お名前", phone:"電話番号", contact:"連絡先", address:"住所", content:"依頼内容", image:"画像", send:"送信", check:"確認", success:"送信完了！", fail:"送信失敗！", required:"必須項目を入力してください。", requestId:"受付ID", copy:"IDをコピー", copied:"IDをコピーしました！", notFound:"見つかりませんでした", status:"状態", pending:"受付済み", processing:"処理中", completed:"完了", adminReply:"管理者コメント", noReply:"返信なし", noImage:"画像なし", newReply:"管理者から返信あり！", myRequests:"自分の依頼", noHistory:"履歴がありません", clearHistory:"履歴を削除", saveIdTip:"IDを保存してください", networkError:"サーバーに接続できません", issueTitle:"依頼内容を選択", issueSub:"作業内容を検索して選択", issueRequired:"依頼内容を選択してください", freeDesc:"状況を入力してください", quote:"見積を希望する", settingsTitle:"設定", language:"言語", languageSub:"日本語 / Tiếng Việt", accountText:"ログインすると履歴を保存できます", accountLogin:"ログイン", accountLogout:"ログアウト", profileActive:"有効", profilePhone:"電話番号", profileProvince:"都道府県", profileProject:"工事名", profileCompany:"会社名", profileRequests:"依頼数", accountTab:"アカウント", accountRegister:"新規登録", accountLoginMode:"登録済み", quickSupportTitle:"すぐに依頼？", quickSupportText:"ログインなしでも依頼できます", quickSupportBtn:"クイック依頼", sideStep1:"不具合を送信", sideStep2:"状況を確認", sideStep3:"返信を受信", tabSend:"依頼送信", tabCheck:"自分の依頼", uploadText:"画像/動画を選択", chooseImage:"ファイル選択", fileSelected:"ファイル選択済み", copyId:"IDコピー", history:"履歴", sending:"送信中...", loading:"読み込み中...", successSub:"担当者よりご連絡します。", copyIdText:"IDコピー", historyText:"履歴", tabServices:"サービス", servicesPageTitle:"サービス詳細", detail1Title:"一般電気工事", detail1Text:"住宅、ビルの配線工事", detail2Title:"計装工事", detail2Text:"制御システムを計測・管理", detail3Title:"自動制御保守", detail3Text:"システムの点検保守", detailBtn:"この内容で依頼", companyTitle:"会社情報", companyNameLabel:"会社名", companyNameValue:"株式会社山電", companyServiceLabel:"事業内容", companyServiceValue:"電気工事 / 計装工事 / 保守", companyAddressLabel:"所在地", companyTelLabel:"電話番号", callCompany:"山電へ電話", mapCompany:"地図を開く", safetyTitle:"今日の安全", safetyText:"焦げた臭い、発熱、火花の場合は使用を止めて依頼してください。", maintenanceTitle:"定期メンテナンス", maintenanceText:"トラブル前に点検することで安定運用できます。", galleryMain:"電気工事・計装工事・保守メンテナンス", gallery1:"現場ニーズに柔軟対応", gallery2:"施工後まで品質管理", serviceTitle:"サービス", service1Title:"一般電気工事", service1Desc:"建物内配線、引き込み工事", service2Title:"計装工事", service2Desc:"制御装置を計測・管理", service3Title:"自動制御保守", service3Desc:"設備の点検保守", philosophyKicker:"理念", philosophyTitle:"人を守り、幸せを創る", philosophyText:"山電は、仲間・家族・お客様を大切にします。", philosophyVisual:"株式会社山電", homeKicker:"YAMADEN SUPPORT", homeTitle:"電気工事・修理の依頼", homeDesc:"写真を添付し、IDで状況を確認できます。" }
 };
+
+const YAMADEN_WEB_COPY = {
+  vi: {
+    welcomeTitle: "YAMADEN luôn sẵn sàng hỗ trợ bạn",
+    welcomeText: "Gửi yêu cầu để đội ngũ phụ trách kiểm tra, phản hồi và hỗ trợ công trình nhanh chóng.",
+    homeKicker: "YAMADEN SUPPORT",
+    homeTitle: "Điện công trình, đo lường điều khiển và bảo trì từ Hiroshima",
+    homeDesc: "YAMADEN hỗ trợ công trình điện tổng hợp, hệ thống điều khiển và bảo trì thiết bị tự động với tinh thần chất lượng, tốc độ và sự tin cậy.",
+    homeSend: "Gửi yêu cầu",
+    homeCheck: "Tra cứu trạng thái",
+    trust1: "Tiếp nhận nhanh",
+    trust2: "Hỗ trợ Việt / Nhật",
+    trust3: "Theo dõi bằng ID",
+    philosophyVisual: "Công ty TNHH YAMADEN",
+    philosophyKicker: "TRIẾT LÝ",
+    philosophyTitle: "Bảo vệ con người, tạo dựng hạnh phúc",
+    philosophyText: "Từ mong muốn bảo vệ con người, YAMADEN đặt đồng nghiệp, gia đình, khách hàng và cộng đồng ở trung tâm. Công ty coi trọng khu vực, kỹ thuật và niềm tin.",
+    serviceTitle: "Dịch vụ chính của YAMADEN",
+    service1Title: "Công trình điện tổng hợp",
+    service1Desc: "Thi công dây điện trong tòa nhà, kéo nguồn, thiết bị điện cho nhà ở, nhà máy và các công trình lớn.",
+    service2Title: "Công trình đo lường điều khiển",
+    service2Desc: "Đo lường và quản lý hệ thống điện, điều hòa và thiết bị điều khiển để duy trì môi trường tòa nhà ổn định.",
+    service3Title: "Bảo trì thiết bị điều khiển tự động",
+    service3Desc: "Kiểm tra, bảo trì hệ thống điều khiển điều hòa và thiết bị công trình để phòng ngừa sự cố.",
+    galleryMain: "Kỹ thuật chắc chắn, phản hồi nhanh và thái độ trung thực cho từng hiện trường.",
+    gallery1: "Ưu tiên nhu cầu khách hàng",
+    gallery2: "Quản lý chất lượng sau thi công",
+    accountText: "Đăng nhập bằng số điện thoại và mã PIN. Nếu đăng ký mới, hãy nhập đầy đủ thông tin để YAMADEN lưu lịch sử yêu cầu và liên hệ hỗ trợ thuận tiện hơn.",
+    accountLogin: "Đăng nhập / Lưu",
+    accountRegister: "Khách mới",
+    accountLoginMode: "Đã có tài khoản",
+    accountLogout: "Đăng xuất",
+    profileActive: "Tài khoản đang hoạt động",
+    profilePhone: "Số điện thoại",
+    profileProvince: "Tỉnh / thành",
+    profileProject: "Tên công trình",
+    profileCompany: "Công ty / cá nhân",
+    profileRequests: "Yêu cầu đã gửi",
+    accountTab: "Tài khoản",
+    tabSend: "Gửi yêu cầu",
+    tabCheck: "Tra cứu",
+    settingsTitle: "Cài đặt",
+    language: "Ngôn ngữ",
+    languageSub: "日本語 / Tiếng Việt",
+    quickSupportTitle: "Cần hỗ trợ nhanh?",
+    quickSupportText: "Bạn vẫn có thể gửi yêu cầu không cần đăng nhập.",
+    quickSupportBtn: "Gửi hỗ trợ nhanh",
+    safetyTitle: "An toàn và chất lượng",
+    safetyText: "YAMADEN tích lũy chất lượng ổn định và công việc chính xác để đáp ứng niềm tin của khách hàng.",
+    maintenanceTitle: "Bảo trì định kỳ",
+    maintenanceText: "Bảo trì thiết bị tòa nhà là yếu tố quan trọng để giữ môi trường sử dụng thoải mái và ổn định quanh năm.",
+    companyTitle: "Thông tin công ty",
+    companyNameLabel: "Tên công ty",
+    companyNameValue: "Công ty TNHH YAMADEN",
+    companyServiceLabel: "Lĩnh vực",
+    companyServiceValue: "Điện công trình / đo lường điều khiển / bảo trì thiết bị điều khiển tự động",
+    companyAddressLabel: "Địa chỉ",
+    companyTelLabel: "Điện thoại",
+    callCompany: "Gọi YAMADEN",
+    mapCompany: "Mở bản đồ"
+  },
+  ja: {
+    welcomeTitle: "いつでもサポートします",
+    welcomeText: "依頼内容を送信すると、担当者が確認してご連絡します。",
+    homeKicker: "YAMADEN SUPPORT",
+    homeTitle: "広島で電気工事、計装工事、自動制御設備保守メンテナンス",
+    homeDesc: "株式会社山電は、確かな品質と迅速な対応で、一般電気工事・計装工事・自動制御設備の保守を支えています。",
+    homeSend: "依頼を送信",
+    homeCheck: "状況を確認",
+    trust1: "迅速受付",
+    trust2: "日越対応",
+    trust3: "IDで確認",
+    philosophyVisual: "株式会社山電",
+    philosophyKicker: "理念",
+    philosophyTitle: "人を守り、幸せを創る",
+    philosophyText: "山電は、仲間・家族・お客様・地域を守るという想いを原点に、地域・技術・信頼を大切にしています。",
+    serviceTitle: "山電の事業",
+    service1Title: "一般電気工事",
+    service1Desc: "建物内配線、電柱からの引き込み工事、住宅から工場・ビルまで幅広い電気設備に対応します。",
+    service2Title: "計装工事",
+    service2Desc: "建築物内の電気・空調設備などの制御装置を計測・管理し、安定した環境を維持します。",
+    service3Title: "自動制御設備保守メンテナンス",
+    service3Desc: "空調設備の制御システムをはじめ、設備の点検保守管理を行います。",
+    galleryMain: "専門性に裏打ちされた施工、迅速な対応、誠実な姿勢で信頼に応えます。",
+    gallery1: "お客様のニーズを最優先",
+    gallery2: "施工後まで品質管理",
+    accountText: "電話番号とPINでログインしてください。新規登録の場合は、お客様情報を入力すると依頼履歴を保存できます。",
+    accountLogin: "ログイン / 保存",
+    accountRegister: "新規登録",
+    accountLoginMode: "登録済み",
+    accountLogout: "ログアウト",
+    profileActive: "アカウント有効",
+    profilePhone: "電話番号",
+    profileProvince: "都道府県",
+    profileProject: "工事件名",
+    profileCompany: "会社名 / 個人",
+    profileRequests: "依頼数",
+    accountTab: "アカウント",
+    tabSend: "依頼送信",
+    tabCheck: "確認",
+    settingsTitle: "設定",
+    language: "言語",
+    languageSub: "日本語 / Tiếng Việt",
+    quickSupportTitle: "すぐに依頼しますか？",
+    quickSupportText: "ログインしなくても依頼できます。",
+    quickSupportBtn: "クイック依頼",
+    safetyTitle: "安全と品質",
+    safetyText: "確かな品質と正確な仕事を積み重ね、お客様の事業と社会の安心を支えます。",
+    maintenanceTitle: "定期メンテナンス",
+    maintenanceText: "一年を通して稼働する設備だからこそ、確かな技術と経験、迅速な対応が必要です。",
+    companyTitle: "会社情報",
+    companyNameLabel: "会社名",
+    companyNameValue: "株式会社山電",
+    companyServiceLabel: "事業内容",
+    companyServiceValue: "一般電気工事 / 計装工事 / 自動制御設備保守メンテナンス",
+    companyAddressLabel: "所在地",
+    companyTelLabel: "電話番号",
+    callCompany: "山電へ電話",
+    mapCompany: "地図を開く"
+  }
+};
+Object.assign(texts.vi, YAMADEN_WEB_COPY.vi);
+Object.assign(texts.ja, YAMADEN_WEB_COPY.ja);
 
 function $(id) { return document.getElementById(id); }
 function escapeHtml(s) { return String(s||"").replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
@@ -1072,16 +1303,17 @@ function updateAccountUI() {
 }
 
 function setAccountMode(mode) {
-  accountMode=mode; let isProfile=mode==="profile";
-  $("accountModeRegister").classList.toggle("active",!isProfile && mode!=="login");
-  $("accountModeLogin").classList.toggle("active",mode==="login");
-  ["accountName","accountEmail","accountProvince","accountProjectName","accountCompany"].forEach(id=>$(id)?.classList.toggle("hidden",!isProfile));
+  accountMode=mode;
+  let isLogin=mode==="login", isProfile=mode==="profile", isRegister=mode==="register";
+  $("accountModeRegister").classList.toggle("active",isRegister);
+  $("accountModeLogin").classList.toggle("active",isLogin);
+  ["accountName","accountEmail","accountProvince","accountProjectName","accountCompany"].forEach(id=>$(id)?.classList.toggle("hidden",isLogin));
   $("accountPhone").classList.toggle("hidden",isProfile);
   $("accountPin").classList.toggle("hidden",isProfile);
-  $("accountPinConfirm").classList.toggle("hidden",mode==="login"||isProfile);
-  $("accountLoginText").innerText=isProfile?t("accountLogin"):(mode==="login"?t("accountLogin"):t("accountRegister"));
-  $("accountWelcome").innerText=isProfile?"Thông tin khách hàng":"Chào mừng";
-  $("accountText").innerHTML=isProfile?"Vui lòng bổ sung thông tin khách hàng.":t("accountText");
+  $("accountPinConfirm").classList.toggle("hidden",isLogin||isProfile);
+  $("accountLoginText").innerText=isProfile?t("accountLogin"):(isLogin?t("accountLogin"):t("accountRegister"));
+  $("accountWelcome").innerText=isProfile?(lang==="ja"?"お客様情報":"Thông tin khách hàng"):(lang==="ja"?"ようこそ":"Chào mừng");
+  $("accountText").innerHTML=isProfile?(lang==="ja"?"承認のため、お客様情報を入力してください。":"Vui lòng bổ sung thông tin khách hàng."):t("accountText");
 }
 
 async function userLogin() {
