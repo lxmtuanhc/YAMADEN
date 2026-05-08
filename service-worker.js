@@ -1,4 +1,4 @@
-const CACHE_NAME = "yamaden-support-dna-frame-v2";
+const CACHE_NAME = "yamaden-support-dna-clean-v1";
 
 const APP_SHELL = [
   "/manifest.json",
