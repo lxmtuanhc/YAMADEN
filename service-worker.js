@@ -1,4 +1,4 @@
-const CACHE_NAME = "yamaden-support-v2-old-login";
+const CACHE_NAME = "yamaden-support-auth-fullscreen-v1";
 
 const APP_SHELL = [
   "/manifest.json",

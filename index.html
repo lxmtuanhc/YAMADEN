@@ -2155,6 +2155,147 @@ body{
   #accountSection .account-welcome-sub{font-size:11px;line-height:1.45;}
 }
 </style>
+
+
+<!-- ===== AUTH SCREEN RESTORE v3 - OLD LOGIN FULL PAGE ===== -->
+<style id="yamaden-auth-screen-restore-v3">
+/* Restore old login/register as a separate full-screen auth page */
+.app.auth-login-mode{
+  width:100%!important;
+  max-width:none!important;
+  min-height:100vh!important;
+  min-height:100dvh!important;
+  margin:0!important;
+  display:block!important;
+  background:#eff6ff!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+}
+.app.auth-login-mode .top-header,
+.app.auth-login-mode .bottom-nav{
+  display:none!important;
+}
+.app.auth-login-mode .main{
+  width:100%!important;
+  height:100vh!important;
+  height:100dvh!important;
+  min-height:100vh!important;
+  min-height:100dvh!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:hidden!important;
+}
+.app.auth-login-mode #accountSection{
+  display:block!important;
+  width:100%!important;
+  height:100vh!important;
+  height:100dvh!important;
+}
+.app.auth-login-mode .account-landing{
+  width:100%!important;
+  min-height:100vh!important;
+  min-height:100dvh!important;
+  height:100vh!important;
+  height:100dvh!important;
+  border-radius:0!important;
+  margin:0!important;
+  padding:calc(28px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom))!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  overflow:auto!important;
+  background:
+    linear-gradient(116deg, rgba(255,255,255,.98) 0 26%, rgba(255,255,255,.18) 26% 34%, transparent 34%),
+    linear-gradient(132deg, transparent 0 67%, rgba(37,99,235,.94) 67% 75%, rgba(14,165,233,.25) 75% 82%, transparent 82%),
+    radial-gradient(circle at 72% 18%, rgba(255,255,255,.84), transparent 16%),
+    linear-gradient(180deg,#dbeafe 0%,#eff6ff 46%,#f8fafc 100%)!important;
+}
+.app.auth-login-mode .account-brand{
+  width:min(100%,390px)!important;
+  margin:0 auto 58px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+}
+.app.auth-login-mode .account-brand img{
+  width:48px!important;
+  height:48px!important;
+  border-radius:15px!important;
+}
+.app.auth-login-mode .account-brand-title{
+  font-size:20px!important;
+  font-weight:950!important;
+  white-space:nowrap!important;
+}
+.app.auth-login-mode .account-brand-sub{
+  margin-top:4px!important;
+  font-size:10px!important;
+  letter-spacing:.14em!important;
+  white-space:nowrap!important;
+}
+.app.auth-login-mode .account-panel{
+  width:min(100%,390px)!important;
+  margin:0 auto!important;
+  padding:26px!important;
+  border-radius:24px!important;
+  background:rgba(255,255,255,.92)!important;
+  border:1px solid rgba(255,255,255,.82)!important;
+  box-shadow:0 18px 48px rgba(15,23,42,.16)!important;
+  backdrop-filter:blur(18px)!important;
+}
+.app.auth-login-mode .account-panel .account-card{
+  margin:0!important;
+  padding:0!important;
+  border:none!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+.app.auth-login-mode .account-welcome{
+  text-align:center!important;
+  margin-bottom:18px!important;
+}
+.app.auth-login-mode .account-welcome-ja{font-size:24px!important;font-weight:950!important;}
+.app.auth-login-mode .account-welcome-brand{font-size:31px!important;font-weight:950!important;color:#2563eb!important;line-height:1.05!important;}
+.app.auth-login-mode .account-welcome-sub{margin-top:8px!important;color:#64748b!important;font-size:12px!important;font-weight:850!important;line-height:1.45!important;}
+.app.auth-login-mode .account-mode{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin:14px 0 6px!important;}
+.app.auth-login-mode .account-mode button{border-radius:14px!important;padding:12px!important;font-weight:950!important;}
+.app.auth-login-mode .account-fields{display:grid!important;grid-template-columns:1fr!important;gap:11px!important;margin-top:12px!important;}
+.app.auth-login-mode .account-panel input{
+  min-height:48px!important;
+  border-radius:9px!important;
+  padding:12px 14px!important;
+  background:#fff!important;
+  border-color:#e2e8f0!important;
+  box-shadow:0 4px 14px rgba(15,23,42,.04)!important;
+}
+.app.auth-login-mode .account-panel .main-btn{
+  margin-top:2px!important;
+  background:linear-gradient(135deg,#2563eb,#0ea5e9)!important;
+  border-radius:9px!important;
+  box-shadow:0 14px 28px rgba(37,99,235,.26)!important;
+}
+.app.auth-login-mode .account-panel .soft-btn{border-radius:9px!important;}
+.app.auth-login-mode .account-divider{display:flex!important;align-items:center!important;gap:10px!important;margin:16px 0!important;color:#94a3b8!important;font-size:12px!important;font-weight:900!important;}
+.app.auth-login-mode .account-divider::before,
+.app.auth-login-mode .account-divider::after{content:""!important;flex:1!important;height:1px!important;background:#e2e8f0!important;}
+.app.auth-login-mode .emergency-card{
+  width:min(100%,390px)!important;
+  margin:18px auto 0!important;
+  padding:16px 18px!important;
+  border-radius:18px!important;
+  display:flex!important;
+}
+@media (max-width:420px){
+  .app.auth-login-mode .account-landing{padding:calc(22px + env(safe-area-inset-top)) 12px calc(14px + env(safe-area-inset-bottom))!important;}
+  .app.auth-login-mode .account-brand{margin-bottom:42px!important;}
+  .app.auth-login-mode .account-panel{padding:20px 16px!important;border-radius:22px!important;}
+  .app.auth-login-mode .account-welcome-ja{font-size:21px!important;}
+  .app.auth-login-mode .account-welcome-brand{font-size:27px!important;}
+  .app.auth-login-mode .account-panel input{min-height:45px!important;}
+}
+</style>
+
 </head>
 <body>
 
@@ -2223,7 +2364,7 @@ body{
 })();
 </script>
 
-<div class="app">
+<div class="app auth-login-mode">
   <header class="top-header">
     <div class="top-row">
       <div class="logo-box">
@@ -3470,6 +3611,15 @@ function showTab(tab) {
   $("sendSection").classList.toggle("hidden", !isSend);
   $("checkSection").classList.toggle("hidden", !isCheck);
   $("settingsSection").classList.toggle("hidden", !isSettings);
+
+  // Auth/login/register must be a separate full-screen screen like the old version.
+  const appEl = document.querySelector(".app");
+  let loggedInForAuthMode = false;
+  try {
+    const savedUser = JSON.parse(localStorage.getItem("userProfile") || "null");
+    loggedInForAuthMode = !!(savedUser && savedUser.status === "active" && savedUser.profileCompleted);
+  } catch(e) {}
+  if (appEl) appEl.classList.toggle("auth-login-mode", isAccount && !loggedInForAuthMode);
   
   document.querySelectorAll(".bottom-nav button").forEach(btn => btn.classList.remove("active"));
   if (isAccount) $("tabAccount").classList.add("active");
