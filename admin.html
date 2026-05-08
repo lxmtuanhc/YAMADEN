@@ -1179,6 +1179,25 @@ html,body{height:100%!important;overflow:hidden!important}
   function list(){try{return Array.isArray(currentUsers)?currentUsers:[]}catch(e){return []}}
   function uid(user){return String((user&&(user._id||user.id||user.userId))||'')}
   function statusText(status){return W(status||'pending')||status||'-'}
+  function modalText(key){
+    var words={
+      ja:{
+        permanentTitle:'完全削除の確認',
+        permanentText:'この顧客を完全に削除しますか？この操作は元に戻せません。',
+        permanentBusy:'削除しています...',
+        permanentFail:'完全削除に失敗しました。サーバー更新後にもう一度お試しください。',
+        close:'閉じる'
+      },
+      vi:{
+        permanentTitle:'Xác nhận xóa vĩnh viễn',
+        permanentText:'Xóa vĩnh viễn khách này? Thao tác này không thể khôi phục.',
+        permanentBusy:'Đang xóa...',
+        permanentFail:'Xóa vĩnh viễn thất bại. Hãy cập nhật server rồi thử lại.',
+        close:'Đóng'
+      }
+    };
+    return (words[L()]&&words[L()][key])||words.ja[key]||key;
+  }
   function removeUserLocal(id){
     try{
       currentUsers=list().filter(function(user){return uid(user)!==String(id)});
@@ -1188,14 +1207,51 @@ html,body{height:100%!important;overflow:hidden!important}
   }
   async function permanentDeleteUser(id){
     if(!id)return;
-    if(!confirm(W('confirmPermanent')))return;
-    removeUserLocal(id);
-    var res=await apiFetch(API+'/admin/users/'+encodeURIComponent(id)+'?permanent=true',{method:'DELETE'});
+    var button=document.getElementById('deleteBtn');
+    if(button){button.disabled=true;button.textContent=modalText('permanentBusy')}
+    var res;
+    try{
+      res=await apiFetch(API+'/admin/users/'+encodeURIComponent(id)+'?permanent=true',{method:'DELETE'});
+    }catch(e){
+      if(button){button.disabled=false;button.textContent=W('permanentDelete')}
+      document.getElementById('modalText').textContent=modalText('permanentFail');
+      return;
+    }
     if(res.status===401)return authFailLogout();
-    if(!res.ok&&typeof loadUsers==='function')return loadUsers();
+    if(button)button.disabled=false;
+    var data=null;
+    try{data=await res.json()}catch(e){}
+    var permanentlyDeleted=data&&/permanent/i.test(String(data.message||''));
+    if(!res.ok||!permanentlyDeleted){
+      document.getElementById('modalText').textContent=(data&&data.message&&!res.ok)?data.message:modalText('permanentFail');
+      if(button)button.textContent=W('permanentDelete');
+      return;
+    }
+    if(typeof closeModal==='function')closeModal();
+    removeUserLocal(id);
     if(typeof loadUsers==='function')loadUsers();
   }
   window.permanentDeleteUser=permanentDeleteUser;
+  window.openPermanentDeleteModal=function(id){
+    if(!id)return;
+    deleteId=id;
+    deleteMode='permanentUser';
+    var title=document.getElementById('modalTitle');
+    var text=document.getElementById('modalText');
+    var cancel=document.getElementById('cancelBtn');
+    var del=document.getElementById('deleteBtn');
+    if(title)title.textContent=modalText('permanentTitle');
+    if(text)text.textContent=modalText('permanentText');
+    if(cancel){cancel.textContent=(typeof t==='function'?t('cancel'):modalText('close'));cancel.style.display=''}
+    if(del){del.textContent=W('permanentDelete');del.style.display='';del.disabled=false}
+    var modal=document.getElementById('modal');
+    if(modal)modal.style.display='flex';
+  };
+  var baseConfirmDelete=window.confirmDelete;
+  window.confirmDelete=async function(){
+    if(deleteMode==='permanentUser')return permanentDeleteUser(deleteId);
+    if(typeof baseConfirmDelete==='function')return baseConfirmDelete();
+  };
   window.deleteUser=function(id){
     if(!id)return;
     removeUserLocal(id);
@@ -1232,7 +1288,7 @@ html,body{height:100%!important;overflow:hidden!important}
         if(button.dataset.act==='reactivate'&&typeof toggleUserStatus==='function')toggleUserStatus(id,'active');
         if(button.dataset.act==='block'&&typeof toggleUserStatus==='function')toggleUserStatus(id,button.dataset.next);
         if(button.dataset.act==='delete'&&typeof deleteUser==='function')deleteUser(id);
-        if(button.dataset.act==='permanent')permanentDeleteUser(id);
+        if(button.dataset.act==='permanent')openPermanentDeleteModal(id);
       });
     });
     var side=document.getElementById('sideUsers');
