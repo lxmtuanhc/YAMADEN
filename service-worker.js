@@ -1,4 +1,4 @@
-const CACHE_NAME = "yamaden-support-v27";
+const CACHE_NAME = "yamaden-support-v28";
 const APP_SHELL = ["/", "/index.html", "/manifest.json", "/icon-192.png", "/icon-512.png"];
 const API_PATHS = ["/admin", "/user", "/request", "/requests"];
 
