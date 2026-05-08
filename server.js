@@ -38,20 +38,9 @@ const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || "";
 const SLACK_ENABLED = process.env.SLACK_ENABLED === "true";
 const ADMIN_URL = process.env.ADMIN_URL || "https://yamaden.onrender.com/admin.html";
 
-// Validate required environment variables
-if (!JWT_SECRET || !USER_JWT_SECRET) {
-  console.error("❌ ERROR: JWT_SECRET and USER_JWT_SECRET must be set in .env file");
-  process.exit(1);
-}
-
-if (!ADMIN_PASSWORD) {
-  console.error("❌ ERROR: ADMIN_PASSWORD must be set in .env file");
-  process.exit(1);
-}
-
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.log("❌ MongoDB error:", err));
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.log("MongoDB error:", err));
 
 function requireAdmin(req, res, next) {
   const token = (req.headers.authorization || "").replace("Bearer ", "");
@@ -382,21 +371,10 @@ async function findBestAssignee(issueTags) {
   return best;
 }
 
-// ============= ROUTES =============
-
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.get("/admin.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "admin.html"));
-});
-
-app.get("/login.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "login.html"));
-});
-
-// Admin login
 app.post("/admin/login", (req, res) => {
   const password = req.body.password || "";
 
@@ -412,12 +390,6 @@ app.post("/admin/login", (req, res) => {
   res.json({ message: "Login success", token });
 });
 
-// Admin check - FIXED: Added missing endpoint
-app.get("/admin/me", requireAdmin, (req, res) => {
-  res.json({ role: "admin", id: "admin", authenticated: true });
-});
-
-// User register
 app.post("/user/register", async (req, res) => {
   try {
     if (!USER_JWT_SECRET) {
@@ -544,7 +516,6 @@ app.post("/user/register", async (req, res) => {
   }
 });
 
-// User login
 app.post("/user/login", async (req, res) => {
   try {
     if (!USER_JWT_SECRET) {
@@ -600,7 +571,6 @@ app.post("/user/login", async (req, res) => {
   }
 });
 
-// User profile update
 app.put("/user/profile", requireUser, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
@@ -640,7 +610,6 @@ app.put("/user/profile", requireUser, async (req, res) => {
   }
 });
 
-// Get current user
 app.get("/user/me", requireUser, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
@@ -654,7 +623,6 @@ app.get("/user/me", requireUser, async (req, res) => {
   }
 });
 
-// Get user's requests
 app.get("/user/requests", requireUser, async (req, res) => {
   try {
     const requests = await Request.find({ userId: req.user.userId }).sort({ createdAt: -1 });
@@ -667,7 +635,6 @@ app.get("/user/requests", requireUser, async (req, res) => {
   }
 });
 
-// Admin get all users - FIXED: removed duplicate, kept one
 app.get("/admin/users", requireAdmin, async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });
@@ -693,7 +660,6 @@ app.get("/admin/users", requireAdmin, async (req, res) => {
   }
 });
 
-// Admin get user's requests
 app.get("/admin/users/:id/requests", requireAdmin, async (req, res) => {
   try {
     const requests = await Request.find({ userId: req.params.id }).sort({ createdAt: -1 });
@@ -706,7 +672,6 @@ app.get("/admin/users/:id/requests", requireAdmin, async (req, res) => {
   }
 });
 
-// Admin update user - FIXED: added validation
 app.put("/admin/users/:id", requireAdmin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -735,7 +700,6 @@ app.put("/admin/users/:id", requireAdmin, async (req, res) => {
   }
 });
 
-// Admin delete user - FIXED: proper response
 app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
   try {
     const userId = req.params.id;
@@ -746,7 +710,7 @@ app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
     if (req.query.permanent === "true") {
       await Request.updateMany({ userId }, { $set: { userId: "" } });
       await User.deleteOne({ _id: userId });
-      return res.json({ message: "User permanently deleted", permanently: true });
+      return res.json({ message: "User permanently deleted" });
     }
 
     user.status = "deleted";
@@ -763,7 +727,6 @@ app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
   }
 });
 
-// Admin get staff
 app.get("/admin/staff", requireAdmin, async (req, res) => {
   try {
     const staff = await Staff.find().sort({ createdAt: -1 });
@@ -776,13 +739,8 @@ app.get("/admin/staff", requireAdmin, async (req, res) => {
   }
 });
 
-// Admin create staff - FIXED: added validation
 app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res) => {
   try {
-    if (!req.body.name || !req.body.name.trim()) {
-      return res.status(400).json({ message: "Staff name is required" });
-    }
-
     const workTags = Array.isArray(req.body.workTags)
       ? req.body.workTags.map(item => String(item || "").trim()).filter(Boolean)
       : parseRequestTags(req.body.workTags);
@@ -795,7 +753,7 @@ app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res)
     }
 
     const staff = new Staff({
-      name: req.body.name.trim(),
+      name: req.body.name || "",
       avatar,
       phone: req.body.phone || "",
       email: req.body.email || "",
@@ -819,7 +777,6 @@ app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res)
   }
 });
 
-// Admin update staff
 app.put("/admin/staff/:id", requireAdmin, upload.single("avatar"), async (req, res) => {
   try {
     const staff = await Staff.findById(req.params.id);
@@ -853,7 +810,6 @@ app.put("/admin/staff/:id", requireAdmin, upload.single("avatar"), async (req, r
   }
 });
 
-// Admin delete staff
 app.delete("/admin/staff/:id", requireAdmin, async (req, res) => {
   try {
     const staff = await Staff.findById(req.params.id);
@@ -875,7 +831,6 @@ app.delete("/admin/staff/:id", requireAdmin, async (req, res) => {
   }
 });
 
-// Create request - FIXED: added concurrent upload limit
 app.post("/request", requireUser, upload.array("image", 12), async (req, res) => {
   try {
     const shortId = await generateRequestId();
@@ -892,23 +847,24 @@ app.post("/request", requireUser, upload.array("image", 12), async (req, res) =>
     const mediaFiles = [];
     const files = Array.isArray(req.files) ? req.files : [];
 
-    // Upload files with concurrency limit to avoid timeout
-    const CONCURRENT_LIMIT = 3;
-    for (let i = 0; i < files.length; i += CONCURRENT_LIMIT) {
-      const batch = files.slice(i, i + CONCURRENT_LIMIT);
-      const results = await Promise.all(batch.map(async (file) => {
-        try {
-          const uploadResult = await uploadMediaToCloudinary(file.buffer);
-          const type = uploadResult.resource_type === "video" || (file.mimetype || "").startsWith("video/")
-            ? "video"
-            : "image";
-          return { url: uploadResult.secure_url, type };
-        } catch (err) {
-          console.error("Upload error:", err);
-          return null;
-        }
-      }));
-      results.filter(r => r !== null).forEach(r => mediaFiles.push(r));
+    for (const file of files) {
+      try {
+        const uploadResult = await uploadMediaToCloudinary(file.buffer);
+        const type = uploadResult.resource_type === "video" || (file.mimetype || "").startsWith("video/")
+          ? "video"
+          : "image";
+
+        mediaFiles.push({
+          url: uploadResult.secure_url,
+          type
+        });
+
+      } catch (uploadError) {
+        return res.status(500).json({
+          message: "Media upload failed",
+          error: uploadError.message
+        });
+      }
     }
 
     const firstMedia = mediaFiles[0] || { url: "", type: "" };
@@ -967,7 +923,6 @@ app.post("/request", requireUser, upload.array("image", 12), async (req, res) =>
   }
 });
 
-// Get all requests
 app.get("/requests", requireAdmin, async (req, res) => {
   try {
     const requests = await Request.find().sort({ createdAt: -1 });
@@ -980,7 +935,6 @@ app.get("/requests", requireAdmin, async (req, res) => {
   }
 });
 
-// Get single request
 app.get("/request/:id", async (req, res) => {
   try {
     const item = await Request.findOne(makeIdQuery(req.params.id));
@@ -999,7 +953,6 @@ app.get("/request/:id", async (req, res) => {
   }
 });
 
-// Update request
 app.put("/request/:id", requireAdmin, async (req, res) => {
   try {
     const item = await Request.findOne(makeIdQuery(req.params.id));
@@ -1039,7 +992,6 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
   }
 });
 
-// Delete request
 app.delete("/request/:id", requireAdmin, async (req, res) => {
   try {
     const result = await Request.deleteOne(makeIdQuery(req.params.id));
@@ -1058,7 +1010,6 @@ app.delete("/request/:id", requireAdmin, async (req, res) => {
   }
 });
 
-// Error handler
 app.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     return res.status(400).json({
@@ -1080,7 +1031,5 @@ app.use((error, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-  console.log(`📋 Admin login: /login.html`);
-  console.log(`👥 Customer app: /index.html`);
+  console.log("Server running on port " + PORT);
 });
