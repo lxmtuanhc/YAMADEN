@@ -1518,17 +1518,24 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
 </style>
 
 
-<!-- ===== YAMADEN MOBILE FINAL FIX - CLEAN SINGLE OVERRIDE ===== -->
-<style id="yamaden-mobile-final-fix">
+<!-- ===== YAMADEN MOBILE APP UI FIX v32 - REAL REDESIGN ===== -->
+<style id="yamaden-mobile-app-ui-fix-v32">
+/* Mobile-first polish: make the home screen feel like an app, not a landing page */
 @media (max-width:860px){
   html,body{
     margin:0!important;
     padding:0!important;
     width:100%!important;
     max-width:100%!important;
+    min-height:100%!important;
     overflow-x:hidden!important;
-    background:#f6f8fc!important;
+    background:#f4f6fa!important;
     -webkit-text-size-adjust:100%!important;
+  }
+
+  body{
+    font-family:"Segoe UI", Arial, sans-serif!important;
+    color:#111827!important;
   }
 
   .app{
@@ -1539,37 +1546,39 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
     margin:0!important;
     display:block!important;
     overflow-x:hidden!important;
-    background:#f6f8fc!important;
+    background:#f4f6fa!important;
     box-shadow:none!important;
   }
 
+  /* compact app header */
   .top-header{
     position:sticky!important;
     top:0!important;
     z-index:90!important;
     height:auto!important;
-    min-height:68px!important;
-    padding:8px 14px!important;
+    min-height:64px!important;
+    padding:7px 12px!important;
     border-radius:0!important;
-    box-shadow:0 8px 22px rgba(0,0,0,.18)!important;
-    background:linear-gradient(135deg,#0b0f14,#171917)!important;
+    background:#121512!important;
+    box-shadow:0 8px 22px rgba(0,0,0,.16)!important;
   }
 
   .top-row{
-    min-height:52px!important;
+    min-height:50px!important;
     gap:10px!important;
   }
 
   .logo-box{
     flex:1 1 auto!important;
     min-width:0!important;
-    gap:10px!important;
+    gap:9px!important;
   }
 
   .logo-box img{
-    width:40px!important;
-    height:40px!important;
-    border-radius:13px!important;
+    width:38px!important;
+    height:38px!important;
+    border-radius:12px!important;
+    box-shadow:none!important;
   }
 
   .logo-text{min-width:0!important;}
@@ -1581,26 +1590,29 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
     overflow:hidden!important;
     text-overflow:ellipsis!important;
     white-space:nowrap!important;
+    font-weight:850!important;
   }
 
   .logo-en{
-    margin-top:3px!important;
+    margin-top:2px!important;
     font-size:9px!important;
-    letter-spacing:.10em!important;
+    letter-spacing:.08em!important;
     max-width:190px!important;
     overflow:hidden!important;
     text-overflow:ellipsis!important;
     white-space:nowrap!important;
+    font-weight:750!important;
   }
 
   .lang-select{
-    flex:0 0 62px!important;
-    width:62px!important;
-    height:42px!important;
-    min-height:42px!important;
-    padding:7px 8px!important;
-    border-radius:14px!important;
+    flex:0 0 58px!important;
+    width:58px!important;
+    height:40px!important;
+    min-height:40px!important;
+    padding:6px 7px!important;
+    border-radius:13px!important;
     font-size:13px!important;
+    font-weight:850!important;
   }
 
   .top-header .hero,
@@ -1613,183 +1625,314 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
     width:100%!important;
     min-width:0!important;
     margin:0!important;
-    padding:10px 10px 92px!important;
+    padding:10px 10px 84px!important;
     overflow-x:hidden!important;
+    background:#f4f6fa!important;
   }
 
+  /* home: action first */
   .home-hero-card{
     width:100%!important;
     min-height:auto!important;
     margin:0!important;
-    padding:16px!important;
-    border-radius:20px!important;
+    padding:14px!important;
+    border-radius:18px!important;
     overflow:hidden!important;
-    box-shadow:0 14px 34px rgba(15,23,42,.15)!important;
+    background:linear-gradient(145deg,#111827,#1f2937)!important;
+    box-shadow:0 10px 24px rgba(15,23,42,.13)!important;
   }
 
   .home-hero-card::after{
-    right:-92px!important;
-    bottom:-108px!important;
-    width:230px!important;
-    height:230px!important;
+    right:-118px!important;
+    bottom:-126px!important;
+    width:220px!important;
+    height:220px!important;
+    opacity:.7!important;
   }
 
   .home-kicker{
-    max-width:100%!important;
-    padding:7px 10px!important;
-    gap:7px!important;
-    font-size:11px!important;
-    letter-spacing:.45px!important;
-  }
-
-  .home-kicker .icon{
-    width:18px!important;
-    height:18px!important;
+    display:none!important;
   }
 
   .home-title{
     max-width:100%!important;
-    margin:14px 0 8px!important;
-    font-size:21px!important;
-    line-height:1.2!important;
-    letter-spacing:-.35px!important;
+    margin:0 0 7px!important;
+    font-size:18px!important;
+    line-height:1.28!important;
+    letter-spacing:-.2px!important;
+    font-weight:850!important;
     overflow-wrap:anywhere!important;
     word-break:break-word!important;
   }
 
   .home-desc{
     max-width:100%!important;
-    font-size:13px!important;
-    line-height:1.55!important;
-    font-weight:760!important;
+    margin:0!important;
+    font-size:12.5px!important;
+    line-height:1.5!important;
+    font-weight:650!important;
+    color:#d9e1ec!important;
     overflow-wrap:anywhere!important;
     word-break:break-word!important;
   }
 
   .home-actions{
-    grid-template-columns:1fr!important;
-    gap:9px!important;
-    margin-top:15px!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
+    margin-top:12px!important;
   }
 
   .home-actions .main-btn,
   .home-actions .soft-btn{
-    min-height:46px!important;
+    min-height:42px!important;
+    padding:9px 8px!important;
+    border-radius:13px!important;
+    font-size:12.5px!important;
+    line-height:1.2!important;
+    font-weight:850!important;
+    gap:6px!important;
+    box-shadow:none!important;
   }
 
+  .home-actions .icon{
+    width:18px!important;
+    height:18px!important;
+  }
+
+  .home-actions .main-btn{
+    background:#ffffff!important;
+    color:#111827!important;
+  }
+
+  .home-actions .soft-btn{
+    background:rgba(255,255,255,.12)!important;
+    color:#fff!important;
+    border:1px solid rgba(255,255,255,.16)!important;
+  }
+
+  /* chips instead of heavy cards */
   .trust-row{
     width:100%!important;
     display:grid!important;
     grid-template-columns:repeat(3,minmax(0,1fr))!important;
-    gap:8px!important;
-    margin:10px 0 12px!important;
+    gap:7px!important;
+    margin:9px 0 10px!important;
   }
 
   .trust-item{
     min-width:0!important;
-    padding:10px 8px!important;
-    border-radius:16px!important;
-    box-shadow:0 9px 20px rgba(17,24,39,.12)!important;
+    padding:9px 8px!important;
+    border-radius:15px!important;
+    background:#111827!important;
+    box-shadow:none!important;
   }
 
   .trust-number{
-    font-size:19px!important;
-    line-height:1.08!important;
+    font-size:17px!important;
+    line-height:1!important;
+    font-weight:850!important;
   }
 
   .trust-label{
     margin-top:5px!important;
-    font-size:10px!important;
+    font-size:9.5px!important;
     line-height:1.25!important;
+    font-weight:650!important;
+    color:#cbd5e1!important;
     overflow-wrap:anywhere!important;
   }
 
-  .philosophy-card,
-  .brand-gallery,
-  .company-info-grid,
-  .utility-grid,
-  .service-grid{
-    grid-template-columns:1fr!important;
-  }
-
-  .philosophy-card{
-    margin-top:12px!important;
-    gap:12px!important;
-  }
-
-  .philosophy-visual,
-  .brand-visual{
-    min-height:210px!important;
-    border-radius:20px!important;
-    overflow:hidden!important;
-  }
-
-  .poster-brand{
-    left:22px!important;
-    top:34px!important;
-  }
-
-  .poster-brand-logo{
-    width:42px!important;
-    height:42px!important;
-    margin-bottom:10px!important;
-  }
-
-  .poster-brand-name{
-    font-size:24px!important;
-  }
-
-  .poster-brand-line{
-    width:72px!important;
-    margin:8px 0 7px!important;
-  }
-
-  .poster-slogan{
-    font-size:10px!important;
-    letter-spacing:.04em!important;
-  }
-
-  .poster-slogan-sub{
-    max-width:240px!important;
-    font-size:7px!important;
-    line-height:1.25!important;
-    letter-spacing:.05em!important;
-  }
-
-  .poster-company{
-    left:22px!important;
-    bottom:20px!important;
-    font-size:10px!important;
-  }
-
-  .poster-mountain{
-    right:22px!important;
-    top:32px!important;
-    width:105px!important;
-    height:64px!important;
+  /* marketing blocks should not dominate mobile home */
+  #homeSection .philosophy-card,
+  #homeSection .brand-gallery{
+    display:none!important;
   }
 
   .card,
-  .service-card,
   .utility-card,
   .company-info,
   .request-card,
   .success-box{
     border-radius:18px!important;
+    box-shadow:0 8px 20px rgba(15,23,42,.05)!important;
   }
 
   .card{
+    margin-bottom:10px!important;
+    padding:14px!important;
+    border-color:#edf0f4!important;
+  }
+
+  .card-title{
     margin-bottom:12px!important;
-    padding:16px!important;
+    gap:8px!important;
+  }
+
+  .card-title-icon{
+    width:32px!important;
+    height:32px!important;
+    border-radius:11px!important;
+  }
+
+  .card h2,
+  .card h3{
+    font-size:17px!important;
+    line-height:1.25!important;
+    font-weight:850!important;
+  }
+
+  .service-grid{
+    grid-template-columns:1fr!important;
+    gap:9px!important;
+    margin-top:0!important;
+  }
+
+  .service-card{
+    display:grid!important;
+    grid-template-columns:38px minmax(0,1fr)!important;
+    gap:10px!important;
+    align-items:center!important;
+    padding:12px!important;
+    border-radius:16px!important;
+    box-shadow:none!important;
+  }
+
+  .service-icon{
+    width:38px!important;
+    height:38px!important;
+    border-radius:13px!important;
+    margin:0!important;
+  }
+
+  .service-title{
+    margin:0 0 3px!important;
+    font-size:14px!important;
+    line-height:1.25!important;
+    font-weight:850!important;
+  }
+
+  .service-desc{
+    font-size:12px!important;
+    line-height:1.42!important;
+    font-weight:600!important;
+  }
+
+  .utility-grid,
+  .company-info-grid,
+  .form-grid,
+  .profile-grid,
+  .account-fields,
+  .quick-contact{
+    grid-template-columns:1fr!important;
+    gap:9px!important;
+  }
+
+  .utility-grid{
+    margin-top:10px!important;
+  }
+
+  .utility-card{
+    padding:13px!important;
+  }
+
+  .utility-head{
+    margin-bottom:6px!important;
+    font-size:14px!important;
+    font-weight:850!important;
+  }
+
+  .utility-head .icon{
+    width:32px!important;
+    height:32px!important;
+    padding:7px!important;
+    border-radius:12px!important;
+  }
+
+  .utility-text,
+  .section-text,
+  .company-info-value{
+    font-size:12.5px!important;
+    line-height:1.5!important;
+    font-weight:600!important;
+  }
+
+  .company-info{
+    padding:12px!important;
+  }
+
+  .company-info-label{
+    font-size:11px!important;
+    margin-bottom:4px!important;
   }
 
   .main-btn,
   .soft-btn,
   .copy-btn{
+    min-height:42px!important;
+    padding:10px 12px!important;
+    border-radius:13px!important;
+    font-size:13px!important;
+    font-weight:850!important;
+    box-shadow:none!important;
+  }
+
+  input,textarea{
     min-height:44px!important;
-    padding:12px!important;
-    border-radius:14px!important;
+    border-radius:13px!important;
     font-size:14px!important;
+    padding:12px 12px 12px 40px!important;
+  }
+
+  textarea{min-height:96px!important;}
+
+  .field{margin-bottom:11px!important;}
+  .field label{font-size:12.5px!important;margin-bottom:5px!important;}
+
+  /* account screen compact */
+  .account-landing{
+    min-height:auto!important;
+    border-radius:18px!important;
+    padding:14px 10px 16px!important;
+    box-shadow:none!important;
+  }
+
+  .account-brand{margin:0 0 14px!important;}
+  .account-brand img{width:40px!important;height:40px!important;border-radius:12px!important;}
+  .account-brand-title{font-size:18px!important;white-space:normal!important;}
+
+  .account-panel{
+    width:100%!important;
+    max-width:360px!important;
+    padding:15px!important;
+    border-radius:20px!important;
+    box-shadow:0 10px 26px rgba(15,23,42,.1)!important;
+  }
+
+  .account-welcome{margin-bottom:12px!important;}
+  .account-welcome-ja{font-size:18px!important;}
+  .account-welcome-brand{font-size:24px!important;}
+  .account-welcome-sub{font-size:11.5px!important;line-height:1.45!important;font-weight:650!important;}
+
+  .account-mode{gap:7px!important;margin:9px 0!important;}
+  .account-mode button{padding:10px 8px!important;border-radius:12px!important;font-size:12.5px!important;}
+
+  .emergency-card{
+    width:100%!important;
+    max-width:360px!important;
+    margin:10px auto 0!important;
+    padding:12px!important;
+    border-radius:16px!important;
+  }
+
+  .emergency-icon{width:38px!important;height:38px!important;}
+  .emergency-title{font-size:13px!important;}
+  .emergency-sub{font-size:11px!important;}
+
+  .secondary-row{
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
+    margin-top:9px!important;
   }
 
   .bottom-nav{
@@ -1801,25 +1944,26 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
     width:100%!important;
     max-width:none!important;
     margin:0!important;
-    border-radius:18px 18px 0 0!important;
-    padding:5px 8px calc(5px + env(safe-area-inset-bottom))!important;
+    border-radius:16px 16px 0 0!important;
+    padding:4px 7px calc(4px + env(safe-area-inset-bottom))!important;
     gap:6px!important;
     background:rgba(18,19,18,.97)!important;
     border-color:rgba(255,255,255,.08)!important;
-    box-shadow:0 -10px 30px rgba(0,0,0,.22)!important;
+    box-shadow:0 -10px 26px rgba(0,0,0,.2)!important;
   }
 
   .bottom-nav button{
     min-width:0!important;
-    padding:8px 4px!important;
-    border-radius:14px!important;
-    font-size:11px!important;
-    gap:2px!important;
+    min-height:44px!important;
+    padding:6px 3px!important;
+    border-radius:13px!important;
+    font-size:10.5px!important;
+    gap:1px!important;
   }
 
   .bottom-nav .icon{
-    width:20px!important;
-    height:20px!important;
+    width:19px!important;
+    height:19px!important;
   }
 }
 
@@ -1828,13 +1972,14 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   .top-header{padding-left:10px!important;padding-right:10px!important;}
   .logo-jp{font-size:14px!important;max-width:150px!important;}
   .logo-en{font-size:8.5px!important;max-width:150px!important;}
-  .home-title{font-size:20px!important;}
-  .home-desc{font-size:12.5px!important;}
-  .trust-row{gap:7px!important;}
-  .trust-item{padding:9px 7px!important;}
-  .trust-number{font-size:18px!important;}
-  .trust-label{font-size:9.5px!important;}
-  .philosophy-visual,.brand-visual{min-height:200px!important;}
+  .home-title{font-size:17px!important;}
+  .home-desc{font-size:12px!important;}
+  .trust-row{gap:6px!important;}
+  .trust-item{padding:8px 7px!important;}
+  .trust-number{font-size:16px!important;}
+  .trust-label{font-size:9px!important;}
+  .home-actions .main-btn,
+  .home-actions .soft-btn{font-size:12px!important;}
 }
 </style>
 
