@@ -345,6 +345,12 @@ input:focus, textarea:focus { border-color: #111827; box-shadow: 0 0 0 5px rgba(
 /* Misc */
 hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
 .small-link { margin-top: 10px; text-align: center; color: #6b7280; font-size: 13px; cursor: pointer; text-decoration: underline; font-weight: 800; }
+
+.app.auth-login-mode .account-divider,
+.app.auth-login-mode .soft-btn[onclick*="showTab('send')"],
+.app.auth-login-mode .emergency-card {
+  display: none !important;
+}
 </style>
 
 <!-- YAMADEN DNA FRAME - clean mobile shell, no overflow -->
@@ -808,6 +814,41 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
     padding: 12px 14px;
     border-radius: 13px;
   }
+
+  .approval-state {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .approval-badge {
+    display: none;
+    min-height: 46px;
+    border-radius: 16px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 950;
+    line-height: 1.35;
+  }
+
+  .approval-badge.pending {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+  }
+
+  .approval-badge.approved {
+    background: #ecfdf5;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+
+  .approval-badge.show {
+    display: flex;
+  }
 }
 
 @media (max-width: 380px) {
@@ -925,7 +966,11 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
               <input id="accountProjectName" placeholder="T?n c?ng tr?nh">
               <input id="accountCompany" placeholder="C?ng ty / c? nh?n">
             </div>
-            <button class="main-btn" onclick="userLogin()"><span class="icon" id="accountLoginIcon"></span><span id="accountLoginText">??ng nh?p / L?u</span></button>
+            <button class="main-btn" onclick="userLogin()"><span class="icon" id="accountLoginIcon"></span><span id="accountLoginText">Đăng nhập / Lưu</span></button>
+            <div class="approval-state">
+              <div class="approval-badge pending" id="approvalPendingText"></div>
+              <div class="approval-badge approved" id="approvalApprovedText"></div>
+            </div>
             <div class="account-divider"><span id="accountDividerText">ho?c</span></div>
             <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="quickSupportBtnIcon"></span><span id="quickSupportBtn">G?i h? tr? nhanh</span></button>
             <div class="account-status" id="accountStatus"></div>
@@ -1129,6 +1174,12 @@ const YAMADEN_WEB_COPY = {
     accountRegister: "Khách mới",
     accountLoginMode: "Đã có tài khoản",
     accountLogout: "Đăng xuất",
+    accountProfileTitle: "Thông tin khách hàng",
+    accountProfileText: "Vui lòng nhập thông tin chi tiết để admin duyệt tài khoản.",
+    accountPending: "Tài khoản đang chờ admin duyệt. Sau khi được duyệt bạn mới có thể vào app chính.",
+    accountApproved: "Tài khoản đã được duyệt. Bạn có thể vào app chính.",
+    registerDone: "Đăng ký thành công. Vui lòng nhập thông tin chi tiết.",
+    profileSaved: "Đã gửi thông tin. Vui lòng chờ admin duyệt.",
     profileActive: "Tài khoản đang hoạt động",
     profilePhone: "Số điện thoại",
     profileProvince: "Tỉnh / thành",
@@ -1188,6 +1239,12 @@ const YAMADEN_WEB_COPY = {
     accountRegister: "新規登録",
     accountLoginMode: "登録済み",
     accountLogout: "ログアウト",
+    accountProfileTitle: "お客様情報",
+    accountProfileText: "管理者承認のため、お客様情報を入力してください。",
+    accountPending: "管理者承認待ちです。承認後にアプリをご利用いただけます。",
+    accountApproved: "管理者承認済みです。アプリをご利用いただけます。",
+    registerDone: "登録しました。続けてお客様情報を入力してください。",
+    profileSaved: "お客様情報を送信しました。管理者承認をお待ちください。",
     profileActive: "アカウント有効",
     profilePhone: "電話番号",
     profileProvince: "都道府県",
@@ -1252,6 +1309,13 @@ function applyLanguage() {
   $("detail3Text").innerText=t("detail3Text"); $("detail1Btn").innerText=t("detailBtn"); $("detail2Btn").innerText=t("detailBtn"); $("detail3Btn").innerText=t("detailBtn");
   $("accountText").innerHTML=t("accountText"); $("accountModeRegister").innerText=t("accountRegister");
   $("accountModeLogin").innerText=t("accountLoginMode"); $("accountLoginText").innerText=t("accountLogin");
+  $("accountName").placeholder=t("name"); $("accountPhone").placeholder=t("phone");
+  $("accountPin").placeholder=lang==="ja"?"PIN 4〜6桁":"Mã PIN 4-6 số";
+  $("accountPinConfirm").placeholder=lang==="ja"?"PIN確認":"Nhập lại mã PIN";
+  $("accountEmail").placeholder="Email"; $("accountProvince").placeholder=t("profileProvince");
+  $("accountProjectName").placeholder=t("profileProject"); $("accountCompany").placeholder=t("profileCompany");
+  $("approvalPendingText").innerText=t("accountPending"); $("approvalApprovedText").innerText=t("accountApproved");
+  $("accountBrandSub").innerText="YAMADEN.CO.LTD";
   $("quickSupportTitle").innerText=t("quickSupportTitle"); $("quickSupportText").innerText=t("quickSupportText");
   $("quickSupportBtn").innerText=t("quickSupportBtn"); $("profileSub").innerText=t("profileActive");
   $("profilePhoneLabel").innerText=t("profilePhone"); $("profileProvinceLabel").innerText=t("profileProvince");
@@ -1287,8 +1351,12 @@ function getUserToken() { return localStorage.getItem("userToken")||""; }
 function updateAccountUI() {
   let saved=localStorage.getItem("userProfile"); currentUser=saved?JSON.parse(saved):null;
   let loggedIn=currentUser && currentUser.status==="active" && currentUser.profileCompleted;
+  let hasProfile=currentUser && currentUser.profileCompleted;
+  let pending=currentUser && currentUser.status!=="active" && currentUser.profileCompleted;
   $("accountFormCard").style.display=loggedIn?"none":"block";
   $("profileCard").style.display=loggedIn?"block":"none";
+  $("approvalPendingText")?.classList.toggle("show",!!pending);
+  $("approvalApprovedText")?.classList.toggle("show",!!loggedIn);
   if(currentUser){
     $("profileName").innerText=currentUser.name||currentUser.phone||"";
     $("profilePhone").innerText=currentUser.phone||""; $("profileEmail").innerText=currentUser.email||"";
@@ -1299,7 +1367,7 @@ function updateAccountUI() {
     $("accountCompany").value=currentUser.company||""; $("name").value=currentUser.name||""; $("phone").value=currentUser.phone||"";
     $("contact").value=currentUser.contact||currentUser.email||""; $("address").value=currentUser.address||currentUser.projectName||"";
   }
-  setAccountMode(accountMode);
+  setAccountMode(hasProfile&&!loggedIn?"login":accountMode);
 }
 
 function setAccountMode(mode) {
@@ -1317,12 +1385,13 @@ function setAccountMode(mode) {
 }
 
 async function userLogin() {
-  let mode=accountMode, phone=$("accountPhone").value.trim(), pin=$("accountPin").value.trim(), pinConfirm=$("accountPinConfirm").value.trim();
+  let mode=accountMode;
+  let phone=$("accountPhone").value.trim(), pin=$("accountPin").value.trim(), pinConfirm=$("accountPinConfirm").value.trim();
   let name=$("accountName").value.trim(), email=$("accountEmail").value.trim(), province=$("accountProvince").value.trim();
   let projectName=$("accountProjectName").value.trim(), company=$("accountCompany").value.trim();
-  if(mode!=="profile" && (!phone||!/^\d{4,6}$/.test(pin))){ showToast(t("required")); return; }
-  if(mode==="register" && pin!==pinConfirm){ showToast("Mã PIN không khớp"); return; }
-  if(mode==="profile" && (!name||!email||!province||!projectName)){ showToast("Vui lòng nhập đầy đủ thông tin"); return; }
+  if(mode!=="profile" && (!phone||!/^[0-9]{4,6}$/.test(pin))){ showToast(t("required")); return; }
+  if(mode==="register" && pin!==pinConfirm){ showToast(lang==="ja"?"PIN???????":"M? PIN kh?ng kh?p"); return; }
+  if(mode==="profile" && (!name||!email||!province||!projectName)){ showToast(t("required")); return; }
   try{
     let endpoint=mode==="register"?"/user/register":mode==="profile"?"/user/profile":"/user/login";
     let method=mode==="profile"?"PUT":"POST";
@@ -1333,16 +1402,51 @@ async function userLogin() {
     let res=await fetch(API+endpoint,{method,headers,body:JSON.stringify(body)});
     let data=await res.json();
     if(!res.ok||!data.user) throw new Error(data.message||"Auth failed");
-    if(mode==="register"){
+
+    if(mode==="register" && !data.token){
       let loginRes=await fetch(API+"/user/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone,pin})});
       let loginData=await loginRes.json();
-      if(loginData.token) localStorage.setItem("userToken",loginData.token);
-    } else if(data.token) localStorage.setItem("userToken",data.token);
+      if(loginData.token) data={...data,...loginData};
+    }
+    if(data.token) localStorage.setItem("userToken",data.token);
     localStorage.setItem("userProfile",JSON.stringify(data.user));
+    currentUser=data.user;
+
+    if(mode==="register"){
+      updateAccountUI();
+      setAccountMode("profile");
+      showToast(t("registerDone"));
+      return;
+    }
+
+    if(mode==="profile"){
+      updateAccountUI();
+      if(data.user.status==="active" && data.user.profileCompleted){
+        $("approvalApprovedText")?.classList.add("show");
+        showToast(t("accountApproved"));
+        showTab("home");
+      } else {
+        $("approvalPendingText")?.classList.add("show");
+        showToast(t("profileSaved"));
+        showTab("account");
+      }
+      return;
+    }
+
     updateAccountUI();
-    if(mode==="profile" || (mode==="login" && data.user.profileCompleted)) showTab("home");
-    else setAccountMode("profile");
-    showToast(t("success"));
+    if(data.user.status==="active" && data.user.profileCompleted){
+      $("approvalApprovedText")?.classList.add("show");
+      showToast(t("accountApproved"));
+      showTab("home");
+    } else if(!data.user.profileCompleted){
+      setAccountMode("profile");
+      showToast(t("accountProfileText"));
+      showTab("account");
+    } else {
+      $("approvalPendingText")?.classList.add("show");
+      showToast(t("accountPending"));
+      showTab("account");
+    }
   } catch(err){ showToast(t("fail")); }
 }
 
