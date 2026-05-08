@@ -3007,5 +3007,183 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
 })();
 </script>
+<style id="yamaden-layout-brand-issue-v12">
+@media (max-width: 860px) {
+  .app:not(.auth-login-mode) {
+    grid-template-rows: calc(76px + env(safe-area-inset-top)) minmax(0,1fr) calc(78px + env(safe-area-inset-bottom)) !important;
+  }
+  .app:not(.auth-login-mode) .top-header {
+    height: calc(76px + env(safe-area-inset-top)) !important;
+    min-height: calc(76px + env(safe-area-inset-top)) !important;
+    padding: calc(16px + env(safe-area-inset-top)) 16px 10px !important;
+  }
+  .app:not(.auth-login-mode) .top-row {
+    height: 50px !important;
+  }
+  .app:not(.auth-login-mode) .bottom-nav {
+    height: calc(78px + env(safe-area-inset-bottom)) !important;
+    min-height: calc(78px + env(safe-area-inset-bottom)) !important;
+    padding: 9px 20px calc(11px + env(safe-area-inset-bottom)) !important;
+    align-items: center !important;
+  }
+  .app:not(.auth-login-mode) .bottom-nav button {
+    height: 52px !important;
+    max-width: 72px !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  #homeSection .philosophy-visual {
+    min-height: 188px !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+    background:
+      linear-gradient(rgba(15,23,42,.34), rgba(15,23,42,.34)),
+      linear-gradient(120deg, rgba(90,76,62,.78), rgba(200,186,160,.62)),
+      linear-gradient(180deg, #b7a58b, #8f7b67) !important;
+  }
+  #homeSection .philosophy-visual::after {
+    display: none !important;
+  }
+  #homeSection .poster-brand {
+    position: absolute !important;
+    inset: 0 !important;
+    display: grid !important;
+    grid-template-columns: 70px minmax(0,1fr) !important;
+    grid-template-rows: auto auto auto !important;
+    column-gap: 14px !important;
+    row-gap: 6px !important;
+    align-content: center !important;
+    align-items: center !important;
+    justify-content: start !important;
+    padding: 24px 24px !important;
+    text-align: left !important;
+    color: #fff !important;
+  }
+  #homeSection .poster-brand-logo {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: 70px !important;
+    height: 70px !important;
+    border-radius: 15px !important;
+    background: #222 !important;
+    object-fit: cover !important;
+    margin: 0 !important;
+    box-shadow: 0 12px 26px rgba(0,0,0,.28) !important;
+  }
+  #homeSection .poster-brand-name {
+    display: block !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    color: #fff !important;
+    font-family: "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif !important;
+    font-size: clamp(28px, 7.2vw, 38px) !important;
+    line-height: 1.05 !important;
+    font-weight: 500 !important;
+    letter-spacing: .04em !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,.35) !important;
+  }
+  #homeSection .poster-brand-line,
+  #homeSection .poster-company {
+    display: none !important;
+  }
+  #homeSection .poster-slogan {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+    margin: 16px 0 0 !important;
+    color: #fff !important;
+    font-family: "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif !important;
+    font-size: clamp(21px, 5.5vw, 29px) !important;
+    line-height: 1.1 !important;
+    font-weight: 500 !important;
+    letter-spacing: .04em !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,.34) !important;
+  }
+  #homeSection .poster-slogan-sub {
+    position: static !important;
+    grid-column: 1 / -1 !important;
+    display: block !important;
+    margin-top: 2px !important;
+    color: #fff !important;
+    font-family: "Times New Roman", serif !important;
+    font-size: clamp(14px, 3.8vw, 19px) !important;
+    line-height: 1.15 !important;
+    letter-spacing: .02em !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,.34) !important;
+  }
+
+  #hiddenIssueInputs,
+  .hidden-issue-inputs {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+  .selected-issues {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+  }
+  .selected-issue-tag {
+    min-height: 34px !important;
+    max-width: 100% !important;
+    border-radius: 999px !important;
+    background: linear-gradient(135deg,#111827,#1f2937) !important;
+    color: #fff !important;
+    padding: 7px 8px 7px 12px !important;
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+    font-weight: 900 !important;
+    box-shadow: 0 8px 18px rgba(15,23,42,.12) !important;
+  }
+  .selected-issue-tag button {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    border-radius: 50% !important;
+    background: rgba(255,255,255,.16) !important;
+    color: #fff !important;
+    font-size: 0 !important;
+  }
+  .selected-issue-tag button::before {
+    content: "×" !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+  }
+  .issue-panel {
+    padding: 16px !important;
+  }
+  .issue-dropdown {
+    border-radius: 16px !important;
+    box-shadow: 0 20px 44px rgba(15,23,42,.20) !important;
+  }
+  .quote-option input {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+  }
+}
+</style>
+<script id="yamaden-layout-brand-issue-v12-script">
+(function(){
+  function fixBrandText(){
+    var name=document.querySelector("#homeSection .poster-brand-name");
+    var logo=document.querySelector("#homeSection .poster-brand-logo");
+    var slogan=document.querySelector("#homeSection .poster-slogan");
+    var sub=document.querySelector("#homeSection .poster-slogan-sub");
+    if(name)name.textContent="\u682a\u5f0f\u4f1a\u793e \u5c71\u96fb";
+    if(logo)logo.src="/icon-192.png";
+    if(slogan)slogan.textContent="\u4eba\u3092\u5b88\u308a\u3001\u5e78\u305b\u3092\u5275\u308b";
+    if(sub)sub.textContent="Protecting people. Creating happiness.";
+  }
+  var oldApply=window.applyLanguage;
+  window.applyLanguage=function(){if(oldApply)oldApply();setTimeout(fixBrandText,0);};
+  document.addEventListener("DOMContentLoaded",function(){setTimeout(fixBrandText,500);});
+  fixBrandText();
+})();
+</script>
 </body>
 </html>
