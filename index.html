@@ -1515,737 +1515,326 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* ===== MOBILE LAYOUT FIX ===== */
-html, body {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-}
-body {
-  -webkit-text-size-adjust: 100%;
-}
-img, video {
-  max-width: 100%;
-}
-.app, .main, .card, .account-landing, .account-panel {
-  max-width: 100%;
-}
+</style>
 
-@media (max-width: 860px) {
-  body {
-    background: #f6f8fc !important;
+
+<!-- ===== YAMADEN MOBILE FINAL FIX - CLEAN SINGLE OVERRIDE ===== -->
+<style id="yamaden-mobile-final-fix">
+@media (max-width:860px){
+  html,body{
+    margin:0!important;
+    padding:0!important;
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:hidden!important;
+    background:#f6f8fc!important;
+    -webkit-text-size-adjust:100%!important;
   }
 
-  .app {
-    width: 100% !important;
-    max-width: 480px !important;
-    min-height: 100dvh !important;
-    margin: 0 auto !important;
-    display: block !important;
-    overflow-x: hidden !important;
-    background: #f6f8fc !important;
-    box-shadow: none !important;
+  .app{
+    width:100%!important;
+    max-width:none!important;
+    min-height:100vh!important;
+    min-height:100dvh!important;
+    margin:0!important;
+    display:block!important;
+    overflow-x:hidden!important;
+    background:#f6f8fc!important;
+    box-shadow:none!important;
   }
 
-  .top-header {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 90 !important;
-    height: auto !important;
-    min-height: 68px !important;
-    padding: 8px 12px !important;
-    border-radius: 0 !important;
-    box-shadow: 0 8px 22px rgba(0,0,0,.18) !important;
-    background: linear-gradient(135deg,#0b0f14,#171917) !important;
+  .top-header{
+    position:sticky!important;
+    top:0!important;
+    z-index:90!important;
+    height:auto!important;
+    min-height:68px!important;
+    padding:8px 14px!important;
+    border-radius:0!important;
+    box-shadow:0 8px 22px rgba(0,0,0,.18)!important;
+    background:linear-gradient(135deg,#0b0f14,#171917)!important;
   }
 
-  .top-row {
-    min-height: 52px !important;
-    gap: 8px !important;
+  .top-row{
+    min-height:52px!important;
+    gap:10px!important;
   }
 
-  .logo-box {
-    flex: 1 !important;
-    min-width: 0 !important;
-    gap: 9px !important;
+  .logo-box{
+    flex:1 1 auto!important;
+    min-width:0!important;
+    gap:10px!important;
   }
 
-  .logo-box img {
-    width: 38px !important;
-    height: 38px !important;
-    border-radius: 12px !important;
+  .logo-box img{
+    width:40px!important;
+    height:40px!important;
+    border-radius:13px!important;
   }
 
-  .logo-jp {
-    font-size: 14px !important;
-    line-height: 1.12 !important;
-    max-width: 190px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+  .logo-text{min-width:0!important;}
+
+  .logo-jp{
+    font-size:15px!important;
+    line-height:1.12!important;
+    max-width:190px!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
   }
 
-  .logo-en {
-    margin-top: 3px !important;
-    font-size: 9px !important;
-    letter-spacing: .10em !important;
+  .logo-en{
+    margin-top:3px!important;
+    font-size:9px!important;
+    letter-spacing:.10em!important;
+    max-width:190px!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
   }
 
-  .lang-select {
-    width: 62px !important;
-    min-height: 42px !important;
-    height: 42px !important;
-    padding: 7px 8px !important;
-    border-radius: 14px !important;
-    font-size: 13px !important;
+  .lang-select{
+    flex:0 0 62px!important;
+    width:62px!important;
+    height:42px!important;
+    min-height:42px!important;
+    padding:7px 8px!important;
+    border-radius:14px!important;
+    font-size:13px!important;
   }
 
   .top-header .hero,
   .top-header .side-steps,
-  .top-header .side-footer {
-    display: none !important;
+  .top-header .side-footer{
+    display:none!important;
   }
 
-  .main {
-    width: 100% !important;
-    min-width: 0 !important;
-    margin-top: 0 !important;
-    padding: 12px 12px 88px !important;
+  .main{
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:10px 10px 92px!important;
+    overflow-x:hidden!important;
   }
 
-  .notice {
-    margin: 0 0 10px !important;
-    padding: 11px 12px !important;
-    border-radius: 14px !important;
-    font-size: 13px !important;
+  .home-hero-card{
+    width:100%!important;
+    min-height:auto!important;
+    margin:0!important;
+    padding:16px!important;
+    border-radius:20px!important;
+    overflow:hidden!important;
+    box-shadow:0 14px 34px rgba(15,23,42,.15)!important;
   }
 
-  /* Account/Profile screen */
-  .account-landing {
-    min-height: auto !important;
-    border-radius: 20px !important;
-    padding: 14px 10px 18px !important;
-    overflow: hidden !important;
-    box-shadow: 0 10px 28px rgba(15,23,42,.08) !important;
+  .home-hero-card::after{
+    right:-92px!important;
+    bottom:-108px!important;
+    width:230px!important;
+    height:230px!important;
   }
 
-  .account-landing::before {
-    top: 58px !important;
-    height: 110px !important;
-    opacity: .30 !important;
+  .home-kicker{
+    max-width:100%!important;
+    padding:7px 10px!important;
+    gap:7px!important;
+    font-size:11px!important;
+    letter-spacing:.45px!important;
   }
 
-  .account-landing::after {
-    width: 82px !important;
-    opacity: .42 !important;
+  .home-kicker .icon{
+    width:18px!important;
+    height:18px!important;
   }
 
-  .account-brand {
-    margin: 0 0 16px !important;
-    gap: 10px !important;
+  .home-title{
+    max-width:100%!important;
+    margin:14px 0 8px!important;
+    font-size:21px!important;
+    line-height:1.2!important;
+    letter-spacing:-.35px!important;
+    overflow-wrap:anywhere!important;
+    word-break:break-word!important;
   }
 
-  .account-brand img {
-    width: 42px !important;
-    height: 42px !important;
-    border-radius: 13px !important;
+  .home-desc{
+    max-width:100%!important;
+    font-size:13px!important;
+    line-height:1.55!important;
+    font-weight:760!important;
+    overflow-wrap:anywhere!important;
+    word-break:break-word!important;
   }
 
-  .account-brand-title {
-    font-size: 20px !important;
-    line-height: 1.15 !important;
-    white-space: normal !important;
+  .home-actions{
+    grid-template-columns:1fr!important;
+    gap:9px!important;
+    margin-top:15px!important;
   }
 
-  .account-brand-sub {
-    font-size: 10px !important;
-    letter-spacing: .13em !important;
+  .home-actions .main-btn,
+  .home-actions .soft-btn{
+    min-height:46px!important;
   }
 
-  .account-panel {
-    width: 100% !important;
-    max-width: 360px !important;
-    margin: 0 auto !important;
-    padding: 16px 14px !important;
-    border-radius: 22px !important;
-    box-shadow: 0 12px 34px rgba(15,23,42,.12) !important;
+  .trust-row{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:8px!important;
+    margin:10px 0 12px!important;
   }
 
-  .account-welcome {
-    margin-bottom: 12px !important;
+  .trust-item{
+    min-width:0!important;
+    padding:10px 8px!important;
+    border-radius:16px!important;
+    box-shadow:0 9px 20px rgba(17,24,39,.12)!important;
   }
 
-  .account-welcome-ja {
-    font-size: 20px !important;
+  .trust-number{
+    font-size:19px!important;
+    line-height:1.08!important;
   }
 
-  .account-welcome-brand {
-    font-size: 24px !important;
+  .trust-label{
+    margin-top:5px!important;
+    font-size:10px!important;
+    line-height:1.25!important;
+    overflow-wrap:anywhere!important;
   }
 
-  .account-welcome-sub {
-    font-size: 11px !important;
-    line-height: 1.45 !important;
+  .philosophy-card,
+  .brand-gallery,
+  .company-info-grid,
+  .utility-grid,
+  .service-grid{
+    grid-template-columns:1fr!important;
   }
 
-  .account-mode {
-    gap: 7px !important;
-    margin: 10px 0 8px !important;
+  .philosophy-card{
+    margin-top:12px!important;
+    gap:12px!important;
   }
 
-  .account-mode button {
-    padding: 10px 8px !important;
-    border-radius: 12px !important;
-    font-size: 13px !important;
+  .philosophy-visual,
+  .brand-visual{
+    min-height:210px!important;
+    border-radius:20px!important;
+    overflow:hidden!important;
   }
 
-  .account-fields {
-    grid-template-columns: 1fr !important;
-    gap: 8px !important;
-    margin-top: 8px !important;
+  .poster-brand{
+    left:22px!important;
+    top:34px!important;
   }
 
-  input,
-  textarea {
-    min-height: 44px !important;
-    padding: 12px 12px 12px 40px !important;
-    border-radius: 14px !important;
-    font-size: 14px !important;
+  .poster-brand-logo{
+    width:42px!important;
+    height:42px!important;
+    margin-bottom:10px!important;
   }
 
-  .account-panel input {
-    min-height: 43px !important;
-    padding: 11px 12px !important;
-    border-radius: 12px !important;
+  .poster-brand-name{
+    font-size:24px!important;
   }
 
-  textarea {
-    min-height: 98px !important;
+  .poster-brand-line{
+    width:72px!important;
+    margin:8px 0 7px!important;
   }
 
-  .input-icon {
-    left: 12px !important;
-    width: 19px !important;
-    height: 19px !important;
+  .poster-slogan{
+    font-size:10px!important;
+    letter-spacing:.04em!important;
   }
 
-  .field {
-    margin-bottom: 12px !important;
+  .poster-slogan-sub{
+    max-width:240px!important;
+    font-size:7px!important;
+    line-height:1.25!important;
+    letter-spacing:.05em!important;
   }
 
-  .field label {
-    margin-bottom: 6px !important;
-    font-size: 13px !important;
+  .poster-company{
+    left:22px!important;
+    bottom:20px!important;
+    font-size:10px!important;
+  }
+
+  .poster-mountain{
+    right:22px!important;
+    top:32px!important;
+    width:105px!important;
+    height:64px!important;
+  }
+
+  .card,
+  .service-card,
+  .utility-card,
+  .company-info,
+  .request-card,
+  .success-box{
+    border-radius:18px!important;
+  }
+
+  .card{
+    margin-bottom:12px!important;
+    padding:16px!important;
   }
 
   .main-btn,
   .soft-btn,
-  .copy-btn {
-    min-height: 44px !important;
-    padding: 12px !important;
-    border-radius: 14px !important;
-    font-size: 14px !important;
+  .copy-btn{
+    min-height:44px!important;
+    padding:12px!important;
+    border-radius:14px!important;
+    font-size:14px!important;
   }
 
-  .account-panel .main-btn,
-  .account-panel .soft-btn {
-    border-radius: 12px !important;
+  .bottom-nav{
+    position:fixed!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    transform:none!important;
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    border-radius:18px 18px 0 0!important;
+    padding:5px 8px calc(5px + env(safe-area-inset-bottom))!important;
+    gap:6px!important;
+    background:rgba(18,19,18,.97)!important;
+    border-color:rgba(255,255,255,.08)!important;
+    box-shadow:0 -10px 30px rgba(0,0,0,.22)!important;
   }
 
-  .account-divider {
-    margin: 12px 0 !important;
+  .bottom-nav button{
+    min-width:0!important;
+    padding:8px 4px!important;
+    border-radius:14px!important;
+    font-size:11px!important;
+    gap:2px!important;
   }
 
-  .account-status {
-    font-size: 12px !important;
-  }
-
-  .emergency-card {
-    width: 100% !important;
-    max-width: 360px !important;
-    margin: 12px auto 0 !important;
-    padding: 12px 14px !important;
-    border-radius: 16px !important;
-  }
-
-  .emergency-icon {
-    width: 40px !important;
-    height: 40px !important;
-  }
-
-  .emergency-title {
-    font-size: 14px !important;
-  }
-
-  .emergency-sub {
-    font-size: 11px !important;
-  }
-
-  .profile-card {
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
-  }
-
-  .profile-head {
-    gap: 10px !important;
-    margin-bottom: 12px !important;
-  }
-
-  .profile-avatar {
-    width: 46px !important;
-    height: 46px !important;
-    border-radius: 15px !important;
-  }
-
-  .profile-name {
-    font-size: 17px !important;
-    line-height: 1.25 !important;
-    word-break: break-word !important;
-  }
-
-  .profile-sub {
-    font-size: 12px !important;
-    margin-top: 2px !important;
-  }
-
-  .profile-grid {
-    grid-template-columns: 1fr !important;
-    gap: 8px !important;
-    margin-bottom: 12px !important;
-  }
-
-  .profile-item {
-    min-height: auto !important;
-    padding: 10px 12px !important;
-    border-radius: 14px !important;
-  }
-
-  .profile-label {
-    font-size: 10.5px !important;
-    margin-bottom: 4px !important;
-  }
-
-  .profile-value {
-    font-size: 14px !important;
-    line-height: 1.35 !important;
-    word-break: break-word !important;
-  }
-
-  .secondary-row {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 8px !important;
-    margin-top: 10px !important;
-  }
-
-  /* Other pages compact */
-  .card {
-    margin-bottom: 12px !important;
-    padding: 16px !important;
-    border-radius: 20px !important;
-  }
-
-  .card-title {
-    margin-bottom: 14px !important;
-    gap: 8px !important;
-  }
-
-  .card-title-icon {
-    width: 34px !important;
-    height: 34px !important;
-    border-radius: 12px !important;
-  }
-
-  .card h2,
-  .card h3 {
-    font-size: 18px !important;
-  }
-
-  .home-hero-card {
-    min-height: auto !important;
-    padding: 18px !important;
-    border-radius: 22px !important;
-  }
-
-  .home-title {
-    font-size: 23px !important;
-    margin: 14px 0 8px !important;
-  }
-
-  .home-desc {
-    font-size: 13px !important;
-    line-height: 1.55 !important;
-  }
-
-  .home-actions {
-    gap: 9px !important;
-    margin-top: 16px !important;
-  }
-
-  .service-card,
-  .utility-card,
-  .company-info,
-  .request-card {
-    border-radius: 18px !important;
-    padding: 14px !important;
-  }
-
-  .trust-row {
-    gap: 8px !important;
-    margin: 12px 0 !important;
-  }
-
-  .trust-item {
-    padding: 11px 8px !important;
-    border-radius: 16px !important;
-  }
-
-  .trust-number {
-    font-size: 19px !important;
-  }
-
-  .trust-label {
-    font-size: 10px !important;
-  }
-
-  .preview-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px !important;
-  }
-
-  .preview-grid .preview-img,
-  .preview-grid .preview-video {
-    height: 92px !important;
-  }
-
-  .media-gallery {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px !important;
-  }
-
-  .media-gallery img,
-  .media-gallery video {
-    height: 110px !important;
-    border-radius: 14px !important;
-  }
-
-  .status-timeline {
-    gap: 6px !important;
-  }
-
-  .step {
-    padding: 8px 4px !important;
-    border-radius: 12px !important;
-    font-size: 10.5px !important;
-  }
-
-  .bottom-nav {
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    transform: none !important;
-    width: 100% !important;
-    max-width: 480px !important;
-    margin: 0 auto !important;
-    border-radius: 18px 18px 0 0 !important;
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom)) !important;
-    gap: 6px !important;
-    background: rgba(255,255,255,.96) !important;
-  }
-
-  .bottom-nav button {
-    min-width: 0 !important;
-    padding: 8px 4px !important;
-    border-radius: 14px !important;
-    font-size: 11px !important;
-    gap: 2px !important;
-  }
-
-  .bottom-nav .icon {
-    width: 20px !important;
-    height: 20px !important;
+  .bottom-nav .icon{
+    width:20px!important;
+    height:20px!important;
   }
 }
 
-@media (max-width: 420px) {
-  .app {
-    max-width: 100% !important;
-  }
-
-  .main {
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-  }
-
-  .top-header {
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-  }
-
-  .logo-jp {
-    font-size: 13px !important;
-    max-width: 150px !important;
-  }
-
-  .logo-en {
-    font-size: 8.5px !important;
-  }
-
-  .account-landing {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-  }
-
-  .account-panel {
-    padding: 14px 12px !important;
-    max-width: 340px !important;
-  }
-
-  .account-brand-title {
-    font-size: 18px !important;
-  }
-
-  .profile-name {
-    font-size: 16px !important;
-  }
-
-  .profile-value {
-    font-size: 13.5px !important;
-  }
-
-  .secondary-row {
-    grid-template-columns: 1fr !important;
-  }
-
-  .bottom-nav button span:not(.icon) {
-    font-size: 10px !important;
-  }
-}
-</style>
-
-
-
-<!-- ===== YAMADEN MOBILE RESPONSIVE FIX v12 ===== -->
-<style id="yamaden-mobile-responsive-fix-v12">
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  max-width: 100%;
-  min-height: 100%;
-  overflow-x: hidden;
-  background: #f6f8fc;
-}
-body {
-  -webkit-text-size-adjust: 100%;
-  touch-action: manipulation;
-}
-.app, .main, .top-header, .card, .home-hero-card, .trust-row, .philosophy-card, .philosophy-visual, .brand-visual, .account-landing, .account-panel, .bottom-nav {
-  max-width: 100%;
-}
-img, video, svg { max-width: 100%; }
-.main { min-width: 0; overflow-x: hidden; }
-.home-title, .home-desc, .section-title, .section-text, .trust-label, .request-desc, .profile-value, .company-info-value, .service-detail-text {
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-@media (max-width: 860px) {
-  html, body {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-    background: #f6f8fc !important;
-  }
-  .app {
-    width: 100% !important;
-    max-width: none !important;
-    min-height: 100vh !important;
-    min-height: 100dvh !important;
-    margin: 0 !important;
-    display: block !important;
-    overflow-x: hidden !important;
-    background: #f6f8fc !important;
-    box-shadow: none !important;
-  }
-  .top-header {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 90 !important;
-    height: auto !important;
-    min-height: 68px !important;
-    padding: 8px 16px !important;
-    border-radius: 0 !important;
-    box-shadow: 0 8px 22px rgba(0,0,0,.18) !important;
-    background: linear-gradient(135deg,#0b0f14,#171917) !important;
-  }
-  .top-row { min-height: 52px !important; gap: 10px !important; }
-  .logo-box { flex: 1 1 auto !important; min-width: 0 !important; gap: 10px !important; }
-  .logo-box img { width: 40px !important; height: 40px !important; border-radius: 13px !important; }
-  .logo-text { min-width: 0 !important; }
-  .logo-jp {
-    font-size: 15px !important;
-    line-height: 1.12 !important;
-    max-width: 190px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-  }
-  .logo-en {
-    margin-top: 3px !important;
-    font-size: 9px !important;
-    letter-spacing: .10em !important;
-    max-width: 190px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-  }
-  .lang-select {
-    flex: 0 0 62px !important;
-    width: 62px !important;
-    min-height: 42px !important;
-    height: 42px !important;
-    padding: 7px 8px !important;
-    border-radius: 14px !important;
-    font-size: 13px !important;
-  }
-  .top-header .hero, .top-header .side-steps, .top-header .side-footer { display: none !important; }
-  .main {
-    width: 100% !important;
-    min-width: 0 !important;
-    margin-top: 0 !important;
-    padding: 10px 10px 92px !important;
-    overflow-x: hidden !important;
-  }
-  .home-hero-card {
-    width: 100% !important;
-    min-height: auto !important;
-    margin: 0 !important;
-    padding: 16px !important;
-    border-radius: 20px !important;
-    overflow: hidden !important;
-    box-shadow: 0 14px 34px rgba(15,23,42,.15) !important;
-  }
-  .home-hero-card::after {
-    right: -92px !important;
-    bottom: -108px !important;
-    width: 230px !important;
-    height: 230px !important;
-  }
-  .home-kicker {
-    max-width: 100% !important;
-    padding: 7px 10px !important;
-    gap: 7px !important;
-    font-size: 11px !important;
-    letter-spacing: .45px !important;
-  }
-  .home-kicker .icon { width: 18px !important; height: 18px !important; }
-  .home-title {
-    max-width: 100% !important;
-    margin: 14px 0 8px !important;
-    font-size: 22px !important;
-    line-height: 1.18 !important;
-    letter-spacing: -0.35px !important;
-    overflow-wrap: anywhere !important;
-  }
-  .home-desc {
-    max-width: 100% !important;
-    font-size: 13px !important;
-    line-height: 1.55 !important;
-    font-weight: 760 !important;
-    overflow-wrap: anywhere !important;
-  }
-  .home-actions { grid-template-columns: 1fr !important; gap: 9px !important; margin-top: 15px !important; }
-  .home-actions .main-btn, .home-actions .soft-btn { min-height: 46px !important; }
-  .trust-row {
-    width: 100% !important;
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 8px !important;
-    margin: 10px 0 12px !important;
-  }
-  .trust-item {
-    min-width: 0 !important;
-    padding: 11px 8px !important;
-    border-radius: 16px !important;
-    box-shadow: 0 9px 20px rgba(17,24,39,.12) !important;
-  }
-  .trust-number { font-size: 20px !important; line-height: 1.08 !important; }
-  .trust-label { margin-top: 5px !important; font-size: 10.5px !important; line-height: 1.25 !important; }
-  .philosophy-card, .brand-gallery, .company-info-grid, .utility-grid, .service-grid { grid-template-columns: 1fr !important; }
-  .philosophy-card { margin-top: 12px !important; gap: 12px !important; }
-  .philosophy-visual, .brand-visual {
-    min-height: 220px !important;
-    border-radius: 22px !important;
-    overflow: hidden !important;
-  }
-  .poster-brand { left: 22px !important; top: 34px !important; }
-  .poster-brand-logo { width: 44px !important; height: 44px !important; margin-bottom: 11px !important; }
-  .poster-brand-name { font-size: 25px !important; }
-  .poster-brand-line { width: 78px !important; margin: 9px 0 8px !important; }
-  .poster-slogan { font-size: 11px !important; letter-spacing: .05em !important; }
-  .poster-slogan-sub {
-    max-width: 260px !important;
-    font-size: 7.5px !important;
-    line-height: 1.25 !important;
-    letter-spacing: .06em !important;
-  }
-  .poster-company { left: 22px !important; bottom: 22px !important; font-size: 10.5px !important; }
-  .poster-mountain { right: 22px !important; top: 32px !important; width: 110px !important; height: 66px !important; }
-  .card, .service-card, .utility-card, .company-info, .request-card, .success-box { border-radius: 18px !important; }
-  .card { margin-bottom: 12px !important; padding: 16px !important; }
-  .main-btn, .soft-btn, .copy-btn {
-    min-height: 44px !important;
-    padding: 12px !important;
-    border-radius: 14px !important;
-    font-size: 14px !important;
-  }
-  .bottom-nav {
-    position: fixed !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    transform: none !important;
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    border-radius: 18px 18px 0 0 !important;
-    padding: 5px 8px calc(5px + env(safe-area-inset-bottom)) !important;
-    gap: 6px !important;
-    background: rgba(18,19,18,.97) !important;
-    border-color: rgba(255,255,255,.08) !important;
-    box-shadow: 0 -10px 30px rgba(0,0,0,.22) !important;
-  }
-  .bottom-nav button {
-    min-width: 0 !important;
-    padding: 8px 4px !important;
-    border-radius: 14px !important;
-    font-size: 11px !important;
-    gap: 2px !important;
-  }
-  .bottom-nav .icon { width: 20px !important; height: 20px !important; }
-}
-@media (max-width: 420px) {
-  .top-header { padding-left: 12px !important; padding-right: 12px !important; }
-  .main { padding-left: 8px !important; padding-right: 8px !important; }
-  .logo-box img { width: 38px !important; height: 38px !important; }
-  .logo-jp { font-size: 13.5px !important; max-width: 150px !important; }
-  .logo-en { font-size: 8.5px !important; max-width: 150px !important; }
-  .home-hero-card { padding: 14px !important; border-radius: 18px !important; }
-  .home-title { font-size: 20.5px !important; line-height: 1.18 !important; }
-  .home-desc { font-size: 12.5px !important; line-height: 1.52 !important; }
-  .home-kicker { font-size: 10px !important; padding: 6px 9px !important; }
-  .trust-row { gap: 6px !important; }
-  .trust-item { padding: 10px 7px !important; border-radius: 14px !important; }
-  .trust-number { font-size: 19px !important; }
-  .trust-label { font-size: 9.5px !important; }
-  .philosophy-visual, .brand-visual { min-height: 205px !important; border-radius: 20px !important; }
-  .poster-brand { left: 20px !important; top: 30px !important; }
-  .poster-brand-logo { width: 40px !important; height: 40px !important; }
-  .poster-brand-name { font-size: 23px !important; }
-  .poster-slogan { font-size: 10px !important; }
-  .poster-slogan-sub { max-width: 230px !important; font-size: 7px !important; }
-  .poster-company { left: 20px !important; bottom: 20px !important; font-size: 10px !important; }
+@media (max-width:420px){
+  .main{padding-left:8px!important;padding-right:8px!important;}
+  .top-header{padding-left:10px!important;padding-right:10px!important;}
+  .logo-jp{font-size:14px!important;max-width:150px!important;}
+  .logo-en{font-size:8.5px!important;max-width:150px!important;}
+  .home-title{font-size:20px!important;}
+  .home-desc{font-size:12.5px!important;}
+  .trust-row{gap:7px!important;}
+  .trust-item{padding:9px 7px!important;}
+  .trust-number{font-size:18px!important;}
+  .trust-label{font-size:9.5px!important;}
+  .philosophy-visual,.brand-visual{min-height:200px!important;}
 }
 </style>
 
