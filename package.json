@@ -1,24 +1,26 @@
 {
-  "name": "electric-app-server",
-  "version": "1.0.0",
-  "description": "Electrical company support app backend",
+  "name": "yamaden-support-system",
+  "version": "2.0.0",
+  "description": "YAMADEN Customer Support System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"No test specified\""
+    "dev": "nodemon server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.10.0",
     "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.5.0",
+    "mongoose": "^8.9.5",
     "multer": "^2.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
   }
 }
