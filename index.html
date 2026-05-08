@@ -4156,27 +4156,29 @@ html,body{
   max-width:100%!important;
   min-width:0!important;
   overflow-x:hidden!important;
-  background:#111!important;
+  -webkit-text-size-adjust:100%!important;
 }
 :root{
   --yamaden-device-top-safe:max(54px,env(safe-area-inset-top));
   --yamaden-device-bottom-safe:env(safe-area-inset-bottom);
   --yamaden-frame-width:min(var(--yamaden-stable-width,100vw),480px);
+  --yamaden-app-header:calc(64px + env(safe-area-inset-top));
+  --yamaden-app-nav:calc(72px + env(safe-area-inset-bottom));
 }
-.app,
-.app *{box-sizing:border-box!important}
-.app{
-  width:100%!important;
-  max-width:480px!important;
-  min-width:0!important;
-  margin:0 auto!important;
-  overflow:hidden!important;
-}
+.app,.app *,.app *::before,.app *::after{box-sizing:border-box!important}
+img,video,canvas,svg{max-width:100%!important}
+.app{min-width:0!important;overflow-x:hidden!important}
+
 body.yamaden-app-active{
   position:fixed!important;
   inset:0!important;
   width:100%!important;
   height:100svh!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  justify-content:center!important;
+  align-items:stretch!important;
   overflow:hidden!important;
   background:#111!important;
 }
@@ -4188,22 +4190,28 @@ body.yamaden-app-active{
   max-height:100svh!important;
   margin:0 auto!important;
   display:grid!important;
-  grid-template-rows:calc(64px + env(safe-area-inset-top)) minmax(0,1fr) calc(70px + env(safe-area-inset-bottom))!important;
-  background:#f5f7fb!important;
+  grid-template-rows:var(--yamaden-app-header) minmax(0,1fr) var(--yamaden-app-nav)!important;
+  background:#f6f8fc!important;
   box-shadow:none!important;
   overflow:hidden!important;
 }
 .app.auth-app-mode .top-header{
   grid-row:1!important;
   position:relative!important;
+  top:auto!important;
+  left:auto!important;
+  right:auto!important;
   width:100%!important;
   max-width:100%!important;
-  height:calc(64px + env(safe-area-inset-top))!important;
-  min-height:calc(64px + env(safe-area-inset-top))!important;
+  min-width:0!important;
+  height:var(--yamaden-app-header)!important;
+  min-height:var(--yamaden-app-header)!important;
+  max-height:var(--yamaden-app-header)!important;
   margin:0!important;
   padding:calc(8px + env(safe-area-inset-top)) 14px 8px!important;
   border-radius:0!important;
-  background:#171917!important;
+  background:linear-gradient(135deg,#0b0f14,#171917)!important;
+  box-shadow:none!important;
   overflow:hidden!important;
   z-index:30!important;
 }
@@ -4213,38 +4221,19 @@ body.yamaden-app-active{
   min-width:0!important;
   height:48px!important;
   display:grid!important;
-  grid-template-columns:minmax(0,1fr) 56px!important;
+  grid-template-columns:minmax(0,1fr) 58px!important;
   gap:10px!important;
   align-items:center!important;
 }
-.app.auth-app-mode .logo-box{min-width:0!important;overflow:hidden!important}
-.app.auth-app-mode .logo-box img{
-  width:36px!important;
-  height:36px!important;
-  min-width:36px!important;
-  border-radius:12px!important;
-}
+.app.auth-app-mode .logo-box{min-width:0!important;width:100%!important;overflow:hidden!important;gap:9px!important}
+.app.auth-app-mode .logo-box img{width:38px!important;height:38px!important;min-width:38px!important;border-radius:12px!important}
 .app.auth-app-mode .logo-text{min-width:0!important;overflow:hidden!important}
-.app.auth-app-mode .logo-jp,
-.app.auth-app-mode .logo-en{
-  display:block!important;
-  white-space:nowrap!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-}
-.app.auth-app-mode .logo-jp{font-size:13px!important;line-height:1.15!important}
-.app.auth-app-mode .logo-en{font-size:9px!important;line-height:1.15!important;letter-spacing:.06em!important}
-.app.auth-app-mode .lang-select{
-  width:56px!important;
-  min-width:56px!important;
-  max-width:56px!important;
-  height:38px!important;
-  padding:0!important;
-  border-radius:13px!important;
-  text-align:center!important;
-  text-align-last:center!important;
-}
+.app.auth-app-mode .logo-jp,.app.auth-app-mode .logo-en{display:block!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.app.auth-app-mode .logo-jp{font-size:14px!important;line-height:1.12!important;font-weight:950!important}
+.app.auth-app-mode .logo-en{font-size:9px!important;line-height:1.15!important;letter-spacing:.08em!important}
+.app.auth-app-mode .lang-select{width:58px!important;min-width:58px!important;max-width:58px!important;height:40px!important;min-height:40px!important;padding:0!important;border-radius:13px!important;text-align:center!important;text-align-last:center!important}
 .app.auth-app-mode .app-logout-btn{display:none!important}
+
 .app.auth-app-mode .main{
   grid-row:2!important;
   width:100%!important;
@@ -4254,7 +4243,7 @@ body.yamaden-app-active{
   min-height:0!important;
   margin:0!important;
   padding:0!important;
-  background:#f5f7fb!important;
+  background:#f6f8fc!important;
   overflow-y:auto!important;
   overflow-x:hidden!important;
   -webkit-overflow-scrolling:touch!important;
@@ -4266,42 +4255,47 @@ body.yamaden-app-active{
   min-width:0!important;
   margin:0!important;
   padding:12px 12px 18px!important;
+  background:#f6f8fc!important;
   overflow-x:hidden!important;
-  background:#f5f7fb!important;
 }
-.app.auth-app-mode section,
-.app.auth-app-mode .card,
-.app.auth-app-mode .home-hero-card,
-.app.auth-app-mode .trust-row,
-.app.auth-app-mode .brand-visual,
-.app.auth-app-mode .company-card,
-.app.auth-app-mode .utility-card,
-.app.auth-app-mode .service-detail,
-.app.auth-app-mode .settings-section-card,
-.app.auth-app-mode .profile-card,
-.app.auth-app-mode .account-panel,
-.app.auth-app-mode .account-card,
-.app.auth-app-mode .success-box,
-.app.auth-app-mode .upload-box{
+.app.auth-app-mode section,.app.auth-app-mode .card,.app.auth-app-mode .home-hero-card,.app.auth-app-mode .trust-row,.app.auth-app-mode .philosophy-card,.app.auth-app-mode .brand-gallery,.app.auth-app-mode .brand-visual,.app.auth-app-mode .philosophy-visual,.app.auth-app-mode .company-card,.app.auth-app-mode .utility-card,.app.auth-app-mode .service-detail,.app.auth-app-mode .settings-section-card,.app.auth-app-mode .profile-card,.app.auth-app-mode .account-panel,.app.auth-app-mode .account-card,.app.auth-app-mode .success-box,.app.auth-app-mode .upload-box{
   width:100%!important;
   max-width:100%!important;
   min-width:0!important;
   margin-left:0!important;
   margin-right:0!important;
-  overflow:hidden!important;
 }
-.app.auth-app-mode img,
-.app.auth-app-mode video,
-.app.auth-app-mode canvas{
-  max-width:100%!important;
-}
-.app.auth-app-mode .settings-row{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
-  gap:10px!important;
-  align-items:center!important;
-}
-.app.auth-app-mode .settings-row>*{min-width:0!important}
+.app.auth-app-mode .home-title,.app.auth-app-mode .home-desc,.app.auth-app-mode .section-title,.app.auth-app-mode .section-text,.app.auth-app-mode .service-desc,.app.auth-app-mode .utility-text,.app.auth-app-mode .company-info-value,.app.auth-app-mode .profile-value,.app.auth-app-mode p,.app.auth-app-mode span,.app.auth-app-mode div{overflow-wrap:anywhere}
+
+/* Preserve the richer YAMADEN look on mobile while keeping it inside the frame. */
+.app.auth-app-mode .home-hero-card{min-height:238px!important;padding:20px!important;border-radius:24px!important;overflow:hidden!important;box-shadow:0 18px 42px rgba(15,23,42,.16)!important}
+.app.auth-app-mode .home-title{font-size:clamp(24px,6.4vw,28px)!important;line-height:1.14!important;margin:16px 0 10px!important;letter-spacing:-.45px!important;word-break:normal!important}
+.app.auth-app-mode .home-desc{font-size:13.5px!important;line-height:1.58!important;word-break:normal!important}
+.app.auth-app-mode .home-actions{grid-template-columns:1fr!important;gap:10px!important;margin-top:18px!important}
+.app.auth-app-mode .home-actions .main-btn,.app.auth-app-mode .home-actions .soft-btn{min-height:48px!important;border-radius:15px!important}
+.app.auth-app-mode .trust-row{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;margin:12px 0 14px!important;overflow:hidden!important}
+.app.auth-app-mode .trust-item{min-width:0!important;padding:12px 9px!important;border-radius:17px!important;overflow:hidden!important}
+.app.auth-app-mode .trust-number{font-size:21px!important;line-height:1.05!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.app.auth-app-mode .trust-label{font-size:10.5px!important;line-height:1.25!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.app.auth-app-mode .philosophy-card,.app.auth-app-mode .brand-gallery,.app.auth-app-mode .service-grid,.app.auth-app-mode .utility-grid,.app.auth-app-mode .company-info-grid{grid-template-columns:1fr!important;gap:12px!important}
+.app.auth-app-mode .philosophy-visual,.app.auth-app-mode .brand-visual{min-height:238px!important;border-radius:22px!important;overflow:hidden!important}
+.app.auth-app-mode .poster-brand{left:22px!important;top:34px!important}
+.app.auth-app-mode .poster-brand-logo{width:46px!important;height:46px!important;margin-bottom:10px!important}
+.app.auth-app-mode .poster-brand-name{font-size:26px!important;line-height:1!important}
+.app.auth-app-mode .poster-brand-line{width:78px!important;margin:9px 0 8px!important}
+.app.auth-app-mode .poster-slogan{font-size:11px!important;letter-spacing:.05em!important}
+.app.auth-app-mode .poster-slogan-sub{font-size:7.5px!important;max-width:260px!important}
+.app.auth-app-mode .poster-company{left:22px!important;bottom:22px!important;font-size:10.5px!important}
+.app.auth-app-mode .poster-mountain{right:24px!important;top:32px!important;width:118px!important;height:70px!important}
+.app.auth-app-mode .card{padding:18px!important;border-radius:22px!important;margin-bottom:14px!important;overflow:hidden!important}
+.app.auth-app-mode .service-card,.app.auth-app-mode .utility-card,.app.auth-app-mode .company-info,.app.auth-app-mode .request-card{border-radius:18px!important;overflow:hidden!important}
+.app.auth-app-mode .visual-label{max-width:100%!important;word-break:normal!important}
+.app.auth-app-mode .brand-visual .visual-label{right:32%!important;font-size:17px!important;line-height:1.35!important;bottom:90px!important}
+.app.auth-app-mode .service-rail{right:34%!important;gap:8px!important}
+.app.auth-app-mode .media-gallery,.app.auth-app-mode .preview-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+.app.auth-app-mode .media-gallery img,.app.auth-app-mode .media-gallery video{height:112px!important;object-fit:cover!important}
+.app.auth-app-mode .preview-grid .preview-img,.app.auth-app-mode .preview-grid .preview-video{height:96px!important;object-fit:cover!important}
+
 .app.auth-app-mode .bottom-nav{
   grid-row:3!important;
   position:relative!important;
@@ -4311,203 +4305,45 @@ body.yamaden-app-active{
   transform:none!important;
   width:100%!important;
   max-width:100%!important;
-  height:calc(70px + env(safe-area-inset-bottom))!important;
-  min-height:calc(70px + env(safe-area-inset-bottom))!important;
+  min-width:0!important;
+  height:var(--yamaden-app-nav)!important;
+  min-height:var(--yamaden-app-nav)!important;
   margin:0!important;
   padding:8px 18px calc(10px + env(safe-area-inset-bottom))!important;
   border-radius:0!important;
   background:#171917!important;
+  border:0!important;
   display:flex!important;
   align-items:center!important;
   justify-content:space-between!important;
   overflow:hidden!important;
   z-index:30!important;
 }
-.app.auth-app-mode .bottom-nav button{
-  flex:1 1 0!important;
-  width:auto!important;
-  max-width:64px!important;
-  min-width:0!important;
-  height:48px!important;
-  border-radius:16px!important;
-  padding:0!important;
-  margin:0!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-}
+.app.auth-app-mode .bottom-nav button{flex:1 1 0!important;width:auto!important;max-width:64px!important;min-width:0!important;height:50px!important;border-radius:16px!important;padding:0!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important}
 .app.auth-app-mode .bottom-nav button span:not(.icon){display:none!important}
-.app.auth-app-mode .bottom-nav button .icon,
-.app.auth-app-mode .bottom-nav button .icon svg{
-  width:24px!important;
-  height:24px!important;
-}
-.app.auth-app-mode .bottom-nav button.active{
-  background:rgba(255,90,31,.16)!important;
-  color:#ff5a1f!important;
-  box-shadow:inset 0 0 0 1px rgba(255,90,31,.16)!important;
-}
-html:has(.app.auth-login-mode),
-body.auth-login-body{
-  height:100svh!important;
-  min-height:100svh!important;
-  overflow:hidden!important;
-  background:#f8fbff!important;
-}
-.app.auth-login-mode{
-  width:var(--yamaden-frame-width)!important;
-  max-width:480px!important;
-  min-width:0!important;
-  height:100svh!important;
-  max-height:100svh!important;
-  margin:0 auto!important;
-  display:block!important;
-  background:#f8fbff!important;
-  box-shadow:none!important;
-  overflow:hidden!important;
-}
-.app.auth-login-mode .top-header,
-.app.auth-login-mode .bottom-nav{display:none!important}
-.app.auth-login-mode .main,
-.app.auth-login-mode .container,
-.app.auth-login-mode #accountSection{
-  width:100%!important;
-  max-width:100%!important;
-  height:100svh!important;
-  min-height:100svh!important;
-  margin:0!important;
-  padding:0!important;
-  overflow:hidden!important;
-}
-.app.auth-login-mode .account-landing{
-  height:100svh!important;
-  min-height:100svh!important;
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:center!important;
-  justify-content:flex-start!important;
-  padding:calc(var(--yamaden-device-top-safe) + 54px) 16px calc(18px + var(--yamaden-device-bottom-safe))!important;
-  overflow:hidden!important;
-  background:linear-gradient(135deg,#f8fbff 0%,#eef6ff 52%,#dbeafe 100%)!important;
-}
-.app.auth-login-mode .account-brand{
-  position:relative!important;
-  z-index:2!important;
-  width:min(330px,100%)!important;
-  margin:0 auto 12px!important;
-  display:flex!important;
-  align-items:center!important;
-  gap:12px!important;
-  flex:0 0 auto!important;
-}
-.app.auth-login-mode .account-brand img{
-  width:46px!important;
-  height:46px!important;
-  border-radius:15px!important;
-}
-.app.auth-login-mode .account-panel{
-  z-index:2!important;
-  width:min(330px,100%)!important;
-  margin:0 auto!important;
-  flex:0 0 auto!important;
-  transform:none!important;
-}
-.app.auth-login-mode .account-card,
-.app.auth-login-mode .profile-card{
-  max-height:none!important;
-  overflow:hidden!important;
-  border-radius:24px!important;
-  background:rgba(255,255,255,.96)!important;
-  box-shadow:0 18px 50px rgba(15,23,42,.14)!important;
-  border:1px solid rgba(255,255,255,.82)!important;
-  padding:16px!important;
-}
-.app.auth-login-mode .account-mode{
-  height:44px!important;
-  margin:10px 0!important;
-  padding:4px!important;
-  border-radius:18px!important;
-}
-.app.auth-login-mode .account-mode button{
-  height:36px!important;
-  border-radius:14px!important;
-  font-size:12px!important;
-  line-height:1.1!important;
-}
+.app.auth-app-mode .bottom-nav button .icon,.app.auth-app-mode .bottom-nav button .icon svg{width:24px!important;height:24px!important}
+.app.auth-app-mode .bottom-nav button.active{background:rgba(255,90,31,.16)!important;color:#ff5a1f!important;box-shadow:inset 0 0 0 1px rgba(255,90,31,.16)!important}
+
+html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-height:100svh!important;overflow:hidden!important;background:#f8fbff!important}
+.app.auth-login-mode{width:var(--yamaden-frame-width)!important;max-width:480px!important;min-width:0!important;height:100svh!important;max-height:100svh!important;margin:0 auto!important;display:block!important;background:#f8fbff!important;box-shadow:none!important;overflow:hidden!important}
+.app.auth-login-mode .top-header,.app.auth-login-mode .bottom-nav{display:none!important}
+.app.auth-login-mode .main,.app.auth-login-mode .container,.app.auth-login-mode #accountSection{width:100%!important;max-width:100%!important;height:100svh!important;min-height:100svh!important;margin:0!important;padding:0!important;overflow:hidden!important}
+.app.auth-login-mode .account-landing{height:100svh!important;min-height:100svh!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;padding:calc(var(--yamaden-device-top-safe) + 54px) 16px calc(18px + var(--yamaden-device-bottom-safe))!important;overflow:hidden!important;background:linear-gradient(135deg,#f8fbff 0%,#eef6ff 52%,#dbeafe 100%)!important}
+.app.auth-login-mode .account-brand{position:relative!important;z-index:2!important;width:min(330px,100%)!important;margin:0 auto 12px!important;display:flex!important;align-items:center!important;gap:12px!important;flex:0 0 auto!important}
+.app.auth-login-mode .account-brand img{width:46px!important;height:46px!important;border-radius:15px!important}
+.app.auth-login-mode .account-panel{z-index:2!important;width:min(330px,100%)!important;margin:0 auto!important;flex:0 0 auto!important;transform:none!important}
+.app.auth-login-mode .account-card,.app.auth-login-mode .profile-card{max-height:none!important;overflow:hidden!important;border-radius:24px!important;background:rgba(255,255,255,.96)!important;box-shadow:0 18px 50px rgba(15,23,42,.14)!important;border:1px solid rgba(255,255,255,.82)!important;padding:16px!important}
+.app.auth-login-mode .account-mode{height:44px!important;margin:10px 0!important;padding:4px!important;border-radius:18px!important}
+.app.auth-login-mode .account-mode button{height:36px!important;border-radius:14px!important;font-size:12px!important;line-height:1.1!important}
 .app.auth-login-mode .account-fields{gap:8px!important;margin-top:0!important}
-.app.auth-login-mode .account-fields input{
-  height:46px!important;
-  min-height:46px!important;
-  border-radius:13px!important;
-  text-align:center!important;
-  font-size:14px!important;
-  font-weight:850!important;
-  padding:0 14px!important;
-}
-.app.auth-login-mode .account-card .main-btn{
-  height:50px!important;
-  min-height:50px!important;
-  border-radius:14px!important;
-  margin-top:9px!important;
-  font-size:16px!important;
-}
-.app.auth-login-mode .auth-required-note{
-  margin-top:9px!important;
-  padding:9px 10px!important;
-  border-radius:14px!important;
-  font-size:11px!important;
-  line-height:1.35!important;
-  text-align:center!important;
-}
-.auth-language-switch{display:none!important}
-.app.auth-login-mode .account-brand .auth-language-switch{
-  display:block!important;
-  position:static!important;
-  margin-left:auto!important;
-  z-index:3!important;
-  flex:0 0 auto!important;
-}
-.auth-login-body>.auth-language-switch{display:none!important}
-.auth-language-select{
-  height:38px!important;
-  min-width:64px!important;
-  border-radius:14px!important;
-  border:1px solid rgba(15,23,42,.14)!important;
-  background:rgba(255,255,255,.96)!important;
-  color:#0f172a!important;
-  font-size:13px!important;
-  font-weight:950!important;
-  text-align:center!important;
-  text-align-last:center!important;
-  padding:0 8px!important;
-  box-shadow:0 10px 24px rgba(15,23,42,.14)!important;
-}
-.toast{
-  top:calc(var(--yamaden-device-top-safe) + 8px)!important;
-  max-width:calc(100% - 28px)!important;
-  z-index:100000!important;
-}
-@media(max-height:620px){
-  .app.auth-login-mode .account-landing{
-    padding-top:calc(var(--yamaden-device-top-safe) + 42px)!important;
-    padding-bottom:calc(14px + var(--yamaden-device-bottom-safe))!important;
-  }
-  .app.auth-login-mode .account-brand{margin-bottom:8px!important}
-  .app.auth-login-mode .account-brand img{width:42px!important;height:42px!important}
-  .app.auth-login-mode .account-card,
-  .app.auth-login-mode .profile-card{padding:13px!important}
-  .app.auth-login-mode .account-welcome{margin-bottom:7px!important}
-  .app.auth-login-mode .account-mode{margin:7px 0!important}
-  .app.auth-login-mode .account-fields input{height:42px!important;min-height:42px!important}
-  .app.auth-login-mode .account-card .main-btn{height:46px!important;min-height:46px!important}
-}
-@media(max-width:380px){
-  .app.auth-app-mode .container{padding-left:10px!important;padding-right:10px!important}
-  .app.auth-app-mode .bottom-nav{padding-left:12px!important;padding-right:12px!important}
-  .app.auth-login-mode .account-landing{padding-left:14px!important;padding-right:14px!important}
-  .app.auth-login-mode .account-panel,
-  .app.auth-login-mode .account-brand{width:min(320px,100%)!important}
-}
+.app.auth-login-mode .account-fields input{height:46px!important;min-height:46px!important;border-radius:13px!important;text-align:center!important;font-size:14px!important;font-weight:850!important;padding:0 14px!important}
+.app.auth-login-mode .account-card .main-btn{height:50px!important;min-height:50px!important;border-radius:14px!important;margin-top:9px!important;font-size:16px!important}
+.app.auth-login-mode .auth-required-note{margin-top:9px!important;padding:9px 10px!important;border-radius:14px!important;font-size:11px!important;line-height:1.35!important;text-align:center!important}
+.auth-language-switch{display:none!important}.app.auth-login-mode .account-brand .auth-language-switch{display:block!important;position:static!important;margin-left:auto!important;z-index:3!important;flex:0 0 auto!important}.auth-login-body>.auth-language-switch{display:none!important}
+.auth-language-select{height:38px!important;min-width:64px!important;border-radius:14px!important;border:1px solid rgba(15,23,42,.14)!important;background:rgba(255,255,255,.96)!important;color:#0f172a!important;font-size:13px!important;font-weight:950!important;text-align:center!important;text-align-last:center!important;padding:0 8px!important;box-shadow:0 10px 24px rgba(15,23,42,.14)!important}
+.toast{top:calc(var(--yamaden-device-top-safe) + 8px)!important;max-width:calc(100% - 28px)!important;z-index:100000!important}
+@media(max-height:620px){.app.auth-login-mode .account-landing{padding-top:calc(var(--yamaden-device-top-safe) + 42px)!important;padding-bottom:calc(14px + var(--yamaden-device-bottom-safe))!important}.app.auth-login-mode .account-brand{margin-bottom:8px!important}.app.auth-login-mode .account-brand img{width:42px!important;height:42px!important}.app.auth-login-mode .account-card,.app.auth-login-mode .profile-card{padding:13px!important}.app.auth-login-mode .account-welcome{margin-bottom:7px!important}.app.auth-login-mode .account-mode{margin:7px 0!important}.app.auth-login-mode .account-fields input{height:42px!important;min-height:42px!important}.app.auth-login-mode .account-card .main-btn{height:46px!important;min-height:46px!important}}
+@media(max-width:380px){.app.auth-app-mode .container{padding-left:10px!important;padding-right:10px!important}.app.auth-app-mode .bottom-nav{padding-left:12px!important;padding-right:12px!important}.app.auth-app-mode .home-title{font-size:23px!important}.app.auth-app-mode .trust-label{font-size:9.5px!important}.app.auth-login-mode .account-landing{padding-left:14px!important;padding-right:14px!important}.app.auth-login-mode .account-panel,.app.auth-login-mode .account-brand{width:min(320px,100%)!important}}
 </style>
 <script id="yamaden-customer-mobile-layout-v39-script">
 (function(){
