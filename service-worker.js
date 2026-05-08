@@ -1,4 +1,4 @@
-const CACHE_NAME = "yamaden-support-auth-fullscreen-v1";
+const CACHE_NAME = "yamaden-support-original-ui-final-v1";
 
 const APP_SHELL = [
   "/manifest.json",
@@ -10,7 +10,6 @@ const API_PATHS = ["/admin", "/user", "/request", "/requests"];
 
 self.addEventListener("install", event => {
   self.skipWaiting();
-
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL))
   );
@@ -26,7 +25,6 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   const request = event.request;
-
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
@@ -40,7 +38,6 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // HTML luôn lấy bản mới, không lấy cache cũ
   if (
     request.mode === "navigate" ||
     url.pathname === "/" ||
@@ -52,7 +49,6 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // Asset như icon, manifest thì cache được
   event.respondWith(
     caches.match(request).then(cached => {
       return cached || fetch(request).then(response => {
