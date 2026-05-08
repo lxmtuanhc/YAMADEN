@@ -1945,5 +1945,188 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
 })();
 </script>
+<style id="yamaden-final-polish-v2">
+@media (max-width: 860px) {
+  .app:not(.auth-login-mode) {
+    grid-template-rows: calc(56px + env(safe-area-inset-top)) minmax(0, 1fr) calc(64px + env(safe-area-inset-bottom)) !important;
+  }
+  .app:not(.auth-login-mode) .top-header {
+    height: calc(56px + env(safe-area-inset-top)) !important;
+    min-height: calc(56px + env(safe-area-inset-top)) !important;
+    padding: calc(5px + env(safe-area-inset-top)) 14px 5px !important;
+  }
+  .app:not(.auth-login-mode) .top-row {
+    height: 44px !important;
+    grid-template-columns: minmax(0, 1fr) 70px !important;
+  }
+  .app:not(.auth-login-mode) .logo-box img {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 12px !important;
+  }
+  .app:not(.auth-login-mode) .logo-jp {
+    font-size: 13px !important;
+  }
+  .app:not(.auth-login-mode) .logo-en {
+    font-size: 9px !important;
+  }
+  .app:not(.auth-login-mode) .lang-select,
+  .auth-language-select {
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+    height: 42px !important;
+    padding: 0 8px !important;
+    font-size: 13px !important;
+  }
+  .app:not(.auth-login-mode) .main {
+    padding: 10px 12px 14px !important;
+  }
+  .app:not(.auth-login-mode) .bottom-nav {
+    height: calc(64px + env(safe-area-inset-bottom)) !important;
+    min-height: calc(64px + env(safe-area-inset-bottom)) !important;
+    padding: 6px 18px calc(8px + env(safe-area-inset-bottom)) !important;
+  }
+  .app:not(.auth-login-mode) .bottom-nav button {
+    height: 46px !important;
+    max-width: 62px !important;
+    border-radius: 16px !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .app:not(.auth-login-mode) .bottom-nav button.active {
+    color: #fff !important;
+  }
+  .app:not(.auth-login-mode) .home-actions {
+    display: none !important;
+  }
+  .app:not(.auth-login-mode) .home-hero-card {
+    min-height: 218px !important;
+  }
+  .app:not(.auth-login-mode) .home-title {
+    margin-top: 28px !important;
+    font-size: clamp(24px, 6.4vw, 30px) !important;
+  }
+  .brand-visual {
+    min-height: 214px !important;
+  }
+  .visual-label {
+    left: 22px !important;
+    right: 22px !important;
+    top: 28px !important;
+    bottom: auto !important;
+    font-size: 22px !important;
+    line-height: 1.22 !important;
+    z-index: 4 !important;
+  }
+  .service-rail {
+    left: 16px !important;
+    right: 16px !important;
+    bottom: 16px !important;
+    z-index: 5 !important;
+  }
+  .gallery-tile .icon {
+    color: #fff !important;
+  }
+  .settings-section-card {
+    min-height: 100% !important;
+  }
+  .settings-row span {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.4;
+  }
+  .account-profile-editor {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .account-profile-editor input {
+    min-height: 44px;
+    border-radius: 14px;
+    border: 1px solid #dbe4ef;
+    padding: 0 14px;
+    font-size: 14px;
+    font-weight: 800;
+  }
+}
+</style>
+<script id="yamaden-final-polish-v2-script">
+(function(){
+  function $(id){return document.getElementById(id);}
+  function langNow(){try{return (window.lang||localStorage.getItem("language")||"ja")==="vi"?"vi":"ja"}catch(e){return "ja"}}
+  function text(ja,vi){return langNow()==="vi"?vi:ja}
+  function set(id,value){var el=$(id); if(el)el.textContent=value;}
+  function iconGear(){
+    return '<svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M4 12H2m20 0h-2M12 4V2m0 20v-2M5.6 5.6 4.2 4.2m15.6 15.6-1.4-1.4m0-12.8 1.4-1.4M4.2 19.8l1.4-1.4"/></svg>';
+  }
+  function iconShield(){
+    return '<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-5"/></svg>';
+  }
+  function syncHome(){
+    set("homeSendText","");
+    set("homeCheckText","");
+    set("galleryMain", text("専門性に裏打ちされた施工、迅速な対応、誠実な姿勢。","Kỹ thuật chắc chắn, phản hồi nhanh và thái độ trung thực."));
+    var g1=$("gallery1Icon"); if(g1)g1.innerHTML=iconShield();
+  }
+  function syncSettings(){
+    var gear=$("tabServicesIcon"); if(gear)gear.innerHTML=iconGear();
+    var headIcon=$("settingsIcon"); if(headIcon)headIcon.innerHTML=iconGear();
+    set("settingsTitleCustomer", text("設定","Cài đặt"));
+    set("settingsLangTitle", text("言語","Ngôn ngữ"));
+    set("settingsLangSub", text("日本語 / Tiếng Việt","日本語 / Tiếng Việt"));
+    set("settingsHistoryTitle", text("依頼履歴","Lịch sử yêu cầu"));
+    set("settingsHistorySub", text("この端末に保存された依頼IDを確認します。","Xem ID yêu cầu đã lưu trên máy này."));
+    set("settingsClearTitle", text("履歴を削除","Xóa lịch sử"));
+    set("settingsClearSub", text("保存された依頼履歴を削除します。","Xóa lịch sử yêu cầu đã lưu."));
+    set("settingsAppTitle", text("アプリ情報","Thông tin app"));
+  }
+  function syncSend(){
+    set("sendTitle", text("依頼を送信","Gửi yêu cầu"));
+    var u=null; try{u=JSON.parse(localStorage.getItem("userProfile")||"null")}catch(e){}
+    if(!u)return;
+    var pairs={name:u.name||"",phone:u.phone||"",contact:u.email||u.contact||"",address:[u.projectName,u.province].filter(Boolean).join(" - ")||u.address||""};
+    Object.entries(pairs).forEach(function(pair){var el=$(pair[0]); if(el&&!el.value)el.value=pair[1];});
+  }
+  function syncAccount(){
+    set("profileName", text("アカウント情報","Thông tin tài khoản"));
+    set("profileSub", text("個人情報、依頼履歴、ログアウトを管理できます。","Kiểm tra thông tin cá nhân, lịch sử yêu cầu và đăng xuất."));
+    set("profileSendText", text("情報を編集","Chỉnh sửa thông tin"));
+    set("profileHistoryText", text("依頼履歴","Lịch sử yêu cầu"));
+    var btn=$("profileSendText")?.closest("button");
+    if(btn)btn.onclick=function(){
+      window.accountMode="profile";
+      if(typeof setAccountMode==="function")setAccountMode("profile");
+      $("accountFormCard").style.display="block";
+      $("profileCard").style.display="none";
+    };
+    if(!$("accountProfileEditor")){
+      var wrap=document.createElement("div");
+      wrap.id="accountProfileEditor";
+      wrap.className="account-profile-editor";
+      wrap.innerHTML='<input id="editProfileName"><input id="editProfileEmail"><input id="editProfileProvince"><input id="editProfileProject"><input id="editProfileCompany">';
+      $("profileCard")?.appendChild(wrap);
+    }
+    var u=null; try{u=JSON.parse(localStorage.getItem("userProfile")||"null")}catch(e){}
+    var map=[
+      ["editProfileName",text("お名前","Họ và tên"),u?.name],
+      ["editProfileEmail","Email",u?.email],
+      ["editProfileProvince",text("都道府県","Tỉnh / thành"),u?.province],
+      ["editProfileProject",text("工事件名","Tên công trình"),u?.projectName],
+      ["editProfileCompany",text("会社名 / 個人","Công ty / cá nhân"),u?.company]
+    ];
+    map.forEach(function(x){var el=$(x[0]); if(el){el.placeholder=x[1]; if(x[2])el.value=x[2];}});
+  }
+  function syncAll(){syncHome();syncSettings();syncSend();syncAccount();}
+  var oldShow=window.showTab;
+  window.showTab=function(tab){if(oldShow)oldShow(tab);setTimeout(syncAll,0);};
+  var oldApply=window.applyLanguage;
+  window.applyLanguage=function(){if(oldApply)oldApply();setTimeout(syncAll,0);};
+  document.addEventListener("DOMContentLoaded",function(){setTimeout(syncAll,500);});
+})();
+</script>
 </body>
 </html>
