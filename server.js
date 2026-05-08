@@ -155,6 +155,8 @@ const UserSchema = new mongoose.Schema({
   profileCompleted: { type: Boolean, default: false },
   status: { type: String, default: "pending" },
   createdAt: Date,
+  deletedAt: Date,
+  reactivatedAt: Date,
   lastLoginAt: Date
 });
 
@@ -405,7 +407,9 @@ app.post("/user/register", async (req, res) => {
 
     let user = await User.findOne({ phone });
 
-    if (user && user.pinHash) {
+    const wasDeleted = user && user.status === "deleted";
+
+    if (user && user.pinHash && !wasDeleted) {
       const ok = await bcrypt.compare(pin, user.pinHash);
 
       if (!ok) {
@@ -430,11 +434,24 @@ app.post("/user/register", async (req, res) => {
       });
     }
 
-    user = user || new User({ phone, createdAt: new Date() });
+    user = user || new User({ phone });
 
     user.phone = phone;
     user.pinHash = await bcrypt.hash(pin, 10);
-    user.status = user.status || "pending";
+    user.status = "pending";
+    user.deletedAt = undefined;
+    user.reactivatedAt = wasDeleted ? new Date() : user.reactivatedAt;
+    user.createdAt = new Date();
+    if (wasDeleted) {
+      user.name = "";
+      user.email = "";
+      user.contact = "";
+      user.company = "";
+      user.customerType = "";
+      user.province = "";
+      user.projectName = "";
+      user.address = "";
+    }
     user.profileCompleted = Boolean(user.name && user.email && user.province && user.projectName);
     user.lastLoginAt = new Date();
 
@@ -490,6 +507,10 @@ app.post("/user/login", async (req, res) => {
     const ok = await bcrypt.compare(pin, user.pinHash);
     if (!ok) {
       return res.status(401).json({ message: "Invalid phone or PIN" });
+    }
+
+    if (user.status === "deleted") {
+      return res.status(403).json({ message: "User was deleted. Please register again." });
     }
 
     if (user.status === "blocked") {
@@ -628,6 +649,10 @@ app.put("/admin/users/:id", requireAdmin, async (req, res) => {
     ["name", "phone", "email", "contact", "company", "customerType", "province", "projectName", "address", "status"].forEach(field => {
       if (req.body[field] !== undefined) user[field] = req.body[field];
     });
+    if (req.body.status && req.body.status !== "deleted") {
+      user.deletedAt = undefined;
+      user.reactivatedAt = new Date();
+    }
 
     await user.save();
 
@@ -651,10 +676,11 @@ app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    await Request.updateMany({ userId }, { $set: { userId: "" } });
-    await User.deleteOne({ _id: userId });
+    user.status = "deleted";
+    user.deletedAt = new Date();
+    await user.save();
 
-    res.json({ message: "User deleted, requests kept" });
+    res.json({ message: "User marked as deleted", data: publicUser(user) });
 
   } catch (error) {
     res.status(500).json({
@@ -855,18 +881,6 @@ app.post("/request", requireUser, upload.array("image", 12), async (req, res) =>
   } catch (error) {
     res.status(500).json({
       message: "Save failed",
-      error: error.message
-    });
-  }
-});
-
-app.get("/user/requests", requireUser, async (req, res) => {
-  try {
-    const requests = await Request.find({ userId: req.user.userId }).sort({ createdAt: -1 });
-    res.json(requests);
-  } catch (error) {
-    res.status(500).json({
-      message: "Read failed",
       error: error.message
     });
   }

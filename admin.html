@@ -1346,5 +1346,97 @@ html,body{height:100%!important;overflow:hidden!important}
   document.addEventListener('DOMContentLoaded',()=>setTimeout(window.__yamadenAdminStableText,1100));setInterval(window.__yamadenAdminStableText,2500);
 })();
 </script>
+
+<!-- yamaden-admin-deleted-users-v43 -->
+<style id="yamaden-admin-deleted-users-v43-style">
+.customer-card-v30.deleted-user{border-color:#cbd5e1!important;background:#f8fafc!important;opacity:.92}.customer-card-v30.deleted-user .customer-actions-v30 .reactivate{background:#2563eb!important;color:#fff!important}.customer-card-v30.deleted-user .customer-actions-v30 .delete{display:none!important}.user-deleted-note{margin-top:4px;color:#64748b;font-size:12px;font-weight:850}
+</style>
+<script id="yamaden-admin-deleted-users-v43-script">
+(function(){
+  function L(){try{return currentLang==='vi'?'vi':'ja'}catch(e){return String(localStorage.getItem('language')||'ja').startsWith('vi')?'vi':'ja'}}
+  function T(key){
+    var words={
+      ja:{approve:'承認',block:'停止',unblock:'解除',delete:'削除',reactivate:'再有効化',pending:'承認待ち',active:'有効',blocked:'停止中',deleted:'削除済み',requestCount:'依頼数',noData:'データがありません',deletedNote:'この顧客は削除リストに保存されています'},
+      vi:{approve:'Duyệt',block:'Khóa',unblock:'Mở khóa',delete:'Xóa',reactivate:'Tái kích hoạt',pending:'Chờ duyệt',active:'Đang hoạt động',blocked:'Đã khóa',deleted:'Đã xóa',requestCount:'Số yêu cầu',noData:'Không có dữ liệu',deletedNote:'Khách này đang được lưu trong danh sách đã xóa'}
+    };
+    return (words[L()]&&words[L()][key])||words.ja[key]||key;
+  }
+  function safe(value){return String(value==null?'':value).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
+  function users(){try{return Array.isArray(currentUsers)?currentUsers:[]}catch(e){return []}}
+  function uid(user){return String((user&&(user._id||user.id||user.userId))||'')}
+  function statusLabel(status){return T(status||'pending')||status||'-'}
+  function renderUserCard(user){
+    var id=uid(user), status=user.status||'pending', pending=status==='pending', blocked=status==='blocked', deleted=status==='deleted';
+    var pill=deleted?'red':pending?'orange':blocked?'red':'green';
+    var approve=pending?'<button class="approve" data-act="approve" data-id="'+safe(id)+'">'+T('approve')+'</button>':'';
+    var reactivate=deleted?'<button class="reactivate" data-act="reactivate" data-id="'+safe(id)+'">'+T('reactivate')+'</button>':'';
+    var block=!deleted?'<button class="block" data-act="block" data-next="'+(blocked?'active':'blocked')+'" data-id="'+safe(id)+'">'+(blocked?T('unblock'):T('block'))+'</button>':'';
+    var remove=!deleted?'<button class="delete" data-act="delete" data-id="'+safe(id)+'">'+T('delete')+'</button>':'';
+    var note=deleted?'<div class="user-deleted-note">'+T('deletedNote')+'</div>':'';
+    return '<div class="customer-card-v30 '+(deleted?'deleted-user':'')+'" data-id="'+safe(id)+'"><div><b>'+safe(user.name||user.phone||'-')+'</b><div class="muted">'+safe(user.phone||'-')+' / '+safe(user.email||'-')+'</div><div class="muted">'+safe(user.company||user.customerType||'-')+'</div>'+note+'</div><div><span class="pill '+pill+'">'+safe(statusLabel(status))+'</span> <span class="pill blue">'+safe(user.province||'-')+'</span><div class="muted">'+safe(user.requestCount||0)+' '+T('requestCount')+'</div></div><div class="customer-actions-v30">'+approve+reactivate+block+remove+'</div></div>';
+  }
+  window.renderUsers=function(){
+    var box=document.getElementById('usersList');
+    if(!box)return;
+    var kw=String((document.getElementById('userSearch')&&document.getElementById('userSearch').value)||'').toLowerCase();
+    var list=users().filter(function(user){return [user.name,user.phone,user.email,user.company,user.customerType,user.province,user.projectName,user.status].join(' ').toLowerCase().indexOf(kw)>=0});
+    box.innerHTML=list.length?list.map(renderUserCard).join(''):'<div class="no-data-v30">'+T('noData')+'</div>';
+    box.querySelectorAll('.customer-card-v30').forEach(function(card){card.addEventListener('click',function(){if(typeof openUserDetail==='function')openUserDetail(card.dataset.id)})});
+    box.querySelectorAll('.customer-actions-v30').forEach(function(actions){
+      actions.addEventListener('click',function(event){
+        event.stopPropagation();
+        var button=event.target.closest('button');
+        if(!button)return;
+        var id=button.dataset.id;
+        if(button.dataset.act==='approve'&&typeof toggleUserStatus==='function')toggleUserStatus(id,'active');
+        if(button.dataset.act==='reactivate'&&typeof toggleUserStatus==='function')toggleUserStatus(id,'active');
+        if(button.dataset.act==='block'&&typeof toggleUserStatus==='function')toggleUserStatus(id,button.dataset.next);
+        if(button.dataset.act==='delete'&&typeof deleteUser==='function')deleteUser(id);
+      });
+    });
+    var side=document.getElementById('sideUsers');
+    if(side)side.textContent=users().length;
+    var final=document.getElementById('finalUserCount');
+    if(final)final.textContent=users().length;
+  };
+  var oldApply=window.applyLanguage;
+  window.applyLanguage=function(){if(oldApply)oldApply();setTimeout(function(){try{if(currentView==='users')renderUsers()}catch(e){}},0)};
+})();
+</script>
+
+<!-- yamaden-admin-live-users-v44 -->
+<script id="yamaden-admin-live-users-v44-script">
+(function(){
+  async function fetchFreshUsers(){
+    var separator=API.indexOf('?')>=0?'&':'?';
+    var res=await apiFetch(API+'/admin/users'+separator+'_ts='+Date.now(),{cache:'no-store'});
+    if(res.status===401)return authFailLogout();
+    if(!res.ok)throw new Error('users load failed');
+    var data=await res.json();
+    return Array.isArray(data)?data:(data.users||[]);
+  }
+  window.loadUsers=async function(){
+    try{
+      var list=await fetchFreshUsers();
+      currentUsers=list;
+      window.currentUsers=list;
+    }catch(e){
+      currentUsers=[];
+      window.currentUsers=[];
+    }
+    if(typeof renderUsers==='function')renderUsers();
+    var side=document.getElementById('sideUsers');
+    if(side)side.textContent=currentUsers.length;
+    var final=document.getElementById('finalUserCount');
+    if(final)final.textContent=currentUsers.length;
+  };
+  document.addEventListener('visibilitychange',function(){
+    try{if(!document.hidden&&currentView==='users')loadUsers()}catch(e){}
+  });
+  setInterval(function(){
+    try{if(currentView==='users')loadUsers()}catch(e){}
+  },15000);
+})();
+</script>
 </body>
 </html>
