@@ -1,4 +1,4 @@
-const CACHE_NAME = "yamaden-support-v1";
+const CACHE_NAME = "yamaden-support-v2";
 
 const APP_SHELL = [
   "/manifest.json",

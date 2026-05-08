@@ -2089,6 +2089,63 @@ body{
   <img id="introFallbackLogo" src="/icon-512.png" alt="YAMADEN">
 </div>
 
+<!-- INTRO FAILSAFE: nếu video lỗi hoặc JS chính lỗi, app vẫn tự mở -->
+<script>
+(function introFailSafe(){
+  var closed = false;
+  function closeIntro(){
+    if (closed) return;
+    closed = true;
+    var intro = document.getElementById("introScreen");
+    if (!intro) return;
+    intro.classList.add("hide");
+    setTimeout(function(){
+      if (intro && intro.parentNode) intro.parentNode.removeChild(intro);
+    }, 520);
+  }
+
+  function bindIntro(){
+    var intro = document.getElementById("introScreen");
+    var video = document.getElementById("introVideo");
+    var fallback = document.getElementById("introFallbackLogo");
+
+    if (!intro) return;
+
+    if (video) {
+      video.addEventListener("ended", closeIntro, { once:true });
+      video.addEventListener("error", function(){
+        if (fallback) fallback.style.display = "block";
+        video.style.display = "none";
+        setTimeout(closeIntro, 900);
+      }, { once:true });
+
+      var playPromise = video.play && video.play();
+      if (playPromise && playPromise.catch) {
+        playPromise.catch(function(){
+          if (fallback) fallback.style.display = "block";
+          video.style.display = "none";
+          setTimeout(closeIntro, 900);
+        });
+      }
+    } else {
+      if (fallback) fallback.style.display = "block";
+      setTimeout(closeIntro, 900);
+    }
+
+    intro.addEventListener("click", closeIntro, { once:true });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindIntro, { once:true });
+  } else {
+    bindIntro();
+  }
+
+  // Chốt an toàn: dù video/JS lỗi vẫn vào app sau 3.2 giây
+  setTimeout(closeIntro, 3200);
+})();
+</script>
+
 <div class="app">
   <header class="top-header">
     <div class="top-row">
