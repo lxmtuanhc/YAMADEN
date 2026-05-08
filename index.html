@@ -1983,6 +1983,67 @@ hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
 }
 </style>
 
+
+
+<!-- ===== YAMADEN MOBILE SERVICE CARD FIX v33 ===== -->
+<style id="yamaden-mobile-service-card-fix-v33">
+@media (max-width:860px){
+  /* Fix broken service card grid: icon stays left, title/description stay right */
+  #homeSection .service-card{
+    display:grid!important;
+    grid-template-columns:44px minmax(0,1fr)!important;
+    grid-template-rows:auto auto!important;
+    column-gap:12px!important;
+    row-gap:4px!important;
+    align-items:start!important;
+    padding:14px!important;
+    min-height:auto!important;
+  }
+
+  #homeSection .service-icon{
+    grid-column:1!important;
+    grid-row:1 / span 2!important;
+    width:44px!important;
+    height:44px!important;
+    margin:0!important;
+  }
+
+  #homeSection .service-title{
+    grid-column:2!important;
+    grid-row:1!important;
+    margin:2px 0 2px!important;
+    font-size:15px!important;
+    line-height:1.25!important;
+    white-space:normal!important;
+  }
+
+  #homeSection .service-desc{
+    grid-column:2!important;
+    grid-row:2!important;
+    margin:0!important;
+    max-width:100%!important;
+    font-size:12.5px!important;
+    line-height:1.45!important;
+    white-space:normal!important;
+    word-break:normal!important;
+    overflow-wrap:break-word!important;
+    color:#6b7280!important;
+  }
+
+  #homeSection .card-title-icon:empty{
+    display:none!important;
+  }
+
+  #homeSection .card-title{
+    margin-bottom:12px!important;
+  }
+
+  #homeSection .card h2{
+    font-size:18px!important;
+  }
+}
+</style>
+
 </head>
 
 <body>
