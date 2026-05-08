@@ -2588,5 +2588,162 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 }
 </style>
+<style id="yamaden-brand-philosophy-v7">
+@media (max-width: 860px) {
+  .app:not(.auth-login-mode) .top-row {
+    grid-template-columns: minmax(0,1fr) 72px !important;
+    align-items: center !important;
+  }
+  .app:not(.auth-login-mode) .logo-box {
+    display: grid !important;
+    grid-template-columns: 42px minmax(0,1fr) !important;
+    gap: 10px !important;
+    align-items: center !important;
+    min-width: 0 !important;
+  }
+  .app:not(.auth-login-mode) .logo-box img {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    object-fit: contain !important;
+    filter: brightness(0) invert(1) drop-shadow(0 2px 5px rgba(0,0,0,.28)) !important;
+  }
+  .app:not(.auth-login-mode) .logo-text {
+    display: block !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+  .app:not(.auth-login-mode) .logo-jp {
+    display: block !important;
+    font-family: "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif !important;
+    font-size: 17px !important;
+    font-weight: 500 !important;
+    line-height: 1.08 !important;
+    letter-spacing: .06em !important;
+    color: #fff !important;
+    white-space: nowrap !important;
+  }
+  .app:not(.auth-login-mode) .logo-en {
+    display: block !important;
+    margin-top: 4px !important;
+    font-family: "Times New Roman", serif !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+    letter-spacing: .10em !important;
+    color: #fff !important;
+    white-space: nowrap !important;
+  }
+  .app:not(.auth-login-mode) .lang-select {
+    grid-column: auto !important;
+    width: 72px !important;
+    min-width: 72px !important;
+  }
+
+  .app.auth-login-mode .account-brand {
+    grid-template-columns: 56px minmax(0,1fr) 76px !important;
+    align-items: center !important;
+  }
+  .app.auth-login-mode .account-brand img {
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    object-fit: contain !important;
+    filter: brightness(0) invert(1) drop-shadow(0 2px 5px rgba(0,0,0,.28)) !important;
+  }
+  .app.auth-login-mode .account-brand-title {
+    font-family: "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif !important;
+    color: #fff !important;
+    font-size: 18px !important;
+    font-weight: 500 !important;
+    letter-spacing: .06em !important;
+    line-height: 1.08 !important;
+  }
+  .app.auth-login-mode .account-brand-sub {
+    color: #fff !important;
+    font-family: "Times New Roman", serif !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    letter-spacing: .10em !important;
+  }
+
+  #homeSection .philosophy-visual {
+    min-height: 156px !important;
+    border-radius: 24px !important;
+    background:
+      linear-gradient(rgba(15,23,42,.22), rgba(15,23,42,.28)),
+      linear-gradient(120deg, rgba(130,105,82,.72), rgba(228,218,196,.56)),
+      linear-gradient(180deg, #d6c7ab, #b18f72) !important;
+  }
+  #homeSection .philosophy-visual::before {
+    display: none !important;
+  }
+  #homeSection .poster-brand-logo,
+  #homeSection .poster-brand-name,
+  #homeSection .poster-brand-line,
+  #homeSection .poster-company {
+    display: none !important;
+  }
+  #homeSection .poster-brand {
+    position: absolute !important;
+    inset: 0 !important;
+    max-width: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    padding: 18px !important;
+    color: #fff !important;
+    text-align: center !important;
+  }
+  #homeSection .poster-slogan {
+    margin: 0 !important;
+    color: #fff !important;
+    font-family: "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif !important;
+    font-size: clamp(28px, 8vw, 40px) !important;
+    line-height: 1.08 !important;
+    font-weight: 500 !important;
+    letter-spacing: .04em !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,.34) !important;
+  }
+  #homeSection .poster-slogan-sub {
+    position: static !important;
+    display: block !important;
+    color: #fff !important;
+    font-family: "Times New Roman", serif !important;
+    font-size: clamp(17px, 4.5vw, 23px) !important;
+    line-height: 1.15 !important;
+    font-weight: 500 !important;
+    letter-spacing: .02em !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,.34) !important;
+  }
+  .app.auth-app-mode #accountSection .account-brand,
+  .app.auth-app-mode #accountSection .auth-language-switch {
+    display: none !important;
+  }
+}
+</style>
+<script id="yamaden-brand-text-v7">
+(function(){
+  function setBrand(){
+    document.querySelectorAll(".logo-jp,.account-brand-title").forEach(function(el){el.textContent="\u682a\u5f0f\u4f1a\u793e \u5c71\u96fb";});
+    document.querySelectorAll(".logo-en,.account-brand-sub").forEach(function(el){el.textContent="YAMADEN.CO.LTD";});
+    var slogan=document.querySelector("#homeSection .poster-slogan");
+    var sub=document.querySelector("#homeSection .poster-slogan-sub");
+    if(slogan)slogan.textContent="\u4eba\u3092\u5b88\u308a\u3001\u5e78\u305b\u3092\u5275\u308b";
+    if(sub)sub.textContent="Protecting people. Creating happiness.";
+  }
+  var oldApply=window.applyLanguage;
+  window.applyLanguage=function(){if(oldApply)oldApply();setTimeout(setBrand,0);};
+  document.addEventListener("DOMContentLoaded",function(){setTimeout(setBrand,300);});
+  setBrand();
+})();
+</script>
 </body>
 </html>
