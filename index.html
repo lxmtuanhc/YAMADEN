@@ -2745,5 +2745,267 @@ document.addEventListener("DOMContentLoaded",()=>{
   setBrand();
 })();
 </script>
+<style id="yamaden-fix-brand-issues-v8">
+@media (max-width: 860px) {
+  .app:not(.auth-login-mode) .logo-box img,
+  .app:not(.auth-login-mode) .top-header .logo-box img,
+  .app.auth-login-mode .account-brand img {
+    border-radius: 12px !important;
+    background: #222 !important;
+    filter: none !important;
+    object-fit: cover !important;
+  }
+  .app:not(.auth-login-mode) #accountSection .account-brand,
+  .app:not(.auth-login-mode) #accountSection .auth-language-switch,
+  body:not(.auth-login-body) #accountSection .account-brand,
+  body:not(.auth-login-body) #accountSection .auth-language-switch {
+    display: none !important;
+  }
+  .app:not(.auth-login-mode) #accountSection .account-landing,
+  body:not(.auth-login-body) #accountSection .account-landing {
+    padding-top: 12px !important;
+  }
+  .issue-quick-picks {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+  }
+  .issue-quick-pick {
+    min-height: 34px !important;
+    border: 1px solid #dbe4ef !important;
+    border-radius: 999px !important;
+    background: #f8fafc !important;
+    color: #334155 !important;
+    padding: 7px 10px !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+  }
+  .issue-quick-pick.active {
+    background: #111827 !important;
+    border-color: #111827 !important;
+    color: #fff !important;
+  }
+  .issue-dropdown.show {
+    z-index: 500 !important;
+  }
+}
+</style>
+<script id="yamaden-fix-brand-issues-v8-script">
+(function(){
+  var fallbackIssues={
+    ja:["\u96fb\u6c17\u56f3\u9762\u8a2d\u8a08","\u76e4\u8a2d\u8a08","\u7167\u660e\u8a2d\u8a08","\u96fb\u6c17\u5bb9\u91cf\u8a08\u7b97","\u6750\u6599\u62fe\u3044\u51fa\u3057","\u73fe\u5834\u8abf\u6574","\u5de5\u7a0b\u7ba1\u7406","\u898b\u7a4d\u4f5c\u6210","\u96fb\u6c17\u5de5\u4e8b","\u914d\u7dda\u5de5\u4e8b","\u7167\u660e\u53d6\u4ed8","\u505c\u96fb\u5bfe\u5fdc","\u6f0f\u96fb\u5bfe\u5fdc","\u5b9a\u671f\u30e1\u30f3\u30c6\u30ca\u30f3\u30b9","\u8a2d\u5099\u70b9\u691c"],
+    vi:["Thi\u1ebft k\u1ebf b\u1ea3n v\u1ebd \u0111i\u1ec7n","Thi\u1ebft k\u1ebf t\u1ee7 \u0111i\u1ec7n","Thi\u1ebft k\u1ebf chi\u1ebfu s\u00e1ng","T\u00ednh t\u1ea3i \u0111i\u1ec7n","B\u00f3c t\u00e1ch v\u1eadt t\u01b0","\u0110i\u1ec1u ph\u1ed1i c\u00f4ng tr\u00ecnh","Qu\u1ea3n l\u00fd ti\u1ebfn \u0111\u1ed9","B\u00e1o gi\u00e1","Thi c\u00f4ng \u0111i\u1ec7n","\u0110i d\u00e2y \u0111i\u1ec7n","L\u1eafp \u0111\u00e8n","X\u1eed l\u00fd m\u1ea5t \u0111i\u1ec7n","X\u1eed l\u00fd r\u00f2 \u0111i\u1ec7n","B\u1ea3o tr\u00ec \u0111\u1ecbnh k\u1ef3","Ki\u1ec3m tra thi\u1ebft b\u1ecb"]
+  };
+  function langNow(){return (window.lang||localStorage.getItem("language")||"ja")==="vi"?"vi":"ja";}
+  function issues(){
+    try{
+      if(typeof getAllIssues==="function"){
+        var list=getAllIssues();
+        if(Array.isArray(list)&&list.length)return list;
+      }
+    }catch(e){}
+    return fallbackIssues[langNow()]||fallbackIssues.ja;
+  }
+  function esc(s){return String(s||"").replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+  function js(s){return String(s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g,"\\n");}
+  function ensureQuickIssues(){
+    var host=document.getElementById("issueChipList");
+    if(!host)return;
+    var quick=document.getElementById("issueQuickPicks");
+    if(!quick){
+      quick=document.createElement("div");
+      quick.id="issueQuickPicks";
+      quick.className="issue-quick-picks";
+      var selected=document.getElementById("selectedIssues");
+      if(selected)selected.after(quick);
+      else host.appendChild(quick);
+    }
+    var chosen=window.__yamadenChosenIssues||[];
+    quick.innerHTML=issues().slice(0,30).map(function(item){
+      var active=chosen.indexOf(item)>=0;
+      return '<button type="button" class="issue-quick-pick '+(active?'active':'')+'" onclick="selectIssueItem(\''+js(item)+'\')">'+esc(item)+'</button>';
+    }).join("");
+  }
+  var oldRender=window.renderIssueChips;
+  window.renderIssueChips=function(){
+    if(oldRender)oldRender();
+    ensureQuickIssues();
+  };
+  var oldSelect=window.selectIssueItem;
+  window.selectIssueItem=function(item){
+    if(oldSelect)oldSelect(item);
+    else {
+      window.__yamadenChosenIssues=window.__yamadenChosenIssues||[];
+      if(window.__yamadenChosenIssues.indexOf(item)<0)window.__yamadenChosenIssues.push(item);
+    }
+    ensureQuickIssues();
+  };
+  var oldRemove=window.removeIssueItem;
+  window.removeIssueItem=function(index){
+    if(oldRemove)oldRemove(index);
+    else if(window.__yamadenChosenIssues)window.__yamadenChosenIssues.splice(index,1);
+    ensureQuickIssues();
+  };
+  function setBrandLogo(){
+    document.querySelectorAll(".logo-box img,.account-brand img").forEach(function(img){
+      img.src="/icon-192.png";
+      img.style.filter="none";
+      img.style.background="#222";
+      img.style.borderRadius="12px";
+      img.style.objectFit="cover";
+    });
+  }
+  var oldApply=window.applyLanguage;
+  window.applyLanguage=function(){if(oldApply)oldApply();setTimeout(function(){ensureQuickIssues();setBrandLogo();},0);};
+  document.addEventListener("DOMContentLoaded",function(){setTimeout(function(){ensureQuickIssues();setBrandLogo();},500);});
+})();
+</script>
+<style id="yamaden-top-logo-v9">
+@media (max-width: 860px) {
+  .app:not(.auth-login-mode) .top-header .logo-box {
+    display: grid !important;
+    grid-template-columns: 42px minmax(0,1fr) !important;
+    gap: 10px !important;
+    align-items: center !important;
+  }
+  .app:not(.auth-login-mode) .top-header .logo-box::before {
+    content: "" !important;
+    display: block !important;
+    width: 42px !important;
+    height: 42px !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    border-radius: 12px !important;
+    background: #222 url("icon-192.png") center / cover no-repeat !important;
+    box-shadow: 0 7px 16px rgba(0,0,0,.24) !important;
+  }
+  .app:not(.auth-login-mode) .top-header .logo-box > img {
+    display: none !important;
+  }
+  .app:not(.auth-login-mode) .top-header .logo-text {
+    grid-column: 2 !important;
+    display: block !important;
+  }
+}
+</style>
+<style id="yamaden-compact-issue-dropdown-v10">
+@media (max-width: 860px) {
+  .issue-quick-picks {
+    display: none !important;
+  }
+  .issue-search-wrap {
+    position: relative !important;
+  }
+  .issue-dropdown {
+    top: 54px !important;
+    max-height: 220px !important;
+    overflow-y: auto !important;
+    z-index: 900 !important;
+  }
+  .issue-dropdown.show {
+    display: block !important;
+  }
+  .selected-issues {
+    margin-top: 10px !important;
+  }
+}
+</style>
+<script id="yamaden-compact-issue-dropdown-v10-script">
+(function(){
+  function showOptions(){
+    try{
+      if(typeof renderIssueOptions==="function")renderIssueOptions();
+    }catch(e){}
+    var dd=document.getElementById("issueDropdown");
+    if(dd)dd.classList.add("show");
+  }
+  document.addEventListener("focusin",function(e){
+    if(e.target&&e.target.id==="issueSearchInput")setTimeout(showOptions,0);
+  });
+  document.addEventListener("click",function(e){
+    if(e.target&&e.target.id==="issueSearchInput")setTimeout(showOptions,0);
+  });
+  var oldRender=window.renderIssueChips;
+  window.renderIssueChips=function(){
+    if(oldRender)oldRender();
+    var quick=document.getElementById("issueQuickPicks");
+    if(quick)quick.style.display="none";
+  };
+})();
+</script>
+<style id="yamaden-final-account-banner-v11">
+@media (max-width: 860px) {
+  body.yamaden-app-active #accountSection .account-landing > .account-brand,
+  body:not(.auth-login-body) #accountSection .account-landing > .account-brand,
+  .app.auth-app-mode #accountSection .account-landing > .account-brand,
+  .app:not(.auth-login-mode) #accountSection .account-landing > .account-brand {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+  body.yamaden-app-active #accountSection .auth-language-switch,
+  body:not(.auth-login-body) #accountSection .auth-language-switch,
+  .app.auth-app-mode #accountSection .auth-language-switch,
+  .app:not(.auth-login-mode) #accountSection .auth-language-switch {
+    display: none !important;
+  }
+  body.yamaden-app-active #accountSection .account-landing,
+  body:not(.auth-login-body) #accountSection .account-landing,
+  .app.auth-app-mode #accountSection .account-landing,
+  .app:not(.auth-login-mode) #accountSection .account-landing {
+    padding-top: 12px !important;
+  }
+
+  #homeSection .philosophy-visual {
+    position: relative !important;
+  }
+  #homeSection .philosophy-visual::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 18px !important;
+    top: 18px !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 11px !important;
+    background: #222 url("icon-192.png") center / cover no-repeat !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,.22) !important;
+    z-index: 5 !important;
+  }
+  #homeSection .poster-brand {
+    padding-top: 34px !important;
+  }
+}
+</style>
+<script id="yamaden-final-account-banner-v11-script">
+(function(){
+  function hideAccountBrand(){
+    var app=document.querySelector(".app");
+    if(!app||app.classList.contains("auth-login-mode"))return;
+    document.querySelectorAll("#accountSection .account-landing > .account-brand,#accountSection .auth-language-switch").forEach(function(el){
+      el.style.setProperty("display","none","important");
+      el.style.setProperty("visibility","hidden","important");
+      el.style.setProperty("height","0","important");
+      el.style.setProperty("margin","0","important");
+      el.style.setProperty("padding","0","important");
+      el.style.setProperty("overflow","hidden","important");
+    });
+  }
+  var oldShow=window.showTab;
+  window.showTab=function(tab){
+    var result=oldShow&&oldShow(tab);
+    setTimeout(hideAccountBrand,0);
+    return result;
+  };
+  document.addEventListener("DOMContentLoaded",function(){
+    hideAccountBrand();
+    setInterval(hideAccountBrand,1200);
+  });
+})();
+</script>
 </body>
 </html>
