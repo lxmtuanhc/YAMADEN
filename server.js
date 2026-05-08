@@ -707,6 +707,12 @@ app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
+    if (req.query.permanent === "true") {
+      await Request.updateMany({ userId }, { $set: { userId: "" } });
+      await User.deleteOne({ _id: userId });
+      return res.json({ message: "User permanently deleted" });
+    }
+
     user.status = "deleted";
     user.deletedAt = new Date();
     await user.save();
