@@ -2078,6 +2078,83 @@ body{
 }
 </style>
 
+
+<style id="yamaden-restore-old-login-structure">
+/* Restore old login/account landing structure while keeping v2 main UI polish */
+#accountSection .account-brand{
+  margin-bottom:78px;
+}
+#accountSection .account-brand-sub{
+  white-space:nowrap;
+}
+#accountSection .account-panel .account-card{
+  margin:0;
+  padding:0;
+  border:none;
+  box-shadow:none;
+  background:transparent;
+}
+#accountSection .profile-card{
+  display:none;
+}
+#accountSection .account-panel .utility-head,
+#accountSection .account-panel .utility-text{
+  display:none;
+}
+#accountSection .account-panel .account-fields{
+  grid-template-columns:1fr;
+  gap:11px;
+}
+#accountSection .account-panel input{
+  min-height:48px;
+  border-radius:9px;
+  background:white;
+  border-color:#e2e8f0;
+  box-shadow:0 4px 14px rgba(15,23,42,0.04);
+}
+#accountSection .account-panel .main-btn{
+  margin-top:2px;
+  background:linear-gradient(135deg,#2563eb,#0ea5e9);
+  border-radius:9px;
+  box-shadow:0 14px 28px rgba(37,99,235,0.26);
+}
+#accountSection .account-panel .soft-btn{
+  border-radius:9px;
+}
+#accountSection .account-divider{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:16px 0;
+  color:#94a3b8;
+  font-size:12px;
+  font-weight:900;
+}
+#accountSection .account-divider::before,
+#accountSection .account-divider::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:#e2e8f0;
+}
+@media(max-width:860px){
+  #accountSection .account-brand{
+    margin:0 0 16px;
+    gap:10px;
+  }
+  #accountSection .account-panel{
+    max-width:360px;
+  }
+  #accountSection .account-panel input{
+    min-height:43px;
+    padding:11px 12px;
+    border-radius:12px;
+  }
+  #accountSection .account-welcome-ja{font-size:20px;}
+  #accountSection .account-welcome-brand{font-size:24px;}
+  #accountSection .account-welcome-sub{font-size:11px;line-height:1.45;}
+}
+</style>
 </head>
 <body>
 
@@ -2186,19 +2263,14 @@ body{
           <img src="/icon-192.png" alt="YAMADEN">
           <div>
             <div class="account-brand-title">株式会社 山電</div>
-            <div class="account-brand-sub">YAMADEN.CO.LTD</div>
-          </div>
-          <div class="auth-language-switch">
-            <select id="authLanguage" class="auth-language-select">
-              <option value="ja">JP</option>
-              <option value="vi">VN</option>
-            </select>
+            <div class="account-brand-sub" id="accountBrandSub">YAMADEN.CO.LTD</div>
           </div>
         </div>
 
         <div class="account-panel">
           <div class="account-success" id="accountSuccess"></div>
-          <div class="profile-card" id="profileCard" style="display: none;">
+
+          <div class="profile-card" id="profileCard">
             <div class="profile-head">
               <div class="profile-avatar"><span class="icon" id="profileIcon"></span></div>
               <div>
@@ -2242,7 +2314,8 @@ body{
               <input id="accountCompany" placeholder="Công ty / cá nhân">
             </div>
             <button class="main-btn" onclick="userLogin()"><span class="icon" id="accountLoginIcon"></span><span id="accountLoginText">Đăng nhập / Lưu</span></button>
-            <div class="divider"><span id="accountDividerText">hoặc</span></div>
+            <div class="account-divider"><span id="accountDividerText">hoặc</span></div>
+            <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="quickSupportBtnIcon"></span><span id="quickSupportBtn">Gửi hỗ trợ nhanh</span></button>
             <div class="account-status" id="accountStatus"></div>
           </div>
         </div>
@@ -2257,7 +2330,6 @@ body{
       </div>
     </section>
 
-    <!-- HOME SECTION -->
     <section id="homeSection" class="hidden">
       <div class="home-hero-card">
         <div class="home-kicker"><span class="icon" id="homeKickerIcon"></span><span id="homeKicker">YAMADEN SUPPORT</span></div>
