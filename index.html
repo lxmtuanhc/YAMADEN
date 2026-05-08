@@ -4130,7 +4130,7 @@ html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-
       if(mode==='profile'&&token)headers.Authorization='Bearer '+token;
       var res=await fetch(API+endpoint,{method:method,headers:headers,body:JSON.stringify(body)});
       var data=await readJsonSafe(res);
-      if(!res.ok||!data.user||(mode==='login'&&!data.token))throw new Error(data.message||'auth failed');
+      if(!res.ok||!data.user||(mode==='login'&&!data.token))throw new Error(data.error||data.message||'auth failed');
 
       if(mode==='register'){
         data=await ensureTokenAfterRegister(phone,pin,data);
@@ -4157,8 +4157,9 @@ html:has(.app.auth-login-mode),body.auth-login-body{height:100svh!important;min-
       }
     }catch(err){
       if(window.showToast){
-        if(mode==='register')showToast(langNow()==='ja'?'登録に失敗しました。もう一度お試しください。':'Đăng ký thất bại. Vui lòng thử lại.');
-        else if(mode==='profile')showToast(langNow()==='ja'?'お客様情報の保存に失敗しました。ログインし直してからお試しください。':'Lưu thông tin thất bại. Hãy đăng nhập lại rồi thử lại.');
+        var detail=err&&err.message&&err.message!=='auth failed'?err.message:'';
+        if(mode==='register')showToast(detail||(langNow()==='ja'?'登録に失敗しました。もう一度お試しください。':'Đăng ký thất bại. Vui lòng thử lại.'));
+        else if(mode==='profile')showToast(detail||(langNow()==='ja'?'お客様情報の保存に失敗しました。ログインし直してからお試しください。':'Lưu thông tin thất bại. Hãy đăng nhập lại rồi thử lại.'));
         else showToast(msg('loginFailed'));
       }
     }
