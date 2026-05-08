@@ -3185,5 +3185,109 @@ document.addEventListener("DOMContentLoaded",()=>{
   fixBrandText();
 })();
 </script>
+<style id="yamaden-fixed-bars-keyboard-v13">
+@media (max-width: 860px) {
+  body.yamaden-app-active,
+  body:not(.auth-login-body) {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100lvh !important;
+    min-height: 100lvh !important;
+    overflow: hidden !important;
+  }
+  .app.auth-app-mode,
+  .app:not(.auth-login-mode) {
+    width: var(--yamaden-frame-width, min(100vw,480px)) !important;
+    max-width: 480px !important;
+    height: 100lvh !important;
+    min-height: 100lvh !important;
+    max-height: 100lvh !important;
+    margin: 0 auto !important;
+    display: block !important;
+    overflow: hidden !important;
+    background: #f5f7fb !important;
+  }
+  .app:not(.auth-login-mode) .top-header,
+  .app.auth-app-mode .top-header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: var(--yamaden-frame-width, min(100vw,480px)) !important;
+    max-width: 480px !important;
+    height: calc(76px + env(safe-area-inset-top)) !important;
+    min-height: calc(76px + env(safe-area-inset-top)) !important;
+    z-index: 3000 !important;
+  }
+  .app:not(.auth-login-mode) .bottom-nav,
+  .app.auth-app-mode .bottom-nav {
+    position: fixed !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: 0 !important;
+    transform: translateX(-50%) !important;
+    width: var(--yamaden-frame-width, min(100vw,480px)) !important;
+    max-width: 480px !important;
+    height: calc(78px + env(safe-area-inset-bottom)) !important;
+    min-height: calc(78px + env(safe-area-inset-bottom)) !important;
+    z-index: 3000 !important;
+  }
+  .app:not(.auth-login-mode) .main,
+  .app.auth-app-mode .main {
+    position: fixed !important;
+    top: calc(76px + env(safe-area-inset-top)) !important;
+    bottom: calc(78px + env(safe-area-inset-bottom)) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: var(--yamaden-frame-width, min(100vw,480px)) !important;
+    max-width: 480px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 10px 12px 16px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    z-index: 1 !important;
+  }
+  .issue-search-wrap {
+    position: relative !important;
+    z-index: 20 !important;
+  }
+  .issue-dropdown {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-height: min(230px, 34vh) !important;
+    z-index: 5000 !important;
+  }
+  .issue-panel:focus-within {
+    overflow: visible !important;
+    z-index: 120 !important;
+  }
+}
+</style>
+<script id="yamaden-fixed-bars-keyboard-v13-script">
+(function(){
+  var lastScroll=0;
+  function lockBars(){
+    var main=document.querySelector(".app:not(.auth-login-mode) .main,.app.auth-app-mode .main");
+    if(main&&document.activeElement&&document.activeElement.id==="issueSearchInput"){
+      main.scrollTop=Math.max(0,lastScroll);
+    }
+  }
+  document.addEventListener("focusin",function(e){
+    var main=document.querySelector(".app:not(.auth-login-mode) .main,.app.auth-app-mode .main");
+    if(main)lastScroll=main.scrollTop;
+    if(e.target&&e.target.id==="issueSearchInput")setTimeout(lockBars,80);
+  });
+  window.addEventListener("resize",function(){setTimeout(lockBars,80);},{passive:true});
+  if(window.visualViewport){
+    window.visualViewport.addEventListener("resize",function(){setTimeout(lockBars,80);},{passive:true});
+  }
+})();
+</script>
 </body>
 </html>
