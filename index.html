@@ -3529,5 +3529,168 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 }
 </style>
+<script id="yamaden-work-catalog-v19">
+(function(){
+  var catalog=[
+    {code:"01",deptJa:"社長・代表",deptVi:"Giám đốc / đại diện công ty",items:[
+      "Phê duyệt công trình","Phê duyệt báo giá","Phê duyệt hợp đồng","Kiểm tra tiến độ tổng thể","Kiểm tra tình trạng công ty","Họp với khách hàng","Tiếp nhận dự án lớn","Xử lý vấn đề quan trọng","Điều phối hoạt động công ty","Quản lý vận hành công ty","Quản lý nhân sự","Kiểm tra doanh thu công trình","Xác nhận kế hoạch thi công","Phê duyệt hồ sơ kỹ thuật","Giải quyết khiếu nại khách hàng","Hỗ trợ xử lý sự cố nghiêm trọng"]},
+    {code:"02",deptJa:"工務部",deptVi:"Bộ phận quản lý công trình",items:[
+      "Khảo sát hiện trường","Kiểm tra công trình","Kiểm tra tiến độ thi công","Kiểm tra an toàn công trình","Kiểm tra chất lượng công trình","Nghiệm thu công trình","Kiểm tra sau thi công","Điều phối thi công","Điều chỉnh lịch thi công","Hỗ trợ bàn giao công trình","Kiểm tra tình trạng thiết bị","Quản lý công trình đang thi công","Hỗ trợ xử lý vấn đề tại công trình"]},
+    {code:"03",deptJa:"FS部",deptVi:"Bộ phận bảo trì / hỗ trợ kỹ thuật",items:[
+      "Kiểm tra thiết bị bị lỗi","Sửa chữa sự cố","Bảo trì định kỳ","Kiểm tra hệ thống điện","Kiểm tra thiết bị hoạt động không ổn định","Xử lý sự cố khẩn cấp","Vệ sinh thiết bị","Thay thế linh kiện","Kiểm tra nguyên nhân lỗi","Hỗ trợ kỹ thuật","Kiểm tra máy móc","Khôi phục hoạt động hệ thống","Kiểm tra kết nối thiết bị","Kiểm tra sau sửa chữa","Hỗ trợ tại hiện trường"]},
+    {code:"04",deptJa:"営業部",deptVi:"Bộ phận kinh doanh / tư vấn",items:[
+      "Tư vấn dịch vụ","Tư vấn công trình mới","Khảo sát để báo giá","Báo giá sửa chữa","Báo giá thi công","Tư vấn thiết bị phù hợp","Tư vấn phương án thi công","Tư vấn phương án tiết kiệm chi phí","Giải thích dịch vụ","Hỗ trợ hợp đồng","Điều chỉnh nội dung hợp đồng","Chăm sóc khách hàng","Hỗ trợ đặt lịch dịch vụ","Tiếp nhận yêu cầu khách hàng"]},
+    {code:"05",deptJa:"工事部",deptVi:"Bộ phận thi công",items:[
+      "Lắp đặt thiết bị","Tháo dỡ thiết bị","Di dời thiết bị","Đi dây điện","Sửa dây điện","Lắp đèn","Thay đèn","Lắp ổ cắm / công tắc","Lắp CB / breaker","Lắp camera","Sửa camera","Đi dây mạng LAN","Lắp Wi-Fi / router","Lắp máy lạnh","Tháo máy lạnh","Lắp quạt thông gió","Thi công hệ thống điện","Thi công tủ điện","Thi công tại công trình","Lắp đặt máy móc","Sửa chữa tại công trình","Lắp đặt hệ thống mới","Cải tạo hệ thống cũ"]},
+    {code:"06",deptJa:"設計部",deptVi:"Bộ phận thiết kế",items:[
+      "Thiết kế bản vẽ","Chỉnh sửa bản vẽ","Thiết kế sơ đồ điện","Vẽ CAD","Thiết kế tủ điện","Thiết kế bố trí thiết bị","Thiết kế hệ thống điện","Làm bản vẽ thi công","Làm bản vẽ hoàn công","Kiểm tra bản vẽ kỹ thuật","Tính toán vật tư","Tính toán công suất","Thiết kế phương án thi công","Kiểm tra tiêu chuẩn kỹ thuật"]},
+    {code:"07",deptJa:"総務部",deptVi:"Bộ phận tổng vụ",items:[
+      "Hỗ trợ thủ tục","Xử lý giấy tờ","Cập nhật thông tin khách hàng","Xác nhận thông tin dịch vụ","Hỗ trợ đặt lịch","Điều chỉnh lịch hẹn","Hỗ trợ thanh toán","Xác nhận thanh toán","Xử lý yêu cầu hành chính","Hỗ trợ hồ sơ dịch vụ","Tiếp nhận yêu cầu chung","Hướng dẫn sử dụng dịch vụ","Kiểm tra thông tin khách hàng","Hỗ trợ xử lý thông tin","Xác nhận hồ sơ"]}
+  ];
+  window.YAMADEN_WORK_CATALOG=catalog;
+  function esc(s){return String(s||"").replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+  function js(s){return String(s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g,"\\n");}
+  function flat(){return catalog.flatMap(function(dept){return dept.items.map(function(item){return {item:item,dept:dept};});});}
+  function deptOf(item){return catalog.find(function(dept){return dept.items.indexOf(item)>=0;});}
+  function currentLang(){return (window.lang||localStorage.getItem("language")||"ja")==="vi"?"vi":"ja";}
+  window.getAllIssues=function(){return flat().map(function(x){return x.item;});};
+  window.renderIssueOptions=function(){
+    var input=document.getElementById("issueSearchInput"), dd=document.getElementById("issueDropdown");
+    if(!input||!dd)return;
+    var kw=input.value.trim().toLowerCase();
+    var chosen=window.__yamadenChosenIssues||[];
+    var items=flat().filter(function(x){
+      var text=[x.item,x.dept.deptJa,x.dept.deptVi,x.dept.code].join(" ").toLowerCase();
+      return chosen.indexOf(x.item)<0 && text.indexOf(kw)>=0;
+    });
+    dd.innerHTML=items.length?items.slice(0,80).map(function(x){
+      var deptLabel=x.dept.code+" "+x.dept.deptJa+" / "+x.dept.deptVi;
+      return '<button type="button" class="issue-option" onclick="selectIssueItem(\''+js(x.item)+'\')"><b>'+esc(x.item)+'</b><span>'+esc(deptLabel)+'</span></button>';
+    }).join(""):'<div class="issue-empty">'+(currentLang()==="ja"?"該当する項目がありません":"Không có mục phù hợp")+'</div>';
+    dd.classList.add("show");
+  };
+  window.renderIssueChips=function(){
+    var wrap=document.getElementById("selectedIssues"), hidden=document.getElementById("hiddenIssueInputs"), input=document.getElementById("issueSearchInput");
+    if(!wrap||!hidden)return;
+    var chosen=window.__yamadenChosenIssues||[];
+    wrap.innerHTML=chosen.map(function(item,i){
+      var dept=deptOf(item);
+      var label=dept?dept.code+" "+dept.deptJa:"";
+      return '<span class="selected-issue-tag"><span><b>'+esc(item)+'</b><small>'+esc(label)+'</small></span><button type="button" onclick="removeIssueItem('+i+')"></button></span>';
+    }).join("");
+    hidden.innerHTML="";
+    if(input)input.placeholder=currentLang()==="ja"?"作業内容を検索して選択":"Tìm và chọn nội dung công việc";
+    document.getElementById("issuePanel")?.classList.remove("required-missing");
+  };
+  window.selectIssueItem=function(item){
+    window.__yamadenChosenIssues=window.__yamadenChosenIssues||[];
+    if(window.__yamadenChosenIssues.indexOf(item)<0)window.__yamadenChosenIssues.push(item);
+    var input=document.getElementById("issueSearchInput"); if(input)input.value="";
+    renderIssueChips(); renderIssueOptions();
+  };
+  window.removeIssueItem=function(index){
+    if(window.__yamadenChosenIssues)window.__yamadenChosenIssues.splice(index,1);
+    renderIssueChips(); renderIssueOptions();
+  };
+  window.__updateIssueList=function(){renderIssueChips();renderIssueOptions();};
+  var oldApply=window.applyLanguage;
+  window.applyLanguage=function(){if(oldApply)oldApply();setTimeout(window.__updateIssueList,0);};
+  document.addEventListener("DOMContentLoaded",function(){setTimeout(window.__updateIssueList,600);});
+})();
+</script>
+<style id="yamaden-work-catalog-v19-style">
+@media (max-width: 860px) {
+  .issue-option {
+    display: grid !important;
+    gap: 3px !important;
+    min-height: 48px !important;
+  }
+  .issue-option b {
+    font-size: 13px !important;
+    color: #0f172a !important;
+  }
+  .issue-option span {
+    font-size: 10.5px !important;
+    color: #64748b !important;
+    font-weight: 800 !important;
+  }
+  .selected-issue-tag > span {
+    display: grid !important;
+    gap: 2px !important;
+    min-width: 0 !important;
+  }
+  .selected-issue-tag b {
+    font-size: 12px !important;
+    line-height: 1.15 !important;
+  }
+  .selected-issue-tag small {
+    font-size: 9.5px !important;
+    line-height: 1.1 !important;
+    color: rgba(255,255,255,.72) !important;
+    font-weight: 800 !important;
+  }
+}
+</style>
+<script id="yamaden-index-issues-only-v20">
+(function(){
+  function esc(s){return String(s||"").replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+  function js(s){return String(s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g,"\\n");}
+  function langNow(){return (window.lang||localStorage.getItem("language")||"ja")==="vi"?"vi":"ja";}
+  function list(){
+    if(Array.isArray(window.YAMADEN_WORK_CATALOG)){
+      return window.YAMADEN_WORK_CATALOG.flatMap(function(dept){return dept.items||[];});
+    }
+    try{return typeof getAllIssues==="function"?getAllIssues():[];}catch(e){return [];}
+  }
+  window.getAllIssues=function(){return Array.from(new Set(list()));};
+  window.renderIssueOptions=function(){
+    var input=document.getElementById("issueSearchInput"), dd=document.getElementById("issueDropdown");
+    if(!input||!dd)return;
+    var kw=input.value.trim().toLowerCase();
+    var chosen=window.__yamadenChosenIssues||[];
+    var items=getAllIssues().filter(function(item){return chosen.indexOf(item)<0 && item.toLowerCase().indexOf(kw)>=0;});
+    dd.innerHTML=items.length?items.slice(0,80).map(function(item){
+      return '<button type="button" class="issue-option" onclick="selectIssueItem(\''+js(item)+'\')">'+esc(item)+'</button>';
+    }).join(""):'<div class="issue-empty">'+(langNow()==="ja"?"該当する項目がありません":"Không có mục phù hợp")+'</div>';
+    dd.classList.add("show");
+  };
+  window.renderIssueChips=function(){
+    var wrap=document.getElementById("selectedIssues"), hidden=document.getElementById("hiddenIssueInputs"), input=document.getElementById("issueSearchInput");
+    if(!wrap||!hidden)return;
+    var chosen=window.__yamadenChosenIssues||[];
+    wrap.innerHTML=chosen.map(function(item,i){
+      return '<span class="selected-issue-tag"><b>'+esc(item)+'</b><button type="button" onclick="removeIssueItem('+i+')"></button></span>';
+    }).join("");
+    hidden.innerHTML="";
+    if(input)input.placeholder=langNow()==="ja"?"作業内容を検索して選択":"Tìm và chọn nội dung công việc";
+    document.getElementById("issuePanel")?.classList.remove("required-missing");
+  };
+  window.selectIssueItem=function(item){
+    window.__yamadenChosenIssues=window.__yamadenChosenIssues||[];
+    if(window.__yamadenChosenIssues.indexOf(item)<0)window.__yamadenChosenIssues.push(item);
+    var input=document.getElementById("issueSearchInput"); if(input)input.value="";
+    renderIssueChips(); renderIssueOptions();
+  };
+  window.removeIssueItem=function(index){
+    if(window.__yamadenChosenIssues)window.__yamadenChosenIssues.splice(index,1);
+    renderIssueChips(); renderIssueOptions();
+  };
+  window.__updateIssueList=function(){renderIssueChips();renderIssueOptions();};
+  document.addEventListener("DOMContentLoaded",function(){setTimeout(window.__updateIssueList,700);});
+})();
+</script>
+<style id="yamaden-index-issues-only-v20-style">
+@media (max-width: 860px) {
+  .issue-option span,
+  .selected-issue-tag small {
+    display: none !important;
+  }
+  .issue-option {
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+}
+</style>
 </body>
 </html>

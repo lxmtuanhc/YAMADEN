@@ -1369,5 +1369,93 @@ html,body{height:100%!important;overflow:hidden!important}
   };
 })();
 </script>
+<style id="yamaden-admin-work-catalog-v47-style">
+.request-issue-tags-admin{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.request-issue-tag-admin{display:inline-flex;align-items:center;border-radius:999px;background:#eef6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-size:11px;font-weight:900;padding:4px 8px}.work-tag-item span{line-height:1.25}.staff-dept-pill{white-space:normal!important;line-height:1.25}
+</style>
+<script id="yamaden-admin-work-catalog-v47-script">
+(function(){
+  const CATALOG=[
+    {code:"01",deptJa:"社長・代表",deptVi:"Giám đốc / đại diện công ty",items:["Phê duyệt công trình","Phê duyệt báo giá","Phê duyệt hợp đồng","Kiểm tra tiến độ tổng thể","Kiểm tra tình trạng công ty","Họp với khách hàng","Tiếp nhận dự án lớn","Xử lý vấn đề quan trọng","Điều phối hoạt động công ty","Quản lý vận hành công ty","Quản lý nhân sự","Kiểm tra doanh thu công trình","Xác nhận kế hoạch thi công","Phê duyệt hồ sơ kỹ thuật","Giải quyết khiếu nại khách hàng","Hỗ trợ xử lý sự cố nghiêm trọng"]},
+    {code:"02",deptJa:"工務部",deptVi:"Bộ phận quản lý công trình",items:["Khảo sát hiện trường","Kiểm tra công trình","Kiểm tra tiến độ thi công","Kiểm tra an toàn công trình","Kiểm tra chất lượng công trình","Nghiệm thu công trình","Kiểm tra sau thi công","Điều phối thi công","Điều chỉnh lịch thi công","Hỗ trợ bàn giao công trình","Kiểm tra tình trạng thiết bị","Quản lý công trình đang thi công","Hỗ trợ xử lý vấn đề tại công trình"]},
+    {code:"03",deptJa:"FS部",deptVi:"Bộ phận bảo trì / hỗ trợ kỹ thuật",items:["Kiểm tra thiết bị bị lỗi","Sửa chữa sự cố","Bảo trì định kỳ","Kiểm tra hệ thống điện","Kiểm tra thiết bị hoạt động không ổn định","Xử lý sự cố khẩn cấp","Vệ sinh thiết bị","Thay thế linh kiện","Kiểm tra nguyên nhân lỗi","Hỗ trợ kỹ thuật","Kiểm tra máy móc","Khôi phục hoạt động hệ thống","Kiểm tra kết nối thiết bị","Kiểm tra sau sửa chữa","Hỗ trợ tại hiện trường"]},
+    {code:"04",deptJa:"営業部",deptVi:"Bộ phận kinh doanh / tư vấn",items:["Tư vấn dịch vụ","Tư vấn công trình mới","Khảo sát để báo giá","Báo giá sửa chữa","Báo giá thi công","Tư vấn thiết bị phù hợp","Tư vấn phương án thi công","Tư vấn phương án tiết kiệm chi phí","Giải thích dịch vụ","Hỗ trợ hợp đồng","Điều chỉnh nội dung hợp đồng","Chăm sóc khách hàng","Hỗ trợ đặt lịch dịch vụ","Tiếp nhận yêu cầu khách hàng"]},
+    {code:"05",deptJa:"工事部",deptVi:"Bộ phận thi công",items:["Lắp đặt thiết bị","Tháo dỡ thiết bị","Di dời thiết bị","Đi dây điện","Sửa dây điện","Lắp đèn","Thay đèn","Lắp ổ cắm / công tắc","Lắp CB / breaker","Lắp camera","Sửa camera","Đi dây mạng LAN","Lắp Wi-Fi / router","Lắp máy lạnh","Tháo máy lạnh","Lắp quạt thông gió","Thi công hệ thống điện","Thi công tủ điện","Thi công tại công trình","Lắp đặt máy móc","Sửa chữa tại công trình","Lắp đặt hệ thống mới","Cải tạo hệ thống cũ"]},
+    {code:"06",deptJa:"設計部",deptVi:"Bộ phận thiết kế",items:["Thiết kế bản vẽ","Chỉnh sửa bản vẽ","Thiết kế sơ đồ điện","Vẽ CAD","Thiết kế tủ điện","Thiết kế bố trí thiết bị","Thiết kế hệ thống điện","Làm bản vẽ thi công","Làm bản vẽ hoàn công","Kiểm tra bản vẽ kỹ thuật","Tính toán vật tư","Tính toán công suất","Thiết kế phương án thi công","Kiểm tra tiêu chuẩn kỹ thuật"]},
+    {code:"07",deptJa:"総務部",deptVi:"Bộ phận tổng vụ",items:["Hỗ trợ thủ tục","Xử lý giấy tờ","Cập nhật thông tin khách hàng","Xác nhận thông tin dịch vụ","Hỗ trợ đặt lịch","Điều chỉnh lịch hẹn","Hỗ trợ thanh toán","Xác nhận thanh toán","Xử lý yêu cầu hành chính","Hỗ trợ hồ sơ dịch vụ","Tiếp nhận yêu cầu chung","Hướng dẫn sử dụng dịch vụ","Kiểm tra thông tin khách hàng","Hỗ trợ xử lý thông tin","Xác nhận hồ sơ"]}
+  ];
+  window.YAMADEN_WORK_CATALOG=CATALOG;
+  function lang(){try{return currentLang==="vi"?"vi":"ja"}catch(e){return String(localStorage.getItem("language")||"ja").startsWith("vi")?"vi":"ja"}}
+  function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]})}
+  function deptLabel(d){return d.code+" "+d.deptJa+" — "+d.deptVi}
+  function deptByLabel(label){return CATALOG.find(d=>deptLabel(d)===label||d.deptJa===label||d.deptVi===label)||CATALOG[0]}
+  function requestTags(r){return Array.isArray(r?.issueTags)?r.issueTags:String(r?.issueTags||"").split(/[,、\n]/).map(x=>x.trim()).filter(Boolean)}
+  window.__yamadenRequestIssueTagsHtml=function(r){
+    const tags=requestTags(r);
+    return tags.length?'<div class="request-issue-tags-admin">'+tags.map(tag=>'<span class="request-issue-tag-admin">'+esc(tag)+'</span>').join("")+'</div>':'';
+  };
+  const oldTitle=window.requestTitle;
+  window.requestTitle=function(r){
+    const tags=requestTags(r);
+    return tags[0]||((oldTitle&&oldTitle(r))||r?.category||r?.title||r?.content||r?.message||"-");
+  };
+  const oldMedia=window.mediaHtml;
+  window.mediaHtml=function(r){return (window.__yamadenRequestIssueTagsHtml?window.__yamadenRequestIssueTagsHtml(r):"")+(oldMedia?oldMedia(r):"")};
+  function ensureStaffModal(){
+    let old=document.getElementById("staffFormModal"); if(old)old.remove();
+    const modal=document.createElement("div");
+    modal.id="staffFormModal";
+    modal.className="staff-form-modal";
+    modal.onclick=e=>{if(e.target===modal)closeStaffProfileForm()};
+    modal.innerHTML='<div class="staff-form-box"><div class="staff-form-head"><div class="staff-form-title" id="staffFormTitle"></div><button class="staff-form-close" onclick="closeStaffProfileForm()"></button></div><div class="staff-form-body"><input type="hidden" id="staffProfileId"><div class="staff-field"><label id="staffProfileNameLabel"></label><input id="staffProfileName"></div><div class="staff-field"><label id="staffProfileEmailLabel"></label><input id="staffProfileEmail" type="email"></div><div class="staff-field"><label id="staffProfileDeptLabel"></label><select id="staffProfileDept" onchange="renderWorkTagOptionsCleanV47()"></select></div><div class="staff-field"><label id="staffProfileWorkLabel"></label><div class="muted" style="font-size:12px;font-weight:800" id="staffWorkHint"></div><div class="work-tag-box" id="staffWorkTagBox"></div></div><div class="staff-form-actions"><button class="staff-cancel-profile" onclick="closeStaffProfileForm()" id="staffProfileCancel"></button><button class="staff-save-profile" onclick="saveStaffProfileV8()" id="staffProfileSave"></button></div></div></div>';
+    document.body.appendChild(modal);
+  }
+  function labels(){
+    const vi=lang()==="vi";
+    const map={staffFormTitle:vi?"Hồ sơ nhân viên":"スタッフプロフィール",staffProfileNameLabel:vi?"Tên":"氏名",staffProfileEmailLabel:"Email",staffProfileDeptLabel:vi?"Bộ phận làm việc":"部署",staffProfileWorkLabel:vi?"Nội dung công việc phụ trách":"担当作業内容",staffWorkHint:vi?"Chọn các công việc nhân viên phụ trách theo bộ phận.":"部署に合わせて担当できる作業を選択してください。",staffProfileCancel:vi?"Hủy":"キャンセル",staffProfileSave:vi?"Lưu":"保存"};
+    Object.entries(map).forEach(([id,text])=>{const el=document.getElementById(id);if(el)el.textContent=text});
+    const sel=document.getElementById("staffProfileDept");
+    if(sel){const cur=sel.value;sel.innerHTML=CATALOG.map(d=>'<option value="'+esc(deptLabel(d))+'">'+esc(deptLabel(d))+'</option>').join("");if(cur)sel.value=cur}
+  }
+  window.renderWorkTagOptionsCleanV47=function(selected=[]){
+    const box=document.getElementById("staffWorkTagBox"), sel=document.getElementById("staffProfileDept");
+    if(!box||!sel)return;
+    const dept=deptByLabel(sel.value);
+    const chosen=new Set(Array.isArray(selected)?selected:[]);
+    box.innerHTML=dept.items.map(tag=>'<label class="work-tag-item"><input type="checkbox" value="'+esc(tag)+'" '+(chosen.has(tag)?"checked":"")+'> <span>'+esc(tag)+'</span></label>').join("");
+  };
+  function tagsOf(s){
+    if(Array.isArray(s?.workTags))return s.workTags;
+    if(Array.isArray(s?.tags))return s.tags;
+    return String(s?.workContent||s?.work||s?.skills||"").split(/[,、\n]/).map(x=>x.trim()).filter(Boolean);
+  }
+  function staffId(s){return s?._id||s?.id||""}
+  function staffDept(s){return s?.department||s?.areas||s?.dept||deptLabel(CATALOG[0])}
+  window.openStaffProfileForm=function(id=""){
+    ensureStaffModal(); labels();
+    const s=(currentStaff||[]).find(x=>String(staffId(x))===String(id));
+    document.getElementById("staffProfileId").value=id||"";
+    document.getElementById("staffProfileName").value=s?.name||"";
+    document.getElementById("staffProfileEmail").value=s?.email||"";
+    const dept=deptByLabel(staffDept(s||{}));
+    document.getElementById("staffProfileDept").value=deptLabel(dept);
+    renderWorkTagOptionsCleanV47(tagsOf(s||{}));
+    document.getElementById("staffFormModal").classList.add("show");
+  };
+  window.closeStaffProfileForm=function(){document.getElementById("staffFormModal")?.classList.remove("show")};
+  window.saveStaffProfileV8=async function(){
+    const id=document.getElementById("staffProfileId").value;
+    const tags=[...document.querySelectorAll("#staffWorkTagBox input:checked")].map(x=>x.value);
+    const dept=document.getElementById("staffProfileDept").value;
+    const body={name:document.getElementById("staffProfileName").value.trim(),email:document.getElementById("staffProfileEmail").value.trim(),phone:"",areas:dept,department:dept,skills:tags.join(", "),workContent:tags.join(", "),workTags:tags,status:"active"};
+    if(!body.name)return;
+    const res=await apiFetch(API+"/admin/staff"+(id?"/"+encodeURIComponent(id):""),{method:id?"PUT":"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    if(res.status===401)return authFailLogout();
+    closeStaffProfileForm();loadStaff();
+  };
+  const oldApply=window.applyLanguage;
+  window.applyLanguage=function(){if(oldApply)oldApply();if(currentView==="staff")setTimeout(()=>renderStaff&&renderStaff(),0);if(window.renderRequests)setTimeout(renderRequests,0)};
+  document.addEventListener("DOMContentLoaded",function(){setTimeout(function(){if(window.renderRequests)renderRequests();},900)});
+})();
+</script>
 </body>
 </html>
