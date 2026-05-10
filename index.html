@@ -3459,5 +3459,33 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 }
 </style>
+<style id="yamaden-bottom-safe-v16">
+@media (max-width: 860px) {
+  :root {
+    --yamaden-bottom-bar: calc(86px + env(safe-area-inset-bottom));
+  }
+  .app:not(.auth-login-mode) .bottom-nav,
+  .app.auth-app-mode .bottom-nav {
+    height: var(--yamaden-bottom-bar) !important;
+    min-height: var(--yamaden-bottom-bar) !important;
+    padding: 8px 20px calc(18px + env(safe-area-inset-bottom)) !important;
+    align-items: flex-start !important;
+  }
+  .app:not(.auth-login-mode) .bottom-nav button,
+  .app.auth-app-mode .bottom-nav button {
+    height: 50px !important;
+    margin-top: 0 !important;
+  }
+  .app:not(.auth-login-mode) .main,
+  .app.auth-app-mode .main {
+    bottom: var(--yamaden-bottom-bar) !important;
+    padding-bottom: 112px !important;
+  }
+  .app:not(.auth-login-mode) #accountSection .account-landing,
+  .app.auth-app-mode #accountSection .account-landing {
+    padding-bottom: 122px !important;
+  }
+}
+</style>
 </body>
 </html>
