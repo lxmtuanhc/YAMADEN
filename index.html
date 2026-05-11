@@ -947,6 +947,37 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
           </div>
 
           <div class="account-card" id="accountFormCard">
+            <button type="button" class="auth-back-btn hidden" id="authBackBtn" onclick="setAccountMode('welcome')" aria-label="Back">‹</button>
+            <div class="auth-start-screen" id="authStartScreen">
+              <div class="auth-start-logo">
+                <img src="/icon-192.png" alt="YAMADEN">
+                <div>
+                  <b>YAMADEN</b>
+                  <span>YAMADA DENKI SERVICE</span>
+                </div>
+              </div>
+              <div class="auth-hero-visual" aria-hidden="true">
+                <div class="auth-tech-face"></div>
+                <div class="auth-tech-body"></div>
+                <div class="auth-tech-board"></div>
+                <div class="auth-zap">ϟ</div>
+              </div>
+              <div class="auth-start-title" id="authStartTitle">Chào mừng</div>
+              <div class="auth-start-text" id="authStartText">Đăng ký hoặc đăng nhập để tiếp tục sử dụng ứng dụng YAMADEN.</div>
+              <button type="button" class="main-btn auth-primary" id="authStartLoginBtn" onclick="setAccountMode('login')">Đăng nhập</button>
+              <button type="button" class="soft-btn auth-secondary" id="authStartRegisterBtn" onclick="setAccountMode('register')">Đăng ký</button>
+              <div class="auth-start-note" id="authStartNote">Tài khoản cần được admin duyệt trước khi sử dụng app.</div>
+            </div>
+            <div class="auth-pending-screen hidden" id="authPendingScreen">
+              <div class="auth-pending-visual" aria-hidden="true">
+                <div class="auth-paper"></div>
+                <div class="auth-checkmark">✓</div>
+              </div>
+              <div class="auth-pending-title" id="authPendingTitle">Thông tin đã được gửi</div>
+              <div class="auth-pending-text" id="authPendingText">Tài khoản của bạn đang chờ admin duyệt. Sau khi được phê duyệt, bạn mới có thể sử dụng đầy đủ chức năng của app.</div>
+              <div class="auth-pending-pill" id="authPendingPill">Đang chờ duyệt</div>
+              <button type="button" class="soft-btn auth-secondary" id="authPendingLoginBtn" onclick="userLogout();setAccountMode('login')">Quay lại đăng nhập</button>
+            </div>
             <div class="account-welcome">
               <div class="account-welcome-ja" id="accountWelcome">Chào mừng</div>
               <div class="account-welcome-brand">YAMADEN</div>
@@ -1110,7 +1141,7 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
 const API = "https://yamaden.onrender.com";
 let lang = localStorage.getItem("language") || "ja";
 let currentUser = null;
-let accountMode = "register";
+let accountMode = "welcome";
 let previewUrls = [];
 let selectedMediaFiles = [];
 let lastCheckedId = "";
@@ -1369,22 +1400,52 @@ function updateAccountUI() {
     $("accountCompany").value=currentUser.company||""; $("name").value=currentUser.name||""; $("phone").value=currentUser.phone||"";
     $("contact").value=currentUser.contact||currentUser.email||""; $("address").value=currentUser.address||currentUser.projectName||"";
   }
-  setAccountMode(currentUser&&!currentUser.profileCompleted?"profile":(hasProfile&&!loggedIn?"login":accountMode));
+  setAccountMode(currentUser&&!currentUser.profileCompleted?"profile":(hasProfile&&!loggedIn?"pending":accountMode));
 }
 
 function setAccountMode(mode) {
   accountMode=mode;
-  let isLogin=mode==="login", isProfile=mode==="profile", isRegister=mode==="register";
+  let isWelcome=mode==="welcome", isLogin=mode==="login", isProfile=mode==="profile", isRegister=mode==="register", isPending=mode==="pending";
+  $("accountFormCard")?.classList.toggle("auth-mode-welcome",isWelcome);
+  $("accountFormCard")?.classList.toggle("auth-mode-form",isLogin||isRegister||isProfile);
+  $("accountFormCard")?.classList.toggle("auth-mode-pending",isPending);
+  $("authStartScreen")?.classList.toggle("hidden",!isWelcome);
+  $("authPendingScreen")?.classList.toggle("hidden",!isPending);
+  $("authBackBtn")?.classList.toggle("hidden",isWelcome||isProfile||isPending);
+  document.querySelector(".account-welcome")?.classList.toggle("hidden",isWelcome||isPending);
+  document.querySelector(".account-mode")?.classList.toggle("hidden",isWelcome||isProfile||isPending);
+  $("accountFields")?.classList.toggle("hidden",isWelcome||isPending);
+  document.querySelector("#accountFormCard > .main-btn")?.classList.toggle("hidden",isWelcome||isPending);
   $("accountModeRegister").classList.toggle("active",isRegister);
   $("accountModeLogin").classList.toggle("active",isLogin);
-  document.querySelector(".account-mode")?.classList.toggle("hidden",isProfile);
   ["accountName","accountEmail","accountProvince","accountProjectName","accountCompany"].forEach(id=>$(id)?.classList.toggle("hidden",!isProfile));
-  $("accountPhone").classList.toggle("hidden",isProfile);
-  $("accountPin").classList.toggle("hidden",isProfile);
-  $("accountPinConfirm").classList.toggle("hidden",isLogin||isProfile);
-  $("accountLoginText").innerText=isProfile?(lang==="ja"?"送信":t("send")):(isLogin?t("accountLogin"):t("accountRegister"));
-  $("accountWelcome").innerText=isProfile?(lang==="ja"?"お客様情報":"Thông tin khách hàng"):(lang==="ja"?"ようこそ":"Chào mừng");
-  $("accountText").innerHTML=isProfile?(lang==="ja"?"承認のため、お客様情報を入力してください。":"Vui lòng bổ sung thông tin khách hàng."):t("accountText");
+  $("accountPhone").classList.toggle("hidden",isProfile||isPending||isWelcome);
+  $("accountPin").classList.toggle("hidden",isProfile||isPending||isWelcome);
+  $("accountPinConfirm").classList.toggle("hidden",!isRegister);
+  $("accountLoginText").innerText=isProfile?(lang==="ja"?"送信":t("send")):(isLogin?t("accountLogin"):(lang==="ja"?"続ける":"Tiếp tục"));
+  $("accountWelcome").innerText=isProfile?(lang==="ja"?"お客様情報":"Thông tin tài khoản"):(isLogin?(lang==="ja"?"ログイン":"Đăng nhập"):(lang==="ja"?"新規登録":"Đăng ký"));
+  $("accountText").innerHTML=isProfile?(lang==="ja"?"管理者承認のため、お客様情報を入力してください。":"Vui lòng cung cấp đầy đủ thông tin để admin duyệt tài khoản của bạn."):(isLogin?(lang==="ja"?"電話番号とPINを入力してください。":"Nhập số điện thoại và PIN để đăng nhập."):(lang==="ja"?"電話番号とPINだけで登録できます。":"Chỉ cần số điện thoại và mã PIN để tạo tài khoản."));
+  $("authStartTitle") && ($("authStartTitle").innerText=lang==="ja"?"ようこそ":"Chào mừng");
+  $("authStartText") && ($("authStartText").innerText=lang==="ja"?"ログインまたは登録してYAMADENアプリをご利用ください。":"Đăng ký hoặc đăng nhập để tiếp tục sử dụng ứng dụng YAMADEN.");
+  $("authStartLoginBtn") && ($("authStartLoginBtn").innerText=t("accountLogin"));
+  $("authStartRegisterBtn") && ($("authStartRegisterBtn").innerText=lang==="ja"?"新規登録":"Đăng ký");
+  $("authStartNote") && ($("authStartNote").innerText=lang==="ja"?"アカウントは管理者承認後に利用できます。":"Tài khoản cần được admin duyệt trước khi sử dụng app.");
+  $("authPendingTitle") && ($("authPendingTitle").innerText=lang==="ja"?"情報を送信しました":"Thông tin đã được gửi");
+  $("authPendingText") && ($("authPendingText").innerText=lang==="ja"?"管理者承認待ちです。承認後にアプリをご利用いただけます。":"Tài khoản của bạn đang chờ admin duyệt. Sau khi được phê duyệt, bạn mới có thể sử dụng đầy đủ chức năng của app.");
+  $("authPendingPill") && ($("authPendingPill").innerText=lang==="ja"?"承認待ち":"Đang chờ duyệt");
+  $("authPendingLoginBtn") && ($("authPendingLoginBtn").innerText=lang==="ja"?"ログインに戻る":"Quay lại đăng nhập");
+  if(isLogin||isRegister){
+    $("accountPhone").placeholder=lang==="ja"?"電話番号":"Số điện thoại";
+    $("accountPin").placeholder=lang==="ja"?"PIN":"Nhập PIN";
+    $("accountPinConfirm").placeholder=lang==="ja"?"PIN確認":"Nhập lại PIN";
+  }
+  if(isProfile){
+    $("accountName").placeholder=lang==="ja"?"お名前":"Họ và tên";
+    $("accountEmail").placeholder="Email";
+    $("accountProvince").placeholder=lang==="ja"?"住所":"Địa chỉ";
+    $("accountProjectName").placeholder=lang==="ja"?"備考 / 工事名":"Ghi chú / tên công trình";
+    $("accountCompany").placeholder=lang==="ja"?"会社名（任意）":"Công ty / cá nhân (nếu có)";
+  }
 }
 
 async function userLogin() {
@@ -1453,7 +1514,7 @@ async function userLogin() {
   } catch(err){ showToast(t("fail")); }
 }
 
-function userLogout(){ localStorage.removeItem("userToken"); localStorage.removeItem("userProfile"); currentUser=null; updateAccountUI(); showTab("account"); }
+function userLogout(){ localStorage.removeItem("userToken"); localStorage.removeItem("userProfile"); currentUser=null; accountMode="welcome"; updateAccountUI(); showTab("account"); }
 
 function getMyRequests(){ try{ return JSON.parse(localStorage.getItem("myRequests")||"[]"); }catch(e){ return []; } }
 function saveMyRequest(id,meta={}){ if(!id)return; let list=getMyRequests().filter(i=>String(i.id)!==String(id)); list.unshift({id,time:Date.now(),...meta}); localStorage.setItem("myRequests",JSON.stringify(list.slice(0,20))); }
@@ -3353,7 +3414,45 @@ document.addEventListener("DOMContentLoaded",()=>{
 .profile-card{border-radius:18px!important;border:1px solid #e5eaf2!important;box-shadow:0 14px 34px rgba(15,23,42,.075)!important}
 .profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 .profile-item{border-radius:12px!important;background:#f8fafc!important}
-@media(max-width:480px){.app.auth-login-mode .account-panel{width:min(100%,390px)!important;padding:12px!important}.app.auth-login-mode .account-card{padding:18px!important}.profile-grid{grid-template-columns:1fr!important}}
+.app.auth-login-mode .auth-back-btn{position:absolute;left:16px;top:14px;z-index:3;width:34px;height:34px;border:0;background:transparent;color:#111827;font-size:34px;line-height:30px;font-weight:600;cursor:pointer}
+.app.auth-login-mode .auth-start-screen,.app.auth-login-mode .auth-pending-screen{text-align:center}
+.app.auth-login-mode .auth-start-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px 0 14px}
+.app.auth-login-mode .auth-start-logo img{width:56px;height:56px;border-radius:16px;box-shadow:0 8px 18px rgba(37,99,235,.16)}
+.app.auth-login-mode .auth-start-logo b{display:block;font-size:22px;line-height:1;color:#075ad7;font-weight:950;letter-spacing:0}
+.app.auth-login-mode .auth-start-logo span{display:block;margin-top:4px;font-size:10px;line-height:1.2;color:#111827;font-weight:950;letter-spacing:.08em}
+.app.auth-login-mode .auth-hero-visual{position:relative;height:168px;margin:0 auto 12px;max-width:260px;background:linear-gradient(180deg,#f8fbff,#eef5ff);border-radius:18px;overflow:hidden;border:1px solid #e5efff}
+.app.auth-login-mode .auth-hero-visual:before{content:"";position:absolute;left:22px;right:22px;bottom:26px;height:72px;border:2px solid #d7e5f7;border-radius:14px;box-shadow:54px -20px 0 -18px #dbeafe,-64px -6px 0 -18px #dbeafe}
+.app.auth-login-mode .auth-tech-face{position:absolute;left:104px;top:34px;width:52px;height:52px;border-radius:50%;background:#ffd0a6;border:4px solid #075ad7;box-shadow:0 -18px 0 -7px #075ad7}
+.app.auth-login-mode .auth-tech-body{position:absolute;left:82px;top:86px;width:96px;height:82px;background:#075ad7;border-radius:26px 26px 16px 16px}
+.app.auth-login-mode .auth-tech-body:before{content:"";position:absolute;left:31px;top:14px;width:34px;height:24px;border-radius:8px;background:#fff;opacity:.9}
+.app.auth-login-mode .auth-tech-board{position:absolute;left:58px;top:104px;width:48px;height:58px;border-radius:8px;background:#173b7a;transform:rotate(-9deg);box-shadow:0 8px 14px rgba(15,23,42,.16)}
+.app.auth-login-mode .auth-zap{position:absolute;right:56px;top:40px;width:48px;height:42px;border-radius:14px;background:#fff;border:2px solid #bfdbfe;color:#075ad7;font-size:32px;line-height:42px;font-weight:950;box-shadow:0 10px 20px rgba(37,99,235,.12)}
+.app.auth-login-mode .auth-start-title{margin-top:4px;color:#111827;font-size:24px;line-height:1.15;font-weight:950;letter-spacing:0}
+.app.auth-login-mode .auth-start-text{max-width:300px;margin:10px auto 20px;color:#4b5563;font-size:13px;line-height:1.5;font-weight:800}
+.app.auth-login-mode .auth-primary{width:100%;margin-top:0!important;background:#075ad7!important;box-shadow:0 16px 30px rgba(7,90,215,.25)!important}
+.app.auth-login-mode .auth-secondary{width:100%;height:48px!important;min-height:48px!important;margin-top:10px!important;border-radius:12px!important;border:1px solid #075ad7!important;background:#fff!important;color:#075ad7!important;font-weight:950!important}
+.app.auth-login-mode .auth-start-note{position:relative;margin:16px auto 0;padding-left:24px;max-width:300px;color:#4b5563;font-size:12px;line-height:1.45;font-weight:850;text-align:left}
+.app.auth-login-mode .auth-start-note:before{content:"i";position:absolute;left:0;top:0;width:17px;height:17px;border-radius:50%;border:1px solid #64748b;color:#334155;font-size:12px;line-height:16px;text-align:center;font-weight:950}
+.app.auth-login-mode .auth-mode-form{padding-top:54px!important}
+.app.auth-login-mode .auth-mode-form .account-welcome{text-align:center!important;border-bottom:0!important;margin-bottom:18px!important;padding-bottom:0!important}
+.app.auth-login-mode .auth-mode-form .account-welcome-brand{display:none!important}
+.app.auth-login-mode .auth-mode-form .account-welcome-ja{font-size:22px!important;color:#111827!important}
+.app.auth-login-mode .auth-mode-form .account-welcome-sub{max-width:300px!important;margin:8px auto 0!important;text-align:center!important}
+.app.auth-login-mode .auth-mode-form .account-fields{gap:14px!important}
+.app.auth-login-mode .auth-mode-form .account-fields input{height:54px!important;border-color:#d6deeb!important;background:#fff!important;padding-left:18px!important}
+.app.auth-login-mode .auth-mode-form .account-fields input::placeholder{color:#98a2b3!important;font-weight:800!important}
+.app.auth-login-mode .auth-mode-form .main-btn{margin-top:18px!important;background:#075ad7!important;box-shadow:0 16px 30px rgba(7,90,215,.25)!important}
+.app.auth-login-mode .auth-mode-pending{padding:30px 22px!important}
+.app.auth-login-mode .auth-pending-visual{position:relative;height:148px;margin:8px auto 8px;max-width:240px}
+.app.auth-login-mode .auth-paper{position:absolute;left:78px;top:10px;width:92px;height:120px;border-radius:16px;background:#fff;border:6px solid #64748b;box-shadow:0 18px 28px rgba(15,23,42,.10)}
+.app.auth-login-mode .auth-paper:before{content:"";position:absolute;left:22px;top:-18px;width:38px;height:22px;border-radius:8px 8px 0 0;background:#e2e8f0;border:4px solid #64748b;border-bottom:0}
+.app.auth-login-mode .auth-paper:after{content:"";position:absolute;left:19px;right:19px;bottom:23px;height:4px;background:#dbeafe;box-shadow:0 -16px 0 #dbeafe,0 -32px 0 #dbeafe}
+.app.auth-login-mode .auth-checkmark{position:absolute;left:105px;top:48px;width:58px;height:58px;border-radius:50%;background:#075ad7;color:#fff;font-size:36px;line-height:58px;font-weight:950;box-shadow:0 14px 24px rgba(7,90,215,.25)}
+.app.auth-login-mode .auth-pending-title{font-size:23px;line-height:1.15;color:#111827;font-weight:950}
+.app.auth-login-mode .auth-pending-text{max-width:300px;margin:10px auto 18px;color:#4b5563;font-size:13px;line-height:1.5;font-weight:850}
+.app.auth-login-mode .auth-pending-pill{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:210px;height:48px;margin:0 auto 8px;border-radius:12px;background:#e8f1ff;color:#075ad7;font-weight:950}
+.app.auth-login-mode .auth-pending-pill:before{content:"◷";font-size:24px;line-height:1}
+@media(max-width:480px){.app.auth-login-mode .account-panel{width:min(100%,390px)!important;padding:12px!important}.app.auth-login-mode .account-card{padding:18px!important}.app.auth-login-mode .auth-mode-form{padding-top:50px!important}.app.auth-login-mode .auth-hero-visual{height:152px}.profile-grid{grid-template-columns:1fr!important}}
 </style>
 
 </body>
