@@ -2,3 +2,5 @@ node_modules
 requests.json
 .env
 .codex-push-temp-2/
+.codex-edge-audit*/
+.edge-profile3/
