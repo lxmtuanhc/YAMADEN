@@ -993,15 +993,23 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
             </div>
             <div class="account-fields" id="accountFields">
               <input id="accountName" placeholder="Họ và tên" autocomplete="name">
+              <div class="auth-field-label hidden" id="accountPhoneAuthLabel">Số điện thoại</div>
               <input id="accountPhone" placeholder="Số điện thoại" inputmode="tel" autocomplete="tel">
+              <div class="auth-field-label hidden" id="accountPinAuthLabel">PIN</div>
               <input id="accountPin" type="password" placeholder="Mã PIN 4-6 số" inputmode="numeric" maxlength="6">
+              <div class="auth-field-label hidden" id="accountPinConfirmAuthLabel">Nhập lại PIN</div>
               <input id="accountPinConfirm" type="password" placeholder="Nhập lại mã PIN" inputmode="numeric" maxlength="6">
               <input id="accountEmail" placeholder="Email" autocomplete="email">
               <input id="accountProvince" placeholder="Tỉnh / thành">
               <input id="accountProjectName" placeholder="Tên công trình">
               <input id="accountCompany" placeholder="Công ty / cá nhân">
             </div>
+            <div class="auth-login-options hidden" id="authLoginOptions">
+              <label class="auth-remember"><input type="checkbox" checked><span id="authRememberText">Ghi nhớ đăng nhập</span></label>
+              <button type="button" id="authForgotPin" onclick="showToast(lang==='ja'?'管理者へお問い合わせください。':'Vui lòng liên hệ admin để được hỗ trợ PIN.')">Quên PIN?</button>
+            </div>
             <button class="main-btn" onclick="userLogin()"><span class="icon" id="accountLoginIcon"></span><span id="accountLoginText">Đăng nhập / Lưu</span></button>
+            <div class="auth-switch-prompt hidden" id="authSwitchPrompt"><span id="authSwitchPromptText">Chưa có tài khoản?</span> <button type="button" id="authSwitchPromptBtn" onclick="setAccountMode('register')">Đăng ký</button></div>
             <div class="approval-state">
               <div class="approval-badge pending" id="approvalPendingText"></div>
               <div class="approval-badge approved" id="approvalApprovedText"></div>
@@ -3741,6 +3749,20 @@ document.addEventListener("DOMContentLoaded",()=>{
     display: none !important;
   }
 
+  .app.auth-login-mode .auth-field-label {
+    display: block !important;
+    margin: 0 0 -4px !important;
+    color: #111827 !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    font-weight: 950 !important;
+    text-align: left !important;
+  }
+
+  .app.auth-login-mode .auth-field-label.hidden {
+    display: none !important;
+  }
+
   .app.auth-login-mode #accountFields input:focus {
     outline: none !important;
     border-color: #075ad7 !important;
@@ -3791,6 +3813,108 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   .app.auth-login-mode .auth-mode-form #accountFormCard > .main-btn {
     margin-top: 20px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form .account-welcome {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 44px 0 clamp(36px, 7dvh, 58px) !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form .account-welcome-ja {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    font-size: 21px !important;
+    line-height: 1.2 !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form .account-welcome-sub {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 18px auto 0 !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #accountFields {
+    gap: 12px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #accountFields input {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+  }
+
+  .app.auth-login-mode .auth-login-options {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin: 12px 0 clamp(54px, 12dvh, 96px) !important;
+    color: #475569 !important;
+    font-size: 12px !important;
+    font-weight: 850 !important;
+  }
+
+  .app.auth-login-mode .auth-login-options.hidden {
+    display: none !important;
+  }
+
+  .app.auth-login-mode .auth-remember {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+  }
+
+  .app.auth-login-mode .auth-remember input {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    accent-color: #075ad7 !important;
+  }
+
+  .app.auth-login-mode #authForgotPin,
+  .app.auth-login-mode #authSwitchPromptBtn {
+    border: 0 !important;
+    background: transparent !important;
+    color: #075ad7 !important;
+    font: inherit !important;
+    font-weight: 950 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .app.auth-login-mode .auth-switch-prompt {
+    display: block !important;
+    margin-top: 18px !important;
+    text-align: center !important;
+    color: #475569 !important;
+    font-size: 12px !important;
+    font-weight: 850 !important;
+  }
+
+  .app.auth-login-mode .auth-switch-prompt.hidden {
+    display: none !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #accountFormCard > .main-btn {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    border-radius: 10px !important;
+    margin-top: 0 !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #accountLoginIcon {
+    display: none !important;
   }
 
   .app.auth-login-mode .auth-pending-visual {
@@ -4012,7 +4136,15 @@ document.addEventListener("DOMContentLoaded",()=>{
       name: $("accountName"), phone: $("accountPhone"), pin: $("accountPin"), pinConfirm: $("accountPinConfirm"),
       email: $("accountEmail"), province: $("accountProvince"), project: $("accountProjectName"), company: $("accountCompany")
     };
+    const labels = {
+      phone: $("accountPhoneAuthLabel"),
+      pin: $("accountPinAuthLabel"),
+      pinConfirm: $("accountPinConfirmAuthLabel")
+    };
     Object.values(fields).forEach(el => show(el, false));
+    Object.values(labels).forEach(el => show(el, false));
+    show($("authLoginOptions"), false);
+    show($("authSwitchPrompt"), false);
 
     if (isWelcome) {
       setText("authStartTitle", c("welcomeTitle"));
@@ -4023,18 +4155,31 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     if (isLogin) {
       show(fields.phone, true); show(fields.pin, true);
+      show(labels.phone, true); show(labels.pin, true);
+      show($("authLoginOptions"), true);
+      show($("authSwitchPrompt"), true);
       setText("accountWelcome", c("loginTitle"));
       setText("accountText", c("loginText"));
       setText("accountLoginText", c("login"));
+      setText("authRememberText", getLang() === "ja" ? "\u30ed\u30b0\u30a4\u30f3\u3092\u4fdd\u6301" : "Ghi nh\u1edb \u0111\u0103ng nh\u1eadp");
+      setText("authForgotPin", getLang() === "ja" ? "PIN\u3092\u5fd8\u308c\u305f\u5834\u5408" : "Qu\u00ean PIN?");
+      setText("authSwitchPromptText", getLang() === "ja" ? "\u30a2\u30ab\u30a6\u30f3\u30c8\u672a\u767b\u9332\uff1f" : "Ch\u01b0a c\u00f3 t\u00e0i kho\u1ea3n?");
+      setText("authSwitchPromptBtn", c("register"));
+      setText("accountPhoneAuthLabel", c("phone"));
+      setText("accountPinAuthLabel", c("pin"));
       if (fields.phone) fields.phone.placeholder = c("phone");
-      if (fields.pin) fields.pin.placeholder = c("pin");
+      if (fields.pin) fields.pin.placeholder = getLang() === "ja" ? "PIN\u3092\u5165\u529b" : "Nh\u1eadp PIN";
     }
 
     if (isRegister) {
       show(fields.phone, true); show(fields.pin, true); show(fields.pinConfirm, true);
+      show(labels.phone, true); show(labels.pin, true); show(labels.pinConfirm, true);
       setText("accountWelcome", c("registerTitle"));
       setText("accountText", c("registerText"));
       setText("accountLoginText", c("next"));
+      setText("accountPhoneAuthLabel", c("phone"));
+      setText("accountPinAuthLabel", c("pin"));
+      setText("accountPinConfirmAuthLabel", c("pinConfirm"));
       if (fields.phone) fields.phone.placeholder = c("phone");
       if (fields.pin) fields.pin.placeholder = c("pin");
       if (fields.pinConfirm) fields.pinConfirm.placeholder = c("pinConfirm");
