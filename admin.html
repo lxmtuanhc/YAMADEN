@@ -1353,6 +1353,102 @@ html,body{height:100%!important;overflow:hidden!important}
 </script>
 <!-- yamaden-admin-detail-balance-v51 -->
 <style id="yamaden-admin-detail-balance-v51-style">
+.staff-form-modal{
+  display:none!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:180!important;
+  background:rgba(2,6,23,.62)!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:18px!important;
+}
+.staff-form-modal.show{
+  display:flex!important;
+}
+.staff-form-box{
+  background:#fff!important;
+  border-radius:18px!important;
+  box-shadow:0 30px 80px rgba(0,0,0,.34)!important;
+  overflow:hidden!important;
+}
+.staff-form-head{
+  height:66px!important;
+  border-bottom:1px solid #e5eaf2!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  padding:0 22px!important;
+}
+.staff-form-title{
+  font-size:20px!important;
+  font-weight:950!important;
+  color:#111827!important;
+}
+.staff-form-close{
+  width:46px!important;
+  height:46px!important;
+  border:0!important;
+  border-radius:12px!important;
+  background:#ef4444!important;
+  color:#fff!important;
+  position:relative!important;
+  font-size:0!important;
+}
+.staff-form-close:before,
+.staff-form-close:after{
+  content:""!important;
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  width:18px!important;
+  height:3px!important;
+  border-radius:999px!important;
+  background:#fff!important;
+}
+.staff-form-close:before{transform:translate(-50%,-50%) rotate(45deg)!important}
+.staff-form-close:after{transform:translate(-50%,-50%) rotate(-45deg)!important}
+.staff-form-body{
+  display:grid!important;
+  gap:12px!important;
+}
+.staff-field{
+  display:grid!important;
+  gap:7px!important;
+}
+.staff-field label{
+  font-size:13px!important;
+  font-weight:950!important;
+  color:#475569!important;
+}
+.staff-field input,
+.staff-field select{
+  width:100%!important;
+  border:1px solid #dbe4ef!important;
+  background:#fff!important;
+  padding:0 14px!important;
+}
+.staff-form-actions{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:12px!important;
+  margin-top:4px!important;
+}
+.staff-form-actions button{
+  height:52px!important;
+  border-radius:12px!important;
+  font-weight:950!important;
+}
+.staff-save-profile{
+  border:0!important;
+  background:#111827!important;
+  color:#fff!important;
+}
+.staff-cancel-profile{
+  border:1px solid #dbe4ef!important;
+  background:#fff!important;
+  color:#111827!important;
+}
 .staff-profile-shell{
   padding:22px!important;
 }
@@ -1573,5 +1669,56 @@ html,body{height:100%!important;overflow:hidden!important}
   }
 }
 </style>
+<!-- yamaden-admin-staff-click-guard-v52 -->
+<script id="yamaden-admin-staff-click-guard-v52-script">
+(function(){
+  function getInlineId(button, fnName){
+    var raw=button && button.getAttribute && button.getAttribute("onclick") || "";
+    var re=new RegExp(fnName+"\\(['\"]?([^'\")]+)");
+    var m=raw.match(re);
+    return m?m[1]:"";
+  }
+  function safeOpenStaff(id){
+    try{
+      if(typeof window.openStaffProfileForm==="function"){
+        window.openStaffProfileForm(id||"");
+        return true;
+      }
+    }catch(err){
+      console.error("openStaffProfileForm failed",err);
+      alert("Không mở được form nhân viên. Lỗi: "+(err&&err.message?err.message:err));
+      return true;
+    }
+    alert("Không tìm thấy hàm mở hồ sơ nhân viên.");
+    return true;
+  }
+  document.addEventListener("click",function(event){
+    var add=event.target.closest && event.target.closest(".staff-add-btn");
+    if(add){
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      safeOpenStaff("");
+      return;
+    }
+    var edit=event.target.closest && event.target.closest(".staff-row-btn.edit,.small-btn.done");
+    if(edit && String(edit.getAttribute("onclick")||"").includes("openStaffProfileForm")){
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      safeOpenStaff(getInlineId(edit,"openStaffProfileForm"));
+      return;
+    }
+    var del=event.target.closest && event.target.closest(".staff-row-btn.delete");
+    if(del && String(del.getAttribute("onclick")||"").includes("deleteStaffProfile")){
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      var id=getInlineId(del,"deleteStaffProfile");
+      if(typeof window.deleteStaffProfile==="function")window.deleteStaffProfile(id);
+    }
+  },true);
+})();
+</script>
 </body>
 </html>
