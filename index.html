@@ -3415,6 +3415,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
   .app.auth-login-mode {
+    position: fixed !important;
+    inset: 0 !important;
     width: min(100vw, 480px) !important;
     max-width: 480px !important;
     height: 100dvh !important;
@@ -3453,6 +3455,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   .app.auth-login-mode .main,
   .app.auth-login-mode #accountSection,
   .app.auth-login-mode .account-landing {
+    position: relative !important;
     width: 100% !important;
     height: 100dvh !important;
     min-height: 100dvh !important;
@@ -3493,6 +3496,11 @@ document.addEventListener("DOMContentLoaded",()=>{
     border: 1px solid rgba(226, 232, 240, 0.95) !important;
     box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12) !important;
     touch-action: none !important;
+  }
+
+  .app.auth-login-mode,
+  .app.auth-login-mode * {
+    overscroll-behavior: none !important;
   }
 
   .app.auth-login-mode .account-card::before,
@@ -3887,56 +3895,56 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   const copy = {
     vi: {
-      welcomeTitle: "Ch?o m?ng",
-      welcomeText: "??ng k? ho?c ??ng nh?p ?? ti?p t?c s? d?ng ?ng d?ng YAMADEN.",
-      loginTitle: "??ng nh?p",
-      loginText: "Nh?p s? ?i?n tho?i v? m? PIN ?? ??ng nh?p.",
-      registerTitle: "??ng k?",
-      registerText: "Nh?p s? ?i?n tho?i, PIN v? nh?p l?i PIN.",
-      profileTitle: "Th?ng tin t?i kho?n",
-      profileText: "Vui l?ng nh?p th?ng tin ?? admin duy?t t?i kho?n.",
-      pendingTitle: "Th?ng tin ?? ???c g?i",
-      pendingText: "T?i kho?n c?a b?n ?ang ch? admin duy?t. Sau khi ???c ph? duy?t, b?n m?i c? th? s? d?ng ??y ?? ch?c n?ng c?a app.",
-      pendingPill: "?ang ch? duy?t",
-      backLogin: "Quay l?i ??ng nh?p",
-      login: "??ng nh?p",
-      register: "??ng k?",
-      next: "Ti?p t?c",
-      submit: "G?i duy?t admin",
-      phone: "S? ?i?n tho?i",
+      welcomeTitle: "Ch\u00e0o m\u1eebng",
+      welcomeText: "\u0110\u0103ng k\u00fd ho\u1eb7c \u0111\u0103ng nh\u1eadp \u0111\u1ec3 ti\u1ebfp t\u1ee5c s\u1eed d\u1ee5ng \u1ee9ng d\u1ee5ng YAMADEN.",
+      loginTitle: "\u0110\u0103ng nh\u1eadp",
+      loginText: "Nh\u1eadp s\u1ed1 \u0111i\u1ec7n tho\u1ea1i v\u00e0 m\u00e3 PIN \u0111\u1ec3 \u0111\u0103ng nh\u1eadp.",
+      registerTitle: "\u0110\u0103ng k\u00fd",
+      registerText: "Nh\u1eadp s\u1ed1 \u0111i\u1ec7n tho\u1ea1i, PIN v\u00e0 nh\u1eadp l\u1ea1i PIN.",
+      profileTitle: "Th\u00f4ng tin t\u00e0i kho\u1ea3n",
+      profileText: "Vui l\u00f2ng nh\u1eadp th\u00f4ng tin \u0111\u1ec3 admin duy\u1ec7t t\u00e0i kho\u1ea3n.",
+      pendingTitle: "Th\u00f4ng tin \u0111\u00e3 \u0111\u01b0\u1ee3c g\u1eedi",
+      pendingText: "T\u00e0i kho\u1ea3n c\u1ee7a b\u1ea1n \u0111ang ch\u1edd admin duy\u1ec7t. Sau khi \u0111\u01b0\u1ee3c ph\u00ea duy\u1ec7t, b\u1ea1n m\u1edbi c\u00f3 th\u1ec3 s\u1eed d\u1ee5ng \u0111\u1ea7y \u0111\u1ee7 ch\u1ee9c n\u0103ng c\u1ee7a app.",
+      pendingPill: "\u0110ang ch\u1edd duy\u1ec7t",
+      backLogin: "Quay l\u1ea1i \u0111\u0103ng nh\u1eadp",
+      login: "\u0110\u0103ng nh\u1eadp",
+      register: "\u0110\u0103ng k\u00fd",
+      next: "Ti\u1ebfp t\u1ee5c",
+      submit: "G\u1eedi duy\u1ec7t admin",
+      phone: "S\u1ed1 \u0111i\u1ec7n tho\u1ea1i",
       pin: "PIN",
-      pinConfirm: "Nh?p l?i PIN",
-      name: "H? v? t?n",
+      pinConfirm: "Nh\u1eadp l\u1ea1i PIN",
+      name: "H\u1ecd v\u00e0 t\u00ean",
       email: "Email",
-      address: "??a ch?",
-      project: "Ghi ch? / t?n c?ng tr?nh",
-      company: "C?ng ty / c? nh?n"
+      address: "\u0110\u1ecba ch\u1ec9",
+      project: "Ghi ch\u00fa / t\u00ean c\u00f4ng tr\u00ecnh",
+      company: "C\u00f4ng ty / c\u00e1 nh\u00e2n"
     },
     ja: {
-      welcomeTitle: "????",
-      welcomeText: "???????????YAMADEN????????????",
-      loginTitle: "????",
-      loginText: "?????PIN??????????",
-      registerTitle: "????",
-      registerText: "?????PIN????PIN??????????",
-      profileTitle: "?????",
-      profileText: "????????????????????????",
-      pendingTitle: "?????????",
-      pendingText: "????????????????????????????",
-      pendingPill: "????",
-      backLogin: "???????",
-      login: "????",
-      register: "????",
-      next: "??",
-      submit: "??????",
-      phone: "????",
+      welcomeTitle: "\u3088\u3046\u3053\u305d",
+      welcomeText: "\u30ed\u30b0\u30a4\u30f3\u307e\u305f\u306f\u767b\u9332\u3057\u3066YAMADEN\u30a2\u30d7\u30ea\u3092\u3054\u5229\u7528\u304f\u3060\u3055\u3044\u3002",
+      loginTitle: "\u30ed\u30b0\u30a4\u30f3",
+      loginText: "\u96fb\u8a71\u756a\u53f7\u3068PIN\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+      registerTitle: "\u65b0\u898f\u767b\u9332",
+      registerText: "\u96fb\u8a71\u756a\u53f7\u3001PIN\u3001\u78ba\u8a8d\u7528PIN\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+      profileTitle: "\u304a\u5ba2\u69d8\u60c5\u5831",
+      profileText: "\u7ba1\u7406\u8005\u627f\u8a8d\u306e\u305f\u3081\u3001\u304a\u5ba2\u69d8\u60c5\u5831\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+      pendingTitle: "\u60c5\u5831\u3092\u9001\u4fe1\u3057\u307e\u3057\u305f",
+      pendingText: "\u7ba1\u7406\u8005\u627f\u8a8d\u5f85\u3061\u3067\u3059\u3002\u627f\u8a8d\u5f8c\u306b\u30a2\u30d7\u30ea\u3092\u3054\u5229\u7528\u3044\u305f\u3060\u3051\u307e\u3059\u3002",
+      pendingPill: "\u627f\u8a8d\u5f85\u3061",
+      backLogin: "\u30ed\u30b0\u30a4\u30f3\u306b\u623b\u308b",
+      login: "\u30ed\u30b0\u30a4\u30f3",
+      register: "\u65b0\u898f\u767b\u9332",
+      next: "\u6b21\u3078",
+      submit: "\u7ba1\u7406\u8005\u3078\u9001\u4fe1",
+      phone: "\u96fb\u8a71\u756a\u53f7",
       pin: "PIN",
-      pinConfirm: "PIN??",
-      name: "???",
+      pinConfirm: "PIN\u78ba\u8a8d",
+      name: "\u304a\u540d\u524d",
       email: "Email",
-      address: "??",
-      project: "?? / ???",
-      company: "???????"
+      address: "\u4f4f\u6240",
+      project: "\u5099\u8003 / \u5de5\u4e8b\u540d",
+      company: "\u4f1a\u793e\u540d\uff08\u4efb\u610f\uff09"
     }
   };
 
@@ -3955,7 +3963,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   function ensureStartLogo() {
     const startLogo = document.querySelector(".auth-start-logo");
     if (!startLogo) return;
-    startLogo.innerHTML = '<img src="/icon-192.png" alt="YAMADEN"><div><b>???? ??</b><span>YAMADEN.CO.LTD</span></div>';
+    startLogo.innerHTML = '<img src="/icon-192.png" alt="YAMADEN"><div><b>&#x682a;&#x5f0f;&#x4f1a;&#x793e; &#x5c71;&#x96fb;</b><span>YAMADEN.CO.LTD</span></div>';
   }
 
   const oldSetAuthLanguage = window.setAuthLanguage;
