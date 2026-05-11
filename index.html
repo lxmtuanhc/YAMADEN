@@ -3531,71 +3531,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 </style>
 <script id="yamaden-work-catalog-v19">
 (function(){
-  var catalog=[
-    {code:"01",deptJa:"社長・代表",deptVi:"Giám đốc / đại diện công ty",items:[
-      "Phê duyệt công trình","Phê duyệt báo giá","Phê duyệt hợp đồng","Kiểm tra tiến độ tổng thể","Kiểm tra tình trạng công ty","Họp với khách hàng","Tiếp nhận dự án lớn","Xử lý vấn đề quan trọng","Điều phối hoạt động công ty","Quản lý vận hành công ty","Quản lý nhân sự","Kiểm tra doanh thu công trình","Xác nhận kế hoạch thi công","Phê duyệt hồ sơ kỹ thuật","Giải quyết khiếu nại khách hàng","Hỗ trợ xử lý sự cố nghiêm trọng"]},
-    {code:"02",deptJa:"工務部",deptVi:"Bộ phận quản lý công trình",items:[
-      "Khảo sát hiện trường","Kiểm tra công trình","Kiểm tra tiến độ thi công","Kiểm tra an toàn công trình","Kiểm tra chất lượng công trình","Nghiệm thu công trình","Kiểm tra sau thi công","Điều phối thi công","Điều chỉnh lịch thi công","Hỗ trợ bàn giao công trình","Kiểm tra tình trạng thiết bị","Quản lý công trình đang thi công","Hỗ trợ xử lý vấn đề tại công trình"]},
-    {code:"03",deptJa:"FS部",deptVi:"Bộ phận bảo trì / hỗ trợ kỹ thuật",items:[
-      "Kiểm tra thiết bị bị lỗi","Sửa chữa sự cố","Bảo trì định kỳ","Kiểm tra hệ thống điện","Kiểm tra thiết bị hoạt động không ổn định","Xử lý sự cố khẩn cấp","Vệ sinh thiết bị","Thay thế linh kiện","Kiểm tra nguyên nhân lỗi","Hỗ trợ kỹ thuật","Kiểm tra máy móc","Khôi phục hoạt động hệ thống","Kiểm tra kết nối thiết bị","Kiểm tra sau sửa chữa","Hỗ trợ tại hiện trường"]},
-    {code:"04",deptJa:"営業部",deptVi:"Bộ phận kinh doanh / tư vấn",items:[
-      "Tư vấn dịch vụ","Tư vấn công trình mới","Khảo sát để báo giá","Báo giá sửa chữa","Báo giá thi công","Tư vấn thiết bị phù hợp","Tư vấn phương án thi công","Tư vấn phương án tiết kiệm chi phí","Giải thích dịch vụ","Hỗ trợ hợp đồng","Điều chỉnh nội dung hợp đồng","Chăm sóc khách hàng","Hỗ trợ đặt lịch dịch vụ","Tiếp nhận yêu cầu khách hàng"]},
-    {code:"05",deptJa:"工事部",deptVi:"Bộ phận thi công",items:[
-      "Lắp đặt thiết bị","Tháo dỡ thiết bị","Di dời thiết bị","Đi dây điện","Sửa dây điện","Lắp đèn","Thay đèn","Lắp ổ cắm / công tắc","Lắp CB / breaker","Lắp camera","Sửa camera","Đi dây mạng LAN","Lắp Wi-Fi / router","Lắp máy lạnh","Tháo máy lạnh","Lắp quạt thông gió","Thi công hệ thống điện","Thi công tủ điện","Thi công tại công trình","Lắp đặt máy móc","Sửa chữa tại công trình","Lắp đặt hệ thống mới","Cải tạo hệ thống cũ"]},
-    {code:"06",deptJa:"設計部",deptVi:"Bộ phận thiết kế",items:[
-      "Thiết kế bản vẽ","Chỉnh sửa bản vẽ","Thiết kế sơ đồ điện","Vẽ CAD","Thiết kế tủ điện","Thiết kế bố trí thiết bị","Thiết kế hệ thống điện","Làm bản vẽ thi công","Làm bản vẽ hoàn công","Kiểm tra bản vẽ kỹ thuật","Tính toán vật tư","Tính toán công suất","Thiết kế phương án thi công","Kiểm tra tiêu chuẩn kỹ thuật"]},
-    {code:"07",deptJa:"総務部",deptVi:"Bộ phận tổng vụ",items:[
-      "Hỗ trợ thủ tục","Xử lý giấy tờ","Cập nhật thông tin khách hàng","Xác nhận thông tin dịch vụ","Hỗ trợ đặt lịch","Điều chỉnh lịch hẹn","Hỗ trợ thanh toán","Xác nhận thanh toán","Xử lý yêu cầu hành chính","Hỗ trợ hồ sơ dịch vụ","Tiếp nhận yêu cầu chung","Hướng dẫn sử dụng dịch vụ","Kiểm tra thông tin khách hàng","Hỗ trợ xử lý thông tin","Xác nhận hồ sơ"]}
-  ];
-  window.YAMADEN_WORK_CATALOG=catalog;
-  function esc(s){return String(s||"").replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
-  function js(s){return String(s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g,"\\n");}
-  function flat(){return catalog.flatMap(function(dept){return dept.items.map(function(item){return {item:item,dept:dept};});});}
-  function deptOf(item){return catalog.find(function(dept){return dept.items.indexOf(item)>=0;});}
-  function currentLang(){return (window.lang||localStorage.getItem("language")||"ja")==="vi"?"vi":"ja";}
-  window.getAllIssues=function(){return flat().map(function(x){return x.item;});};
-  window.renderIssueOptions=function(){
-    var input=document.getElementById("issueSearchInput"), dd=document.getElementById("issueDropdown");
-    if(!input||!dd)return;
-    var kw=input.value.trim().toLowerCase();
-    var chosen=window.__yamadenChosenIssues||[];
-    var items=flat().filter(function(x){
-      var text=[x.item,x.dept.deptJa,x.dept.deptVi,x.dept.code].join(" ").toLowerCase();
-      return chosen.indexOf(x.item)<0 && text.indexOf(kw)>=0;
-    });
-    dd.innerHTML=items.length?items.slice(0,80).map(function(x){
-      var deptLabel=x.dept.code+" "+x.dept.deptJa+" / "+x.dept.deptVi;
-      return '<button type="button" class="issue-option" onclick="selectIssueItem(\''+js(x.item)+'\')"><b>'+esc(x.item)+'</b><span>'+esc(deptLabel)+'</span></button>';
-    }).join(""):'<div class="issue-empty">'+(currentLang()==="ja"?"該当する項目がありません":"Không có mục phù hợp")+'</div>';
-    dd.classList.add("show");
-  };
-  window.renderIssueChips=function(){
-    var wrap=document.getElementById("selectedIssues"), hidden=document.getElementById("hiddenIssueInputs"), input=document.getElementById("issueSearchInput");
-    if(!wrap||!hidden)return;
-    var chosen=window.__yamadenChosenIssues||[];
-    wrap.innerHTML=chosen.map(function(item,i){
-      var dept=deptOf(item);
-      var label=dept?dept.code+" "+dept.deptJa:"";
-      return '<span class="selected-issue-tag"><span><b>'+esc(item)+'</b><small>'+esc(label)+'</small></span><button type="button" onclick="removeIssueItem('+i+')"></button></span>';
-    }).join("");
-    hidden.innerHTML="";
-    if(input)input.placeholder=currentLang()==="ja"?"作業内容を検索して選択":"Tìm và chọn nội dung công việc";
-    document.getElementById("issuePanel")?.classList.remove("required-missing");
-  };
-  window.selectIssueItem=function(item){
-    window.__yamadenChosenIssues=window.__yamadenChosenIssues||[];
-    if(window.__yamadenChosenIssues.indexOf(item)<0)window.__yamadenChosenIssues.push(item);
-    var input=document.getElementById("issueSearchInput"); if(input)input.value="";
-    renderIssueChips(); renderIssueOptions();
-  };
-  window.removeIssueItem=function(index){
-    if(window.__yamadenChosenIssues)window.__yamadenChosenIssues.splice(index,1);
-    renderIssueChips(); renderIssueOptions();
-  };
-  window.__updateIssueList=function(){renderIssueChips();renderIssueOptions();};
-  var oldApply=window.applyLanguage;
-  window.applyLanguage=function(){if(oldApply)oldApply();setTimeout(window.__updateIssueList,0);};
-  document.addEventListener("DOMContentLoaded",function(){setTimeout(window.__updateIssueList,600);});
+  window.YAMADEN_WORK_CATALOG=[{"code":"01","deptJa":"社長・代表","deptVi":"Giám đốc / đại diện công ty","items":[{"vi":"Phê duyệt công trình","ja":"工事承認"},{"vi":"Phê duyệt báo giá","ja":"見積承認"},{"vi":"Phê duyệt hợp đồng","ja":"契約承認"},{"vi":"Kiểm tra tiến độ tổng thể","ja":"全体進捗確認"},{"vi":"Kiểm tra tình trạng công ty","ja":"会社状況確認"},{"vi":"Họp với khách hàng","ja":"顧客打合せ"},{"vi":"Tiếp nhận dự án lớn","ja":"大型案件受付"},{"vi":"Xử lý vấn đề quan trọng","ja":"重要事項対応"},{"vi":"Điều phối hoạt động công ty","ja":"会社活動調整"},{"vi":"Quản lý vận hành công ty","ja":"会社運営管理"},{"vi":"Quản lý nhân sự","ja":"人事管理"},{"vi":"Kiểm tra doanh thu công trình","ja":"工事売上確認"},{"vi":"Xác nhận kế hoạch thi công","ja":"施工計画確認"},{"vi":"Phê duyệt hồ sơ kỹ thuật","ja":"技術書類承認"},{"vi":"Giải quyết khiếu nại khách hàng","ja":"苦情対応"},{"vi":"Hỗ trợ xử lý sự cố nghiêm trọng","ja":"重大問題支援"}]},{"code":"02","deptJa":"工務部","deptVi":"Bộ phận quản lý công trình","items":[{"vi":"Khảo sát hiện trường","ja":"現場調査"},{"vi":"Kiểm tra công trình","ja":"工事確認"},{"vi":"Kiểm tra tiến độ thi công","ja":"施工進捗確認"},{"vi":"Kiểm tra an toàn công trình","ja":"現場安全確認"},{"vi":"Kiểm tra chất lượng công trình","ja":"工事品質確認"},{"vi":"Nghiệm thu công trình","ja":"工事検収"},{"vi":"Kiểm tra sau thi công","ja":"施工後確認"},{"vi":"Điều phối thi công","ja":"施工調整"},{"vi":"Điều chỉnh lịch thi công","ja":"施工日程調整"},{"vi":"Hỗ trợ bàn giao công trình","ja":"引渡支援"},{"vi":"Kiểm tra tình trạng thiết bị","ja":"設備状況確認"},{"vi":"Quản lý công trình đang thi công","ja":"施工中案件管理"},{"vi":"Hỗ trợ xử lý vấn đề tại công trình","ja":"現場問題支援"}]},{"code":"03","deptJa":"FS部","deptVi":"Bộ phận bảo trì / hỗ trợ kỹ thuật","items":[{"vi":"Kiểm tra thiết bị bị lỗi","ja":"故障設備確認"},{"vi":"Sửa chữa sự cố","ja":"不具合修理"},{"vi":"Bảo trì định kỳ","ja":"定期保守"},{"vi":"Kiểm tra hệ thống điện","ja":"電気系統確認"},{"vi":"Kiểm tra thiết bị hoạt động không ổn định","ja":"動作不安定設備確認"},{"vi":"Xử lý sự cố khẩn cấp","ja":"緊急対応"},{"vi":"Vệ sinh thiết bị","ja":"設備清掃"},{"vi":"Thay thế linh kiện","ja":"部品交換"},{"vi":"Kiểm tra nguyên nhân lỗi","ja":"故障原因調査"},{"vi":"Hỗ trợ kỹ thuật","ja":"技術支援"},{"vi":"Kiểm tra máy móc","ja":"機械確認"},{"vi":"Khôi phục hoạt động hệ thống","ja":"システム復旧"},{"vi":"Kiểm tra kết nối thiết bị","ja":"機器接続確認"},{"vi":"Kiểm tra sau sửa chữa","ja":"修理後確認"},{"vi":"Hỗ trợ tại hiện trường","ja":"現場支援"}]},{"code":"04","deptJa":"営業部","deptVi":"Bộ phận kinh doanh / tư vấn","items":[{"vi":"Tư vấn dịch vụ","ja":"サービス相談"},{"vi":"Tư vấn công trình mới","ja":"新規工事相談"},{"vi":"Khảo sát để báo giá","ja":"見積調査"},{"vi":"Báo giá sửa chữa","ja":"修理見積"},{"vi":"Báo giá thi công","ja":"施工見積"},{"vi":"Tư vấn thiết bị phù hợp","ja":"適切機器提案"},{"vi":"Tư vấn phương án thi công","ja":"施工方法提案"},{"vi":"Tư vấn phương án tiết kiệm chi phí","ja":"コスト削減提案"},{"vi":"Giải thích dịch vụ","ja":"サービス説明"},{"vi":"Hỗ trợ hợp đồng","ja":"契約支援"},{"vi":"Điều chỉnh nội dung hợp đồng","ja":"契約内容調整"},{"vi":"Chăm sóc khách hàng","ja":"顧客フォロー"},{"vi":"Hỗ trợ đặt lịch dịch vụ","ja":"サービス予約支援"},{"vi":"Tiếp nhận yêu cầu khách hàng","ja":"顧客依頼受付"}]},{"code":"05","deptJa":"工事部","deptVi":"Bộ phận thi công","items":[{"vi":"Lắp đặt thiết bị","ja":"設備取付"},{"vi":"Tháo dỡ thiết bị","ja":"設備撤去"},{"vi":"Di dời thiết bị","ja":"設備移設"},{"vi":"Đi dây điện","ja":"電気配線"},{"vi":"Sửa dây điện","ja":"配線修理"},{"vi":"Lắp đèn","ja":"照明取付"},{"vi":"Thay đèn","ja":"照明交換"},{"vi":"Lắp ổ cắm / công tắc","ja":"コンセント・スイッチ取付"},{"vi":"Lắp CB / breaker","ja":"ブレーカー取付"},{"vi":"Lắp camera","ja":"カメラ取付"},{"vi":"Sửa camera","ja":"カメラ修理"},{"vi":"Đi dây mạng LAN","ja":"LAN配線"},{"vi":"Lắp Wi-Fi / router","ja":"Wi-Fi・ルーター設置"},{"vi":"Lắp máy lạnh","ja":"エアコン取付"},{"vi":"Tháo máy lạnh","ja":"エアコン撤去"},{"vi":"Lắp quạt thông gió","ja":"換気扇取付"},{"vi":"Thi công hệ thống điện","ja":"電気設備工事"},{"vi":"Thi công tủ điện","ja":"制御盤工事"},{"vi":"Thi công tại công trình","ja":"現場施工"},{"vi":"Lắp đặt máy móc","ja":"機械設置"},{"vi":"Sửa chữa tại công trình","ja":"現場修理"},{"vi":"Lắp đặt hệ thống mới","ja":"新規システム設置"},{"vi":"Cải tạo hệ thống cũ","ja":"既存システム改修"}]},{"code":"06","deptJa":"設計部","deptVi":"Bộ phận thiết kế","items":[{"vi":"Thiết kế bản vẽ","ja":"図面設計"},{"vi":"Chỉnh sửa bản vẽ","ja":"図面修正"},{"vi":"Thiết kế sơ đồ điện","ja":"電気系統図設計"},{"vi":"Vẽ CAD","ja":"CAD作図"},{"vi":"Thiết kế tủ điện","ja":"制御盤設計"},{"vi":"Thiết kế bố trí thiết bị","ja":"設備配置設計"},{"vi":"Thiết kế hệ thống điện","ja":"電気システム設計"},{"vi":"Làm bản vẽ thi công","ja":"施工図作成"},{"vi":"Làm bản vẽ hoàn công","ja":"竣工図作成"},{"vi":"Kiểm tra bản vẽ kỹ thuật","ja":"技術図面確認"},{"vi":"Tính toán vật tư","ja":"材料拾い出し"},{"vi":"Tính toán công suất","ja":"電気容量計算"},{"vi":"Thiết kế phương án thi công","ja":"施工方法設計"},{"vi":"Kiểm tra tiêu chuẩn kỹ thuật","ja":"技術基準確認"}]},{"code":"07","deptJa":"総務部","deptVi":"Bộ phận tổng vụ","items":[{"vi":"Hỗ trợ thủ tục","ja":"手続支援"},{"vi":"Xử lý giấy tờ","ja":"書類処理"},{"vi":"Cập nhật thông tin khách hàng","ja":"顧客情報更新"},{"vi":"Xác nhận thông tin dịch vụ","ja":"サービス情報確認"},{"vi":"Hỗ trợ đặt lịch","ja":"予約支援"},{"vi":"Điều chỉnh lịch hẹn","ja":"予約日程調整"},{"vi":"Hỗ trợ thanh toán","ja":"支払支援"},{"vi":"Xác nhận thanh toán","ja":"入金確認"},{"vi":"Xử lý yêu cầu hành chính","ja":"事務依頼対応"},{"vi":"Hỗ trợ hồ sơ dịch vụ","ja":"サービス書類支援"},{"vi":"Tiếp nhận yêu cầu chung","ja":"一般依頼受付"},{"vi":"Hướng dẫn sử dụng dịch vụ","ja":"サービス利用案内"},{"vi":"Kiểm tra thông tin khách hàng","ja":"顧客情報確認"},{"vi":"Hỗ trợ xử lý thông tin","ja":"情報処理支援"},{"vi":"Xác nhận hồ sơ","ja":"書類確認"}]}];
 })();
 </script>
 <style id="yamaden-work-catalog-v19-style">
@@ -3636,45 +3572,28 @@ document.addEventListener("DOMContentLoaded",()=>{
   function esc(s){return String(s||"").replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
   function js(s){return String(s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g,"\\n");}
   function langNow(){return (window.lang||localStorage.getItem("language")||"ja")==="vi"?"vi":"ja";}
-  function list(){
-    if(Array.isArray(window.YAMADEN_WORK_CATALOG)){
-      return window.YAMADEN_WORK_CATALOG.flatMap(function(dept){return dept.items||[];});
-    }
-    try{return typeof getAllIssues==="function"?getAllIssues():[];}catch(e){return [];}
-  }
-  window.getAllIssues=function(){return Array.from(new Set(list()));};
+  function flat(){return Array.isArray(window.YAMADEN_WORK_CATALOG)?window.YAMADEN_WORK_CATALOG.flatMap(function(dept){return (dept.items||[]).map(function(item){return {label:langNow()==="ja"?item.ja:item.vi,vi:item.vi,ja:item.ja,dept:dept};});}):[];}
+  window.getAllIssues=function(){return Array.from(new Set(flat().map(function(x){return x.label;})));};
   window.renderIssueOptions=function(){
     var input=document.getElementById("issueSearchInput"), dd=document.getElementById("issueDropdown");
     if(!input||!dd)return;
     var kw=input.value.trim().toLowerCase();
     var chosen=window.__yamadenChosenIssues||[];
-    var items=getAllIssues().filter(function(item){return chosen.indexOf(item)<0 && item.toLowerCase().indexOf(kw)>=0;});
-    dd.innerHTML=items.length?items.slice(0,80).map(function(item){
-      return '<button type="button" class="issue-option" onclick="selectIssueItem(\''+js(item)+'\')">'+esc(item)+'</button>';
-    }).join(""):'<div class="issue-empty">'+(langNow()==="ja"?"該当する項目がありません":"Không có mục phù hợp")+'</div>';
+    var items=flat().filter(function(x){return chosen.indexOf(x.label)<0 && [x.label,x.vi,x.ja,x.dept.code,x.dept.deptJa,x.dept.deptVi].join(" ").toLowerCase().indexOf(kw)>=0;});
+    dd.innerHTML=items.length?items.slice(0,80).map(function(x){return '<button type="button" class="issue-option" onclick="selectIssueItem(\''+js(x.label)+'\')">'+esc(x.label)+'</button>';}).join(""):'<div class="issue-empty">'+(langNow()==="ja"?"該当する項目がありません":"Không có mục phù hợp")+'</div>';
     dd.classList.add("show");
   };
   window.renderIssueChips=function(){
     var wrap=document.getElementById("selectedIssues"), hidden=document.getElementById("hiddenIssueInputs"), input=document.getElementById("issueSearchInput");
     if(!wrap||!hidden)return;
     var chosen=window.__yamadenChosenIssues||[];
-    wrap.innerHTML=chosen.map(function(item,i){
-      return '<span class="selected-issue-tag"><b>'+esc(item)+'</b><button type="button" onclick="removeIssueItem('+i+')"></button></span>';
-    }).join("");
+    wrap.innerHTML=chosen.map(function(item,i){return '<span class="selected-issue-tag"><b>'+esc(item)+'</b><button type="button" onclick="removeIssueItem('+i+')"></button></span>';}).join("");
     hidden.innerHTML="";
     if(input)input.placeholder=langNow()==="ja"?"作業内容を検索して選択":"Tìm và chọn nội dung công việc";
     document.getElementById("issuePanel")?.classList.remove("required-missing");
   };
-  window.selectIssueItem=function(item){
-    window.__yamadenChosenIssues=window.__yamadenChosenIssues||[];
-    if(window.__yamadenChosenIssues.indexOf(item)<0)window.__yamadenChosenIssues.push(item);
-    var input=document.getElementById("issueSearchInput"); if(input)input.value="";
-    renderIssueChips(); renderIssueOptions();
-  };
-  window.removeIssueItem=function(index){
-    if(window.__yamadenChosenIssues)window.__yamadenChosenIssues.splice(index,1);
-    renderIssueChips(); renderIssueOptions();
-  };
+  window.selectIssueItem=function(item){window.__yamadenChosenIssues=window.__yamadenChosenIssues||[];if(window.__yamadenChosenIssues.indexOf(item)<0)window.__yamadenChosenIssues.push(item);var input=document.getElementById("issueSearchInput");if(input)input.value="";renderIssueChips();renderIssueOptions();};
+  window.removeIssueItem=function(index){if(window.__yamadenChosenIssues)window.__yamadenChosenIssues.splice(index,1);renderIssueChips();renderIssueOptions();};
   window.__updateIssueList=function(){renderIssueChips();renderIssueOptions();};
   document.addEventListener("DOMContentLoaded",function(){setTimeout(window.__updateIssueList,700);});
 })();
