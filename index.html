@@ -4314,5 +4314,149 @@ document.addEventListener("DOMContentLoaded",()=>{
   setTimeout(syncLangButtons, 300);
 })();
 </script>
+<style id="yamaden-auth-lock-layout-fix">
+@media (max-width: 860px) {
+  /* Khóa toàn màn hình đăng nhập */
+  .app.auth-login-mode,
+  .app.auth-login-mode .main,
+  .app.auth-login-mode #accountSection,
+  .app.auth-login-mode .account-landing {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  /* Chỉ cho cuộn bên trong card nếu nội dung quá dài */
+  .app.auth-login-mode .account-card {
+    height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Khóa khu vực logo */
+  .app.auth-login-mode .auth-start-logo {
+    min-height: 112px !important;
+    max-height: 112px !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* Khóa hình người kỹ thuật viên */
+  .app.auth-login-mode .auth-hero-visual {
+    height: 176px !important;
+    min-height: 176px !important;
+    max-height: 176px !important;
+    margin-bottom: 14px !important;
+    flex: 0 0 176px !important;
+  }
+
+  /* Khóa tiêu đề để đổi ngôn ngữ không đẩy layout */
+  .app.auth-login-mode .auth-start-title,
+  .app.auth-login-mode .account-welcome-ja,
+  .app.auth-login-mode .auth-pending-title {
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    line-height: 32px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Khóa đoạn mô tả 2 dòng */
+  .app.auth-login-mode .auth-start-text,
+  .app.auth-login-mode .account-welcome-sub,
+  .app.auth-login-mode .auth-pending-text {
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    line-height: 1.45 !important;
+    overflow: hidden !important;
+
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+  }
+
+  /* Khóa ghi chú dưới nút */
+  .app.auth-login-mode .auth-start-note {
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    overflow: hidden !important;
+
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+  }
+
+  /* Khóa nút login/register */
+  .app.auth-login-mode .auth-primary,
+  .app.auth-login-mode .auth-secondary,
+  .app.auth-login-mode #accountFormCard > .main-btn {
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+    flex: 0 0 52px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Khóa input */
+  .app.auth-login-mode #accountFields {
+    gap: 12px !important;
+  }
+
+  .app.auth-login-mode #accountFields input {
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+    flex: 0 0 52px !important;
+  }
+
+  /* Khóa khu vực form đăng nhập/đăng ký */
+  .app.auth-login-mode .auth-mode-form .account-welcome {
+    height: 82px !important;
+    min-height: 82px !important;
+    max-height: 82px !important;
+    margin-bottom: 16px !important;
+    overflow: hidden !important;
+  }
+
+  /* Khóa màn hình welcome */
+  .app.auth-login-mode .auth-mode-welcome .auth-start-screen {
+    min-height: auto !important;
+    height: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Khóa màn hình chờ duyệt */
+  .app.auth-login-mode .auth-mode-pending .auth-pending-screen {
+    min-height: auto !important;
+    height: 100% !important;
+    justify-content: center !important;
+  }
+
+  .app.auth-login-mode .auth-pending-visual {
+    height: 150px !important;
+    min-height: 150px !important;
+    max-height: 150px !important;
+    flex: 0 0 150px !important;
+  }
+
+  .app.auth-login-mode .auth-pending-pill {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+</style>
 </body>
 </html>
