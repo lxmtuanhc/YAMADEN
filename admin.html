@@ -1353,6 +1353,93 @@ html,body{height:100%!important;overflow:hidden!important}
 </script>
 <!-- yamaden-admin-detail-balance-v51 -->
 <style id="yamaden-admin-detail-balance-v51-style">
+.staff-profile-shell{
+  padding:22px!important;
+}
+.staff-profile-head{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+  margin-bottom:18px!important;
+}
+.staff-profile-title{
+  font-size:22px!important;
+  font-weight:950!important;
+  color:#0f172a!important;
+  line-height:1.2!important;
+}
+.staff-add-btn{
+  height:44px!important;
+  border:0!important;
+  border-radius:12px!important;
+  background:linear-gradient(135deg,#111827,#1f2937)!important;
+  color:white!important;
+  font-weight:950!important;
+  padding:0 18px!important;
+  box-shadow:0 12px 26px rgba(15,23,42,.18)!important;
+}
+.staff-profile-list{
+  display:grid!important;
+  gap:10px!important;
+}
+.staff-profile-list-head,
+.staff-profile-row{
+  display:grid!important;
+  grid-template-columns:70px minmax(140px,1.1fr) minmax(220px,1.2fr) minmax(190px,1fr) 82px 82px!important;
+  align-items:center!important;
+  gap:14px!important;
+}
+.staff-profile-list-head{
+  padding:0 18px 8px!important;
+  color:#64748b!important;
+  font-size:12px!important;
+  font-weight:950!important;
+}
+.staff-profile-row{
+  min-height:82px!important;
+  padding:14px 18px!important;
+  border:1px solid #dbe5f2!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  box-shadow:0 8px 18px rgba(15,23,42,.035)!important;
+  cursor:pointer!important;
+  transition:.16s ease!important;
+}
+.staff-profile-row:hover{
+  border-color:#bfdbfe!important;
+  background:#f8fbff!important;
+  transform:translateY(-1px)!important;
+}
+.staff-row-name{
+  font-size:16px!important;
+  font-weight:950!important;
+  color:#0f172a!important;
+}
+.staff-row-mail{
+  font-weight:850!important;
+  color:#475569!important;
+  word-break:break-word!important;
+}
+.staff-row-btn{
+  width:100%!important;
+  height:38px!important;
+  border-radius:10px!important;
+  border:1px solid #dbe5f2!important;
+  background:white!important;
+  font-weight:950!important;
+}
+.staff-row-btn.edit{
+  color:#0f172a!important;
+}
+.staff-row-btn.delete{
+  background:#ef4444!important;
+  border-color:#ef4444!important;
+  color:white!important;
+}
+.staff-action-cell{
+  min-width:0!important;
+}
 .staff-detail-modal .staff-detail-box,
 #customerStaffLikeModal .staff-detail-box{
   width:min(1080px,96vw)!important;
@@ -1452,6 +1539,24 @@ html,body{height:100%!important;overflow:hidden!important}
   grid-template-columns:88px minmax(0,1fr)!important;
 }
 @media(max-width:760px){
+  .staff-profile-head{
+    align-items:stretch!important;
+    flex-direction:column!important;
+  }
+  .staff-add-btn{
+    width:100%!important;
+  }
+  .staff-profile-list-head{
+    display:none!important;
+  }
+  .staff-profile-row{
+    grid-template-columns:58px minmax(0,1fr)!important;
+  }
+  .staff-profile-row .staff-dept-cell,
+  .staff-profile-row .staff-mail-cell,
+  .staff-profile-row .staff-action-cell{
+    grid-column:2!important;
+  }
   .staff-detail-modal .staff-detail-body,
   #customerStaffLikeModal .staff-detail-body{
     height:min(680px,calc(92vh - 72px))!important;
