@@ -4413,5 +4413,52 @@ document.addEventListener("DOMContentLoaded",()=>{
   }, 300);
 })();
 </script>
+<style id="yamaden-auth-scroll-lock-v25-style">
+html:has(.app.auth-login-mode),
+body:has(.app.auth-login-mode) {
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+.app.auth-login-mode,
+.app.auth-login-mode .main,
+.app.auth-login-mode #accountSection,
+.app.auth-login-mode .account-landing,
+.app.auth-login-mode .account-panel,
+.app.auth-login-mode .account-card {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  -webkit-overflow-scrolling: auto !important;
+}
+
+.app.auth-login-mode .account-landing,
+.app.auth-login-mode .account-panel,
+.app.auth-login-mode .account-card,
+.app.auth-login-mode .auth-start-screen,
+.app.auth-login-mode .auth-pending-screen,
+.app.auth-login-mode .account-welcome,
+.app.auth-login-mode #accountFields {
+  touch-action: none !important;
+}
+
+.app.auth-login-mode input,
+.app.auth-login-mode button {
+  touch-action: manipulation !important;
+}
+
+@media (max-width: 860px) {
+  .app.auth-login-mode .account-card {
+    height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #accountFields {
+    max-height: none !important;
+  }
+}
+</style>
 </body>
 </html>
