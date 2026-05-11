@@ -3401,9 +3401,19 @@ document.addEventListener("DOMContentLoaded",()=>{
 })();
 </script>
 
-<!-- yamaden-auth-final-clean-v24 -->
-<style id="yamaden-auth-final-clean-v24-style">
+
+<!-- yamaden-auth-clean-v26: single consolidated auth UI layer -->
+<style id="yamaden-auth-clean-v26-style">
 @media (max-width: 860px) {
+  html:has(.app.auth-login-mode),
+  body:has(.app.auth-login-mode) {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+  }
+
   .app.auth-login-mode {
     width: min(100vw, 480px) !important;
     max-width: 480px !important;
@@ -3416,79 +3426,9 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
   .app.auth-login-mode .top-header,
-  .app.auth-login-mode .bottom-nav {
-    display: none !important;
-  }
-
-  .app.auth-login-mode .main,
-  .app.auth-login-mode #accountSection {
-    width: 100% !important;
-    height: 100dvh !important;
-    min-height: 100dvh !important;
-    max-height: 100dvh !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-    background: #f8fbff !important;
-  }
-
-  .app.auth-login-mode .account-landing {
-    width: 100% !important;
-    height: 100dvh !important;
-    min-height: 100dvh !important;
-    max-height: 100dvh !important;
-    padding: calc(16px + env(safe-area-inset-top)) 18px calc(16px + env(safe-area-inset-bottom)) !important;
-    overflow: hidden !important;
-    border-radius: 0 !important;
-    background:
-      radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.12), transparent 30%),
-      radial-gradient(circle at 95% 12%, rgba(14, 165, 233, 0.12), transparent 28%),
-      linear-gradient(180deg, #f8fbff 0%, #eef6ff 58%, #ffffff 100%) !important;
-  }
-
-  .app.auth-login-mode .account-brand {
-    display: none !important;
-  }
-
-  .app.auth-login-mode .account-panel {
-    width: min(100%, 390px) !important;
-    height: 100% !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-
-  .app.auth-login-mode .account-card {
-    position: relative !important;
-    width: 100% !important;
-    height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
-    min-height: 0 !important;
-    max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
-    padding: 22px !important;
-    border-radius: 28px !important;
-    background: rgba(255, 255, 255, 0.96) !important;
-    border: 1px solid rgba(226, 232, 240, 0.95) !important;
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12) !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    scrollbar-width: none !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-
-  .app.auth-login-mode .account-card::-webkit-scrollbar {
-    display: none !important;
-  }
-
-  .app.auth-login-mode .account-card::before {
-    display: none !important;
-  }
-
-  .app.auth-login-mode .profile-card {
-    display: none !important;
-  }
-
+  .app.auth-login-mode .bottom-nav,
+  .app.auth-login-mode .account-brand,
+  .app.auth-login-mode .profile-card,
   .app.auth-login-mode .account-success,
   .app.auth-login-mode .approval-state,
   .app.auth-login-mode .account-divider,
@@ -3498,6 +3438,72 @@ document.addEventListener("DOMContentLoaded",()=>{
   .app.auth-login-mode #quickSupportBtnIcon,
   .app.auth-login-mode .soft-btn[onclick*="showTab('send')"] {
     display: none !important;
+  }
+
+  .app.auth-login-mode .main,
+  .app.auth-login-mode #accountSection,
+  .app.auth-login-mode .account-landing,
+  .app.auth-login-mode .account-panel,
+  .app.auth-login-mode .account-card {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    -webkit-overflow-scrolling: auto !important;
+  }
+
+  .app.auth-login-mode .main,
+  .app.auth-login-mode #accountSection,
+  .app.auth-login-mode .account-landing {
+    width: 100% !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #f8fbff !important;
+  }
+
+  .app.auth-login-mode .account-landing {
+    padding: calc(16px + env(safe-area-inset-top)) 18px calc(16px + env(safe-area-inset-bottom)) !important;
+    border-radius: 0 !important;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.12), transparent 30%),
+      radial-gradient(circle at 95% 12%, rgba(14, 165, 233, 0.12), transparent 28%),
+      linear-gradient(180deg, #f8fbff 0%, #eef6ff 58%, #ffffff 100%) !important;
+  }
+
+  .app.auth-login-mode .account-panel {
+    width: min(100%, 390px) !important;
+    height: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .app.auth-login-mode .account-card {
+    position: relative !important;
+    width: 100% !important;
+    height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    min-height: 0 !important;
+    padding: 22px !important;
+    border-radius: 28px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    border: 1px solid rgba(226, 232, 240, 0.95) !important;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12) !important;
+    touch-action: none !important;
+  }
+
+  .app.auth-login-mode .account-card::before,
+  .app.auth-login-mode .account-mode,
+  .app.auth-login-mode .account-welcome-brand {
+    display: none !important;
+  }
+
+  .app.auth-login-mode input,
+  .app.auth-login-mode button {
+    touch-action: manipulation !important;
   }
 
   .app.auth-login-mode .auth-card-lang {
@@ -3518,20 +3524,19 @@ document.addEventListener("DOMContentLoaded",()=>{
   .app.auth-login-mode .auth-card-lang button {
     width: 42px !important;
     height: 28px !important;
-    border: none !important;
+    border: 0 !important;
     border-radius: 999px !important;
     background: transparent !important;
     color: #64748b !important;
     font-size: 12px !important;
     font-weight: 950 !important;
-    cursor: pointer !important;
     box-shadow: none !important;
   }
 
   .app.auth-login-mode .auth-card-lang button.active,
   .app.auth-login-mode .auth-card-lang button.is-active {
     background: #075ad7 !important;
-    color: #ffffff !important;
+    color: #fff !important;
     box-shadow: 0 8px 18px rgba(7, 90, 215, 0.22) !important;
   }
 
@@ -3542,24 +3547,24 @@ document.addEventListener("DOMContentLoaded",()=>{
     z-index: 22 !important;
     width: 38px !important;
     height: 38px !important;
-    border: none !important;
+    border: 0 !important;
     border-radius: 14px !important;
     background: #f8fafc !important;
     color: #111827 !important;
     font-size: 32px !important;
     line-height: 30px !important;
     font-weight: 700 !important;
-    cursor: pointer !important;
   }
 
   .app.auth-login-mode .auth-start-screen,
   .app.auth-login-mode .auth-pending-screen {
     height: 100% !important;
-    min-height: auto !important;
+    min-height: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
     text-align: center !important;
+    overflow: hidden !important;
   }
 
   .app.auth-login-mode .auth-start-screen.hidden,
@@ -3568,12 +3573,51 @@ document.addEventListener("DOMContentLoaded",()=>{
     display: none !important;
   }
 
+  .app.auth-login-mode .auth-mode-welcome .auth-start-title {
+    display: block !important;
+    order: -2 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 auto 8px !important;
+    color: #111827 !important;
+    font-size: 24px !important;
+    line-height: 1.15 !important;
+    font-weight: 950 !important;
+    text-align: center !important;
+    overflow: visible !important;
+  }
+
+  .app.auth-login-mode .auth-mode-welcome .auth-start-text {
+    display: block !important;
+    order: -1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    max-width: 280px !important;
+    margin: 0 auto clamp(44px, 7dvh, 64px) !important;
+    color: #4b5563 !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    font-weight: 850 !important;
+    text-align: center !important;
+    overflow: visible !important;
+  }
+
+  .app.auth-login-mode .auth-mode-welcome .account-welcome,
+  .app.auth-login-mode .auth-mode-welcome #accountFields,
+  .app.auth-login-mode .auth-mode-welcome #accountFormCard > .main-btn,
+  .app.auth-login-mode .auth-mode-welcome .auth-hero-visual,
+  .app.auth-login-mode .auth-mode-welcome #authStartNote {
+    display: none !important;
+  }
+
   .app.auth-login-mode .auth-start-logo {
     width: 100% !important;
     height: 112px !important;
     min-height: 112px !important;
     max-height: 112px !important;
-    margin: 0 auto 12px !important;
+    margin: 0 auto 22px !important;
     padding: 0 !important;
     display: flex !important;
     flex-direction: column !important;
@@ -3590,7 +3634,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     height: 72px !important;
     object-fit: cover !important;
     border-radius: 20px !important;
-    background: #ffffff !important;
+    background: #fff !important;
     box-shadow: 0 14px 34px rgba(37, 99, 235, 0.18) !important;
   }
 
@@ -3617,165 +3661,18 @@ document.addEventListener("DOMContentLoaded",()=>{
     text-align: center !important;
   }
 
-  .app.auth-login-mode .auth-hero-visual {
-    position: relative !important;
-    width: min(100%, 270px) !important;
-    height: 176px !important;
-    min-height: 176px !important;
-    max-height: 176px !important;
-    flex: 0 0 176px !important;
-    margin: 0 auto 14px !important;
-    border-radius: 24px !important;
-    background: linear-gradient(180deg, #f8fbff, #eef6ff) !important;
-    border: 1px solid #dbeafe !important;
+  .app.auth-login-mode .account-welcome {
+    display: block !important;
+    height: 82px !important;
+    min-height: 82px !important;
+    max-height: 82px !important;
+    margin: 0 0 16px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    text-align: center !important;
     overflow: hidden !important;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8) !important;
   }
 
-  .app.auth-login-mode .auth-hero-visual::before {
-    content: "" !important;
-    position: absolute !important;
-    left: 22px !important;
-    right: 22px !important;
-    bottom: 24px !important;
-    height: 74px !important;
-    border: 2px solid #d7e5f7 !important;
-    border-radius: 16px !important;
-    background:
-      linear-gradient(90deg, transparent 0 48%, #dbeafe 48% 52%, transparent 52%),
-      linear-gradient(180deg, transparent 0 46%, #dbeafe 46% 50%, transparent 50%) !important;
-    opacity: 0.8 !important;
-  }
-
-  .app.auth-login-mode .auth-hero-visual::after {
-    content: "" !important;
-    position: absolute !important;
-    left: 26px !important;
-    top: 44px !important;
-    width: 38px !important;
-    height: 38px !important;
-    border-radius: 50% !important;
-    background: #ffffff !important;
-    border: 2px solid #dbeafe !important;
-    box-shadow:
-      172px 6px 0 -2px #ffffff,
-      172px 6px 0 0 #dbeafe !important;
-  }
-
-  .app.auth-login-mode .auth-tech-face {
-    position: absolute !important;
-    left: 105px !important;
-    top: 34px !important;
-    width: 58px !important;
-    height: 58px !important;
-    border-radius: 50% !important;
-    background: #ffd4ad !important;
-    border: 4px solid #075ad7 !important;
-    box-shadow: 0 -19px 0 -7px #075ad7 !important;
-    z-index: 3 !important;
-  }
-
-  .app.auth-login-mode .auth-tech-face::before {
-    content: "" !important;
-    position: absolute !important;
-    left: 15px !important;
-    top: 23px !important;
-    width: 5px !important;
-    height: 5px !important;
-    border-radius: 50% !important;
-    background: #111827 !important;
-    box-shadow: 20px 0 0 #111827 !important;
-  }
-
-  .app.auth-login-mode .auth-tech-face::after {
-    content: "" !important;
-    position: absolute !important;
-    left: 20px !important;
-    top: 38px !important;
-    width: 18px !important;
-    height: 8px !important;
-    border-bottom: 2px solid #9a3412 !important;
-    border-radius: 0 0 18px 18px !important;
-  }
-
-  .app.auth-login-mode .auth-tech-body {
-    position: absolute !important;
-    left: 80px !important;
-    top: 88px !important;
-    width: 108px !important;
-    height: 88px !important;
-    border-radius: 30px 30px 18px 18px !important;
-    background: linear-gradient(180deg, #0b63e5, #075ad7) !important;
-    z-index: 2 !important;
-    box-shadow: 0 18px 28px rgba(7, 90, 215, 0.2) !important;
-  }
-
-  .app.auth-login-mode .auth-tech-body::before {
-    content: "" !important;
-    position: absolute !important;
-    left: 36px !important;
-    top: 16px !important;
-    width: 36px !important;
-    height: 24px !important;
-    border-radius: 8px !important;
-    background: rgba(255, 255, 255, 0.92) !important;
-  }
-
-  .app.auth-login-mode .auth-tech-body::after {
-    content: "" !important;
-    position: absolute !important;
-    right: -30px !important;
-    top: 12px !important;
-    width: 42px !important;
-    height: 18px !important;
-    border-radius: 999px !important;
-    background: #ffd4ad !important;
-    transform: rotate(-28deg) !important;
-  }
-
-  .app.auth-login-mode .auth-tech-board {
-    position: absolute !important;
-    left: 62px !important;
-    top: 108px !important;
-    width: 48px !important;
-    height: 60px !important;
-    border-radius: 10px !important;
-    background: #173b7a !important;
-    transform: rotate(-9deg) !important;
-    z-index: 4 !important;
-    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2) !important;
-  }
-
-  .app.auth-login-mode .auth-tech-board::before {
-    content: "" !important;
-    position: absolute !important;
-    left: 10px !important;
-    right: 10px !important;
-    top: 14px !important;
-    height: 3px !important;
-    border-radius: 999px !important;
-    background: #dbeafe !important;
-    box-shadow: 0 12px 0 #dbeafe, 0 24px 0 #dbeafe !important;
-  }
-
-  .app.auth-login-mode .auth-zap {
-    position: absolute !important;
-    right: 50px !important;
-    top: 40px !important;
-    width: 50px !important;
-    height: 44px !important;
-    border-radius: 15px !important;
-    background: #ffffff !important;
-    border: 2px solid #bfdbfe !important;
-    color: #075ad7 !important;
-    font-size: 34px !important;
-    line-height: 42px !important;
-    font-weight: 950 !important;
-    z-index: 5 !important;
-    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.14) !important;
-  }
-
-  .app.auth-login-mode .auth-start-title,
   .app.auth-login-mode .account-welcome-ja,
   .app.auth-login-mode .auth-pending-title {
     height: 32px !important;
@@ -3791,7 +3688,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     text-overflow: ellipsis !important;
   }
 
-  .app.auth-login-mode .auth-start-text,
   .app.auth-login-mode .account-welcome-sub,
   .app.auth-login-mode .auth-pending-text {
     max-width: 310px !important;
@@ -3809,39 +3705,43 @@ document.addEventListener("DOMContentLoaded",()=>{
     -webkit-box-orient: vertical !important;
   }
 
-  .app.auth-login-mode .auth-start-note {
-    position: relative !important;
-    max-width: 310px !important;
-    height: 36px !important;
-    min-height: 36px !important;
-    max-height: 36px !important;
-    margin: 16px auto 0 !important;
-    padding-left: 24px !important;
-    color: #4b5563 !important;
-    font-size: 12px !important;
-    line-height: 1.45 !important;
-    font-weight: 850 !important;
-    text-align: left !important;
-    overflow: hidden !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2 !important;
-    -webkit-box-orient: vertical !important;
+  .app.auth-login-mode #accountFields {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    margin-top: 0 !important;
   }
 
-  .app.auth-login-mode .auth-start-note::before {
-    content: "i" !important;
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 17px !important;
-    height: 17px !important;
-    border-radius: 50% !important;
-    border: 1px solid #64748b !important;
-    color: #334155 !important;
-    font-size: 12px !important;
-    line-height: 16px !important;
-    text-align: center !important;
-    font-weight: 950 !important;
+  .app.auth-login-mode #accountFields input {
+    display: block !important;
+    width: 100% !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+    border-radius: 16px !important;
+    padding: 0 16px !important;
+    text-align: left !important;
+    background: #fff !important;
+    border: 1px solid #dbe4ef !important;
+    color: #111827 !important;
+    font-size: 15px !important;
+    font-weight: 850 !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.035) !important;
+  }
+
+  .app.auth-login-mode #accountFields input.hidden {
+    display: none !important;
+  }
+
+  .app.auth-login-mode #accountFields input:focus {
+    outline: none !important;
+    border-color: #075ad7 !important;
+    box-shadow: 0 0 0 4px rgba(7, 90, 215, 0.1) !important;
+  }
+
+  .app.auth-login-mode #accountFields input::placeholder {
+    color: #98a2b3 !important;
+    opacity: 1 !important;
   }
 
   .app.auth-login-mode .auth-primary,
@@ -3864,83 +3764,17 @@ document.addEventListener("DOMContentLoaded",()=>{
   .app.auth-login-mode #accountFormCard > .main-btn {
     margin-top: 0 !important;
     background: #075ad7 !important;
-    color: #ffffff !important;
-    border: none !important;
+    color: #fff !important;
+    border: 0 !important;
     box-shadow: 0 16px 34px rgba(7, 90, 215, 0.25) !important;
   }
 
   .app.auth-login-mode .auth-secondary {
     margin-top: 10px !important;
-    background: #ffffff !important;
+    background: #fff !important;
     color: #075ad7 !important;
     border: 1.5px solid #075ad7 !important;
     box-shadow: none !important;
-  }
-
-  .app.auth-login-mode .account-welcome {
-    display: block !important;
-    height: 82px !important;
-    min-height: 82px !important;
-    max-height: 82px !important;
-    margin: 0 0 16px !important;
-    padding: 0 !important;
-    border: 0 !important;
-    text-align: center !important;
-    overflow: hidden !important;
-  }
-
-  .app.auth-login-mode .account-welcome-brand {
-    display: none !important;
-  }
-
-  .app.auth-login-mode .account-mode {
-    display: none !important;
-  }
-
-  .app.auth-login-mode #accountFields {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-    margin-top: 0 !important;
-  }
-
-  .app.auth-login-mode #accountFields input {
-    display: block !important;
-    width: 100% !important;
-    height: 52px !important;
-    min-height: 52px !important;
-    max-height: 52px !important;
-    border-radius: 16px !important;
-    padding: 0 16px !important;
-    text-align: left !important;
-    background: #ffffff !important;
-    border: 1px solid #dbe4ef !important;
-    color: #111827 !important;
-    font-size: 15px !important;
-    font-weight: 850 !important;
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.035) !important;
-  }
-
-  .app.auth-login-mode #accountFields input.hidden {
-    display: none !important;
-  }
-
-  .app.auth-login-mode.auth-login-mode #authStartNote,
-  .app.auth-login-mode .auth-mode-welcome .auth-hero-visual,
-  .app.auth-login-mode .auth-mode-welcome .auth-start-title,
-  .app.auth-login-mode .auth-mode-welcome .auth-start-text {
-    display: none !important;
-  }
-
-  .app.auth-login-mode #accountFields input:focus {
-    outline: none !important;
-    border-color: #075ad7 !important;
-    box-shadow: 0 0 0 4px rgba(7, 90, 215, 0.1) !important;
-  }
-
-  .app.auth-login-mode #accountFields input::placeholder {
-    color: #98a2b3 !important;
-    opacity: 1 !important;
   }
 
   .app.auth-login-mode .auth-mode-form {
@@ -3968,7 +3802,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     width: 94px !important;
     height: 122px !important;
     border-radius: 18px !important;
-    background: #ffffff !important;
+    background: #fff !important;
     border: 6px solid #64748b !important;
     box-shadow: 0 20px 34px rgba(15, 23, 42, 0.1) !important;
   }
@@ -3986,17 +3820,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     border-bottom: 0 !important;
   }
 
-  .app.auth-login-mode .auth-paper::after {
-    content: "" !important;
-    position: absolute !important;
-    left: 20px !important;
-    right: 20px !important;
-    bottom: 24px !important;
-    height: 4px !important;
-    background: #dbeafe !important;
-    box-shadow: 0 -16px 0 #dbeafe, 0 -32px 0 #dbeafe !important;
-  }
-
   .app.auth-login-mode .auth-checkmark {
     position: absolute !important;
     left: 96px !important;
@@ -4005,7 +3828,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     height: 62px !important;
     border-radius: 50% !important;
     background: #075ad7 !important;
-    color: #ffffff !important;
+    color: #fff !important;
     font-size: 38px !important;
     line-height: 62px !important;
     font-weight: 950 !important;
@@ -4018,20 +3841,15 @@ document.addEventListener("DOMContentLoaded",()=>{
     justify-content: center !important;
     min-width: 210px !important;
     height: 48px !important;
-    min-height: 48px !important;
-    max-height: 48px !important;
     margin: 0 auto 10px !important;
     border-radius: 14px !important;
     background: #e8f1ff !important;
     color: #075ad7 !important;
     font-weight: 950 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
   }
 
   .app.auth-login-mode .auth-pending-pill::before {
-    content: "◷" !important;
+    content: "?" !important;
     margin-right: 8px !important;
     font-size: 22px !important;
   }
@@ -4049,13 +3867,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     max-height: 104px !important;
   }
 
-  .app.auth-login-mode .auth-hero-visual {
-    height: 156px !important;
-    min-height: 156px !important;
-    max-height: 156px !important;
-    flex-basis: 156px !important;
-  }
-
   .app.auth-login-mode .auth-start-title,
   .app.auth-login-mode .account-welcome-ja,
   .app.auth-login-mode .auth-pending-title {
@@ -4064,108 +3875,112 @@ document.addEventListener("DOMContentLoaded",()=>{
 }
 </style>
 
-<script id="yamaden-auth-final-clean-v24-logic">
+<script id="yamaden-auth-clean-v26-logic">
 (function () {
-  function $(id) {
-    return document.getElementById(id);
-  }
+  function $(id) { return document.getElementById(id); }
+  function getLang() { return (localStorage.getItem("language") || localStorage.getItem("lang") || window.lang || "ja") === "vi" ? "vi" : "ja"; }
+  function setText(id, text) { const el = $(id); if (el) el.innerText = text; }
+  function show(el, visible) { if (el) el.classList.toggle("hidden", !visible); }
+  function getSavedUser() { try { return JSON.parse(localStorage.getItem("userProfile") || "null"); } catch (e) { return null; } }
+  function isActiveUser(user) { return !!(user && user.status === "active" && user.profileCompleted); }
+  function isPendingUser(user) { return !!(user && user.profileCompleted && user.status !== "active"); }
 
-  function getLang() {
-    return (localStorage.getItem("language") || localStorage.getItem("lang") || window.lang || "ja") === "vi" ? "vi" : "ja";
-  }
+  const copy = {
+    vi: {
+      welcomeTitle: "Ch?o m?ng",
+      welcomeText: "??ng k? ho?c ??ng nh?p ?? ti?p t?c s? d?ng ?ng d?ng YAMADEN.",
+      loginTitle: "??ng nh?p",
+      loginText: "Nh?p s? ?i?n tho?i v? m? PIN ?? ??ng nh?p.",
+      registerTitle: "??ng k?",
+      registerText: "Nh?p s? ?i?n tho?i, PIN v? nh?p l?i PIN.",
+      profileTitle: "Th?ng tin t?i kho?n",
+      profileText: "Vui l?ng nh?p th?ng tin ?? admin duy?t t?i kho?n.",
+      pendingTitle: "Th?ng tin ?? ???c g?i",
+      pendingText: "T?i kho?n c?a b?n ?ang ch? admin duy?t. Sau khi ???c ph? duy?t, b?n m?i c? th? s? d?ng ??y ?? ch?c n?ng c?a app.",
+      pendingPill: "?ang ch? duy?t",
+      backLogin: "Quay l?i ??ng nh?p",
+      login: "??ng nh?p",
+      register: "??ng k?",
+      next: "Ti?p t?c",
+      submit: "G?i duy?t admin",
+      phone: "S? ?i?n tho?i",
+      pin: "PIN",
+      pinConfirm: "Nh?p l?i PIN",
+      name: "H? v? t?n",
+      email: "Email",
+      address: "??a ch?",
+      project: "Ghi ch? / t?n c?ng tr?nh",
+      company: "C?ng ty / c? nh?n"
+    },
+    ja: {
+      welcomeTitle: "????",
+      welcomeText: "???????????YAMADEN????????????",
+      loginTitle: "????",
+      loginText: "?????PIN??????????",
+      registerTitle: "????",
+      registerText: "?????PIN????PIN??????????",
+      profileTitle: "?????",
+      profileText: "????????????????????????",
+      pendingTitle: "?????????",
+      pendingText: "????????????????????????????",
+      pendingPill: "????",
+      backLogin: "???????",
+      login: "????",
+      register: "????",
+      next: "??",
+      submit: "??????",
+      phone: "????",
+      pin: "PIN",
+      pinConfirm: "PIN??",
+      name: "???",
+      email: "Email",
+      address: "??",
+      project: "?? / ???",
+      company: "???????"
+    }
+  };
 
-  function setText(id, text) {
-    const el = $(id);
-    if (el) el.innerText = text;
-  }
-
-  function show(el, visible) {
-    if (!el) return;
-    el.classList.toggle("hidden", !visible);
-  }
+  function c(key) { const lang = getLang(); return (copy[lang] && copy[lang][key]) || copy.ja[key] || key; }
 
   function syncLangButtons() {
-    const l = getLang();
+    const lang = getLang();
     const vi = $("authLangVi");
     const ja = $("authLangJa");
-
-    if (vi) {
-      vi.classList.toggle("active", l === "vi");
-      vi.classList.toggle("is-active", l === "vi");
-    }
-
-    if (ja) {
-      ja.classList.toggle("active", l === "ja");
-      ja.classList.toggle("is-active", l === "ja");
-    }
-
+    if (vi) vi.classList.toggle("active", lang === "vi");
+    if (ja) ja.classList.toggle("active", lang === "ja");
     const mainLang = $("language");
-    if (mainLang) mainLang.value = l;
+    if (mainLang) mainLang.value = lang;
   }
-
-  const oldSetAuthLanguage = window.setAuthLanguage;
-
-  window.setAuthLanguage = function (next) {
-    const l = next === "vi" ? "vi" : "ja";
-
-    window.lang = l;
-    localStorage.setItem("language", l);
-    localStorage.setItem("lang", l);
-
-    if (typeof oldSetAuthLanguage === "function") {
-      try {
-        oldSetAuthLanguage(l);
-      } catch (e) {}
-    } else if (typeof window.applyLanguage === "function") {
-      try {
-        window.applyLanguage();
-      } catch (e) {}
-    }
-
-    const currentMode = window.accountMode || "welcome";
-    window.setAccountMode(currentMode);
-
-    setTimeout(syncLangButtons, 0);
-    setTimeout(syncLangButtons, 80);
-  };
 
   function ensureStartLogo() {
     const startLogo = document.querySelector(".auth-start-logo");
     if (!startLogo) return;
-
-    startLogo.innerHTML = `
-      <img src="/icon-192.png" alt="YAMADEN">
-      <div>
-        <b>株式会社 山電</b>
-        <span>YAMADEN.CO.LTD</span>
-      </div>
-    `;
+    startLogo.innerHTML = '<img src="/icon-192.png" alt="YAMADEN"><div><b>???? ??</b><span>YAMADEN.CO.LTD</span></div>';
   }
 
-  function getSavedUser() {
-    try {
-      return JSON.parse(localStorage.getItem("userProfile") || "null");
-    } catch (e) {
-      return null;
+  const oldSetAuthLanguage = window.setAuthLanguage;
+  window.setAuthLanguage = function (next) {
+    const lang = next === "vi" ? "vi" : "ja";
+    window.lang = lang;
+    localStorage.setItem("language", lang);
+    localStorage.setItem("lang", lang);
+    if (typeof oldSetAuthLanguage === "function") {
+      try { oldSetAuthLanguage(lang); } catch (e) {}
+    } else if (typeof window.applyLanguage === "function") {
+      try { window.applyLanguage(); } catch (e) {}
     }
-  }
-
-  function isActiveUser(user) {
-    return !!(user && user.status === "active" && user.profileCompleted);
-  }
-
-  function isPendingUser(user) {
-    return !!(user && user.profileCompleted && user.status !== "active");
-  }
+    const currentMode = (typeof accountMode !== "undefined" ? accountMode : window.accountMode) || "welcome";
+    window.setAccountMode(currentMode);
+    syncLangButtons();
+  };
 
   window.setAccountMode = function (mode) {
-    const l = getLang();
     const card = $("accountFormCard");
     if (!card) return;
-
     const allowed = ["welcome", "login", "register", "profile", "pending"];
     mode = allowed.includes(mode) ? mode : "welcome";
     window.accountMode = mode;
+    try { accountMode = mode; } catch (e) {}
 
     const isWelcome = mode === "welcome";
     const isLogin = mode === "login";
@@ -4186,106 +4001,67 @@ document.addEventListener("DOMContentLoaded",()=>{
     show(document.querySelector("#accountFormCard > .main-btn"), isLogin || isRegister || isProfile);
 
     const fields = {
-      name: $("accountName"),
-      phone: $("accountPhone"),
-      pin: $("accountPin"),
-      pinConfirm: $("accountPinConfirm"),
-      email: $("accountEmail"),
-      province: $("accountProvince"),
-      project: $("accountProjectName"),
-      company: $("accountCompany")
+      name: $("accountName"), phone: $("accountPhone"), pin: $("accountPin"), pinConfirm: $("accountPinConfirm"),
+      email: $("accountEmail"), province: $("accountProvince"), project: $("accountProjectName"), company: $("accountCompany")
     };
-
-    Object.values(fields).forEach(function (el) {
-      show(el, false);
-    });
+    Object.values(fields).forEach(el => show(el, false));
 
     if (isWelcome) {
-      setText("authStartTitle", l === "ja" ? "ようこそ" : "Chào mừng");
-      setText("authStartText", l === "ja"
-        ? "ログインまたは登録してYAMADENアプリをご利用ください。"
-        : "Đăng ký hoặc đăng nhập để tiếp tục sử dụng ứng dụng YAMADEN.");
-      setText("authStartLoginBtn", l === "ja" ? "ログイン" : "Đăng nhập");
-      setText("authStartRegisterBtn", l === "ja" ? "新規登録" : "Đăng ký");
-      setText("authStartNote", l === "ja"
-        ? "アカウントは管理者承認後に利用できます。"
-        : "Tài khoản cần được admin duyệt trước khi sử dụng app.");
+      setText("authStartTitle", c("welcomeTitle"));
+      setText("authStartText", c("welcomeText"));
+      setText("authStartLoginBtn", c("login"));
+      setText("authStartRegisterBtn", c("register"));
     }
 
     if (isLogin) {
-      show(fields.phone, true);
-      show(fields.pin, true);
-
-      setText("accountWelcome", l === "ja" ? "ログイン" : "Đăng nhập");
-      setText("accountText", l === "ja"
-        ? "電話番号とPINを入力してください。"
-        : "Nhập số điện thoại và mã PIN để đăng nhập.");
-      setText("accountLoginText", l === "ja" ? "ログイン" : "Đăng nhập");
-
-      if (fields.phone) fields.phone.placeholder = l === "ja" ? "電話番号" : "Số điện thoại";
-      if (fields.pin) fields.pin.placeholder = "PIN";
+      show(fields.phone, true); show(fields.pin, true);
+      setText("accountWelcome", c("loginTitle"));
+      setText("accountText", c("loginText"));
+      setText("accountLoginText", c("login"));
+      if (fields.phone) fields.phone.placeholder = c("phone");
+      if (fields.pin) fields.pin.placeholder = c("pin");
     }
 
     if (isRegister) {
-      show(fields.phone, true);
-      show(fields.pin, true);
-      show(fields.pinConfirm, true);
-
-      setText("accountWelcome", l === "ja" ? "新規登録" : "Đăng ký");
-      setText("accountText", l === "ja"
-        ? "電話番号とPINを登録してください。"
-        : "Nhập số điện thoại, PIN và nhập lại PIN.");
-      setText("accountLoginText", l === "ja" ? "次へ" : "Tiếp tục");
-
-      if (fields.phone) fields.phone.placeholder = l === "ja" ? "電話番号" : "Số điện thoại";
-      if (fields.pin) fields.pin.placeholder = "PIN";
-      if (fields.pinConfirm) fields.pinConfirm.placeholder = l === "ja" ? "PIN確認" : "Nhập lại PIN";
+      show(fields.phone, true); show(fields.pin, true); show(fields.pinConfirm, true);
+      setText("accountWelcome", c("registerTitle"));
+      setText("accountText", c("registerText"));
+      setText("accountLoginText", c("next"));
+      if (fields.phone) fields.phone.placeholder = c("phone");
+      if (fields.pin) fields.pin.placeholder = c("pin");
+      if (fields.pinConfirm) fields.pinConfirm.placeholder = c("pinConfirm");
     }
 
     if (isProfile) {
-      show(fields.name, true);
-      show(fields.email, true);
-      show(fields.province, true);
-      show(fields.project, true);
-      show(fields.company, true);
-
-      setText("accountWelcome", l === "ja" ? "お客様情報" : "Thông tin tài khoản");
-      setText("accountText", l === "ja"
-        ? "管理者承認のため、お客様情報を入力してください。"
-        : "Vui lòng nhập thông tin để admin duyệt tài khoản.");
-      setText("accountLoginText", l === "ja" ? "管理者へ送信" : "Gửi duyệt admin");
-
-      if (fields.name) fields.name.placeholder = l === "ja" ? "お名前" : "Họ và tên";
-      if (fields.email) fields.email.placeholder = "Email";
-      if (fields.province) fields.province.placeholder = l === "ja" ? "住所" : "Địa chỉ";
-      if (fields.project) fields.project.placeholder = l === "ja" ? "備考 / 工事件名" : "Ghi chú / tên công trình";
-      if (fields.company) fields.company.placeholder = l === "ja" ? "会社名（任意）" : "Công ty / cá nhân";
+      show(fields.name, true); show(fields.email, true); show(fields.province, true); show(fields.project, true); show(fields.company, true);
+      setText("accountWelcome", c("profileTitle"));
+      setText("accountText", c("profileText"));
+      setText("accountLoginText", c("submit"));
+      if (fields.name) fields.name.placeholder = c("name");
+      if (fields.email) fields.email.placeholder = c("email");
+      if (fields.province) fields.province.placeholder = c("address");
+      if (fields.project) fields.project.placeholder = c("project");
+      if (fields.company) fields.company.placeholder = c("company");
     }
 
     if (isPending) {
-      setText("authPendingTitle", l === "ja" ? "情報を送信しました" : "Thông tin đã được gửi");
-      setText("authPendingText", l === "ja"
-        ? "管理者承認待ちです。承認後にアプリをご利用いただけます。"
-        : "Tài khoản của bạn đang chờ admin duyệt. Sau khi được phê duyệt, bạn mới có thể sử dụng đầy đủ chức năng của app.");
-      setText("authPendingPill", l === "ja" ? "承認待ち" : "Đang chờ duyệt");
-      setText("authPendingLoginBtn", l === "ja" ? "ログインに戻る" : "Quay lại đăng nhập");
+      setText("authPendingTitle", c("pendingTitle"));
+      setText("authPendingText", c("pendingText"));
+      setText("authPendingPill", c("pendingPill"));
+      setText("authPendingLoginBtn", c("backLogin"));
     }
 
     syncLangButtons();
   };
 
-  const oldUpdateAccountUI = window.updateAccountUI;
-
   window.updateAccountUI = function () {
     const user = getSavedUser();
     window.currentUser = user;
-
+    try { currentUser = user; } catch (e) {}
     const loggedIn = isActiveUser(user);
     const pending = isPendingUser(user);
-
     const formCard = $("accountFormCard");
     const profileCard = $("profileCard");
-
     if (formCard) formCard.style.display = loggedIn ? "none" : "block";
     if (profileCard) profileCard.style.display = loggedIn ? "block" : "none";
 
@@ -4296,209 +4072,70 @@ document.addEventListener("DOMContentLoaded",()=>{
       if ($("profileProvince")) $("profileProvince").innerText = user.province || "";
       if ($("profileProject")) $("profileProject").innerText = user.projectName || "";
       if ($("profileCompany")) $("profileCompany").innerText = user.company || "";
-      if ($("profileRequests") && typeof window.getMyRequests === "function") {
-        $("profileRequests").innerText = window.getMyRequests().length;
-      }
-
+      if ($("profileRequests") && typeof window.getMyRequests === "function") $("profileRequests").innerText = window.getMyRequests().length;
       if ($("accountName")) $("accountName").value = user.name || "";
       if ($("accountPhone")) $("accountPhone").value = user.phone || "";
       if ($("accountEmail")) $("accountEmail").value = user.email || "";
       if ($("accountProvince")) $("accountProvince").value = user.province || "";
       if ($("accountProjectName")) $("accountProjectName").value = user.projectName || "";
       if ($("accountCompany")) $("accountCompany").value = user.company || "";
-
       if ($("name")) $("name").value = user.name || "";
       if ($("phone")) $("phone").value = user.phone || "";
       if ($("contact")) $("contact").value = user.contact || user.email || "";
       if ($("address")) $("address").value = user.address || user.projectName || "";
     }
 
-    if (loggedIn) {
-      return;
-    }
-
-    if (pending) {
-      window.setAccountMode("pending");
-      return;
-    }
-
-    const current = window.accountMode || "welcome";
-
-    if (["login", "register", "profile"].includes(current)) {
-      window.setAccountMode(current);
-    } else {
-      window.setAccountMode("welcome");
-    }
+    if (loggedIn) return;
+    if (pending) return window.setAccountMode("pending");
+    const current = (typeof accountMode !== "undefined" ? accountMode : window.accountMode) || "welcome";
+    window.setAccountMode(["login", "register", "profile"].includes(current) ? current : "welcome");
   };
 
   const oldShowTab = window.showTab;
-
   window.showTab = function (tab) {
-    if (typeof oldShowTab === "function") {
-      oldShowTab(tab);
-    }
-
+    if (typeof oldShowTab === "function") oldShowTab(tab);
     const app = document.querySelector(".app");
-    const user = getSavedUser();
-    const loggedIn = isActiveUser(user);
-
+    const loggedIn = isActiveUser(getSavedUser());
     if (app) {
       app.classList.toggle("auth-login-mode", tab === "account" && !loggedIn);
       app.classList.toggle("auth-app-mode", loggedIn);
     }
-
-    if (tab === "account" && !loggedIn) {
-      window.updateAccountUI();
-    }
-
+    if (tab === "account" && !loggedIn) window.updateAccountUI();
     syncLangButtons();
   };
 
   const oldUserLogout = window.userLogout;
-
   window.userLogout = function () {
     localStorage.removeItem("userToken");
     localStorage.removeItem("userProfile");
     window.currentUser = null;
     window.accountMode = "welcome";
-
-    if (typeof oldUserLogout === "function") {
-      try {
-        oldUserLogout();
-      } catch (e) {}
-    }
-
+    try { accountMode = "welcome"; } catch (e) {}
+    if (typeof oldUserLogout === "function") { try { oldUserLogout(); } catch (e) {} }
     window.showTab("account");
     window.setAccountMode("welcome");
   };
 
   document.addEventListener("DOMContentLoaded", function () {
     ensureStartLogo();
-
     const vi = $("authLangVi");
     const ja = $("authLangJa");
-
-    if (vi) {
-      vi.onclick = function () {
-        window.setAuthLanguage("vi");
-      };
-    }
-
-    if (ja) {
-      ja.onclick = function () {
-        window.setAuthLanguage("ja");
-      };
-    }
-
+    if (vi) vi.onclick = () => window.setAuthLanguage("vi");
+    if (ja) ja.onclick = () => window.setAuthLanguage("ja");
     const user = getSavedUser();
-
     if (isActiveUser(user)) {
-      if (typeof window.showTab === "function") {
-        window.showTab("home");
-      }
+      if (typeof window.showTab === "function") window.showTab("home");
     } else {
       window.accountMode = "welcome";
-      if (typeof window.showTab === "function") {
-        window.showTab("account");
-      }
+      try { accountMode = "welcome"; } catch (e) {}
+      if (typeof window.showTab === "function") window.showTab("account");
       window.setAccountMode("welcome");
     }
-
     syncLangButtons();
   });
 
-  setTimeout(function () {
-    ensureStartLogo();
-    syncLangButtons();
-  }, 300);
+  setTimeout(function () { ensureStartLogo(); syncLangButtons(); }, 300);
 })();
 </script>
-<style id="yamaden-auth-scroll-lock-v25-style">
-html:has(.app.auth-login-mode),
-body:has(.app.auth-login-mode) {
-  height: 100dvh !important;
-  min-height: 100dvh !important;
-  max-height: 100dvh !important;
-  overflow: hidden !important;
-  overscroll-behavior: none !important;
-}
-
-.app.auth-login-mode,
-.app.auth-login-mode .main,
-.app.auth-login-mode #accountSection,
-.app.auth-login-mode .account-landing,
-.app.auth-login-mode .account-panel,
-.app.auth-login-mode .account-card {
-  overflow: hidden !important;
-  overscroll-behavior: none !important;
-  -webkit-overflow-scrolling: auto !important;
-}
-
-.app.auth-login-mode .account-landing,
-.app.auth-login-mode .account-panel,
-.app.auth-login-mode .account-card,
-.app.auth-login-mode .auth-start-screen,
-.app.auth-login-mode .auth-pending-screen,
-.app.auth-login-mode .account-welcome,
-.app.auth-login-mode #accountFields {
-  touch-action: none !important;
-}
-
-.app.auth-login-mode input,
-.app.auth-login-mode button {
-  touch-action: manipulation !important;
-}
-
-@media (max-width: 860px) {
-  .app.auth-login-mode .account-card {
-    height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
-    max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
-  }
-
-  .app.auth-login-mode .auth-mode-welcome .auth-start-screen {
-    position: relative !important;
-    justify-content: center !important;
-    padding-top: 0 !important;
-  }
-
-  .app.auth-login-mode .auth-mode-welcome .auth-start-title {
-    display: block !important;
-    position: static !important;
-    order: -1 !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    margin: 0 auto clamp(48px, 8dvh, 72px) !important;
-    line-height: 1.15 !important;
-    color: #111827 !important;
-    text-align: center !important;
-    overflow: visible !important;
-  }
-
-  .app.auth-login-mode .auth-mode-welcome .auth-start-text {
-    display: block !important;
-    order: -1 !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    margin: -54px auto clamp(44px, 7dvh, 64px) !important;
-    max-width: 280px !important;
-    color: #4b5563 !important;
-    font-size: 13px !important;
-    line-height: 1.35 !important;
-    font-weight: 850 !important;
-    text-align: center !important;
-    overflow: visible !important;
-  }
-
-  .app.auth-login-mode .auth-mode-welcome .auth-start-logo {
-    margin-bottom: 22px !important;
-  }
-
-  .app.auth-login-mode .auth-mode-form #accountFields {
-    max-height: none !important;
-  }
-}
-</style>
 </body>
 </html>
