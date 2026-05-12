@@ -1008,6 +1008,10 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
               <label class="auth-remember"><input type="checkbox" checked><span id="authRememberText">Ghi nhớ đăng nhập</span></label>
               <button type="button" id="authForgotPin" onclick="showToast(lang==='ja'?'管理者へお問い合わせください。':'Vui lòng liên hệ admin để được hỗ trợ PIN.')">Quên PIN?</button>
             </div>
+            <label class="auth-register-terms hidden" id="authRegisterTerms">
+              <input type="checkbox" checked>
+              <span id="authRegisterTermsText">Tôi đồng ý với <b>Điều khoản sử dụng</b> và <b>Chính sách bảo mật</b></span>
+            </label>
             <button class="main-btn" onclick="userLogin()"><span class="icon" id="accountLoginIcon"></span><span id="accountLoginText">Đăng nhập / Lưu</span></button>
             <div class="auth-switch-prompt hidden" id="authSwitchPrompt"><span id="authSwitchPromptText">Chưa có tài khoản?</span> <button type="button" id="authSwitchPromptBtn" onclick="setAccountMode('register')">Đăng ký</button></div>
             <div class="approval-state">
@@ -3867,6 +3871,35 @@ document.addEventListener("DOMContentLoaded",()=>{
     display: none !important;
   }
 
+  .app.auth-login-mode .auth-register-terms {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    margin: 12px 0 18px !important;
+    color: #475569 !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+    font-weight: 850 !important;
+    text-align: left !important;
+  }
+
+  .app.auth-login-mode .auth-register-terms.hidden {
+    display: none !important;
+  }
+
+  .app.auth-login-mode .auth-register-terms input {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    margin-top: 1px !important;
+    accent-color: #075ad7 !important;
+  }
+
+  .app.auth-login-mode .auth-register-terms b {
+    color: #075ad7 !important;
+    font-weight: 950 !important;
+  }
+
   .app.auth-login-mode .auth-remember {
     display: inline-flex !important;
     align-items: center !important;
@@ -3915,6 +3948,10 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   .app.auth-login-mode .auth-mode-form #accountLoginIcon {
     display: none !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form.auth-mode-form #authSwitchPrompt {
+    margin-top: 18px !important;
   }
 
   .app.auth-login-mode .auth-pending-visual {
@@ -4012,6 +4049,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   function $(id) { return document.getElementById(id); }
   function getLang() { return (localStorage.getItem("language") || localStorage.getItem("lang") || window.lang || "ja") === "vi" ? "vi" : "ja"; }
   function setText(id, text) { const el = $(id); if (el) el.innerText = text; }
+  function setHtml(id, html) { const el = $(id); if (el) el.innerHTML = html; }
   function show(el, visible) { if (el) el.classList.toggle("hidden", !visible); }
   function getSavedUser() { try { return JSON.parse(localStorage.getItem("userProfile") || "null"); } catch (e) { return null; } }
   function isActiveUser(user) { return !!(user && user.status === "active" && user.profileCompleted); }
@@ -4144,6 +4182,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     Object.values(fields).forEach(el => show(el, false));
     Object.values(labels).forEach(el => show(el, false));
     show($("authLoginOptions"), false);
+    show($("authRegisterTerms"), false);
     show($("authSwitchPrompt"), false);
 
     if (isWelcome) {
@@ -4165,6 +4204,8 @@ document.addEventListener("DOMContentLoaded",()=>{
       setText("authForgotPin", getLang() === "ja" ? "PIN\u3092\u5fd8\u308c\u305f\u5834\u5408" : "Qu\u00ean PIN?");
       setText("authSwitchPromptText", getLang() === "ja" ? "\u30a2\u30ab\u30a6\u30f3\u30c8\u672a\u767b\u9332\uff1f" : "Ch\u01b0a c\u00f3 t\u00e0i kho\u1ea3n?");
       setText("authSwitchPromptBtn", c("register"));
+      const switchBtn = $("authSwitchPromptBtn");
+      if (switchBtn) switchBtn.onclick = () => window.setAccountMode("register");
       setText("accountPhoneAuthLabel", c("phone"));
       setText("accountPinAuthLabel", c("pin"));
       if (fields.phone) fields.phone.placeholder = c("phone");
@@ -4174,12 +4215,19 @@ document.addEventListener("DOMContentLoaded",()=>{
     if (isRegister) {
       show(fields.phone, true); show(fields.pin, true); show(fields.pinConfirm, true);
       show(labels.phone, true); show(labels.pin, true); show(labels.pinConfirm, true);
+      show($("authRegisterTerms"), true);
+      show($("authSwitchPrompt"), true);
       setText("accountWelcome", c("registerTitle"));
       setText("accountText", c("registerText"));
       setText("accountLoginText", c("next"));
       setText("accountPhoneAuthLabel", c("phone"));
       setText("accountPinAuthLabel", c("pin"));
       setText("accountPinConfirmAuthLabel", c("pinConfirm"));
+      setHtml("authRegisterTermsText", getLang() === "ja" ? "\u5229\u7528\u898f\u7d04\u3068\u30d7\u30e9\u30a4\u30d0\u30b7\u30fc\u30dd\u30ea\u30b7\u30fc\u306b\u540c\u610f\u3057\u307e\u3059" : "T\u00f4i \u0111\u1ed3ng \u00fd v\u1edbi <b>\u0110i\u1ec1u kho\u1ea3n s\u1eed d\u1ee5ng</b> v\u00e0 <b>Ch\u00ednh s\u00e1ch b\u1ea3o m\u1eadt</b>");
+      setText("authSwitchPromptText", getLang() === "ja" ? "\u3059\u3067\u306b\u30a2\u30ab\u30a6\u30f3\u30c8\u304c\u3042\u308a\u307e\u3059\u304b\uff1f" : "\u0110\u00e3 c\u00f3 t\u00e0i kho\u1ea3n?");
+      setText("authSwitchPromptBtn", c("login"));
+      const switchBtn = $("authSwitchPromptBtn");
+      if (switchBtn) switchBtn.onclick = () => window.setAccountMode("login");
       if (fields.phone) fields.phone.placeholder = c("phone");
       if (fields.pin) fields.pin.placeholder = c("pin");
       if (fields.pinConfirm) fields.pinConfirm.placeholder = c("pinConfirm");
