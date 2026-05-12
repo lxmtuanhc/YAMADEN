@@ -1129,7 +1129,7 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
 
     <!-- SEND REQUEST SECTION -->
     <section id="sendSection" class="hidden card"><div class="card-title"><div class="card-title-icon" id="sendTitleIcon"></div><h2 id="sendTitle">Gửi yêu cầu hỗ trợ</h2></div>
-      <div class="issue-panel"><div class="issue-head"><div class="issue-title" id="issueTitle">Chọn vấn đề yêu cầu</div><div class="issue-sub" id="issueSub">Tìm và chọn nội dung công việc, sau đó mô tả chi tiết bên dưới.</div></div><div id="issueChipList"><div class="issue-search-wrap"><input id="issueSearchInput" class="issue-search-input" autocomplete="off" placeholder="Tìm và chọn nội dung công việc"><div id="issueDropdown" class="issue-dropdown"></div></div><div id="selectedIssues" class="selected-issues"></div><div id="hiddenIssueInputs" class="hidden-issue-inputs"></div></div><div id="issueRequiredText" class="issue-required-text">Vui lòng chọn ít nhất 1 vấn đề yêu cầu.</div></div>
+      <div class="issue-panel" id="issuePanel"><div class="issue-head"><div class="issue-title" id="issueTitle">Chọn vấn đề yêu cầu</div><div class="issue-sub" id="issueSub">Tìm và chọn nội dung công việc, sau đó mô tả chi tiết bên dưới.</div></div><div id="issueChipList"><div class="issue-search-wrap"><input id="issueSearchInput" class="issue-search-input" autocomplete="off" placeholder="Tìm và chọn nội dung công việc"><div id="issueDropdown" class="issue-dropdown"></div></div><div id="selectedIssues" class="selected-issues"></div><div id="hiddenIssueInputs" class="hidden-issue-inputs"></div></div><div id="issueRequiredText" class="issue-required-text">Vui lòng chọn ít nhất 1 vấn đề yêu cầu.</div></div>
       <label class="quote-option"><input type="checkbox" id="quoteRequested"><span id="quoteOptionText">Tôi muốn nhận báo giá</span></label>
       <div class="form-grid"><div class="field"><label><span id="labelName">Họ và tên</span> <span class="required">*</span></label><div class="input-wrap"><div class="input-icon icon" id="nameIcon"></div><input id="name" autocomplete="name" placeholder="Họ và tên"></div></div><div class="field"><label><span id="labelPhone">Số điện thoại</span> <span class="required">*</span></label><div class="input-wrap"><div class="input-icon icon" id="phoneIcon"></div><input id="phone" inputmode="tel" placeholder="Số điện thoại"></div></div><div class="field"><label id="labelContact">Liên hệ</label><div class="input-wrap"><div class="input-icon icon" id="contactIcon"></div><input id="contact" placeholder="Email / LINE / Zalo"></div></div><div class="field"><label><span id="labelAddress">Địa chỉ</span> <span class="required">*</span></label><div class="input-wrap"><div class="input-icon icon" id="addressIcon"></div><input id="address" placeholder="Địa chỉ"></div></div><div class="field full"><label><span id="labelContent">Mô tả tự do / chi tiết yêu cầu</span> <span class="required">*</span></label><div class="input-wrap"><div class="input-icon textarea-icon icon" id="contentIcon"></div><textarea id="content" placeholder="Hãy nhập tình trạng, vị trí và điều bạn cần hỗ trợ."></textarea></div><div class="issue-free-note">Hãy nhập tình trạng, vị trí và điều bạn cần hỗ trợ.</div></div><div class="field full"><label id="labelImage">Hình ảnh</label><div class="upload-box"><div class="upload-icon" id="uploadIcon"></div><div id="uploadText">Chọn ảnh hoặc chụp ảnh</div><div class="upload-sub">Tối đa 12 file · JPG / PNG / MP4</div><input type="file" id="image" accept="image/*,video/*" multiple style="display:none;"><button type="button" class="soft-btn choose-image-btn" id="chooseImageBtn" onclick="document.getElementById('image').click()">Chọn ảnh</button></div></div></div>
       <button class="main-btn" onclick="sendRequest()" id="sendBtn"><span class="icon" id="sendBtnIcon"></span><span id="sendBtnText">Gửi yêu cầu</span></button>
@@ -1394,12 +1394,18 @@ function applyLanguage() {
   $("labelContent").innerHTML=t("content")+' <span class="required">*</span>'; $("labelImage").innerText=t("image");
   $("content").placeholder=t("freeDesc");
   $("labelCheckId").innerText=t("requestId"); if(selectedMediaFiles.length===0) $("uploadText").innerText=t("uploadText");
-  if($(".upload-sub")) $(".upload-sub").innerText=lang==="ja"?"最大12ファイル · JPG / PNG / MP4":"Tối đa 12 file · JPG / PNG / MP4";
+ document.querySelectorAll(".upload-sub").forEach(el => {
+  el.innerText = lang === "ja"
+    ? "最大12ファイル · JPG / PNG / MP4"
+    : "Tối đa 12 file · JPG / PNG / MP4";
+});
   $("chooseImageBtn").innerText=t("chooseImage"); $("copyIdText").innerText=t("copyId"); $("historyText").innerText=t("history");
   $("sendBtnText").innerText=t("send"); $("checkBtnText").innerText=t("check"); $("checkId").placeholder=t("checkPlaceholder");
   $("myRequestTitle").innerText=t("myRequests"); $("clearHistoryBtn").innerText=t("clearHistory");
   $("issueTitle").innerText=t("issueTitle"); $("issueSub").innerText=t("issueSub"); $("issueRequiredText").innerText=t("issueRequired");
-  if($(".issue-free-note")) $(".issue-free-note").innerText=t("freeDesc");
+  document.querySelectorAll(".issue-free-note").forEach(el => {
+  el.innerText = t("freeDesc");
+});
   $("quoteOptionText").innerText=t("quote"); $("settingsTitleCustomer").innerText=t("settingsTitle");
   $("settingsLangTitle").innerText=t("language"); $("settingsLangSub").innerText=t("languageSub");
   $("settingsHistoryTitle").innerText=t("historySetting"); $("settingsClearTitle").innerText=t("clearHistorySetting");
@@ -4438,6 +4444,246 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
 
   setTimeout(function () { ensureStartLogo(); syncLangButtons(); }, 300);
+})();
+</script>
+<!-- yamaden-pending-screen-final-fix-v27 -->
+<style id="yamaden-pending-screen-final-fix-v27-style">
+@media (max-width: 860px) {
+  .app.auth-login-mode #accountFormCard.auth-mode-pending {
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending > * {
+    display: none !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authCardLang {
+    display: inline-flex !important;
+    position: absolute !important;
+    top: 18px !important;
+    right: 18px !important;
+    z-index: 30 !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen {
+    display: flex !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 20 !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 76px 24px 32px !important;
+    margin: 0 !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    background: rgba(255,255,255,0.98) !important;
+    overflow: hidden !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen.hidden {
+    display: flex !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .auth-pending-visual {
+    display: block !important;
+    width: 220px !important;
+    height: 150px !important;
+    min-height: 150px !important;
+    max-height: 150px !important;
+    flex: 0 0 150px !important;
+    margin: 0 auto 20px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .auth-pending-title {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 0 14px !important;
+    padding: 0 !important;
+    color: #111827 !important;
+    font-size: 27px !important;
+    line-height: 1.22 !important;
+    font-weight: 950 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .auth-pending-text {
+    display: block !important;
+    width: 100% !important;
+    max-width: 330px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 auto 22px !important;
+    padding: 0 !important;
+    color: #4b5563 !important;
+    font-size: 15px !important;
+    line-height: 1.55 !important;
+    font-weight: 850 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    -webkit-box-orient: unset !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .auth-pending-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    min-width: 210px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    margin: 0 auto 18px !important;
+    padding: 0 22px !important;
+    border-radius: 16px !important;
+    background: #e8f1ff !important;
+    color: #075ad7 !important;
+    font-size: 16px !important;
+    font-weight: 950 !important;
+    white-space: nowrap !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .auth-pending-pill::before {
+    content: "⏳" !important;
+    margin-right: 8px !important;
+    font-size: 18px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingLoginBtn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    max-width: 330px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    margin: 0 auto !important;
+    padding: 0 18px !important;
+    border-radius: 18px !important;
+    border: 2px solid #075ad7 !important;
+    background: #ffffff !important;
+    color: #075ad7 !important;
+    font-size: 17px !important;
+    font-weight: 950 !important;
+    box-shadow: none !important;
+  }
+}
+</style>
+
+<script id="yamaden-pending-screen-final-fix-v27-logic">
+(function () {
+  function getLang() {
+    return (localStorage.getItem("language") || localStorage.getItem("lang") || window.lang || "ja") === "vi" ? "vi" : "ja";
+  }
+
+  function getSavedUser() {
+    try {
+      return JSON.parse(localStorage.getItem("userProfile") || "null");
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function isPendingUser(user) {
+    return !!(user && user.profileCompleted && user.status !== "active");
+  }
+
+  function applyPendingScreenFix() {
+    const user = getSavedUser();
+    const pending = isPendingUser(user);
+
+    const app = document.querySelector(".app");
+    const card = document.getElementById("accountFormCard");
+    const pendingScreen = document.getElementById("authPendingScreen");
+
+    if (!card || !pendingScreen) return;
+
+    if (!pending) {
+      card.classList.remove("auth-mode-pending");
+      return;
+    }
+
+    if (app) {
+      app.classList.add("auth-login-mode");
+      app.classList.remove("auth-app-mode");
+    }
+
+    card.style.display = "block";
+    card.classList.add("auth-mode-pending");
+    card.classList.remove("auth-mode-welcome");
+    card.classList.remove("auth-mode-form");
+
+    pendingScreen.classList.remove("hidden");
+    pendingScreen.style.display = "flex";
+
+    const l = getLang();
+
+    const title = document.getElementById("authPendingTitle");
+    const text = document.getElementById("authPendingText");
+    const pill = document.getElementById("authPendingPill");
+    const btn = document.getElementById("authPendingLoginBtn");
+
+    if (title) title.innerText = l === "ja" ? "情報を送信しました" : "Thông tin đã được gửi";
+
+    if (text) {
+      text.innerText = l === "ja"
+        ? "管理者承認待ちです。承認後にアプリをご利用いただけます。"
+        : "Tài khoản của bạn đang chờ admin duyệt. Sau khi được phê duyệt, bạn mới có thể sử dụng đầy đủ chức năng của app.";
+    }
+
+    if (pill) pill.innerText = l === "ja" ? "承認待ち" : "Đang chờ duyệt";
+    if (btn) btn.innerText = l === "ja" ? "ログインに戻る" : "Quay lại đăng nhập";
+  }
+
+  const oldSetAccountMode = window.setAccountMode;
+  window.setAccountMode = function (mode) {
+    if (typeof oldSetAccountMode === "function") {
+      oldSetAccountMode(mode);
+    }
+
+    setTimeout(applyPendingScreenFix, 0);
+    setTimeout(applyPendingScreenFix, 100);
+  };
+
+  const oldUpdateAccountUI = window.updateAccountUI;
+  window.updateAccountUI = function () {
+    if (typeof oldUpdateAccountUI === "function") {
+      oldUpdateAccountUI();
+    }
+
+    setTimeout(applyPendingScreenFix, 0);
+    setTimeout(applyPendingScreenFix, 100);
+  };
+
+  const oldShowTab = window.showTab;
+  window.showTab = function (tab) {
+    if (typeof oldShowTab === "function") {
+      oldShowTab(tab);
+    }
+
+    setTimeout(applyPendingScreenFix, 0);
+    setTimeout(applyPendingScreenFix, 100);
+  };
+
+  document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(applyPendingScreenFix, 0);
+    setTimeout(applyPendingScreenFix, 300);
+    setTimeout(applyPendingScreenFix, 800);
+  });
+
+  setTimeout(applyPendingScreenFix, 0);
 })();
 </script>
 </body>
