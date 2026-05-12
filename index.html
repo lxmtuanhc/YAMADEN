@@ -992,6 +992,7 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
               <button id="accountModeLogin" onclick="setAccountMode('login')">Đã có tài khoản</button>
             </div>
             <div class="account-fields" id="accountFields">
+              <div class="auth-field-label hidden" id="accountNameAuthLabel">Họ và tên / お名前</div>
               <input id="accountName" placeholder="Họ và tên" autocomplete="name">
               <div class="auth-field-label hidden" id="accountPhoneAuthLabel">Số điện thoại</div>
               <input id="accountPhone" placeholder="Số điện thoại" inputmode="tel" autocomplete="tel">
@@ -999,10 +1000,19 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
               <input id="accountPin" type="password" placeholder="Mã PIN 4-6 số" inputmode="numeric" maxlength="6">
               <div class="auth-field-label hidden" id="accountPinConfirmAuthLabel">Nhập lại PIN</div>
               <input id="accountPinConfirm" type="password" placeholder="Nhập lại mã PIN" inputmode="numeric" maxlength="6">
+              <div class="auth-field-label hidden" id="accountEmailAuthLabel">Email</div>
               <input id="accountEmail" placeholder="Email" autocomplete="email">
+              <div class="auth-field-label hidden" id="accountContactAuthLabel">Email hoặc LINE/Zalo / 連絡先</div>
+              <input id="accountContact" placeholder="Email hoặc LINE/Zalo" autocomplete="off">
+              <div class="auth-field-label hidden" id="accountAddressAuthLabel">Địa chỉ / 住所</div>
+              <input id="accountAddress" placeholder="Địa chỉ" autocomplete="street-address">
               <input id="accountProvince" placeholder="Tỉnh / thành">
+              <div class="auth-field-label hidden" id="accountProjectAuthLabel">Tên công trình / 工事件名</div>
               <input id="accountProjectName" placeholder="Tên công trình">
+              <div class="auth-field-label hidden" id="accountCompanyAuthLabel">Công ty hoặc cá nhân / 会社名・個人</div>
               <input id="accountCompany" placeholder="Công ty / cá nhân">
+              <div class="auth-field-label hidden" id="accountNoteAuthLabel">Ghi chú thêm / 備考</div>
+              <input id="accountNote" placeholder="Ghi chú thêm">
             </div>
             <div class="auth-login-options hidden" id="authLoginOptions">
               <label class="auth-remember"><input type="checkbox" checked><span id="authRememberText">Ghi nhớ đăng nhập</span></label>
@@ -1421,7 +1431,10 @@ function updateAccountUI() {
     $("profileProvince").innerText=currentUser.province||""; $("profileProject").innerText=currentUser.projectName||"";
     $("profileCompany").innerText=currentUser.company||""; $("profileRequests").innerText=getMyRequests().length;
     $("accountName").value=currentUser.name||""; $("accountPhone").value=currentUser.phone||""; $("accountEmail").value=currentUser.email||"";
-    $("accountProvince").value=currentUser.province||""; $("accountProjectName").value=currentUser.projectName||"";
+    if($("accountContact")) $("accountContact").value=currentUser.contact||"";
+    if($("accountAddress")) $("accountAddress").value=currentUser.address||currentUser.province||"";
+    if($("accountNote")) $("accountNote").value=currentUser.note||"";
+    $("accountProvince").value=currentUser.province||currentUser.address||""; $("accountProjectName").value=currentUser.projectName||"";
     $("accountCompany").value=currentUser.company||""; $("name").value=currentUser.name||""; $("phone").value=currentUser.phone||"";
     $("contact").value=currentUser.contact||currentUser.email||""; $("address").value=currentUser.address||currentUser.projectName||"";
   }
@@ -1478,15 +1491,16 @@ function setAccountMode(mode) {
 async function userLogin() {
   let mode=accountMode;
   let phone=$("accountPhone").value.trim(), pin=$("accountPin").value.trim(), pinConfirm=$("accountPinConfirm").value.trim();
-  let name=$("accountName").value.trim(), email=$("accountEmail").value.trim(), province=$("accountProvince").value.trim();
+  let name=$("accountName").value.trim(), email=$("accountEmail").value.trim(), province=($("accountAddress")?.value||$("accountProvince").value).trim();
   let projectName=$("accountProjectName").value.trim(), company=$("accountCompany").value.trim();
+  let contact=($("accountContact")?.value||"").trim(), address=($("accountAddress")?.value||province).trim(), note=($("accountNote")?.value||"").trim();
   if(mode!=="profile" && (!phone||!/^[0-9]{4,6}$/.test(pin))){ showToast(t("required")); return; }
   if(mode==="register" && pin!==pinConfirm){ showToast(lang==="ja"?"PINが一致しません":"Mã PIN không khớp"); return; }
   if(mode==="profile" && (!name||!email||!province||!projectName)){ showToast(t("required")); return; }
   try{
     let endpoint=mode==="register"?"/user/register":mode==="profile"?"/user/profile":"/user/login";
     let method=mode==="profile"?"PUT":"POST";
-    let body=mode==="profile"?{name,email,province,projectName,company}:{phone,pin};
+    let body=mode==="profile"?{name,email,contact,province,address,projectName,company,note}:{phone,pin};
     let headers={"Content-Type":"application/json"};
     let token=getUserToken();
     if(mode==="profile" && token) headers.Authorization="Bearer "+token;
@@ -3681,6 +3695,22 @@ document.addEventListener("DOMContentLoaded",()=>{
     text-align: center !important;
   }
 
+  .app.auth-login-mode .auth-mode-welcome .auth-primary {
+    position: absolute !important;
+    left: 22px !important;
+    right: 22px !important;
+    bottom: 86px !important;
+    width: auto !important;
+  }
+
+  .app.auth-login-mode .auth-mode-welcome .auth-secondary {
+    position: absolute !important;
+    left: 22px !important;
+    right: 22px !important;
+    bottom: 22px !important;
+    width: auto !important;
+  }
+
   .app.auth-login-mode .account-welcome {
     display: block !important;
     height: 82px !important;
@@ -3939,6 +3969,11 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
   .app.auth-login-mode .auth-mode-form #accountFormCard > .main-btn {
+    position: absolute !important;
+    left: 22px !important;
+    right: 22px !important;
+    bottom: 54px !important;
+    width: auto !important;
     height: 48px !important;
     min-height: 48px !important;
     max-height: 48px !important;
@@ -3951,7 +3986,45 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
   .app.auth-login-mode .auth-mode-form.auth-mode-form #authSwitchPrompt {
-    margin-top: 18px !important;
+    position: absolute !important;
+    left: 22px !important;
+    right: 22px !important;
+    bottom: 22px !important;
+    margin-top: 0 !important;
+  }
+
+  .app.auth-login-mode .auth-mode-profile .account-welcome {
+    margin: 34px 0 12px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-profile .account-welcome-sub {
+    height: 22px !important;
+    min-height: 22px !important;
+    max-height: 22px !important;
+    margin-top: 8px !important;
+    -webkit-line-clamp: 1 !important;
+  }
+
+  .app.auth-login-mode .auth-mode-profile #accountFields {
+    gap: 6px !important;
+    padding-bottom: 76px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-profile .auth-field-label {
+    font-size: 10px !important;
+    margin-bottom: -5px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-profile #accountFields input {
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    border-radius: 9px !important;
+    font-size: 12px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-profile #accountFormCard > .main-btn {
+    bottom: 22px !important;
   }
 
   .app.auth-login-mode .auth-pending-visual {
@@ -4074,13 +4147,15 @@ document.addEventListener("DOMContentLoaded",()=>{
       next: "Ti\u1ebfp t\u1ee5c",
       submit: "G\u1eedi duy\u1ec7t admin",
       phone: "S\u1ed1 \u0111i\u1ec7n tho\u1ea1i",
+      contact: "Email ho\u1eb7c LINE/Zalo",
       pin: "PIN",
       pinConfirm: "Nh\u1eadp l\u1ea1i PIN",
       name: "H\u1ecd v\u00e0 t\u00ean",
       email: "Email",
       address: "\u0110\u1ecba ch\u1ec9",
       project: "Ghi ch\u00fa / t\u00ean c\u00f4ng tr\u00ecnh",
-      company: "C\u00f4ng ty / c\u00e1 nh\u00e2n"
+      company: "C\u00f4ng ty / c\u00e1 nh\u00e2n",
+      note: "Ghi ch\u00fa th\u00eam"
     },
     ja: {
       welcomeTitle: "\u3088\u3046\u3053\u305d",
@@ -4100,13 +4175,15 @@ document.addEventListener("DOMContentLoaded",()=>{
       next: "\u6b21\u3078",
       submit: "\u7ba1\u7406\u8005\u3078\u9001\u4fe1",
       phone: "\u96fb\u8a71\u756a\u53f7",
+      contact: "\u9023\u7d61\u5148",
       pin: "PIN",
       pinConfirm: "PIN\u78ba\u8a8d",
       name: "\u304a\u540d\u524d",
       email: "Email",
       address: "\u4f4f\u6240",
-      project: "\u5099\u8003 / \u5de5\u4e8b\u540d",
-      company: "\u4f1a\u793e\u540d\uff08\u4efb\u610f\uff09"
+      project: "\u5de5\u4e8b\u4ef6\u540d",
+      company: "\u4f1a\u793e\u540d\u30fb\u500b\u4eba",
+      note: "\u5099\u8003"
     }
   };
 
@@ -4160,6 +4237,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     card.classList.toggle("auth-mode-welcome", isWelcome);
     card.classList.toggle("auth-mode-form", isLogin || isRegister || isProfile);
+    card.classList.toggle("auth-mode-profile", isProfile);
     card.classList.toggle("auth-mode-pending", isPending);
 
     show($("authStartScreen"), isWelcome);
@@ -4172,12 +4250,20 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     const fields = {
       name: $("accountName"), phone: $("accountPhone"), pin: $("accountPin"), pinConfirm: $("accountPinConfirm"),
-      email: $("accountEmail"), province: $("accountProvince"), project: $("accountProjectName"), company: $("accountCompany")
+      email: $("accountEmail"), contact: $("accountContact"), address: $("accountAddress"), province: $("accountProvince"),
+      project: $("accountProjectName"), company: $("accountCompany"), note: $("accountNote")
     };
     const labels = {
+      name: $("accountNameAuthLabel"),
       phone: $("accountPhoneAuthLabel"),
       pin: $("accountPinAuthLabel"),
-      pinConfirm: $("accountPinConfirmAuthLabel")
+      pinConfirm: $("accountPinConfirmAuthLabel"),
+      email: $("accountEmailAuthLabel"),
+      contact: $("accountContactAuthLabel"),
+      address: $("accountAddressAuthLabel"),
+      project: $("accountProjectAuthLabel"),
+      company: $("accountCompanyAuthLabel"),
+      note: $("accountNoteAuthLabel")
     };
     Object.values(fields).forEach(el => show(el, false));
     Object.values(labels).forEach(el => show(el, false));
@@ -4234,15 +4320,28 @@ document.addEventListener("DOMContentLoaded",()=>{
     }
 
     if (isProfile) {
-      show(fields.name, true); show(fields.email, true); show(fields.province, true); show(fields.project, true); show(fields.company, true);
+      show(fields.name, true); show(fields.phone, true); show(fields.email, true); show(fields.contact, true); show(fields.address, true); show(fields.project, true); show(fields.company, true); show(fields.note, true);
+      show(labels.name, true); show(labels.phone, true); show(labels.email, true); show(labels.contact, true); show(labels.address, true); show(labels.project, true); show(labels.company, true); show(labels.note, true);
       setText("accountWelcome", c("profileTitle"));
       setText("accountText", c("profileText"));
       setText("accountLoginText", c("submit"));
+      setText("accountNameAuthLabel", getLang() === "ja" ? "1. \u304a\u540d\u524d" : "1. H\u1ecd v\u00e0 t\u00ean");
+      setText("accountPhoneAuthLabel", getLang() === "ja" ? "2. \u96fb\u8a71\u756a\u53f7" : "2. S\u1ed1 \u0111i\u1ec7n tho\u1ea1i");
+      setText("accountEmailAuthLabel", getLang() === "ja" ? "3. Email" : "3. Email");
+      setText("accountContactAuthLabel", getLang() === "ja" ? "3. \u9023\u7d61\u5148" : "3. Email ho\u1eb7c LINE/Zalo");
+      setText("accountAddressAuthLabel", getLang() === "ja" ? "4. \u4f4f\u6240" : "4. \u0110\u1ecba ch\u1ec9");
+      setText("accountProjectAuthLabel", getLang() === "ja" ? "5. \u5de5\u4e8b\u4ef6\u540d" : "5. T\u00ean c\u00f4ng tr\u00ecnh");
+      setText("accountCompanyAuthLabel", getLang() === "ja" ? "6. \u4f1a\u793e\u540d\u30fb\u500b\u4eba" : "6. C\u00f4ng ty ho\u1eb7c c\u00e1 nh\u00e2n");
+      setText("accountNoteAuthLabel", getLang() === "ja" ? "7. \u5099\u8003" : "7. Ghi ch\u00fa th\u00eam");
       if (fields.name) fields.name.placeholder = c("name");
+      if (fields.phone) fields.phone.placeholder = c("phone");
       if (fields.email) fields.email.placeholder = c("email");
-      if (fields.province) fields.province.placeholder = c("address");
+      if (fields.contact) fields.contact.placeholder = c("contact");
+      if (fields.address) fields.address.placeholder = c("address");
+      if (fields.province) fields.province.value = fields.address ? fields.address.value : fields.province.value;
       if (fields.project) fields.project.placeholder = c("project");
       if (fields.company) fields.company.placeholder = c("company");
+      if (fields.note) fields.note.placeholder = c("note");
     }
 
     if (isPending) {
@@ -4277,7 +4376,10 @@ document.addEventListener("DOMContentLoaded",()=>{
       if ($("accountName")) $("accountName").value = user.name || "";
       if ($("accountPhone")) $("accountPhone").value = user.phone || "";
       if ($("accountEmail")) $("accountEmail").value = user.email || "";
-      if ($("accountProvince")) $("accountProvince").value = user.province || "";
+      if ($("accountContact")) $("accountContact").value = user.contact || "";
+      if ($("accountAddress")) $("accountAddress").value = user.address || user.province || "";
+      if ($("accountNote")) $("accountNote").value = user.note || "";
+      if ($("accountProvince")) $("accountProvince").value = user.province || user.address || "";
       if ($("accountProjectName")) $("accountProjectName").value = user.projectName || "";
       if ($("accountCompany")) $("accountCompany").value = user.company || "";
       if ($("name")) $("name").value = user.name || "";

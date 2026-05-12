@@ -151,6 +151,7 @@ const UserSchema = new mongoose.Schema({
   province: String,
   projectName: String,
   address: String,
+  note: String,
   pinHash: String,
   profileCompleted: { type: Boolean, default: false },
   status: { type: String, default: "pending" },
@@ -428,6 +429,7 @@ app.post("/user/register", async (req, res) => {
           user.province = "";
           user.projectName = "";
           user.address = "";
+          user.note = "";
           user.lastLoginAt = new Date();
           await user.save();
 
@@ -482,6 +484,7 @@ app.post("/user/register", async (req, res) => {
       user.province = "";
       user.projectName = "";
       user.address = "";
+      user.note = "";
     }
     user.profileCompleted = Boolean(user.name && user.email && user.province && user.projectName);
     user.lastLoginAt = new Date();
@@ -576,7 +579,7 @@ app.put("/user/profile", requireUser, async (req, res) => {
     const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    ["name", "email", "company", "province", "projectName", "address", "contact"].forEach(field => {
+    ["name", "email", "company", "province", "projectName", "address", "contact", "note"].forEach(field => {
       if (req.body[field] !== undefined) {
         user[field] = String(req.body[field] || "").trim();
       }
@@ -591,8 +594,11 @@ app.put("/user/profile", requireUser, async (req, res) => {
       "SĐT: " + (user.phone || "-") + "\n" +
       "Email: " + (user.email || "-") + "\n" +
       "Khu vực: " + (user.province || "-") + "\n" +
+      "Liên hệ: " + (user.contact || "-") + "\n" +
+      "Địa chỉ: " + (user.address || "-") + "\n" +
       "Công trình: " + (user.projectName || "-") + "\n" +
       "Công ty/cá nhân: " + (user.company || "-") + "\n" +
+      "Ghi chú: " + (user.note || "-") + "\n" +
       "Trạng thái: " + (user.status || "pending") + "\n" +
       "Admin: " + ADMIN_URL
     );
@@ -677,7 +683,7 @@ app.put("/admin/users/:id", requireAdmin, async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    ["name", "phone", "email", "contact", "company", "customerType", "province", "projectName", "address", "status"].forEach(field => {
+    ["name", "phone", "email", "contact", "company", "customerType", "province", "projectName", "address", "note", "status"].forEach(field => {
       if (req.body[field] !== undefined) user[field] = req.body[field];
     });
     if (req.body.status && req.body.status !== "deleted") {
