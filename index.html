@@ -946,88 +946,48 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
             <button class="soft-btn" style="margin-top:12px;" onclick="userLogout()"><span class="icon" id="profileLogoutIcon"></span><span id="profileLogoutText">Đăng xuất</span></button>
           </div>
 
-          <div class="account-card" id="accountFormCard">
-            <button type="button" class="auth-back-btn hidden" id="authBackBtn" onclick="setAccountMode('welcome')" aria-label="Back">&lsaquo;</button>
-            <div class="auth-card-lang" id="authCardLang">
+          <div class="account-card auth-mode-welcome" id="accountFormCard">
+            <button type="button" class="auth-back-btn hidden" id="authBackBtn" onclick="setAccountMode('welcome')" aria-label="Back">‹</button>
+            <div class="auth-card-lang" id="authCardLang" aria-label="Language">
               <button type="button" id="authLangVi" onclick="setAuthLanguage('vi')">VN</button>
               <button type="button" id="authLangJa" onclick="setAuthLanguage('ja')">JP</button>
             </div>
             <div class="auth-start-screen" id="authStartScreen">
-              <div class="auth-start-logo">
-                <img src="/icon-192.png" alt="YAMADEN">
-                <div>
-                  <b>株式会社 山電</b>
-                  <span>YAMADEN.CO.LTD</span>
-                </div>
-              </div>
-              <div class="auth-hero-visual" aria-hidden="true">
-                <div class="auth-tech-face"></div>
-                <div class="auth-tech-body"></div>
-                <div class="auth-tech-board"></div>
-                <div class="auth-zap">ϟ</div>
-              </div>
+              <div class="auth-start-logo"><img src="/icon-192.png" alt="YAMADEN"><div><b>株式会社 山電</b><span>YAMADEN.CO.LTD</span></div></div>
+              <div class="auth-hero-visual" aria-hidden="true"><div class="auth-visual-ring"></div><div class="auth-visual-line one"></div><div class="auth-visual-line two"></div><div class="auth-visual-badge">Y</div></div>
+              <div class="auth-start-kicker">YAMADEN CUSTOMER APP</div>
               <div class="auth-start-title" id="authStartTitle">Chào mừng</div>
               <div class="auth-start-text" id="authStartText">Đăng ký hoặc đăng nhập để tiếp tục sử dụng ứng dụng YAMADEN.</div>
-              <button type="button" class="main-btn auth-primary" id="authStartLoginBtn" onclick="setAccountMode('login')">Đăng nhập</button>
-              <button type="button" class="soft-btn auth-secondary" id="authStartRegisterBtn" onclick="setAccountMode('register')">Đăng ký</button>
+              <div class="auth-start-actions"><button type="button" class="main-btn auth-primary" id="authStartLoginBtn" onclick="setAccountMode('login')">Đăng nhập</button><button type="button" class="soft-btn auth-secondary" id="authStartRegisterBtn" onclick="setAccountMode('register')">Đăng ký</button></div>
               <div class="auth-start-note" id="authStartNote">Tài khoản cần được admin duyệt trước khi sử dụng app.</div>
             </div>
             <div class="auth-pending-screen hidden" id="authPendingScreen">
-              <div class="auth-pending-visual" aria-hidden="true">
-                <div class="auth-paper"></div>
-                <div class="auth-checkmark">✓</div>
-              </div>
+              <div class="auth-pending-visual" aria-hidden="true"><div class="auth-pending-doc"></div></div>
               <div class="auth-pending-title" id="authPendingTitle">Thông tin đã được gửi</div>
-              <div class="auth-pending-text" id="authPendingText">Tài khoản của bạn đang chờ admin duyệt. Sau khi được phê duyệt, bạn mới có thể sử dụng đầy đủ chức năng của app.</div>
+              <div class="auth-pending-text" id="authPendingText">Tài khoản của bạn đang chờ admin duyệt. Sau khi được phê duyệt, bạn có thể sử dụng đầy đủ chức năng của app.</div>
               <div class="auth-pending-pill" id="authPendingPill">Đang chờ duyệt</div>
               <button type="button" class="soft-btn auth-secondary" id="authPendingLoginBtn" onclick="userLogout();setAccountMode('login')">Quay lại đăng nhập</button>
             </div>
-            <div class="account-welcome">
-              <div class="account-welcome-ja" id="accountWelcome">Chào mừng</div>
-              <div class="account-welcome-brand">YAMADEN</div>
-              <div class="account-welcome-sub" id="accountText">Đăng nhập bằng thông tin của bạn để YAMADEN lưu lịch sử yêu cầu và liên hệ hỗ trợ thuận tiện hơn.</div>
-            </div>
-            <div class="account-mode">
-              <button id="accountModeRegister" class="active" onclick="setAccountMode('register')">Khách mới</button>
-              <button id="accountModeLogin" onclick="setAccountMode('login')">Đã có tài khoản</button>
-            </div>
+            <div class="account-welcome"><div class="account-welcome-ja" id="accountWelcome">Chào mừng</div><div class="account-welcome-brand">YAMADEN</div><div class="account-welcome-sub" id="accountText">Đăng nhập bằng thông tin của bạn để YAMADEN lưu lịch sử yêu cầu và liên hệ hỗ trợ thuận tiện hơn.</div></div>
+            <div class="account-mode"><button id="accountModeRegister" class="active" onclick="setAccountMode('register')">Khách mới</button><button id="accountModeLogin" onclick="setAccountMode('login')">Đã có tài khoản</button></div>
             <div class="account-fields" id="accountFields">
-              <div class="auth-field-label hidden" id="accountNameAuthLabel">Họ và tên / お名前</div>
-              <input id="accountName" placeholder="Họ và tên" autocomplete="name">
-              <div class="auth-field-label hidden" id="accountPhoneAuthLabel">Số điện thoại</div>
-              <input id="accountPhone" placeholder="Số điện thoại" inputmode="tel" autocomplete="tel">
-              <div class="auth-field-label hidden" id="accountPinAuthLabel">PIN</div>
-              <input id="accountPin" type="password" placeholder="Mã PIN 4-6 số" inputmode="numeric" maxlength="6">
-              <div class="auth-field-label hidden" id="accountPinConfirmAuthLabel">Nhập lại PIN</div>
-              <input id="accountPinConfirm" type="password" placeholder="Nhập lại mã PIN" inputmode="numeric" maxlength="6">
-              <div class="auth-field-label hidden" id="accountEmailAuthLabel">Email</div>
-              <input id="accountEmail" placeholder="Email" autocomplete="email">
-              <div class="auth-field-label hidden" id="accountContactAuthLabel">Email hoặc LINE/Zalo / 連絡先</div>
-              <input id="accountContact" placeholder="Email hoặc LINE/Zalo" autocomplete="off">
-              <div class="auth-field-label hidden" id="accountAddressAuthLabel">Địa chỉ / 住所</div>
-              <input id="accountAddress" placeholder="Địa chỉ" autocomplete="street-address">
+              <div class="auth-field-label hidden" id="accountNameAuthLabel">Họ và tên</div><input id="accountName" placeholder="Họ và tên" autocomplete="name">
+              <div class="auth-field-label hidden" id="accountPhoneAuthLabel">Số điện thoại</div><input id="accountPhone" placeholder="Số điện thoại" inputmode="tel" autocomplete="tel">
+              <div class="auth-field-label hidden" id="accountPinAuthLabel">PIN</div><input id="accountPin" type="password" placeholder="Mã PIN 4-6 số" inputmode="numeric" maxlength="6">
+              <div class="auth-field-label hidden" id="accountPinConfirmAuthLabel">Nhập lại PIN</div><input id="accountPinConfirm" type="password" placeholder="Nhập lại mã PIN" inputmode="numeric" maxlength="6">
+              <div class="auth-field-label hidden" id="accountEmailAuthLabel">Email</div><input id="accountEmail" placeholder="Email" autocomplete="email">
+              <div class="auth-field-label hidden" id="accountContactAuthLabel">Liên hệ</div><input id="accountContact" placeholder="Email / LINE / Zalo" autocomplete="off">
+              <div class="auth-field-label hidden" id="accountAddressAuthLabel">Địa chỉ</div><input id="accountAddress" placeholder="Địa chỉ" autocomplete="street-address">
               <input id="accountProvince" placeholder="Tỉnh / thành">
-              <div class="auth-field-label hidden" id="accountProjectAuthLabel">Tên công trình / 工事件名</div>
-              <input id="accountProjectName" placeholder="Tên công trình">
-              <div class="auth-field-label hidden" id="accountCompanyAuthLabel">Công ty hoặc cá nhân / 会社名・個人</div>
-              <input id="accountCompany" placeholder="Công ty / cá nhân">
-              <div class="auth-field-label hidden" id="accountNoteAuthLabel">Ghi chú thêm / 備考</div>
-              <input id="accountNote" placeholder="Ghi chú thêm">
+              <div class="auth-field-label hidden" id="accountProjectAuthLabel">Tên công trình</div><input id="accountProjectName" placeholder="Tên công trình">
+              <div class="auth-field-label hidden" id="accountCompanyAuthLabel">Công ty / cá nhân</div><input id="accountCompany" placeholder="Công ty / cá nhân">
+              <div class="auth-field-label hidden" id="accountNoteAuthLabel">Ghi chú thêm</div><input id="accountNote" placeholder="Ghi chú thêm">
             </div>
-            <div class="auth-login-options hidden" id="authLoginOptions">
-              <label class="auth-remember"><input type="checkbox" checked><span id="authRememberText">Ghi nhớ đăng nhập</span></label>
-              <button type="button" id="authForgotPin" onclick="showToast(lang==='ja'?'管理者へお問い合わせください。':'Vui lòng liên hệ admin để được hỗ trợ PIN.')">Quên PIN?</button>
-            </div>
-            <label class="auth-register-terms hidden" id="authRegisterTerms">
-              <input type="checkbox" checked>
-              <span id="authRegisterTermsText">Tôi đồng ý với <b>Điều khoản sử dụng</b> và <b>Chính sách bảo mật</b></span>
-            </label>
+            <div class="auth-login-options hidden" id="authLoginOptions"><label class="auth-remember"><input type="checkbox" checked><span id="authRememberText">Ghi nhớ đăng nhập</span></label><button type="button" id="authForgotPin" onclick="showToast(lang==='ja'?'管理者へお問い合わせください。':'Vui lòng liên hệ admin để được hỗ trợ PIN.')">Quên PIN?</button></div>
+            <label class="auth-register-terms hidden" id="authRegisterTerms"><input type="checkbox" checked><span id="authRegisterTermsText">Tôi đồng ý với <b>Điều khoản sử dụng</b> và <b>Chính sách bảo mật</b></span></label>
             <button class="main-btn" onclick="userLogin()"><span class="icon" id="accountLoginIcon"></span><span id="accountLoginText">Đăng nhập / Lưu</span></button>
             <div class="auth-switch-prompt hidden" id="authSwitchPrompt"><span id="authSwitchPromptText">Chưa có tài khoản?</span> <button type="button" id="authSwitchPromptBtn" onclick="setAccountMode('register')">Đăng ký</button></div>
-            <div class="approval-state">
-              <div class="approval-badge pending" id="approvalPendingText"></div>
-              <div class="approval-badge approved" id="approvalApprovedText"></div>
-            </div>
+            <div class="approval-state"><div class="approval-badge pending" id="approvalPendingText"></div><div class="approval-badge approved" id="approvalApprovedText"></div></div>
             <div class="account-divider"><span id="accountDividerText">hoặc</span></div>
             <button class="soft-btn" onclick="showTab('send')"><span class="icon" id="quickSupportBtnIcon"></span><span id="quickSupportBtn">Gửi hỗ trợ nhanh</span></button>
             <div class="account-status" id="accountStatus"></div>
@@ -4684,6 +4644,1520 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
 
   setTimeout(applyPendingScreenFix, 0);
+})();
+</script>
+
+<!-- yamaden-auth-premium-v28: redesigned login/register UI -->
+<style id="yamaden-auth-premium-v28-style">
+@media (max-width: 860px) {
+  .app.auth-login-mode .account-landing {
+    height: auto !important;
+    min-height: 100svh !important;
+    overflow-y: auto !important;
+    justify-content: flex-start !important;
+    padding: calc(18px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom)) !important;
+    background:
+      linear-gradient(124deg, transparent 0 50%, rgba(37,99,235,.18) 50% 57%, transparent 57%),
+      linear-gradient(132deg, transparent 0 62%, rgba(96,165,250,.18) 62% 68%, transparent 68%),
+      linear-gradient(180deg,#fff 0%,#eef6ff 54%,#dbeafe 100%) !important;
+  }
+
+  .app.auth-login-mode .account-brand {
+    width: min(380px, 100%) !important;
+    margin: 0 auto 14px !important;
+    min-height: 54px !important;
+    display: grid !important;
+    grid-template-columns: 46px minmax(0,1fr) auto !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .app.auth-login-mode .account-brand img {
+    width: 46px !important;
+    height: 46px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 12px 28px rgba(15,23,42,.16) !important;
+  }
+
+  .app.auth-login-mode .account-brand-title {
+    color: #0f172a !important;
+    font-size: 19px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+
+  .app.auth-login-mode .account-brand-sub {
+    color: #075ad7 !important;
+    font-size: 10px !important;
+    letter-spacing: .16em !important;
+  }
+
+  .app.auth-login-mode .account-panel {
+    width: min(390px, 100%) !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.account-card {
+    position: relative !important;
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 22px !important;
+    border-radius: 30px !important;
+    background: rgba(255,255,255,.92) !important;
+    border: 1px solid rgba(255,255,255,.86) !important;
+    box-shadow: 0 26px 70px rgba(15,23,42,.16), inset 0 1px 0 rgba(255,255,255,.86) !important;
+    overflow: hidden !important;
+  }
+
+  .app.auth-login-mode #accountFormCard::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background:
+      radial-gradient(circle at 18% 8%, rgba(37,99,235,.10), transparent 28%),
+      linear-gradient(135deg, transparent 0 64%, rgba(37,99,235,.10) 64% 70%, transparent 70%) !important;
+    pointer-events: none !important;
+  }
+
+  .app.auth-login-mode #accountFormCard > * {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  .app.auth-login-mode .auth-card-lang {
+    position: absolute !important;
+    top: 18px !important;
+    right: 18px !important;
+    display: inline-flex !important;
+    gap: 4px !important;
+    padding: 4px !important;
+    border-radius: 999px !important;
+    background: rgba(15,23,42,.06) !important;
+    border: 1px solid rgba(15,23,42,.08) !important;
+  }
+
+  .app.auth-login-mode .auth-card-lang button {
+    width: 44px !important;
+    height: 34px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+    color: #64748b !important;
+    font-size: 12px !important;
+    font-weight: 950 !important;
+  }
+
+  .app.auth-login-mode .auth-card-lang button.active {
+    background: #0f172a !important;
+    color: #fff !important;
+    box-shadow: 0 10px 22px rgba(15,23,42,.18) !important;
+  }
+
+  .app.auth-login-mode .auth-back-btn {
+    position: absolute !important;
+    top: 18px !important;
+    left: 18px !important;
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 15px !important;
+    border: 1px solid rgba(15,23,42,.08) !important;
+    background: rgba(255,255,255,.86) !important;
+    color: #0f172a !important;
+    font-size: 30px !important;
+    line-height: 1 !important;
+    box-shadow: 0 12px 28px rgba(15,23,42,.10) !important;
+  }
+
+  .app.auth-login-mode .auth-start-screen {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 545px !important;
+    padding-top: 8px !important;
+  }
+
+  .app.auth-login-mode .auth-start-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding-right: 108px !important;
+  }
+
+  .app.auth-login-mode .auth-start-logo img {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 15px !important;
+    box-shadow: 0 14px 30px rgba(15,23,42,.16) !important;
+  }
+
+  .app.auth-login-mode .auth-start-logo b {
+    display: block !important;
+    color: #0f172a !important;
+    font-size: 18px !important;
+    line-height: 1.08 !important;
+    white-space: nowrap !important;
+  }
+
+  .app.auth-login-mode .auth-start-logo span {
+    display: block !important;
+    margin-top: 4px !important;
+    color: #075ad7 !important;
+    font-size: 10px !important;
+    font-weight: 950 !important;
+    letter-spacing: .15em !important;
+  }
+
+  .app.auth-login-mode .auth-hero-visual {
+    display: block !important;
+    position: relative !important;
+    height: 158px !important;
+    margin: 24px 0 18px !important;
+    border-radius: 26px !important;
+    overflow: hidden !important;
+    background: linear-gradient(145deg,#0b1220,#172033 62%,#075ad7) !important;
+    box-shadow: 0 22px 46px rgba(15,23,42,.20) !important;
+  }
+
+  .app.auth-login-mode .auth-visual-ring {
+    position: absolute !important;
+    width: 210px !important;
+    height: 210px !important;
+    right: -74px !important;
+    bottom: -94px !important;
+    border-radius: 50% !important;
+    background: rgba(255,255,255,.12) !important;
+  }
+
+  .app.auth-login-mode .auth-visual-line {
+    position: absolute !important;
+    left: 24px !important;
+    right: 84px !important;
+    height: 18px !important;
+    border-radius: 999px !important;
+    background: rgba(255,255,255,.18) !important;
+  }
+
+  .app.auth-login-mode .auth-visual-line.one { top: 58px !important; }
+  .app.auth-login-mode .auth-visual-line.two { top: 88px !important; right: 168px !important; }
+
+  .app.auth-login-mode .auth-visual-badge {
+    position: absolute !important;
+    right: 26px !important;
+    top: 36px !important;
+    width: 70px !important;
+    height: 70px !important;
+    border-radius: 24px !important;
+    display: grid !important;
+    place-items: center !important;
+    color: #fff !important;
+    font-size: 28px !important;
+    font-weight: 950 !important;
+    background: rgba(255,255,255,.14) !important;
+    border: 1px solid rgba(255,255,255,.18) !important;
+  }
+
+  .app.auth-login-mode .auth-start-kicker {
+    color: #075ad7 !important;
+    font-size: 11px !important;
+    font-weight: 950 !important;
+    letter-spacing: .14em !important;
+    text-align: center !important;
+  }
+
+  .app.auth-login-mode .auth-start-title,
+  .app.auth-login-mode .account-welcome-ja {
+    color: #0f172a !important;
+    font-size: 28px !important;
+    line-height: 1.12 !important;
+    font-weight: 950 !important;
+    text-align: center !important;
+    margin-top: 8px !important;
+  }
+
+  .app.auth-login-mode .auth-start-text,
+  .app.auth-login-mode .account-welcome-sub {
+    color: #64748b !important;
+    font-size: 13px !important;
+    font-weight: 850 !important;
+    line-height: 1.52 !important;
+    text-align: center !important;
+    max-width: 300px !important;
+    margin: 10px auto 0 !important;
+  }
+
+  .app.auth-login-mode .auth-start-actions {
+    display: grid !important;
+    gap: 10px !important;
+    margin-top: auto !important;
+    padding-top: 22px !important;
+  }
+
+  .app.auth-login-mode .auth-primary,
+  .app.auth-login-mode #accountFormCard > .main-btn {
+    width: 100% !important;
+    min-height: 54px !important;
+    border-radius: 17px !important;
+    background: linear-gradient(135deg,#075ad7,#14b8d6) !important;
+    color: #fff !important;
+    box-shadow: 0 18px 34px rgba(37,99,235,.28) !important;
+    font-size: 16px !important;
+    font-weight: 950 !important;
+  }
+
+  .app.auth-login-mode .auth-secondary {
+    width: 100% !important;
+    min-height: 50px !important;
+    border-radius: 16px !important;
+    background: rgba(255,255,255,.74) !important;
+    border: 1px solid rgba(15,23,42,.10) !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+    font-size: 15px !important;
+  }
+
+  .app.auth-login-mode .auth-start-note {
+    margin: 12px auto 0 !important;
+    padding: 10px 12px !important;
+    border-radius: 15px !important;
+    background: #eff6ff !important;
+    border: 1px solid #bfdbfe !important;
+    color: #1d4ed8 !important;
+    font-size: 12px !important;
+    font-weight: 850 !important;
+    line-height: 1.4 !important;
+    text-align: center !important;
+  }
+
+  .app.auth-login-mode .account-welcome {
+    display: block !important;
+    margin: 42px 0 18px !important;
+  }
+
+  .app.auth-login-mode .account-welcome-brand {
+    color: #075ad7 !important;
+    font-size: 31px !important;
+    font-weight: 950 !important;
+    line-height: 1.05 !important;
+    text-align: center !important;
+  }
+
+  .app.auth-login-mode .account-mode,
+  .app.auth-login-mode .account-divider,
+  .app.auth-login-mode .soft-btn[onclick*="showTab('send')"],
+  .app.auth-login-mode .approval-state {
+    display: none !important;
+  }
+
+  .app.auth-login-mode #accountFields {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
+    margin-top: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .app.auth-login-mode .auth-field-label {
+    margin: 5px 4px -3px !important;
+    color: #64748b !important;
+    font-size: 11px !important;
+    font-weight: 950 !important;
+  }
+
+  .app.auth-login-mode #accountFields input {
+    width: 100% !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    border-radius: 16px !important;
+    border: 1px solid #dbe4ef !important;
+    background: rgba(255,255,255,.92) !important;
+    box-shadow: 0 10px 22px rgba(15,23,42,.045) !important;
+    color: #0f172a !important;
+    font-size: 15px !important;
+    font-weight: 850 !important;
+    text-align: center !important;
+    padding: 0 14px !important;
+  }
+
+  .app.auth-login-mode #accountFields input::placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+  }
+
+  .app.auth-login-mode .auth-login-options,
+  .app.auth-login-mode .auth-register-terms {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin: 12px 2px 0 !important;
+    color: #64748b !important;
+    font-size: 12px !important;
+    font-weight: 850 !important;
+  }
+
+  .app.auth-login-mode .auth-login-options.hidden,
+  .app.auth-login-mode .auth-register-terms.hidden,
+  .app.auth-login-mode .auth-switch-prompt.hidden,
+  .app.auth-login-mode #accountFields.hidden,
+  .app.auth-login-mode .account-welcome.hidden,
+  .app.auth-login-mode #accountFormCard > .main-btn.hidden,
+  .app.auth-login-mode .auth-back-btn.hidden,
+  .app.auth-login-mode .auth-start-screen.hidden,
+  .app.auth-login-mode .auth-pending-screen.hidden {
+    display: none !important;
+  }
+
+  .app.auth-login-mode #authForgotPin,
+  .app.auth-login-mode #authSwitchPromptBtn {
+    border: 0 !important;
+    background: transparent !important;
+    color: #075ad7 !important;
+    font-weight: 950 !important;
+  }
+
+  .app.auth-login-mode #accountFormCard > .main-btn {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    margin-top: 18px !important;
+  }
+
+  .app.auth-login-mode .auth-switch-prompt {
+    position: static !important;
+    width: 100% !important;
+    margin: 14px 0 0 !important;
+    padding: 11px 12px !important;
+    border-radius: 15px !important;
+    background: rgba(239,246,255,.86) !important;
+    color: #64748b !important;
+    font-size: 13px !important;
+    font-weight: 850 !important;
+    text-align: center !important;
+  }
+
+  .app.auth-login-mode .account-status {
+    display: none !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile {
+    padding-bottom: 22px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome {
+    margin-top: 34px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountFields input {
+    height: 44px !important;
+    min-height: 44px !important;
+    text-align: left !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending {
+    min-height: 540px !important;
+    display: block !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending > * {
+    display: none !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authCardLang,
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen {
+    display: flex !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen {
+    position: static !important;
+    width: 100% !important;
+    min-height: 496px !important;
+    padding: 56px 0 0 !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 14px !important;
+  }
+
+  .app.auth-login-mode .auth-pending-visual {
+    display: block !important;
+    position: relative !important;
+    width: 148px !important;
+    height: 148px !important;
+    margin: 0 auto 6px !important;
+    border-radius: 42px !important;
+    background: linear-gradient(145deg,#0b1220,#075ad7) !important;
+    box-shadow: 0 22px 48px rgba(15,23,42,.20) !important;
+  }
+
+  .app.auth-login-mode .auth-pending-doc {
+    position: absolute !important;
+    inset: 34px 42px !important;
+    border-radius: 14px !important;
+    background: #fff !important;
+  }
+
+  .app.auth-login-mode .auth-pending-title {
+    color: #0f172a !important;
+    font-size: 24px !important;
+    font-weight: 950 !important;
+    text-align: center !important;
+  }
+
+  .app.auth-login-mode .auth-pending-text {
+    max-width: 300px !important;
+    color: #64748b !important;
+    font-size: 13px !important;
+    font-weight: 850 !important;
+    line-height: 1.55 !important;
+    text-align: center !important;
+  }
+
+  .app.auth-login-mode .auth-pending-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 40px !important;
+    padding: 0 16px !important;
+    border-radius: 999px !important;
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
+    border: 1px solid #bfdbfe !important;
+    font-size: 13px !important;
+    font-weight: 950 !important;
+  }
+
+  .app.auth-login-mode #authPendingLoginBtn {
+    margin-top: 6px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .app.auth-login-mode .account-landing {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+  .app.auth-login-mode #accountFormCard.account-card {
+    padding: 18px !important;
+    border-radius: 26px !important;
+  }
+  .app.auth-login-mode .auth-start-screen {
+    min-height: 520px !important;
+  }
+  .app.auth-login-mode .auth-hero-visual {
+    height: 134px !important;
+  }
+}
+</style>
+
+<!-- yamaden-auth-demo-refine-v29: clean blue-white auth screens from supplied demo -->
+<style id="yamaden-auth-demo-refine-v29-style">
+@media (max-width: 860px) {
+  .app.auth-login-mode {
+    background: #f6f9ff !important;
+  }
+
+  .app.auth-login-mode .account-landing {
+    padding: calc(22px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom)) !important;
+    background:
+      radial-gradient(circle at 50% 7%, rgba(37, 99, 235, .08), transparent 28%),
+      linear-gradient(180deg, #fbfdff 0%, #f7fbff 62%, #eaf3ff 100%) !important;
+  }
+
+  .app.auth-login-mode .account-brand {
+    display: none !important;
+  }
+
+  .app.auth-login-mode .account-panel {
+    width: min(390px, 100%) !important;
+    min-height: calc(100svh - 44px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    display: flex !important;
+    align-items: stretch !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.account-card {
+    width: 100% !important;
+    min-height: calc(100svh - 44px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    padding: 30px 22px 22px !important;
+    border-radius: 20px !important;
+    background: #fff !important;
+    border: 1px solid #edf2fb !important;
+    box-shadow: 0 24px 70px rgba(37, 99, 235, .10) !important;
+    overflow: hidden !important;
+  }
+
+  .app.auth-login-mode #accountFormCard::before {
+    display: none !important;
+  }
+
+  .app.auth-login-mode #accountFormCard::after {
+    content: "" !important;
+    position: absolute !important;
+    left: -18% !important;
+    right: -18% !important;
+    bottom: -88px !important;
+    height: 190px !important;
+    background:
+      radial-gradient(ellipse at 70% 40%, rgba(37, 99, 235, .14), transparent 54%),
+      radial-gradient(ellipse at 22% 62%, rgba(96, 165, 250, .18), transparent 58%) !important;
+    border-radius: 50% 50% 0 0 !important;
+    pointer-events: none !important;
+  }
+
+  .app.auth-login-mode .auth-card-lang {
+    top: 28px !important;
+    right: 18px !important;
+    padding: 2px !important;
+    gap: 2px !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    border: 1px solid #dbeafe !important;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, .08) !important;
+  }
+
+  .app.auth-login-mode .auth-card-lang button {
+    width: 34px !important;
+    height: 25px !important;
+    border-radius: 9px !important;
+    color: #64748b !important;
+    font-size: 11px !important;
+  }
+
+  .app.auth-login-mode .auth-card-lang button.active {
+    background: #eff6ff !important;
+    color: #075ad7 !important;
+    box-shadow: none !important;
+  }
+
+  .app.auth-login-mode .auth-back-btn {
+    top: 28px !important;
+    left: 18px !important;
+    width: 34px !important;
+    height: 34px !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 29px !important;
+  }
+
+  .app.auth-login-mode .auth-start-screen {
+    min-height: calc(100svh - 94px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    padding-top: 72px !important;
+    align-items: stretch !important;
+  }
+
+  .app.auth-login-mode .auth-start-logo,
+  .app.auth-login-mode .auth-start-kicker {
+    display: none !important;
+  }
+
+  .app.auth-login-mode .auth-hero-visual {
+    display: flex !important;
+    height: auto !important;
+    margin: 0 auto 22px !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .app.auth-login-mode .auth-hero-visual::before {
+    content: "" !important;
+    display: block !important;
+    width: 76px !important;
+    height: 76px !important;
+    border-radius: 22px !important;
+    background: #1f1f1f url("/icon-192.png") center / 58px 58px no-repeat !important;
+    box-shadow: 0 18px 34px rgba(15, 23, 42, .18) !important;
+  }
+
+  .app.auth-login-mode .auth-hero-visual::after {
+    content: "株式会社 山電\\A YAMADEN.CO.LTD" !important;
+    white-space: pre !important;
+    display: block !important;
+    margin-top: 12px !important;
+    color: #0f172a !important;
+    font-family: "Times New Roman", "Yu Mincho", serif !important;
+    font-size: 22px !important;
+    line-height: 1.15 !important;
+    font-weight: 700 !important;
+    letter-spacing: .03em !important;
+    text-align: center !important;
+    text-shadow: none !important;
+  }
+
+  .app.auth-login-mode .auth-visual-ring,
+  .app.auth-login-mode .auth-visual-line,
+  .app.auth-login-mode .auth-visual-badge {
+    display: none !important;
+  }
+
+  .app.auth-login-mode .auth-start-title,
+  .app.auth-login-mode .account-welcome-ja {
+    font-size: 22px !important;
+    color: #111827 !important;
+    margin: 0 !important;
+    line-height: 1.25 !important;
+    text-align: center !important;
+  }
+
+  .app.auth-login-mode .auth-start-text,
+  .app.auth-login-mode .account-welcome-sub {
+    max-width: 290px !important;
+    margin: 8px auto 0 !important;
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+    color: #64748b !important;
+    font-weight: 750 !important;
+    text-align: center !important;
+  }
+
+  .app.auth-login-mode .auth-start-actions {
+    margin-top: auto !important;
+    padding-top: 24px !important;
+    gap: 12px !important;
+  }
+
+  .app.auth-login-mode .auth-primary,
+  .app.auth-login-mode #accountFormCard > .main-btn {
+    min-height: 52px !important;
+    border-radius: 10px !important;
+    background: linear-gradient(180deg, #1d6cff 0%, #075ad7 100%) !important;
+    box-shadow: 0 14px 28px rgba(37, 99, 235, .22) !important;
+    font-size: 15px !important;
+  }
+
+  .app.auth-login-mode .auth-secondary {
+    min-height: 50px !important;
+    border-radius: 10px !important;
+    background: #f6f8fc !important;
+    border: 1px solid #e5edf7 !important;
+    color: #075ad7 !important;
+    font-size: 14px !important;
+  }
+
+  .app.auth-login-mode .auth-start-note {
+    margin-top: 18px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    color: #64748b !important;
+    font-size: 12px !important;
+  }
+
+  .app.auth-login-mode .account-welcome {
+    margin: 74px 0 22px !important;
+    position: relative !important;
+  }
+
+  .app.auth-login-mode .account-welcome::before {
+    content: "" !important;
+    display: block !important;
+    width: 70px !important;
+    height: 70px !important;
+    margin: 0 auto 14px !important;
+    border-radius: 21px !important;
+    background: #1f1f1f url("/icon-192.png") center / 54px 54px no-repeat !important;
+    box-shadow: 0 18px 34px rgba(15, 23, 42, .18) !important;
+  }
+
+  .app.auth-login-mode .account-welcome::after {
+    content: "株式会社 山電\\A YAMADEN.CO.LTD" !important;
+    white-space: pre !important;
+    display: block !important;
+    margin: 0 auto 16px !important;
+    color: #0f172a !important;
+    font-family: "Times New Roman", "Yu Mincho", serif !important;
+    font-size: 20px !important;
+    line-height: 1.12 !important;
+    font-weight: 700 !important;
+    letter-spacing: .03em !important;
+    text-align: center !important;
+  }
+
+  .app.auth-login-mode .account-welcome-brand {
+    display: none !important;
+  }
+
+  .app.auth-login-mode #accountFields {
+    gap: 10px !important;
+  }
+
+  .app.auth-login-mode .auth-field-label {
+    margin: 8px 0 -3px !important;
+    color: #111827 !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+  }
+
+  .app.auth-login-mode #accountFields input {
+    height: 45px !important;
+    min-height: 45px !important;
+    border-radius: 9px !important;
+    border: 1px solid #dbe4ef !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    text-align: left !important;
+    padding: 0 14px !important;
+    font-size: 14px !important;
+    font-weight: 750 !important;
+  }
+
+  .app.auth-login-mode .auth-login-options,
+  .app.auth-login-mode .auth-register-terms {
+    margin-top: 12px !important;
+    font-size: 12px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard > .main-btn {
+    margin-top: 20px !important;
+  }
+
+  .app.auth-login-mode .auth-switch-prompt {
+    margin-top: 18px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    color: #64748b !important;
+  }
+
+  .app.auth-login-mode .auth-mode-profile .account-welcome::before,
+  .app.auth-login-mode .auth-mode-profile .account-welcome::after {
+    background-color: #1f1f1f !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome {
+    margin-top: 74px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountFields input {
+    height: 43px !important;
+    min-height: 43px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending {
+    min-height: calc(100svh - 44px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen {
+    min-height: calc(100svh - 114px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    padding-top: 58px !important;
+  }
+
+  .app.auth-login-mode .auth-pending-visual {
+    width: 112px !important;
+    height: 112px !important;
+    border-radius: 50% !important;
+    background: #eff6ff !important;
+    box-shadow: none !important;
+  }
+
+  .app.auth-login-mode .auth-pending-doc {
+    inset: 28px 34px !important;
+    border-radius: 12px !important;
+    background: #1267f2 !important;
+  }
+
+  .app.auth-login-mode .auth-pending-title {
+    font-size: 20px !important;
+  }
+
+  .app.auth-login-mode .auth-pending-text {
+    font-size: 12px !important;
+  }
+
+  .app.auth-login-mode .auth-pending-pill {
+    background: #eff6ff !important;
+    color: #075ad7 !important;
+    border-color: #dbeafe !important;
+  }
+}
+</style>
+
+<!-- yamaden-auth-demo-layout-v30: align auth flow to latest demo -->
+<style id="yamaden-auth-demo-layout-v30-style">
+@media (max-width: 860px) {
+  .app.auth-login-mode .auth-start-screen {
+    padding-top: 108px !important;
+  }
+
+  .app.auth-login-mode .auth-start-title {
+    order: 1 !important;
+    font-size: 20px !important;
+  }
+
+  .app.auth-login-mode .auth-start-text {
+    order: 2 !important;
+    max-width: 250px !important;
+    margin-top: 10px !important;
+  }
+
+  .app.auth-login-mode .auth-hero-visual {
+    order: 3 !important;
+    margin: 68px auto 0 !important;
+  }
+
+  .app.auth-login-mode .auth-hero-visual::before {
+    width: 74px !important;
+    height: 74px !important;
+    border-radius: 21px !important;
+    background-size: 58px 58px !important;
+  }
+
+  .app.auth-login-mode .auth-hero-visual::after {
+    margin-top: 12px !important;
+    font-size: 20px !important;
+    color: #111827 !important;
+  }
+
+  .app.auth-login-mode .auth-start-actions {
+    order: 4 !important;
+    margin-top: auto !important;
+    padding-top: 32px !important;
+  }
+
+  .app.auth-login-mode .auth-start-note {
+    order: 5 !important;
+    margin-top: 16px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-form .account-welcome,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome {
+    margin: 70px 0 24px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-form .account-welcome::before,
+  .app.auth-login-mode #accountFormCard.auth-mode-form .account-welcome::after,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome::before,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome::after {
+    display: none !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-form .account-welcome-ja,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome-ja {
+    font-size: 20px !important;
+    margin: 0 !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-form .account-welcome-sub,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome-sub {
+    max-width: 260px !important;
+    margin-top: 8px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-form,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile {
+    padding-top: 22px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-form #accountFields input,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountFields input {
+    height: 44px !important;
+    min-height: 44px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-form #accountFields,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountFields {
+    gap: 8px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-form .auth-field-label,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .auth-field-label {
+    font-size: 11px !important;
+    margin-top: 7px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountFields {
+    max-height: none !important;
+  }
+}
+
+@media (max-height: 720px) and (max-width: 860px) {
+  .app.auth-login-mode .auth-start-screen {
+    padding-top: 74px !important;
+    min-height: calc(100svh - 92px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+  }
+
+  .app.auth-login-mode .auth-hero-visual {
+    margin-top: 38px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-form .account-welcome,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome {
+    margin-top: 50px !important;
+    margin-bottom: 16px !important;
+  }
+}
+</style>
+
+<!-- yamaden-auth-lock-v31: keep auth screen fixed while preserving long profile form usability -->
+<style id="yamaden-auth-lock-v31-style">
+@media (max-width: 860px) {
+  html:has(.app.auth-login-mode),
+  body.auth-login-body {
+    height: 100svh !important;
+    min-height: 100svh !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: manipulation !important;
+  }
+
+  .app.auth-login-mode {
+    height: 100svh !important;
+    max-height: 100svh !important;
+    overflow: hidden !important;
+  }
+
+  .app.auth-login-mode .main,
+  .app.auth-login-mode #accountSection,
+  .app.auth-login-mode .account-landing {
+    height: 100svh !important;
+    max-height: 100svh !important;
+    overflow: hidden !important;
+  }
+
+  .app.auth-login-mode .account-panel,
+  .app.auth-login-mode #accountFormCard.account-card {
+    min-height: calc(100svh - 44px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    max-height: calc(100svh - 44px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-welcome,
+  .app.auth-login-mode #accountFormCard.auth-mode-form,
+  .app.auth-login-mode #accountFormCard.auth-mode-pending {
+    overflow: hidden !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+  }
+}
+</style>
+
+<!-- yamaden-app-premium-v32: full app UI refresh, function-safe -->
+<style id="yamaden-app-premium-v32-style">
+@media (max-width: 860px) {
+  body.yamaden-app-active,
+  body:not(.auth-login-body) {
+    background: #eef4ff !important;
+  }
+
+  .app:not(.auth-login-mode),
+  .app.auth-app-mode {
+    width: min(100vw, 480px) !important;
+    height: 100svh !important;
+    max-height: 100svh !important;
+    margin: 0 auto !important;
+    display: grid !important;
+    grid-template-rows: calc(66px + env(safe-area-inset-top)) minmax(0, 1fr) calc(74px + env(safe-area-inset-bottom)) !important;
+    background: #f8fbff !important;
+    overflow: hidden !important;
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, .05) !important;
+  }
+
+  .app:not(.auth-login-mode) .top-header,
+  .app.auth-app-mode .top-header {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    height: calc(66px + env(safe-area-inset-top)) !important;
+    min-height: calc(66px + env(safe-area-inset-top)) !important;
+    padding: calc(10px + env(safe-area-inset-top)) 18px 10px !important;
+    border-radius: 0 !important;
+    background:
+      radial-gradient(circle at 86% 0, rgba(37, 99, 235, .16), transparent 24%),
+      linear-gradient(135deg, #05070b 0%, #101318 62%, #17110d 100%) !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    z-index: 20 !important;
+  }
+
+  .app:not(.auth-login-mode) .top-row,
+  .app.auth-app-mode .top-row {
+    height: 46px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 64px !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .app:not(.auth-login-mode) .logo-box,
+  .app.auth-app-mode .logo-box {
+    display: grid !important;
+    grid-template-columns: 42px minmax(0, 1fr) !important;
+    gap: 10px !important;
+    align-items: center !important;
+    min-width: 0 !important;
+  }
+
+  .app:not(.auth-login-mode) .logo-box img,
+  .app.auth-app-mode .logo-box img {
+    display: block !important;
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 14px !important;
+    background: #202020 !important;
+    box-shadow: 0 12px 26px rgba(0, 0, 0, .24) !important;
+  }
+
+  .app:not(.auth-login-mode) .logo-jp,
+  .app.auth-app-mode .logo-jp {
+    font-family: "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif !important;
+    font-size: 18px !important;
+    font-weight: 500 !important;
+    letter-spacing: .05em !important;
+    line-height: 1.06 !important;
+    color: #fff !important;
+    white-space: nowrap !important;
+  }
+
+  .app:not(.auth-login-mode) .logo-en,
+  .app.auth-app-mode .logo-en {
+    margin-top: 4px !important;
+    font-family: "Times New Roman", serif !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: .12em !important;
+    line-height: 1 !important;
+    color: #fff !important;
+    white-space: nowrap !important;
+  }
+
+  .app:not(.auth-login-mode) .lang-select,
+  .app.auth-app-mode .lang-select {
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    border-radius: 15px !important;
+    border: 1px solid rgba(255, 255, 255, .18) !important;
+    background: rgba(255, 255, 255, .12) !important;
+    color: #fff !important;
+    text-align: center !important;
+    text-align-last: center !important;
+    font-weight: 950 !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.04) !important;
+  }
+
+  .app:not(.auth-login-mode) .main,
+  .app.auth-app-mode .main {
+    grid-row: 2 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    padding: 14px 14px 18px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    background: #f8fbff !important;
+  }
+
+  .app:not(.auth-login-mode) .bottom-nav,
+  .app.auth-app-mode .bottom-nav {
+    position: relative !important;
+    grid-row: 3 !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: calc(74px + env(safe-area-inset-bottom)) !important;
+    min-height: calc(74px + env(safe-area-inset-bottom)) !important;
+    margin: 0 !important;
+    padding: 8px 22px calc(10px + env(safe-area-inset-bottom)) !important;
+    border-radius: 0 !important;
+    border: 0 !important;
+    border-top: 1px solid #e7edf7 !important;
+    background: rgba(255, 255, 255, .96) !important;
+    box-shadow: 0 -12px 32px rgba(15, 23, 42, .07) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 8px !important;
+    z-index: 30 !important;
+  }
+
+  .app:not(.auth-login-mode) .bottom-nav button,
+  .app.auth-app-mode .bottom-nav button {
+    flex: 1 1 0 !important;
+    max-width: 64px !important;
+    height: 50px !important;
+    padding: 0 !important;
+    border-radius: 17px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #94a3b8 !important;
+    background: transparent !important;
+  }
+
+  .app:not(.auth-login-mode) .bottom-nav button span:not(.icon),
+  .app.auth-app-mode .bottom-nav button span:not(.icon) {
+    display: none !important;
+  }
+
+  .app:not(.auth-login-mode) .bottom-nav .icon,
+  .app:not(.auth-login-mode) .bottom-nav .icon svg,
+  .app.auth-app-mode .bottom-nav .icon,
+  .app.auth-app-mode .bottom-nav .icon svg {
+    width: 25px !important;
+    height: 25px !important;
+  }
+
+  .app:not(.auth-login-mode) .bottom-nav button.active,
+  .app.auth-app-mode .bottom-nav button.active {
+    background: #1267f2 !important;
+    color: #fff !important;
+    box-shadow: 0 12px 24px rgba(18, 103, 242, .24) !important;
+  }
+
+  .app:not(.auth-login-mode) .bottom-nav button.active svg,
+  .app.auth-app-mode .bottom-nav button.active svg {
+    stroke: #fff !important;
+  }
+
+  .card,
+  .settings-section-card,
+  .profile-card,
+  .success-box {
+    border-radius: 20px !important;
+    border: 1px solid #e7edf7 !important;
+    box-shadow: 0 14px 38px rgba(15, 23, 42, .06) !important;
+    background: #fff !important;
+  }
+
+  .card {
+    padding: 18px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .card-title {
+    margin-bottom: 18px !important;
+  }
+
+  .card-title-icon,
+  .service-icon,
+  .utility-head .icon,
+  .profile-avatar {
+    border-radius: 14px !important;
+    background: #eff6ff !important;
+    color: #1267f2 !important;
+  }
+
+  .card h2,
+  .card h3,
+  .section-title,
+  .profile-name,
+  .service-title,
+  .utility-head {
+    color: #0f172a !important;
+    font-weight: 950 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .home-hero-card {
+    min-height: auto !important;
+    border-radius: 22px !important;
+    padding: 22px !important;
+    background: linear-gradient(145deg, #0b1220 0%, #152033 70%, #1d4ed8 100%) !important;
+    box-shadow: 0 18px 44px rgba(15, 23, 42, .16) !important;
+  }
+
+  .home-kicker {
+    background: rgba(255,255,255,.10) !important;
+    border: 1px solid rgba(255,255,255,.16) !important;
+  }
+
+  .home-title {
+    font-size: 24px !important;
+    line-height: 1.22 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .home-actions {
+    display: none !important;
+  }
+
+  .trust-row {
+    gap: 9px !important;
+    margin: 12px 0 14px !important;
+  }
+
+  .trust-item {
+    border-radius: 17px !important;
+    padding: 13px 12px !important;
+    background: #fff !important;
+    color: #0f172a !important;
+    border: 1px solid #e7edf7 !important;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, .05) !important;
+  }
+
+  .trust-number {
+    color: #1267f2 !important;
+  }
+
+  .trust-label {
+    color: #64748b !important;
+  }
+
+  .philosophy-card {
+    display: block !important;
+    margin: 0 0 14px !important;
+  }
+
+  .philosophy-copy {
+    display: none !important;
+  }
+
+  .philosophy-visual {
+    min-height: 180px !important;
+    border-radius: 22px !important;
+    border: 1px solid #e7edf7 !important;
+    background:
+      linear-gradient(rgba(8, 12, 18, .52), rgba(8, 12, 18, .52)),
+      radial-gradient(circle at 70% 12%, rgba(255,255,255,.22), transparent 28%),
+      linear-gradient(135deg, #111827 0%, #1e293b 58%, #2563eb 100%) !important;
+    box-shadow: 0 16px 38px rgba(15, 23, 42, .10) !important;
+  }
+
+  .philosophy-visual::before,
+  .philosophy-visual::after {
+    display: none !important;
+  }
+
+  .poster-brand {
+    position: absolute !important;
+    inset: 0 !important;
+    display: grid !important;
+    grid-template-columns: 62px minmax(0, 1fr) !important;
+    grid-template-rows: auto auto 1fr auto !important;
+    column-gap: 14px !important;
+    align-items: center !important;
+    padding: 24px !important;
+    color: #fff !important;
+  }
+
+  .poster-brand-logo {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: 62px !important;
+    height: 62px !important;
+    border-radius: 16px !important;
+    background: #202020 !important;
+  }
+
+  .poster-brand-name {
+    display: block !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    font-family: "Times New Roman", "Yu Mincho", serif !important;
+    font-size: 28px !important;
+    color: #fff !important;
+    line-height: 1.05 !important;
+    text-shadow: 0 2px 10px rgba(0,0,0,.34) !important;
+  }
+
+  .poster-brand-name::after {
+    content: "YAMADEN.CO.LTD" !important;
+    display: block !important;
+    margin-top: 5px !important;
+    font-family: "Times New Roman", serif !important;
+    font-size: 13px !important;
+    letter-spacing: .12em !important;
+    color: #fff !important;
+  }
+
+  .poster-brand-line,
+  .poster-company {
+    display: none !important;
+  }
+
+  .poster-slogan {
+    grid-column: 1 / -1 !important;
+    grid-row: 4 !important;
+    color: #fff !important;
+    font-family: "Times New Roman", "Yu Mincho", serif !important;
+    font-size: 24px !important;
+    text-shadow: 0 2px 10px rgba(0,0,0,.36) !important;
+  }
+
+  .poster-slogan-sub {
+    display: block !important;
+    grid-column: 1 / -1 !important;
+    color: #fff !important;
+    font-family: "Times New Roman", serif !important;
+    font-size: 14px !important;
+    text-shadow: 0 2px 9px rgba(0,0,0,.34) !important;
+  }
+
+  .service-grid,
+  .utility-grid,
+  .company-info-grid {
+    gap: 10px !important;
+  }
+
+  .service-card,
+  .utility-card,
+  .company-info,
+  .request-card,
+  .issue-panel,
+  .quote-option {
+    border-radius: 16px !important;
+    border: 1px solid #e7edf7 !important;
+    background: #fff !important;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, .045) !important;
+  }
+
+  .issue-panel {
+    padding: 16px !important;
+  }
+
+  .issue-title {
+    color: #0f172a !important;
+    font-size: 18px !important;
+  }
+
+  .issue-sub,
+  .issue-free-note,
+  .service-desc,
+  .utility-text,
+  .company-info-label {
+    color: #64748b !important;
+  }
+
+  .issue-search-input,
+  input,
+  textarea {
+    border-radius: 12px !important;
+    border: 1px solid #dbe4ef !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  .issue-dropdown {
+    border-radius: 16px !important;
+    border: 1px solid #dbe4ef !important;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, .14) !important;
+  }
+
+  .selected-issues {
+    margin-top: 12px !important;
+  }
+
+  .selected-issue-tag {
+    min-height: 38px !important;
+    border-radius: 12px !important;
+    background: #0f172a !important;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, .14) !important;
+  }
+
+  .quote-option {
+    justify-content: space-between !important;
+  }
+
+  .quote-option input {
+    width: 22px !important;
+    height: 22px !important;
+    accent-color: #1267f2 !important;
+  }
+
+  .main-btn {
+    border-radius: 12px !important;
+    background: linear-gradient(180deg, #1d6cff 0%, #075ad7 100%) !important;
+    box-shadow: 0 14px 28px rgba(37, 99, 235, .20) !important;
+  }
+
+  .soft-btn,
+  .copy-btn,
+  .settings-soft,
+  .settings-action {
+    border-radius: 12px !important;
+  }
+
+  .settings-section-card {
+    min-height: 100% !important;
+    padding: 20px !important;
+  }
+
+  .settings-row {
+    border-radius: 16px !important;
+    border: 1px solid #e7edf7 !important;
+    background: #fff !important;
+  }
+
+  .settings-action {
+    background: #1267f2 !important;
+  }
+
+  .profile-card {
+    padding: 20px !important;
+  }
+
+  .profile-grid {
+    gap: 10px !important;
+  }
+
+  .profile-item {
+    border-radius: 15px !important;
+    background: #fff !important;
+    border: 1px solid #e7edf7 !important;
+  }
+
+  .profile-value {
+    color: #0f172a !important;
+  }
+
+  .emergency-card {
+    display: none !important;
+  }
+}
+</style>
+
+<script id="yamaden-brand-lock-v32-script">
+(function(){
+  function lockYamadenBrand(){
+    document.querySelectorAll(".logo-jp").forEach(function(el){ el.textContent = "株式会社 山電"; });
+    document.querySelectorAll(".logo-en").forEach(function(el){ el.textContent = "YAMADEN.CO.LTD"; });
+    var brandName = document.querySelector("#homeSection .poster-brand-name");
+    if (brandName) brandName.textContent = "株式会社 山電";
+    var slogan = document.querySelector("#homeSection .poster-slogan");
+    if (slogan) slogan.textContent = "人を守り、幸せを創る";
+    var sub = document.querySelector("#homeSection .poster-slogan-sub");
+    if (sub) sub.textContent = "Protecting people. Creating happiness.";
+  }
+  var oldApplyLanguage = window.applyLanguage;
+  window.applyLanguage = function(){
+    if (typeof oldApplyLanguage === "function") oldApplyLanguage();
+    setTimeout(lockYamadenBrand, 0);
+  };
+  var oldSetAuthLanguage = window.setAuthLanguage;
+  window.setAuthLanguage = function(next){
+    if (typeof oldSetAuthLanguage === "function") oldSetAuthLanguage(next);
+    setTimeout(lockYamadenBrand, 0);
+  };
+  document.addEventListener("DOMContentLoaded", function(){
+    lockYamadenBrand();
+    setTimeout(lockYamadenBrand, 250);
+    setTimeout(lockYamadenBrand, 900);
+  });
+  setInterval(lockYamadenBrand, 1800);
 })();
 </script>
 </body>
