@@ -33,7 +33,7 @@
 }
 
 body {
-  font-family: "Segoe UI", Arial, sans-serif;
+  font-family: "Noto Sans JP", "Noto Sans", "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", Arial, sans-serif;
   color: var(--text);
   background: radial-gradient(circle at 16% 0%, rgba(37, 99, 235, 0.13), transparent 32%),
               radial-gradient(circle at 86% 2%, rgba(6, 182, 212, 0.12), transparent 30%),
@@ -973,14 +973,22 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
               <div class="auth-start-note" id="authStartNote">Tài khoản cần được admin duyệt trước khi sử dụng app.</div>
             </div>
             <div class="auth-pending-screen hidden" id="authPendingScreen">
+              <div class="auth-pending-logo">
+                <img src="/icon-192.png" alt="YAMADEN">
+                <div>
+                  <b>株式会社 山電</b>
+                  <span>YAMADEN.CO.LTD</span>
+                </div>
+              </div>
               <div class="auth-pending-visual" aria-hidden="true">
                 <div class="auth-paper"></div>
                 <div class="auth-checkmark">✓</div>
               </div>
-              <div class="auth-pending-title" id="authPendingTitle">Thông tin đã được gửi</div>
-              <div class="auth-pending-text" id="authPendingText">Tài khoản của bạn đang chờ admin duyệt. Sau khi được phê duyệt, bạn mới có thể sử dụng đầy đủ chức năng của app.</div>
-              <div class="auth-pending-pill" id="authPendingPill">Đang chờ duyệt</div>
-              <button type="button" class="soft-btn auth-secondary" id="authPendingLoginBtn" onclick="userLogout();setAccountMode('welcome')">Quay lại đăng nhập</button>
+              <div class="auth-pending-title" id="authPendingTitle">Tài khoản đang chờ duyệt</div>
+              <div class="auth-pending-text" id="authPendingText">Hồ sơ của bạn đã được gửi thành công. Chúng tôi sẽ xem xét và duyệt tài khoản trong thời gian sớm nhất.</div>
+              <div class="auth-pending-pill" id="authPendingPill">Thời gian dự kiến:
+24 – 48 giờ làm việc</div>
+              <button type="button" class="main-btn auth-primary" id="authPendingLoginBtn" onclick="userLogout();setAccountMode('welcome')">Quay về trang chủ</button>
             </div>
             <div class="account-welcome">
               <div class="account-welcome-ja" id="accountWelcome">Chào mừng</div>
@@ -996,10 +1004,10 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
               <input id="accountName" placeholder="Họ và tên" autocomplete="name">
               <div class="auth-field-label hidden" id="accountPhoneAuthLabel">Số điện thoại</div>
               <input id="accountPhone" placeholder="Số điện thoại" inputmode="tel" autocomplete="tel">
-              <div class="auth-field-label hidden" id="accountPinAuthLabel">PIN</div>
-              <input id="accountPin" type="password" placeholder="Mã PIN 4-6 số" inputmode="numeric" maxlength="6">
-              <div class="auth-field-label hidden" id="accountPinConfirmAuthLabel">Nhập lại PIN</div>
-              <input id="accountPinConfirm" type="password" placeholder="Nhập lại mã PIN" inputmode="numeric" maxlength="6">
+              <div class="auth-field-label hidden" id="accountPinAuthLabel">Mã PIN 6 số</div>
+              <input id="accountPin" type="password" placeholder="Nhập mã PIN 6 số" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="new-password">
+              <div class="auth-field-label hidden" id="accountPinConfirmAuthLabel">Xác nhận PIN</div>
+              <input id="accountPinConfirm" type="password" placeholder="Nhập lại mã PIN 6 số" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="new-password">
               <div class="auth-field-label hidden" id="accountEmailAuthLabel">Email</div>
               <input id="accountEmail" placeholder="Email" autocomplete="email">
               <div class="auth-field-label hidden" id="accountContactAuthLabel">Email hoặc LINE/Zalo / 連絡先</div>
@@ -1376,8 +1384,8 @@ function applyLanguage() {
   $("accountText").innerHTML=t("accountText"); $("accountModeRegister").innerText=t("accountRegister");
   $("accountModeLogin").innerText=t("accountLoginMode"); $("accountLoginText").innerText=t("accountLogin");
   $("accountName").placeholder=t("name"); $("accountPhone").placeholder=t("phone");
-  $("accountPin").placeholder=lang==="ja"?"PIN 4〜6桁":"Mã PIN 4-6 số";
-  $("accountPinConfirm").placeholder=lang==="ja"?"PIN確認":"Nhập lại mã PIN";
+  $("accountPin").placeholder=lang==="ja"?"6桁のPINコード":"Nhập mã PIN 6 số";
+  $("accountPinConfirm").placeholder=lang==="ja"?"PINコードを再入力":"Nhập lại mã PIN 6 số";
   $("accountEmail").placeholder="Email"; $("accountProvince").placeholder=t("profileProvince");
   $("accountProjectName").placeholder=t("profileProject"); $("accountCompany").placeholder=t("profileCompany");
   $("approvalPendingText").innerText=t("accountPending"); $("approvalApprovedText").innerText=t("accountApproved");
@@ -1462,7 +1470,7 @@ function setAccountMode(mode) {
   $("accountPinConfirm").classList.toggle("hidden",!isRegister);
   $("accountLoginText").innerText=isProfile?(lang==="ja"?"送信":t("send")):(isLogin?t("accountLogin"):(lang==="ja"?"続ける":"Tiếp tục"));
   $("accountWelcome").innerText=isProfile?(lang==="ja"?"お客様情報":"Thông tin tài khoản"):(isLogin?(lang==="ja"?"ログイン":"Đăng nhập"):(lang==="ja"?"新規登録":"Đăng ký"));
-  $("accountText").innerHTML=isProfile?(lang==="ja"?"管理者承認のため、お客様情報を入力してください。":"Vui lòng cung cấp đầy đủ thông tin để admin duyệt tài khoản của bạn."):(isLogin?(lang==="ja"?"電話番号とPINを入力してください。":"Nhập số điện thoại và PIN để đăng nhập."):(lang==="ja"?"電話番号とPINだけで登録できます。":"Chỉ cần số điện thoại và mã PIN để tạo tài khoản."));
+  $("accountText").innerHTML=isProfile?(lang==="ja"?"管理者承認のため、お客様情報を入力してください。":"Vui lòng cung cấp đầy đủ thông tin để admin duyệt tài khoản của bạn."):(isLogin?(lang==="ja"?"電話番号と6桁のPINコードを入力してください。":"Nhập số điện thoại và mã PIN 6 số để đăng nhập."):(lang==="ja"?"電話番号と6桁のPINコードだけで登録できます。":"Chỉ cần số điện thoại và mã PIN 6 số để tạo tài khoản."));
   $("authStartTitle") && ($("authStartTitle").innerText=lang==="ja"?"ようこそ":"Chào mừng");
   $("authStartText") && ($("authStartText").innerText=lang==="ja"?"ログインまたは登録してYAMADENアプリをご利用ください。":"Đăng ký hoặc đăng nhập để tiếp tục sử dụng ứng dụng YAMADEN.");
   $("authStartLoginBtn") && ($("authStartLoginBtn").innerText=t("accountLogin"));
@@ -1476,8 +1484,8 @@ function setAccountMode(mode) {
   $("authLangJa")?.classList.toggle("active",lang==="ja");
   if(isLogin||isRegister){
     $("accountPhone").placeholder=lang==="ja"?"電話番号":"Số điện thoại";
-    $("accountPin").placeholder=lang==="ja"?"PIN":"Nhập PIN";
-    $("accountPinConfirm").placeholder=lang==="ja"?"PIN確認":"Nhập lại PIN";
+    $("accountPin").placeholder=lang==="ja"?"6桁のPINコード":"Nhập mã PIN 6 số";
+    $("accountPinConfirm").placeholder=lang==="ja"?"PINコードを再入力":"Nhập lại mã PIN 6 số";
   }
   if(isProfile){
     $("accountName").placeholder=lang==="ja"?"お名前":"Họ và tên";
@@ -1494,8 +1502,8 @@ async function userLogin() {
   let name=$("accountName").value.trim(), email=$("accountEmail").value.trim(), province=($("accountAddress")?.value||$("accountProvince").value).trim();
   let projectName=$("accountProjectName").value.trim(), company=$("accountCompany").value.trim();
   let contact=($("accountContact")?.value||"").trim(), address=($("accountAddress")?.value||province).trim(), note=($("accountNote")?.value||"").trim();
-  if(mode!=="profile" && (!phone||!/^[0-9]{4,6}$/.test(pin))){ showToast(t("required")); return; }
-  if(mode==="register" && pin!==pinConfirm){ showToast(lang==="ja"?"PINが一致しません":"Mã PIN không khớp"); return; }
+  if(mode!=="profile" && (!phone||!/^[0-9]{6}$/.test(pin))){ showToast(lang==="ja"?"PINコードは6桁の数字で入力してください。":"PIN phải gồm đúng 6 chữ số."); return; }
+  if(mode==="register" && pin!==pinConfirm){ showToast(lang==="ja"?"確認用PINが一致しません。":"PIN xác nhận không khớp."); return; }
   if(mode==="profile" && (!name||!email||!province||!projectName)){ showToast(t("required")); return; }
   try{
     let endpoint=mode==="register"?"/user/register":mode==="profile"?"/user/profile":"/user/login";
@@ -4130,60 +4138,64 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   const copy = {
     vi: {
-      welcomeTitle: "Ch\u00e0o m\u1eebng",
-      welcomeText: "\u0110\u0103ng k\u00fd ho\u1eb7c \u0111\u0103ng nh\u1eadp \u0111\u1ec3 ti\u1ebfp t\u1ee5c s\u1eed d\u1ee5ng \u1ee9ng d\u1ee5ng YAMADEN.",
-      loginTitle: "\u0110\u0103ng nh\u1eadp",
-      loginText: "Nh\u1eadp s\u1ed1 \u0111i\u1ec7n tho\u1ea1i v\u00e0 m\u00e3 PIN \u0111\u1ec3 \u0111\u0103ng nh\u1eadp.",
-      registerTitle: "\u0110\u0103ng k\u00fd",
-      registerText: "Nh\u1eadp s\u1ed1 \u0111i\u1ec7n tho\u1ea1i, PIN v\u00e0 nh\u1eadp l\u1ea1i PIN.",
-      profileTitle: "Th\u00f4ng tin t\u00e0i kho\u1ea3n",
-      profileText: "Vui l\u00f2ng nh\u1eadp th\u00f4ng tin \u0111\u1ec3 admin duy\u1ec7t t\u00e0i kho\u1ea3n.",
-      pendingTitle: "Th\u00f4ng tin \u0111\u00e3 \u0111\u01b0\u1ee3c g\u1eedi",
-      pendingText: "T\u00e0i kho\u1ea3n c\u1ee7a b\u1ea1n \u0111ang ch\u1edd admin duy\u1ec7t. Sau khi \u0111\u01b0\u1ee3c ph\u00ea duy\u1ec7t, b\u1ea1n m\u1edbi c\u00f3 th\u1ec3 s\u1eed d\u1ee5ng \u0111\u1ea7y \u0111\u1ee7 ch\u1ee9c n\u0103ng c\u1ee7a app.",
-      pendingPill: "\u0110ang ch\u1edd duy\u1ec7t",
-      backLogin: "Quay l\u1ea1i \u0111\u0103ng nh\u1eadp",
-      login: "\u0110\u0103ng nh\u1eadp",
-      register: "\u0110\u0103ng k\u00fd",
-      next: "Ti\u1ebfp t\u1ee5c",
-      submit: "G\u1eedi duy\u1ec7t admin",
-      phone: "S\u1ed1 \u0111i\u1ec7n tho\u1ea1i",
-      contact: "Email ho\u1eb7c LINE/Zalo",
-      pin: "PIN",
-      pinConfirm: "Nh\u1eadp l\u1ea1i PIN",
-      name: "H\u1ecd v\u00e0 t\u00ean",
+      welcomeTitle: "Chào mừng",
+      welcomeText: "Đăng ký hoặc đăng nhập để tiếp tục sử dụng ứng dụng YAMADEN.",
+      loginTitle: "Đăng nhập",
+      loginText: "Nhập số điện thoại và mã PIN 6 số để đăng nhập.",
+      registerTitle: "Đăng ký",
+      registerText: "Vui lòng nhập số điện thoại, mã PIN 6 số và xác nhận PIN.",
+      profileTitle: "Thông tin tài khoản",
+      profileText: "Vui lòng nhập thông tin để admin duyệt tài khoản.",
+      pendingTitle: "Thông tin đã được gửi",
+      pendingText: "Tài khoản của bạn đang chờ admin duyệt. Sau khi đuợc phê duyệt, bạn mới có thể sử dụng đầy đủ chức năng của app.",
+      pendingPill: "Đang chờ duyệt",
+      backLogin: "Quay lại đăng nhập",
+      login: "Đăng nhập",
+      register: "Đăng ký",
+      next: "Tiếp tục",
+      submit: "Gửi duyệt admin",
+      phone: "Số điện thoại",
+      contact: "Email hoặc LINE/Zalo",
+      pin: "Mã PIN 6 số",
+      pinConfirm: "Xác nhận PIN",
+      pinPlaceholder: "Nhập mã PIN 6 số",
+      pinConfirmPlaceholder: "Nhập lại mã PIN 6 số",
+      name: "Họ và tên",
       email: "Email",
-      address: "\u0110\u1ecba ch\u1ec9",
-      project: "Ghi ch\u00fa / t\u00ean c\u00f4ng tr\u00ecnh",
-      company: "C\u00f4ng ty / c\u00e1 nh\u00e2n",
-      note: "Ghi ch\u00fa th\u00eam"
+      address: "Địa chỉ",
+      project: "Ghi chú / tên công trình",
+      company: "Công ty / cá nhân",
+      note: "Ghi chú thêm"
     },
     ja: {
-      welcomeTitle: "\u3088\u3046\u3053\u305d",
-      welcomeText: "\u30ed\u30b0\u30a4\u30f3\u307e\u305f\u306f\u767b\u9332\u3057\u3066YAMADEN\u30a2\u30d7\u30ea\u3092\u3054\u5229\u7528\u304f\u3060\u3055\u3044\u3002",
-      loginTitle: "\u30ed\u30b0\u30a4\u30f3",
-      loginText: "\u96fb\u8a71\u756a\u53f7\u3068PIN\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
-      registerTitle: "\u65b0\u898f\u767b\u9332",
-      registerText: "\u96fb\u8a71\u756a\u53f7\u3001PIN\u3001\u78ba\u8a8d\u7528PIN\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
-      profileTitle: "\u304a\u5ba2\u69d8\u60c5\u5831",
-      profileText: "\u7ba1\u7406\u8005\u627f\u8a8d\u306e\u305f\u3081\u3001\u304a\u5ba2\u69d8\u60c5\u5831\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
-      pendingTitle: "\u60c5\u5831\u3092\u9001\u4fe1\u3057\u307e\u3057\u305f",
-      pendingText: "\u7ba1\u7406\u8005\u627f\u8a8d\u5f85\u3061\u3067\u3059\u3002\u627f\u8a8d\u5f8c\u306b\u30a2\u30d7\u30ea\u3092\u3054\u5229\u7528\u3044\u305f\u3060\u3051\u307e\u3059\u3002",
-      pendingPill: "\u627f\u8a8d\u5f85\u3061",
-      backLogin: "\u30ed\u30b0\u30a4\u30f3\u306b\u623b\u308b",
-      login: "\u30ed\u30b0\u30a4\u30f3",
-      register: "\u65b0\u898f\u767b\u9332",
-      next: "\u6b21\u3078",
-      submit: "\u7ba1\u7406\u8005\u3078\u9001\u4fe1",
-      phone: "\u96fb\u8a71\u756a\u53f7",
-      contact: "\u9023\u7d61\u5148",
-      pin: "PIN",
-      pinConfirm: "PIN\u78ba\u8a8d",
-      name: "\u304a\u540d\u524d",
+      welcomeTitle: "ようこそ",
+      welcomeText: "ログインまたは登録してYAMADENアプリをご利用ください。",
+      loginTitle: "ログイン",
+      loginText: "電話番号と6桁のPINコードを入力してください。",
+      registerTitle: "新規登録",
+      registerText: "電話番号、6桁のPINコード、確認用PINを入力してください。",
+      profileTitle: "お客様情報",
+      profileText: "管理者承認のため、お客様情報を入力してください。",
+      pendingTitle: "情報を送信しました",
+      pendingText: "管理者承認待ちです。承認後にアプリをご利用いただけます。",
+      pendingPill: "承認待ち",
+      backLogin: "ログインに戻る",
+      login: "ログイン",
+      register: "新規登録",
+      next: "次へ",
+      submit: "管理者へ送信",
+      phone: "電話番号",
+      contact: "連絡先",
+      pin: "PINコード（6桁）",
+      pinConfirm: "PINコード確認",
+      pinPlaceholder: "6桁のPINコード",
+      pinConfirmPlaceholder: "PINコードを再入力",
+      name: "お名前",
       email: "Email",
-      address: "\u4f4f\u6240",
-      project: "\u5de5\u4e8b\u4ef6\u540d",
-      company: "\u4f1a\u793e\u540d\u30fb\u500b\u4eba",
-      note: "\u5099\u8003"
+      address: "住所",
+      project: "工事件名",
+      company: "会社名・個人",
+      note: "備考"
     }
   };
 
@@ -4286,16 +4298,16 @@ document.addEventListener("DOMContentLoaded",()=>{
       setText("accountWelcome", c("loginTitle"));
       setText("accountText", c("loginText"));
       setText("accountLoginText", c("login"));
-      setText("authRememberText", getLang() === "ja" ? "\u30ed\u30b0\u30a4\u30f3\u3092\u4fdd\u6301" : "Ghi nh\u1edb \u0111\u0103ng nh\u1eadp");
-      setText("authForgotPin", getLang() === "ja" ? "PIN\u3092\u5fd8\u308c\u305f\u5834\u5408" : "Qu\u00ean PIN?");
-      setText("authSwitchPromptText", getLang() === "ja" ? "\u30a2\u30ab\u30a6\u30f3\u30c8\u672a\u767b\u9332\uff1f" : "Ch\u01b0a c\u00f3 t\u00e0i kho\u1ea3n?");
+      setText("authRememberText", getLang() === "ja" ? "ログインを保持" : "Ghi nhớ đăng nhập");
+      setText("authForgotPin", getLang() === "ja" ? "PINを忘れた場合" : "Quên PIN?");
+      setText("authSwitchPromptText", getLang() === "ja" ? "アカウント未登録？" : "Chưa có tài khoản?");
       setText("authSwitchPromptBtn", c("register"));
       const switchBtn = $("authSwitchPromptBtn");
       if (switchBtn) switchBtn.onclick = () => window.setAccountMode("register");
       setText("accountPhoneAuthLabel", c("phone"));
       setText("accountPinAuthLabel", c("pin"));
       if (fields.phone) fields.phone.placeholder = c("phone");
-      if (fields.pin) fields.pin.placeholder = getLang() === "ja" ? "PIN\u3092\u5165\u529b" : "Nh\u1eadp PIN";
+      if (fields.pin) fields.pin.placeholder = c("pinPlaceholder");
     }
 
     if (isRegister) {
@@ -4309,14 +4321,14 @@ document.addEventListener("DOMContentLoaded",()=>{
       setText("accountPhoneAuthLabel", c("phone"));
       setText("accountPinAuthLabel", c("pin"));
       setText("accountPinConfirmAuthLabel", c("pinConfirm"));
-      setHtml("authRegisterTermsText", getLang() === "ja" ? "\u5229\u7528\u898f\u7d04\u3068\u30d7\u30e9\u30a4\u30d0\u30b7\u30fc\u30dd\u30ea\u30b7\u30fc\u306b\u540c\u610f\u3057\u307e\u3059" : "T\u00f4i \u0111\u1ed3ng \u00fd v\u1edbi <b>\u0110i\u1ec1u kho\u1ea3n s\u1eed d\u1ee5ng</b> v\u00e0 <b>Ch\u00ednh s\u00e1ch b\u1ea3o m\u1eadt</b>");
-      setText("authSwitchPromptText", getLang() === "ja" ? "\u3059\u3067\u306b\u30a2\u30ab\u30a6\u30f3\u30c8\u304c\u3042\u308a\u307e\u3059\u304b\uff1f" : "\u0110\u00e3 c\u00f3 t\u00e0i kho\u1ea3n?");
+      setHtml("authRegisterTermsText", getLang() === "ja" ? "利用規約とプライバシーポリシーに同意します" : "Tôi đồng ý với <b>Điều khoản sử dụng</b> và <b>Chính sách bảo mật</b>");
+      setText("authSwitchPromptText", getLang() === "ja" ? "すでにアカウントがありますか？" : "Đã có tài khoản?");
       setText("authSwitchPromptBtn", c("login"));
       const switchBtn = $("authSwitchPromptBtn");
       if (switchBtn) switchBtn.onclick = () => window.setAccountMode("login");
       if (fields.phone) fields.phone.placeholder = c("phone");
-      if (fields.pin) fields.pin.placeholder = c("pin");
-      if (fields.pinConfirm) fields.pinConfirm.placeholder = c("pinConfirm");
+      if (fields.pin) fields.pin.placeholder = c("pinPlaceholder");
+      if (fields.pinConfirm) fields.pinConfirm.placeholder = c("pinConfirmPlaceholder");
     }
 
     if (isProfile) {
@@ -4325,18 +4337,16 @@ document.addEventListener("DOMContentLoaded",()=>{
       setText("accountWelcome", c("profileTitle"));
       setText("accountText", c("profileText"));
       setText("accountLoginText", c("submit"));
-      setText("accountNameAuthLabel", getLang() === "ja" ? "1. \u304a\u540d\u524d" : "1. H\u1ecd v\u00e0 t\u00ean");
-      setText("accountPhoneAuthLabel", getLang() === "ja" ? "2. \u96fb\u8a71\u756a\u53f7" : "2. S\u1ed1 \u0111i\u1ec7n tho\u1ea1i");
+      setText("accountNameAuthLabel", getLang() === "ja" ? "1. お名前" : "1. Họ và tên");
+      setText("accountPhoneAuthLabel", getLang() === "ja" ? "2. 電話番号" : "2. Số điện thoại");
       setText("accountEmailAuthLabel", getLang() === "ja" ? "3. Email" : "3. Email");
-      setText("accountContactAuthLabel", getLang() === "ja" ? "3. \u9023\u7d61\u5148" : "3. Email ho\u1eb7c LINE/Zalo");
-      setText("accountAddressAuthLabel", getLang() === "ja" ? "4. \u4f4f\u6240" : "4. \u0110\u1ecba ch\u1ec9");
-      setText("accountProjectAuthLabel", getLang() === "ja" ? "5. \u5de5\u4e8b\u4ef6\u540d" : "5. T\u00ean c\u00f4ng tr\u00ecnh");
-      setText("accountCompanyAuthLabel", getLang() === "ja" ? "6. \u4f1a\u793e\u540d\u30fb\u500b\u4eba" : "6. C\u00f4ng ty ho\u1eb7c c\u00e1 nh\u00e2n");
-      setText("accountNoteAuthLabel", getLang() === "ja" ? "7. \u5099\u8003" : "7. Ghi ch\u00fa th\u00eam");
+      setText("accountAddressAuthLabel", getLang() === "ja" ? "4. 住所" : "4. Địa chỉ");
+      setText("accountProjectAuthLabel", getLang() === "ja" ? "5. 工事件名" : "5. Tên công trình");
+      setText("accountCompanyAuthLabel", getLang() === "ja" ? "6. 会社名・個人" : "6. Công ty hoặc cá nhân");
+      setText("accountNoteAuthLabel", getLang() === "ja" ? "7. 備考" : "7. Ghi chú thêm");
       if (fields.name) fields.name.placeholder = c("name");
       if (fields.phone) fields.phone.placeholder = c("phone");
       if (fields.email) fields.email.placeholder = c("email");
-      if (fields.contact) fields.contact.placeholder = c("contact");
       if (fields.address) fields.address.placeholder = c("address");
       if (fields.province) fields.province.value = fields.address ? fields.address.value : fields.province.value;
       if (fields.project) fields.project.placeholder = c("project");
@@ -4376,7 +4386,6 @@ document.addEventListener("DOMContentLoaded",()=>{
       if ($("accountName")) $("accountName").value = user.name || "";
       if ($("accountPhone")) $("accountPhone").value = user.phone || "";
       if ($("accountEmail")) $("accountEmail").value = user.email || "";
-      if ($("accountContact")) $("accountContact").value = user.contact || "";
       if ($("accountAddress")) $("accountAddress").value = user.address || user.province || "";
       if ($("accountNote")) $("accountNote").value = user.note || "";
       if ($("accountProvince")) $("accountProvince").value = user.province || user.address || "";
@@ -4384,7 +4393,6 @@ document.addEventListener("DOMContentLoaded",()=>{
       if ($("accountCompany")) $("accountCompany").value = user.company || "";
       if ($("name")) $("name").value = user.name || "";
       if ($("phone")) $("phone").value = user.phone || "";
-      if ($("contact")) $("contact").value = user.contact || user.email || "";
       if ($("address")) $("address").value = user.address || user.projectName || "";
     }
 
@@ -4419,7 +4427,22 @@ document.addEventListener("DOMContentLoaded",()=>{
     window.setAccountMode("welcome");
   };
 
+  function setupPinNumericOnly() {
+    ["accountPin", "accountPinConfirm"].forEach(function(id) {
+      const el = $(id);
+      if (!el || el.dataset.pinNumericReady === "1") return;
+      el.dataset.pinNumericReady = "1";
+      el.setAttribute("maxlength", "6");
+      el.setAttribute("inputmode", "numeric");
+      el.setAttribute("pattern", "[0-9]*");
+      el.addEventListener("input", function () {
+        el.value = el.value.replace(/\D/g, "").slice(0, 6);
+      });
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
+    setupPinNumericOnly();
     ensureStartLogo();
     const vi = $("authLangVi");
     const ja = $("authLangJa");
@@ -4705,6 +4728,357 @@ document.addEventListener("DOMContentLoaded",()=>{
   window.applyLanguage=function(){if(typeof oldApply==='function')oldApply.apply(this,arguments);setTimeout(fixProfileFields,0)};
   document.addEventListener('DOMContentLoaded',function(){setTimeout(fixProfileFields,0)});
   setTimeout(fixProfileFields,0);
+})();
+</script>
+
+
+
+<!-- yamaden-auth-pending-ui-sync-v45 -->
+<style id="yamaden-auth-pending-ui-sync-v45-style">
+@media (max-width:860px){
+  body.auth-login-body:has(#accountFormCard.auth-mode-pending) .toast{display:none!important;}
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending{
+    position:fixed!important;
+    inset:0!important;
+    width:100vw!important;
+    max-width:none!important;
+    height:100svh!important;
+    min-height:100svh!important;
+    margin:0!important;
+    padding:calc(18px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom))!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    border:0!important;
+    border-radius:0!important;
+    background:
+      radial-gradient(circle at 16% 0%, rgba(37,99,235,.16), transparent 34%),
+      radial-gradient(circle at 88% 4%, rgba(14,165,233,.13), transparent 34%),
+      linear-gradient(180deg,#eff6ff 0%,#f8fafc 48%,#ffffff 100%)!important;
+    box-shadow:none!important;
+    overflow:hidden!important;
+    z-index:9000!important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending > *{display:none!important;}
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authCardLang{
+    display:flex!important;
+    position:absolute!important;
+    top:calc(18px + env(safe-area-inset-top))!important;
+    right:22px!important;
+    left:auto!important;
+    width:96px!important;
+    height:38px!important;
+    padding:4px!important;
+    border-radius:999px!important;
+    background:#eef4fb!important;
+    border:1px solid #dbe7f6!important;
+    box-shadow:0 10px 24px rgba(15,23,42,.10)!important;
+    z-index:10000!important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authCardLang button{
+    height:30px!important;
+    min-height:30px!important;
+    border-radius:999px!important;
+    font-size:12px!important;
+    font-weight:950!important;
+    padding:0!important;
+    color:#64748b!important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authCardLang button.active,
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authCardLang button.is-active{
+    background:#075ad7!important;
+    color:#fff!important;
+    box-shadow:0 8px 18px rgba(7,90,215,.24)!important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen{
+    display:flex!important;
+    position:relative!important;
+    width:min(100%,390px)!important;
+    min-height:min(690px,calc(100svh - 56px - env(safe-area-inset-top) - env(safe-area-inset-bottom)))!important;
+    height:auto!important;
+    padding:26px 22px 24px!important;
+    border-radius:30px!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    text-align:center!important;
+    overflow:hidden!important;
+    background:
+      radial-gradient(circle at 86% 0%, rgba(37,99,235,.14), transparent 34%),
+      linear-gradient(180deg,rgba(255,255,255,.98),rgba(248,250,252,.96))!important;
+    border:1px solid rgba(226,232,240,.96)!important;
+    box-shadow:0 22px 54px rgba(15,23,42,.14)!important;
+  }
+
+  .app.auth-login-mode .auth-pending-logo{
+    width:100%!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:7px!important;
+    margin:4px auto 28px!important;
+  }
+
+  .app.auth-login-mode .auth-pending-logo img{
+    width:66px!important;
+    height:66px!important;
+    border-radius:20px!important;
+    background:#fff!important;
+    object-fit:cover!important;
+    box-shadow:0 14px 32px rgba(37,99,235,.18)!important;
+  }
+
+  .app.auth-login-mode .auth-pending-logo b{
+    display:block!important;
+    margin-top:3px!important;
+    font-family:"Yu Mincho","Hiragino Mincho ProN","Times New Roman",serif!important;
+    font-size:20px!important;
+    line-height:1.1!important;
+    color:#0f172a!important;
+    font-weight:900!important;
+    letter-spacing:.04em!important;
+  }
+
+  .app.auth-login-mode .auth-pending-logo span{
+    display:block!important;
+    margin-top:4px!important;
+    font-family:"Times New Roman",serif!important;
+    font-size:11px!important;
+    color:#2563eb!important;
+    font-weight:850!important;
+    letter-spacing:.14em!important;
+  }
+
+  .app.auth-login-mode .auth-pending-visual{
+    position:relative!important;
+    width:102px!important;
+    height:102px!important;
+    min-height:102px!important;
+    flex:0 0 102px!important;
+    margin:0 auto 22px!important;
+    border-radius:28px!important;
+    background:linear-gradient(135deg,#050505,#1f2937)!important;
+    box-shadow:0 18px 36px rgba(15,23,42,.22)!important;
+  }
+
+  .app.auth-login-mode .auth-pending-visual::before,
+  .app.auth-login-mode .auth-pending-visual::after{display:none!important;}
+
+  .app.auth-login-mode .auth-paper{
+    position:absolute!important;
+    left:50%!important;
+    top:50%!important;
+    width:44px!important;
+    height:56px!important;
+    transform:translate(-50%,-50%)!important;
+    border-radius:10px!important;
+    background:rgba(255,255,255,.94)!important;
+    border:0!important;
+    box-shadow:none!important;
+  }
+
+  .app.auth-login-mode .auth-paper::before{
+    content:""!important;
+    position:absolute!important;
+    left:11px!important;
+    top:12px!important;
+    width:22px!important;
+    height:4px!important;
+    border-radius:999px!important;
+    background:#cbd5e1!important;
+    box-shadow:0 11px 0 #cbd5e1,0 22px 0 #cbd5e1!important;
+    border:0!important;
+  }
+
+  .app.auth-login-mode .auth-paper::after{display:none!important;}
+
+  .app.auth-login-mode .auth-checkmark{
+    position:absolute!important;
+    right:-8px!important;
+    bottom:-8px!important;
+    width:44px!important;
+    height:44px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    border:4px solid #fff!important;
+    border-radius:50%!important;
+    background:#075ad7!important;
+    color:#fff!important;
+    font-size:0!important;
+    line-height:1!important;
+    font-weight:950!important;
+    box-shadow:0 12px 24px rgba(7,90,215,.26)!important;
+  }
+
+  .app.auth-login-mode .auth-checkmark::before{
+    content:"✓"!important;
+    font-size:26px!important;
+    line-height:1!important;
+    font-weight:950!important;
+  }
+
+  .app.auth-login-mode .auth-pending-title{
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0 auto 12px!important;
+    color:#111827!important;
+    font-size:24px!important;
+    line-height:1.25!important;
+    font-weight:950!important;
+    letter-spacing:-.02em!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+
+  .app.auth-login-mode .auth-pending-text{
+    width:min(318px,100%)!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0 auto 22px!important;
+    color:#64748b!important;
+    font-size:14px!important;
+    line-height:1.65!important;
+    font-weight:800!important;
+    display:block!important;
+    overflow:visible!important;
+    -webkit-line-clamp:unset!important;
+    -webkit-box-orient:unset!important;
+  }
+
+  .app.auth-login-mode .auth-pending-pill{
+    position:relative!important;
+    width:min(326px,100%)!important;
+    min-width:0!important;
+    min-height:72px!important;
+    height:auto!important;
+    margin:0 auto 28px!important;
+    padding:14px 16px 14px 66px!important;
+    border-radius:20px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    text-align:left!important;
+    background:#f1f5f9!important;
+    border:1px solid #e2e8f0!important;
+    color:#111827!important;
+    font-size:15px!important;
+    line-height:1.55!important;
+    font-weight:900!important;
+    white-space:pre-line!important;
+    box-shadow:none!important;
+  }
+
+  .app.auth-login-mode .auth-pending-pill::before{
+    content:"⏱"!important;
+    position:absolute!important;
+    left:16px!important;
+    top:50%!important;
+    transform:translateY(-50%)!important;
+    width:38px!important;
+    height:38px!important;
+    margin:0!important;
+    border-radius:14px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    background:#111827!important;
+    color:#fff!important;
+    font-size:18px!important;
+    line-height:1!important;
+  }
+
+  .app.auth-login-mode #authPendingLoginBtn{
+    display:flex!important;
+    width:min(326px,100%)!important;
+    height:54px!important;
+    min-height:54px!important;
+    margin:auto auto 0!important;
+    border-radius:18px!important;
+    border:0!important;
+    background:linear-gradient(135deg,#050505,#1f2937)!important;
+    color:#fff!important;
+    box-shadow:0 14px 28px rgba(15,23,42,.22)!important;
+    font-size:15px!important;
+    font-weight:950!important;
+  }
+}
+
+@media (max-width:380px){
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen{
+    min-height:min(650px,calc(100svh - 46px - env(safe-area-inset-top) - env(safe-area-inset-bottom)))!important;
+    padding:22px 18px 20px!important;
+    border-radius:26px!important;
+  }
+  .app.auth-login-mode .auth-pending-logo{margin-bottom:20px!important;}
+  .app.auth-login-mode .auth-pending-visual{width:92px!important;height:92px!important;min-height:92px!important;flex-basis:92px!important;margin-bottom:18px!important;}
+  .app.auth-login-mode .auth-pending-title{font-size:22px!important;}
+  .app.auth-login-mode .auth-pending-text{font-size:13px!important;line-height:1.55!important;margin-bottom:18px!important;}
+  .app.auth-login-mode .auth-pending-pill{min-height:66px!important;margin-bottom:22px!important;font-size:14px!important;}
+}
+</style>
+<script id="yamaden-auth-pending-ui-sync-v45-script">
+(function(){
+  function getLang(){
+    try{return (window.lang==='vi'||localStorage.getItem('language')==='vi'||localStorage.getItem('lang')==='vi')?'vi':'ja';}
+    catch(e){return 'ja';}
+  }
+  function ensurePendingLogo(){
+    var screen=document.getElementById('authPendingScreen');
+    if(!screen)return;
+    if(!screen.querySelector('.auth-pending-logo')){
+      var logo=document.createElement('div');
+      logo.className='auth-pending-logo';
+      logo.innerHTML='<img src="/icon-192.png" alt="YAMADEN"><div><b>株式会社 山電</b><span>YAMADEN.CO.LTD</span></div>';
+      screen.insertBefore(logo,screen.firstChild);
+    }
+  }
+  function applyPendingUI(){
+    ensurePendingLogo();
+    var card=document.getElementById('accountFormCard');
+    if(!card||!card.classList.contains('auth-mode-pending'))return;
+    var isVi=getLang()==='vi';
+    var title=document.getElementById('authPendingTitle');
+    var text=document.getElementById('authPendingText');
+    var pill=document.getElementById('authPendingPill');
+    var btn=document.getElementById('authPendingLoginBtn');
+    if(title)title.textContent=isVi?'Tài khoản đang chờ duyệt':'アカウント承認待ち';
+    if(text)text.textContent=isVi?'Hồ sơ của bạn đã được gửi thành công. Chúng tôi sẽ xem xét và duyệt tài khoản trong thời gian sớm nhất.':'プロフィール情報を送信しました。内容を確認後、できるだけ早くアカウントを承認します。';
+    if(pill)pill.textContent=isVi?'Thời gian dự kiến:\n24 – 48 giờ làm việc':'目安時間:\n24〜48営業時間';
+    if(btn){
+      btn.textContent=isVi?'Quay về trang chủ':'ホームへ戻る';
+      btn.classList.remove('soft-btn','auth-secondary');
+      btn.classList.add('main-btn','auth-primary');
+      btn.onclick=function(){
+        try{localStorage.removeItem('userToken');localStorage.removeItem('userProfile');}catch(e){}
+        if(typeof window.setAccountMode==='function')window.setAccountMode('welcome');
+      };
+    }
+  }
+  var oldSet=window.setAccountMode;
+  window.setAccountMode=function(){
+    var result=typeof oldSet==='function'?oldSet.apply(this,arguments):undefined;
+    setTimeout(applyPendingUI,0);
+    return result;
+  };
+  var oldApply=window.applyLanguage;
+  window.applyLanguage=function(){
+    if(typeof oldApply==='function')oldApply.apply(this,arguments);
+    setTimeout(applyPendingUI,0);
+  };
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(applyPendingUI,0);});
+  setTimeout(applyPendingUI,0);
 })();
 </script>
 
