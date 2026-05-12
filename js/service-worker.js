@@ -1,12 +1,12 @@
-const CACHE_NAME = "yamaden-support-auth-v58";
+const CACHE_NAME = "yamaden-support-auth-v59";
 
 const APP_SHELL = [
   "/",
   "/index.html",
-  "/css/main.css",
-  "/css/auth.css",
-  "/js/app.js",
-  "/js/auth.js",
+  "/css/main.css?v=59",
+  "/css/auth.css?v=59",
+  "/js/app.js?v=59",
+  "/js/auth.js?v=59",
   "/data/manifest.json",
   "/assets/icon-192.png",
   "/assets/icon-512.png"
