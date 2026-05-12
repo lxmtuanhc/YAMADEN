@@ -6160,5 +6160,157 @@ document.addEventListener("DOMContentLoaded",()=>{
   setInterval(lockYamadenBrand, 1800);
 })();
 </script>
+<!-- yamaden-auth-demo-exact-v33: closer match to final login demo -->
+<style id="yamaden-auth-demo-exact-v33-style">
+@media (max-width: 860px) {
+  .app.auth-login-mode .account-landing {
+    padding: calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom)) !important;
+    background: #f8fbff !important;
+  }
+  .app.auth-login-mode .account-panel,
+  .app.auth-login-mode #accountFormCard.account-card {
+    min-height: calc(100svh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    max-height: calc(100svh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+  }
+  .app.auth-login-mode #accountFormCard.account-card {
+    border-radius: 24px !important;
+    padding: 22px 20px !important;
+    border: 1px solid #edf2fb !important;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, .09) !important;
+  }
+  .app.auth-login-mode .auth-card-lang {
+    top: 18px !important;
+    right: 18px !important;
+    height: 28px !important;
+  }
+  .app.auth-login-mode .auth-card-lang button {
+    width: 35px !important;
+    height: 24px !important;
+    font-size: 10.5px !important;
+  }
+  .app.auth-login-mode .auth-back-btn {
+    top: 16px !important;
+    left: 16px !important;
+  }
+  .app.auth-login-mode .auth-start-screen {
+    min-height: calc(100svh - 72px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    padding-top: 132px !important;
+  }
+  .app.auth-login-mode .auth-start-title {
+    font-size: 19px !important;
+    font-weight: 950 !important;
+  }
+  .app.auth-login-mode .auth-start-text {
+    max-width: 235px !important;
+    font-size: 11.5px !important;
+    line-height: 1.55 !important;
+  }
+  .app.auth-login-mode .auth-hero-visual {
+    margin-top: 78px !important;
+  }
+  .app.auth-login-mode .auth-hero-visual::before {
+    width: 76px !important;
+    height: 76px !important;
+    border-radius: 21px !important;
+  }
+  .app.auth-login-mode .auth-hero-visual::after {
+    font-size: 20px !important;
+    line-height: 1.18 !important;
+  }
+  .app.auth-login-mode .auth-start-actions {
+    gap: 12px !important;
+    padding-top: 34px !important;
+  }
+  .app.auth-login-mode .auth-primary,
+  .app.auth-login-mode .auth-secondary,
+  .app.auth-login-mode #accountFormCard > .main-btn {
+    height: 50px !important;
+    min-height: 50px !important;
+    border-radius: 10px !important;
+  }
+  .app.auth-login-mode .auth-secondary {
+    background: #fff !important;
+    color: #075ad7 !important;
+    border: 1.5px solid #1267f2 !important;
+  }
+  .app.auth-login-mode #accountFormCard.auth-mode-form .account-welcome,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome {
+    margin: 82px 0 28px !important;
+  }
+  .app.auth-login-mode #accountFormCard.auth-mode-form .account-welcome-ja,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome-ja {
+    font-size: 20px !important;
+  }
+  .app.auth-login-mode #accountFormCard.auth-mode-form .account-welcome-sub,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome-sub {
+    max-width: 230px !important;
+    font-size: 11px !important;
+  }
+  .app.auth-login-mode #accountFields {
+    gap: 9px !important;
+  }
+  .app.auth-login-mode .auth-field-label {
+    margin: 9px 0 -2px !important;
+    font-size: 11px !important;
+  }
+  .app.auth-login-mode #accountFields input {
+    height: 44px !important;
+    min-height: 44px !important;
+    border-radius: 10px !important;
+    padding: 0 13px !important;
+    font-size: 13px !important;
+  }
+  .app.auth-login-mode .auth-login-options,
+  .app.auth-login-mode .auth-register-terms {
+    margin-top: 13px !important;
+    font-size: 11px !important;
+  }
+  .app.auth-login-mode #accountFormCard > .main-btn {
+    margin-top: 22px !important;
+  }
+  .app.auth-login-mode .auth-switch-prompt {
+    margin-top: 18px !important;
+    font-size: 11px !important;
+  }
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen {
+    min-height: calc(100svh - 82px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    padding-top: 58px !important;
+  }
+  .app.auth-login-mode .auth-pending-visual {
+    width: 132px !important;
+    height: 132px !important;
+    margin-bottom: 28px !important;
+    background:
+      radial-gradient(circle at 70% 70%, rgba(18,103,242,.24), transparent 28%),
+      #eff6ff !important;
+  }
+  .app.auth-login-mode .auth-pending-doc {
+    inset: 30px 40px !important;
+  }
+  .app.auth-login-mode .auth-pending-title {
+    font-size: 20px !important;
+  }
+  .app.auth-login-mode .auth-pending-text {
+    max-width: 255px !important;
+    font-size: 11.5px !important;
+  }
+  .app.auth-login-mode #authPendingLoginBtn {
+    margin-top: auto !important;
+  }
+}
+@media (max-height: 720px) and (max-width: 860px) {
+  .app.auth-login-mode .auth-start-screen {
+    padding-top: 78px !important;
+  }
+  .app.auth-login-mode .auth-hero-visual {
+    margin-top: 42px !important;
+  }
+  .app.auth-login-mode #accountFormCard.auth-mode-form .account-welcome,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome {
+    margin-top: 58px !important;
+    margin-bottom: 18px !important;
+  }
+}
+</style>
 </body>
 </html>
