@@ -314,6 +314,8 @@ function setAccountMode(mode) {
   let isWelcome=mode==="welcome", isLogin=mode==="login", isProfile=mode==="profile", isRegister=mode==="register", isPending=mode==="pending";
   $("accountFormCard")?.classList.toggle("auth-mode-welcome",isWelcome);
   $("accountFormCard")?.classList.toggle("auth-mode-form",isLogin||isRegister||isProfile);
+  $("accountFormCard")?.classList.toggle("auth-mode-login",isLogin);
+  $("accountFormCard")?.classList.toggle("auth-mode-register",isRegister);
   $("accountFormCard")?.classList.toggle("auth-mode-pending",isPending);
   $("authStartScreen")?.classList.toggle("hidden",!isWelcome);
   $("authPendingScreen")?.classList.toggle("hidden",!isPending);

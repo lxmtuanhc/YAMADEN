@@ -306,6 +306,8 @@
 
     card.classList.toggle("auth-mode-welcome", isWelcome);
     card.classList.toggle("auth-mode-form", isLogin || isRegister || isProfile);
+    card.classList.toggle("auth-mode-login", isLogin);
+    card.classList.toggle("auth-mode-register", isRegister);
     card.classList.toggle("auth-mode-profile", isProfile);
     card.classList.toggle("auth-mode-pending", isPending);
 
