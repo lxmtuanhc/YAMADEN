@@ -3802,11 +3802,27 @@
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-login #accountFields {
-    grid-template-rows: 16px 48px 16px 48px !important;
+    height: 212px !important;
+    min-height: 212px !important;
+    max-height: 212px !important;
+    grid-template-rows: 16px 48px 16px 48px 16px 48px !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields {
+    height: 212px !important;
+    min-height: 212px !important;
+    max-height: 212px !important;
     grid-template-rows: 16px 48px 16px 48px 16px 48px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountFields::after {
+    content: "" !important;
+    display: block !important;
+    grid-row: 5 / span 2 !important;
+    height: 74px !important;
+    min-height: 74px !important;
+    max-height: 74px !important;
+    visibility: hidden !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-login .auth-field-label,
@@ -3834,7 +3850,26 @@
     height: 48px !important;
     min-height: 48px !important;
     max-height: 48px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 112px !important;
+    align-items: center !important;
+    gap: 12px !important;
     margin: 0 !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-login .auth-remember,
+  .app.auth-login-mode #accountFormCard.auth-mode-login #authForgotPin {
+    min-width: 0 !important;
+    height: 24px !important;
+    line-height: 24px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-login #authForgotPin {
+    width: 112px !important;
+    text-align: right !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register .auth-register-terms {
