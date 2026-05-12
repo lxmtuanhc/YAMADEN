@@ -3432,14 +3432,12 @@
 
 /* ===== Mobile auth no-jump sizing ===== */
 @media (max-width: 860px) {
-  .app.auth-login-mode #accountFormCard.auth-mode-login,
   .app.auth-login-mode #accountFormCard.auth-mode-register {
     display: block !important;
     position: relative !important;
     overflow: hidden !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome,
   .app.auth-login-mode #accountFormCard.auth-mode-register .account-welcome {
     height: 142px !important;
     min-height: 142px !important;
@@ -3452,7 +3450,6 @@
     overflow: hidden !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome-ja,
   .app.auth-login-mode #accountFormCard.auth-mode-register .account-welcome-ja {
     height: 44px !important;
     min-height: 44px !important;
@@ -3464,7 +3461,6 @@
     text-overflow: ellipsis !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome-sub,
   .app.auth-login-mode #accountFormCard.auth-mode-register .account-welcome-sub {
     height: 64px !important;
     min-height: 64px !important;
@@ -3476,19 +3472,11 @@
     overflow: hidden !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login #accountFields,
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields {
     display: grid !important;
     gap: 10px !important;
     margin: 0 !important;
     overflow: hidden !important;
-  }
-
-  .app.auth-login-mode #accountFormCard.auth-mode-login #accountFields {
-    height: 154px !important;
-    min-height: 154px !important;
-    max-height: 154px !important;
-    grid-template-rows: 22px 54px 22px 54px !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields {
@@ -3498,7 +3486,6 @@
     grid-template-rows: 22px 52px 22px 52px 22px 52px !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login .auth-field-label,
   .app.auth-login-mode #accountFormCard.auth-mode-register .auth-field-label {
     height: 22px !important;
     min-height: 22px !important;
@@ -3510,7 +3497,6 @@
     text-overflow: ellipsis !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login #accountFields input,
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields input {
     height: 52px !important;
     min-height: 52px !important;
@@ -3518,20 +3504,10 @@
     margin: 0 !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login .auth-login-options {
-    height: 46px !important;
-    min-height: 46px !important;
-    max-height: 46px !important;
-    margin: 14px 0 0 !important;
-    overflow: hidden !important;
-  }
-
-  .app.auth-login-mode #accountFormCard.auth-mode-login #accountFormCard > .main-btn,
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFormCard > .main-btn {
     position: absolute !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login > .main-btn,
   .app.auth-login-mode #accountFormCard.auth-mode-register > .main-btn {
     position: absolute !important;
     left: 24px !important;
@@ -3543,15 +3519,10 @@
     border-radius: 16px !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login > .main-btn {
-    bottom: 94px !important;
-  }
-
   .app.auth-login-mode #accountFormCard.auth-mode-register > .main-btn {
     bottom: 86px !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login #authSwitchPrompt,
   .app.auth-login-mode #accountFormCard.auth-mode-register #authSwitchPrompt {
     position: absolute !important;
     left: 24px !important;
@@ -3570,16 +3541,9 @@
 }
 
 @media (max-width: 380px) {
-  .app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome,
   .app.auth-login-mode #accountFormCard.auth-mode-register .account-welcome {
     margin-top: 66px !important;
     margin-bottom: 20px !important;
-  }
-
-  .app.auth-login-mode #accountFormCard.auth-mode-login #accountFields {
-    height: 150px !important;
-    min-height: 150px !important;
-    max-height: 150px !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields {
@@ -3752,94 +3716,131 @@
   }
 }
 
-/* ===== Final auth no-jump lock ===== */
+/* ===== Canonical login layout lock ===== */
 @media (max-width: 860px) {
-  .app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome,
-  .app.auth-login-mode #accountFormCard.auth-mode-register .account-welcome {
+  .app.auth-login-mode #accountFormCard.auth-mode-login,
+  .app.auth-login-mode #accountFormCard.auth-mode-login * {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-login {
+    display: block !important;
+    position: relative !important;
+    overflow: hidden !important;
+    contain: layout style !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome {
     position: absolute !important;
     left: 22px !important;
     right: 22px !important;
     top: 118px !important;
+    width: auto !important;
     height: 112px !important;
     min-height: 112px !important;
     max-height: 112px !important;
     margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    overflow: hidden !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome-ja,
-  .app.auth-login-mode #accountFormCard.auth-mode-register .account-welcome-ja {
+  .app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome-ja {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
     height: 36px !important;
     min-height: 36px !important;
     max-height: 36px !important;
     line-height: 36px !important;
+    margin: 0 !important;
+    padding: 0 !important;
     font-size: 24px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-align: center !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome-sub,
-  .app.auth-login-mode #accountFormCard.auth-mode-register .account-welcome-sub {
+  .app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome-sub {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 50px !important;
+    width: auto !important;
+    max-width: none !important;
     height: 48px !important;
     min-height: 48px !important;
     max-height: 48px !important;
-    margin: 14px auto 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     line-height: 1.45 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-align: center !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login #accountFields,
-  .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields {
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountFields {
     position: absolute !important;
     left: 22px !important;
     right: 22px !important;
     top: 248px !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    grid-template-rows: none !important;
-    gap: 10px !important;
+    width: auto !important;
+    height: 212px !important;
+    min-height: 212px !important;
+    max-height: 212px !important;
     margin: 0 !important;
     padding: 0 !important;
-  }
-
-  .app.auth-login-mode #accountFormCard.auth-mode-login #accountFields {
-    height: 212px !important;
-    min-height: 212px !important;
-    max-height: 212px !important;
-    grid-template-rows: 16px 48px 16px 48px 16px 48px !important;
-  }
-
-  .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields {
-    height: 212px !important;
-    min-height: 212px !important;
-    max-height: 212px !important;
-    grid-template-rows: 16px 48px 16px 48px 16px 48px !important;
-  }
-
-  .app.auth-login-mode #accountFormCard.auth-mode-login #accountFields::after {
-    content: "" !important;
     display: block !important;
-    grid-row: 5 / span 2 !important;
-    height: 74px !important;
-    min-height: 74px !important;
-    max-height: 74px !important;
-    visibility: hidden !important;
+    overflow: hidden !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login .auth-field-label,
-  .app.auth-login-mode #accountFormCard.auth-mode-register .auth-field-label {
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountPhoneAuthLabel,
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountPinAuthLabel,
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountPinConfirmAuthLabel {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
     height: 16px !important;
     min-height: 16px !important;
     max-height: 16px !important;
     line-height: 16px !important;
     margin: 0 !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login #accountFields input,
-  .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields input {
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountPhoneAuthLabel { top: 0 !important; }
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountPinAuthLabel { top: 74px !important; }
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountPinConfirmAuthLabel { top: 148px !important; }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountPhone,
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountPin,
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountPinConfirm {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
     height: 48px !important;
     min-height: 48px !important;
     max-height: 48px !important;
     margin: 0 !important;
+    padding: 0 16px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountPhone { top: 26px !important; }
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountPin { top: 100px !important; }
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountPinConfirm { top: 174px !important; }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-login .auth-login-placeholder {
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-login .auth-login-options {
@@ -3850,18 +3851,22 @@
     height: 48px !important;
     min-height: 48px !important;
     max-height: 48px !important;
+    margin: 0 !important;
+    padding: 0 !important;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) 112px !important;
     align-items: center !important;
     gap: 12px !important;
-    margin: 0 !important;
+    overflow: hidden !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-login .auth-remember,
   .app.auth-login-mode #accountFormCard.auth-mode-login #authForgotPin {
-    min-width: 0 !important;
     height: 24px !important;
     line-height: 24px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -3872,37 +3877,31 @@
     text-align: right !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-register .auth-register-terms {
+  .app.auth-login-mode #accountFormCard.auth-mode-login > .main-btn {
     position: absolute !important;
     left: 22px !important;
     right: 22px !important;
-    top: 468px !important;
+    bottom: 54px !important;
+    width: auto !important;
+    height: 48px !important;
     min-height: 48px !important;
     max-height: 48px !important;
     margin: 0 !important;
   }
 
-  .app.auth-login-mode #accountFormCard.auth-mode-login > .main-btn,
-  .app.auth-login-mode #accountFormCard.auth-mode-register > .main-btn {
-    bottom: 54px !important;
-  }
-
-  .app.auth-login-mode #accountFormCard.auth-mode-login #authSwitchPrompt,
-  .app.auth-login-mode #accountFormCard.auth-mode-register #authSwitchPrompt {
+  .app.auth-login-mode #accountFormCard.auth-mode-login #authSwitchPrompt {
+    position: absolute !important;
+    left: 22px !important;
+    right: 22px !important;
     bottom: 22px !important;
     height: 24px !important;
-    min-height: 20px !important;
+    min-height: 24px !important;
     max-height: 24px !important;
-  }
-
-  .app.auth-login-mode #accountFormCard.auth-mode-login .auth-login-placeholder {
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-
-  .app.auth-login-mode #accountFormCard.auth-mode-login,
-  .app.auth-login-mode #accountFormCard.auth-mode-login * {
-    transition: none !important;
-    animation: none !important;
+    line-height: 24px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 }
