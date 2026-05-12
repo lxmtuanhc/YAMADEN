@@ -3439,10 +3439,10 @@
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register .account-welcome {
-    height: 142px !important;
-    min-height: 142px !important;
-    max-height: 142px !important;
-    margin: 78px 0 28px !important;
+    height: 126px !important;
+    min-height: 126px !important;
+    max-height: 126px !important;
+    margin: 58px 0 22px !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -3462,10 +3462,10 @@
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register .account-welcome-sub {
-    height: 64px !important;
-    min-height: 64px !important;
-    max-height: 64px !important;
-    margin: 20px auto 0 !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    margin: 16px auto 0 !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
@@ -3480,10 +3480,10 @@
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields {
-    height: 240px !important;
-    min-height: 240px !important;
-    max-height: 240px !important;
-    grid-template-rows: 22px 52px 22px 52px 22px 52px !important;
+    height: 230px !important;
+    min-height: 230px !important;
+    max-height: 230px !important;
+    grid-template-rows: 20px 52px 20px 52px 20px 52px !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register .auth-field-label {
@@ -3504,6 +3504,19 @@
     margin: 0 !important;
   }
 
+  .app.auth-login-mode #accountFormCard.auth-mode-register #authRegisterTerms {
+    position: absolute !important;
+    left: 24px !important;
+    right: 24px !important;
+    bottom: 144px !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    max-height: 58px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFormCard > .main-btn {
     position: absolute !important;
   }
@@ -3520,7 +3533,7 @@
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register > .main-btn {
-    bottom: 86px !important;
+    bottom: 76px !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register #authSwitchPrompt {

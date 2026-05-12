@@ -138,11 +138,13 @@
     if (vi) {
       vi.classList.toggle("active", lang === "vi");
       vi.classList.toggle("is-active", lang === "vi");
+      vi.setAttribute("aria-pressed", lang === "vi" ? "true" : "false");
     }
 
     if (ja) {
       ja.classList.toggle("active", lang === "ja");
       ja.classList.toggle("is-active", lang === "ja");
+      ja.setAttribute("aria-pressed", lang === "ja" ? "true" : "false");
     }
 
     if (mainLang) mainLang.value = lang;
@@ -307,7 +309,7 @@
     card.classList.toggle("auth-mode-welcome", isWelcome);
     card.classList.toggle("auth-mode-form", isLogin || isRegister || isProfile);
     card.classList.toggle("auth-mode-login", isLogin);
-    card.classList.toggle("auth-mode-register", isRegister || isLogin);
+    card.classList.toggle("auth-mode-register", isRegister);
     card.classList.toggle("auth-mode-profile", isProfile);
     card.classList.toggle("auth-mode-pending", isPending);
 
