@@ -236,6 +236,7 @@
       setText("authPendingLoginBtn", c("backLogin"));
     }
   }
+  window.updateAuthTextsOnly = updateAuthTextsOnly;
 
   function ensurePendingScreen() {
     const screen = $("authPendingScreen");

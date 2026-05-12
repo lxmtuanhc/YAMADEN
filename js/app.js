@@ -203,12 +203,16 @@ function setAuthLanguage(next) {
 
   if ($("language")) $("language").value = lang;
 
-  applyLanguage();
+  const authOnly = ["welcome", "register", "login", "profile", "pending"].includes(keepMode);
+  if (!authOnly) {
+    applyLanguage();
+  }
 
   // Khi đổi VN/JP trong màn hình đăng ký hoặc đăng nhập, giữ nguyên màn hình hiện tại.
   // Không tự nhảy sang màn hình chờ duyệt dù localStorage đang có tài khoản pending.
-  if (["welcome", "register", "login", "profile"].includes(keepMode)) {
-    setAccountMode(keepMode);
+  if (authOnly && typeof updateAuthTextsOnly === "function") {
+    updateAuthTextsOnly();
+    syncAuthLanguageButtons();
   }
 
   window.__updateIssueList && window.__updateIssueList();
