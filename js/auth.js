@@ -265,28 +265,24 @@
     }
   }
 
-  const appSetAuthLanguage = window.setAuthLanguage;
+   window.setAuthLanguage = function (next) {
+  const lang = next === "vi" ? "vi" : "ja";
 
-  window.setAuthLanguage = function (next) {
-    const lang = next === "vi" ? "vi" : "ja";
-    window.lang = lang;
+  window.lang = lang;
 
-    if (typeof appSetAuthLanguage === "function") {
-      appSetAuthLanguage(lang);
-    } else {
-      localStorage.setItem("language", lang);
-      localStorage.setItem("lang", lang);
-      if (typeof window.applyLanguage === "function") {
-        window.applyLanguage();
-      }
-    }
+  localStorage.setItem("language", lang);
+  localStorage.setItem("lang", lang);
 
-    syncLangButtons();
-    updateAuthTextsOnly();
+  if (typeof window.applyLanguage === "function") {
+    window.applyLanguage();
+  }
 
-    if (window.__updateIssueList) {
-      window.__updateIssueList();
-    }
+  syncLangButtons();
+  updateAuthTextsOnly();
+
+  if (window.__updateIssueList) {
+    window.__updateIssueList();
+  }
   };
 
   window.setAccountMode = function (mode) {
