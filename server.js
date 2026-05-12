@@ -159,6 +159,7 @@ const UserSchema = new mongoose.Schema({
   profileCompleted: { type: Boolean, default: false },
   status: { type: String, default: "pending" },
   createdAt: Date,
+  approvedAt: Date,
   deletedAt: Date,
   reactivatedAt: Date,
   lastLoginAt: Date
@@ -614,6 +615,7 @@ app.get("/user/requests", requireUser, async (req, res) => {
 
 app.get("/admin/users", requireAdmin, async (req, res) => {
   try {
+    res.set("Cache-Control", "no-store");
     const users = await User.find().sort({ createdAt: -1 });
 
     const counts = await Request.aggregate([
@@ -653,10 +655,14 @@ app.put("/admin/users/:id", requireAdmin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
+    const previousStatus = user.status;
 
     ["name", "phone", "email", "contact", "company", "customerType", "province", "projectName", "address", "note", "status"].forEach(field => {
       if (req.body[field] !== undefined) user[field] = req.body[field];
     });
+    if (previousStatus === "pending" && req.body.status === "active" && !user.approvedAt) {
+      user.approvedAt = new Date();
+    }
     if (req.body.status && req.body.status !== "deleted") {
       user.deletedAt = undefined;
       user.reactivatedAt = new Date();
@@ -684,7 +690,7 @@ app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (req.query.permanent === "true") {
+    if (req.query.permanent === "true" || user.status === "pending") {
       await Request.updateMany({ userId }, { $set: { userId: "" } });
       await User.deleteOne({ _id: userId });
       return res.json({ message: "User permanently deleted" });
