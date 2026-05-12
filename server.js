@@ -48,6 +48,9 @@ function requireAdmin(req, res, next) {
 
   try {
     req.admin = jwt.verify(token, JWT_SECRET);
+    if (!req.admin || req.admin.role !== "admin") {
+      return res.status(403).json({ message: "Admin access required" });
+    }
     next();
   } catch {
     return res.status(401).json({ message: "Invalid token" });
@@ -414,38 +417,6 @@ app.post("/user/register", async (req, res) => {
       const ok = await bcrypt.compare(pin, user.pinHash);
 
       if (!ok) {
-        const canRestartRegistration = user.status !== "active";
-        if (canRestartRegistration) {
-          user.pinHash = await bcrypt.hash(pin, 10);
-          user.status = "pending";
-          user.profileCompleted = false;
-          user.deletedAt = undefined;
-          user.reactivatedAt = new Date();
-          user.name = "";
-          user.email = "";
-          user.contact = "";
-          user.company = "";
-          user.customerType = "";
-          user.province = "";
-          user.projectName = "";
-          user.address = "";
-          user.note = "";
-          user.lastLoginAt = new Date();
-          await user.save();
-
-          const token = jwt.sign(
-            { role: "user", userId: String(user._id), phone: user.phone },
-            USER_JWT_SECRET,
-            { expiresIn: "180d" }
-          );
-
-          return res.json({
-            message: "Register restarted",
-            token,
-            user: publicUser(user)
-          });
-        }
-
         return res.status(409).json({
           message: "Phone is already registered"
         });

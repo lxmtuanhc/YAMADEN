@@ -4,16 +4,13 @@
 <meta charset="UTF-8">
 <title>YAMADEN Support</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<link rel="icon" type="image/png" href="/icon-192.png">
-<link rel="apple-touch-icon" href="/icon-192.png">
-<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/assets/icon-192.png">
+<link rel="apple-touch-icon" href="/assets/icon-192.png">
+<link rel="manifest" href="/data/manifest.json">
 <meta name="theme-color" content="#171917">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="YAMADEN">
-
-<!-- YAMADEN DNA FRAME - clean mobile shell, no overflow -->
-
 <link rel="stylesheet" href="/css/main.css">
 <link rel="stylesheet" href="/css/auth.css">
 </head>
@@ -21,15 +18,15 @@
 
 <!-- INTRO SCREEN -->
 <div id="introScreen">
-  <video id="introVideo" autoplay muted playsinline preload="auto"><source src="intro.mp4" type="video/mp4"></video>
-  <img id="introFallbackLogo" src="/icon-512.png" alt="YAMADEN">
+  <video id="introVideo" autoplay muted playsinline preload="auto"><source src="/assets/intro.mp4" type="video/mp4"></video>
+  <img id="introFallbackLogo" src="/assets/icon-512.png" alt="YAMADEN">
 </div>
 
 <div class="app">
   <header class="top-header">
     <div class="top-row">
       <div class="logo-box">
-        <img src="/icon-192.png" alt="YAMADEN">
+        <img src="/assets/icon-192.png" alt="YAMADEN">
         <div class="logo-text">
           <div class="logo-jp">株式会社 山電</div>
           <div class="logo-en">YAMADEN.CO.LTD</div>
@@ -56,7 +53,7 @@
     <section id="accountSection">
       <div class="account-landing">
         <div class="account-brand">
-          <img src="/icon-192.png" alt="YAMADEN">
+          <img src="/assets/icon-192.png" alt="YAMADEN">
           <div>
             <div class="account-brand-title">株式会社 山電</div>
             <div class="account-brand-sub" id="accountBrandSub">YAMADEN.CO.LTD</div>
@@ -97,7 +94,7 @@
             </div>
             <div class="auth-start-screen" id="authStartScreen">
               <div class="auth-start-logo">
-                <img src="/icon-192.png" alt="YAMADEN">
+                <img src="/assets/icon-192.png" alt="YAMADEN">
                 <div>
                   <b>株式会社 山電</b>
                   <span>YAMADEN.CO.LTD</span>
@@ -117,7 +114,7 @@
             </div>
             <div class="auth-pending-screen hidden" id="authPendingScreen">
               <div class="auth-pending-logo">
-                <img src="/icon-192.png" alt="YAMADEN">
+                <img src="/assets/icon-192.png" alt="YAMADEN">
                 <div>
                   <b>株式会社 山電</b>
                   <span>YAMADEN.CO.LTD</span>
@@ -216,7 +213,7 @@
       <div class="philosophy-card">
         <div class="philosophy-visual">
           <div class="poster-brand">
-            <img class="poster-brand-logo" src="/icon-512.png" alt="YAMADEN">
+            <img class="poster-brand-logo" src="/assets/icon-512.png" alt="YAMADEN">
             <div class="poster-brand-name">YAMADEN</div>
             <div class="poster-brand-line"></div>
             <div class="poster-slogan">People first. Reliable work.</div>
@@ -313,19 +310,14 @@
 
 <div id="toast" class="toast"></div>
 
-<!-- yamaden-unified-clean-v22: consolidated final UI and language layer -->
-
-<!-- yamaden-auth-clean-v26: single consolidated auth UI layer -->
-
-<!-- yamaden-auth-pending-demo-v43 -->
-
-<!-- yamaden-auth-profile-form-fix-v44 -->
-
-<!-- yamaden-auth-pending-ui-sync-v45 -->
-
-<!-- yamaden-auth-pending-ui-match-register-v46 -->
-
 <script src="/js/app.js" defer></script>
 <script src="/js/auth.js" defer></script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("/js/service-worker.js").catch(console.error);
+  });
+}
+</script>
 </body>
 </html>

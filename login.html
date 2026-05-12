@@ -5,9 +5,9 @@
 <title>YAMADEN Admin Login</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="icon" type="image/png" href="/icon-admin-192.png">
-<link rel="apple-touch-icon" href="/icon-admin-192.png">
-<link rel="manifest" href="/admin-manifest.json">
+<link rel="icon" type="image/png" href="/assets/icon-admin-192.png">
+<link rel="apple-touch-icon" href="/assets/icon-admin-192.png">
+<link rel="manifest" href="/data/admin-manifest.json">
 <meta name="theme-color" content="#020617">
 
 <style>
@@ -379,7 +379,7 @@ input:focus {
 <div class="login-shell">
   <section class="left-panel">
     <div class="brand-main">
-      <img src="/icon-admin-192.png" alt="YAMADEN Admin">
+      <img src="/assets/icon-admin-192.png" alt="YAMADEN Admin">
       <div>
         <div class="brand-title">株式会社 山電</div>
         <div class="brand-sub">YAMADEN.CO.LTD</div>
@@ -416,7 +416,7 @@ input:focus {
     <div class="login-card">
       <div class="top-row">
         <div class="mobile-brand">
-          <img src="/icon-admin-192.png" alt="YAMADEN Admin">
+          <img src="/assets/icon-admin-192.png" alt="YAMADEN Admin">
           <div>
             <div class="mobile-brand-title">株式会社 山電</div>
             <div class="mobile-brand-sub">YAMADEN.CO.LTD</div>
@@ -447,7 +447,9 @@ input:focus {
 </div>
 
 <script>
-const API = "https://yamaden.onrender.com";
+const API = location.hostname === "localhost" || location.hostname === "127.0.0.1"
+  ? location.origin
+  : "https://yamaden.onrender.com";
 const TOKEN_MAX_AGE = 86400000;
 
 let lang = localStorage.getItem("loginLang") || localStorage.getItem("language") || "ja";

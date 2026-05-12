@@ -7,9 +7,9 @@ const APP_SHELL = [
   "/css/auth.css",
   "/js/app.js",
   "/js/auth.js",
-  "/manifest.json",
-  "/icon-192.png",
-  "/icon-512.png"
+  "/data/manifest.json",
+  "/assets/icon-192.png",
+  "/assets/icon-512.png"
 ];
 
 const API_PATHS = [

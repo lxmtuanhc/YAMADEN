@@ -1,5 +1,7 @@
 // ========== CONFIGURATION ==========
-const API = "https://yamaden.onrender.com";
+const API = location.hostname === "localhost" || location.hostname === "127.0.0.1"
+  ? location.origin
+  : "https://yamaden.onrender.com";
 let lang = localStorage.getItem("language") || "ja";
 let currentUser = null;
 let accountMode = "welcome";
@@ -538,7 +540,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   document.addEventListener("click",e=>{ if(!e.target.closest(".issue-search-wrap")) $("issueDropdown")?.classList.remove("show"); });
   applyLanguage(); updateAccountUI(); showInitialScreen();
   setInterval(()=>{ if(!$("checkSection").classList.contains("hidden") && $("checkId").value) checkStatus(true); },5000);
-  initIntro(); if("serviceWorker" in navigator) navigator.serviceWorker.register("/service-worker.js").catch(()=>{});
+  initIntro();
 });
 
 /* ===== Module boundary: original app code ===== */
