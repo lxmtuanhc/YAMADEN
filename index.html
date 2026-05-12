@@ -980,7 +980,7 @@ hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
               <div class="auth-pending-title" id="authPendingTitle">Thông tin đã được gửi</div>
               <div class="auth-pending-text" id="authPendingText">Tài khoản của bạn đang chờ admin duyệt. Sau khi được phê duyệt, bạn mới có thể sử dụng đầy đủ chức năng của app.</div>
               <div class="auth-pending-pill" id="authPendingPill">Đang chờ duyệt</div>
-              <button type="button" class="soft-btn auth-secondary" id="authPendingLoginBtn" onclick="userLogout();setAccountMode('login')">Quay lại đăng nhập</button>
+              <button type="button" class="soft-btn auth-secondary" id="authPendingLoginBtn" onclick="userLogout();setAccountMode('welcome')">Quay lại đăng nhập</button>
             </div>
             <div class="account-welcome">
               <div class="account-welcome-ja" id="accountWelcome">Chào mừng</div>
@@ -4440,5 +4440,273 @@ document.addEventListener("DOMContentLoaded",()=>{
   setTimeout(function () { ensureStartLogo(); syncLangButtons(); }, 300);
 })();
 </script>
+
+
+
+<!-- yamaden-auth-pending-demo-v43 -->
+<style id="yamaden-auth-pending-demo-v43-style">
+@media (max-width:860px){
+  body.auth-login-body:has(#accountFormCard.auth-mode-pending) .toast{display:none!important}
+  .app.auth-login-mode #accountFormCard.auth-mode-pending{
+    position:fixed!important;
+    inset:0!important;
+    width:100vw!important;
+    height:100svh!important;
+    min-height:100svh!important;
+    max-width:none!important;
+    margin:0!important;
+    padding:0 30px calc(34px + env(safe-area-inset-bottom))!important;
+    border:0!important;
+    border-radius:0!important;
+    background:#fff!important;
+    box-shadow:none!important;
+    z-index:9000!important;
+    overflow:hidden!important;
+  }
+  .app.auth-login-mode #accountFormCard.auth-mode-pending>*{display:none!important}
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authCardLang{
+    display:flex!important;
+    position:fixed!important;
+    top:calc(16px + env(safe-area-inset-top))!important;
+    right:22px!important;
+    left:auto!important;
+    width:72px!important;
+    height:30px!important;
+    padding:3px!important;
+    border-radius:999px!important;
+    background:#f4f8ff!important;
+    border:1px solid #dbe7f6!important;
+    box-shadow:0 8px 22px rgba(29,78,216,.12)!important;
+    z-index:10000!important;
+  }
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authCardLang button{
+    height:22px!important;
+    min-height:22px!important;
+    border-radius:999px!important;
+    font-size:10px!important;
+    font-weight:900!important;
+    padding:0!important;
+  }
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen{
+    display:flex!important;
+    height:100%!important;
+    min-height:0!important;
+    width:100%!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    padding:calc(12.5svh + env(safe-area-inset-top)) 0 0!important;
+    overflow:hidden!important;
+    text-align:center!important;
+  }
+  .app.auth-login-mode .auth-pending-visual{
+    position:relative!important;
+    width:158px!important;
+    height:158px!important;
+    margin:0 auto 36px!important;
+    border-radius:36px!important;
+    background:radial-gradient(circle at 50% 55%,rgba(37,99,235,.13),transparent 58%)!important;
+    box-shadow:none!important;
+  }
+  .app.auth-login-mode .auth-pending-visual::before,
+  .app.auth-login-mode .auth-pending-visual::after{
+    content:""!important;
+    position:absolute!important;
+    background:#eaf3ff!important;
+    border-radius:999px!important;
+    opacity:.95!important;
+  }
+  .app.auth-login-mode .auth-pending-visual::before{width:48px!important;height:24px!important;left:2px!important;top:62px!important}
+  .app.auth-login-mode .auth-pending-visual::after{width:54px!important;height:26px!important;right:4px!important;top:45px!important}
+  .app.auth-login-mode .auth-paper,
+  .app.auth-login-mode .auth-pending-doc{
+    position:absolute!important;
+    left:50%!important;
+    top:52%!important;
+    width:84px!important;
+    height:106px!important;
+    transform:translate(-50%,-50%)!important;
+    border-radius:18px!important;
+    background:linear-gradient(180deg,#fff,#f8fbff)!important;
+    border:0!important;
+    box-shadow:0 18px 36px rgba(37,99,235,.18)!important;
+  }
+  .app.auth-login-mode .auth-paper::before,
+  .app.auth-login-mode .auth-pending-doc::before{
+    content:""!important;
+    position:absolute!important;
+    left:24px!important;
+    top:-10px!important;
+    width:36px!important;
+    height:22px!important;
+    border-radius:8px 8px 4px 4px!important;
+    background:#1d6ff2!important;
+    box-shadow:0 12px 18px rgba(37,99,235,.18)!important;
+  }
+  .app.auth-login-mode .auth-paper::after,
+  .app.auth-login-mode .auth-pending-doc::after{
+    content:""!important;
+    position:absolute!important;
+    left:22px!important;
+    top:40px!important;
+    width:44px!important;
+    height:42px!important;
+    border-radius:12px!important;
+    background:linear-gradient(#d7e8ff 0 8px,transparent 8px 14px,#d7e8ff 14px 22px,transparent 22px 28px,#d7e8ff 28px 36px)!important;
+  }
+  .app.auth-login-mode .auth-checkmark{
+    position:absolute!important;
+    right:22px!important;
+    bottom:28px!important;
+    width:52px!important;
+    height:52px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    border-radius:50%!important;
+    background:#1268e8!important;
+    color:#fff!important;
+    font-size:0!important;
+    box-shadow:0 16px 28px rgba(18,104,232,.28)!important;
+  }
+  .app.auth-login-mode .auth-checkmark::before{content:"✓"!important;font-size:34px!important;line-height:1!important;font-weight:900!important}
+  .app.auth-login-mode .auth-pending-title{
+    margin:0!important;
+    color:#111827!important;
+    font-size:19px!important;
+    line-height:1.26!important;
+    font-weight:900!important;
+    letter-spacing:0!important;
+  }
+  .app.auth-login-mode .auth-pending-text{
+    width:min(285px,100%)!important;
+    margin:16px auto 0!important;
+    color:#64748b!important;
+    font-size:12px!important;
+    line-height:1.72!important;
+    font-weight:700!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+  .app.auth-login-mode .auth-pending-pill{
+    width:min(292px,100%)!important;
+    min-height:66px!important;
+    margin:46px auto 0!important;
+    border-radius:12px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    background:#f1f6ff!important;
+    border:1px solid #e4eefb!important;
+    color:#111827!important;
+    font-size:14px!important;
+    line-height:1.65!important;
+    font-weight:900!important;
+    white-space:pre-line!important;
+    box-shadow:none!important;
+  }
+  .app.auth-login-mode .auth-pending-pill::first-line{color:#64748b!important;font-size:11px!important;font-weight:750!important}
+  .app.auth-login-mode #authPendingLoginBtn{
+    display:flex!important;
+    width:min(292px,100%)!important;
+    height:52px!important;
+    min-height:52px!important;
+    margin:64px auto 0!important;
+    border-radius:12px!important;
+    border:0!important;
+    background:#eef4fb!important;
+    color:#111827!important;
+    box-shadow:none!important;
+    font-size:14px!important;
+    font-weight:900!important;
+  }
+}
+@media (max-height:760px) and (max-width:860px){
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen{padding-top:calc(9svh + env(safe-area-inset-top))!important}
+  .app.auth-login-mode .auth-pending-visual{width:138px!important;height:138px!important;margin-bottom:24px!important}
+  .app.auth-login-mode .auth-paper,.app.auth-login-mode .auth-pending-doc{width:76px!important;height:96px!important}
+  .app.auth-login-mode .auth-checkmark{width:46px!important;height:46px!important;right:20px!important;bottom:22px!important}
+  .app.auth-login-mode .auth-checkmark::before{font-size:30px!important}
+  .app.auth-login-mode .auth-pending-pill{margin-top:30px!important}
+  .app.auth-login-mode #authPendingLoginBtn{margin-top:44px!important}
+}
+</style>
+<script id="yamaden-auth-pending-demo-v43-script">
+(function(){
+  function getLang(){
+    try{return window.lang==='vi'?'vi':'ja'}catch(e){return String(localStorage.getItem('language')||'ja').indexOf('vi')===0?'vi':'ja'}
+  }
+  function applyPendingDemo(){
+    var card=document.getElementById('accountFormCard');
+    if(!card||!card.classList.contains('auth-mode-pending'))return;
+    var isVi=getLang()==='vi';
+    var title=document.getElementById('authPendingTitle');
+    var text=document.getElementById('authPendingText');
+    var pill=document.getElementById('authPendingPill');
+    var btn=document.getElementById('authPendingLoginBtn');
+    if(title)title.textContent=isVi?'Tài khoản đang chờ duyệt':'アカウント承認待ち';
+    if(text)text.textContent=isVi?'Hồ sơ của bạn đã được gửi thành công. Chúng tôi sẽ xem xét và duyệt tài khoản trong thời gian sớm nhất.':'プロフィール情報を送信しました。内容を確認後、できるだけ早くアカウントを承認します。';
+    if(pill)pill.textContent=isVi?'Thời gian dự kiến:\n24 – 48 giờ làm việc':'目安時間:\n24〜48営業時間';
+    if(btn){
+      btn.textContent=isVi?'Quay về trang chủ':'ホームへ戻る';
+      btn.onclick=function(){
+        try{localStorage.removeItem('userToken');localStorage.removeItem('userProfile')}catch(e){}
+        if(typeof window.setAccountMode==='function')window.setAccountMode('welcome');
+      };
+    }
+  }
+  var oldSet=window.setAccountMode;
+  window.setAccountMode=function(){var r=typeof oldSet==='function'?oldSet.apply(this,arguments):undefined;setTimeout(applyPendingDemo,0);return r};
+  var oldApply=window.applyLanguage;
+  window.applyLanguage=function(){if(typeof oldApply==='function')oldApply.apply(this,arguments);setTimeout(applyPendingDemo,0)};
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(applyPendingDemo,0)});
+  setTimeout(applyPendingDemo,0);
+})();
+</script>
+
+<!-- yamaden-auth-profile-form-fix-v44 -->
+<style id="yamaden-auth-profile-form-fix-v44-style">
+@media (max-width:860px){
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountContactAuthLabel,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountContact{
+    display:none!important;
+  }
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountNote{
+    height:92px!important;
+    min-height:92px!important;
+    padding-top:18px!important;
+    padding-bottom:18px!important;
+    align-self:stretch!important;
+  }
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountNote::placeholder{
+    line-height:1.35!important;
+  }
+}
+</style>
+<script id="yamaden-auth-profile-form-fix-v44-script">
+(function(){
+  function fixProfileFields(){
+    var card=document.getElementById('accountFormCard');
+    if(!card||!card.classList.contains('auth-mode-profile'))return;
+    var contact=document.getElementById('accountContact');
+    var contactLabel=document.getElementById('accountContactAuthLabel');
+    if(contact)contact.classList.add('hidden');
+    if(contactLabel)contactLabel.classList.add('hidden');
+    var emailLabel=document.getElementById('accountEmailAuthLabel');
+    if(emailLabel)emailLabel.textContent=(window.lang==='ja')?'3. Email':'3. Email';
+    var noteLabel=document.getElementById('accountNoteAuthLabel');
+    if(noteLabel)noteLabel.textContent=(window.lang==='ja')?'7. 備考':'7. Ghi chú thêm';
+    var note=document.getElementById('accountNote');
+    if(note)note.placeholder=(window.lang==='ja')?'備考':'Ghi chú thêm';
+  }
+  var oldSet=window.setAccountMode;
+  window.setAccountMode=function(){var r=typeof oldSet==='function'?oldSet.apply(this,arguments):undefined;setTimeout(fixProfileFields,0);return r};
+  var oldApply=window.applyLanguage;
+  window.applyLanguage=function(){if(typeof oldApply==='function')oldApply.apply(this,arguments);setTimeout(fixProfileFields,0)};
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(fixProfileFields,0)});
+  setTimeout(fixProfileFields,0);
+})();
+</script>
+
 </body>
 </html>
