@@ -3899,4 +3899,10 @@
     visibility: hidden !important;
     pointer-events: none !important;
   }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-login,
+  .app.auth-login-mode #accountFormCard.auth-mode-login * {
+    transition: none !important;
+    animation: none !important;
+  }
 }

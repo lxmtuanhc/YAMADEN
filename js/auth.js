@@ -272,8 +272,11 @@
 
   localStorage.setItem("language", lang);
   localStorage.setItem("lang", lang);
+  if ($("language")) $("language").value = lang;
 
-  if (typeof window.applyLanguage === "function") {
+  const mode = window.accountMode || "welcome";
+  const authOnly = ["welcome", "login", "register", "profile", "pending"].includes(mode);
+  if (!authOnly && typeof window.applyLanguage === "function") {
     window.applyLanguage();
   }
 
