@@ -178,6 +178,21 @@ function escapeJsString(s) { return String(s||"").replace(/\\/g,"\\\\").replace(
 function showToast(msg) { let t=$("toast"); t.innerText=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2200); }
 function t(key) { return texts[lang]&&texts[lang][key] ? texts[lang][key] : (texts.ja[key]||key); }
 function setIcon(id,name) { let el=$(id); if(el && ICONS[name]) el.innerHTML=ICONS[name]; }
+function syncAuthLanguageButtons() {
+  const vi = $("authLangVi");
+  const ja = $("authLangJa");
+  const isVi = lang === "vi";
+  if (vi) {
+    vi.classList.toggle("active", isVi);
+    vi.classList.toggle("is-active", isVi);
+    vi.setAttribute("aria-pressed", isVi ? "true" : "false");
+  }
+  if (ja) {
+    ja.classList.toggle("active", !isVi);
+    ja.classList.toggle("is-active", !isVi);
+    ja.setAttribute("aria-pressed", !isVi ? "true" : "false");
+  }
+}
 
 function setAuthLanguage(next) {
   const keepMode = accountMode || "welcome";
@@ -325,8 +340,7 @@ function setAccountMode(mode) {
   $("authPendingText") && ($("authPendingText").innerText=lang==="ja"?"管理者承認待ちです。承認後にアプリをご利用いただけます。":"Tài khoản của bạn đang chờ admin duyệt. Sau khi được phê duyệt, bạn mới có thể sử dụng đầy đủ chức năng của app.");
   $("authPendingPill") && ($("authPendingPill").innerText=lang==="ja"?"承認待ち":"Đang chờ duyệt");
   $("authPendingLoginBtn") && ($("authPendingLoginBtn").innerText=lang==="ja"?"ログインに戻る":"Quay lại đăng nhập");
-  $("authLangVi")?.classList.toggle("active",lang==="vi");
-  $("authLangJa")?.classList.toggle("active",lang==="ja");
+  syncAuthLanguageButtons();
   if(isLogin||isRegister){
     $("accountPhone").placeholder=lang==="ja"?"電話番号":"Số điện thoại";
     $("accountPin").placeholder=lang==="ja"?"6桁のPINコード":"Nhập mã PIN 6 số";
@@ -552,7 +566,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     ja:{issueTitle:"依頼内容を選択",issueSub:"作業内容を検索して選択し、下に詳しい状況を入力してください。",issuePh:"作業内容を検索して選択",issueRequired:"依頼内容を1つ以上選択してください。",quote:"見積を希望する",freeDesc:"状況、場所、必要なサポート内容を入力してください。",uploadSub:"最大12ファイル・JPG / PNG / MP4",noResult:"該当する項目がありません",sendTitle:"サポート依頼を送信",content:"依頼内容",image:"画像",chooseImage:"ファイルを選択",uploadText:"画像/動画を選択",settingsLogout:"ログアウト",settingsLogoutSub:"現在のアカウントからログアウトします。"},
     vi:{issueTitle:"Chọn vấn đề",issueSub:"Tìm và chọn nội dung công việc, sau đó mô tả chi tiết bên dưới.",issuePh:"Tìm và chọn nội dung công việc",issueRequired:"Vui lòng chọn ít nhất 1 vấn đề yêu cầu.",quote:"Muốn nhận báo giá",freeDesc:"Hãy nhập tình trạng, vị trí và điều bạn cần hỗ trợ.",uploadSub:"Tối đa 12 file · JPG / PNG / MP4",noResult:"Không có mục phù hợp",sendTitle:"Gửi yêu cầu",content:"Mô tả yêu cầu",image:"Hình ảnh / Video",chooseImage:"Chọn file",uploadText:"Chọn ảnh/video",settingsLogout:"Đăng xuất",settingsLogoutSub:"Đăng xuất khỏi tài khoản hiện tại."}
   };
-  function langNow(){return ((window.lang||localStorage.getItem("language")||localStorage.getItem("lang")||"ja")==="vi")?"vi":"ja";}
+  function langNow(){return ((localStorage.getItem("language")||localStorage.getItem("lang")||window.lang||"ja")==="vi")?"vi":"ja";}
   function tr(key){const l=langNow();return (SEND_TEXT[l]&&SEND_TEXT[l][key])||SEND_TEXT.ja[key]||key;}
   function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
   function js(v){return String(v==null?"":v).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g,"\\n");}
@@ -643,8 +657,9 @@ document.addEventListener("DOMContentLoaded",()=>{
   function ensureAuthLanguageSwitch(){
     document.getElementById("authLanguageSwitch")?.remove();
     const current=langNow();
-    document.getElementById("authLangVi")?.classList.toggle("active",current==="vi");
-    document.getElementById("authLangJa")?.classList.toggle("active",current==="ja");
+    const vi=document.getElementById("authLangVi"), ja=document.getElementById("authLangJa");
+    if(vi){vi.classList.toggle("active",current==="vi");vi.classList.toggle("is-active",current==="vi");vi.setAttribute("aria-pressed",current==="vi"?"true":"false");}
+    if(ja){ja.classList.toggle("active",current==="ja");ja.classList.toggle("is-active",current==="ja");ja.setAttribute("aria-pressed",current==="ja"?"true":"false");}
   }
   function syncUnified(){
     normalizeLang(); syncBrand(); syncSendLanguage(); syncSettings(); ensureAuthLanguageSwitch(); window.renderIssueChips();

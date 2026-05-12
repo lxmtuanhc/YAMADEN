@@ -45,10 +45,11 @@
       registerText: "Vui lòng nhập số điện thoại, mã PIN 6 số và xác nhận PIN.",
       profileTitle: "Thông tin tài khoản",
       profileText: "Vui lòng nhập thông tin để admin duyệt tài khoản.",
-      pendingTitle: "Thông tin đã được gửi",
-      pendingText: "Tài khoản của bạn đang chờ admin duyệt. Sau khi được phê duyệt, bạn mới có thể sử dụng đầy đủ chức năng của app.",
-      pendingPill: "Đang chờ duyệt",
-      backLogin: "Quay lại đăng nhập",
+      pendingTitle: "Tài khoản đang chờ duyệt",
+      pendingText: "Hồ sơ của bạn đã được gửi thành công. Chúng tôi sẽ xem xét và duyệt tài khoản trong thời gian sớm nhất.",
+      pendingTimeTitle: "Thời gian dự kiến:",
+      pendingTimeText: "24 - 48 giờ làm việc",
+      backLogin: "Quay về trang chủ",
       login: "Đăng nhập",
       register: "Đăng ký",
       next: "Tiếp tục",
@@ -87,10 +88,11 @@
       registerText: "電話番号、6桁のPINコード、確認用PINを入力してください。",
       profileTitle: "お客様情報",
       profileText: "管理者承認のため、お客様情報を入力してください。",
-      pendingTitle: "情報を送信しました",
-      pendingText: "管理者承認待ちです。承認後にアプリをご利用いただけます。",
-      pendingPill: "承認待ち",
-      backLogin: "ログインに戻る",
+      pendingTitle: "アカウント承認待ち",
+      pendingText: "プロフィール情報を送信しました。内容を確認後、できるだけ早くアカウントを承認します。",
+      pendingTimeTitle: "目安時間:",
+      pendingTimeText: "24〜48営業時間",
+      backLogin: "ホームへ戻る",
       login: "ログイン",
       register: "新規登録",
       next: "次へ",
@@ -226,10 +228,40 @@
     }
 
     if (mode === "pending") {
+      ensurePendingScreen();
       setText("authPendingTitle", c("pendingTitle"));
       setText("authPendingText", c("pendingText"));
-      setText("authPendingPill", c("pendingPill"));
+      setText("pendingTimeTitle", c("pendingTimeTitle"));
+      setText("pendingTimeText", c("pendingTimeText"));
       setText("authPendingLoginBtn", c("backLogin"));
+    }
+  }
+
+  function ensurePendingScreen() {
+    const screen = $("authPendingScreen");
+    if (!screen || screen.dataset.finalPendingReady === "1") return;
+    screen.dataset.finalPendingReady = "1";
+    screen.innerHTML =
+      '<div class="pending-status-icon" aria-hidden="true"><span></span></div>' +
+      '<div class="auth-pending-title" id="authPendingTitle"></div>' +
+      '<div class="auth-pending-text" id="authPendingText"></div>' +
+      '<div class="pending-time-box">' +
+        '<div class="pending-time-icon" aria-hidden="true">⏱</div>' +
+        '<div><b id="pendingTimeTitle"></b><span id="pendingTimeText"></span></div>' +
+      '</div>' +
+      '<button type="button" class="main-btn auth-primary" id="authPendingLoginBtn"></button>';
+
+    const btn = $("authPendingLoginBtn");
+    if (btn) {
+      btn.onclick = function () {
+        try {
+          localStorage.removeItem("userToken");
+          localStorage.removeItem("userProfile");
+        } catch (e) {}
+        window.currentUser = null;
+        try { currentUser = null; } catch (e) {}
+        if (typeof window.setAccountMode === "function") window.setAccountMode("welcome");
+      };
     }
   }
 
@@ -237,6 +269,7 @@
 
   window.setAuthLanguage = function (next) {
     const lang = next === "vi" ? "vi" : "ja";
+    window.lang = lang;
 
     if (typeof appSetAuthLanguage === "function") {
       appSetAuthLanguage(lang);
@@ -248,7 +281,6 @@
       }
     }
 
-    window.lang = lang;
     syncLangButtons();
     updateAuthTextsOnly();
 

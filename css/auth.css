@@ -167,6 +167,148 @@
   }
 }
 
+/* ===== Mobile auth final fixes ===== */
+@media (max-width: 860px) {
+  .app.auth-login-mode #authCardLang button {
+    background: transparent !important;
+    color: #64748b !important;
+    box-shadow: none !important;
+  }
+
+  .app.auth-login-mode #authCardLang button[aria-pressed="true"] {
+    background: #1764dc !important;
+    color: #fff !important;
+    box-shadow: 0 8px 18px rgba(23,100,220,.24) !important;
+  }
+
+  .app.auth-login-mode #authCardLang button[aria-pressed="false"] {
+    background: transparent !important;
+    color: #64748b !important;
+    box-shadow: none !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 56px 24px 24px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form .account-welcome {
+    margin: clamp(50px, 9svh, 82px) 0 clamp(42px, 7svh, 66px) !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #accountFields {
+    gap: 12px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #accountFields input {
+    height: 56px !important;
+    min-height: 56px !important;
+    font-size: 16px !important;
+  }
+
+  .app.auth-login-mode .auth-login-options {
+    margin: 16px 0 auto !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #accountFormCard > .main-btn {
+    position: static !important;
+    width: 100% !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    margin: clamp(56px, 11svh, 100px) 0 0 !important;
+    border-radius: 16px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #authSwitchPrompt {
+    position: static !important;
+    margin: auto 0 0 !important;
+    padding-top: 28px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending {
+    min-height: 0 !important;
+    height: calc(100svh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    max-height: calc(100svh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    overflow: hidden !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen {
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 74px 22px 22px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .pending-status-icon {
+    width: 96px !important;
+    height: 96px !important;
+    margin: 28px auto 24px !important;
+    border-radius: 28px !important;
+    flex: 0 0 auto !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .auth-pending-title {
+    font-size: clamp(28px, 8vw, 38px) !important;
+    line-height: 1.15 !important;
+    margin-bottom: 16px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .auth-pending-text {
+    font-size: clamp(16px, 4.4vw, 20px) !important;
+    line-height: 1.45 !important;
+    margin-bottom: 24px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .pending-time-box {
+    min-height: 86px !important;
+    margin-bottom: 22px !important;
+    padding: 16px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingLoginBtn {
+    height: 58px !important;
+    min-height: 58px !important;
+    margin-top: auto !important;
+    flex: 0 0 auto !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .app.auth-login-mode .auth-mode-form .account-welcome {
+    margin: 44px 0 36px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #accountFormCard > .main-btn {
+    margin-top: 46px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen {
+    padding: 68px 20px 20px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .pending-status-icon {
+    width: 84px !important;
+    height: 84px !important;
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .auth-pending-title {
+    font-size: 28px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .auth-pending-text {
+    font-size: 15px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .pending-time-box {
+    margin-bottom: 18px !important;
+  }
+}
+
 @media (max-width: 860px) {
   .app:not(.auth-login-mode) {
     grid-template-rows: calc(56px + env(safe-area-inset-top)) minmax(0, 1fr) calc(64px + env(safe-area-inset-bottom)) !important;
@@ -3066,6 +3208,148 @@
   }
 }
 
+/* ===== Mobile auth final fixes (must stay last) ===== */
+@media (max-width: 860px) {
+  .app.auth-login-mode #authCardLang button {
+    background: transparent !important;
+    color: #64748b !important;
+    box-shadow: none !important;
+  }
+
+  .app.auth-login-mode #authCardLang button[aria-pressed="true"] {
+    background: #1764dc !important;
+    color: #fff !important;
+    box-shadow: 0 8px 18px rgba(23,100,220,.24) !important;
+  }
+
+  .app.auth-login-mode #authCardLang button[aria-pressed="false"] {
+    background: transparent !important;
+    color: #64748b !important;
+    box-shadow: none !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 56px 24px 24px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form .account-welcome {
+    margin: clamp(50px, 9svh, 82px) 0 clamp(42px, 7svh, 66px) !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #accountFields {
+    gap: 12px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #accountFields input {
+    height: 56px !important;
+    min-height: 56px !important;
+    font-size: 16px !important;
+  }
+
+  .app.auth-login-mode .auth-login-options {
+    margin: 16px 0 auto !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #accountFormCard > .main-btn {
+    position: static !important;
+    width: 100% !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    margin: clamp(56px, 11svh, 100px) 0 0 !important;
+    border-radius: 16px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #authSwitchPrompt {
+    position: static !important;
+    margin: auto 0 0 !important;
+    padding-top: 28px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending {
+    min-height: 0 !important;
+    height: calc(100svh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    max-height: calc(100svh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    overflow: hidden !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen {
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 74px 22px 22px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .pending-status-icon {
+    width: 96px !important;
+    height: 96px !important;
+    margin: 28px auto 24px !important;
+    border-radius: 28px !important;
+    flex: 0 0 auto !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .auth-pending-title {
+    font-size: clamp(28px, 8vw, 38px) !important;
+    line-height: 1.15 !important;
+    margin-bottom: 16px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .auth-pending-text {
+    font-size: clamp(16px, 4.4vw, 20px) !important;
+    line-height: 1.45 !important;
+    margin-bottom: 24px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .pending-time-box {
+    min-height: 86px !important;
+    margin-bottom: 22px !important;
+    padding: 16px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingLoginBtn {
+    height: 58px !important;
+    min-height: 58px !important;
+    margin-top: auto !important;
+    flex: 0 0 auto !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .app.auth-login-mode .auth-mode-form .account-welcome {
+    margin: 44px 0 36px !important;
+  }
+
+  .app.auth-login-mode .auth-mode-form #accountFormCard > .main-btn {
+    margin-top: 46px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen {
+    padding: 68px 20px 20px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .pending-status-icon {
+    width: 84px !important;
+    height: 84px !important;
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .auth-pending-title {
+    font-size: 28px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .auth-pending-text {
+    font-size: 15px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending .pending-time-box {
+    margin-bottom: 18px !important;
+  }
+}
+
 @media (max-width:380px){
   .app.auth-login-mode #accountFormCard.auth-mode-pending{
     min-height:min(690px,calc(100svh - 44px - env(safe-area-inset-top) - env(safe-area-inset-bottom)))!important;
@@ -3104,5 +3388,44 @@
     height:60px!important;
     min-height:60px!important;
     font-size:18px!important;
+  }
+}
+
+/* ===== Mobile auth absolute last override ===== */
+@media (max-width: 860px) {
+  .app.auth-login-mode #authCardLang button[aria-pressed="false"] {
+    background: transparent !important;
+    color: #64748b !important;
+    box-shadow: none !important;
+  }
+
+  .app.auth-login-mode #authCardLang button[aria-pressed="true"] {
+    background: #1764dc !important;
+    color: #fff !important;
+    box-shadow: 0 8px 18px rgba(23,100,220,.24) !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending {
+    min-height: 0 !important;
+    height: calc(100svh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    max-height: calc(100svh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen {
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 74px 22px 22px !important;
+    overflow-y: auto !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .app.auth-login-mode #accountFormCard.auth-mode-pending {
+    min-height: 0 !important;
+    height: calc(100svh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-pending #authPendingScreen {
+    padding: 68px 20px 20px !important;
   }
 }
