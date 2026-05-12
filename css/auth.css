@@ -3789,7 +3789,7 @@
     position: absolute !important;
     left: 22px !important;
     right: 22px !important;
-    top: 274px !important;
+    top: 248px !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
@@ -3801,8 +3801,12 @@
     padding: 0 !important;
   }
 
+  .app.auth-login-mode #accountFormCard.auth-mode-login #accountFields {
+    grid-template-rows: 16px 48px 16px 48px !important;
+  }
+
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields {
-    top: 248px !important;
+    grid-template-rows: 16px 48px 16px 48px 16px 48px !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-login .auth-field-label,
@@ -3826,10 +3830,10 @@
     position: absolute !important;
     left: 22px !important;
     right: 22px !important;
-    top: 426px !important;
-    height: 36px !important;
-    min-height: 36px !important;
-    max-height: 36px !important;
+    top: 468px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
     margin: 0 !important;
   }
 
