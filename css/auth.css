@@ -3894,4 +3894,9 @@
     min-height: 20px !important;
     max-height: 24px !important;
   }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-login .auth-login-placeholder {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
 }

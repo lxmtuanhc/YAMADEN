@@ -329,7 +329,9 @@ function setAccountMode(mode) {
   ["accountName","accountEmail","accountProvince","accountProjectName","accountCompany"].forEach(id=>$(id)?.classList.toggle("hidden",!isProfile));
   $("accountPhone").classList.toggle("hidden",isProfile||isPending||isWelcome);
   $("accountPin").classList.toggle("hidden",isProfile||isPending||isWelcome);
-  $("accountPinConfirm").classList.toggle("hidden",!isRegister);
+  $("accountPinConfirm").classList.toggle("hidden",!(isRegister||isLogin));
+  $("accountPinConfirm").classList.toggle("auth-login-placeholder",isLogin);
+  $("accountPinConfirm").disabled=!!isLogin;
   $("accountLoginText").innerText=isProfile?(lang==="ja"?"送信":t("send")):(isLogin?t("accountLogin"):(lang==="ja"?"続ける":"Tiếp tục"));
   $("accountWelcome").innerText=isProfile?(lang==="ja"?"お客様情報":"Thông tin tài khoản"):(isLogin?(lang==="ja"?"ログイン":"Đăng nhập"):(lang==="ja"?"新規登録":"Đăng ký"));
   $("accountText").innerHTML=isProfile?(lang==="ja"?"管理者承認のため、お客様情報を入力してください。":"Vui lòng cung cấp đầy đủ thông tin để admin duyệt tài khoản của bạn."):(isLogin?(lang==="ja"?"電話番号と6桁のPINコードを入力してください。":"Nhập số điện thoại và mã PIN 6 số để đăng nhập."):(lang==="ja"?"電話番号と6桁のPINコードだけで登録できます。":"Chỉ cần số điện thoại và mã PIN 6 số để tạo tài khoản."));

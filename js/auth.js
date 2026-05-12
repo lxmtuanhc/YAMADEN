@@ -344,6 +344,10 @@
 
     Object.values(fields).forEach(el => show(el, false));
     Object.values(labels).forEach(el => show(el, false));
+    [fields.pinConfirm, labels.pinConfirm].forEach(el => {
+      if (el) el.classList.remove("auth-login-placeholder");
+    });
+    if (fields.pinConfirm) fields.pinConfirm.disabled = false;
     show($("authLoginOptions"), false);
     show($("authRegisterTerms"), false);
     show($("authSwitchPrompt"), false);
@@ -351,8 +355,14 @@
     if (isLogin) {
       show(fields.phone, true);
       show(fields.pin, true);
+      show(fields.pinConfirm, true);
       show(labels.phone, true);
       show(labels.pin, true);
+      show(labels.pinConfirm, true);
+      [fields.pinConfirm, labels.pinConfirm].forEach(el => {
+        if (el) el.classList.add("auth-login-placeholder");
+      });
+      if (fields.pinConfirm) fields.pinConfirm.disabled = true;
       show($("authLoginOptions"), true);
       show($("authSwitchPrompt"), true);
       const switchBtn = $("authSwitchPromptBtn");
