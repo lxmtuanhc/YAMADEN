@@ -1,4 +1,4 @@
-const CACHE_NAME = "yamaden-support-auth-v53";
+const CACHE_NAME = "yamaden-support-auth-v54";
 
 const APP_SHELL = [
   "/",
