@@ -3480,9 +3480,9 @@
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields {
-    height: 218px !important;
-    min-height: 218px !important;
-    max-height: 218px !important;
+    height: 238px !important;
+    min-height: 238px !important;
+    max-height: 238px !important;
     grid-template-rows: 18px 48px 18px 48px 18px 48px !important;
   }
 
@@ -3561,9 +3561,9 @@
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields {
-    height: 210px !important;
-    min-height: 210px !important;
-    max-height: 210px !important;
+    height: 238px !important;
+    min-height: 238px !important;
+    max-height: 238px !important;
   }
 }
 
