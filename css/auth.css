@@ -4056,15 +4056,20 @@
   .app.auth-login-mode.auth-profile-mode #accountSection {
     height: 100svh !important;
     min-height: 100svh !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   .app.auth-login-mode.auth-profile-mode .account-landing {
     height: 100svh !important;
     min-height: 100svh !important;
+    max-height: none !important;
     padding: calc(16px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
     -webkit-overflow-scrolling: touch !important;
     justify-content: flex-start !important;
   }
@@ -4072,6 +4077,9 @@
   .app.auth-login-mode.auth-profile-mode .account-panel {
     width: 100% !important;
     max-width: 390px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     margin: 0 auto !important;
     padding: 0 !important;
     background: transparent !important;
