@@ -9,6 +9,7 @@ let previewUrls = [];
 let selectedMediaFiles = [];
 let lastCheckedId = "";
 let lastAdminReply = "";
+let syncingUserProfile = false;
 
 const ICONS = {
   user: `<svg viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>`,
@@ -358,7 +359,7 @@ async function saveUserProfile() {
   }
 
   try {
-    const res = await fetch(API_BASE + "/user/profile", {
+    const res = await fetch(API + "/user/profile", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -374,6 +375,31 @@ async function saveUserProfile() {
     showToast(t("profileSaved"));
   } catch (err) {
     showToast(t("networkError"));
+  }
+}
+
+async function syncUserProfileFromServer() {
+  const token = getUserToken();
+  if (!token || syncingUserProfile) return;
+  syncingUserProfile = true;
+  try {
+    const res = await fetch(API + "/user/me", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+    if (!res.ok) return;
+    const user = await res.json();
+    if (!user || !user._id) return;
+    currentUser = user;
+    localStorage.setItem("userProfile", JSON.stringify(user));
+    updateAccountUI();
+    const app = document.querySelector(".app");
+    const active = user.status === "active" && user.profileCompleted;
+    if (app && !$("accountSection").classList.contains("hidden")) {
+      app.classList.toggle("auth-login-mode", !active);
+    }
+  } catch (err) {
+  } finally {
+    syncingUserProfile = false;
   }
 }
 
@@ -602,6 +628,7 @@ function showTab(tab){
   if(isAccount) $("tabAccount").classList.add("active"); else if(isHome) $("tabHome").classList.add("active");
   else if(isSend) $("tabSend").classList.add("active"); else if(isSettings) $("tabServices").classList.add("active");
   if(isCheck) renderMyRequests();
+  if(isAccount) syncUserProfileFromServer();
 }
 
 function showInitialScreen(){ let user=localStorage.getItem("userProfile"); let loggedIn=user&&JSON.parse(user)?.status==="active"&&JSON.parse(user)?.profileCompleted; showTab(loggedIn?"home":"account"); }
