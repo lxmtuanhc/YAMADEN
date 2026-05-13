@@ -2315,40 +2315,6 @@
     margin-top: 0 !important;
   }
 
-  .app.auth-login-mode .auth-mode-profile .account-welcome {
-    margin: 34px 0 12px !important;
-  }
-
-  .app.auth-login-mode .auth-mode-profile .account-welcome-sub {
-    height: 22px !important;
-    min-height: 22px !important;
-    max-height: 22px !important;
-    margin-top: 8px !important;
-    -webkit-line-clamp: 1 !important;
-  }
-
-  .app.auth-login-mode .auth-mode-profile #accountFields {
-    gap: 6px !important;
-    padding-bottom: 76px !important;
-  }
-
-  .app.auth-login-mode .auth-mode-profile .auth-field-label {
-    font-size: 10px !important;
-    margin-bottom: -5px !important;
-  }
-
-  .app.auth-login-mode .auth-mode-profile #accountFields input {
-    height: 34px !important;
-    min-height: 34px !important;
-    max-height: 34px !important;
-    border-radius: 9px !important;
-    font-size: 12px !important;
-  }
-
-  .app.auth-login-mode .auth-mode-profile #accountFormCard > .main-btn {
-    bottom: 22px !important;
-  }
-
   .app.auth-login-mode .auth-pending-visual {
     position: relative !important;
     width: 220px !important;
@@ -2625,27 +2591,6 @@
   .app.auth-login-mode .auth-pending-pill{margin-top:30px!important}
   .app.auth-login-mode #authPendingLoginBtn{margin-top:44px!important}
 }
-
-/* ===== Auth/login/register/pending overrides ===== */
-
-@media (max-width:860px){
-  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountContactAuthLabel,
-  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountContact{
-    display:none!important;
-  }
-  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountNote{
-    height:92px!important;
-    min-height:92px!important;
-    padding-top:18px!important;
-    padding-bottom:18px!important;
-    align-self:stretch!important;
-  }
-  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountNote::placeholder{
-    line-height:1.35!important;
-  }
-}
-
-/* ===== Auth/login/register/pending overrides ===== */
 
 @media (max-width:860px){
   body.auth-login-body:has(#accountFormCard.auth-mode-pending) .toast{display:none!important;}
@@ -4101,5 +4046,109 @@
   .app.auth-app-mode #profileCard .profile-input:focus {
     box-shadow: inset 0 0 0 2px #1764dc !important;
     background: #fff !important;
+  }
+}
+
+/* ===== Profile approval form scroll fix ===== */
+@media (max-width: 860px) {
+  .app.auth-login-mode #accountFormCard.auth-mode-profile {
+    display: flex !important;
+    flex-direction: column !important;
+    width: min(100%, 390px) !important;
+    height: auto !important;
+    min-height: calc(100svh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    max-height: none !important;
+    padding: calc(76px + env(safe-area-inset-top)) 24px 28px !important;
+    overflow: visible !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 0 20px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome-ja {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome-sub {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 8px auto 0 !important;
+    display: block !important;
+    overflow: visible !important;
+    -webkit-line-clamp: unset !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountFields {
+    position: static !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    gap: 10px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile .auth-field-label {
+    position: static !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 0 -2px !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountFields input,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountNote {
+    position: static !important;
+    width: 100% !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+    margin: 0 !important;
+    padding: 0 16px !important;
+    border-radius: 16px !important;
+    font-size: 15px !important;
+    text-align: left !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountContactAuthLabel,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountContact {
+    display: none !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile > .main-btn {
+    position: static !important;
+    width: 100% !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    margin: 18px 0 0 !important;
+    flex: 0 0 auto !important;
+    border-radius: 16px !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #authBackBtn,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #authCardLang {
+    z-index: 3 !important;
   }
 }
