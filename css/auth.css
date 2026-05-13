@@ -4054,12 +4054,19 @@
   .app.auth-login-mode #accountFormCard.auth-mode-profile {
     display: flex !important;
     flex-direction: column !important;
-    width: min(100%, 390px) !important;
-    height: auto !important;
-    min-height: calc(100svh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: min(100vw, 480px) !important;
+    height: 100svh !important;
+    min-height: 100svh !important;
     max-height: none !important;
-    padding: calc(76px + env(safe-area-inset-top)) 24px 28px !important;
-    overflow: visible !important;
+    margin: 0 auto !important;
+    padding: calc(78px + env(safe-area-inset-top)) 24px calc(104px + env(safe-area-inset-bottom)) !important;
+    border-radius: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    z-index: 5000 !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome {
@@ -4101,7 +4108,7 @@
     max-height: none !important;
     gap: 10px !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 0 0 8px !important;
     overflow: visible !important;
   }
 
@@ -4137,14 +4144,19 @@
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-profile > .main-btn {
-    position: static !important;
-    width: 100% !important;
+    position: fixed !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+    transform: translateX(-50%) !important;
+    width: min(342px, calc(100vw - 48px)) !important;
     height: 56px !important;
     min-height: 56px !important;
     max-height: 56px !important;
-    margin: 18px 0 0 !important;
+    margin: 0 !important;
     flex: 0 0 auto !important;
     border-radius: 16px !important;
+    z-index: 7000 !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-profile #authBackBtn,
