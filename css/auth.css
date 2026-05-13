@@ -4104,26 +4104,26 @@
 
   .app.auth-login-mode #accountFormCard.auth-mode-profile #accountFields {
     position: static !important;
-    display: grid !important;
-    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
     width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    row-gap: 10px !important;
-    column-gap: 0 !important;
-    margin: 8px 0 0 !important;
-    padding: 0 0 8px !important;
+    gap: 0 !important;
+    margin: 14px 0 0 !important;
+    padding: 0 !important;
     overflow: visible !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-profile .auth-field-label {
     position: static !important;
+    display: block !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    margin: 0 !important;
-    line-height: 1.25 !important;
+    margin: 0 0 8px !important;
+    line-height: 1.35 !important;
     white-space: normal !important;
     overflow: visible !important;
     text-overflow: clip !important;
@@ -4136,7 +4136,7 @@
     height: 52px !important;
     min-height: 52px !important;
     max-height: 52px !important;
-    margin: 0 0 16px !important;
+    margin: 0 0 18px !important;
     padding: 0 16px !important;
     border-radius: 16px !important;
     font-size: 15px !important;
@@ -4158,7 +4158,7 @@
     height: 56px !important;
     min-height: 56px !important;
     max-height: 56px !important;
-    margin: 8px 0 0 !important;
+    margin: 4px 0 0 !important;
     flex: 0 0 auto !important;
     border-radius: 16px !important;
     z-index: 1 !important;
