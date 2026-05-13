@@ -4344,3 +4344,45 @@
     margin: 2px 0 0 !important;
   }
 }
+
+/* ===== Profile info touch scroll unlock ===== */
+@media (max-width: 860px) {
+  .app.auth-login-mode.auth-profile-mode,
+  .app.auth-login-mode.auth-profile-mode *,
+  .app.auth-login-mode.auth-profile-mode .main,
+  .app.auth-login-mode.auth-profile-mode #accountSection,
+  .app.auth-login-mode.auth-profile-mode .account-landing,
+  .app.auth-login-mode.auth-profile-mode .account-panel,
+  .app.auth-login-mode.auth-profile-mode #accountFormCard.auth-mode-profile {
+    touch-action: pan-y !important;
+    overscroll-behavior-y: auto !important;
+  }
+
+  .app.auth-login-mode.auth-profile-mode {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .app.auth-login-mode.auth-profile-mode .main,
+  .app.auth-login-mode.auth-profile-mode #accountSection,
+  .app.auth-login-mode.auth-profile-mode .account-landing,
+  .app.auth-login-mode.auth-profile-mode .account-panel {
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+
+  .app.auth-login-mode.auth-profile-mode #accountFormCard.auth-mode-profile {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin-bottom: calc(32px + env(safe-area-inset-bottom)) !important;
+  }
+}
