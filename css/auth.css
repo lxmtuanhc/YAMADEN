@@ -4179,7 +4179,11 @@
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-profile #accountContactAuthLabel,
-  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountContact {
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountContact,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountPinAuthLabel,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountPin,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountPinConfirmAuthLabel,
+  .app.auth-login-mode #accountFormCard.auth-mode-profile #accountPinConfirm {
     display: none !important;
   }
 

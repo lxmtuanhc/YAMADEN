@@ -16,7 +16,13 @@
   }
 
   function show(el, visible) {
-    if (el) el.classList.toggle("hidden", !visible);
+    if (!el) return;
+    el.classList.toggle("hidden", !visible);
+    if (visible) {
+      el.style.removeProperty("display");
+    } else {
+      el.style.setProperty("display", "none", "important");
+    }
   }
 
   function getSavedUser() {
