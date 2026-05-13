@@ -312,6 +312,7 @@
     card.classList.toggle("auth-mode-register", isRegister);
     card.classList.toggle("auth-mode-profile", isProfile);
     card.classList.toggle("auth-mode-pending", isPending);
+    document.querySelector(".app")?.classList.toggle("auth-profile-mode", isProfile);
 
     show($("authStartScreen"), isWelcome);
     show($("authPendingScreen"), isPending);
@@ -471,7 +472,8 @@
 
   const oldUserLogout = window.userLogout;
   window.userLogout = function () {
-    localStorage.removeItem("userToken");
+  document.querySelector(".app")?.classList.remove("auth-profile-mode");
+  localStorage.removeItem("userToken");
     localStorage.removeItem("userProfile");
     window.currentUser = null;
     window.accountMode = "welcome";

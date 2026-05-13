@@ -4051,26 +4051,53 @@
 
 /* ===== Profile approval form scroll fix ===== */
 @media (max-width: 860px) {
-  .app.auth-login-mode #accountFormCard.auth-mode-profile {
-    display: flex !important;
-    flex-direction: column !important;
-    position: fixed !important;
-    left: 50% !important;
-    top: calc(32px + env(safe-area-inset-top)) !important;
-    right: auto !important;
-    bottom: calc(18px + env(safe-area-inset-bottom)) !important;
-    transform: translateX(-50%) !important;
-    width: min(390px, calc(100vw - 36px)) !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    margin: 0 !important;
-    padding: 82px 22px 28px !important;
-    border-radius: 30px !important;
+  .app.auth-login-mode.auth-profile-mode,
+  .app.auth-login-mode.auth-profile-mode .main,
+  .app.auth-login-mode.auth-profile-mode #accountSection {
+    height: 100svh !important;
+    min-height: 100svh !important;
+    overflow: hidden !important;
+  }
+
+  .app.auth-login-mode.auth-profile-mode .account-landing {
+    height: 100svh !important;
+    min-height: 100svh !important;
+    padding: calc(16px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
-    z-index: 5000 !important;
+    justify-content: flex-start !important;
+  }
+
+  .app.auth-login-mode.auth-profile-mode .account-panel {
+    width: 100% !important;
+    max-width: 390px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .app.auth-login-mode #accountFormCard.auth-mode-profile {
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 auto !important;
+    padding: 72px 22px 24px !important;
+    border-radius: 28px !important;
+    overflow-y: visible !important;
+    overflow-x: hidden !important;
+    z-index: 1 !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-profile .account-welcome {
