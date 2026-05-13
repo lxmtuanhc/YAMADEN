@@ -3439,10 +3439,10 @@
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register .account-welcome {
-    height: 126px !important;
-    min-height: 126px !important;
-    max-height: 126px !important;
-    margin: 58px 0 22px !important;
+    height: 112px !important;
+    min-height: 112px !important;
+    max-height: 112px !important;
+    margin: 28px 0 14px !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -3451,21 +3451,21 @@
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register .account-welcome-ja {
-    height: 44px !important;
-    min-height: 44px !important;
-    max-height: 44px !important;
-    line-height: 44px !important;
-    font-size: 26px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    line-height: 40px !important;
+    font-size: 25px !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register .account-welcome-sub {
-    height: 56px !important;
-    min-height: 56px !important;
-    max-height: 56px !important;
-    margin: 16px auto 0 !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+    margin: 12px auto 0 !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
@@ -3474,23 +3474,23 @@
 
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields {
     display: grid !important;
-    gap: 10px !important;
+    gap: 8px !important;
     margin: 0 !important;
     overflow: hidden !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields {
-    height: 230px !important;
-    min-height: 230px !important;
-    max-height: 230px !important;
-    grid-template-rows: 20px 52px 20px 52px 20px 52px !important;
+    height: 218px !important;
+    min-height: 218px !important;
+    max-height: 218px !important;
+    grid-template-rows: 18px 48px 18px 48px 18px 48px !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register .auth-field-label {
-    height: 22px !important;
-    min-height: 22px !important;
-    max-height: 22px !important;
-    line-height: 22px !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    max-height: 18px !important;
+    line-height: 18px !important;
     margin: 0 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
@@ -3498,9 +3498,9 @@
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields input {
-    height: 52px !important;
-    min-height: 52px !important;
-    max-height: 52px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
     margin: 0 !important;
   }
 
@@ -3508,10 +3508,10 @@
     position: absolute !important;
     left: 24px !important;
     right: 24px !important;
-    bottom: 144px !important;
-    height: 58px !important;
-    min-height: 58px !important;
-    max-height: 58px !important;
+    bottom: 142px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
@@ -3526,14 +3526,15 @@
     left: 24px !important;
     right: 24px !important;
     width: auto !important;
-    height: 58px !important;
-    min-height: 58px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
     margin: 0 !important;
     border-radius: 16px !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register > .main-btn {
-    bottom: 76px !important;
+    bottom: 72px !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register #authSwitchPrompt {
@@ -3555,14 +3556,14 @@
 
 @media (max-width: 380px) {
   .app.auth-login-mode #accountFormCard.auth-mode-register .account-welcome {
-    margin-top: 66px !important;
-    margin-bottom: 20px !important;
+    margin-top: 22px !important;
+    margin-bottom: 10px !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-register #accountFields {
-    height: 226px !important;
-    min-height: 226px !important;
-    max-height: 226px !important;
+    height: 210px !important;
+    min-height: 210px !important;
+    max-height: 210px !important;
   }
 }
 
