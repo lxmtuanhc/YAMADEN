@@ -171,6 +171,26 @@ const YAMADEN_WEB_COPY = {
 };
 Object.assign(texts.vi, YAMADEN_WEB_COPY.vi);
 Object.assign(texts.ja, YAMADEN_WEB_COPY.ja);
+Object.assign(texts.vi, {
+  historySetting: "Lịch sử yêu cầu",
+  clearHistorySetting: "Xóa lịch sử",
+  appInfo: "Thông tin app",
+  settingsLogout: "Đăng xuất",
+  settingsLogoutSub: "Đăng xuất khỏi tài khoản hiện tại.",
+  issuePh: "Tìm và chọn nội dung công việc",
+  noResult: "Không tìm thấy nội dung phù hợp",
+  uploadSub: "Tối đa 12 file · JPG / PNG / MP4"
+});
+Object.assign(texts.ja, {
+  historySetting: "依頼履歴",
+  clearHistorySetting: "履歴を削除",
+  appInfo: "アプリ情報",
+  settingsLogout: "ログアウト",
+  settingsLogoutSub: "現在のアカウントからログアウトします。",
+  issuePh: "作業内容を検索して選択",
+  noResult: "該当する内容がありません",
+  uploadSub: "最大12ファイル · JPG / PNG / MP4"
+});
 
 function $(id) { return document.getElementById(id); }
 function escapeHtml(s) { return String(s||"").replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
@@ -558,7 +578,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   window.imageEl=$("image"); $("image").addEventListener("change",()=>{ let f=Array.from($("image").files||[]); selectedMediaFiles=[...selectedMediaFiles,...f].slice(0,12); $("image").value=""; renderSelectedMedia(); });
   $("language").addEventListener("change",changeLanguage);
   $("issueSearchInput").addEventListener("input",renderIssueOptions);
-  $("issueSearchInput").addEventListener("focus",()=>$("issueDropdown")?.classList.add("show"));
+  $("issueSearchInput").addEventListener("focus",()=>{ $("issueDropdown")?.classList.add("show"); window.renderIssueOptions?.(); });
   document.addEventListener("click",e=>{ if(!e.target.closest(".issue-search-wrap")) $("issueDropdown")?.classList.remove("show"); });
   applyLanguage(); updateAccountUI(); showInitialScreen();
   setInterval(()=>{ if(!$("checkSection").classList.contains("hidden") && $("checkId").value) checkStatus(true); },5000);

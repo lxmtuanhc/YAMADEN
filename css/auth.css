@@ -3919,3 +3919,163 @@
     text-overflow: ellipsis !important;
   }
 }
+
+/* ===== App mode polish v63 absolute final ===== */
+@media (max-width: 860px) {
+  .app:not(.auth-login-mode) .top-header .logo-box::before,
+  .app.auth-app-mode .top-header .logo-box::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  .app:not(.auth-login-mode) .top-header .logo-box > img,
+  .app.auth-app-mode .top-header .logo-box > img {
+    display: block !important;
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    border-radius: 14px !important;
+    background: #202020 !important;
+    object-fit: cover !important;
+    filter: none !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,.24) !important;
+  }
+
+  #issueChipList,
+  .issue-panel,
+  .issue-search-wrap {
+    overflow: visible !important;
+  }
+
+  .issue-search-wrap {
+    position: relative !important;
+    z-index: 80 !important;
+  }
+
+  .issue-dropdown {
+    display: none !important;
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-height: min(260px, 36vh) !important;
+    overflow-y: auto !important;
+    background: #fff !important;
+    border: 1px solid #dbe4ef !important;
+    border-radius: 18px !important;
+    box-shadow: 0 18px 38px rgba(15,23,42,.18) !important;
+    padding: 8px !important;
+    z-index: 9000 !important;
+  }
+
+  .issue-dropdown.show {
+    display: grid !important;
+    gap: 8px !important;
+  }
+
+  .issue-option {
+    width: 100% !important;
+    min-height: 54px !important;
+    border: 0 !important;
+    border-radius: 14px !important;
+    background: #f8fafc !important;
+    color: #111827 !important;
+    padding: 10px 12px !important;
+    text-align: left !important;
+  }
+
+  .issue-option b,
+  .issue-option span {
+    display: block !important;
+  }
+
+  .issue-option span {
+    margin-top: 3px !important;
+    color: #64748b !important;
+    font-size: 12px !important;
+  }
+
+  .issue-empty {
+    padding: 14px !important;
+    color: #64748b !important;
+    font-weight: 850 !important;
+  }
+
+  .app:not(.auth-login-mode) #accountSection .account-landing,
+  .app.auth-app-mode #accountSection .account-landing {
+    min-height: auto !important;
+    padding: 18px 14px 122px !important;
+    border-radius: 0 !important;
+    background: #f8fafc !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .app:not(.auth-login-mode) #accountSection .account-panel,
+  .app.auth-app-mode #accountSection .account-panel {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .app:not(.auth-login-mode) #profileCard,
+  .app.auth-app-mode #profileCard {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 22px 18px 18px !important;
+    border-radius: 28px !important;
+    background: #fff !important;
+    border: 1px solid #e5edf7 !important;
+    box-shadow: 0 18px 40px rgba(15,23,42,.10) !important;
+  }
+
+  .app:not(.auth-login-mode) #profileCard .profile-head,
+  .app.auth-app-mode #profileCard .profile-head {
+    display: grid !important;
+    grid-template-columns: 62px minmax(0,1fr) !important;
+    gap: 14px !important;
+    align-items: center !important;
+    margin-bottom: 18px !important;
+  }
+
+  .app:not(.auth-login-mode) #profileCard .profile-avatar,
+  .app.auth-app-mode #profileCard .profile-avatar {
+    width: 62px !important;
+    height: 62px !important;
+    border-radius: 20px !important;
+  }
+
+  .app:not(.auth-login-mode) #profileCard .profile-name,
+  .app.auth-app-mode #profileCard .profile-name {
+    font-size: 24px !important;
+    line-height: 1.15 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .app:not(.auth-login-mode) #profileCard .profile-grid,
+  .app.auth-app-mode #profileCard .profile-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .app:not(.auth-login-mode) #profileCard .profile-item,
+  .app.auth-app-mode #profileCard .profile-item {
+    padding: 14px 16px !important;
+    border-radius: 18px !important;
+    background: #fff !important;
+  }
+
+  .app:not(.auth-login-mode) #profileCard .profile-value,
+  .app.auth-app-mode #profileCard .profile-value {
+    font-size: 17px !important;
+    line-height: 1.25 !important;
+    overflow-wrap: anywhere !important;
+  }
+}
