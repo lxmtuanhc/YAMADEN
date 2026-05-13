@@ -11,8 +11,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="YAMADEN">
-<link rel="stylesheet" href="/css/main.css?v=63">
-<link rel="stylesheet" href="/css/auth.css?v=63">
+<link rel="stylesheet" href="/css/main.css?v=64">
+<link rel="stylesheet" href="/css/auth.css?v=64">
 </head>
 <body>
 
@@ -73,14 +73,15 @@
             </div>
             <div class="profile-grid">
               <div class="profile-item"><div class="profile-label" id="profilePhoneLabel">Số điện thoại</div><div class="profile-value" id="profilePhone"></div></div>
-              <div class="profile-item"><div class="profile-label">Email</div><div class="profile-value" id="profileEmail"></div></div>
-              <div class="profile-item"><div class="profile-label" id="profileProvinceLabel">Tỉnh / thành</div><div class="profile-value" id="profileProvince"></div></div>
-              <div class="profile-item"><div class="profile-label" id="profileProjectLabel">Tên công trình</div><div class="profile-value" id="profileProject"></div></div>
-              <div class="profile-item"><div class="profile-label" id="profileCompanyLabel">Công ty / cá nhân</div><div class="profile-value" id="profileCompany"></div></div>
+              <div class="profile-item"><div class="profile-label" id="profileNameLabel">Họ và tên</div><input class="profile-input" id="profileNameInput" autocomplete="name"></div>
+              <div class="profile-item"><div class="profile-label">Email</div><input class="profile-input" id="profileEmail" autocomplete="email"></div>
+              <div class="profile-item"><div class="profile-label" id="profileProvinceLabel">Tỉnh / thành</div><input class="profile-input" id="profileProvince"></div>
+              <div class="profile-item"><div class="profile-label" id="profileProjectLabel">Tên công trình</div><input class="profile-input" id="profileProject"></div>
+              <div class="profile-item"><div class="profile-label" id="profileCompanyLabel">Công ty / cá nhân</div><input class="profile-input" id="profileCompany"></div>
               <div class="profile-item"><div class="profile-label" id="profileRequestsLabel">Yêu cầu đã gửi</div><div class="profile-value" id="profileRequests">0</div></div>
             </div>
             <div class="secondary-row">
-              <button class="main-btn" onclick="showTab('send')"><span class="icon" id="profileSendIcon"></span><span id="profileSendText">Gửi yêu cầu</span></button>
+              <button class="main-btn" onclick="saveUserProfile()"><span class="icon" id="profileSendIcon"></span><span id="profileSendText">Lưu thông tin</span></button>
               <button class="soft-btn" onclick="showTab('check')"><span class="icon" id="profileHistoryIcon"></span><span id="profileHistoryText">Yêu cầu của tôi</span></button>
             </div>
             <button class="soft-btn" style="margin-top:12px;" onclick="userLogout()"><span class="icon" id="profileLogoutIcon"></span><span id="profileLogoutText">Đăng xuất</span></button>
@@ -310,12 +311,12 @@
 
 <div id="toast" class="toast"></div>
 
-<script src="/js/app.js?v=63" defer></script>
-<script src="/js/auth.js?v=63" defer></script>
+<script src="/js/app.js?v=64" defer></script>
+<script src="/js/auth.js?v=64" defer></script>
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
-    navigator.serviceWorker.register("/js/service-worker.js?v=63").catch(console.error);
+    navigator.serviceWorker.register("/js/service-worker.js?v=64").catch(console.error);
   });
 }
 </script>

@@ -175,6 +175,7 @@ Object.assign(texts.vi, {
   historySetting: "Lịch sử yêu cầu",
   clearHistorySetting: "Xóa lịch sử",
   appInfo: "Thông tin app",
+  saveProfile: "Lưu thông tin",
   settingsLogout: "Đăng xuất",
   settingsLogoutSub: "Đăng xuất khỏi tài khoản hiện tại.",
   issuePh: "Tìm và chọn nội dung công việc",
@@ -185,6 +186,7 @@ Object.assign(texts.ja, {
   historySetting: "依頼履歴",
   clearHistorySetting: "履歴を削除",
   appInfo: "アプリ情報",
+  saveProfile: "情報を保存",
   settingsLogout: "ログアウト",
   settingsLogoutSub: "現在のアカウントからログアウトします。",
   issuePh: "作業内容を検索して選択",
@@ -271,9 +273,9 @@ function applyLanguage() {
   $("accountBrandSub").innerText="YAMADEN.CO.LTD";
   $("quickSupportTitle").innerText=t("quickSupportTitle"); $("quickSupportText").innerText=t("quickSupportText");
   $("quickSupportBtn").innerText=t("quickSupportBtn"); $("profileSub").innerText=t("profileActive");
-  $("profilePhoneLabel").innerText=t("profilePhone"); $("profileProvinceLabel").innerText=t("profileProvince");
+  $("profilePhoneLabel").innerText=t("profilePhone"); if($("profileNameLabel")) $("profileNameLabel").innerText=t("name"); $("profileProvinceLabel").innerText=t("profileProvince");
   $("profileProjectLabel").innerText=t("profileProject"); $("profileCompanyLabel").innerText=t("profileCompany");
-  $("profileRequestsLabel").innerText=t("profileRequests"); $("profileSendText").innerText=t("send"); $("profileHistoryText").innerText=t("tabCheck");
+  $("profileRequestsLabel").innerText=t("profileRequests"); $("profileSendText").innerText=t("saveProfile"); $("profileHistoryText").innerText=t("tabCheck");
   $("profileLogoutText").innerText=t("accountLogout"); $("sideStep1").innerText=t("sideStep1"); $("sideStep2").innerText=t("sideStep2");
   $("sideStep3").innerText=t("sideStep3"); $("sendTitle").innerText=t("sendTitle"); $("checkTitle").innerText=t("checkTitle");
   $("labelName").innerHTML=t("name")+' <span class="required">*</span>'; $("labelPhone").innerHTML=t("phone")+' <span class="required">*</span>';
@@ -319,9 +321,13 @@ function updateAccountUI() {
   $("approvalApprovedText")?.classList.toggle("show",!!loggedIn);
   if(currentUser){
     $("profileName").innerText=currentUser.name||currentUser.phone||"";
-    $("profilePhone").innerText=currentUser.phone||""; $("profileEmail").innerText=currentUser.email||"";
-    $("profileProvince").innerText=currentUser.province||""; $("profileProject").innerText=currentUser.projectName||"";
-    $("profileCompany").innerText=currentUser.company||""; $("profileRequests").innerText=getMyRequests().length;
+    $("profilePhone").innerText=currentUser.phone||"";
+    if($("profileNameInput")) $("profileNameInput").value=currentUser.name||"";
+    if($("profileEmail")) $("profileEmail").value=currentUser.email||"";
+    if($("profileProvince")) $("profileProvince").value=currentUser.province||currentUser.address||"";
+    if($("profileProject")) $("profileProject").value=currentUser.projectName||"";
+    if($("profileCompany")) $("profileCompany").value=currentUser.company||"";
+    $("profileRequests").innerText=getMyRequests().length;
     $("accountName").value=currentUser.name||""; $("accountPhone").value=currentUser.phone||""; $("accountEmail").value=currentUser.email||"";
     if($("accountContact")) $("accountContact").value=currentUser.contact||"";
     if($("accountAddress")) $("accountAddress").value=currentUser.address||currentUser.province||"";
@@ -331,6 +337,44 @@ function updateAccountUI() {
     $("contact").value=currentUser.contact||currentUser.email||""; $("address").value=currentUser.address||currentUser.projectName||"";
   }
   setAccountMode(currentUser&&!currentUser.profileCompleted?"profile":(hasProfile&&!loggedIn?"pending":accountMode));
+}
+
+async function saveUserProfile() {
+  const user = currentUser || JSON.parse(localStorage.getItem("userProfile") || "null");
+  if (!user) return showToast(t("accountLogin"));
+
+  const payload = {
+    name: $("profileNameInput")?.value.trim() || "",
+    email: $("profileEmail")?.value.trim() || "",
+    province: $("profileProvince")?.value.trim() || "",
+    address: $("profileProvince")?.value.trim() || "",
+    projectName: $("profileProject")?.value.trim() || "",
+    company: $("profileCompany")?.value.trim() || ""
+  };
+
+  if (!payload.name || !payload.email || !payload.province || !payload.projectName) {
+    showToast(t("required"));
+    return;
+  }
+
+  try {
+    const res = await fetch(API_BASE + "/user/profile", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + getUserToken()
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || "Update failed");
+    currentUser = data.user || { ...user, ...payload, profileCompleted: true };
+    localStorage.setItem("userProfile", JSON.stringify(currentUser));
+    updateAccountUI();
+    showToast(t("profileSaved"));
+  } catch (err) {
+    showToast(t("networkError"));
+  }
 }
 
 function setAccountMode(mode) {
@@ -630,7 +674,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     const kw=input.value.trim().toLowerCase();
     const chosen=new Set(selectedIssues());
     const items=allIssues().filter(item=>!chosen.has(item.label)&&(!kw||item.label.toLowerCase().includes(kw)||item.dept.toLowerCase().includes(kw)||item.ja.toLowerCase().includes(kw)||item.vi.toLowerCase().includes(kw)));
-    dd.innerHTML=items.length ? items.slice(0,40).map(item=>'<button type="button" class="issue-option" onclick="selectIssueItem(\''+js(item.label)+'\')"><b>'+esc(item.label)+'</b><span>'+esc(item.dept)+'</span></button>').join("") : '<div class="issue-empty">'+esc(tr("noResult"))+'</div>';
+    dd.innerHTML=items.length ? items.slice(0,40).map(item=>'<button type="button" class="issue-option" onclick="selectIssueItem(\''+js(item.label)+'\')"><b>'+esc(item.label)+'</b></button>').join("") : '<div class="issue-empty">'+esc(tr("noResult"))+'</div>';
     dd.classList.add("show");
   };
   window.renderIssueChips=function(){

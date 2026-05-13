@@ -4078,4 +4078,28 @@
     line-height: 1.25 !important;
     overflow-wrap: anywhere !important;
   }
+
+  .app:not(.auth-login-mode) #profileCard .profile-input,
+  .app.auth-app-mode #profileCard .profile-input {
+    width: 100% !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    margin-top: 6px !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: #f8fafc !important;
+    color: #111827 !important;
+    font-size: 16px !important;
+    line-height: 1.25 !important;
+    font-weight: 950 !important;
+    padding: 0 12px !important;
+    outline: none !important;
+    box-shadow: inset 0 0 0 1px #dbe4ef !important;
+  }
+
+  .app:not(.auth-login-mode) #profileCard .profile-input:focus,
+  .app.auth-app-mode #profileCard .profile-input:focus {
+    box-shadow: inset 0 0 0 2px #1764dc !important;
+    background: #fff !important;
+  }
 }
