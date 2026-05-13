@@ -4196,3 +4196,414 @@
     z-index: 3 !important;
   }
 }
+
+/* Stable account form layout override */
+.app.auth-login-mode {
+  display: block !important;
+  width: min(100vw, 480px) !important;
+  max-width: min(100vw, 480px) !important;
+  min-height: 100svh !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+  background: #f8fbff !important;
+}
+
+.app.auth-login-mode .top-header,
+.app.auth-login-mode .bottom-nav,
+.app.auth-login-mode .emergency-card {
+  display: none !important;
+}
+
+.app.auth-login-mode .main,
+.app.auth-login-mode #accountSection {
+  width: 100% !important;
+  height: 100svh !important;
+  min-height: 100svh !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.app.auth-login-mode .account-landing {
+  width: 100% !important;
+  height: 100svh !important;
+  min-height: 100svh !important;
+  padding: calc(28px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom)) !important;
+  display: block !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  border-radius: 0 !important;
+}
+
+.app.auth-login-mode .account-brand {
+  width: min(100%, 390px) !important;
+  margin: 0 auto 18px !important;
+}
+
+.app.auth-login-mode .account-panel {
+  width: min(100%, 390px) !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.app.auth-login-mode #accountFormCard {
+  position: relative !important;
+  min-height: auto !important;
+  padding: 58px 22px 22px !important;
+  border-radius: 24px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12) !important;
+  overflow: visible !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-welcome,
+.app.auth-login-mode #accountFormCard.auth-mode-pending {
+  padding-bottom: 24px !important;
+}
+
+.app.auth-login-mode .auth-card-lang {
+  position: absolute !important;
+  top: 16px !important;
+  right: 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  height: 36px !important;
+  padding: 4px !important;
+  border-radius: 999px !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  z-index: 20 !important;
+}
+
+.app.auth-login-mode .auth-card-lang button {
+  width: 42px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: #64748b !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+}
+
+.app.auth-login-mode .auth-card-lang button.active,
+.app.auth-login-mode .auth-card-lang button.is-active {
+  background: #075ad7 !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(7, 90, 215, 0.22) !important;
+}
+
+.app.auth-login-mode .auth-back-btn {
+  position: absolute !important;
+  top: 15px !important;
+  left: 16px !important;
+}
+
+.app.auth-login-mode .auth-start-screen,
+.app.auth-login-mode .auth-pending-screen {
+  height: auto !important;
+  min-height: 0 !important;
+  display: grid !important;
+  gap: 14px !important;
+  justify-items: stretch !important;
+  text-align: center !important;
+  overflow: visible !important;
+}
+
+.app.auth-login-mode .approval-badge {
+  display: none !important;
+}
+
+.app.auth-login-mode .approval-badge.show {
+  display: flex !important;
+}
+
+.app.auth-login-mode .auth-start-screen.hidden,
+.app.auth-login-mode .auth-pending-screen.hidden,
+.app.auth-login-mode .hidden {
+  display: none !important;
+}
+
+.app.auth-login-mode .auth-start-logo,
+.app.auth-login-mode .auth-pending-logo {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 auto 6px !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.app.auth-login-mode .auth-start-logo img,
+.app.auth-login-mode .auth-pending-logo img {
+  width: 72px !important;
+  height: 72px !important;
+  border-radius: 20px !important;
+}
+
+.app.auth-login-mode .auth-hero-visual,
+.app.auth-login-mode .auth-pending-visual {
+  display: none !important;
+}
+
+.app.auth-login-mode .auth-start-title,
+.app.auth-login-mode .auth-pending-title,
+.app.auth-login-mode .account-welcome-ja {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.app.auth-login-mode .auth-start-text,
+.app.auth-login-mode .auth-pending-text,
+.app.auth-login-mode .account-welcome-sub {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 auto !important;
+  display: block !important;
+  line-height: 1.45 !important;
+  overflow: visible !important;
+  -webkit-line-clamp: unset !important;
+}
+
+.app.auth-login-mode .auth-primary,
+.app.auth-login-mode .auth-secondary,
+.app.auth-login-mode #accountFormCard > .main-btn {
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  max-height: none !important;
+  margin: 0 !important;
+  flex: none !important;
+}
+
+.app.auth-login-mode .auth-secondary {
+  margin-top: -4px !important;
+}
+
+.app.auth-login-mode .account-welcome {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 8px 0 22px !important;
+  overflow: visible !important;
+}
+
+.app.auth-login-mode #accountFields {
+  position: static !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.app.auth-login-mode .auth-field-label,
+.app.auth-login-mode #accountFields input {
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  margin: 0 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.app.auth-login-mode #accountFields input {
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: none !important;
+  padding: 0 16px !important;
+  border-radius: 14px !important;
+}
+
+.app.auth-login-mode .auth-login-options,
+.app.auth-login-mode .auth-register-terms,
+.app.auth-login-mode .auth-switch-prompt {
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 14px 0 0 !important;
+  overflow: visible !important;
+}
+
+.app.auth-login-mode .auth-login-options {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-login .auth-login-options {
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 14px 0 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.app.auth-login-mode .auth-remember {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.app.auth-login-mode #authForgotPin {
+  flex: 0 1 auto !important;
+  width: auto !important;
+  max-width: 142px !important;
+  min-width: 0 !important;
+  height: auto !important;
+  line-height: 1.25 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  text-align: right !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-login #authForgotPin {
+  position: static !important;
+  width: auto !important;
+  max-width: 150px !important;
+  height: auto !important;
+  line-height: 1.25 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-login {
+  display: block !important;
+  overflow: visible !important;
+  contain: none !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome,
+.app.auth-login-mode #accountFormCard.auth-mode-login #accountFields,
+.app.auth-login-mode #accountFormCard.auth-mode-login > .main-btn,
+.app.auth-login-mode #accountFormCard.auth-mode-login #authSwitchPrompt {
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  overflow: visible !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome {
+  margin: 36px 0 22px !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome-ja,
+.app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome-sub,
+.app.auth-login-mode #accountFormCard.auth-mode-login #accountPhoneAuthLabel,
+.app.auth-login-mode #accountFormCard.auth-mode-login #accountPinAuthLabel,
+.app.auth-login-mode #accountFormCard.auth-mode-login #accountPinConfirmAuthLabel,
+.app.auth-login-mode #accountFormCard.auth-mode-login #accountPhone,
+.app.auth-login-mode #accountFormCard.auth-mode-login #accountPin,
+.app.auth-login-mode #accountFormCard.auth-mode-login #accountPinConfirm {
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-login .account-welcome-sub {
+  display: block !important;
+  margin-top: 12px !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-login #accountFields {
+  display: grid !important;
+  gap: 8px !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-login #accountPhone,
+.app.auth-login-mode #accountFormCard.auth-mode-login #accountPin,
+.app.auth-login-mode #accountFormCard.auth-mode-login #accountPinConfirm {
+  height: 48px !important;
+  min-height: 48px !important;
+  padding: 0 16px !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-login > .main-btn {
+  height: 52px !important;
+  min-height: 52px !important;
+  margin-top: 18px !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-login #authSwitchPrompt {
+  margin-top: 14px !important;
+  text-align: center !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-form > .main-btn {
+  margin-top: 18px !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-profile #accountFields {
+  gap: 8px !important;
+}
+
+.app.auth-login-mode #accountFormCard.auth-mode-profile #accountFields input,
+.app.auth-login-mode #accountFormCard.auth-mode-profile #accountNote {
+  margin: 0 !important;
+}
