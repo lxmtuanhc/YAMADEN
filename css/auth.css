@@ -4065,7 +4065,7 @@
     min-height: 0 !important;
     max-height: none !important;
     margin: 0 !important;
-    padding: 82px 22px 104px !important;
+    padding: 82px 22px 28px !important;
     border-radius: 30px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
@@ -4110,9 +4110,9 @@
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    row-gap: 8px !important;
+    row-gap: 10px !important;
     column-gap: 0 !important;
-    margin: 0 !important;
+    margin: 8px 0 0 !important;
     padding: 0 0 8px !important;
     overflow: visible !important;
   }
@@ -4136,7 +4136,7 @@
     height: 52px !important;
     min-height: 52px !important;
     max-height: 52px !important;
-    margin: 0 0 12px !important;
+    margin: 0 0 16px !important;
     padding: 0 16px !important;
     border-radius: 16px !important;
     font-size: 15px !important;
@@ -4149,19 +4149,19 @@
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-profile > .main-btn {
-    position: fixed !important;
-    left: 50% !important;
+    position: static !important;
+    left: auto !important;
     right: auto !important;
-    bottom: calc(18px + env(safe-area-inset-bottom)) !important;
-    transform: translateX(-50%) !important;
-    width: min(342px, calc(100vw - 72px)) !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: 100% !important;
     height: 56px !important;
     min-height: 56px !important;
     max-height: 56px !important;
-    margin: 0 !important;
+    margin: 8px 0 0 !important;
     flex: 0 0 auto !important;
     border-radius: 16px !important;
-    z-index: 7000 !important;
+    z-index: 1 !important;
   }
 
   .app.auth-login-mode #accountFormCard.auth-mode-profile #authBackBtn,
