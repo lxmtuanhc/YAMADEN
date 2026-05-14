@@ -28,6 +28,49 @@ button {
   cursor: pointer;
 }
 
+.intro-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background: #303030;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.46s ease, visibility 0.46s ease;
+}
+
+.intro-screen.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.intro-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.intro-fallback-logo {
+  width: 118px;
+  height: 118px;
+  border-radius: 28px;
+  display: none;
+  object-fit: contain;
+}
+
+.intro-screen.has-fallback .intro-video {
+  display: none;
+}
+
+.intro-screen.has-fallback .intro-fallback-logo {
+  display: block;
+}
+
 .app-shell {
   height: 100vh;
   height: 100svh;
@@ -79,6 +122,7 @@ button {
 }
 
 .bottom-tab a {
+  min-height: 54px;
   min-width: 0;
   border-radius: 16px;
   color: #7b8797;
@@ -92,6 +136,15 @@ button {
   font-weight: 900;
 }
 
+.bottom-tab a span {
+  width: 100%;
+  max-width: 58px;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .bottom-tab a.active {
   color: #1262e3;
   background: #edf5ff;
@@ -103,6 +156,7 @@ button {
   align-items: center;
   gap: 10px;
   min-width: 0;
+  max-width: 218px;
   color: #0f172a;
 }
 
@@ -116,13 +170,20 @@ button {
 .brand-mark img {
   width: 42px;
   height: 42px;
+  flex: 0 0 42px;
   border-radius: 14px;
+}
+
+.brand-mark div {
+  min-width: 0;
 }
 
 .brand-mark strong,
 .brand-mark span {
   display: block;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .brand-mark strong {
@@ -139,13 +200,16 @@ button {
 }
 
 .top-actions {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .language-switch {
+  width: 88px;
   height: 42px;
+  flex: 0 0 88px;
   padding: 4px;
   border-radius: 999px;
   border: 1px solid #dbe4ef;
@@ -155,7 +219,9 @@ button {
 }
 
 .language-switch button {
-  min-width: 40px;
+  width: 38px;
+  min-width: 38px;
+  height: 32px;
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -226,6 +292,7 @@ p {
 }
 
 .button {
+  height: 50px;
   min-height: 50px;
   width: 100%;
   border-radius: 16px;
@@ -236,6 +303,13 @@ p {
   gap: 8px;
   font-size: 14px;
   font-weight: 950;
+}
+
+.button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .button-primary {
@@ -263,6 +337,9 @@ p {
 
 .list-row > .button {
   width: auto;
+  max-width: 132px;
+  flex: 0 0 auto;
+  height: 36px;
   min-height: 36px;
   padding: 8px 12px;
   border-radius: 13px;
@@ -321,6 +398,8 @@ p {
 
 .filter-tabs button {
   flex: 0 0 auto;
+  height: 34px;
+  max-width: 132px;
   border: 1px solid #dbe4ef;
   border-radius: 999px;
   background: #fff;
@@ -328,6 +407,9 @@ p {
   padding: 8px 12px;
   font-size: 12px;
   font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .filter-tabs button.active {
@@ -342,6 +424,7 @@ p {
 }
 
 .request-card {
+  min-height: 104px;
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) 18px;
   gap: 12px;
@@ -363,6 +446,7 @@ p {
 }
 
 .list-row {
+  min-width: 0;
   display: flex;
   justify-content: space-between;
   gap: 10px;
@@ -401,6 +485,8 @@ p {
 }
 
 .status-badge {
+  flex: 0 0 auto;
+  max-width: 118px;
   display: inline-flex;
   align-items: center;
   min-height: 24px;
@@ -409,6 +495,8 @@ p {
   font-size: 11px;
   font-weight: 950;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .status-submitted,
@@ -458,6 +546,7 @@ p {
 
 .field input,
 .field select {
+  height: 48px;
   min-height: 48px;
   padding: 12px 13px;
 }
@@ -778,6 +867,7 @@ p {
 }
 
 .stats-grid div {
+  min-height: 78px;
   border: 1px solid #e2ebf6;
   background: #f8fbff;
   border-radius: 16px;
@@ -799,6 +889,9 @@ p {
   color: #64748b;
   font-size: 11px;
   font-weight: 850;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .quote-table {

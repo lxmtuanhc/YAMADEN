@@ -15,6 +15,7 @@ import { QuotesPage } from "./pages/quotes/QuotesPage";
 import { QuoteDetailPage } from "./pages/quotes/QuoteDetailPage";
 import { SchedulePage } from "./pages/schedule/SchedulePage";
 import { AccountPage } from "./pages/account/AccountPage";
+import { SplashScreen } from "./components/SplashScreen";
 
 function AuthGate() {
   const authStatus = useAppStore(state => state.authStatus);
@@ -26,25 +27,28 @@ function AuthGate() {
 
 export function App() {
   return (
-    <Routes>
-      <Route element={<AuthLayout />}>
-        <Route path="/" element={<WelcomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/profile-setup" element={<ProfileSetupPage />} />
-        <Route path="/pending" element={<PendingApprovalPage />} />
-      </Route>
-      <Route element={<AuthGate />}>
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/requests" element={<RequestsPage />} />
-        <Route path="/requests/new" element={<RequestCreatePage />} />
-        <Route path="/requests/:id" element={<RequestDetailPage />} />
-        <Route path="/quotes" element={<QuotesPage />} />
-        <Route path="/quotes/:id" element={<QuoteDetailPage />} />
-        <Route path="/schedule" element={<SchedulePage />} />
-        <Route path="/account" element={<AccountPage />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/home" replace />} />
-    </Routes>
+    <>
+      <SplashScreen />
+      <Routes>
+        <Route element={<AuthLayout />}>
+          <Route path="/" element={<WelcomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/profile-setup" element={<ProfileSetupPage />} />
+          <Route path="/pending" element={<PendingApprovalPage />} />
+        </Route>
+        <Route element={<AuthGate />}>
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/requests" element={<RequestsPage />} />
+          <Route path="/requests/new" element={<RequestCreatePage />} />
+          <Route path="/requests/:id" element={<RequestDetailPage />} />
+          <Route path="/quotes" element={<QuotesPage />} />
+          <Route path="/quotes/:id" element={<QuoteDetailPage />} />
+          <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="/account" element={<AccountPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/home" replace />} />
+      </Routes>
+    </>
   );
 }
