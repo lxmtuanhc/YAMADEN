@@ -16,6 +16,7 @@ export const vi = {
   "common.required": "Vui lòng nhập đầy đủ thông tin.",
   "common.success": "Thành công",
   "common.empty": "Chưa có dữ liệu phù hợp.",
+  "common.loading": "Đang tải...",
   "language.vi": "Tiếng Việt",
   "language.ja": "日本語",
   "auth.welcomeTitle": "Dịch vụ hỗ trợ YAMADEN",

@@ -1,18 +1,31 @@
 import { Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RequestCard } from "../../components/requests/RequestCard";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { useTranslation } from "../../hooks/useTranslation";
+import { requestService } from "../../services/requestService";
 import { useAppStore } from "../../stores/appStore";
+import type { SupportRequest } from "../../types";
 
 export function HomePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useAppStore(state => state.user);
-  const requests = useAppStore(state => state.requests);
   const quotes = useAppStore(state => state.quotes);
   const schedules = useAppStore(state => state.schedules);
+  const [requests, setRequests] = useState<SupportRequest[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    requestService.getRequests().then(result => {
+      if (mounted) setRequests(result);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <section className="page">

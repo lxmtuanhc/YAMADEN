@@ -1,5 +1,6 @@
 import type { RequestStatus } from "../../types";
 import type { TranslationKey } from "../../i18n";
+import { getRequestTimelineIndex } from "../../constants/requestStatus";
 
 export const requestFilters: Array<{ id: RequestStatus | "all"; key: TranslationKey }> = [
   { id: "all", key: "status.all" },
@@ -17,14 +18,5 @@ export const categoryOptions: Array<{ value: string; key: TranslationKey }> = [
 ];
 
 export function timelineIndex(status: RequestStatus): number {
-  const order: Record<RequestStatus, number> = {
-    submitted: 0,
-    received: 1,
-    processing: 2,
-    waiting_customer: 3,
-    scheduled: 4,
-    completed: 5,
-    cancelled: 0
-  };
-  return order[status];
+  return getRequestTimelineIndex(status);
 }

@@ -4,13 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { useTranslation } from "../../hooks/useTranslation";
-import { useAppStore } from "../../stores/appStore";
+import { requestService } from "../../services/requestService";
 import { categoryOptions } from "./requestHelpers";
 
 export function RequestCreatePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const createRequest = useAppStore(state => state.createRequest);
   const [category, setCategory] = useState(categoryOptions[0].value);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -18,22 +17,31 @@ export function RequestCreatePage() {
   const [datetime, setDatetime] = useState("");
   const [imageName, setImageName] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!category || !title.trim() || !description.trim() || !address.trim()) {
       setError(t("common.required"));
       return;
     }
-    const request = createRequest({
-      category,
-      title: title.trim(),
-      description: description.trim(),
-      address: address.trim(),
-      datetime: datetime.trim(),
-      imageName
-    });
-    navigate(`/requests/${request.id}`);
+    setError("");
+    setIsSubmitting(true);
+    try {
+      const request = await requestService.createRequest({
+        category,
+        title: title.trim(),
+        description: description.trim(),
+        address: address.trim(),
+        datetime: datetime.trim(),
+        imageName
+      });
+      navigate(`/requests/${request.id}`);
+    } catch {
+      setError(t("common.required"));
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -89,7 +97,7 @@ export function RequestCreatePage() {
 
           {error ? <div className="form-error">{error}</div> : null}
 
-          <Button type="submit">{t("request.submit")}</Button>
+          <Button type="submit" disabled={isSubmitting}>{t("request.submit")}</Button>
         </form>
       </Card>
     </section>

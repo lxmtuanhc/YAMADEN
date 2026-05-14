@@ -22,7 +22,7 @@ export function RequestCard({ request }: { request: SupportRequest }) {
         <h3>{request.title}</h3>
         <p>
           <MapPin size={13} />
-          <span>{request.projectName}</span>
+          <span>{request.projectName || request.address}</span>
         </p>
         <p>
           <span>{t("request.createdAt")}</span>

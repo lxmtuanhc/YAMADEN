@@ -1,17 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { createRequestId, todayLabel } from "../utils/format";
 import { defaultUser, initialQuotes, initialRequests, initialSchedules } from "../data/mockData";
 import type { Language, Quote, QuoteStatus, RequestStatus, Schedule, SupportRequest, User, UserStatus } from "../types";
-
-interface NewRequestInput {
-  category: string;
-  title: string;
-  description: string;
-  address: string;
-  datetime: string;
-  imageName?: string;
-}
 
 interface AppState {
   language: Language;
@@ -26,8 +16,6 @@ interface AppState {
   saveProfile: (profile: Omit<User, "id" | "phone" | "pin" | "status">) => void;
   approvePendingUser: () => void;
   logout: () => void;
-  createRequest: (input: NewRequestInput) => SupportRequest;
-  updateRequestStatus: (id: string, status: RequestStatus) => void;
   updateQuoteStatus: (id: string, status: QuoteStatus) => void;
 }
 
@@ -83,27 +71,6 @@ export const useAppStore = create<AppState>()(
         });
       },
       logout: () => set({ authStatus: "notLoggedIn" }),
-      createRequest: input => {
-        const user = get().user;
-        const request: SupportRequest = {
-          id: createRequestId(),
-          category: input.category,
-          title: input.title,
-          description: input.description,
-          address: input.address,
-          datetime: input.datetime,
-          projectName: user?.projectName || input.address,
-          createdAt: todayLabel(),
-          createdBy: user?.name || user?.phone || "Customer",
-          status: "submitted",
-          images: input.imageName ? [input.imageName] : []
-        };
-        set({ requests: [request, ...get().requests] });
-        return request;
-      },
-      updateRequestStatus: (id, status) => {
-        set({ requests: get().requests.map(item => (item.id === id ? { ...item, status } : item)) });
-      },
       updateQuoteStatus: (id, status) => {
         set({ quotes: get().quotes.map(item => (item.id === id ? { ...item, status } : item)) });
       }

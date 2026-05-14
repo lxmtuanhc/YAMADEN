@@ -621,6 +621,39 @@ p {
   font-weight: 850;
 }
 
+.loading-state,
+.error-state {
+  min-height: 92px;
+  border-radius: 20px;
+  background: #fff;
+  border: 1px solid #e1e8f2;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 850;
+  padding: 18px;
+}
+
+.loading-state svg {
+  animation: spin 0.8s linear infinite;
+  color: #1262e3;
+}
+
+.error-state {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  color: #dc2626;
+  background: #fff5f5;
+  border-color: #fecaca;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .auth-content {
   display: grid;
   align-items: center;

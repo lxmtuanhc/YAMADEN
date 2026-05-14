@@ -1,43 +1,92 @@
 import { MessageCircle } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { Timeline } from "../../components/Timeline";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
+import { ErrorState } from "../../components/ui/ErrorState";
+import { LoadingState } from "../../components/ui/LoadingState";
 import { StatusBadge } from "../../components/ui/StatusBadge";
+import type { TranslationKey } from "../../i18n";
 import { useTranslation } from "../../hooks/useTranslation";
-import { useAppStore } from "../../stores/appStore";
-import type { RequestStatus } from "../../types";
-import { categoryOptions, timelineIndex } from "./requestHelpers";
+import { REQUEST_UPDATE_ACTIONS } from "../../constants/requestStatus";
+import { requestService } from "../../services/requestService";
+import type { SupportRequest } from "../../types";
+import { categoryOptions } from "./requestHelpers";
 
 export function RequestDetailPage() {
   const { id } = useParams();
-  const { t } = useTranslation();
-  const request = useAppStore(state => state.requests.find(item => item.id === id));
-  const updateRequestStatus = useAppStore(state => state.updateRequestStatus);
+  const { t, language } = useTranslation();
+  const [request, setRequest] = useState<SupportRequest | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState("");
+  const [error, setError] = useState("");
 
   const timelineSteps = useMemo(
-    () => [
-      t("request.timelineSubmitted"),
-      t("request.timelineReceived"),
-      t("request.timelineProcessing"),
-      t("request.timelineWaiting"),
-      t("request.timelineScheduled"),
-      t("request.timelineCompleted")
-    ],
-    [t]
+    () => request?.timeline.map(event => t(event.message as TranslationKey)) || [],
+    [request, t]
   );
 
-  if (!request) return <Navigate to="/requests" replace />;
+  useEffect(() => {
+    let mounted = true;
+    setIsLoading(true);
+    setError("");
+    if (!id) {
+      setIsLoading(false);
+      setError(t("common.empty"));
+      return;
+    }
+    requestService
+      .getRequestById(id)
+      .then(result => {
+        if (!mounted) return;
+        if (result) setRequest(result);
+        else setError(t("common.empty"));
+      })
+      .catch(() => {
+        if (mounted) setError(t("common.empty"));
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [id, language, t]);
+
+  if (!id) return <Navigate to="/requests" replace />;
+
+  async function addEvent(status: SupportRequest["status"]) {
+    if (!request) return;
+    setActionLoading(status);
+    setError("");
+    try {
+      const updated = await requestService.addTimelineEvent(request.id, { type: status });
+      setRequest(updated);
+    } catch {
+      setError(t("common.empty"));
+    } finally {
+      setActionLoading("");
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <section className="page">
+        <LoadingState />
+      </section>
+    );
+  }
+
+  if (!request) {
+    return (
+      <section className="page">
+        <ErrorState message={error || t("common.empty")} />
+      </section>
+    );
+  }
 
   const categoryLabel = categoryOptions.find(option => option.value === request.category)?.key ?? "request.categoryElectrical";
-
-  const actions: Array<{ status: RequestStatus; key: "request.markReceived" | "request.markProcessing" | "request.markWaiting" | "request.markCompleted" }> = [
-    { status: "received", key: "request.markReceived" },
-    { status: "processing", key: "request.markProcessing" },
-    { status: "waiting_customer", key: "request.markWaiting" },
-    { status: "completed", key: "request.markCompleted" }
-  ];
 
   return (
     <section className="page">
@@ -53,9 +102,9 @@ export function RequestDetailPage() {
         <div className="info-grid">
           <InfoRow label={t("request.id")} value={request.id} />
           <InfoRow label={t("request.subject")} value={request.title} />
-          <InfoRow label={t("request.project")} value={request.projectName} />
+          <InfoRow label={t("request.project")} value={request.projectName || request.address} />
           <InfoRow label={t("request.createdAt")} value={request.createdAt} />
-          <InfoRow label={t("request.createdBy")} value={request.createdBy} />
+          <InfoRow label={t("request.createdBy")} value={request.createdBy || "-"} />
           <InfoRow label={t("request.category")} value={t(categoryLabel)} />
           <InfoRow label={t("request.address")} value={request.address} />
           <InfoRow label={t("request.datetime")} value={request.datetime || "-"} />
@@ -78,14 +127,15 @@ export function RequestDetailPage() {
 
       <Card>
         <h2 className="section-title">{t("request.timeline")}</h2>
-        <Timeline steps={timelineSteps} activeIndex={timelineIndex(request.status)} />
+        <Timeline steps={timelineSteps} activeIndex={timelineSteps.length - 1} />
       </Card>
 
       <Card>
+        {error ? <ErrorState message={error} /> : null}
         <div className="action-grid">
-          {actions.map(action => (
-            <Button key={action.status} variant="outline" onClick={() => updateRequestStatus(request.id, action.status)}>
-              {t(action.key)}
+          {REQUEST_UPDATE_ACTIONS.map(action => (
+            <Button key={action.status} variant="outline" disabled={!!actionLoading} onClick={() => addEvent(action.status)}>
+              {actionLoading === action.status ? t("common.loading") : t(action.labelKey)}
             </Button>
           ))}
         </div>

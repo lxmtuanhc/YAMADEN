@@ -23,28 +23,47 @@ export type ScheduleStatus = "upcoming" | "confirmed" | "on_the_way" | "complete
 export interface User {
   id: string;
   phone: string;
-  pin: string;
   name: string;
   email: string;
-  address: string;
-  projectName: string;
-  companyType: string;
   status: UserStatus;
+  pin?: string;
+  address?: string;
+  projectName?: string;
+  companyType?: string;
 }
 
-export interface SupportRequest {
+export type TimelineEventType =
+  | "submitted"
+  | "received"
+  | "processing"
+  | "waiting_customer"
+  | "scheduled"
+  | "completed"
+  | "cancelled";
+
+export interface TimelineEvent {
   id: string;
-  category: string;
+  type: TimelineEventType;
+  message: string;
+  createdAt: string;
+}
+
+export interface Request {
+  id: string;
   title: string;
+  category: string;
   description: string;
   address: string;
-  datetime: string;
-  projectName: string;
-  createdAt: string;
-  createdBy: string;
   status: RequestStatus;
+  createdAt: string;
   images: string[];
+  timeline: TimelineEvent[];
+  datetime?: string;
+  projectName?: string;
+  createdBy?: string;
 }
+
+export type SupportRequest = Request;
 
 export interface QuoteItem {
   name: string;

@@ -16,6 +16,7 @@ export const ja = {
   "common.required": "必須項目を入力してください。",
   "common.success": "完了",
   "common.empty": "該当するデータがありません。",
+  "common.loading": "読み込み中...",
   "language.vi": "Tiếng Việt",
   "language.ja": "日本語",
   "auth.welcomeTitle": "YAMADEN サポート",
