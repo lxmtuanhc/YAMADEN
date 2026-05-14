@@ -8,6 +8,7 @@ import { useAppStore } from "../../stores/appStore";
 export function LoginPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const user = useAppStore(state => state.user);
   const login = useAppStore(state => state.login);
   const [phone, setPhone] = useState("08062417758");
   const [pin, setPin] = useState("123456");
@@ -15,8 +16,13 @@ export function LoginPage() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!phone.trim() || !pin.trim()) {
+      setError(t("auth.loginErrorRequired"));
+      return;
+    }
     if (!login(phone, pin)) {
-      setError(t("common.required"));
+      const isPendingAccount = user?.phone === phone.trim() && user?.pin === pin && user.status === "pendingApproval";
+      setError(isPendingAccount ? t("auth.loginErrorPending") : t("auth.loginErrorInvalid"));
       return;
     }
     navigate("/home");
