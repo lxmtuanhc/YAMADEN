@@ -33,6 +33,50 @@ function upsertUser(users: User[], user: User) {
   return [user, ...users];
 }
 
+function stripSecretFields<T>(value: T): T {
+  if (Array.isArray(value)) return value.map(item => stripSecretFields(item)) as T;
+  if (!value || typeof value !== "object") return value;
+  const source = value as Record<string, unknown>;
+  const sanitized: Record<string, unknown> = {};
+  Object.keys(source).forEach(key => {
+    const lowerKey = key.toLowerCase();
+    if (lowerKey === "pin" || lowerKey === "password" || lowerKey === "passcode") return;
+    sanitized[key] = stripSecretFields(source[key]);
+  });
+  return sanitized as T;
+}
+
+function cleanupPersistedSecrets() {
+  const secretKeys = new Set(["pin", "password", "passcode", "userpassword", "accountpin", "accountpassword"]);
+  try {
+    [localStorage, sessionStorage].forEach(storage => {
+      Array.from({ length: storage.length }, (_, index) => storage.key(index))
+        .filter((key): key is string => Boolean(key))
+        .forEach(key => {
+          if (secretKeys.has(key.toLowerCase())) {
+            storage.removeItem(key);
+            return;
+          }
+          const raw = storage.getItem(key);
+          if (!raw) return;
+          try {
+            const parsed = JSON.parse(raw);
+            const sanitized = stripSecretFields(parsed);
+            if (JSON.stringify(parsed) !== JSON.stringify(sanitized)) {
+              storage.setItem(key, JSON.stringify(sanitized));
+            }
+          } catch {
+            // Plain values such as tokens and language are not JSON state.
+          }
+        });
+    });
+  } catch (error) {
+    console.warn("Unable to cleanup persisted auth secrets", error);
+  }
+}
+
+cleanupPersistedSecrets();
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
@@ -75,7 +119,16 @@ export const useAppStore = create<AppState>()(
       }
     }),
     {
-      name: APP_STORAGE_KEY
+      name: APP_STORAGE_KEY,
+      partialize: state => stripSecretFields({
+        language: state.language,
+        user: state.user,
+        users: state.users,
+        authStatus: state.authStatus,
+        requests: state.requests,
+        quotes: state.quotes,
+        schedules: state.schedules
+      })
     }
   )
 );

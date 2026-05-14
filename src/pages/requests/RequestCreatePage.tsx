@@ -1,5 +1,5 @@
-import { Upload, X } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { ChevronDown, Upload, X } from "lucide-react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
@@ -24,6 +24,7 @@ export function RequestCreatePage() {
   const [contact, setContact] = useState(user?.contactPerson || user?.email || "");
   const [title, setTitle] = useState("");
   const [issueSearch, setIssueSearch] = useState("");
+  const [isIssueDropdownOpen, setIsIssueDropdownOpen] = useState(false);
   const [selectedIssues, setSelectedIssues] = useState<string[]>([]);
   const [issueOptions, setIssueOptions] = useState<string[]>([]);
   const [description, setDescription] = useState("");
@@ -33,6 +34,7 @@ export function RequestCreatePage() {
   const [mediaPreviews, setMediaPreviews] = useState<Array<{ key: string; name: string; type: string; url: string }>>([]);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const issueDropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setName(current => current || user?.name || "");
@@ -53,6 +55,21 @@ export function RequestCreatePage() {
       });
     return () => {
       mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    function handleOutside(event: MouseEvent | TouchEvent) {
+      const target = event.target;
+      if (target instanceof Node && issueDropdownRef.current && !issueDropdownRef.current.contains(target)) {
+        setIsIssueDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
     };
   }, []);
 
@@ -79,7 +96,11 @@ export function RequestCreatePage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!name.trim() || !phone.trim() || !title.trim() || !selectedIssues.length || !description.trim() || !address.trim()) {
+    if (!selectedIssues.length) {
+      setError(t("request.issueRequired"));
+      return;
+    }
+    if (!name.trim() || !phone.trim() || !title.trim() || !description.trim() || !address.trim()) {
       setError(t("common.required"));
       return;
     }
@@ -142,6 +163,7 @@ export function RequestCreatePage() {
     if (!value || selectedIssues.includes(value)) return;
     setSelectedIssues(current => [...current, value]);
     setIssueSearch("");
+    setIsIssueDropdownOpen(true);
   }
 
   function removeIssue(issueToRemove: string) {
@@ -163,9 +185,12 @@ export function RequestCreatePage() {
             <input value={title} placeholder={t("request.titlePlaceholder")} onChange={event => setTitle(event.target.value)} />
           </label>
 
-          <div className="field issue-multi-select">
+          <div className="field issue-multi-select" ref={issueDropdownRef}>
             <span>{t("request.issue")} *</span>
             <div className="issue-search-box">
+              {selectedIssues.length ? (
+                <div className="issue-selected-label">{t("request.issueSelected")}</div>
+              ) : null}
               {selectedIssues.length ? (
                 <div className="issue-chip-list">
                   {selectedIssues.map(selectedIssue => (
@@ -181,20 +206,34 @@ export function RequestCreatePage() {
               <input
                 value={issueSearch}
                 placeholder={t("request.issueSearchPlaceholder")}
-                onChange={event => setIssueSearch(event.target.value)}
+                onFocus={() => setIsIssueDropdownOpen(true)}
+                onChange={event => {
+                  setIssueSearch(event.target.value);
+                  setIsIssueDropdownOpen(true);
+                }}
               />
+              <button
+                className={`issue-dropdown-toggle ${isIssueDropdownOpen ? "open" : ""}`}
+                type="button"
+                aria-label={t("request.issueToggle")}
+                onClick={() => setIsIssueDropdownOpen(current => !current)}
+              >
+                <ChevronDown size={18} />
+              </button>
             </div>
-            <div className="issue-option-list">
-              {filteredIssueOptions.length ? (
-                filteredIssueOptions.slice(0, 8).map(option => (
-                  <button type="button" key={option} onClick={() => addIssue(option)}>
-                    {option}
-                  </button>
-                ))
-              ) : (
-                <span>{t("common.empty")}</span>
-              )}
-            </div>
+            {isIssueDropdownOpen ? (
+              <div className="issue-option-list">
+                {filteredIssueOptions.length ? (
+                  filteredIssueOptions.map(option => (
+                    <button type="button" key={option} onClick={() => addIssue(option)}>
+                      {option}
+                    </button>
+                  ))
+                ) : (
+                  <span>{t("request.issueNoResults")}</span>
+                )}
+              </div>
+            ) : null}
           </div>
 
           <label className="field">
