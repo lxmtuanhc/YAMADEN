@@ -795,10 +795,26 @@ p {
   position: relative;
 }
 
-.upload-field input {
+.request-media-input {
   position: absolute;
-  inset: 0;
+  width: 1px;
+  height: 1px;
+  left: 50%;
+  bottom: 12px;
   opacity: 0;
+  pointer-events: none;
+}
+
+.media-picker-button {
+  min-width: 0;
+  min-height: 38px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  background: #1262e3;
+  font-size: 13px;
+  font-weight: 950;
 }
 
 .upload-file-list {
@@ -844,7 +860,9 @@ p {
   font-size: 12px;
   font-weight: 850;
   line-height: 1.25;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .upload-file-item button {

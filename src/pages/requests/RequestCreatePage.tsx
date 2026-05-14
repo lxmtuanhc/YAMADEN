@@ -1,4 +1,4 @@
-import { ChevronDown, Upload, X } from "lucide-react";
+import { ChevronDown, FileVideo, Upload, X } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
@@ -30,11 +30,12 @@ export function RequestCreatePage() {
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState(user?.address || "");
   const [datetime, setDatetime] = useState("");
-  const [files, setFiles] = useState<File[]>([]);
+  const [selectedMediaFiles, setSelectedMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<Array<{ key: string; name: string; type: string; url: string }>>([]);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const issueDropdownRef = useRef<HTMLDivElement | null>(null);
+  const mediaInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setName(current => current || user?.name || "");
@@ -74,7 +75,7 @@ export function RequestCreatePage() {
   }, []);
 
   useEffect(() => {
-    const previews = files.map(file => ({
+    const previews = selectedMediaFiles.map(file => ({
       key: fileKey(file),
       name: file.name,
       type: file.type,
@@ -84,7 +85,7 @@ export function RequestCreatePage() {
     return () => {
       previews.forEach(preview => URL.revokeObjectURL(preview.url));
     };
-  }, [files]);
+  }, [selectedMediaFiles]);
 
   const filteredIssueOptions = useMemo(() => {
     const keyword = issueSearch.trim().toLowerCase();
@@ -113,7 +114,7 @@ export function RequestCreatePage() {
         description: description.trim(),
         address: address.trim(),
         datetime: datetime.trim(),
-        files,
+        files: selectedMediaFiles,
         name: name.trim(),
         phone: phone.trim(),
         contact: contact.trim(),
@@ -121,7 +122,7 @@ export function RequestCreatePage() {
       });
       navigate(`/requests/${request.id}`);
     } catch {
-      setError(t("common.required"));
+      setError(selectedMediaFiles.length ? t("request.uploadFailed") : t("common.required"));
     } finally {
       setIsSubmitting(false);
     }
@@ -129,10 +130,15 @@ export function RequestCreatePage() {
 
   function handleFileChange(selectedFiles: FileList | null) {
     if (!selectedFiles?.length) return;
-    setFiles(current => {
+    setSelectedMediaFiles(current => {
       const next = [...current];
       let hitLimit = false;
+      let hasInvalidFile = false;
       Array.from(selectedFiles).forEach(file => {
+        if (!/^image\/|^video\//.test(file.type || "")) {
+          hasInvalidFile = true;
+          return;
+        }
         const duplicate = next.some(item => (
           item.name === file.name &&
           item.size === file.size &&
@@ -145,13 +151,14 @@ export function RequestCreatePage() {
           hitLimit = true;
         }
       });
+      if (hasInvalidFile) setError(t("request.fileInvalid"));
       if (hitLimit) setError(t("request.fileLimit").replace("{count}", String(maxUploadFiles)));
       return next;
     });
   }
 
   function removeFile(fileToRemove: File) {
-    setFiles(current => current.filter(file => (
+    setSelectedMediaFiles(current => current.filter(file => (
       file.name !== fileToRemove.name ||
       file.size !== fileToRemove.size ||
       file.lastModified !== fileToRemove.lastModified
@@ -266,11 +273,17 @@ export function RequestCreatePage() {
             <input value={datetime} placeholder={t("request.datetimePlaceholder")} onChange={event => setDatetime(event.target.value)} />
           </label>
 
-          <label className="upload-field">
+          <div className="upload-field">
             <Upload size={22} />
             <span>{t("request.attachments")}</span>
-            <span>{files.length ? t("request.filesSelected").replace("{count}", String(files.length)) : t("request.uploadHint")}</span>
+            <span>{selectedMediaFiles.length ? t("request.filesSelected").replace("{count}", String(selectedMediaFiles.length)) : t("request.uploadHint")}</span>
+            <button className="media-picker-button" type="button" onClick={() => mediaInputRef.current?.click()}>
+              {t("request.chooseMedia")}
+            </button>
             <input
+              ref={mediaInputRef}
+              id="request-media-input"
+              className="request-media-input"
               type="file"
               accept="image/*,video/*"
               multiple
@@ -279,8 +292,8 @@ export function RequestCreatePage() {
                 event.target.value = "";
               }}
             />
-          </label>
-          {files.length ? (
+          </div>
+          {selectedMediaFiles.length ? (
             <div className="upload-file-list" aria-label={t("request.attachments")}>
               {mediaPreviews.map(preview => (
                 <div className="upload-file-item" key={preview.key}>
@@ -290,12 +303,12 @@ export function RequestCreatePage() {
                     ) : preview.type.startsWith("video/") ? (
                       <video src={preview.url} muted preload="metadata" />
                     ) : (
-                      <Upload size={18} />
+                      <FileVideo size={18} />
                     )}
                   </div>
                   <span>{preview.name}</span>
                   <button type="button" onClick={() => {
-                    const file = files.find(item => fileKey(item) === preview.key);
+                    const file = selectedMediaFiles.find(item => fileKey(item) === preview.key);
                     if (file) removeFile(file);
                   }} aria-label={t("request.removeAttachment")}>
                     <X size={16} />
