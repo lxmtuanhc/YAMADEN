@@ -11,10 +11,15 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const app = express();
+const distPath = path.join(__dirname, "dist");
 
 app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: "10mb" }));
-app.use(express.static(__dirname));
+app.use(express.static(distPath));
+app.use("/assets", express.static(path.join(__dirname, "assets")));
+app.use("/css", express.static(path.join(__dirname, "css")));
+app.use("/js", express.static(path.join(__dirname, "js")));
+app.use("/data", express.static(path.join(__dirname, "data")));
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -377,7 +382,15 @@ async function findBestAssignee(issueTags) {
 }
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(distPath, "index.html"));
+});
+
+app.get("/admin.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin.html"));
+});
+
+app.get("/login.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "login.html"));
 });
 
 app.post("/admin/login", (req, res) => {
@@ -991,6 +1004,11 @@ app.delete("/request/:id", requireAdmin, async (req, res) => {
       error: error.message
     });
   }
+});
+
+app.get("*", (req, res, next) => {
+  if (path.extname(req.path)) return next();
+  res.sendFile(path.join(distPath, "index.html"));
 });
 
 app.use((error, req, res, next) => {
