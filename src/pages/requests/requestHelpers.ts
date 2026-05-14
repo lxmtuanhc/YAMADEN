@@ -4,8 +4,11 @@ import { getRequestTimelineIndex } from "../../constants/requestStatus";
 
 export const requestFilters: Array<{ id: RequestStatus | "all"; key: TranslationKey }> = [
   { id: "all", key: "status.all" },
+  { id: "submitted", key: "status.submitted" },
+  { id: "received", key: "status.received" },
   { id: "processing", key: "status.processing" },
   { id: "waiting_customer", key: "status.waiting_customer" },
+  { id: "scheduled", key: "status.scheduled" },
   { id: "completed", key: "status.completed" },
   { id: "cancelled", key: "status.cancelled" }
 ];
