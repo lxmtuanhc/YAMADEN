@@ -80,6 +80,7 @@ export const ja = {
   "request.uploadHint": "画像・動画を選択してください",
   "request.attachments": "添付画像・動画",
   "request.filesSelected": "{count}件の画像・動画を選択済み",
+  "request.removeAttachment": "添付ファイルを削除",
   "request.submit": "依頼を送信",
   "request.detail": "依頼詳細",
   "request.info": "依頼情報",

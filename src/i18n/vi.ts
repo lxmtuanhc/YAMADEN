@@ -80,6 +80,7 @@ export const vi = {
   "request.uploadHint": "Chọn ảnh/video hoặc kéo thả vào đây",
   "request.attachments": "Ảnh/video đính kèm",
   "request.filesSelected": "Đã chọn {count} ảnh/video",
+  "request.removeAttachment": "Xóa tệp đính kèm",
   "request.submit": "Gửi yêu cầu",
   "request.detail": "Chi tiết yêu cầu",
   "request.info": "Thông tin yêu cầu",

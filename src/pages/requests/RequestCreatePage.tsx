@@ -1,4 +1,4 @@
-import { Upload } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
@@ -96,6 +96,14 @@ export function RequestCreatePage() {
     });
   }
 
+  function removeFile(fileToRemove: File) {
+    setFiles(current => current.filter(file => (
+      file.name !== fileToRemove.name ||
+      file.size !== fileToRemove.size ||
+      file.lastModified !== fileToRemove.lastModified
+    )));
+  }
+
   return (
     <section className="page request-create-page">
       <div className="page-header">
@@ -173,7 +181,12 @@ export function RequestCreatePage() {
           {files.length ? (
             <div className="upload-file-list" aria-label={t("request.attachments")}>
               {files.map(file => (
-                <span key={`${file.name}-${file.size}-${file.lastModified}`}>{file.name}</span>
+                <div className="upload-file-item" key={`${file.name}-${file.size}-${file.lastModified}`}>
+                  <span>{file.name}</span>
+                  <button type="button" onClick={() => removeFile(file)} aria-label={t("request.removeAttachment")}>
+                    <X size={16} />
+                  </button>
+                </div>
               ))}
             </div>
           ) : null}
