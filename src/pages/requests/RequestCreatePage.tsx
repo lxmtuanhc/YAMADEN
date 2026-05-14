@@ -1,5 +1,5 @@
 import { Upload, X } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
@@ -11,6 +11,10 @@ import { categoryOptions } from "./requestHelpers";
 const maxUploadFiles = 12;
 const defaultCategory = categoryOptions[0].value;
 
+function fileKey(file: File) {
+  return `${file.name}-${file.size}-${file.lastModified}`;
+}
+
 export function RequestCreatePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -19,12 +23,14 @@ export function RequestCreatePage() {
   const [phone, setPhone] = useState(user?.phone || "");
   const [contact, setContact] = useState(user?.contactPerson || user?.email || "");
   const [title, setTitle] = useState("");
-  const [issue, setIssue] = useState("");
+  const [issueSearch, setIssueSearch] = useState("");
+  const [selectedIssues, setSelectedIssues] = useState<string[]>([]);
   const [issueOptions, setIssueOptions] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState(user?.address || "");
   const [datetime, setDatetime] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [mediaPreviews, setMediaPreviews] = useState<Array<{ key: string; name: string; type: string; url: string }>>([]);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -40,8 +46,7 @@ export function RequestCreatePage() {
     requestService.getIssueOptions()
       .then(options => {
         if (!mounted) return;
-        setIssueOptions(options);
-        setIssue(current => current || options[0] || "");
+        setIssueOptions(Array.from(new Set(options.map(option => option.trim()).filter(Boolean))));
       })
       .catch(() => {
         if (mounted) setIssueOptions([]);
@@ -51,9 +56,30 @@ export function RequestCreatePage() {
     };
   }, []);
 
+  useEffect(() => {
+    const previews = files.map(file => ({
+      key: fileKey(file),
+      name: file.name,
+      type: file.type,
+      url: URL.createObjectURL(file)
+    }));
+    setMediaPreviews(previews);
+    return () => {
+      previews.forEach(preview => URL.revokeObjectURL(preview.url));
+    };
+  }, [files]);
+
+  const filteredIssueOptions = useMemo(() => {
+    const keyword = issueSearch.trim().toLowerCase();
+    return issueOptions.filter(option => (
+      !selectedIssues.includes(option) &&
+      (!keyword || option.toLowerCase().includes(keyword))
+    ));
+  }, [issueOptions, issueSearch, selectedIssues]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!name.trim() || !phone.trim() || !title.trim() || !issue.trim() || !description.trim() || !address.trim()) {
+    if (!name.trim() || !phone.trim() || !title.trim() || !selectedIssues.length || !description.trim() || !address.trim()) {
       setError(t("common.required"));
       return;
     }
@@ -70,7 +96,7 @@ export function RequestCreatePage() {
         name: name.trim(),
         phone: phone.trim(),
         contact: contact.trim(),
-        issueTags: [issue.trim()]
+        issueTags: selectedIssues
       });
       navigate(`/requests/${request.id}`);
     } catch {
@@ -84,14 +110,21 @@ export function RequestCreatePage() {
     if (!selectedFiles?.length) return;
     setFiles(current => {
       const next = [...current];
+      let hitLimit = false;
       Array.from(selectedFiles).forEach(file => {
         const duplicate = next.some(item => (
           item.name === file.name &&
           item.size === file.size &&
           item.lastModified === file.lastModified
         ));
-        if (!duplicate && next.length < maxUploadFiles) next.push(file);
+        if (duplicate) return;
+        if (next.length < maxUploadFiles) {
+          next.push(file);
+        } else {
+          hitLimit = true;
+        }
       });
+      if (hitLimit) setError(t("request.fileLimit").replace("{count}", String(maxUploadFiles)));
       return next;
     });
   }
@@ -102,6 +135,17 @@ export function RequestCreatePage() {
       file.size !== fileToRemove.size ||
       file.lastModified !== fileToRemove.lastModified
     )));
+  }
+
+  function addIssue(issue: string) {
+    const value = issue.trim();
+    if (!value || selectedIssues.includes(value)) return;
+    setSelectedIssues(current => [...current, value]);
+    setIssueSearch("");
+  }
+
+  function removeIssue(issueToRemove: string) {
+    setSelectedIssues(current => current.filter(issue => issue !== issueToRemove));
   }
 
   return (
@@ -119,20 +163,39 @@ export function RequestCreatePage() {
             <input value={title} placeholder={t("request.titlePlaceholder")} onChange={event => setTitle(event.target.value)} />
           </label>
 
-          <label className="field">
+          <div className="field issue-multi-select">
             <span>{t("request.issue")} *</span>
-            <select value={issue} onChange={event => setIssue(event.target.value)}>
-              {issueOptions.length ? (
-                issueOptions.map(option => (
-                  <option key={option} value={option}>
+            <div className="issue-search-box">
+              {selectedIssues.length ? (
+                <div className="issue-chip-list">
+                  {selectedIssues.map(selectedIssue => (
+                    <span className="issue-chip" key={selectedIssue}>
+                      {selectedIssue}
+                      <button type="button" onClick={() => removeIssue(selectedIssue)} aria-label={t("request.removeIssue")}>
+                        <X size={14} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+              <input
+                value={issueSearch}
+                placeholder={t("request.issueSearchPlaceholder")}
+                onChange={event => setIssueSearch(event.target.value)}
+              />
+            </div>
+            <div className="issue-option-list">
+              {filteredIssueOptions.length ? (
+                filteredIssueOptions.slice(0, 8).map(option => (
+                  <button type="button" key={option} onClick={() => addIssue(option)}>
                     {option}
-                  </option>
+                  </button>
                 ))
               ) : (
-                <option value="">{t("common.empty")}</option>
+                <span>{t("common.empty")}</span>
               )}
-            </select>
-          </label>
+            </div>
+          </div>
 
           <label className="field">
             <span>{t("auth.name")} *</span>
@@ -180,10 +243,22 @@ export function RequestCreatePage() {
           </label>
           {files.length ? (
             <div className="upload-file-list" aria-label={t("request.attachments")}>
-              {files.map(file => (
-                <div className="upload-file-item" key={`${file.name}-${file.size}-${file.lastModified}`}>
-                  <span>{file.name}</span>
-                  <button type="button" onClick={() => removeFile(file)} aria-label={t("request.removeAttachment")}>
+              {mediaPreviews.map(preview => (
+                <div className="upload-file-item" key={preview.key}>
+                  <div className="upload-preview">
+                    {preview.type.startsWith("image/") ? (
+                      <img src={preview.url} alt={preview.name} />
+                    ) : preview.type.startsWith("video/") ? (
+                      <video src={preview.url} muted preload="metadata" />
+                    ) : (
+                      <Upload size={18} />
+                    )}
+                  </div>
+                  <span>{preview.name}</span>
+                  <button type="button" onClick={() => {
+                    const file = files.find(item => fileKey(item) === preview.key);
+                    if (file) removeFile(file);
+                  }} aria-label={t("request.removeAttachment")}>
                     <X size={16} />
                   </button>
                 </div>
