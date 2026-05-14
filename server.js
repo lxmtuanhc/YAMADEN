@@ -372,6 +372,28 @@ function staffTags(staff) {
   return normalizeTagList(fromArray.concat(fromText));
 }
 
+function uniqueStaffWorkOptions(staffList) {
+  const seen = new Set();
+  const options = [];
+
+  staffList.forEach(staff => {
+    const values = normalizeTagList(
+      (Array.isArray(staff.workTags) ? staff.workTags : [])
+        .concat(parseRequestTags(staff.workContent))
+        .concat(parseRequestTags(staff.skills))
+    );
+
+    values.forEach(value => {
+      const key = value.toLowerCase();
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      options.push(value);
+    });
+  });
+
+  return options.sort((a, b) => a.localeCompare(b, "ja"));
+}
+
 async function findBestAssignee(issueTags) {
   const tags = parseRequestTags(issueTags);
   if (!tags.length) return null;
@@ -880,6 +902,19 @@ app.delete("/admin/staff/:id", requireAdmin, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Staff delete failed",
+      error: error.message
+    });
+  }
+});
+
+app.get("/api/work-options", requireUser, async (req, res) => {
+  try {
+    const staff = await Staff.find({ status: { $ne: "off" } }).sort({ createdAt: -1 });
+    res.set("Cache-Control", "no-store");
+    res.json({ data: uniqueStaffWorkOptions(staff) });
+  } catch (error) {
+    res.status(500).json({
+      message: "Work options load failed",
       error: error.message
     });
   }

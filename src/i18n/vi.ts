@@ -70,6 +70,8 @@ export const vi = {
   "request.history": "Lịch sử yêu cầu",
   "request.createTitle": "Tạo yêu cầu mới",
   "request.category": "Danh mục",
+  "request.contact": "Liên hệ",
+  "request.issue": "Vấn đề cần giải quyết",
   "request.subject": "Tiêu đề",
   "request.description": "Mô tả",
   "request.address": "Địa điểm",

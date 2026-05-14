@@ -113,6 +113,7 @@ export function RequestDetailPage() {
           <InfoRow label={t("request.createdAt")} value={request.createdAt} />
           <InfoRow label={t("request.createdBy")} value={request.createdBy || "-"} />
           <InfoRow label={t("request.category")} value={t(categoryLabel)} />
+          <InfoRow label={t("request.issue")} value={request.issueTags?.join(", ") || "-"} />
           <InfoRow label={t("request.address")} value={request.address} />
           <InfoRow label={t("request.datetime")} value={request.datetime || "-"} />
           <InfoRow label={t("request.description")} value={request.description} />

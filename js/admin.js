@@ -139,6 +139,10 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
     }
   }
   function statusCountFix(s){return (requests||[]).filter(r=>normalizeStatus(r.status)===s).length}
+  function requestIssueText(row){
+    if(Array.isArray(row&&row.issueTags)&&row.issueTags.length)return row.issueTags.join(', ');
+    return (row&&(row.issueType||row.workContent))||'';
+  }
   function filteredFix(){
     const kw=(document.getElementById('search')?.value||'').toLowerCase();
     const sf=document.getElementById('staffFilter')?.value||'all';
@@ -148,7 +152,7 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
       if(sf!=='all'&&String(r.assigneeId||r.assigneeName||'')!==sf)return false;
       if(uf==='high'&&!isUrgent(r))return false;
       if(uf==='normal'&&isUrgent(r))return false;
-      return [requestTitle(r),customerName(r),phone(r),address(r),r.adminReply].join(' ').toLowerCase().includes(kw);
+      return [requestTitle(r),customerName(r),phone(r),address(r),requestIssueText(r),r.adminReply].join(' ').toLowerCase().includes(kw);
     });
   }
   window.renderRequests=function(){
@@ -157,10 +161,12 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
     const list=filteredFix();
     body.innerHTML=list.length?list.map(r=>{
       const id=r.id||r._id, st=normalizeStatus(r.status);
+      const issue=requestIssueText(r);
+      const issueLine=issue?'<div class="muted request-sub">'+esc(issue)+'</div>':'';
       if(currentView==='dashboard'){
-        return '<tr class="req-row" onclick="openRequestDetail(\''+esc(id)+'\')"><td><div class="idline">'+esc(r.requestId||('REQ-'+String(id).slice(-6)))+'</div></td><td><span class="request-title">'+esc(requestTitle(r))+'</span><div class="muted request-sub">'+esc(address(r))+'</div></td><td><b>'+esc(customerName(r))+'</b><div class="muted">'+esc(phone(r))+'</div></td><td><span class="pill '+(isUrgent(r)?'red':'orange')+'">'+(isUrgent(r)?labelFix('urgent'):labelFix('normal'))+'</span></td><td><span class="time-red">'+elapsed(r.createdAt)+'</span></td><td><button class="small-btn done" onclick="event.stopPropagation();openRequestDetail(\''+esc(id)+'\')">'+labelFix('detail')+'</button></td></tr>';
+        return '<tr class="req-row" onclick="openRequestDetail(\''+esc(id)+'\')"><td><div class="idline">'+esc(r.requestId||('REQ-'+String(id).slice(-6)))+'</div></td><td><span class="request-title">'+esc(requestTitle(r))+'</span><div class="muted request-sub">'+esc(address(r))+'</div>'+issueLine+'</td><td><b>'+esc(customerName(r))+'</b><div class="muted">'+esc(phone(r))+'</div></td><td><span class="pill '+(isUrgent(r)?'red':'orange')+'">'+(isUrgent(r)?labelFix('urgent'):labelFix('normal'))+'</span></td><td><span class="time-red">'+elapsed(r.createdAt)+'</span></td><td><button class="small-btn done" onclick="event.stopPropagation();openRequestDetail(\''+esc(id)+'\')">'+labelFix('detail')+'</button></td></tr>';
       }
-      return '<tr class="req-row" onclick="openRequestDetail(\''+esc(id)+'\')"><td><div class="idline">'+esc(r.requestId||('REQ-'+String(id).slice(-6)))+'</div></td><td><span class="request-title">'+esc(requestTitle(r))+'</span><div class="muted request-sub">'+esc(address(r))+'</div></td><td><b>'+esc(customerName(r))+'</b><div class="muted">'+esc(phone(r))+'</div></td><td><span class="pill '+(isUrgent(r)?'red':'orange')+'">'+(isUrgent(r)?labelFix('urgent'):labelFix('normal'))+'</span></td><td>'+esc(r.assigneeName||'-')+'</td><td><span class="pill '+statusClass(st)+'">'+statusLabel(st)+'</span></td><td><span class="time-red">'+elapsed(r.createdAt)+'</span></td><td><button class="small-btn done" onclick="event.stopPropagation();openRequestDetail(\''+esc(id)+'\')">'+labelFix('detail')+'</button></td></tr>';
+      return '<tr class="req-row" onclick="openRequestDetail(\''+esc(id)+'\')"><td><div class="idline">'+esc(r.requestId||('REQ-'+String(id).slice(-6)))+'</div></td><td><span class="request-title">'+esc(requestTitle(r))+'</span><div class="muted request-sub">'+esc(address(r))+'</div>'+issueLine+'</td><td><b>'+esc(customerName(r))+'</b><div class="muted">'+esc(phone(r))+'</div></td><td><span class="pill '+(isUrgent(r)?'red':'orange')+'">'+(isUrgent(r)?labelFix('urgent'):labelFix('normal'))+'</span></td><td>'+esc(r.assigneeName||'-')+'</td><td><span class="pill '+statusClass(st)+'">'+statusLabel(st)+'</span></td><td><span class="time-red">'+elapsed(r.createdAt)+'</span></td><td><button class="small-btn done" onclick="event.stopPropagation();openRequestDetail(\''+esc(id)+'\')">'+labelFix('detail')+'</button></td></tr>';
     }).join(''):'<tr><td colspan="'+(currentView==='dashboard'?6:8)+'" class="muted" style="text-align:center;padding:30px">'+labelFix('noData')+'</td></tr>';
     if(document.getElementById('tab-all'))document.getElementById('tab-all').textContent=(requests||[]).length;
     ['untreated','processing','estimating','quoted','ordered','completed','lost'].forEach(s=>{const el=document.getElementById('tab-'+s);if(el)el.textContent=statusCountFix(s)});

@@ -2,6 +2,10 @@ import type { User, UserStatus } from "../types";
 
 const USER_TOKEN_KEY = "yamaden-user-token";
 
+export function getUserToken() {
+  return localStorage.getItem(USER_TOKEN_KEY) || "";
+}
+
 type BackendUser = Partial<User> & {
   _id?: string;
   company?: string;
@@ -23,7 +27,7 @@ type AuthResponse = {
 };
 
 function authHeaders() {
-  const token = localStorage.getItem(USER_TOKEN_KEY);
+  const token = getUserToken();
   return {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {})

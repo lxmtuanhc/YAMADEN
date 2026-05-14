@@ -63,6 +63,9 @@ export interface Request {
   datetime?: string;
   projectName?: string;
   createdBy?: string;
+  phone?: string;
+  contact?: string;
+  issueTags?: string[];
 }
 
 export type SupportRequest = Request;

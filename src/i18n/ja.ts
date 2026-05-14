@@ -70,6 +70,8 @@ export const ja = {
   "request.history": "依頼履歴",
   "request.createTitle": "新しい依頼",
   "request.category": "カテゴリ",
+  "request.contact": "連絡先",
+  "request.issue": "解決したい問題",
   "request.subject": "タイトル",
   "request.description": "詳細",
   "request.address": "場所",

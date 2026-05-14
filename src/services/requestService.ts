@@ -4,6 +4,7 @@ import type { RequestStatus, SupportRequest, TimelineEvent } from "../types";
 import { createRequestId, todayLabel } from "../utils/format";
 import { REQUEST_TIMELINE_MESSAGE_KEYS } from "../constants/requestStatus";
 import { APP_STORAGE_KEY } from "../constants/storageKeys";
+import { getUserToken } from "./authService";
 
 export interface CreateRequestInput {
   category: string;
@@ -12,6 +13,10 @@ export interface CreateRequestInput {
   address: string;
   datetime?: string;
   imageName?: string;
+  name?: string;
+  phone?: string;
+  contact?: string;
+  issueTags?: string[];
 }
 
 export type UpdateRequestInput = Partial<
@@ -69,6 +74,78 @@ function commitRequests(requests: SupportRequest[]) {
   useAppStore.setState({ requests });
 }
 
+function normalizeBackendStatus(status?: string): RequestStatus {
+  if (status === "untreated") return "submitted";
+  if (status === "contacted") return "received";
+  if (status === "site_done") return "processing";
+  if (status === "quoted") return "waiting_customer";
+  if (status === "ordered") return "scheduled";
+  if (status === "lost") return "cancelled";
+  if (
+    status === "submitted" ||
+    status === "received" ||
+    status === "processing" ||
+    status === "waiting_customer" ||
+    status === "scheduled" ||
+    status === "completed" ||
+    status === "cancelled"
+  ) {
+    return status;
+  }
+  return "submitted";
+}
+
+function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): SupportRequest {
+  const status = normalizeBackendStatus(item.status);
+  const createdAt = item.createdAt ? new Date(item.createdAt).toLocaleString() : todayLabel();
+  return normalizeRequest({
+    id: String(item.id || item._id || createRequestId()),
+    title: input?.title || item.title || item.category || item.content || "",
+    category: input?.category || item.category || input?.issueTags?.[0] || "",
+    description: input?.description || item.description || item.content || "",
+    address: item.address || input?.address || "",
+    status,
+    createdAt,
+    images: input?.imageName ? [input.imageName] : item.image ? [item.image] : [],
+    timeline: [createTimelineEvent(status, REQUEST_TIMELINE_MESSAGE_KEYS[status], createdAt)],
+    datetime: input?.datetime || item.datetime || "",
+    projectName: useAppStore.getState().user?.projectName || input?.address || item.address || "",
+    createdBy: item.name || input?.name || useAppStore.getState().user?.name || useAppStore.getState().user?.phone || "Customer",
+    phone: item.phone || input?.phone || "",
+    contact: item.contact || input?.contact || "",
+    issueTags: Array.isArray(item.issueTags) ? item.issueTags : input?.issueTags || []
+  });
+}
+
+async function createBackendRequest(input: CreateRequestInput): Promise<SupportRequest | null> {
+  const token = getUserToken();
+  if (!token) return null;
+
+  const response = await fetch("/request", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      name: input.name,
+      phone: input.phone,
+      contact: input.contact,
+      address: input.address,
+      content: input.description,
+      issueTags: input.issueTags || [],
+      quoteRequested: false
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error("Request create failed");
+  }
+
+  const payload = await response.json();
+  return backendRequestToSupportRequest(payload.data || payload, input);
+}
+
 export const requestService = {
   async getRequests(): Promise<SupportRequest[]> {
     await delay();
@@ -85,6 +162,12 @@ export const requestService = {
   async createRequest(input: CreateRequestInput): Promise<SupportRequest> {
     await delay();
     const user = useAppStore.getState().user;
+    const backendRequest = await createBackendRequest(input);
+    if (backendRequest) {
+      commitRequests([backendRequest, ...readRequests()]);
+      return backendRequest;
+    }
+
     const createdAt = todayLabel();
     const request: SupportRequest = {
       id: createRequestId(),
@@ -98,10 +181,25 @@ export const requestService = {
       timeline: [createTimelineEvent("submitted", REQUEST_TIMELINE_MESSAGE_KEYS.submitted, createdAt)],
       datetime: input.datetime,
       projectName: user?.projectName || input.address,
-      createdBy: user?.name || user?.phone || "Customer"
+      createdBy: input.name || user?.name || user?.phone || "Customer",
+      phone: input.phone || user?.phone || "",
+      contact: input.contact || user?.contactPerson || user?.email || "",
+      issueTags: input.issueTags || []
     };
     commitRequests([request, ...readRequests()]);
     return request;
+  },
+
+  async getIssueOptions(): Promise<string[]> {
+    const token = getUserToken();
+    const response = await fetch("/api/work-options", {
+      cache: "no-store",
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    if (!response.ok) return [];
+    const payload = await response.json();
+    const options = Array.isArray(payload.data) ? payload.data : [];
+    return options.map((item: unknown) => String(item || "").trim()).filter(Boolean);
   },
 
   async updateRequest(id: string, input: UpdateRequestInput): Promise<SupportRequest> {
