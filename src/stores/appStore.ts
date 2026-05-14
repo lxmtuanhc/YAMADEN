@@ -3,6 +3,8 @@ import { persist } from "zustand/middleware";
 import { defaultUser, initialQuotes, initialRequests, initialSchedules } from "../data/mockData";
 import type { Language, Quote, QuoteStatus, RequestStatus, Schedule, SupportRequest, User, UserStatus } from "../types";
 
+type ProfileInput = Pick<User, "name" | "email" | "phone" | "accountType" | "companyName" | "contactPerson">;
+
 interface AppState {
   language: Language;
   user: User | null;
@@ -13,7 +15,7 @@ interface AppState {
   setLanguage: (language: Language) => void;
   login: (phone: string, pin: string) => boolean;
   register: (phone: string, pin: string) => void;
-  saveProfile: (profile: Omit<User, "id" | "phone" | "pin" | "status">) => void;
+  saveProfile: (profile: ProfileInput) => void;
   approvePendingUser: () => void;
   logout: () => void;
   updateQuoteStatus: (id: string, status: QuoteStatus) => void;
@@ -48,7 +50,9 @@ export const useAppStore = create<AppState>()(
             email: "",
             address: "",
             projectName: "",
-            companyType: "",
+            accountType: "personal",
+            companyName: "",
+            contactPerson: "",
             status: "profileIncomplete"
           },
           authStatus: "profileIncomplete"

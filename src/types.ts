@@ -29,7 +29,9 @@ export interface User {
   pin?: string;
   address?: string;
   projectName?: string;
-  companyType?: string;
+  accountType?: "personal" | "company";
+  companyName?: string;
+  contactPerson?: string;
 }
 
 export type TimelineEventType =

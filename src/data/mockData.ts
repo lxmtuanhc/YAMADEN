@@ -8,7 +8,7 @@ export const defaultUser: User = {
   email: "lxmtuanhc@gmail.com",
   address: "733-0851, Hiroshima, 9-22",
   projectName: "Cty Yamaden",
-  companyType: "Ca nhan",
+  accountType: "personal",
   status: "active"
 };
 

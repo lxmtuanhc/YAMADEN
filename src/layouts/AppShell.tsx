@@ -1,5 +1,5 @@
-import { Bell, CalendarDays, FileText, Home, ReceiptText, User } from "lucide-react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { ArrowLeft, Bell, CalendarDays, FileText, Home, ReceiptText, User } from "lucide-react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { LanguageSwitch } from "../components/LanguageSwitch";
 import { useTranslation } from "../hooks/useTranslation";
 
@@ -10,14 +10,30 @@ const tabs = [
   { to: "/schedule", key: "nav.schedule", Icon: CalendarDays },
   { to: "/account", key: "nav.account", Icon: User }
 ] as const;
+const tabRootPaths = tabs.map(tab => tab.to);
 
 export function AppShell() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const canShowBack = !tabRootPaths.includes(location.pathname);
+
+  function handleBack() {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/home");
+  }
 
   return (
     <div className="app-shell">
       <header className="top-bar">
+        {canShowBack ? (
+          <button className="icon-button back-button" type="button" aria-label={t("common.back")} onClick={handleBack}>
+            <ArrowLeft size={19} />
+          </button>
+        ) : null}
         <button className="brand-mark brand-button" type="button" onClick={() => navigate("/home")}>
           <img src="/assets/icon-192.png" alt="" />
           <div>

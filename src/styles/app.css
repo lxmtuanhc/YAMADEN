@@ -14,6 +14,8 @@ body,
   height: 100%;
   margin: 0;
   overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: pan-x pan-y;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
@@ -109,6 +111,10 @@ button {
   border-bottom: 1px solid #e1e8f2;
   overflow: hidden;
   z-index: 10;
+}
+
+.top-bar .brand-mark {
+  flex: 1 1 auto;
 }
 
 .auth-top {
@@ -281,6 +287,10 @@ button {
   justify-content: center;
 }
 
+.back-button {
+  flex: 0 0 42px;
+}
+
 .page {
   width: 100%;
   max-width: 100%;
@@ -423,7 +433,7 @@ p {
   color: #0f172a;
   outline: 0;
   box-shadow: none;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 750;
 }
 
@@ -848,6 +858,80 @@ p {
   text-align: center;
 }
 
+.profile-progress {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+}
+
+.profile-progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.profile-progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dbeafe;
+}
+
+.profile-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #1262e3;
+}
+
+.profile-review {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+}
+
+.profile-review div {
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr);
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.profile-review div:last-child {
+  border-bottom: 0;
+}
+
+.profile-review span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.profile-review strong {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+.field-error {
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+  box-shadow: none;
+}
+
 .auth-card h1 {
   font-size: 28px;
   font-weight: 950;
@@ -1165,6 +1249,7 @@ textarea {
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  font-size: 16px;
 }
 
 .language-switch button {
@@ -2090,6 +2175,7 @@ textarea {
 ========================================================= */
 
 .app-shell {
+  height: 100vh;
   height: 100dvh;
   max-height: 100dvh;
   width: 100%;
