@@ -665,6 +665,28 @@ p {
   opacity: 0;
 }
 
+.upload-file-list {
+  display: grid;
+  gap: 6px;
+  margin-top: -4px;
+}
+
+.upload-file-list span {
+  min-height: 28px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.request-create-page {
+  padding-bottom: calc(90px + env(safe-area-inset-bottom));
+}
+
 .form-error {
   padding: 10px 12px;
   color: #dc2626;

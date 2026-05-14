@@ -8,11 +8,13 @@ import { requestService } from "../../services/requestService";
 import { useAppStore } from "../../stores/appStore";
 import { categoryOptions } from "./requestHelpers";
 
+const maxUploadFiles = 12;
+const defaultCategory = categoryOptions[0].value;
+
 export function RequestCreatePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useAppStore(state => state.user);
-  const [category, setCategory] = useState(categoryOptions[0].value);
   const [name, setName] = useState(user?.name || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [contact, setContact] = useState(user?.contactPerson || user?.email || "");
@@ -22,7 +24,7 @@ export function RequestCreatePage() {
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState(user?.address || "");
   const [datetime, setDatetime] = useState("");
-  const [imageName, setImageName] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -51,7 +53,7 @@ export function RequestCreatePage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!category || !name.trim() || !phone.trim() || !title.trim() || !issue.trim() || !description.trim() || !address.trim()) {
+    if (!name.trim() || !phone.trim() || !title.trim() || !issue.trim() || !description.trim() || !address.trim()) {
       setError(t("common.required"));
       return;
     }
@@ -59,12 +61,12 @@ export function RequestCreatePage() {
     setIsSubmitting(true);
     try {
       const request = await requestService.createRequest({
-        category,
+        category: defaultCategory,
         title: title.trim(),
         description: description.trim(),
         address: address.trim(),
         datetime: datetime.trim(),
-        imageName,
+        files,
         name: name.trim(),
         phone: phone.trim(),
         contact: contact.trim(),
@@ -78,8 +80,24 @@ export function RequestCreatePage() {
     }
   }
 
+  function handleFileChange(selectedFiles: FileList | null) {
+    if (!selectedFiles?.length) return;
+    setFiles(current => {
+      const next = [...current];
+      Array.from(selectedFiles).forEach(file => {
+        const duplicate = next.some(item => (
+          item.name === file.name &&
+          item.size === file.size &&
+          item.lastModified === file.lastModified
+        ));
+        if (!duplicate && next.length < maxUploadFiles) next.push(file);
+      });
+      return next;
+    });
+  }
+
   return (
-    <section className="page">
+    <section className="page request-create-page">
       <div className="page-header">
         <div>
           <h1>{t("request.createTitle")}</h1>
@@ -89,13 +107,22 @@ export function RequestCreatePage() {
       <Card>
         <form className="form-stack" onSubmit={handleSubmit}>
           <label className="field">
-            <span>{t("request.category")} *</span>
-            <select value={category} onChange={event => setCategory(event.target.value)}>
-              {categoryOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {t(option.key)}
-                </option>
-              ))}
+            <span>{t("request.subject")} *</span>
+            <input value={title} placeholder={t("request.titlePlaceholder")} onChange={event => setTitle(event.target.value)} />
+          </label>
+
+          <label className="field">
+            <span>{t("request.issue")} *</span>
+            <select value={issue} onChange={event => setIssue(event.target.value)}>
+              {issueOptions.length ? (
+                issueOptions.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))
+              ) : (
+                <option value="">{t("common.empty")}</option>
+              )}
             </select>
           </label>
 
@@ -115,33 +142,13 @@ export function RequestCreatePage() {
           </label>
 
           <label className="field">
-            <span>{t("request.issue")} *</span>
-            <select value={issue} onChange={event => setIssue(event.target.value)}>
-              {issueOptions.length ? (
-                issueOptions.map(option => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))
-              ) : (
-                <option value="">{t("common.empty")}</option>
-              )}
-            </select>
-          </label>
-
-          <label className="field">
-            <span>{t("request.subject")} *</span>
-            <input value={title} placeholder={t("request.titlePlaceholder")} onChange={event => setTitle(event.target.value)} />
+            <span>{t("request.address")} *</span>
+            <input value={address} placeholder={t("request.addressPlaceholder")} onChange={event => setAddress(event.target.value)} />
           </label>
 
           <label className="field">
             <span>{t("request.description")} *</span>
             <textarea value={description} placeholder={t("request.descriptionPlaceholder")} onChange={event => setDescription(event.target.value)} />
-          </label>
-
-          <label className="field">
-            <span>{t("request.address")} *</span>
-            <input value={address} placeholder={t("request.addressPlaceholder")} onChange={event => setAddress(event.target.value)} />
           </label>
 
           <label className="field">
@@ -151,13 +158,25 @@ export function RequestCreatePage() {
 
           <label className="upload-field">
             <Upload size={22} />
-            <span>{imageName || t("request.uploadHint")}</span>
+            <span>{t("request.attachments")}</span>
+            <span>{files.length ? t("request.filesSelected").replace("{count}", String(files.length)) : t("request.uploadHint")}</span>
             <input
               type="file"
-              accept="image/*"
-              onChange={event => setImageName(event.target.files?.[0]?.name || "")}
+              accept="image/*,video/*"
+              multiple
+              onChange={event => {
+                handleFileChange(event.target.files);
+                event.target.value = "";
+              }}
             />
           </label>
+          {files.length ? (
+            <div className="upload-file-list" aria-label={t("request.attachments")}>
+              {files.map(file => (
+                <span key={`${file.name}-${file.size}-${file.lastModified}`}>{file.name}</span>
+              ))}
+            </div>
+          ) : null}
 
           {error ? <div className="form-error">{error}</div> : null}
 

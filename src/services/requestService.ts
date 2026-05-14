@@ -13,6 +13,7 @@ export interface CreateRequestInput {
   address: string;
   datetime?: string;
   imageName?: string;
+  files?: File[];
   name?: string;
   phone?: string;
   contact?: string;
@@ -98,6 +99,11 @@ function normalizeBackendStatus(status?: string): RequestStatus {
 function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): SupportRequest {
   const status = normalizeBackendStatus(item.status);
   const createdAt = item.createdAt ? new Date(item.createdAt).toLocaleString() : todayLabel();
+  const mediaFiles = Array.isArray(item.mediaFiles) ? item.mediaFiles : [];
+  const mediaUrls = mediaFiles
+    .map((file: any) => file?.url || file)
+    .filter(Boolean);
+  const fallbackImages = input?.files?.length ? input.files.map(file => file.name) : input?.imageName ? [input.imageName] : [];
   return normalizeRequest({
     id: String(item.id || item._id || createRequestId()),
     title: input?.title || item.title || item.category || item.content || "",
@@ -106,7 +112,7 @@ function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): 
     address: item.address || input?.address || "",
     status,
     createdAt,
-    images: input?.imageName ? [input.imageName] : item.image ? [item.image] : [],
+    images: mediaUrls.length ? mediaUrls : item.image ? [item.image] : fallbackImages,
     timeline: [createTimelineEvent(status, REQUEST_TIMELINE_MESSAGE_KEYS[status], createdAt)],
     datetime: input?.datetime || item.datetime || "",
     projectName: useAppStore.getState().user?.projectName || input?.address || item.address || "",
@@ -121,21 +127,39 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
   const token = getUserToken();
   if (!token) return null;
 
+  const hasFiles = Boolean(input.files?.length);
+  const body = hasFiles ? new FormData() : JSON.stringify({
+    name: input.name,
+    phone: input.phone,
+    contact: input.contact,
+    category: input.category,
+    title: input.title,
+    address: input.address,
+    content: input.description,
+    issueTags: input.issueTags || [],
+    quoteRequested: false
+  });
+
+  if (hasFiles && body instanceof FormData) {
+    body.append("name", input.name || "");
+    body.append("phone", input.phone || "");
+    body.append("contact", input.contact || "");
+    body.append("category", input.category);
+    body.append("title", input.title);
+    body.append("address", input.address);
+    body.append("content", input.description);
+    body.append("quoteRequested", "false");
+    (input.issueTags || []).forEach(tag => body.append("issueTags", tag));
+    input.files?.slice(0, 12).forEach(file => body.append("image", file));
+  }
+
   const response = await fetch("/request", {
     method: "POST",
-    headers: {
+    headers: hasFiles ? { Authorization: `Bearer ${token}` } : {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({
-      name: input.name,
-      phone: input.phone,
-      contact: input.contact,
-      address: input.address,
-      content: input.description,
-      issueTags: input.issueTags || [],
-      quoteRequested: false
-    })
+    body
   });
 
   if (!response.ok) {
@@ -177,7 +201,7 @@ export const requestService = {
       address: input.address,
       status: "submitted",
       createdAt,
-      images: input.imageName ? [input.imageName] : [],
+      images: input.files?.length ? input.files.map(file => file.name) : input.imageName ? [input.imageName] : [],
       timeline: [createTimelineEvent("submitted", REQUEST_TIMELINE_MESSAGE_KEYS.submitted, createdAt)],
       datetime: input.datetime,
       projectName: user?.projectName || input.address,
