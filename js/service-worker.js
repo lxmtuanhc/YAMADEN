@@ -1,86 +1,17 @@
-const CACHE_NAME = "yamaden-support-auth-v72";
-
-const APP_SHELL = [
-  "/",
-  "/index.html",
-  "/css/main.css?v=72",
-  "/css/auth.css?v=72",
-  "/js/app.js?v=72",
-  "/js/auth.js?v=72",
-  "/data/manifest.json",
-  "/assets/icon-192.png",
-  "/assets/icon-512.png"
-];
-
-const API_PATHS = [
-  "/admin",
-  "/user",
-  "/request",
-  "/requests"
-];
+const LEGACY_CACHE_PREFIX = "yamaden-support";
 
 self.addEventListener("install", event => {
   self.skipWaiting();
-
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL))
-  );
 });
 
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
+      .then(keys => Promise.all(keys.filter(key => key.startsWith(LEGACY_CACHE_PREFIX)).map(key => caches.delete(key))))
+      .then(() => self.registration.unregister())
+      .then(() => self.clients.matchAll({ type: "window" }))
+      .then(clients => clients.forEach(client => client.navigate(client.url)))
   );
 });
 
-self.addEventListener("fetch", event => {
-  const request = event.request;
-
-  if (request.method !== "GET") return;
-
-  const url = new URL(request.url);
-
-  const isApiRequest = API_PATHS.some(path => {
-    return url.pathname === path || url.pathname.startsWith(path + "/");
-  });
-
-  if (isApiRequest) {
-    event.respondWith(fetch(request));
-    return;
-  }
-
-  if (
-    request.mode === "navigate" ||
-    url.pathname === "/" ||
-    url.pathname.endsWith(".html")
-  ) {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put("/index.html", copy));
-          return response;
-        })
-        .catch(() => caches.match("/index.html"))
-    );
-    return;
-  }
-
-  event.respondWith(
-    caches.match(request).then(cached => {
-      if (cached) return cached;
-
-      return fetch(request).then(response => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-        return response;
-      });
-    })
-  );
-});
+self.addEventListener("fetch", () => {});

@@ -18,6 +18,10 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.static(distPath));
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 app.use("/css", express.static(path.join(__dirname, "css")));
+app.get("/js/service-worker.js", (req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.sendFile(path.join(__dirname, "js", "service-worker.js"));
+});
 app.use("/js", express.static(path.join(__dirname, "js")));
 app.use("/data", express.static(path.join(__dirname, "data")));
 

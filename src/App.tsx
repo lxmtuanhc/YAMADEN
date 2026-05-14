@@ -16,6 +16,7 @@ import { QuoteDetailPage } from "./pages/quotes/QuoteDetailPage";
 import { SchedulePage } from "./pages/schedule/SchedulePage";
 import { AccountPage } from "./pages/account/AccountPage";
 import { SplashScreen } from "./components/SplashScreen";
+import { LegacyServiceWorkerCleanup } from "./components/LegacyServiceWorkerCleanup";
 
 function AuthGate() {
   const authStatus = useAppStore(state => state.authStatus);
@@ -28,6 +29,7 @@ function AuthGate() {
 export function App() {
   return (
     <>
+      <LegacyServiceWorkerCleanup />
       <SplashScreen />
       <Routes>
         <Route element={<AuthLayout />}>
