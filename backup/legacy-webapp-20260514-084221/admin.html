@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>YAMADEN Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="/assets/icon-admin-192.png" />
+<link rel="apple-touch-icon" href="/assets/icon-admin-192.png" />
+<link rel="manifest" href="/data/admin-manifest.json" />
+<meta name="theme-color" content="#020617" />
+<link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand" onclick="logoReload()">
+      <div class="brand-logo"><img src="/assets/icon-admin-192.png" alt="YAMADEN"></div>
+      <div>
+        <div class="brand-title" id="brandTitle">株式会社 山電</div>
+        <div class="brand-sub">YAMADEN.CO.LTD<br><span id="brandConsole">Admin Console</span></div>
+      </div>
+    </div>
+    <button class="menu-item active" id="menuDashboard" onclick="showView('dashboard')"><span class="menu-left"><span class="menu-ico">🏠</span><span data-i="dashboard">ダッシュボード</span></span></button>
+    <div class="menu-title" data-i="requestManage">依頼管理</div>
+    <button class="menu-item" id="menuUntreated" onclick="openRequestStatus('untreated')"><span class="menu-left"><span class="menu-ico">⏱</span><span data-i="untreated">未対応</span></span><span class="badge-dot" id="sideUntreated">0</span></button>
+    <button class="menu-item" id="menuProcessing" onclick="openRequestStatus('processing')"><span class="menu-left"><span class="menu-ico">💬</span><span data-i="processing">対応中</span></span><span class="menu-count" id="sideProcessing">0</span></button>
+    <button class="menu-item" id="menuQuoted" onclick="openRequestStatus('quoted')"><span class="menu-left"><span class="menu-ico">📄</span><span data-i="quoted">見積中</span></span><span class="menu-count" id="sideQuoted">0</span></button>
+    <button class="menu-item" id="menuOrdered" onclick="openRequestStatus('ordered')"><span class="menu-left"><span class="menu-ico">▦</span><span data-i="ordered">受注</span></span><span class="menu-count" id="sideOrdered">0</span></button>
+    <button class="menu-item" id="menuCompleted" onclick="openRequestStatus('completed')"><span class="menu-left"><span class="menu-ico">✓</span><span data-i="completed">完了</span></span><span class="menu-count" id="sideCompleted">0</span></button>
+    <button class="menu-item" id="menuLost" onclick="openRequestStatus('lost')"><span class="menu-left"><span class="menu-ico">x</span><span data-i="lost">Lost</span></span><span class="menu-count" id="sideLost">0</span></button>
+    <div class="menu-title" data-i="customerDeal">顧客・取引</div>
+    <button class="menu-item" id="menuUsers" onclick="showView('users')"><span class="menu-left"><span class="menu-ico">👥</span><span data-i="users">顧客一覧</span></span><span id="sideUsers">0</span></button>
+    <button class="menu-item" onclick="showView('requests')"><span class="menu-left"><span class="menu-ico">📋</span><span data-i="requestList">見積一覧</span></span></button>
+    <div class="menu-title" data-i="staffManage">スタッフ管理</div>
+    <button class="menu-item" id="menuStaff" onclick="showView('staff')"><span class="menu-left"><span class="menu-ico">🧑‍🔧</span><span data-i="staffList">スタッフ一覧</span></span><span id="sideStaff">0</span></button>
+    <button class="menu-item" id="menuSettings" onclick="openSettingsPanel()"><span class="menu-left"><span class="menu-ico">⚙</span><span data-i="setting">各種設定</span></span></button>
+    <div class="side-card"><div class="ai-dot">AI</div><div><b>AIアシスタント</b><p>自動分析・分担を支援</p></div></div>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px"><div class="mobile-brand brand-logo">⚡</div><div><div class="page-title" id="pageTitle">ダッシュボード</div><div class="page-sub" id="pageSub">本日もおつかれさまです。効率よく対応して売上を最大化しましょう！</div></div></div>
+      <div class="top-actions">
+        <button class="icon-btn" onclick="openRequestStatus('untreated')">🔔<span class="notify" id="notifyUntreated">0</span></button>
+        <button class="icon-btn" onclick="showView('requests')">💬<span class="notify" id="notifyChat">0</span></button>
+        <select class="select" id="language" onchange="changeLanguage()"><option value="ja">日本語</option><option value="vi">Tiếng Việt</option></select>
+        <div class="admin-chip"><span class="admin-dot"></span><div><div class="admin-name">Admin</div><div class="admin-role" id="adminRole">管理者</div></div></div>
+        <button class="primary-btn" onclick="logout()" id="logoutBtn">ログアウト</button>
+      </div>
+    </div>
+    <div class="content">
+      <section id="dashboardView">
+        <div class="kpis">
+          <div class="kpi"><div class="kpi-label"><span data-i="urgentNeed">最重要</span><span>⏰</span></div><div class="kpi-num" id="kpiUrgent">0</div><div class="trend down" data-i="urgentSub">未対応</div></div>
+          <div class="kpi"><div class="kpi-label" data-i="todaySales">今日の売上</div><div class="kpi-num" id="kpiSales">¥0</div><div class="trend">↑ 18.6%</div></div>
+          <div class="kpi"><div class="kpi-label" data-i="todayOrders">今週の受注数</div><div class="kpi-num" id="kpiOrders">0件</div><div class="trend">↑ 24.0%</div></div>
+          <div class="kpi"><div class="kpi-label" data-i="quoteRate">見積→受注率</div><div class="kpi-num" id="kpiQuoteRate">0%</div><div class="trend">↑ 8.2%</div></div>
+          <div class="kpi"><div class="kpi-label" data-i="avgTime">平均対応時間</div><div class="kpi-num" id="kpiAvg">-</div><div class="trend down">↓ 0.6時間</div></div>
+          <div class="kpi"><div class="kpi-label" data-i="claimRate">クレーム率</div><div class="kpi-num" id="kpiClaim">0%</div><div class="trend">↓ 0.4%</div></div>
+        </div>
+        <div class="grid">
+          <div>
+            <div class="panel"><div class="panel-head"><div class="panel-title">🔥 <span data-i="top5">今すぐ対応すべき依頼 TOP 5</span></div><button class="see-all" onclick="showView('requests')" data-i="seeAll">すべて見る ›</button></div><div class="table-wrap"><table class="queue-table"><thead><tr><th data-i="priority">緊急度</th><th data-i="content">依頼内容 / お客様</th><th data-i="elapsed">放置時間</th><th data-i="assignee">担当者</th><th data-i="action">アクション</th></tr></thead><tbody id="queueBody"></tbody></table></div></div>
+            <div class="panel request-panel"><div class="toolbar"><div class="tabs" id="mainTabs"></div><select id="staffFilter" class="filter-select" onchange="renderRequests()"><option value="all">全担当者</option></select><select id="urgentFilter" class="filter-select" onchange="renderRequests()"><option value="all">緊急度</option><option value="high">高</option><option value="normal">中</option></select><input class="search" id="search" placeholder="検索..." oninput="renderRequests()" /></div><div class="table-wrap"><table class="data-table"><thead><tr><th>依頼ID</th><th data-i="content">依頼内容</th><th data-i="customer">お客様</th><th data-i="priority">緊急度</th><th data-i="assignee">担当者</th><th data-i="status">ステータス</th><th data-i="elapsed">放置時間</th><th>AI判定</th><th data-i="reply">返信</th><th data-i="action">操作</th></tr></thead><tbody id="requestBody"></tbody></table></div></div>
+          </div>
+          <aside class="right-col"><div class="panel"><div class="panel-head"><div class="panel-title" data-i="aiAlert">AIからの提案・アラート</div><button class="see-all" data-i="seeAll">すべて見る ›</button></div><div class="alert-list" id="aiAlerts"></div></div><div class="panel"><div class="panel-head"><div class="panel-title" data-i="staffStatus">スタッフ稼働状況</div><button class="see-all" onclick="showView('staff')" data-i="seeAll">すべて見る ›</button></div><div class="staff-list" id="staffStatusList"></div></div></aside>
+        </div>
+      </section>
+      <section id="usersView" class="hidden"><div class="panel"><div class="panel-head"><div class="panel-title" data-i="users">顧客一覧</div><input id="userSearch" class="search" placeholder="検索..." oninput="renderUsers()" /></div><div class="cards" id="usersList"></div></div></section>
+      <section id="staffView" class="hidden"><div class="panel"><div class="panel-head"><div class="panel-title" data-i="staffList">スタッフ一覧</div></div><div class="simple-card"><div class="form-grid"><input class="input" id="staffName" placeholder="名前"><input class="input" id="staffPhone" placeholder="電話"><input class="input" id="staffEmail" placeholder="Email"><input class="input" id="staffAreas" placeholder="エリア"><input class="input" id="staffSkills" placeholder="専門"><select class="input" id="staffStatus"><option value="active">active</option><option value="busy">busy</option><option value="off">off</option></select><button class="save-btn" id="staffSaveBtn" onclick="saveStaffProfile()">保存</button></div></div><div class="cards" id="staffList"></div></div></section>
+    </div>
+  </main>
+</div>
+<div class="bottom-bar"><button class="quick-btn blue" onclick="openRequestStatus('quoted')">📄 <span data-i="makeQuote">見積書を作成</span></button><button class="quick-btn orange" onclick="openRequestStatus('processing')">📅 <span data-i="schedule">現場訪問をスケジュール</span></button><button class="quick-btn purple" onclick="showView('users')">👥 <span data-i="registerCustomer">顧客一覧</span></button><button class="quick-btn dark" onclick="showView('requests')">💬 <span data-i="chatList">チャット一覧</span></button></div>
+<div class="modal" id="modal" onclick="closeModal()"><div class="modal-box" onclick="event.stopPropagation()"><h3 id="modalTitle">削除の確認</h3><p id="modalText">削除しますか？</p><div class="modal-actions"><button class="cancel" onclick="closeModal()" id="cancelBtn">キャンセル</button><button class="danger" onclick="confirmDelete()" id="deleteBtn">削除</button></div></div></div>
+<div class="modal" id="imageModal" onclick="closeImageModal()"><div class="image-box" onclick="event.stopPropagation()"><button class="close-x" onclick="closeImageModal()">×</button><img id="imageModalImg"><video id="imageModalVideo" controls playsinline></video></div></div>
+<!-- yamaden-final-admin-structure-v1 -->
+<!-- yamaden-final-polish-v2 -->
+<!-- yamaden-table-nav-fix-v3 -->
+<!-- yamaden-canonical-nav-v4 -->
+<!-- yamaden-fixed-shell-v5 -->
+<!-- yamaden-id-label-v6 -->
+<!-- yamaden-stats-view-v10 -->
+<!-- yamaden-period-charts-v11 -->
+<!-- yamaden-admin-final-language-clean-v15 -->
+<!-- yamaden-manual-assignee-v17 -->
+<!-- yamaden-final-stats-charts-v21 -->
+<!-- yamaden-admin-issuefix-v30 -->
+
+<!-- yamaden-admin-language-stabilizer-v31 -->
+
+<!-- yamaden-admin-live-users-v44 -->
+<!-- yamaden-admin-permanent-delete-v45 -->
+<!-- yamaden-customer-stafflike-detail-v46 -->
+<!-- yamaden-admin-request-tags-final-v50 -->
+<!-- yamaden-admin-staff-clean-v53 -->
+<script src="/js/admin.js"></script>
+</body>
+</html>

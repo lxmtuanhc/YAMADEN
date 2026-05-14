@@ -1,4 +1,6 @@
 node_modules
+dist
+*.tsbuildinfo
 requests.json
 .env
 .codex-push-temp-2/
