@@ -5,6 +5,7 @@
   "description": "YAMADEN mobile-first support SPA",
   "scripts": {
     "start": "node server.js",
+    "postinstall": "npm run build",
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
