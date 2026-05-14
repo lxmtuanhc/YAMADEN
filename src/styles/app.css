@@ -1898,3 +1898,187 @@ textarea {
     min-height: 96px;
   }
 }
+
+/* =========================================================
+   PROFESSIONAL I18N RESERVE SPACE
+   Purpose: reserve space for JP/VN text instead of letting
+   text length resize cards, buttons, nav, or timelines.
+========================================================= */
+
+:root {
+  --title-line: 1.25;
+  --body-line: 1.35;
+  --button-height: 52px;
+  --compact-button-height: 40px;
+  --input-height: 48px;
+  --bottom-tab-height: calc(74px + env(safe-area-inset-bottom));
+  --bottom-tab-item-height: 58px;
+}
+
+.page-header h1,
+.section-title,
+.auth-card h1,
+.home-user h1,
+.home-user h2,
+.request-card h3,
+.quote-card h3 {
+  display: -webkit-box;
+  min-height: calc(2em * var(--title-line));
+  max-height: calc(2em * var(--title-line));
+  line-height: var(--title-line);
+  white-space: normal;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.auth-card p,
+.home-user p,
+.request-card p,
+.quote-card p,
+.timeline-text,
+.muted-line {
+  display: -webkit-box;
+  min-height: calc(2em * var(--body-line));
+  max-height: calc(2em * var(--body-line));
+  line-height: var(--body-line);
+  white-space: normal;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.auth-card p {
+  min-height: calc(3em * var(--body-line));
+  max-height: calc(3em * var(--body-line));
+  -webkit-line-clamp: 3;
+}
+
+.card {
+  max-height: none;
+}
+
+.home-hero {
+  min-height: 246px;
+  align-content: start;
+}
+
+.auth-card {
+  min-height: 360px;
+  align-content: center;
+}
+
+.request-card,
+.quote-list-card {
+  height: 136px;
+  min-height: 136px;
+  max-height: 136px;
+  align-items: center;
+}
+
+.request-card .list-body,
+.quote-list-card .list-body {
+  display: grid;
+  align-content: center;
+}
+
+.request-card p span,
+.quote-card p span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.button {
+  height: var(--button-height);
+  min-height: var(--button-height);
+  max-height: var(--button-height);
+}
+
+.button span {
+  line-height: 1.2;
+}
+
+.list-row > .button,
+.filter-tabs button {
+  height: var(--compact-button-height);
+  min-height: var(--compact-button-height);
+  max-height: var(--compact-button-height);
+}
+
+.field input,
+.field select,
+input,
+select {
+  height: var(--input-height);
+  min-height: var(--input-height);
+  max-height: var(--input-height);
+}
+
+.field textarea,
+textarea {
+  min-height: 132px;
+  max-height: 220px;
+}
+
+.bottom-tab {
+  flex: 0 0 var(--bottom-tab-height);
+  height: var(--bottom-tab-height);
+  min-height: var(--bottom-tab-height);
+  max-height: var(--bottom-tab-height);
+}
+
+.bottom-tab a {
+  height: var(--bottom-tab-item-height);
+  min-height: var(--bottom-tab-item-height);
+  max-height: var(--bottom-tab-item-height);
+}
+
+.bottom-tab a span {
+  height: 13px;
+  line-height: 13px;
+}
+
+.timeline-item {
+  grid-template-columns: 28px minmax(0, 1fr);
+  min-height: 42px;
+}
+
+.timeline-text {
+  align-self: start;
+}
+
+.stats-grid div {
+  min-height: 86px;
+}
+
+.stats-grid span {
+  min-height: calc(2em * var(--body-line));
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+@media (max-width: 600px) {
+  .content-scroll {
+    padding-bottom: 18px;
+  }
+
+  .page {
+    gap: 16px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .two-actions,
+  .action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
