@@ -2,6 +2,11 @@
   box-sizing: border-box;
 }
 
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body,
 #root {
@@ -1162,6 +1167,30 @@ textarea {
   box-sizing: border-box;
 }
 
+.language-switch button {
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+}
+
+.icon-button {
+  height: 42px;
+  min-height: 42px;
+  max-height: 42px;
+}
+
+.filter-tabs button {
+  height: 34px;
+  min-height: 34px;
+  max-height: 34px;
+}
+
+.list-row > .button {
+  height: 36px;
+  min-height: 36px;
+  max-height: 36px;
+}
+
 .top-bar,
 .header,
 .app-header {
@@ -1174,6 +1203,252 @@ textarea {
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
+}
+
+/* ===== FIX JP/VN TEXT LAYOUT JUMP: mobile/PWA text cannot size containers ===== */
+.app,
+.app-shell,
+.mobile-shell,
+.main,
+.main-content,
+.page,
+.screen,
+.content,
+.container,
+.content-scroll {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.app *,
+.app-shell *,
+.content-scroll *,
+.page *,
+.screen *,
+.card *,
+.request-card *,
+.menu-card *,
+.action-card *,
+.timeline-card *,
+.bottom-nav *,
+.bottom-tab *,
+.top-bar *,
+.header * {
+  min-width: 0;
+}
+
+.header,
+.app-header,
+.top-header {
+  height: 56px;
+  min-height: 56px;
+  max-height: 56px;
+  overflow: hidden;
+}
+
+.top-bar {
+  flex: 0 0 calc(74px + env(safe-area-inset-top));
+  height: calc(74px + env(safe-area-inset-top));
+  min-height: calc(74px + env(safe-area-inset-top));
+  max-height: calc(74px + env(safe-area-inset-top));
+}
+
+.header-title,
+.page-title,
+.section-title,
+.page-header h1 {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.bottom-nav {
+  width: min(520px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  height: 74px;
+  min-height: 74px;
+  max-height: 74px;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+.bottom-tab {
+  flex: 0 0 calc(74px + env(safe-area-inset-bottom));
+  height: calc(74px + env(safe-area-inset-bottom));
+  min-height: calc(74px + env(safe-area-inset-bottom));
+  max-height: calc(74px + env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+
+.bottom-nav button,
+.bottom-nav .nav-item,
+.bottom-nav .tab-item,
+.bottom-tab a {
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  height: 58px;
+  min-height: 58px;
+  max-height: 58px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.bottom-nav svg,
+.bottom-nav .icon,
+.bottom-tab svg {
+  flex: 0 0 auto;
+}
+
+.bottom-nav span,
+.bottom-nav .nav-label,
+.bottom-nav .tab-label,
+.bottom-tab span,
+.bottom-tab a span {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+  line-height: 1.1;
+  font-size: 11px;
+}
+
+button,
+.btn,
+.primary-btn,
+.secondary-btn,
+.action-btn,
+.button {
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+  max-height: 52px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+button span,
+.btn span,
+.button-label,
+.button span {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.menu-grid,
+.card-grid,
+.action-grid,
+.request-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.card,
+.request-card,
+.menu-card,
+.action-card,
+.timeline-card,
+.history-card {
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.request-card,
+.menu-card,
+.action-card {
+  min-height: 104px;
+  max-height: 160px;
+}
+
+.card-title,
+.request-title,
+.request-card h3,
+.quote-card h3,
+.menu-card-title,
+.action-title,
+.timeline-title,
+.history-title {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.card-text,
+.request-text,
+.request-card p,
+.quote-card p,
+.menu-card-text,
+.action-text,
+.subtext,
+.description,
+.timeline-text,
+.history-text {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.timeline-item,
+.history-item {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+}
+
+.form-row,
+.field-row,
+.form-group,
+.field {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+label,
+.form-label,
+.field span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 @media (max-width: 360px) {
