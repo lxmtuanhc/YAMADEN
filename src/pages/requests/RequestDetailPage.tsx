@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { Timeline } from "../../components/Timeline";
 import { QuoteCard } from "../../components/quotes/QuoteCard";
 import { Button } from "../../components/ui/Button";
@@ -13,14 +13,17 @@ import { useTranslation } from "../../hooks/useTranslation";
 import { REQUEST_UPDATE_ACTIONS } from "../../constants/requestStatus";
 import { quoteService } from "../../services/quoteService";
 import { requestService } from "../../services/requestService";
-import type { Quote, SupportRequest } from "../../types";
+import { scheduleService } from "../../services/scheduleService";
+import type { Quote, Schedule, SupportRequest } from "../../types";
 import { categoryOptions } from "./requestHelpers";
 
 export function RequestDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { t, language } = useTranslation();
   const [request, setRequest] = useState<SupportRequest | null>(null);
   const [relatedQuotes, setRelatedQuotes] = useState<Quote[]>([]);
+  const [relatedSchedules, setRelatedSchedules] = useState<Schedule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState("");
   const [error, setError] = useState("");
@@ -39,12 +42,13 @@ export function RequestDetailPage() {
       setError(t("common.empty"));
       return;
     }
-    Promise.all([requestService.getRequestById(id), quoteService.getQuotesByRequestId(id)])
-      .then(([result, quotes]) => {
+    Promise.all([requestService.getRequestById(id), quoteService.getQuotesByRequestId(id), scheduleService.getSchedulesByRequestId(id)])
+      .then(([result, quotes, schedules]) => {
         if (!mounted) return;
         if (result) setRequest(result);
         else setError(t("common.empty"));
         setRelatedQuotes(quotes);
+        setRelatedSchedules(schedules);
       })
       .catch(() => {
         if (mounted) setError(t("common.empty"));
@@ -138,6 +142,32 @@ export function RequestDetailPage() {
           </div>
         </Card>
       ) : null}
+
+      <Card>
+        <div className="list-row">
+          <h2 className="section-title">{t("schedule.related")}</h2>
+          <Button variant="outline" onClick={() => navigate(`/schedule?requestId=${request.id}`)}>
+            {t("schedule.create")}
+          </Button>
+        </div>
+        <div className="list-stack">
+          {relatedSchedules.length ? (
+            relatedSchedules.map(schedule => (
+              <div className="info-grid" key={schedule.id}>
+                <div className="list-row">
+                  <span className="list-id">{schedule.id}</span>
+                  <StatusBadge status={schedule.status} />
+                </div>
+                <InfoRow label={t("schedule.date")} value={schedule.date} />
+                <InfoRow label={t("schedule.time")} value={schedule.time} />
+                <InfoRow label={t("schedule.technician")} value={schedule.technician} />
+              </div>
+            ))
+          ) : (
+            <div className="muted-line">{t("common.empty")}</div>
+          )}
+        </div>
+      </Card>
 
       <Card>
         <h2 className="section-title">{t("request.timeline")}</h2>

@@ -18,7 +18,7 @@ export type RequestStatus =
 
 export type QuoteStatus = "pending" | "approved" | "revision_requested" | "expired";
 
-export type ScheduleStatus = "upcoming" | "confirmed" | "on_the_way" | "completed";
+export type ScheduleStatus = "upcoming" | "in_progress" | "completed" | "cancelled";
 
 export interface User {
   id: string;

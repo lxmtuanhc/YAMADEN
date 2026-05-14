@@ -22,10 +22,10 @@ const quoteStatusKeys: Record<QuoteStatus, TranslationKey> = {
 };
 
 const scheduleStatusKeys: Record<ScheduleStatus, TranslationKey> = {
-  upcoming: "schedule.upcoming",
-  confirmed: "status.scheduled",
-  on_the_way: "status.processing",
-  completed: "status.completed"
+  upcoming: "schedule.statusUpcoming",
+  in_progress: "schedule.statusInProgress",
+  completed: "schedule.statusCompleted",
+  cancelled: "schedule.statusCancelled"
 };
 
 export function StatusBadge({ status }: { status: Status }) {
