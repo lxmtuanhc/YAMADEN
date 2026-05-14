@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { useTranslation } from "../../hooks/useTranslation";
@@ -47,6 +48,9 @@ export function RegisterPage() {
         <button className="text-link" type="button" onClick={() => navigate("/login")}>
           {t("auth.hasAccount")} {t("auth.login")}
         </button>
+        <Button type="button" variant="outline" icon={<ArrowLeft size={18} />} onClick={() => navigate("/login")}>
+          {t("common.back")}
+        </Button>
       </Card>
     </section>
   );
