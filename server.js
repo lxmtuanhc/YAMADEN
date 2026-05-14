@@ -31,10 +31,9 @@ app.get("/js/service-worker.js", (req, res) => {
 app.use("/js", express.static(path.join(__dirname, "js")));
 app.use("/data", express.static(path.join(__dirname, "data")));
 
-const MAX_UPLOAD_FILE_SIZE = 100 * 1024 * 1024;
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_UPLOAD_FILE_SIZE },
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const ok = /^image\/|^video\//.test(file.mimetype || "");
     cb(ok ? null : new Error("Only image or video files are allowed"), ok);
@@ -288,34 +287,6 @@ function uploadMediaToCloudinary(fileBuffer) {
     );
 
     stream.end(fileBuffer);
-  });
-}
-
-function requestMediaUpload(req, res, next) {
-  upload.array("image", 12)(req, res, error => {
-    if (!error) return next();
-
-    const status = error instanceof multer.MulterError ? 400 : 415;
-    const code = error.code || "UPLOAD_ERROR";
-    const message = code === "LIMIT_FILE_SIZE"
-      ? "File exceeds upload size limit"
-      : error.message;
-
-    console.error("[request:create] multer upload failed", {
-      field: "image",
-      code,
-      message,
-      contentType: req.headers["content-type"] || "",
-      contentLength: req.headers["content-length"] || "",
-      limitBytes: MAX_UPLOAD_FILE_SIZE
-    });
-
-    return res.status(status).json({
-      message: "Upload failed",
-      code,
-      error: message,
-      limitBytes: code === "LIMIT_FILE_SIZE" ? MAX_UPLOAD_FILE_SIZE : undefined
-    });
   });
 }
 
@@ -1046,7 +1017,7 @@ app.get("/api/work-options", requireUser, async (req, res) => {
   }
 });
 
-app.post("/request", requireUser, requestMediaUpload, async (req, res) => {
+app.post("/request", requireUser, upload.array("image", 12), async (req, res) => {
   try {
     const requestCode = await generateRequestCode();
 
@@ -1075,20 +1046,6 @@ app.post("/request", requireUser, requestMediaUpload, async (req, res) => {
       }))
     });
 
-    if (files.length > 0 && !cloudinaryEnvReady) {
-      console.error("[request:create] cloudinary env missing", {
-        requestCode,
-        CLOUDINARY_CLOUD_NAME: Boolean(process.env.CLOUDINARY_CLOUD_NAME),
-        CLOUDINARY_API_KEY: Boolean(process.env.CLOUDINARY_API_KEY),
-        CLOUDINARY_API_SECRET: Boolean(process.env.CLOUDINARY_API_SECRET)
-      });
-      return res.status(500).json({
-        message: "Media upload failed",
-        code: "CLOUDINARY_ENV_MISSING",
-        error: "Cloudinary env missing"
-      });
-    }
-
     if ((req.headers["content-type"] || "").includes("multipart/form-data") && files.length === 0) {
       console.warn("[request:create] multipart request contained no multer files", {
         requestCode,
@@ -1097,32 +1054,35 @@ app.post("/request", requireUser, requestMediaUpload, async (req, res) => {
       });
     }
 
-    for (const file of files) {
-      try {
-        const uploadResult = await uploadMediaToCloudinary(file.buffer);
-        const type = uploadResult.resource_type === "video" || (file.mimetype || "").startsWith("video/")
-          ? "video"
-          : "image";
+    const CONCURRENT_LIMIT = 3;
+    for (let i = 0; i < files.length; i += CONCURRENT_LIMIT) {
+      const batch = files.slice(i, i + CONCURRENT_LIMIT);
+      const results = await Promise.all(batch.map(async file => {
+        try {
+          const uploadResult = await uploadMediaToCloudinary(file.buffer);
+          const type = uploadResult.resource_type === "video" || (file.mimetype || "").startsWith("video/")
+            ? "video"
+            : "image";
 
-        mediaFiles.push({
-          url: uploadResult.secure_url,
-          type
-        });
+          return {
+            url: uploadResult.secure_url,
+            type
+          };
 
-      } catch (uploadError) {
-        console.error("[request:create] cloudinary upload failed", {
-          requestCode,
-          fileName: file.originalname,
-          mimeType: file.mimetype,
-          size: file.size,
-          code: uploadError.http_code || uploadError.code,
-          message: uploadError.message
-        });
-        return res.status(500).json({
-          message: "Media upload failed",
-          error: uploadError.message
-        });
-      }
+        } catch (uploadError) {
+          console.error("[request:create] cloudinary upload failed", {
+            requestCode,
+            fileName: file.originalname,
+            mimeType: file.mimetype,
+            size: file.size,
+            code: uploadError.http_code || uploadError.code,
+            message: uploadError.message
+          });
+          return null;
+        }
+      }));
+
+      results.filter(result => result !== null).forEach(result => mediaFiles.push(result));
     }
 
     const firstMedia = mediaFiles[0] || { url: "", type: "" };
@@ -1441,9 +1401,19 @@ app.get("*", (req, res, next) => {
 
 app.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
+    console.error("[request:create] multer upload failed", {
+      field: "image",
+      code: error.code,
+      message: error.message,
+      contentType: req.headers["content-type"] || "",
+      contentLength: req.headers["content-length"] || "",
+      limitBytes: 50 * 1024 * 1024
+    });
     return res.status(400).json({
       message: "Upload failed",
-      error: error.message
+      code: error.code,
+      error: error.message,
+      limitBytes: error.code === "LIMIT_FILE_SIZE" ? 50 * 1024 * 1024 : undefined
     });
   }
 

@@ -240,8 +240,8 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
     body.append("address", input.address);
     body.append("content", input.description);
     body.append("quoteRequested", "false");
-    body.append("issueTags", JSON.stringify(input.issueTags || []));
-    uploadFiles.forEach(file => body.append("image", file, file.name));
+    (input.issueTags || []).forEach(tag => body.append("issueTags", tag));
+    uploadFiles.forEach(file => body.append("image", file));
     console.debug("[request:create] FormData fields", Array.from(body.entries()).map(([field, value]) => (
       value instanceof File
         ? { field, name: value.name, type: value.type, size: value.size }
