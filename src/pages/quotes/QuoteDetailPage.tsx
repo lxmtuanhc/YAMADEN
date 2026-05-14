@@ -49,12 +49,15 @@ export function QuoteDetailPage() {
 
   if (!id) return <Navigate to="/quotes" replace />;
 
-  async function updateStatus(status: Quote["status"]) {
+  async function updateStatus(status: "approved" | "revision_requested") {
     if (!quote) return;
     setActionLoading(status);
     setError("");
     try {
-      const updated = await quoteService.updateQuoteStatus(quote.id, status);
+      const updated =
+        status === "approved"
+          ? await quoteService.approveQuote(quote.id)
+          : await quoteService.requestRevision(quote.id);
       setQuote(updated);
     } catch {
       setError(t("common.empty"));

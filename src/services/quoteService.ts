@@ -1,26 +1,40 @@
 import { initialQuotes } from "../data/mockData";
+import { requestService } from "./requestService";
 import { useAppStore } from "../stores/appStore";
 import type { Quote, QuoteStatus } from "../types";
 
 export type UpdateQuoteInput = Partial<Pick<Quote, "status" | "validUntil" | "items" | "projectName">>;
 
+const quoteSeedById = new Map(initialQuotes.map(quote => [quote.id, quote]));
+
 function delay() {
   return new Promise(resolve => window.setTimeout(resolve, 120));
 }
 
+function normalizeQuote(quote: Quote): Quote {
+  const seed = quoteSeedById.get(quote.id);
+  return {
+    ...quote,
+    requestId: quote.requestId || seed?.requestId || "",
+    items: quote.items || seed?.items || [],
+    projectName: quote.projectName || seed?.projectName || "",
+    validUntil: quote.validUntil || seed?.validUntil || ""
+  };
+}
+
 function readQuotes(): Quote[] {
   const storeQuotes = useAppStore.getState().quotes;
-  if (storeQuotes.length) return storeQuotes;
+  if (storeQuotes.length) return storeQuotes.map(normalizeQuote);
 
   try {
     const raw = JSON.parse(localStorage.getItem("yamaden-mobile-spa") || "null");
     const saved = raw?.state?.quotes;
-    if (Array.isArray(saved)) return saved;
+    if (Array.isArray(saved)) return saved.map(normalizeQuote);
   } catch (error) {
     console.warn("Unable to read quote cache", error);
   }
 
-  return initialQuotes;
+  return initialQuotes.map(normalizeQuote);
 }
 
 function commitQuotes(quotes: Quote[]) {
@@ -40,6 +54,13 @@ export const quoteService = {
     return readQuotes().find(quote => quote.id === id) || null;
   },
 
+  async getQuotesByRequestId(requestId: string): Promise<Quote[]> {
+    await delay();
+    const allQuotes = readQuotes();
+    commitQuotes(allQuotes);
+    return allQuotes.filter(quote => quote.requestId === requestId);
+  },
+
   async updateQuote(id: string, input: UpdateQuoteInput): Promise<Quote> {
     await delay();
     const quotes = readQuotes();
@@ -52,6 +73,30 @@ export const quoteService = {
   },
 
   async updateQuoteStatus(id: string, status: QuoteStatus): Promise<Quote> {
-    return quoteService.updateQuote(id, { status });
+    const quote = await quoteService.updateQuote(id, { status });
+
+    if (status === "approved") {
+      await requestService.addTimelineEvent(quote.requestId, {
+        type: "scheduled",
+        message: "request.timelineQuoteApproved"
+      });
+    }
+
+    if (status === "revision_requested") {
+      await requestService.addTimelineEvent(quote.requestId, {
+        type: "waiting_customer",
+        message: "request.timelineQuoteRevision"
+      });
+    }
+
+    return quote;
+  },
+
+  async approveQuote(id: string): Promise<Quote> {
+    return quoteService.updateQuoteStatus(id, "approved");
+  },
+
+  async requestRevision(id: string): Promise<Quote> {
+    return quoteService.updateQuoteStatus(id, "revision_requested");
   }
 };

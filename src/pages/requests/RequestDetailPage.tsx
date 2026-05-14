@@ -2,6 +2,7 @@ import { MessageCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { Timeline } from "../../components/Timeline";
+import { QuoteCard } from "../../components/quotes/QuoteCard";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { ErrorState } from "../../components/ui/ErrorState";
@@ -10,14 +11,16 @@ import { StatusBadge } from "../../components/ui/StatusBadge";
 import type { TranslationKey } from "../../i18n";
 import { useTranslation } from "../../hooks/useTranslation";
 import { REQUEST_UPDATE_ACTIONS } from "../../constants/requestStatus";
+import { quoteService } from "../../services/quoteService";
 import { requestService } from "../../services/requestService";
-import type { SupportRequest } from "../../types";
+import type { Quote, SupportRequest } from "../../types";
 import { categoryOptions } from "./requestHelpers";
 
 export function RequestDetailPage() {
   const { id } = useParams();
   const { t, language } = useTranslation();
   const [request, setRequest] = useState<SupportRequest | null>(null);
+  const [relatedQuotes, setRelatedQuotes] = useState<Quote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState("");
   const [error, setError] = useState("");
@@ -36,12 +39,12 @@ export function RequestDetailPage() {
       setError(t("common.empty"));
       return;
     }
-    requestService
-      .getRequestById(id)
-      .then(result => {
+    Promise.all([requestService.getRequestById(id), quoteService.getQuotesByRequestId(id)])
+      .then(([result, quotes]) => {
         if (!mounted) return;
         if (result) setRequest(result);
         else setError(t("common.empty"));
+        setRelatedQuotes(quotes);
       })
       .catch(() => {
         if (mounted) setError(t("common.empty"));
@@ -124,6 +127,17 @@ export function RequestDetailPage() {
             : <div className="muted-line">{t("common.empty")}</div>}
         </div>
       </Card>
+
+      {relatedQuotes.length ? (
+        <Card>
+          <h2 className="section-title">{t("quote.related")}</h2>
+          <div className="list-stack">
+            {relatedQuotes.map(quote => (
+              <QuoteCard key={quote.id} quote={quote} />
+            ))}
+          </div>
+        </Card>
+      ) : null}
 
       <Card>
         <h2 className="section-title">{t("request.timeline")}</h2>
