@@ -1006,6 +1006,176 @@ p {
   font-weight: 950;
 }
 
+/* Mobile/PWA layout hardening: language changes must never resize the app frame. */
+.app,
+.app-shell,
+.mobile-shell,
+.main,
+.main-content,
+.content-scroll,
+.page,
+.screen {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.bottom-nav,
+.bottom-tab {
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.bottom-nav {
+  width: min(520px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+}
+
+.bottom-nav button,
+.bottom-nav .nav-item {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 58px;
+  max-height: 58px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.bottom-tab a {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 54px;
+  max-height: 54px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.bottom-nav button span,
+.bottom-nav .nav-label,
+.bottom-tab a span,
+.tab-label,
+.button-label,
+.button span {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.15;
+}
+
+.card,
+.request-card,
+.quote-list-card,
+.menu-card,
+.action-card,
+.timeline-card,
+.auth-card,
+.home-hero {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.card-title,
+.request-title,
+.request-card h3,
+.quote-card h3,
+.menu-card-title,
+.action-title,
+.timeline-title,
+.section-title,
+.page-title,
+.page-header h1,
+.header-title,
+.brand-mark strong,
+.brand-mark span {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-title,
+.page-title,
+.page-header h1,
+.card-title,
+.request-card h3,
+.quote-card h3,
+.menu-card-title,
+.action-title,
+.brand-mark strong,
+.brand-mark span {
+  white-space: nowrap;
+}
+
+.card-text,
+.request-text,
+.request-card p,
+.quote-card p,
+.timeline-text,
+.description,
+.subtext,
+.muted-line,
+.info-row strong {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.menu-grid,
+.card-grid,
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.menu-grid > *,
+.card-grid > *,
+.action-grid > *,
+.two-actions > *,
+.stats-grid > * {
+  min-width: 0;
+}
+
+button,
+.btn,
+.primary-btn,
+.secondary-btn,
+.button {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.top-bar,
+.header,
+.app-header {
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.timeline,
+.timeline-item {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
 @media (max-width: 360px) {
   .top-bar {
     gap: 8px;
@@ -1027,7 +1197,6 @@ p {
     min-width: 35px;
   }
 
-  .action-grid,
   .two-actions,
   .stats-grid {
     grid-template-columns: 1fr;
