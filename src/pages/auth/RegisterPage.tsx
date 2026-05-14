@@ -14,14 +14,18 @@ export function RegisterPage() {
   const [confirmPin, setConfirmPin] = useState("");
   const [error, setError] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!phone.trim() || pin.length !== 6 || pin !== confirmPin) {
       setError(t("common.required"));
       return;
     }
-    register(phone.trim(), pin);
-    navigate("/profile-setup");
+    try {
+      await register(phone.trim(), pin);
+      navigate("/profile-setup");
+    } catch {
+      setError(t("common.required"));
+    }
   }
 
   return (

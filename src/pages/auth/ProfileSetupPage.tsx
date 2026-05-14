@@ -55,12 +55,12 @@ export function ProfileSetupPage() {
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!validateStep(0) || !validateStep(1) || !validateStep(2)) {
       return;
     }
-    saveProfile({
+    await saveProfile({
       name: name.trim(),
       email: email.trim(),
       phone: phone.trim(),

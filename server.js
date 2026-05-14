@@ -166,7 +166,7 @@ const UserSchema = new mongoose.Schema({
   note: String,
   pinHash: String,
   profileCompleted: { type: Boolean, default: false },
-  status: { type: String, default: "pending" },
+  status: { type: String, default: "pendingApproval" },
   createdAt: Date,
   approvedAt: Date,
   deletedAt: Date,
@@ -192,8 +192,17 @@ const Request = mongoose.model("Request", RequestSchema);
 const User = mongoose.model("User", UserSchema);
 const Staff = mongoose.model("Staff", StaffSchema);
 
+const USER_STATUS_PENDING = "pendingApproval";
+
+function normalizeUserStatus(status) {
+  if (status === "pending") return USER_STATUS_PENDING;
+  return status || USER_STATUS_PENDING;
+}
+
 function publicUser(user) {
   const item = user.toObject ? user.toObject() : { ...user };
+  item.id = String(item._id || item.id || "");
+  item.status = normalizeUserStatus(item.status);
   delete item.pinHash;
   return item;
 }
@@ -460,7 +469,7 @@ app.post("/user/register", async (req, res) => {
 
     user.phone = phone;
     user.pinHash = await bcrypt.hash(pin, 10);
-    user.status = "pending";
+    user.status = USER_STATUS_PENDING;
     user.deletedAt = undefined;
     user.reactivatedAt = wasDeleted ? new Date() : user.reactivatedAt;
     user.createdAt = new Date();
@@ -483,7 +492,7 @@ app.post("/user/register", async (req, res) => {
     notifySlack(
       "*YAMADEN - User mới đăng ký*\n" +
       "SĐT: " + user.phone + "\n" +
-      "Trạng thái: " + (user.status || "pending") + "\n" +
+      "Trạng thái: " + (user.status || USER_STATUS_PENDING) + "\n" +
       "Admin: " + ADMIN_URL
     );
 
@@ -568,13 +577,14 @@ app.put("/user/profile", requireUser, async (req, res) => {
     const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    ["name", "email", "company", "province", "projectName", "address", "contact", "note"].forEach(field => {
+    ["name", "phone", "email", "company", "province", "projectName", "address", "contact", "note"].forEach(field => {
       if (req.body[field] !== undefined) {
         user[field] = String(req.body[field] || "").trim();
       }
     });
 
     user.profileCompleted = Boolean(user.name && user.email && user.province && user.projectName);
+    if (user.status !== "active") user.status = USER_STATUS_PENDING;
     await user.save();
 
     notifySlack(
@@ -588,7 +598,7 @@ app.put("/user/profile", requireUser, async (req, res) => {
       "Công trình: " + (user.projectName || "-") + "\n" +
       "Công ty/cá nhân: " + (user.company || "-") + "\n" +
       "Ghi chú: " + (user.note || "-") + "\n" +
-      "Trạng thái: " + (user.status || "pending") + "\n" +
+      "Trạng thái: " + (user.status || USER_STATUS_PENDING) + "\n" +
       "Admin: " + ADMIN_URL
     );
 
@@ -627,6 +637,49 @@ app.get("/user/requests", requireUser, async (req, res) => {
       message: "Read failed",
       error: error.message
     });
+  }
+});
+
+app.get("/api/admin/users", requireAdmin, async (req, res) => {
+  try {
+    res.set("Cache-Control", "no-store");
+    const users = await User.find().sort({ createdAt: -1 });
+
+    const counts = await Request.aggregate([
+      { $match: { userId: { $ne: "" } } },
+      { $group: { _id: "$userId", count: { $sum: 1 } } }
+    ]);
+
+    const countMap = new Map(counts.map(item => [String(item._id), item.count]));
+
+    res.json(users.map(user => {
+      const item = publicUser(user);
+      item.requestCount = countMap.get(String(user._id)) || 0;
+      return item;
+    }));
+
+  } catch (error) {
+    res.status(500).json({ message: "Read failed", error: error.message });
+  }
+});
+
+app.patch("/api/admin/users/:id/approve", requireAdmin, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.status = "active";
+    if (!user.approvedAt) user.approvedAt = new Date();
+    user.deletedAt = undefined;
+    await user.save();
+
+    res.json({
+      data: publicUser(user),
+      message: "Approved"
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Approve failed", error: error.message });
   }
 });
 
@@ -677,7 +730,8 @@ app.put("/admin/users/:id", requireAdmin, async (req, res) => {
     ["name", "phone", "email", "contact", "company", "customerType", "province", "projectName", "address", "note", "status"].forEach(field => {
       if (req.body[field] !== undefined) user[field] = req.body[field];
     });
-    if (previousStatus === "pending" && req.body.status === "active" && !user.approvedAt) {
+    user.status = normalizeUserStatus(user.status);
+    if ((previousStatus === "pending" || previousStatus === USER_STATUS_PENDING) && req.body.status === "active" && !user.approvedAt) {
       user.approvedAt = new Date();
     }
     if (req.body.status && req.body.status !== "deleted") {
@@ -707,7 +761,7 @@ app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (req.query.permanent === "true" || user.status === "pending") {
+    if (req.query.permanent === "true" || user.status === "pending" || user.status === USER_STATUS_PENDING) {
       await Request.updateMany({ userId }, { $set: { userId: "" } });
       await User.deleteOne({ _id: userId });
       return res.json({ message: "User permanently deleted" });
@@ -1007,6 +1061,143 @@ app.delete("/request/:id", requireAdmin, async (req, res) => {
       message: "Delete failed",
       error: error.message
     });
+  }
+});
+
+app.post("/api/auth/register", async (req, res) => {
+  try {
+    if (!USER_JWT_SECRET) {
+      return res.status(500).json({ message: "User login is not configured" });
+    }
+
+    const phone = String(req.body.phone || "").trim();
+    const pin = String(req.body.pin || "").trim();
+
+    if (!phone || !/^\d{4,6}$/.test(pin)) {
+      return res.status(400).json({ message: "Phone and 4-6 digit PIN are required" });
+    }
+
+    let user = await User.findOne({ phone });
+    const wasDeleted = user && user.status === "deleted";
+
+    if (user && user.pinHash && !wasDeleted) {
+      const ok = await bcrypt.compare(pin, user.pinHash);
+      if (!ok) return res.status(409).json({ message: "Phone is already registered" });
+    }
+
+    user = user || new User({ phone });
+    user.phone = phone;
+    user.pinHash = await bcrypt.hash(pin, 10);
+    user.status = USER_STATUS_PENDING;
+    user.profileCompleted = false;
+    user.deletedAt = undefined;
+    user.reactivatedAt = wasDeleted ? new Date() : user.reactivatedAt;
+    user.createdAt = user.createdAt || new Date();
+    user.lastLoginAt = new Date();
+
+    if (wasDeleted) {
+      user.name = "";
+      user.email = "";
+      user.contact = "";
+      user.company = "";
+      user.customerType = "";
+      user.province = "";
+      user.projectName = "";
+      user.address = "";
+      user.note = "";
+    }
+
+    await user.save();
+
+    const token = jwt.sign(
+      { role: "user", userId: String(user._id), phone: user.phone },
+      USER_JWT_SECRET,
+      { expiresIn: "180d" }
+    );
+
+    res.json({
+      data: {
+        user: publicUser(user),
+        token,
+        status: "profileIncomplete"
+      }
+    });
+
+  } catch (error) {
+    console.log("API REGISTER ERROR:", error);
+    res.status(500).json({ message: "Register failed", error: error.message });
+  }
+});
+
+app.post("/api/auth/profile", requireUser, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.name = String(req.body.name || "").trim();
+    user.phone = String(req.body.phone || user.phone || "").trim();
+    user.email = String(req.body.email || "").trim();
+    user.address = String(req.body.address || "").trim();
+    user.province = user.address;
+    user.projectName = String(req.body.projectName || "").trim();
+    user.customerType = String(req.body.companyType || req.body.accountType || "personal").trim();
+    user.company = String(req.body.companyName || "").trim();
+    user.contact = String(req.body.contactPerson || "").trim();
+    user.profileCompleted = Boolean(user.name && user.email && user.address && user.projectName);
+    if (user.status !== "active") user.status = USER_STATUS_PENDING;
+
+    await user.save();
+
+    res.json({
+      data: {
+        user: publicUser(user),
+        status: normalizeUserStatus(user.status)
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Profile update failed", error: error.message });
+  }
+});
+
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    if (!USER_JWT_SECRET) {
+      return res.status(500).json({ message: "User login is not configured" });
+    }
+
+    const phone = String(req.body.phone || "").trim();
+    const pin = String(req.body.pin || "").trim();
+    const user = await User.findOne({ phone });
+
+    if (!user || !user.pinHash) return res.status(401).json({ message: "Invalid phone or PIN" });
+
+    const ok = await bcrypt.compare(pin, user.pinHash);
+    if (!ok) return res.status(401).json({ message: "Invalid phone or PIN" });
+
+    if (user.status === "deleted") return res.status(403).json({ message: "User was deleted. Please register again." });
+    if (user.status === "blocked") return res.status(403).json({ message: "User is blocked" });
+
+    user.status = normalizeUserStatus(user.status);
+    user.lastLoginAt = new Date();
+    await user.save();
+
+    const token = jwt.sign(
+      { role: "user", userId: String(user._id), phone: user.phone },
+      USER_JWT_SECRET,
+      { expiresIn: "180d" }
+    );
+
+    res.json({
+      data: {
+        user: publicUser(user),
+        token,
+        status: normalizeUserStatus(user.status)
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Login failed", error: error.message });
   }
 });
 

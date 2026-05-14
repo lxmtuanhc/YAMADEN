@@ -14,18 +14,27 @@ export function LoginPage() {
   const [pin, setPin] = useState("123456");
   const [error, setError] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!phone.trim() || !pin.trim()) {
       setError(t("auth.loginErrorRequired"));
       return;
     }
-    if (!login(phone, pin)) {
-      const isPendingAccount = user?.phone === phone.trim() && user?.pin === pin && user.status === "pendingApproval";
+    try {
+      if (await login(phone, pin)) {
+        navigate("/home");
+        return;
+      }
+      const latestUser = useAppStore.getState().user || user;
+      const isPendingAccount = latestUser?.phone === phone.trim() && latestUser.status === "pendingApproval";
+      if (isPendingAccount) {
+        navigate("/pending");
+        return;
+      }
       setError(isPendingAccount ? t("auth.loginErrorPending") : t("auth.loginErrorInvalid"));
-      return;
+    } catch {
+      setError(t("auth.loginErrorInvalid"));
     }
-    navigate("/home");
   }
 
   return (
