@@ -64,6 +64,8 @@ export function ProfileSetupPage() {
       name: name.trim(),
       email: email.trim(),
       phone: phone.trim(),
+      address: address.trim(),
+      projectName: projectName.trim(),
       accountType,
       companyName: accountType === "company" ? companyName.trim() : "",
       contactPerson: accountType === "company" ? contactPerson.trim() : ""

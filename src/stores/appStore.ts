@@ -4,7 +4,7 @@ import { APP_STORAGE_KEY } from "../constants/storageKeys";
 import { defaultUser, initialQuotes, initialRequests, initialSchedules } from "../data/mockData";
 import type { Language, Quote, QuoteStatus, RequestStatus, Schedule, SupportRequest, User, UserStatus } from "../types";
 
-type ProfileInput = Pick<User, "name" | "email" | "phone" | "accountType" | "companyName" | "contactPerson">;
+type ProfileInput = Pick<User, "name" | "email" | "phone" | "address" | "projectName" | "accountType" | "companyName" | "contactPerson">;
 
 interface AppState {
   language: Language;
@@ -45,9 +45,11 @@ export const useAppStore = create<AppState>()(
       schedules: initialSchedules,
       setLanguage: language => set({ language }),
       login: (phone, pin) => {
-        const user = get().user;
-        if (user && user.phone === phone && user.pin === pin && user.status === "active") {
-          set({ authStatus: "active" });
+        const normalizedPhone = phone.trim();
+        const users = get().users || [];
+        const user = users.find(item => item.phone === normalizedPhone && item.pin === pin && item.status === "active");
+        if (user) {
+          set({ user, users: upsertUser(users, user), authStatus: "active" });
           return true;
         }
         return false;

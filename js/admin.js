@@ -926,6 +926,11 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
   function localRequests(){
     return (Array.isArray(state().requests)?state().requests:[]).map(localRequestToAdmin);
   }
+  function hasLocalUser(id){
+    const current=state().user;
+    const users=Array.isArray(state().users)?state().users:[];
+    return !!((current&&String(current.id)===String(id))||users.some(user=>String(user.id)===String(id)));
+  }
   function updateLocalUser(id,patch){
     const current=state().user;
     const users=Array.isArray(state().users)?state().users:[];
@@ -940,6 +945,24 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
     const authStatus=isCurrent&&status==="active"?"notLoggedIn":isCurrent&&status==="pendingApproval"?"pendingApproval":state().authStatus;
     savePatch(Object.assign({users:nextUsers},isCurrent?{user:next,authStatus}:{}));
     return true;
+  }
+  function removeLocalUser(id){
+    const current=state().user;
+    const users=Array.isArray(state().users)?state().users:[];
+    if(!hasLocalUser(id))return false;
+    const isCurrent=current&&String(current.id)===String(id);
+    savePatch(Object.assign(
+      {users:users.filter(user=>String(user.id)!==String(id))},
+      isCurrent?{user:null,authStatus:"notLoggedIn"}:{}
+    ));
+    return true;
+  }
+  function applyLocalUserAction(id,action){
+    if(!hasLocalUser(id))return false;
+    if(action==="approve"||action==="reactivate"||action==="unblock")return updateLocalUser(id,{status:"active"});
+    if(action==="block")return updateLocalUser(id,{status:"blocked"});
+    if(action==="reject"||action==="delete"||action==="permanent")return removeLocalUser(id);
+    return false;
   }
   function updateLocalRequest(id,patch){
     const current=Array.isArray(state().requests)?state().requests:[];
@@ -1048,14 +1071,7 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
   window.confirmDelete=async function(){
     if(deleteMode==="stableUserAction"&&window.__stableUserAction){
       const item=window.__stableUserAction;
-      const user=state().user;
-      if(user&&String(user.id)===String(item.id)){
-        if(item.action==="approve"||item.action==="reactivate"||item.action==="unblock")updateLocalUser(item.id,{status:"active"});
-        if(item.action==="block")updateLocalUser(item.id,{status:"blocked"});
-        if(item.action==="reject"||item.action==="delete"||item.action==="permanent"){
-          const users=Array.isArray(state().users)?state().users:[];
-          savePatch({user:null,users:users.filter(user=>String(user.id)!==String(item.id)),authStatus:"notLoggedIn"});
-        }
+      if(applyLocalUserAction(item.id,item.action)){
         window.__stableUserAction=null;
         closeModal();
         window.loadUsers();
@@ -1097,17 +1113,11 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
     if(!btn)return;
     const id=btn.dataset.userId;
     const action=btn.dataset.userAction;
-    const user=state().user;
-    if(!user||String(user.id)!==String(id))return;
+    if(!hasLocalUser(id))return;
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
-    if(action==="approve"||action==="reactivate"||action==="unblock")updateLocalUser(id,{status:"active"});
-    if(action==="block")updateLocalUser(id,{status:"blocked"});
-    if(action==="reject"||action==="delete"||action==="permanent"){
-      const users=Array.isArray(state().users)?state().users:[];
-      savePatch({user:null,users:users.filter(user=>String(user.id)!==String(id)),authStatus:"notLoggedIn"});
-    }
+    applyLocalUserAction(id,action);
     window.loadUsers();
   },true);
   window.addEventListener("storage",function(e){
