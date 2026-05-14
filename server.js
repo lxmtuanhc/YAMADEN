@@ -127,11 +127,15 @@ function notifySlack(text) {
 
 const RequestSchema = new mongoose.Schema({
   id: mongoose.Schema.Types.Mixed,
+  requestCode: String,
+  requestId: String,
   userId: String,
   name: String,
   phone: String,
   contact: String,
   address: String,
+  title: String,
+  category: String,
   content: String,
   image: String,
   mediaUrl: String,
@@ -150,7 +154,14 @@ const RequestSchema = new mongoose.Schema({
   assigneeId: String,
   assigneeName: String,
   issueTags: [String],
-  quoteRequested: Boolean
+  quoteRequested: Boolean,
+  timeline: [{
+    id: String,
+    type: String,
+    message: String,
+    note: String,
+    createdAt: Date
+  }]
 });
 
 const UserSchema = new mongoose.Schema({
@@ -208,21 +219,41 @@ function publicUser(user) {
 }
 
 function makeIdQuery(id) {
-  const query = [{ id }];
+  const query = [{ id }, { requestCode: id }, { requestId: id }];
   if (!isNaN(Number(id))) query.push({ id: Number(id) });
+  if (mongoose.Types.ObjectId.isValid(id)) query.push({ _id: id });
   return { $or: query };
 }
 
-async function generateRequestId() {
-  let id;
+async function generateRequestCode() {
+  let code;
   let exists;
 
   do {
-    id = "YD-" + Math.floor(1000 + Math.random() * 9000);
-    exists = await Request.findOne({ id });
+    code = "YMD-" + Math.floor(Math.random() * 1000000).toString().padStart(6, "0");
+    exists = await Request.findOne({
+      $or: [
+        { requestCode: code },
+        { requestId: code },
+        { id: code }
+      ]
+    });
   } while (exists);
 
-  return id;
+  return code;
+}
+
+async function ensureRequestCode(item) {
+  if (!item) return "";
+  if (item.requestCode && /^YMD-\d{6}$/.test(String(item.requestCode))) {
+    if (!item.requestId) item.requestId = item.requestCode;
+    return item.requestCode;
+  }
+
+  const code = await generateRequestCode();
+  item.requestCode = code;
+  item.requestId = code;
+  return code;
 }
 
 function uploadMediaToCloudinary(fileBuffer) {
@@ -241,19 +272,65 @@ function uploadMediaToCloudinary(fileBuffer) {
 
 function normalizeRequestStatus(status) {
   if (status === "pending") return "untreated";
-  if (status === "processing") return "contacted";
+  if (status === "received") return "contacted";
+  if (status === "waiting_customer") return "estimating";
+  if (status === "scheduled") return "ordered";
+  if (status === "cancelled") return "lost";
   if (status === "completed") return "completed";
   return status || "untreated";
 }
 
 const REQUEST_STATUS_TIMESTAMPS = {
   contacted: ["firstResponseAt", "contactedAt"],
+  processing: ["firstResponseAt", "contactedAt"],
+  estimating: ["firstResponseAt"],
   site_done: ["siteVisitedAt"],
   quoted: ["quotedAt"],
   ordered: ["orderedAt"],
   completed: ["completedAt"],
   lost: ["lostAt"]
 };
+
+const REQUEST_STATUS_TO_CUSTOMER = {
+  untreated: "submitted",
+  contacted: "received",
+  processing: "processing",
+  site_done: "processing",
+  estimating: "waiting_customer",
+  quoted: "waiting_customer",
+  ordered: "scheduled",
+  completed: "completed",
+  lost: "cancelled"
+};
+
+const CUSTOMER_TIMELINE_MESSAGES = {
+  submitted: "request.timelineSubmitted",
+  received: "request.timelineReceived",
+  processing: "request.timelineProcessing",
+  waiting_customer: "request.timelineWaiting",
+  scheduled: "request.timelineScheduled",
+  completed: "request.timelineCompleted",
+  cancelled: "status.cancelled"
+};
+
+function customerStatus(status) {
+  return REQUEST_STATUS_TO_CUSTOMER[status] || REQUEST_STATUS_TO_CUSTOMER[normalizeRequestStatus(status)] || status || "submitted";
+}
+
+function mergeStatusTimeline(item, status, note) {
+  const type = customerStatus(status);
+  const message = CUSTOMER_TIMELINE_MESSAGES[type] || "request.timelineSubmitted";
+  const existing = Array.isArray(item.timeline) ? item.timeline : [];
+  item.timeline = existing
+    .filter(event => event && event.type !== type)
+    .concat([{
+      id: "tl-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+      type,
+      message,
+      note: String(note || "").trim(),
+      createdAt: new Date()
+    }]);
+}
 
 function applyStatusTimestamps(item, nextStatus) {
   const normalized = normalizeRequestStatus(nextStatus);
@@ -922,7 +999,7 @@ app.get("/api/work-options", requireUser, async (req, res) => {
 
 app.post("/request", requireUser, upload.array("image", 12), async (req, res) => {
   try {
-    const shortId = await generateRequestId();
+    const requestCode = await generateRequestCode();
 
     const user = await User.findById(req.user.userId);
     if (!user) return res.status(401).json({ message: "User not found" });
@@ -961,12 +1038,16 @@ app.post("/request", requireUser, upload.array("image", 12), async (req, res) =>
     const bestAssignee = await findBestAssignee(issueTags);
 
     const newRequest = new Request({
-      id: shortId,
+      id: requestCode,
+      requestCode,
+      requestId: requestCode,
       userId: String(user._id),
       name: req.body.name || user.name || "",
       phone: req.body.phone || user.phone || "",
       contact: req.body.contact || user.contact || "",
       address: req.body.address || user.address || "",
+      title: req.body.title || "",
+      category: req.body.category || "",
       content: req.body.content || "",
       image: firstMedia.type === "image" ? firstMedia.url : "",
       mediaUrl: firstMedia.url,
@@ -978,6 +1059,13 @@ app.post("/request", requireUser, upload.array("image", 12), async (req, res) =>
       assigneeName: bestAssignee ? bestAssignee.name : "",
       status: "untreated",
       adminReply: "",
+      timeline: [{
+        id: "tl-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+        type: "submitted",
+        message: "request.timelineSubmitted",
+        note: "",
+        createdAt: new Date()
+      }],
       createdAt: new Date()
     });
 
@@ -989,7 +1077,7 @@ app.post("/request", requireUser, upload.array("image", 12), async (req, res) =>
 
     notifySlack(
       "*YAMADEN - Yêu cầu mới*\n" +
-      "ID: " + shortId + "\n" +
+      "ID: " + requestCode + "\n" +
       "Nguồn: Tài khoản khách hàng\n" +
       "Tên: " + (newRequest.name || "-") + "\n" +
       "SĐT: " + (newRequest.phone || "-") + "\n" +
@@ -1015,6 +1103,12 @@ app.post("/request", requireUser, upload.array("image", 12), async (req, res) =>
 app.get("/requests", requireAdmin, async (req, res) => {
   try {
     const requests = await Request.find().sort({ createdAt: -1 });
+    for (const request of requests) {
+      if (!request.requestCode) {
+        await ensureRequestCode(request);
+        await request.save();
+      }
+    }
     res.json(requests);
   } catch (error) {
     res.status(500).json({
@@ -1030,6 +1124,11 @@ app.get("/request/:id", async (req, res) => {
 
     if (!item) {
       return res.status(404).json({ message: "Not found" });
+    }
+
+    if (!item.requestCode) {
+      await ensureRequestCode(item);
+      await item.save();
     }
 
     res.json(item);
@@ -1050,9 +1149,12 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
       return res.status(404).json({ message: "Not found" });
     }
 
+    if (!item.requestCode) await ensureRequestCode(item);
+
     if (req.body.status) {
       item.status = normalizeRequestStatus(req.body.status);
       applyStatusTimestamps(item, item.status);
+      mergeStatusTimeline(item, item.status, req.body.adminReply);
     }
 
     if (req.body.assigneeId !== undefined) item.assigneeId = req.body.assigneeId;
@@ -1063,6 +1165,10 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
 
       if (!item.firstResponseAt && String(req.body.adminReply || "").trim()) {
         item.firstResponseAt = new Date();
+      }
+
+      if (!req.body.status && String(req.body.adminReply || "").trim()) {
+        mergeStatusTimeline(item, item.status, req.body.adminReply);
       }
     }
 

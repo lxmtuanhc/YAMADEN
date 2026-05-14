@@ -16,7 +16,7 @@ export function RequestCard({ request }: { request: SupportRequest }) {
       </div>
       <div className="list-body">
         <div className="list-row">
-          <span className="list-id">{request.id}</span>
+          <span className="list-id">{request.requestCode || request.id}</span>
           <StatusBadge status={request.status} />
         </div>
         <h3>{request.title}</h3>

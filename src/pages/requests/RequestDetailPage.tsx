@@ -10,7 +10,6 @@ import { LoadingState } from "../../components/ui/LoadingState";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import type { TranslationKey } from "../../i18n";
 import { useTranslation } from "../../hooks/useTranslation";
-import { REQUEST_UPDATE_ACTIONS } from "../../constants/requestStatus";
 import { quoteService } from "../../services/quoteService";
 import { requestService } from "../../services/requestService";
 import { scheduleService } from "../../services/scheduleService";
@@ -25,7 +24,6 @@ export function RequestDetailPage() {
   const [relatedQuotes, setRelatedQuotes] = useState<Quote[]>([]);
   const [relatedSchedules, setRelatedSchedules] = useState<Schedule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState("");
   const [error, setError] = useState("");
 
   const timelineSteps = useMemo(
@@ -63,20 +61,6 @@ export function RequestDetailPage() {
 
   if (!id) return <Navigate to="/requests" replace />;
 
-  async function addEvent(status: SupportRequest["status"]) {
-    if (!request) return;
-    setActionLoading(status);
-    setError("");
-    try {
-      const updated = await requestService.addTimelineEvent(request.id, { type: status });
-      setRequest(updated);
-    } catch {
-      setError(t("common.empty"));
-    } finally {
-      setActionLoading("");
-    }
-  }
-
   if (isLoading) {
     return (
       <section className="page">
@@ -96,7 +80,7 @@ export function RequestDetailPage() {
   const categoryLabel = categoryOptions.find(option => option.value === request.category)?.key ?? "request.categoryElectrical";
 
   return (
-    <section className="page">
+    <section className="page request-detail-page">
       <div className="page-header">
         <div>
           <h1>{t("request.detail")}</h1>
@@ -107,7 +91,7 @@ export function RequestDetailPage() {
       <Card>
         <h2 className="section-title">{t("request.info")}</h2>
         <div className="info-grid">
-          <InfoRow label={t("request.id")} value={request.id} />
+          <InfoRow label={t("request.id")} value={request.requestCode || request.id} />
           <InfoRow label={t("request.subject")} value={request.title} />
           <InfoRow label={t("request.project")} value={request.projectName || request.address} />
           <InfoRow label={t("request.createdAt")} value={request.createdAt} />
@@ -176,15 +160,13 @@ export function RequestDetailPage() {
       </Card>
 
       <Card>
-        {error ? <ErrorState message={error} /> : null}
-        <div className="action-grid">
-          {REQUEST_UPDATE_ACTIONS.map(action => (
-            <Button key={action.status} variant="outline" disabled={!!actionLoading} onClick={() => addEvent(action.status)}>
-              {actionLoading === action.status ? t("common.loading") : t(action.labelKey)}
-            </Button>
-          ))}
+        <h2 className="section-title">{t("request.adminReplyTitle")}</h2>
+        <div className="admin-reply-box">
+          {request.adminReply?.trim() || t("request.adminReplyEmpty")}
         </div>
       </Card>
+
+      {error ? <ErrorState message={error} /> : null}
 
       <Button icon={<MessageCircle size={18} />}>{t("request.support")}</Button>
     </section>

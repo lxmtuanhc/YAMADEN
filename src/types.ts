@@ -48,10 +48,12 @@ export interface TimelineEvent {
   type: TimelineEventType;
   message: string;
   createdAt: string;
+  note?: string;
 }
 
 export interface Request {
   id: string;
+  requestCode?: string;
   title: string;
   category: string;
   description: string;
@@ -66,6 +68,7 @@ export interface Request {
   phone?: string;
   contact?: string;
   issueTags?: string[];
+  adminReply?: string;
 }
 
 export type SupportRequest = Request;

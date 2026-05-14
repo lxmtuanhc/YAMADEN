@@ -43,17 +43,43 @@ function createTimelineEvent(type: RequestStatus, message?: string, createdAt = 
   };
 }
 
+function stableRequestCode(value?: string) {
+  const source = String(value || createRequestId());
+  if (/^YMD-\d{6}$/.test(source)) return source;
+  let hash = 0;
+  for (let index = 0; index < source.length; index += 1) {
+    hash = (hash * 31 + source.charCodeAt(index)) % 1000000;
+  }
+  return `YMD-${String(hash).padStart(6, "0")}`;
+}
+
 function normalizeRequest(request: SupportRequest): SupportRequest {
+  const requestCode = request.requestCode || stableRequestCode(request.id);
   const fallbackTimeline =
     request.timeline && request.timeline.length
-      ? request.timeline
+      ? dedupeTimeline(request.timeline)
       : [createTimelineEvent(request.status || "submitted", REQUEST_TIMELINE_MESSAGE_KEYS[request.status || "submitted"], request.createdAt)];
 
   return {
     ...request,
+    requestCode,
     images: request.images || [],
     timeline: fallbackTimeline
   };
+}
+
+function dedupeTimeline(timeline: TimelineEvent[]): TimelineEvent[] {
+  const latestByType = new Map<string, TimelineEvent>();
+  timeline.forEach(event => {
+    if (!event?.type) return;
+    const previous = latestByType.get(event.type);
+    if (!previous || new Date(event.createdAt || 0).getTime() >= new Date(previous.createdAt || 0).getTime()) {
+      latestByType.set(event.type, event);
+    }
+  });
+  return Array.from(latestByType.values()).sort((a, b) => (
+    new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
+  ));
 }
 
 function readRequests(): SupportRequest[] {
@@ -78,6 +104,7 @@ function commitRequests(requests: SupportRequest[]) {
 function normalizeBackendStatus(status?: string): RequestStatus {
   if (status === "untreated") return "submitted";
   if (status === "contacted") return "received";
+  if (status === "estimating") return "waiting_customer";
   if (status === "site_done") return "processing";
   if (status === "quoted") return "waiting_customer";
   if (status === "ordered") return "scheduled";
@@ -96,6 +123,37 @@ function normalizeBackendStatus(status?: string): RequestStatus {
   return "submitted";
 }
 
+function backendTimeline(item: any, status: RequestStatus, createdAt: string): TimelineEvent[] {
+  if (Array.isArray(item.timeline) && item.timeline.length) {
+    return dedupeTimeline(item.timeline.map((event: any) => ({
+      id: String(event.id || `tl-${event.type || status}-${event.createdAt || Date.now()}`),
+      type: normalizeBackendStatus(event.type) as TimelineEvent["type"],
+      message: event.message || REQUEST_TIMELINE_MESSAGE_KEYS[normalizeBackendStatus(event.type)],
+      note: event.note || "",
+      createdAt: event.createdAt ? new Date(event.createdAt).toLocaleString() : createdAt
+    })));
+  }
+
+  const events: TimelineEvent[] = [
+    createTimelineEvent("submitted", REQUEST_TIMELINE_MESSAGE_KEYS.submitted, item.createdAt ? new Date(item.createdAt).toLocaleString() : createdAt)
+  ];
+  const timestampMap: Array<[keyof typeof REQUEST_TIMELINE_MESSAGE_KEYS, string | undefined]> = [
+    ["received", item.contactedAt || item.firstResponseAt],
+    ["processing", item.siteVisitedAt],
+    ["waiting_customer", item.quotedAt],
+    ["scheduled", item.orderedAt],
+    ["completed", item.completedAt],
+    ["cancelled", item.lostAt]
+  ];
+  timestampMap.forEach(([type, value]) => {
+    if (value) events.push(createTimelineEvent(type, REQUEST_TIMELINE_MESSAGE_KEYS[type], new Date(value).toLocaleString()));
+  });
+  if (events.length === 1 && status !== "submitted") {
+    events.push(createTimelineEvent(status, REQUEST_TIMELINE_MESSAGE_KEYS[status], createdAt));
+  }
+  return dedupeTimeline(events);
+}
+
 function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): SupportRequest {
   const status = normalizeBackendStatus(item.status);
   const createdAt = item.createdAt ? new Date(item.createdAt).toLocaleString() : todayLabel();
@@ -105,22 +163,36 @@ function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): 
     .filter(Boolean);
   const fallbackImages = input?.files?.length ? input.files.map(file => file.name) : input?.imageName ? [input.imageName] : [];
   return normalizeRequest({
-    id: String(item.id || item._id || createRequestId()),
-    title: input?.title || item.title || item.category || item.content || "",
+    id: String(item.id || item.requestCode || item.requestId || item._id || createRequestId()),
+    requestCode: item.requestCode || item.requestId || stableRequestCode(String(item.id || item._id || "")),
+    title: input?.title || item.title || item.content || item.category || "",
     category: input?.category || item.category || input?.issueTags?.[0] || "",
     description: input?.description || item.description || item.content || "",
     address: item.address || input?.address || "",
     status,
     createdAt,
     images: mediaUrls.length ? mediaUrls : item.image ? [item.image] : fallbackImages,
-    timeline: [createTimelineEvent(status, REQUEST_TIMELINE_MESSAGE_KEYS[status], createdAt)],
+    timeline: backendTimeline(item, status, createdAt),
     datetime: input?.datetime || item.datetime || "",
     projectName: useAppStore.getState().user?.projectName || input?.address || item.address || "",
     createdBy: item.name || input?.name || useAppStore.getState().user?.name || useAppStore.getState().user?.phone || "Customer",
     phone: item.phone || input?.phone || "",
     contact: item.contact || input?.contact || "",
-    issueTags: Array.isArray(item.issueTags) ? item.issueTags : input?.issueTags || []
+    issueTags: Array.isArray(item.issueTags) ? item.issueTags : input?.issueTags || [],
+    adminReply: item.adminReply || item.adminResponse || item.response || item.feedback || item.note || ""
   });
+}
+
+async function fetchBackendRequestById(id: string): Promise<SupportRequest | null> {
+  const token = getUserToken();
+  const response = await fetch(`/request/${encodeURIComponent(id)}`, {
+    cache: "no-store",
+    headers: token ? { Authorization: `Bearer ${token}` } : {}
+  });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error("Request load failed");
+  const payload = await response.json();
+  return backendRequestToSupportRequest(payload.data || payload);
 }
 
 async function createBackendRequest(input: CreateRequestInput): Promise<SupportRequest | null> {
@@ -180,7 +252,20 @@ export const requestService = {
 
   async getRequestById(id: string): Promise<SupportRequest | null> {
     await delay();
-    return readRequests().find(request => request.id === id) || null;
+    try {
+      const backendRequest = await fetchBackendRequestById(id);
+      if (backendRequest) {
+        const current = readRequests();
+        const exists = current.some(request => request.id === backendRequest.id || request.requestCode === backendRequest.requestCode);
+        commitRequests(exists
+          ? current.map(request => (request.id === backendRequest.id || request.requestCode === backendRequest.requestCode ? backendRequest : request))
+          : [backendRequest, ...current]);
+        return backendRequest;
+      }
+    } catch (error) {
+      console.warn("Unable to load request from backend", error);
+    }
+    return readRequests().find(request => request.id === id || request.requestCode === id) || null;
   },
 
   async createRequest(input: CreateRequestInput): Promise<SupportRequest> {
@@ -195,6 +280,7 @@ export const requestService = {
     const createdAt = todayLabel();
     const request: SupportRequest = {
       id: createRequestId(),
+      requestCode: stableRequestCode(`${Date.now()}-${input.title}`),
       title: input.title,
       category: input.category,
       description: input.description,

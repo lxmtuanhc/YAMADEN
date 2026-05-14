@@ -821,6 +821,23 @@ p {
   padding-bottom: calc(90px + env(safe-area-inset-bottom));
 }
 
+.request-detail-page {
+  padding-bottom: calc(90px + env(safe-area-inset-bottom));
+}
+
+.admin-reply-box {
+  min-width: 0;
+  padding: 12px 13px;
+  border-radius: 12px;
+  background: #f8fbff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .form-error {
   padding: 10px 12px;
   color: #dc2626;
