@@ -2,6 +2,7 @@ import { initialQuotes } from "../data/mockData";
 import { requestService } from "./requestService";
 import { useAppStore } from "../stores/appStore";
 import type { Quote, QuoteStatus } from "../types";
+import { APP_STORAGE_KEY } from "../constants/storageKeys";
 
 export type UpdateQuoteInput = Partial<Pick<Quote, "status" | "validUntil" | "items" | "projectName">>;
 
@@ -27,7 +28,7 @@ function readQuotes(): Quote[] {
   if (storeQuotes.length) return storeQuotes.map(normalizeQuote);
 
   try {
-    const raw = JSON.parse(localStorage.getItem("yamaden-mobile-spa") || "null");
+    const raw = JSON.parse(localStorage.getItem(APP_STORAGE_KEY) || "null");
     const saved = raw?.state?.quotes;
     if (Array.isArray(saved)) return saved.map(normalizeQuote);
   } catch (error) {

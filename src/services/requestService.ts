@@ -3,8 +3,7 @@ import { useAppStore } from "../stores/appStore";
 import type { RequestStatus, SupportRequest, TimelineEvent } from "../types";
 import { createRequestId, todayLabel } from "../utils/format";
 import { REQUEST_TIMELINE_MESSAGE_KEYS } from "../constants/requestStatus";
-
-const STORAGE_KEY = "yamaden-mobile-spa";
+import { APP_STORAGE_KEY } from "../constants/storageKeys";
 
 export interface CreateRequestInput {
   category: string;
@@ -56,7 +55,7 @@ function readRequests(): SupportRequest[] {
   if (storeRequests.length) return storeRequests.map(normalizeRequest);
 
   try {
-    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    const raw = JSON.parse(localStorage.getItem(APP_STORAGE_KEY) || "null");
     const saved = raw?.state?.requests;
     if (Array.isArray(saved)) return saved.map(normalizeRequest);
   } catch (error) {

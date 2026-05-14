@@ -1,10 +1,9 @@
 import { SCHEDULE_REQUEST_STATUS_BY_STATUS, SCHEDULE_TIMELINE_MESSAGE_KEYS } from "../constants/scheduleStatus";
+import { APP_STORAGE_KEY } from "../constants/storageKeys";
 import { initialSchedules } from "../data/mockData";
 import { useAppStore } from "../stores/appStore";
 import type { Schedule, ScheduleStatus } from "../types";
 import { requestService } from "./requestService";
-
-const STORAGE_KEY = "yamaden-mobile-spa";
 
 export interface CreateScheduleInput {
   requestId: string;
@@ -52,7 +51,7 @@ function readSchedules(): Schedule[] {
   if (storeSchedules.length) return storeSchedules.map(normalizeSchedule);
 
   try {
-    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    const raw = JSON.parse(localStorage.getItem(APP_STORAGE_KEY) || "null");
     const saved = raw?.state?.schedules;
     if (Array.isArray(saved)) return saved.map(normalizeSchedule);
   } catch (error) {

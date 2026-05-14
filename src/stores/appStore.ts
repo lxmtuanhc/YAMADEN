@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { APP_STORAGE_KEY } from "../constants/storageKeys";
 import { defaultUser, initialQuotes, initialRequests, initialSchedules } from "../data/mockData";
 import type { Language, Quote, QuoteStatus, RequestStatus, Schedule, SupportRequest, User, UserStatus } from "../types";
 
@@ -20,6 +21,8 @@ interface AppState {
   logout: () => void;
   updateQuoteStatus: (id: string, status: QuoteStatus) => void;
 }
+
+export type AppStateSnapshot = Pick<AppState, "language" | "user" | "authStatus" | "requests" | "quotes" | "schedules">;
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -80,7 +83,7 @@ export const useAppStore = create<AppState>()(
       }
     }),
     {
-      name: "yamaden-mobile-spa"
+      name: APP_STORAGE_KEY
     }
   )
 );

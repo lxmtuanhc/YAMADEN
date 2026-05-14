@@ -817,3 +817,286 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
   window.addEventListener('focus',autoRefresh);
   setInterval(autoRefresh,5000);
 })();
+
+/* ===== Shared localStorage bridge for Vite customer app ===== */
+(function(){
+  const keys=window.YAMADEN_STORAGE_KEYS||{APP_STATE:"yamaden-mobile-spa"};
+  const STORAGE_KEY=keys.APP_STATE;
+  const CUSTOMER_TO_ADMIN_STATUS={
+    submitted:"untreated",
+    received:"processing",
+    processing:"processing",
+    waiting_customer:"quoted",
+    scheduled:"ordered",
+    completed:"completed",
+    cancelled:"lost"
+  };
+  const ADMIN_TO_CUSTOMER_STATUS={
+    untreated:"submitted",
+    processing:"processing",
+    quoted:"waiting_customer",
+    ordered:"scheduled",
+    completed:"completed",
+    lost:"cancelled"
+  };
+  const TIMELINE_MESSAGE_BY_STATUS={
+    submitted:"request.timelineSubmitted",
+    received:"request.timelineReceived",
+    processing:"request.timelineProcessing",
+    waiting_customer:"request.timelineWaiting",
+    scheduled:"request.timelineScheduled",
+    completed:"request.timelineCompleted",
+    cancelled:"request.timelineCompleted"
+  };
+  function readState(){
+    try{
+      const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
+      return raw&&raw.state?raw:{state:{}};
+    }catch(e){
+      return {state:{}};
+    }
+  }
+  function writeState(raw){
+    localStorage.setItem(STORAGE_KEY,JSON.stringify({state:raw.state||{},version:raw.version||0}));
+  }
+  function state(){
+    return readState().state||{};
+  }
+  function savePatch(patch){
+    const raw=readState();
+    raw.state=Object.assign({},raw.state||{},patch);
+    writeState(raw);
+    return raw.state;
+  }
+  function timelineEvent(status,message){
+    return {
+      id:"tl-admin-"+Date.now()+"-"+Math.floor(Math.random()*1000),
+      type:status,
+      message:message||TIMELINE_MESSAGE_BY_STATUS[status]||TIMELINE_MESSAGE_BY_STATUS.submitted,
+      createdAt:new Date().toLocaleString()
+    };
+  }
+  function localUserToAdmin(user){
+    if(!user)return null;
+    return {
+      _id:user.id,
+      id:user.id,
+      name:user.name||user.phone||"",
+      phone:user.phone||"",
+      email:user.email||"",
+      company:user.companyName||user.accountType||"",
+      customerType:user.accountType||"",
+      projectName:user.projectName||"",
+      province:user.address||"",
+      status:user.status==="pendingApproval"?"pending":user.status,
+      requestCount:Array.isArray(state().requests)?state().requests.length:0,
+      source:"localStorage"
+    };
+  }
+  function localRequestToAdmin(request){
+    const user=state().user||{};
+    return Object.assign({},request,{
+      _id:request.id,
+      requestId:request.id,
+      name:request.createdBy||user.name||user.phone||"Customer",
+      phone:user.phone||request.phone||"",
+      email:user.email||request.email||"",
+      content:request.description||request.title||"",
+      category:request.category||request.title||"",
+      location:request.address||"",
+      status:CUSTOMER_TO_ADMIN_STATUS[request.status]||request.status||"untreated",
+      source:"account",
+      userId:user.id||request.userId||""
+    });
+  }
+  function mergeById(apiRows,localRows){
+    const map=new Map();
+    (Array.isArray(apiRows)?apiRows:[]).forEach(item=>map.set(String(item._id||item.id||item.requestId),item));
+    (Array.isArray(localRows)?localRows:[]).forEach(item=>map.set(String(item._id||item.id||item.requestId),item));
+    return Array.from(map.values());
+  }
+  function localUsers(){
+    const user=state().user;
+    return user&&user.status&&user.status!=="notLoggedIn"?[localUserToAdmin(user)].filter(Boolean):[];
+  }
+  function localRequests(){
+    return (Array.isArray(state().requests)?state().requests:[]).map(localRequestToAdmin);
+  }
+  function updateLocalUser(id,patch){
+    const current=state().user;
+    if(!current||String(current.id)!==String(id))return false;
+    const status=patch.status==="pending"?"pendingApproval":patch.status;
+    const next=Object.assign({},current,patch,status?{status}:null);
+    const authStatus=status==="active"?"notLoggedIn":status==="pendingApproval"?"pendingApproval":state().authStatus;
+    savePatch({user:next,authStatus});
+    return true;
+  }
+  function updateLocalRequest(id,patch){
+    const current=Array.isArray(state().requests)?state().requests:[];
+    let changed=false;
+    const next=current.map(request=>{
+      if(String(request.id)!==String(id))return request;
+      changed=true;
+      const status=patch.status?ADMIN_TO_CUSTOMER_STATUS[patch.status]||patch.status:request.status;
+      const base=Object.assign({},request,patch,{status});
+      delete base._id;
+      delete base.requestId;
+      delete base.name;
+      delete base.phone;
+      delete base.content;
+      if(status!==request.status){
+        base.timeline=[...(Array.isArray(request.timeline)?request.timeline:[]),timelineEvent(status)];
+      }
+      if(patch.status==="quoted"){
+        upsertLocalQuoteForRequest(base);
+      }
+      return base;
+    });
+    if(changed)savePatch({requests:next});
+    return changed;
+  }
+  function deleteLocalRequest(id){
+    const current=Array.isArray(state().requests)?state().requests:[];
+    const next=current.filter(request=>String(request.id)!==String(id));
+    if(next.length!==current.length){
+      savePatch({requests:next});
+      return true;
+    }
+    return false;
+  }
+  function upsertLocalQuoteForRequest(request,patch){
+    const current=Array.isArray(state().quotes)?state().quotes:[];
+    const existing=current.find(quote=>String(quote.requestId)===String(request.id));
+    const quote=Object.assign({
+      id:existing?existing.id:"Q-"+new Date().getFullYear()+"-"+Math.floor(1000+Math.random()*9000),
+      requestId:request.id,
+      projectName:request.projectName||request.title||request.address||request.id,
+      validUntil:"",
+      status:"pending",
+      items:[]
+    },existing||{},patch||{});
+    const next=existing?current.map(item=>String(item.id)===String(existing.id)?quote:item):[quote].concat(current);
+    savePatch({quotes:next});
+    return quote;
+  }
+  const oldNormalizeStatus=window.normalizeStatus||normalizeStatus;
+  window.normalizeStatus=function(s){
+    return oldNormalizeStatus(CUSTOMER_TO_ADMIN_STATUS[String(s||"").toLowerCase()]||s);
+  };
+  const oldLoadRequests=window.loadRequests||loadRequests;
+  window.loadRequests=async function(){
+    let apiRows=[];
+    try{
+      const res=await apiFetch(API+"/requests");
+      if(res.status===401)return authFailLogout();
+      if(res.ok){
+        const data=await res.json();
+        apiRows=Array.isArray(data)?data:(data.requests||[]);
+      }
+    }catch(e){}
+    requests=mergeById(apiRows,localRequests());
+    renderAll();
+  };
+  const oldUpdateStatus=window.updateStatus||updateStatus;
+  window.updateStatus=async function(id,status){
+    if(updateLocalRequest(id,{status})){
+      requests=localRequests();
+      renderAll();
+      return;
+    }
+    return oldUpdateStatus(id,status);
+  };
+  window.createLocalQuote=function(requestId,quotePatch){
+    const request=(Array.isArray(state().requests)?state().requests:[]).find(item=>String(item.id)===String(requestId));
+    if(!request)return null;
+    const quote=upsertLocalQuoteForRequest(request,quotePatch);
+    updateLocalRequest(requestId,{status:"quoted"});
+    return quote;
+  };
+  window.updateLocalQuote=function(id,quotePatch){
+    const current=Array.isArray(state().quotes)?state().quotes:[];
+    let found=false;
+    const next=current.map(quote=>{
+      if(String(quote.id)!==String(id))return quote;
+      found=true;
+      return Object.assign({},quote,quotePatch||{});
+    });
+    if(found)savePatch({quotes:next});
+    return found;
+  };
+  const oldSaveReply=window.saveReply||saveReply;
+  window.saveReply=async function(id){
+    const box=$("reply-"+id);
+    if(updateLocalRequest(id,{adminReply:box?box.value:""})){
+      requests=localRequests();
+      renderAll();
+      return;
+    }
+    return oldSaveReply(id);
+  };
+  const oldConfirmDelete=window.confirmDelete||confirmDelete;
+  window.confirmDelete=async function(){
+    if(deleteMode==="stableUserAction"&&window.__stableUserAction){
+      const item=window.__stableUserAction;
+      const user=state().user;
+      if(user&&String(user.id)===String(item.id)){
+        if(item.action==="approve"||item.action==="reactivate"||item.action==="unblock")updateLocalUser(item.id,{status:"active"});
+        if(item.action==="block")updateLocalUser(item.id,{status:"blocked"});
+        if(item.action==="reject"||item.action==="delete"||item.action==="permanent")savePatch({user:null,authStatus:"notLoggedIn"});
+        window.__stableUserAction=null;
+        closeModal();
+        window.loadUsers();
+        return;
+      }
+    }
+    if(deleteMode==="request"&&deleteId&&deleteLocalRequest(deleteId)){
+      closeModal();
+      requests=localRequests();
+      renderAll();
+      return;
+    }
+    return oldConfirmDelete.apply(this,arguments);
+  };
+  const oldLoadUsers=window.loadUsers||loadUsers;
+  window.loadUsers=async function(){
+    let apiRows=[];
+    try{
+      const sep=API.indexOf("?")>=0?"&":"?";
+      const res=await apiFetch(API+"/admin/users"+sep+"_ts="+Date.now(),{cache:"no-store"});
+      if(res.status===401)return authFailLogout();
+      if(res.ok){
+        const data=await res.json();
+        apiRows=Array.isArray(data)?data:(data.users||[]);
+      }
+    }catch(e){}
+    currentUsers=mergeById(apiRows,localUsers());
+    window.currentUsers=currentUsers;
+    if(typeof renderUsers==="function")renderUsers();
+    const side=$("sideUsers");
+    if(side)side.textContent=currentUsers.length;
+    const final=$("finalUserCount");
+    if(final)final.textContent=currentUsers.length;
+  };
+  const oldConfirmUserAction=window.confirmDelete;
+  const originalOpenAction=window.__stableUserAction;
+  document.addEventListener("click",function(e){
+    const btn=e.target.closest("[data-user-action]");
+    if(!btn)return;
+    const id=btn.dataset.userId;
+    const action=btn.dataset.userAction;
+    const user=state().user;
+    if(!user||String(user.id)!==String(id))return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    if(action==="approve"||action==="reactivate"||action==="unblock")updateLocalUser(id,{status:"active"});
+    if(action==="block")updateLocalUser(id,{status:"blocked"});
+    if(action==="reject"||action==="delete"||action==="permanent")savePatch({user:null,authStatus:"notLoggedIn"});
+    window.loadUsers();
+  },true);
+  window.addEventListener("storage",function(e){
+    if(e.key!==STORAGE_KEY)return;
+    if((typeof currentView==="undefined"?currentView:"")==="users")window.loadUsers();
+    window.loadRequests();
+  });
+})();
