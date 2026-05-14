@@ -20,6 +20,20 @@ export interface CreateRequestInput {
   issueTags?: string[];
 }
 
+class BackendRequestError extends Error {
+  status: number;
+  body: unknown;
+  endpoint: string;
+
+  constructor(message: string, status: number, body: unknown, endpoint: string) {
+    super(message);
+    this.name = "BackendRequestError";
+    this.status = status;
+    this.body = body;
+    this.endpoint = endpoint;
+  }
+}
+
 export type UpdateRequestInput = Partial<
   Pick<SupportRequest, "category" | "title" | "description" | "address" | "datetime" | "images" | "status">
 >;
@@ -213,6 +227,11 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
   });
 
   if (hasFiles && body instanceof FormData) {
+    const uploadFiles = input.files?.slice(0, 12) || [];
+    console.debug("[request:create] appending media files", {
+      count: uploadFiles.length,
+      field: "image"
+    });
     body.append("name", input.name || "");
     body.append("phone", input.phone || "");
     body.append("contact", input.contact || "");
@@ -221,11 +240,17 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
     body.append("address", input.address);
     body.append("content", input.description);
     body.append("quoteRequested", "false");
-    (input.issueTags || []).forEach(tag => body.append("issueTags", tag));
-    input.files?.slice(0, 12).forEach(file => body.append("image", file));
+    body.append("issueTags", JSON.stringify(input.issueTags || []));
+    uploadFiles.forEach(file => body.append("image", file, file.name));
+    console.debug("[request:create] FormData fields", Array.from(body.entries()).map(([field, value]) => (
+      value instanceof File
+        ? { field, name: value.name, type: value.type, size: value.size }
+        : { field, value }
+    )));
   }
 
-  const response = await fetch("/request", {
+  const endpoint = "/request";
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: hasFiles ? { Authorization: `Bearer ${token}` } : {
       "Content-Type": "application/json",
@@ -235,7 +260,27 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
   });
 
   if (!response.ok) {
-    throw new Error("Request create failed");
+    let responseBody: unknown = "";
+    let message = "Request create failed";
+    try {
+      const rawBody = await response.text();
+      responseBody = rawBody;
+      if (rawBody) {
+        try {
+          responseBody = JSON.parse(rawBody);
+        } catch {}
+      }
+      if (responseBody && typeof responseBody === "object") {
+        const payload = responseBody as { message?: string; error?: string; code?: string };
+        message = payload.message || payload.error || payload.code || message;
+      }
+    } catch {}
+    console.error("[request:create] backend response failed", {
+      endpoint,
+      status: response.status,
+      body: responseBody
+    });
+    throw new BackendRequestError(message, response.status, responseBody, endpoint);
   }
 
   const payload = await response.json();

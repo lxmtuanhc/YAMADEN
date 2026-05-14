@@ -121,7 +121,8 @@ export function RequestCreatePage() {
         issueTags: selectedIssues
       });
       navigate(`/requests/${request.id}`);
-    } catch {
+    } catch (submitError) {
+      console.warn("Request submit failed", submitError);
       setError(selectedMediaFiles.length ? t("request.uploadFailed") : t("common.required"));
     } finally {
       setIsSubmitting(false);
@@ -202,8 +203,8 @@ export function RequestCreatePage() {
                 <div className="issue-chip-list">
                   {selectedIssues.map(selectedIssue => (
                     <span className="issue-chip" key={selectedIssue}>
-                      {selectedIssue}
-                      <button type="button" onClick={() => removeIssue(selectedIssue)} aria-label={t("request.removeIssue")}>
+                      <span>{selectedIssue}</span>
+                      <button className="issue-chip-remove" type="button" onClick={() => removeIssue(selectedIssue)} aria-label={t("request.removeIssue")}>
                         <X size={14} />
                       </button>
                     </span>
@@ -233,7 +234,7 @@ export function RequestCreatePage() {
                 {filteredIssueOptions.length ? (
                   filteredIssueOptions.map(option => (
                     <button type="button" key={option} onClick={() => addIssue(option)}>
-                      {option}
+                      <span>{option}</span>
                     </button>
                   ))
                 ) : (
