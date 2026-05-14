@@ -9,6 +9,7 @@ type ProfileInput = Pick<User, "name" | "email" | "phone" | "accountType" | "com
 interface AppState {
   language: Language;
   user: User | null;
+  users: User[];
   authStatus: UserStatus;
   requests: SupportRequest[];
   quotes: Quote[];
@@ -22,13 +23,22 @@ interface AppState {
   updateQuoteStatus: (id: string, status: QuoteStatus) => void;
 }
 
-export type AppStateSnapshot = Pick<AppState, "language" | "user" | "authStatus" | "requests" | "quotes" | "schedules">;
+export type AppStateSnapshot = Pick<AppState, "language" | "user" | "users" | "authStatus" | "requests" | "quotes" | "schedules">;
+
+function upsertUser(users: User[], user: User) {
+  const existing = users.some(item => item.id === user.id || item.phone === user.phone);
+  if (existing) {
+    return users.map(item => (item.id === user.id || item.phone === user.phone ? user : item));
+  }
+  return [user, ...users];
+}
 
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       language: "vi",
       user: defaultUser,
+      users: [defaultUser],
       authStatus: "active",
       requests: initialRequests,
       quotes: initialQuotes,
@@ -43,37 +53,43 @@ export const useAppStore = create<AppState>()(
         return false;
       },
       register: (phone, pin) => {
+        const newUser: User = {
+          ...defaultUser,
+          id: `user-${Date.now()}`,
+          phone,
+          pin,
+          name: "",
+          email: "",
+          address: "",
+          projectName: "",
+          accountType: "personal",
+          companyName: "",
+          contactPerson: "",
+          status: "profileIncomplete"
+        };
         set({
-          user: {
-            ...defaultUser,
-            id: `user-${Date.now()}`,
-            phone,
-            pin,
-            name: "",
-            email: "",
-            address: "",
-            projectName: "",
-            accountType: "personal",
-            companyName: "",
-            contactPerson: "",
-            status: "profileIncomplete"
-          },
+          user: newUser,
+          users: upsertUser(get().users || [], newUser),
           authStatus: "profileIncomplete"
         });
       },
       saveProfile: profile => {
         const user = get().user;
         if (!user) return;
+        const nextUser: User = { ...user, ...profile, status: "pendingApproval" };
         set({
-          user: { ...user, ...profile, status: "pendingApproval" },
+          user: nextUser,
+          users: upsertUser(get().users || [], nextUser),
           authStatus: "pendingApproval"
         });
       },
       approvePendingUser: () => {
         const user = get().user;
         if (!user) return;
+        const nextUser: User = { ...user, status: "active" };
         set({
-          user: { ...user, status: "active" },
+          user: nextUser,
+          users: upsertUser(get().users || [], nextUser),
           authStatus: "notLoggedIn"
         });
       },

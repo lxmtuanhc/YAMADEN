@@ -9,6 +9,7 @@ function applySnapshot(snapshot?: Partial<AppStateSnapshot>) {
   useAppStore.setState({
     ...(snapshot.language ? { language: snapshot.language } : {}),
     ...(snapshot.user !== undefined ? { user: snapshot.user } : {}),
+    ...(Array.isArray(snapshot.users) ? { users: snapshot.users } : {}),
     ...(snapshot.authStatus ? { authStatus: snapshot.authStatus } : {}),
     ...(Array.isArray(snapshot.requests) ? { requests: snapshot.requests } : {}),
     ...(Array.isArray(snapshot.quotes) ? { quotes: snapshot.quotes } : {}),

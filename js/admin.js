@@ -916,19 +916,29 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
     return Array.from(map.values());
   }
   function localUsers(){
-    const user=state().user;
-    return user&&user.status&&user.status!=="notLoggedIn"?[localUserToAdmin(user)].filter(Boolean):[];
+    const current=state().user;
+    const all=Array.isArray(state().users)?state().users.slice():[];
+    if(current&&current.status&&current.status!=="notLoggedIn"&&!all.some(user=>String(user.id)===String(current.id))){
+      all.unshift(current);
+    }
+    return all.filter(user=>user&&user.status&&user.status!=="notLoggedIn").map(localUserToAdmin).filter(Boolean);
   }
   function localRequests(){
     return (Array.isArray(state().requests)?state().requests:[]).map(localRequestToAdmin);
   }
   function updateLocalUser(id,patch){
     const current=state().user;
-    if(!current||String(current.id)!==String(id))return false;
+    const users=Array.isArray(state().users)?state().users:[];
+    const target=users.find(user=>String(user.id)===String(id))||(current&&String(current.id)===String(id)?current:null);
+    if(!target)return false;
     const status=patch.status==="pending"?"pendingApproval":patch.status;
-    const next=Object.assign({},current,patch,status?{status}:null);
-    const authStatus=status==="active"?"notLoggedIn":status==="pendingApproval"?"pendingApproval":state().authStatus;
-    savePatch({user:next,authStatus});
+    const next=Object.assign({},target,patch,status?{status}:null);
+    const nextUsers=users.some(user=>String(user.id)===String(id))
+      ?users.map(user=>String(user.id)===String(id)?next:user)
+      :[next].concat(users);
+    const isCurrent=current&&String(current.id)===String(id);
+    const authStatus=isCurrent&&status==="active"?"notLoggedIn":isCurrent&&status==="pendingApproval"?"pendingApproval":state().authStatus;
+    savePatch(Object.assign({users:nextUsers},isCurrent?{user:next,authStatus}:{}));
     return true;
   }
   function updateLocalRequest(id,patch){
@@ -1042,7 +1052,10 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
       if(user&&String(user.id)===String(item.id)){
         if(item.action==="approve"||item.action==="reactivate"||item.action==="unblock")updateLocalUser(item.id,{status:"active"});
         if(item.action==="block")updateLocalUser(item.id,{status:"blocked"});
-        if(item.action==="reject"||item.action==="delete"||item.action==="permanent")savePatch({user:null,authStatus:"notLoggedIn"});
+        if(item.action==="reject"||item.action==="delete"||item.action==="permanent"){
+          const users=Array.isArray(state().users)?state().users:[];
+          savePatch({user:null,users:users.filter(user=>String(user.id)!==String(item.id)),authStatus:"notLoggedIn"});
+        }
         window.__stableUserAction=null;
         closeModal();
         window.loadUsers();
@@ -1091,7 +1104,10 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
     e.stopImmediatePropagation();
     if(action==="approve"||action==="reactivate"||action==="unblock")updateLocalUser(id,{status:"active"});
     if(action==="block")updateLocalUser(id,{status:"blocked"});
-    if(action==="reject"||action==="delete"||action==="permanent")savePatch({user:null,authStatus:"notLoggedIn"});
+    if(action==="reject"||action==="delete"||action==="permanent"){
+      const users=Array.isArray(state().users)?state().users:[];
+      savePatch({user:null,users:users.filter(user=>String(user.id)!==String(id)),authStatus:"notLoggedIn"});
+    }
     window.loadUsers();
   },true);
   window.addEventListener("storage",function(e){
