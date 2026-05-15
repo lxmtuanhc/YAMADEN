@@ -9,11 +9,17 @@ export type UserStatus =
 
 export type RequestStatus =
   | "submitted"
+  | "untreated"
   | "received"
+  | "contacted"
   | "processing"
+  | "estimating"
+  | "quoted"
   | "waiting_customer"
+  | "ordered"
   | "scheduled"
   | "completed"
+  | "lost"
   | "cancelled";
 
 export type QuoteStatus = "pending" | "approved" | "revision_requested" | "expired";
@@ -36,19 +42,27 @@ export interface User {
 
 export type TimelineEventType =
   | "submitted"
+  | "untreated"
   | "received"
+  | "contacted"
   | "processing"
+  | "estimating"
+  | "quoted"
   | "waiting_customer"
+  | "ordered"
   | "scheduled"
   | "completed"
+  | "lost"
   | "cancelled";
 
 export interface TimelineEvent {
   id: string;
   type: TimelineEventType;
+  status?: TimelineEventType;
   message: string;
   createdAt: string;
   note?: string;
+  actor?: string;
 }
 
 export interface RequestMediaFile {

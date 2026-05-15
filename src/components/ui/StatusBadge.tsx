@@ -6,11 +6,17 @@ type Status = RequestStatus | QuoteStatus | ScheduleStatus;
 
 const requestStatusKeys: Record<RequestStatus, TranslationKey> = {
   submitted: "status.submitted",
+  untreated: "status.untreated",
   received: "status.received",
+  contacted: "status.received",
   processing: "status.processing",
+  estimating: "status.estimating",
+  quoted: "status.quoted",
   waiting_customer: "status.waiting_customer",
+  ordered: "status.ordered",
   scheduled: "status.scheduled",
   completed: "status.completed",
+  lost: "status.lost",
   cancelled: "status.cancelled"
 };
 
@@ -30,6 +36,10 @@ const scheduleStatusKeys: Record<ScheduleStatus, TranslationKey> = {
 
 export function StatusBadge({ status }: { status: Status }) {
   const { t } = useTranslation();
-  const key = ({ ...requestStatusKeys, ...quoteStatusKeys, ...scheduleStatusKeys } as Record<Status, TranslationKey>)[status];
+  const key = status in requestStatusKeys
+    ? requestStatusKeys[status as RequestStatus]
+    : status in quoteStatusKeys
+      ? quoteStatusKeys[status as QuoteStatus]
+      : scheduleStatusKeys[status as ScheduleStatus];
   return <span className={`status-badge status-${status}`}>{t(key)}</span>;
 }

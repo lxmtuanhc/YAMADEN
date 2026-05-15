@@ -1,7 +1,6 @@
-import { MessageCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { MessageCircle, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { Timeline } from "../../components/Timeline";
 import { QuoteCard } from "../../components/quotes/QuoteCard";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
@@ -15,49 +14,83 @@ import { requestService } from "../../services/requestService";
 import { scheduleService } from "../../services/scheduleService";
 import type { Quote, RequestMediaFile, Schedule, SupportRequest } from "../../types";
 import { categoryOptions } from "./requestHelpers";
+import { REQUEST_STATUS_LABEL_KEYS, REQUEST_TIMELINE_MESSAGE_KEYS } from "../../constants/requestStatus";
 
 export function RequestDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const [request, setRequest] = useState<SupportRequest | null>(null);
   const [relatedQuotes, setRelatedQuotes] = useState<Quote[]>([]);
   const [relatedSchedules, setRelatedSchedules] = useState<Schedule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [refreshMessage, setRefreshMessage] = useState("");
 
-  const timelineSteps = useMemo(
-    () => request?.timeline.map(event => t(event.message as TranslationKey)) || [],
-    [request, t]
-  );
+  const timelineItems = useMemo(() => request ? requestTimelineItems(request) : [], [request]);
+
+  const fetchRequestDetail = useCallback(async () => {
+    if (!id) return null;
+    const [result, quotes, schedules] = await Promise.all([
+      requestService.getRequestById(id),
+      quoteService.getQuotesByRequestId(id),
+      scheduleService.getSchedulesByRequestId(id)
+    ]);
+    return { result, quotes, schedules };
+  }, [id]);
 
   useEffect(() => {
-    let mounted = true;
+    let active = true;
     setIsLoading(true);
     setError("");
-    if (!id) {
-      setIsLoading(false);
-      setError(t("common.empty"));
-      return;
-    }
-    Promise.all([requestService.getRequestById(id), quoteService.getQuotesByRequestId(id), scheduleService.getSchedulesByRequestId(id)])
-      .then(([result, quotes, schedules]) => {
-        if (!mounted) return;
-        if (result) setRequest(result);
-        else setError(t("common.empty"));
-        setRelatedQuotes(quotes);
-        setRelatedSchedules(schedules);
+    fetchRequestDetail()
+      .then(payload => {
+        if (!active) return;
+        if (!payload?.result) {
+          setError(t("common.empty"));
+          return;
+        }
+        setRequest(payload.result);
+        setRelatedQuotes(payload.quotes);
+        setRelatedSchedules(payload.schedules);
       })
       .catch(() => {
-        if (mounted) setError(t("common.empty"));
+        if (active) setError(t("common.empty"));
       })
       .finally(() => {
-        if (mounted) setIsLoading(false);
+        if (active) setIsLoading(false);
       });
     return () => {
-      mounted = false;
+      active = false;
     };
-  }, [id, language, t]);
+  }, [fetchRequestDetail, t]);
+
+  async function refreshRequestDetail() {
+    setRefreshMessage(t("request.refreshing"));
+    setIsRefreshing(true);
+    try {
+      const payload = await fetchRequestDetail();
+      if (!payload?.result) {
+        setRefreshMessage(t("request.refreshFailed"));
+        return;
+      }
+      setRequest(payload.result);
+      setRelatedQuotes(payload.quotes);
+      setRelatedSchedules(payload.schedules);
+      setRefreshMessage(t("request.refreshSuccess"));
+    } catch {
+      setRefreshMessage(t("request.refreshFailed"));
+    } finally {
+      setIsRefreshing(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!refreshMessage || refreshMessage === t("request.refreshing")) return;
+    const timeout = window.setTimeout(() => setRefreshMessage(""), 2600);
+    return () => window.clearTimeout(timeout);
+  }, [refreshMessage, t]);
 
   if (!id) return <Navigate to="/requests" replace />;
 
@@ -86,8 +119,21 @@ export function RequestDetailPage() {
         <div>
           <h1>{t("request.detail")}</h1>
         </div>
-        <StatusBadge status={request.status} />
+        <div className="request-detail-actions">
+          <StatusBadge status={request.status} />
+          <button
+            className="request-refresh-button"
+            type="button"
+            aria-label={t("request.refresh")}
+            title={isRefreshing ? t("request.refreshing") : t("request.refresh")}
+            disabled={isRefreshing}
+            onClick={refreshRequestDetail}
+          >
+            <RefreshCw size={18} className={isRefreshing ? "spin" : ""} />
+          </button>
+        </div>
       </div>
+      {refreshMessage ? <div className="refresh-message">{refreshMessage}</div> : null}
 
       <Card>
         <h2 className="section-title">{t("request.info")}</h2>
@@ -162,7 +208,18 @@ export function RequestDetailPage() {
 
       <Card>
         <h2 className="section-title">{t("request.timeline")}</h2>
-        <Timeline steps={timelineSteps} activeIndex={timelineSteps.length - 1} />
+        <div className="timeline">
+          {timelineItems.map(item => (
+            <div className="timeline-item done" key={item.id}>
+              <div className="timeline-dot">{null}</div>
+              <div className="timeline-text">
+                <strong>{t(item.labelKey)}</strong>
+                {item.createdAt ? <span>{item.createdAt}</span> : null}
+                {item.note ? <em>{item.note}</em> : null}
+              </div>
+            </div>
+          ))}
+        </div>
       </Card>
 
       <Card>
@@ -180,6 +237,74 @@ export function RequestDetailPage() {
 }
 
 type DetailMedia = RequestMediaFile & { url: string; name: string };
+type DetailTimelineItem = {
+  id: string;
+  labelKey: TranslationKey;
+  createdAt: string;
+  note: string;
+};
+
+function requestTimelineItems(request: SupportRequest): DetailTimelineItem[] {
+  const source = Array.isArray(request.timeline) && request.timeline.length
+    ? request.timeline
+    : [{
+        id: `status-${request.status}`,
+        type: request.status,
+        message: REQUEST_TIMELINE_MESSAGE_KEYS[request.status],
+        createdAt: request.createdAt
+      }];
+  const byStatus = new Map<string, DetailTimelineItem>();
+
+  source
+    .map(event => {
+      const status = normalizeTimelineStatus(event.type || event.status || request.status, request.status);
+      return {
+        id: event.id || `tl-${status}-${event.createdAt || request.createdAt}`,
+        status,
+        labelKey: REQUEST_TIMELINE_MESSAGE_KEYS[status] || REQUEST_STATUS_LABEL_KEYS[status],
+        createdAt: event.createdAt || request.createdAt,
+        note: event.note || ""
+      };
+    })
+    .sort((left, right) => dateValue(left.createdAt) - dateValue(right.createdAt))
+    .forEach(item => {
+      const previous = byStatus.get(item.status);
+      if (!previous || dateValue(item.createdAt) >= dateValue(previous.createdAt)) {
+        byStatus.set(item.status, item);
+      }
+    });
+
+  const currentStatus = normalizeTimelineStatus(request.status, request.status);
+  if (!byStatus.has(currentStatus)) {
+    byStatus.set(currentStatus, {
+      id: `status-${currentStatus}`,
+      labelKey: REQUEST_TIMELINE_MESSAGE_KEYS[currentStatus] || REQUEST_STATUS_LABEL_KEYS[currentStatus],
+      createdAt: request.createdAt,
+      note: ""
+    });
+  }
+
+  return Array.from(byStatus.values()).sort((left, right) => dateValue(left.createdAt) - dateValue(right.createdAt));
+}
+
+function normalizeTimelineStatus(status: string, currentStatus?: string) {
+  if (status === "waiting_customer" && (currentStatus === "estimating" || currentStatus === "quoted")) {
+    return currentStatus;
+  }
+  if (status === "pending" || status === "new" || status === "unhandled") return "untreated";
+  if (status === "contacted") return "received";
+  if (status === "quote" || status === "estimate") return "quoted";
+  if (status === "quoting" || status === "estimate_pending") return "estimating";
+  if (status === "order" || status === "accepted") return "ordered";
+  if (status === "failed") return "lost";
+  if (status in REQUEST_TIMELINE_MESSAGE_KEYS) return status as keyof typeof REQUEST_TIMELINE_MESSAGE_KEYS;
+  return "untreated";
+}
+
+function dateValue(value: string) {
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
 
 function requestMediaItems(request: SupportRequest): DetailMedia[] {
   const source = request.mediaFiles?.length

@@ -354,24 +354,29 @@ const REQUEST_STATUS_TIMESTAMPS = {
 };
 
 const REQUEST_STATUS_TO_CUSTOMER = {
-  untreated: "submitted",
+  untreated: "untreated",
   contacted: "received",
   processing: "processing",
   site_done: "processing",
-  estimating: "waiting_customer",
-  quoted: "waiting_customer",
-  ordered: "scheduled",
+  estimating: "estimating",
+  quoted: "quoted",
+  ordered: "ordered",
   completed: "completed",
-  lost: "cancelled"
+  lost: "lost"
 };
 
 const CUSTOMER_TIMELINE_MESSAGES = {
   submitted: "request.timelineSubmitted",
+  untreated: "request.timelineUntreated",
   received: "request.timelineReceived",
   processing: "request.timelineProcessing",
+  estimating: "request.timelineEstimating",
+  quoted: "request.timelineQuoted",
   waiting_customer: "request.timelineWaiting",
+  ordered: "request.timelineOrdered",
   scheduled: "request.timelineScheduled",
   completed: "request.timelineCompleted",
+  lost: "request.timelineLost",
   cancelled: "status.cancelled"
 };
 
@@ -388,8 +393,10 @@ function mergeStatusTimeline(item, status, note) {
     .concat([{
       id: "tl-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
       type,
+      status: type,
       message,
       note: String(note || "").trim(),
+      actor: "admin",
       createdAt: new Date()
     }]);
 }

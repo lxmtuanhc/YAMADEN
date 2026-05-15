@@ -131,46 +131,71 @@ function upsertRequest(request: SupportRequest, requests: SupportRequest[]) {
 }
 
 function normalizeBackendStatus(status?: string): RequestStatus {
-  if (status === "untreated") return "submitted";
+  if (status === "pending" || status === "new" || status === "unhandled") return "untreated";
   if (status === "contacted") return "received";
-  if (status === "estimating") return "waiting_customer";
   if (status === "site_done") return "processing";
-  if (status === "quoted") return "waiting_customer";
-  if (status === "ordered") return "scheduled";
-  if (status === "lost") return "cancelled";
+  if (status === "quote" || status === "estimate") return "quoted";
+  if (status === "quoting" || status === "estimate_pending") return "estimating";
+  if (status === "order" || status === "accepted") return "ordered";
+  if (status === "failed") return "lost";
   if (
     status === "submitted" ||
+    status === "untreated" ||
     status === "received" ||
+    status === "contacted" ||
     status === "processing" ||
+    status === "estimating" ||
+    status === "quoted" ||
     status === "waiting_customer" ||
+    status === "ordered" ||
     status === "scheduled" ||
     status === "completed" ||
+    status === "lost" ||
     status === "cancelled"
   ) {
     return status;
   }
-  return "submitted";
+  return "untreated";
+}
+
+function timelineMessageForStatus(status: RequestStatus): TranslationKey {
+  return REQUEST_TIMELINE_MESSAGE_KEYS[status] || REQUEST_TIMELINE_MESSAGE_KEYS.submitted;
 }
 
 function backendTimeline(item: any, status: RequestStatus, createdAt: string): TimelineEvent[] {
+  const addCurrentStatusIfMissing = (events: TimelineEvent[]) => {
+    const normalized = dedupeTimeline(events);
+    if (!normalized.some(event => normalizeBackendStatus(event.type) === status)) {
+      normalized.push(createTimelineEvent(status, timelineMessageForStatus(status), createdAt));
+    }
+    return dedupeTimeline(normalized);
+  };
+
   if (Array.isArray(item.timeline) && item.timeline.length) {
-    return dedupeTimeline(item.timeline.map((event: any, index: number) => {
+    return addCurrentStatusIfMissing(item.timeline.map((event: any, index: number) => {
       if (typeof event === "string") {
         return {
           id: `tl-string-${index}-${Date.now()}`,
           type: status,
-          message: event || REQUEST_TIMELINE_MESSAGE_KEYS[status],
+          status,
+          message: event || timelineMessageForStatus(status),
           note: "",
+          actor: "",
           createdAt
         };
       }
 
-      const eventStatus = normalizeBackendStatus(event?.type || event?.status);
+      const rawEventStatus = normalizeBackendStatus(event?.type || event?.status);
+      const eventStatus = rawEventStatus === "waiting_customer" && (status === "estimating" || status === "quoted")
+        ? status
+        : rawEventStatus;
       return {
         id: String(event?.id || `tl-${eventStatus}-${event?.createdAt || Date.now()}`),
         type: eventStatus as TimelineEvent["type"],
-        message: event?.message || REQUEST_TIMELINE_MESSAGE_KEYS[eventStatus],
+        status: eventStatus as TimelineEvent["type"],
+        message: timelineMessageForStatus(eventStatus),
         note: event?.note || "",
+        actor: event?.actor || "",
         createdAt: event?.createdAt ? new Date(event.createdAt).toLocaleString() : createdAt
       };
     }));
@@ -182,10 +207,11 @@ function backendTimeline(item: any, status: RequestStatus, createdAt: string): T
   const timestampMap: Array<[keyof typeof REQUEST_TIMELINE_MESSAGE_KEYS, string | undefined]> = [
     ["received", item.contactedAt || item.firstResponseAt],
     ["processing", item.siteVisitedAt],
-    ["waiting_customer", item.quotedAt],
-    ["scheduled", item.orderedAt],
+    ["estimating", item.firstResponseAt],
+    ["quoted", item.quotedAt],
+    ["ordered", item.orderedAt],
     ["completed", item.completedAt],
-    ["cancelled", item.lostAt]
+    ["lost", item.lostAt]
   ];
   timestampMap.forEach(([type, value]) => {
     if (value) events.push(createTimelineEvent(type, REQUEST_TIMELINE_MESSAGE_KEYS[type], new Date(value).toLocaleString()));
@@ -193,7 +219,7 @@ function backendTimeline(item: any, status: RequestStatus, createdAt: string): T
   if (events.length === 1 && status !== "submitted") {
     events.push(createTimelineEvent(status, REQUEST_TIMELINE_MESSAGE_KEYS[status], createdAt));
   }
-  return dedupeTimeline(events);
+  return addCurrentStatusIfMissing(events);
 }
 
 function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): SupportRequest {
@@ -248,8 +274,13 @@ function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): 
     phone: item.phone || input?.phone || "",
     contact: item.contact || input?.contact || "",
     issueTags: Array.isArray(item.issueTags) ? item.issueTags : input?.issueTags || [],
-    adminReply: item.adminReply || item.adminResponse || item.response || item.feedback || item.note || ""
+    adminReply: item.adminReply || item.adminResponse || item.response || item.feedback || item.note || latestTimelineNote(item.timeline) || ""
   });
+}
+
+function latestTimelineNote(timeline: unknown) {
+  if (!Array.isArray(timeline)) return "";
+  return [...timeline].reverse().find(event => event && typeof event === "object" && String((event as { note?: string }).note || "").trim())?.note || "";
 }
 
 async function fetchBackendRequestById(id: string): Promise<SupportRequest | null> {
