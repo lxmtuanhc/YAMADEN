@@ -195,6 +195,11 @@ const RequestSchema = new mongoose.Schema({
   lostAt: Date,
   assigneeId: String,
   assigneeName: String,
+  assignedStaff: mongoose.Schema.Types.Mixed,
+  assignedTo: mongoose.Schema.Types.Mixed,
+  assignee: mongoose.Schema.Types.Mixed,
+  staff: mongoose.Schema.Types.Mixed,
+  responsiblePerson: mongoose.Schema.Types.Mixed,
   issueTags: [String],
   quoteRequested: Boolean,
   timeline: [TimelineEventSchema]
@@ -259,6 +264,65 @@ function makeIdQuery(id) {
   if (!isNaN(Number(id))) query.push({ id: Number(id) });
   if (mongoose.Types.ObjectId.isValid(id)) query.push({ _id: id });
   return { $or: query };
+}
+
+function cleanText(value) {
+  return String(value || "").trim();
+}
+
+function staffHistoryQuery(staffId) {
+  const id = cleanText(staffId);
+  if (!id) return null;
+  const ids = [id];
+  if (mongoose.Types.ObjectId.isValid(id)) {
+    ids.push(new mongoose.Types.ObjectId(id));
+  }
+  return {
+    $or: [
+      { assigneeId: { $in: ids } },
+      { "assignedStaff.id": { $in: ids } },
+      { "assignedStaff._id": { $in: ids } },
+      { "assignedStaff.staffId": { $in: ids } },
+      { "assignedTo.id": { $in: ids } },
+      { "assignedTo._id": { $in: ids } },
+      { "assignedTo.staffId": { $in: ids } },
+      { "assignee.id": { $in: ids } },
+      { "assignee._id": { $in: ids } },
+      { "assignee.staffId": { $in: ids } },
+      { "staff.id": { $in: ids } },
+      { "staff._id": { $in: ids } },
+      { "staff.staffId": { $in: ids } },
+      { "responsiblePerson.id": { $in: ids } },
+      { "responsiblePerson._id": { $in: ids } },
+      { "responsiblePerson.staffId": { $in: ids } }
+    ]
+  };
+}
+
+function latestTimelineEvent(item) {
+  const events = Array.isArray(item.timeline) ? item.timeline : [];
+  return events
+    .filter(event => event && event.createdAt)
+    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())[0] || null;
+}
+
+function latestTimelineNoteForRequest(item) {
+  const events = Array.isArray(item.timeline) ? item.timeline : [];
+  const event = [...events].reverse().find(value => value && cleanText(value.note));
+  return event ? cleanText(event.note) : "";
+}
+
+function publicAssigneeHistoryRequest(item) {
+  const latestEvent = latestTimelineEvent(item);
+  return {
+    id: String(item.id || item._id || ""),
+    requestCode: item.requestCode || item.requestId || "",
+    title: item.title || item.content || item.category || "",
+    status: customerStatus(item.status),
+    createdAt: item.createdAt || "",
+    updatedAt: latestEvent ? latestEvent.createdAt : (item.completedAt || item.orderedAt || item.quotedAt || item.siteVisitedAt || item.contactedAt || item.firstResponseAt || ""),
+    latestNote: latestTimelineNoteForRequest(item)
+  };
 }
 
 async function generateRequestCode() {
@@ -1350,6 +1414,26 @@ app.get("/request/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Read failed",
+      error: error.message
+    });
+  }
+});
+
+app.get("/api/requests/staff/:staffId/history", async (req, res) => {
+  try {
+    const query = staffHistoryQuery(req.params.staffId);
+    if (!query) {
+      return res.json({ data: [] });
+    }
+
+    const requests = await Request.find(query).sort({ createdAt: -1 }).limit(50);
+    res.json({
+      data: requests.map(publicAssigneeHistoryRequest)
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Staff request history read failed",
       error: error.message
     });
   }

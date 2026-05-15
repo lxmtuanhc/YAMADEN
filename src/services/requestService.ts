@@ -1,6 +1,6 @@
 import { initialRequests } from "../data/mockData";
 import { useAppStore } from "../stores/appStore";
-import type { RequestMediaFile, RequestStatus, SupportRequest, TimelineEvent } from "../types";
+import type { AssigneeRequestHistoryItem, RequestAssignee, RequestMediaFile, RequestStatus, SupportRequest, TimelineEvent } from "../types";
 import { createRequestId, todayLabel } from "../utils/format";
 import { REQUEST_TIMELINE_MESSAGE_KEYS } from "../constants/requestStatus";
 import { APP_STORAGE_KEY } from "../constants/storageKeys";
@@ -284,6 +284,73 @@ function latestTimelineNote(timeline: unknown) {
   return [...timeline].reverse().find(event => event && typeof event === "object" && String((event as { note?: string }).note || "").trim())?.note || "";
 }
 
+function latestTimelineDate(timeline: unknown) {
+  if (!Array.isArray(timeline)) return "";
+  const dates = timeline
+    .map(event => event && typeof event === "object" ? String((event as { createdAt?: string }).createdAt || "") : "")
+    .filter(Boolean)
+    .map(value => new Date(value).getTime())
+    .filter(value => !Number.isNaN(value));
+  if (!dates.length) return "";
+  return new Date(Math.max(...dates)).toLocaleString();
+}
+
+function cleanText(value: unknown) {
+  return String(value || "").trim();
+}
+
+function assigneeIdentityFromValue(value: RequestAssignee | string | undefined) {
+  if (!value) return { id: "", name: "" };
+  if (typeof value === "string") return { id: "", name: cleanText(value) };
+  return {
+    id: cleanText(value.id || value._id || value.staffId),
+    name: cleanText(value.name)
+  };
+}
+
+function requestAssigneeIdentity(request: SupportRequest) {
+  const candidates = [
+    request.assignedStaff,
+    request.assignedTo,
+    request.assignee,
+    request.staff,
+    request.responsiblePerson
+  ];
+  const fromProfile = candidates.map(assigneeIdentityFromValue).find(item => item.id || item.name);
+  return {
+    id: fromProfile?.id || cleanText(request.assigneeId),
+    name: fromProfile?.name || cleanText(request.assigneeName)
+  };
+}
+
+function sameAssignee(left: SupportRequest, right: SupportRequest) {
+  const leftIdentity = requestAssigneeIdentity(left);
+  const rightIdentity = requestAssigneeIdentity(right);
+  if (leftIdentity.id && rightIdentity.id) return leftIdentity.id === rightIdentity.id;
+  return Boolean(leftIdentity.name && rightIdentity.name && leftIdentity.name === rightIdentity.name);
+}
+
+function requestHistoryItem(request: SupportRequest): AssigneeRequestHistoryItem {
+  return {
+    id: request.id,
+    requestCode: request.requestCode,
+    title: request.title,
+    status: request.status,
+    createdAt: request.createdAt,
+    updatedAt: latestTimelineDate(request.timeline),
+    latestNote: latestTimelineNote(request.timeline)
+  };
+}
+
+function localAssigneeHistory(request: SupportRequest): AssigneeRequestHistoryItem[] {
+  const identity = requestAssigneeIdentity(request);
+  if (!identity.id && !identity.name) return [];
+  return readRequests()
+    .filter(item => sameAssignee(request, item))
+    .map(requestHistoryItem)
+    .sort((left, right) => new Date(right.createdAt || 0).getTime() - new Date(left.createdAt || 0).getTime());
+}
+
 async function fetchBackendRequestById(id: string): Promise<SupportRequest | null> {
   const token = getUserToken();
   const response = await fetch(`/request/${encodeURIComponent(id)}`, {
@@ -294,6 +361,26 @@ async function fetchBackendRequestById(id: string): Promise<SupportRequest | nul
   if (!response.ok) throw new Error("Request load failed");
   const payload = await response.json();
   return backendRequestToSupportRequest(payload.data || payload);
+}
+
+async function fetchBackendAssigneeHistory(staffId: string): Promise<AssigneeRequestHistoryItem[]> {
+  const token = getUserToken();
+  const response = await fetch(`/api/requests/staff/${encodeURIComponent(staffId)}/history`, {
+    cache: "no-store",
+    headers: token ? { Authorization: `Bearer ${token}` } : {}
+  });
+  if (!response.ok) throw new Error("Assignee history load failed");
+  const payload = await response.json();
+  const items = Array.isArray(payload.data) ? payload.data : [];
+  return items.map((item: any) => ({
+    id: String(item.id || item.requestCode || item.requestId || item._id || ""),
+    requestCode: item.requestCode || item.requestId || "",
+    title: item.title || item.content || item.category || "",
+    status: normalizeBackendStatus(item.status),
+    createdAt: item.createdAt ? new Date(item.createdAt).toLocaleString() : "",
+    updatedAt: item.updatedAt ? new Date(item.updatedAt).toLocaleString() : "",
+    latestNote: cleanText(item.latestNote)
+  })).filter(item => item.id || item.requestCode || item.title);
 }
 
 async function createBackendRequest(input: CreateRequestInput): Promise<SupportRequest | null> {
@@ -410,6 +497,21 @@ export const requestService = {
       console.warn("Unable to load request from backend", error);
     }
     return readRequests().find(request => request.id === id || request.requestCode === id) || null;
+  },
+
+  async getAssigneeHistory(request: SupportRequest): Promise<AssigneeRequestHistoryItem[]> {
+    await delay();
+    const identity = requestAssigneeIdentity(request);
+    if (!identity.id && !identity.name) return [];
+    try {
+      if (identity.id) {
+        const backendHistory = await fetchBackendAssigneeHistory(identity.id);
+        if (backendHistory.length) return backendHistory;
+      }
+    } catch (error) {
+      console.warn("Unable to load assignee history from backend", error);
+    }
+    return localAssigneeHistory(request);
   },
 
   async createRequest(input: CreateRequestInput): Promise<SupportRequest> {

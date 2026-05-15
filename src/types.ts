@@ -69,6 +69,8 @@ export interface TimelineEvent {
 
 export interface RequestAssignee {
   id?: string;
+  _id?: string;
+  staffId?: string;
   name?: string;
   department?: string;
   areas?: string;
@@ -77,6 +79,16 @@ export interface RequestAssignee {
   email?: string;
   phone?: string;
   note?: string;
+}
+
+export interface AssigneeRequestHistoryItem {
+  id: string;
+  requestCode?: string;
+  title: string;
+  status: RequestStatus;
+  createdAt: string;
+  updatedAt?: string;
+  latestNote?: string;
 }
 
 export interface RequestMediaFile {

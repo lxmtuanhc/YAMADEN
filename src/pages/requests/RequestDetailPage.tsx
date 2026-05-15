@@ -12,7 +12,7 @@ import { useTranslation } from "../../hooks/useTranslation";
 import { quoteService } from "../../services/quoteService";
 import { requestService } from "../../services/requestService";
 import { scheduleService } from "../../services/scheduleService";
-import type { Quote, RequestAssignee, RequestMediaFile, Schedule, SupportRequest, TimelineEvent } from "../../types";
+import type { AssigneeRequestHistoryItem, Quote, RequestAssignee, RequestMediaFile, Schedule, SupportRequest, TimelineEvent } from "../../types";
 import { categoryOptions } from "./requestHelpers";
 import { REQUEST_STATUS_LABEL_KEYS, REQUEST_TIMELINE_MESSAGE_KEYS } from "../../constants/requestStatus";
 
@@ -28,9 +28,9 @@ export function RequestDetailPage() {
   const [error, setError] = useState("");
   const [refreshMessage, setRefreshMessage] = useState("");
   const [isAssigneeModalOpen, setIsAssigneeModalOpen] = useState(false);
+  const [assigneeHistory, setAssigneeHistory] = useState<AssigneeRequestHistoryItem[]>([]);
 
   const timelineItems = useMemo(() => request ? requestTimelineItems(request) : [], [request]);
-  const timelineHistoryItems = useMemo(() => request ? requestTimelineHistoryItems(request) : [], [request]);
   const assignee = useMemo(() => request ? requestAssignee(request) : null, [request]);
 
   const fetchRequestDetail = useCallback(async () => {
@@ -40,7 +40,8 @@ export function RequestDetailPage() {
       quoteService.getQuotesByRequestId(id),
       scheduleService.getSchedulesByRequestId(id)
     ]);
-    return { result, quotes, schedules };
+    const history = result ? await requestService.getAssigneeHistory(result) : [];
+    return { result, quotes, schedules, history };
   }, [id]);
 
   useEffect(() => {
@@ -57,6 +58,7 @@ export function RequestDetailPage() {
         setRequest(payload.result);
         setRelatedQuotes(payload.quotes);
         setRelatedSchedules(payload.schedules);
+        setAssigneeHistory(payload.history);
       })
       .catch(() => {
         if (active) setError(t("common.empty"));
@@ -81,6 +83,7 @@ export function RequestDetailPage() {
       setRequest(payload.result);
       setRelatedQuotes(payload.quotes);
       setRelatedSchedules(payload.schedules);
+      setAssigneeHistory(payload.history);
       setRefreshMessage(t("request.refreshSuccess"));
     } catch {
       setRefreshMessage(t("request.refreshFailed"));
@@ -260,8 +263,7 @@ export function RequestDetailPage() {
       {isAssigneeModalOpen ? (
         <AssigneeModal
           assignee={assignee}
-          request={request}
-          timelineItems={timelineHistoryItems}
+          historyItems={assigneeHistory}
           language={language}
           t={t}
           onClose={() => setIsAssigneeModalOpen(false)}
@@ -281,6 +283,7 @@ type DetailTimelineItem = {
 };
 
 type SafeAssignee = {
+  id: string;
   name: string;
   department: string;
   work: string;
@@ -332,30 +335,6 @@ function requestTimelineItems(request: SupportRequest): DetailTimelineItem[] {
   }
 
   return Array.from(byStatus.values()).sort((left, right) => dateValue(left.createdAt) - dateValue(right.createdAt));
-}
-
-function requestTimelineHistoryItems(request: SupportRequest): DetailTimelineItem[] {
-  const source = Array.isArray(request.timeline) && request.timeline.length
-    ? request.timeline
-    : [{
-        id: `status-${request.status}`,
-        type: request.status,
-        message: REQUEST_TIMELINE_MESSAGE_KEYS[request.status],
-        createdAt: request.createdAt
-      }];
-
-  return source
-    .map(event => {
-      const status = normalizeTimelineStatus(event.type || event.status || request.status, request.status);
-      return {
-        id: event.id || `tl-${status}-${event.createdAt || request.createdAt}`,
-        labelKey: REQUEST_TIMELINE_MESSAGE_KEYS[status] || REQUEST_STATUS_LABEL_KEYS[status],
-        createdAt: event.createdAt || request.createdAt,
-        note: event.note || "",
-        actorName: timelineActorName(event)
-      };
-    })
-    .sort((left, right) => dateValue(left.createdAt) - dateValue(right.createdAt));
 }
 
 function normalizeTimelineStatus(status: string, currentStatus?: string) {
@@ -433,6 +412,7 @@ function requestAssignee(request: SupportRequest): SafeAssignee | null {
   const fallbackName = cleanText(request.assigneeName);
   if (!fallbackName) return null;
   return {
+    id: cleanText(request.assigneeId),
     name: fallbackName,
     department: "",
     work: "",
@@ -446,11 +426,12 @@ function safeAssigneeFromValue(value: RequestAssignee | string | undefined): Saf
   if (!value) return null;
   if (typeof value === "string") {
     const name = cleanText(value);
-    return name ? { name, department: "", work: "", email: "", phone: "", note: "" } : null;
+    return name ? { id: "", name, department: "", work: "", email: "", phone: "", note: "" } : null;
   }
   const name = cleanText(value.name);
   if (!name) return null;
   return {
+    id: cleanText(value.id || value._id || value.staffId),
     name,
     department: cleanText(value.department || value.areas),
     work: cleanText(value.workContent || value.skills),
@@ -470,15 +451,13 @@ function timelineActorName(event: TimelineEvent) {
 
 function AssigneeModal({
   assignee,
-  request,
-  timelineItems,
+  historyItems,
   language,
   t,
   onClose
 }: {
   assignee: SafeAssignee | null;
-  request: SupportRequest;
-  timelineItems: DetailTimelineItem[];
+  historyItems: AssigneeRequestHistoryItem[];
   language: "vi" | "ja";
   t: (key: TranslationKey) => string;
   onClose: () => void;
@@ -487,10 +466,9 @@ function AssigneeModal({
     ? [
         [t("request.assigneeName"), assignee.name],
         [t("request.assigneeDepartment"), assignee.department],
-        [t("request.assigneeWork"), assignee.work],
         [t("request.assigneeEmail"), assignee.email],
         [t("request.assigneePhone"), assignee.phone],
-        [t("request.assigneeNote"), assignee.note]
+        [t("request.assigneeWork"), assignee.work]
       ].filter(([, value]) => cleanText(value))
     : [];
 
@@ -523,22 +501,23 @@ function AssigneeModal({
         ) : null}
         <div className="assignee-history">
           <h3>{t("request.assigneeHistoryTitle")}</h3>
-          <div className="timeline request-timeline-list">
-            {timelineItems.length ? timelineItems.map(item => {
-              const statusLabel = t(item.labelKey);
-              const note = visibleTimelineNote(item.note, statusLabel);
+          <div className="assignee-history-list">
+            {assignee && historyItems.length ? historyItems.map(item => {
               return (
-                <div className="timeline-item done request-timeline-item" key={`modal-${request.id}-${item.id}`}>
-                  <div className="timeline-dot request-timeline-dot">{null}</div>
-                  <div className="timeline-text request-timeline-content">
-                    <strong className="request-timeline-status">{statusLabel}</strong>
-                    {item.actorName ? <span className="request-timeline-actor">{item.actorName}</span> : null}
-                    {item.createdAt ? <span className="request-timeline-time">{formatTimelineDate(item.createdAt, language)}</span> : null}
-                    {note ? <em className="request-timeline-note">{note}</em> : null}
+                <div className="assignee-history-item" key={`assignee-history-${item.id || item.requestCode}`}>
+                  <div className="assignee-history-main">
+                    <strong>{item.requestCode || item.id}</strong>
+                    <span>{item.title || "-"}</span>
                   </div>
+                  <StatusBadge status={item.status} />
+                  <div className="assignee-history-meta">
+                    <span>{t("request.createdAt")}: {item.createdAt ? formatTimelineDate(item.createdAt, language) : "-"}</span>
+                    {item.updatedAt ? <span>{t("request.historyUpdatedAt")}: {formatTimelineDate(item.updatedAt, language)}</span> : null}
+                  </div>
+                  {item.latestNote ? <em>{t("request.historyLatestNote")}: {item.latestNote}</em> : null}
                 </div>
               );
-            }) : <div className="muted-line">{t("common.empty")}</div>}
+            }) : <div className="assignee-history-empty">{assignee ? t("request.assigneeHistoryEmpty") : t("request.assigneeEmpty")}</div>}
           </div>
         </div>
       </div>
