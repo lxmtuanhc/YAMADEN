@@ -34,6 +34,14 @@ export function RequestDetailPage() {
   const timelineItems = useMemo(() => request ? requestTimelineItems(request) : [], [request]);
   const assignee = useMemo(() => request ? requestAssignee(request, assigneeProfile) : null, [request, assigneeProfile]);
 
+  useEffect(() => {
+    if (!isAssigneeModalOpen) return undefined;
+    document.body.classList.add("modal-open");
+    return () => {
+      document.body.classList.remove("modal-open");
+    };
+  }, [isAssigneeModalOpen]);
+
   const fetchRequestDetail = useCallback(async () => {
     if (!id) return null;
     const [result, quotes, schedules] = await Promise.all([
@@ -165,23 +173,25 @@ export function RequestDetailPage() {
         </div>
       </Card>
 
-      <Card className="assignee-card">
-        <div className="assignee-summary">
+      <Card className={`assignee-card${assignee?.name ? " assignee-card-clickable" : ""}`}>
+        <button className="assignee-summary" type="button" onClick={assignee?.name ? () => setIsAssigneeModalOpen(true) : undefined} disabled={!assignee?.name}>
+          <div className="assignee-summary-avatar" aria-hidden="true">
+            {assignee?.avatar ? <img src={assignee.avatar} alt="" /> : assignee?.name ? assignee.name.slice(0, 1).toUpperCase() : "?"}
+          </div>
           <div className="assignee-summary-text">
             <span>{t("request.assigneeTitle")}</span>
             {assignee?.name ? (
               <>
-                <strong>{assignee.name}{assignee.department ? ` / ${assignee.department}` : ""}</strong>
-                <button className="assignee-view-button" type="button" onClick={() => setIsAssigneeModalOpen(true)}>
-                  {t("request.assigneeViewInfo")}
-                </button>
+                <strong>{assignee.name}</strong>
+                {assignee.department ? <em>{assignee.department}</em> : null}
+                {assignee.workContents.length ? <small>{assignee.workContents.slice(0, 2).join(", ")}</small> : null}
               </>
             ) : (
               <strong className="assignee-empty">{t("request.assigneeEmpty")}</strong>
             )}
           </div>
           {assignee?.name ? <ChevronRight size={18} /> : null}
-        </div>
+        </button>
       </Card>
 
       <Card>
@@ -298,8 +308,8 @@ type SafeAssignee = {
   avatar: string;
   department: string;
   role: string;
-  workContent: string;
-  skills: string;
+  workContents: string[];
+  skills: string[];
   contact: string;
   email: string;
   phone: string;
@@ -434,8 +444,8 @@ function requestAssignee(request: SupportRequest, profile?: StaffProfile | null)
     avatar: "",
     department: "",
     role: "",
-    workContent: "",
-    skills: "",
+    workContents: [],
+    skills: [],
     contact: "",
     email: "",
     phone: "",
@@ -446,14 +456,15 @@ function requestAssignee(request: SupportRequest, profile?: StaffProfile | null)
 function safeAssigneeFromProfile(profile: StaffProfile): SafeAssignee {
   const email = cleanText(profile.email);
   const phone = cleanText(profile.phone);
+  const workContents = normalizeTextList(profile.workTags?.length ? profile.workTags : profile.workContent);
   return {
     id: cleanText(profile.id),
     name: cleanText(profile.name),
     avatar: cleanText(profile.avatar),
     department: cleanText(profile.department || profile.areas),
     role: cleanText(profile.role || profile.position || profile.title),
-    workContent: cleanText(profile.workContent),
-    skills: [profile.skills, ...(profile.workTags || [])].map(cleanText).filter(Boolean).join(", "),
+    workContents,
+    skills: withoutDuplicateItems(normalizeTextList(profile.skills), workContents),
     contact: [email, phone].filter(Boolean).join(" / "),
     email,
     phone,
@@ -471,8 +482,8 @@ function safeAssigneeFromValue(value: RequestAssignee | string | undefined): Saf
       avatar: "",
       department: "",
       role: "",
-      workContent: "",
-      skills: "",
+      workContents: [],
+      skills: [],
       contact: "",
       email: "",
       phone: "",
@@ -481,14 +492,15 @@ function safeAssigneeFromValue(value: RequestAssignee | string | undefined): Saf
   }
   const name = cleanText(value.name);
   if (!name) return null;
+  const workContents = normalizeTextList(value.workTags?.length ? value.workTags : value.workContent);
   return {
     id: cleanText(value.id || value._id || value.staffId),
     name,
     avatar: cleanText(value.avatar),
     department: cleanText(value.department || value.areas),
     role: cleanText(value.role || value.position || value.title),
-    workContent: cleanText(value.workContent),
-    skills: [value.skills, ...(value.workTags || [])].map(cleanText).filter(Boolean).join(", "),
+    workContents,
+    skills: withoutDuplicateItems(normalizeTextList(value.skills), workContents),
     contact: [value.email, value.phone].map(cleanText).filter(Boolean).join(" / "),
     email: cleanText(value.email),
     phone: cleanText(value.phone),
@@ -498,6 +510,38 @@ function safeAssigneeFromValue(value: RequestAssignee | string | undefined): Saf
 
 function cleanText(value: unknown) {
   return String(value || "").trim();
+}
+
+function normalizeTextList(value: unknown) {
+  const source = Array.isArray(value) ? value : cleanText(value).split(/[,;、；\n\r]+/);
+  const seen = new Set<string>();
+  const items: string[] = [];
+
+  source
+    .flatMap(item => Array.isArray(item) ? item : String(item || "").split(/[,;、；\n\r]+/))
+    .map(item => item.trim())
+    .filter(Boolean)
+    .forEach(item => {
+      const key = normalizedListKey(item);
+      if (seen.has(key)) return;
+      seen.add(key);
+      items.push(item);
+    });
+
+  return items;
+}
+
+function normalizedListKey(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff]+/g, "");
+}
+
+function withoutDuplicateItems(items: string[], existing: string[]) {
+  const existingKeys = new Set(existing.map(normalizedListKey));
+  return items.filter(item => !existingKeys.has(normalizedListKey(item)));
 }
 
 function timelineActorName(event: TimelineEvent) {
@@ -522,8 +566,6 @@ function AssigneeModal({
         [t("request.assigneeName"), assignee.name],
         [t("request.assigneeDepartment"), assignee.department],
         [t("request.assigneeRole"), assignee.role],
-        [t("request.assigneeWorkContent"), assignee.workContent],
-        [t("request.assigneeSkills"), assignee.skills],
         [t("request.assigneeContact"), assignee.contact],
         [t("request.assigneeNote"), assignee.note]
       ].filter(([, value]) => cleanText(value))
@@ -560,6 +602,23 @@ function AssigneeModal({
               ))}
             </div>
           ) : null}
+          {assignee ? (
+            <>
+              <AssigneeChipSection
+                title={t("request.assigneeWorkContent")}
+                items={assignee.workContents}
+                emptyLabel={t("request.assigneeWorkEmpty")}
+                moreLabel={t("request.assigneeMoreWork")}
+              />
+              {assignee.skills.length ? (
+                <AssigneeChipSection
+                  title={t("request.assigneeSkills")}
+                  items={assignee.skills}
+                  moreLabel={t("request.assigneeMoreWork")}
+                />
+              ) : null}
+            </>
+          ) : null}
           <div className="assignee-history">
             <h3>{t("request.assigneeHistoryTitle")}</h3>
             <div className="assignee-history-list">
@@ -586,6 +645,36 @@ function AssigneeModal({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function AssigneeChipSection({
+  title,
+  items,
+  emptyLabel,
+  moreLabel
+}: {
+  title: string;
+  items: string[];
+  emptyLabel?: string;
+  moreLabel: string;
+}) {
+  const visibleItems = items.slice(0, 10);
+  const hiddenCount = Math.max(0, items.length - visibleItems.length);
+  if (!items.length && !emptyLabel) return null;
+
+  return (
+    <div className="assignee-chip-section">
+      <h3>{title}</h3>
+      {items.length ? (
+        <div className="assignee-chip-list">
+          {visibleItems.map(item => <span className="assignee-chip" key={item}>{item}</span>)}
+          {hiddenCount ? <span className="assignee-chip-more">{moreLabel.replace("{count}", String(hiddenCount))}</span> : null}
+        </div>
+      ) : (
+        <div className="assignee-chip-empty">{emptyLabel}</div>
+      )}
     </div>
   );
 }

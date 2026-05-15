@@ -1069,6 +1069,14 @@ p {
   overflow: hidden;
 }
 
+.assignee-card-clickable {
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.assignee-card-clickable:active {
+  transform: scale(0.99);
+}
+
 .assignee-summary {
   width: 100%;
   min-width: 0;
@@ -1083,13 +1091,47 @@ p {
   text-align: left;
 }
 
+.assignee-summary:disabled {
+  cursor: default;
+}
+
+.assignee-card-clickable .assignee-summary {
+  cursor: pointer;
+}
+
+.assignee-card-clickable .assignee-summary:hover {
+  background: #f8fbff;
+}
+
 .assignee-summary svg {
   flex: 0 0 auto;
   color: #94a3b8;
 }
 
+.assignee-summary-avatar {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: #1262e3;
+  font-size: 16px;
+  font-weight: 950;
+  overflow: hidden;
+}
+
+.assignee-summary-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .assignee-summary-text {
   min-width: 0;
+  flex: 1 1 auto;
   display: grid;
   gap: 4px;
 }
@@ -1117,29 +1159,27 @@ p {
   overflow-wrap: anywhere;
 }
 
+.assignee-summary-text small {
+  min-width: 0;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .assignee-summary-text .assignee-empty {
   color: #64748b;
   font-size: 13px;
-}
-
-.assignee-view-button {
-  width: fit-content;
-  max-width: 100%;
-  border: 0;
-  border-radius: 999px;
-  padding: 7px 11px;
-  color: #1262e3;
-  background: #eaf2ff;
-  font-size: 12px;
-  font-weight: 900;
-  line-height: 1.2;
 }
 
 .assignee-modal-overlay,
 .assignee-modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1149,7 +1189,7 @@ p {
 
 .assignee-modal {
   width: min(92vw, 520px);
-  max-height: 82vh;
+  max-height: calc(100dvh - 120px);
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -1198,7 +1238,11 @@ p {
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  padding: 0 20px 24px;
+  padding: 0 20px calc(24px + env(safe-area-inset-bottom));
+}
+
+body.modal-open {
+  overflow: hidden;
 }
 
 .assignee-profile {
@@ -1272,6 +1316,57 @@ p {
 
 .assignee-info-grid {
   margin-top: 10px;
+}
+
+.assignee-chip-section {
+  min-width: 0;
+  margin-top: 14px;
+}
+
+.assignee-chip-section h3 {
+  margin: 0 0 8px;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.35;
+}
+
+.assignee-chip-list {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.assignee-chip,
+.assignee-chip-more {
+  min-width: 0;
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: #334155;
+  background: #eef4ff;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assignee-chip-more {
+  color: #1262e3;
+  background: #eaf2ff;
+}
+
+.assignee-chip-empty {
+  padding: 11px 12px;
+  border-radius: 14px;
+  color: #64748b;
+  background: #f8fafc;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.4;
 }
 
 .assignee-history {
@@ -1398,7 +1493,7 @@ p {
 @media (max-width: 430px) {
   .assignee-modal {
     width: calc(100vw - 32px);
-    max-height: calc(82vh - env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 112px - env(safe-area-inset-bottom));
   }
 }
 
@@ -2956,6 +3051,89 @@ textarea {
   line-height: 1.45;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
+}
+
+/* Assignee detail overrides must stay after global button/card/mobile clamps. */
+body.modal-open,
+body.modal-open .app-shell,
+body.modal-open .content-scroll {
+  overflow: hidden;
+}
+
+.request-detail-page .assignee-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.request-detail-page .assignee-summary {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-height: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  overflow: visible;
+  white-space: normal;
+}
+
+.request-detail-page .assignee-summary span,
+.request-detail-page .assignee-summary strong,
+.request-detail-page .assignee-summary em,
+.request-detail-page .assignee-summary small {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  max-height: none;
+  overflow: hidden;
+  white-space: normal;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: initial;
+}
+
+.request-detail-page .assignee-summary-text {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: grid;
+  gap: 4px;
+}
+
+.request-detail-page .assignee-summary-text small {
+  white-space: nowrap;
+}
+
+.assignee-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+
+.assignee-modal {
+  width: min(92vw, 520px);
+  max-height: min(82dvh, calc(100dvh - 120px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.assignee-modal-header {
+  flex: 0 0 auto;
+}
+
+.assignee-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
 }
 
 /* =========================================================

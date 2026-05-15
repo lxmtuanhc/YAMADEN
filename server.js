@@ -652,14 +652,14 @@ function parseRequestTags(value) {
     if (Array.isArray(parsed)) return normalizeTagList(parsed);
   } catch {}
 
-  return normalizeTagList(raw.split(/[,、\n]/));
+  return normalizeTagList(raw.split(/[,;、；\n\r]+/));
 }
 
 function staffTags(staff) {
   const fromArray = Array.isArray(staff.workTags) ? staff.workTags : [];
   const fromText = [staff.skills, staff.workContent, staff.areas, staff.department]
     .join(",")
-    .split(/[,、\n]/);
+    .split(/[,;、；\n\r]+/);
 
   return normalizeTagList(fromArray.concat(fromText));
 }
