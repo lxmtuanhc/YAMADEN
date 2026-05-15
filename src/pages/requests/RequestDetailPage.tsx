@@ -13,7 +13,7 @@ import { useTranslation } from "../../hooks/useTranslation";
 import { quoteService } from "../../services/quoteService";
 import { requestService } from "../../services/requestService";
 import { scheduleService } from "../../services/scheduleService";
-import type { Quote, Schedule, SupportRequest } from "../../types";
+import type { Quote, RequestMediaFile, Schedule, SupportRequest } from "../../types";
 import { categoryOptions } from "./requestHelpers";
 
 export function RequestDetailPage() {
@@ -78,6 +78,7 @@ export function RequestDetailPage() {
   }
 
   const categoryLabel = categoryOptions.find(option => option.value === request.category)?.key ?? "request.categoryElectrical";
+  const mediaItems = requestMediaItems(request);
 
   return (
     <section className="page request-detail-page">
@@ -106,14 +107,19 @@ export function RequestDetailPage() {
 
       <Card>
         <h2 className="section-title">{t("request.images")}</h2>
-        <div className="image-grid">
-          {request.images.length
-            ? request.images.map(image => (
-                <div className="image-tile" key={image}>
-                  {image}
+        <div className="request-media-grid">
+          {mediaItems.length
+            ? mediaItems.map(media => (
+                <div className="request-media-item" key={media.url}>
+                  {isVideoMedia(media) ? (
+                    <video className="request-media-video" src={media.url} controls playsInline preload="metadata" />
+                  ) : (
+                    <img className="request-media-thumb" src={media.url} alt={media.name} />
+                  )}
+                  <div className="request-media-name">{media.name}</div>
                 </div>
               ))
-            : <div className="muted-line">{t("common.empty")}</div>}
+            : <div className="muted-line">{t("request.mediaEmpty")}</div>}
         </div>
       </Card>
 
@@ -171,6 +177,48 @@ export function RequestDetailPage() {
       <Button icon={<MessageCircle size={18} />}>{t("request.support")}</Button>
     </section>
   );
+}
+
+type DetailMedia = RequestMediaFile & { url: string; name: string };
+
+function requestMediaItems(request: SupportRequest): DetailMedia[] {
+  const source = request.mediaFiles?.length
+    ? request.mediaFiles
+    : request.mediaUrl
+      ? [{ url: request.mediaUrl, type: request.mediaType }]
+      : request.image
+        ? [{ url: request.image, type: "image" }]
+        : request.images.map(url => ({ url, type: mediaTypeFromUrl(url) }));
+
+  return source
+    .map(item => {
+      const url = item.secureUrl || item.url || "";
+      if (!url) return null;
+      return {
+        ...item,
+        url,
+        name: item.originalName || mediaNameFromUrl(url)
+      };
+    })
+    .filter((item): item is DetailMedia => Boolean(item));
+}
+
+function isVideoMedia(media: RequestMediaFile) {
+  const value = `${media.resourceType || ""} ${media.type || ""} ${media.mimetype || ""} ${media.url || ""}`;
+  return /video|\.mp4|\.mov|\.webm|\.m4v/i.test(value);
+}
+
+function mediaTypeFromUrl(url: string) {
+  return /(\.mp4|\.mov|\.webm|\.m4v)(\?|$)/i.test(url) ? "video" : "image";
+}
+
+function mediaNameFromUrl(url: string) {
+  try {
+    const pathname = new URL(url).pathname;
+    return decodeURIComponent(pathname.split("/").pop() || "media");
+  } catch {
+    return url.split("/").pop() || "media";
+  }
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {

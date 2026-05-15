@@ -991,6 +991,53 @@ p {
   font-weight: 950;
 }
 
+.request-media-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.request-media-item {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #eef4ff;
+  border: 1px solid #dbeafe;
+}
+
+.request-media-thumb,
+.request-media-video {
+  width: 100%;
+  height: 96px;
+  object-fit: cover;
+  display: block;
+  background: #dbeafe;
+}
+
+.request-media-name {
+  min-width: 0;
+  padding: 6px 8px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 430px) {
+  .request-media-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .request-media-thumb,
+  .request-media-video {
+    height: 86px;
+  }
+}
+
 .muted-line {
   color: #64748b;
   font-size: 13px;

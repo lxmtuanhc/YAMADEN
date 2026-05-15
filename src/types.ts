@@ -51,6 +51,18 @@ export interface TimelineEvent {
   note?: string;
 }
 
+export interface RequestMediaFile {
+  url?: string;
+  secureUrl?: string;
+  publicId?: string;
+  resourceType?: string;
+  format?: string;
+  originalName?: string;
+  mimetype?: string;
+  size?: number;
+  type?: string;
+}
+
 export interface Request {
   id: string;
   requestCode?: string;
@@ -61,6 +73,10 @@ export interface Request {
   status: RequestStatus;
   createdAt: string;
   images: string[];
+  image?: string;
+  mediaUrl?: string;
+  mediaType?: string;
+  mediaFiles?: RequestMediaFile[];
   timeline: TimelineEvent[];
   datetime?: string;
   projectName?: string;

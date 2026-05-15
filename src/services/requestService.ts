@@ -1,6 +1,6 @@
 import { initialRequests } from "../data/mockData";
 import { useAppStore } from "../stores/appStore";
-import type { RequestStatus, SupportRequest, TimelineEvent } from "../types";
+import type { RequestMediaFile, RequestStatus, SupportRequest, TimelineEvent } from "../types";
 import { createRequestId, todayLabel } from "../utils/format";
 import { REQUEST_TIMELINE_MESSAGE_KEYS } from "../constants/requestStatus";
 import { APP_STORAGE_KEY } from "../constants/storageKeys";
@@ -78,6 +78,7 @@ function normalizeRequest(request: SupportRequest): SupportRequest {
     ...request,
     requestCode,
     images: request.images || [],
+    mediaFiles: request.mediaFiles || [],
     timeline: fallbackTimeline
   };
 }
@@ -184,9 +185,32 @@ function backendTimeline(item: any, status: RequestStatus, createdAt: string): T
 function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): SupportRequest {
   const status = normalizeBackendStatus(item.status);
   const createdAt = item.createdAt ? new Date(item.createdAt).toLocaleString() : todayLabel();
-  const mediaFiles = Array.isArray(item.mediaFiles) ? item.mediaFiles : [];
+  const backendMediaFiles = Array.isArray(item.mediaFiles) ? item.mediaFiles : [];
+  const mediaFiles: RequestMediaFile[] = backendMediaFiles
+    .map((file: any) => typeof file === "string" ? { url: file, type: "image" } : {
+      url: file?.secureUrl || file?.url || "",
+      secureUrl: file?.secureUrl,
+      publicId: file?.publicId,
+      resourceType: file?.resourceType,
+      format: file?.format,
+      originalName: file?.originalName,
+      mimetype: file?.mimetype,
+      size: file?.size,
+      type: file?.type || file?.resourceType
+    })
+    .filter(file => file.url || file.secureUrl);
+
+  if (!mediaFiles.length && item.mediaUrl) {
+    mediaFiles.push({
+      url: item.mediaUrl,
+      type: item.mediaType || (/(\.mp4|\.mov|\.webm|\.m4v)(\?|$)/i.test(item.mediaUrl) ? "video" : "image")
+    });
+  } else if (!mediaFiles.length && item.image) {
+    mediaFiles.push({ url: item.image, type: "image" });
+  }
+
   const mediaUrls = mediaFiles
-    .map((file: any) => file?.url || file)
+    .map(file => file.secureUrl || file.url)
     .filter(Boolean);
   const fallbackImages = input?.files?.length ? input.files.map(file => file.name) : input?.imageName ? [input.imageName] : [];
   return normalizeRequest({
@@ -199,6 +223,10 @@ function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): 
     status,
     createdAt,
     images: mediaUrls.length ? mediaUrls : item.image ? [item.image] : fallbackImages,
+    image: item.image || "",
+    mediaUrl: item.mediaUrl || "",
+    mediaType: item.mediaType || "",
+    mediaFiles,
     timeline: backendTimeline(item, status, createdAt),
     datetime: input?.datetime || item.datetime || "",
     projectName: useAppStore.getState().user?.projectName || input?.address || item.address || "",
