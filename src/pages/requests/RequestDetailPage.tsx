@@ -12,7 +12,7 @@ import { useTranslation } from "../../hooks/useTranslation";
 import { quoteService } from "../../services/quoteService";
 import { requestService } from "../../services/requestService";
 import { scheduleService } from "../../services/scheduleService";
-import type { AssigneeRequestHistoryItem, Quote, RequestAssignee, RequestMediaFile, Schedule, SupportRequest, TimelineEvent } from "../../types";
+import type { AssigneeRequestHistoryItem, Quote, RequestAssignee, RequestMediaFile, Schedule, StaffProfile, SupportRequest, TimelineEvent } from "../../types";
 import { categoryOptions } from "./requestHelpers";
 import { REQUEST_STATUS_LABEL_KEYS, REQUEST_TIMELINE_MESSAGE_KEYS } from "../../constants/requestStatus";
 
@@ -29,9 +29,10 @@ export function RequestDetailPage() {
   const [refreshMessage, setRefreshMessage] = useState("");
   const [isAssigneeModalOpen, setIsAssigneeModalOpen] = useState(false);
   const [assigneeHistory, setAssigneeHistory] = useState<AssigneeRequestHistoryItem[]>([]);
+  const [assigneeProfile, setAssigneeProfile] = useState<StaffProfile | null>(null);
 
   const timelineItems = useMemo(() => request ? requestTimelineItems(request) : [], [request]);
-  const assignee = useMemo(() => request ? requestAssignee(request) : null, [request]);
+  const assignee = useMemo(() => request ? requestAssignee(request, assigneeProfile) : null, [request, assigneeProfile]);
 
   const fetchRequestDetail = useCallback(async () => {
     if (!id) return null;
@@ -40,8 +41,13 @@ export function RequestDetailPage() {
       quoteService.getQuotesByRequestId(id),
       scheduleService.getSchedulesByRequestId(id)
     ]);
-    const history = result ? await requestService.getAssigneeHistory(result) : [];
-    return { result, quotes, schedules, history };
+    const [profile, history] = result
+      ? await Promise.all([
+          requestService.getAssigneeProfile(result),
+          requestService.getAssigneeHistory(result)
+        ])
+      : [null, []];
+    return { result, quotes, schedules, profile, history };
   }, [id]);
 
   useEffect(() => {
@@ -58,6 +64,7 @@ export function RequestDetailPage() {
         setRequest(payload.result);
         setRelatedQuotes(payload.quotes);
         setRelatedSchedules(payload.schedules);
+        setAssigneeProfile(payload.profile);
         setAssigneeHistory(payload.history);
       })
       .catch(() => {
@@ -83,6 +90,7 @@ export function RequestDetailPage() {
       setRequest(payload.result);
       setRelatedQuotes(payload.quotes);
       setRelatedSchedules(payload.schedules);
+      setAssigneeProfile(payload.profile);
       setAssigneeHistory(payload.history);
       setRefreshMessage(t("request.refreshSuccess"));
     } catch {
@@ -158,20 +166,22 @@ export function RequestDetailPage() {
       </Card>
 
       <Card className="assignee-card">
-        <button className="assignee-summary" type="button" onClick={() => setIsAssigneeModalOpen(true)}>
+        <div className="assignee-summary">
           <div className="assignee-summary-text">
             <span>{t("request.assigneeTitle")}</span>
             {assignee?.name ? (
               <>
-                <strong>{assignee.name}</strong>
-                {assignee.department ? <em>{assignee.department}</em> : null}
+                <strong>{assignee.name}{assignee.department ? ` / ${assignee.department}` : ""}</strong>
+                <button className="assignee-view-button" type="button" onClick={() => setIsAssigneeModalOpen(true)}>
+                  {t("request.assigneeViewInfo")}
+                </button>
               </>
             ) : (
               <strong className="assignee-empty">{t("request.assigneeEmpty")}</strong>
             )}
           </div>
-          <ChevronRight size={18} />
-        </button>
+          {assignee?.name ? <ChevronRight size={18} /> : null}
+        </div>
       </Card>
 
       <Card>
@@ -285,8 +295,12 @@ type DetailTimelineItem = {
 type SafeAssignee = {
   id: string;
   name: string;
+  avatar: string;
   department: string;
-  work: string;
+  role: string;
+  workContent: string;
+  skills: string;
+  contact: string;
   email: string;
   phone: string;
   note: string;
@@ -399,7 +413,10 @@ function visibleTimelineNote(note: string, statusLabel: string) {
   return value;
 }
 
-function requestAssignee(request: SupportRequest): SafeAssignee | null {
+function requestAssignee(request: SupportRequest, profile?: StaffProfile | null): SafeAssignee | null {
+  if (profile?.name) {
+    return safeAssigneeFromProfile(profile);
+  }
   const candidates = [
     request.assignedStaff,
     request.assignee,
@@ -407,18 +424,40 @@ function requestAssignee(request: SupportRequest): SafeAssignee | null {
     request.responsiblePerson,
     request.assignedTo
   ];
-  const profile = candidates.map(safeAssigneeFromValue).find(item => item?.name) || null;
-  if (profile) return profile;
+  const requestProfile = candidates.map(safeAssigneeFromValue).find(item => item?.name) || null;
+  if (requestProfile) return requestProfile;
   const fallbackName = cleanText(request.assigneeName);
   if (!fallbackName) return null;
   return {
     id: cleanText(request.assigneeId),
     name: fallbackName,
+    avatar: "",
     department: "",
-    work: "",
+    role: "",
+    workContent: "",
+    skills: "",
+    contact: "",
     email: "",
     phone: "",
     note: ""
+  };
+}
+
+function safeAssigneeFromProfile(profile: StaffProfile): SafeAssignee {
+  const email = cleanText(profile.email);
+  const phone = cleanText(profile.phone);
+  return {
+    id: cleanText(profile.id),
+    name: cleanText(profile.name),
+    avatar: cleanText(profile.avatar),
+    department: cleanText(profile.department || profile.areas),
+    role: cleanText(profile.role || profile.position || profile.title),
+    workContent: cleanText(profile.workContent),
+    skills: [profile.skills, ...(profile.workTags || [])].map(cleanText).filter(Boolean).join(", "),
+    contact: [email, phone].filter(Boolean).join(" / "),
+    email,
+    phone,
+    note: cleanText(profile.note || profile.introduction)
   };
 }
 
@@ -426,18 +465,34 @@ function safeAssigneeFromValue(value: RequestAssignee | string | undefined): Saf
   if (!value) return null;
   if (typeof value === "string") {
     const name = cleanText(value);
-    return name ? { id: "", name, department: "", work: "", email: "", phone: "", note: "" } : null;
+    return name ? {
+      id: "",
+      name,
+      avatar: "",
+      department: "",
+      role: "",
+      workContent: "",
+      skills: "",
+      contact: "",
+      email: "",
+      phone: "",
+      note: ""
+    } : null;
   }
   const name = cleanText(value.name);
   if (!name) return null;
   return {
     id: cleanText(value.id || value._id || value.staffId),
     name,
+    avatar: cleanText(value.avatar),
     department: cleanText(value.department || value.areas),
-    work: cleanText(value.workContent || value.skills),
+    role: cleanText(value.role || value.position || value.title),
+    workContent: cleanText(value.workContent),
+    skills: [value.skills, ...(value.workTags || [])].map(cleanText).filter(Boolean).join(", "),
+    contact: [value.email, value.phone].map(cleanText).filter(Boolean).join(" / "),
     email: cleanText(value.email),
     phone: cleanText(value.phone),
-    note: cleanText(value.note)
+    note: cleanText(value.note || value.introduction)
   };
 }
 
@@ -466,58 +521,68 @@ function AssigneeModal({
     ? [
         [t("request.assigneeName"), assignee.name],
         [t("request.assigneeDepartment"), assignee.department],
-        [t("request.assigneeEmail"), assignee.email],
-        [t("request.assigneePhone"), assignee.phone],
-        [t("request.assigneeWork"), assignee.work]
+        [t("request.assigneeRole"), assignee.role],
+        [t("request.assigneeWorkContent"), assignee.workContent],
+        [t("request.assigneeSkills"), assignee.skills],
+        [t("request.assigneeContact"), assignee.contact],
+        [t("request.assigneeNote"), assignee.note]
       ].filter(([, value]) => cleanText(value))
     : [];
 
   return (
-    <div className="assignee-modal-backdrop" role="presentation" onClick={onClose}>
+    <div className="assignee-modal-overlay assignee-modal-backdrop" role="presentation" onClick={onClose}>
       <div className="assignee-modal" role="dialog" aria-modal="true" aria-labelledby="assignee-modal-title" onClick={event => event.stopPropagation()}>
         <div className="assignee-modal-header">
-          <h2 id="assignee-modal-title">{t("request.assigneeTitle")}</h2>
-          <button type="button" className="assignee-modal-close" aria-label={t("common.cancel")} onClick={onClose}>
+          <h2 id="assignee-modal-title">{t("request.assigneeInfoTitle")}</h2>
+          <button type="button" className="assignee-modal-close" aria-label={t("common.close")} onClick={onClose}>
             <X size={18} />
           </button>
         </div>
-        {assignee ? (
-          <div className="assignee-profile">
-            <div className="assignee-avatar" aria-hidden="true">{assignee.name.slice(0, 1).toUpperCase()}</div>
-            <div>
-              <strong>{assignee.name}</strong>
-              {assignee.department ? <span>{assignee.department}</span> : null}
+        <div className="assignee-modal-body">
+          {assignee ? (
+            <div className="assignee-profile">
+              <div className="assignee-avatar" aria-hidden="true">
+                {assignee.avatar ? <img src={assignee.avatar} alt="" /> : assignee.name.slice(0, 1).toUpperCase()}
+              </div>
+              <div>
+                <span>{t("request.staffProfile")}</span>
+                <strong>{assignee.name}</strong>
+                {assignee.department ? <em>{assignee.department}</em> : null}
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="assignee-modal-empty">{t("request.assigneeEmpty")}</div>
-        )}
-        {fields.length ? (
-          <div className="assignee-info-grid">
-            {fields.map(([label, value]) => (
-              <InfoRow key={label} label={label} value={value} />
-            ))}
-          </div>
-        ) : null}
-        <div className="assignee-history">
-          <h3>{t("request.assigneeHistoryTitle")}</h3>
-          <div className="assignee-history-list">
-            {assignee && historyItems.length ? historyItems.map(item => {
-              return (
-                <div className="assignee-history-item" key={`assignee-history-${item.id || item.requestCode}`}>
-                  <div className="assignee-history-main">
-                    <strong>{item.requestCode || item.id}</strong>
-                    <span>{item.title || "-"}</span>
-                  </div>
-                  <StatusBadge status={item.status} />
+          ) : (
+            <div className="assignee-modal-empty">{t("request.assigneeEmpty")}</div>
+          )}
+          {fields.length ? (
+            <div className="assignee-info-grid">
+              {fields.map(([label, value]) => (
+                <InfoRow key={label} label={label} value={value} />
+              ))}
+            </div>
+          ) : null}
+          <div className="assignee-history">
+            <h3>{t("request.assigneeHistoryTitle")}</h3>
+            <div className="assignee-history-list">
+              {assignee && historyItems.length ? historyItems.map(item => {
+                return (
+                  <div className="assignee-history-item" key={`assignee-history-${item.id || item.requestCode}`}>
+                    <div className="assignee-history-top">
+                      <StatusBadge status={item.status} />
+                    </div>
+                    <div className="assignee-history-main">
+                      <strong>{item.requestCode || item.id}</strong>
+                      <span>{item.title || "-"}</span>
+                    </div>
                   <div className="assignee-history-meta">
-                    <span>{t("request.createdAt")}: {item.createdAt ? formatTimelineDate(item.createdAt, language) : "-"}</span>
+                    {item.createdAt ? <span>{t("request.createdAt")}: {formatTimelineDate(item.createdAt, language)}</span> : null}
                     {item.updatedAt ? <span>{t("request.historyUpdatedAt")}: {formatTimelineDate(item.updatedAt, language)}</span> : null}
                   </div>
-                  {item.latestNote ? <em>{t("request.historyLatestNote")}: {item.latestNote}</em> : null}
-                </div>
-              );
-            }) : <div className="assignee-history-empty">{assignee ? t("request.assigneeHistoryEmpty") : t("request.assigneeEmpty")}</div>}
+                    {item.issueTags?.length ? <div className="assignee-history-tags">{item.issueTags.slice(0, 3).map(tag => <span key={tag}>{tag}</span>)}</div> : null}
+                    {item.latestNote ? <em>{t("request.historyLatestNote")}: {item.latestNote}</em> : null}
+                  </div>
+                );
+              }) : <div className="assignee-history-empty">{assignee ? t("request.assigneeHistoryEmpty") : t("request.assigneeEmpty")}</div>}
+            </div>
           </div>
         </div>
       </div>

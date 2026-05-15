@@ -72,13 +72,19 @@ export interface RequestAssignee {
   _id?: string;
   staffId?: string;
   name?: string;
+  avatar?: string;
   department?: string;
   areas?: string;
+  role?: string;
+  position?: string;
+  title?: string;
   skills?: string;
   workContent?: string;
+  workTags?: string[];
   email?: string;
   phone?: string;
   note?: string;
+  introduction?: string;
 }
 
 export interface AssigneeRequestHistoryItem {
@@ -89,6 +95,25 @@ export interface AssigneeRequestHistoryItem {
   createdAt: string;
   updatedAt?: string;
   latestNote?: string;
+  issueTags?: string[];
+}
+
+export interface StaffProfile {
+  id: string;
+  name: string;
+  avatar?: string;
+  department?: string;
+  areas?: string;
+  role?: string;
+  position?: string;
+  title?: string;
+  workContent?: string;
+  skills?: string;
+  workTags?: string[];
+  email?: string;
+  phone?: string;
+  note?: string;
+  introduction?: string;
 }
 
 export interface RequestMediaFile {

@@ -1,6 +1,6 @@
 import { initialRequests } from "../data/mockData";
 import { useAppStore } from "../stores/appStore";
-import type { AssigneeRequestHistoryItem, RequestAssignee, RequestMediaFile, RequestStatus, SupportRequest, TimelineEvent } from "../types";
+import type { AssigneeRequestHistoryItem, RequestAssignee, RequestMediaFile, RequestStatus, StaffProfile, SupportRequest, TimelineEvent } from "../types";
 import { createRequestId, todayLabel } from "../utils/format";
 import { REQUEST_TIMELINE_MESSAGE_KEYS } from "../constants/requestStatus";
 import { APP_STORAGE_KEY } from "../constants/storageKeys";
@@ -338,7 +338,8 @@ function requestHistoryItem(request: SupportRequest): AssigneeRequestHistoryItem
     status: request.status,
     createdAt: request.createdAt,
     updatedAt: latestTimelineDate(request.timeline),
-    latestNote: latestTimelineNote(request.timeline)
+    latestNote: latestTimelineNote(request.timeline),
+    issueTags: request.issueTags || []
   };
 }
 
@@ -378,9 +379,39 @@ async function fetchBackendAssigneeHistory(staffId: string): Promise<AssigneeReq
     title: item.title || item.content || item.category || "",
     status: normalizeBackendStatus(item.status),
     createdAt: item.createdAt ? new Date(item.createdAt).toLocaleString() : "",
-    updatedAt: item.updatedAt ? new Date(item.updatedAt).toLocaleString() : "",
-    latestNote: cleanText(item.latestNote)
+    updatedAt: item.completedAt ? new Date(item.completedAt).toLocaleString() : item.updatedAt ? new Date(item.updatedAt).toLocaleString() : "",
+    latestNote: cleanText(item.latestNote),
+    issueTags: Array.isArray(item.issueTags) ? item.issueTags.map((tag: unknown) => cleanText(tag)).filter(Boolean) : []
   })).filter(item => item.id || item.requestCode || item.title);
+}
+
+async function fetchBackendStaffProfile(staffId: string): Promise<StaffProfile | null> {
+  const token = getUserToken();
+  const response = await fetch(`/api/staff/${encodeURIComponent(staffId)}/profile`, {
+    cache: "no-store",
+    headers: token ? { Authorization: `Bearer ${token}` } : {}
+  });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error("Staff profile load failed");
+  const payload = await response.json();
+  const item = payload.data || payload;
+  return {
+    id: cleanText(item.id || item._id || staffId),
+    name: cleanText(item.name),
+    avatar: cleanText(item.avatar),
+    department: cleanText(item.department || item.areas),
+    areas: cleanText(item.areas),
+    role: cleanText(item.role || item.position || item.title),
+    position: cleanText(item.position),
+    title: cleanText(item.title),
+    workContent: cleanText(item.workContent),
+    skills: cleanText(item.skills),
+    workTags: Array.isArray(item.workTags) ? item.workTags.map((tag: unknown) => cleanText(tag)).filter(Boolean) : [],
+    email: cleanText(item.email),
+    phone: cleanText(item.phone),
+    note: cleanText(item.note || item.introduction),
+    introduction: cleanText(item.introduction)
+  };
 }
 
 async function createBackendRequest(input: CreateRequestInput): Promise<SupportRequest | null> {
@@ -512,6 +543,18 @@ export const requestService = {
       console.warn("Unable to load assignee history from backend", error);
     }
     return localAssigneeHistory(request);
+  },
+
+  async getAssigneeProfile(request: SupportRequest): Promise<StaffProfile | null> {
+    await delay();
+    const identity = requestAssigneeIdentity(request);
+    if (!identity.id) return null;
+    try {
+      return await fetchBackendStaffProfile(identity.id);
+    } catch (error) {
+      console.warn("Unable to load assignee profile from backend", error);
+      return null;
+    }
   },
 
   async createRequest(input: CreateRequestInput): Promise<SupportRequest> {

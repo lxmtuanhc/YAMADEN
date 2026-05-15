@@ -234,8 +234,13 @@ const StaffSchema = new mongoose.Schema({
   areas: String,
   skills: String,
   department: String,
+  role: String,
+  position: String,
+  title: String,
   workContent: String,
   workTags: [String],
+  note: String,
+  introduction: String,
   status: { type: String, default: "active" },
   createdAt: Date
 });
@@ -321,8 +326,46 @@ function publicAssigneeHistoryRequest(item) {
     status: customerStatus(item.status),
     createdAt: item.createdAt || "",
     updatedAt: latestEvent ? latestEvent.createdAt : (item.completedAt || item.orderedAt || item.quotedAt || item.siteVisitedAt || item.contactedAt || item.firstResponseAt || ""),
-    latestNote: latestTimelineNoteForRequest(item)
+    completedAt: item.completedAt || "",
+    latestNote: latestTimelineNoteForRequest(item),
+    issueTags: Array.isArray(item.issueTags) ? item.issueTags : []
   };
+}
+
+function publicStaffProfile(staff) {
+  if (!staff) return null;
+  return {
+    id: String(staff._id || staff.id || ""),
+    name: staff.name || "",
+    avatar: staff.avatar || "",
+    department: staff.department || staff.areas || "",
+    areas: staff.areas || "",
+    role: staff.role || staff.position || staff.title || "",
+    position: staff.position || "",
+    title: staff.title || "",
+    workContent: staff.workContent || "",
+    skills: staff.skills || "",
+    workTags: Array.isArray(staff.workTags) ? staff.workTags : [],
+    email: staff.email || "",
+    phone: staff.phone || "",
+    note: staff.note || staff.introduction || "",
+    introduction: staff.introduction || ""
+  };
+}
+
+function handledRequestRank(item) {
+  const status = customerStatus(item.status);
+  if (status === "completed") return 0;
+  if (status === "ordered" || status === "scheduled") return 1;
+  if (status === "processing" || status === "quoted" || status === "estimating") return 2;
+  return 3;
+}
+
+function latestRequestTime(item) {
+  const latestEvent = latestTimelineEvent(item);
+  const value = latestEvent?.createdAt || item.completedAt || item.updatedAt || item.createdAt || 0;
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
 }
 
 async function generateRequestCode() {
@@ -1064,6 +1107,27 @@ app.get("/admin/staff", requireAdmin, async (req, res) => {
   }
 });
 
+app.get("/api/staff/:id/profile", async (req, res) => {
+  try {
+    const staff = mongoose.Types.ObjectId.isValid(req.params.id)
+      ? await Staff.findById(req.params.id)
+      : null;
+
+    if (!staff) {
+      return res.status(404).json({ message: "Staff not found" });
+    }
+
+    res.json({
+      data: publicStaffProfile(staff)
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Staff profile read failed",
+      error: error.message
+    });
+  }
+});
+
 app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res) => {
   try {
     const workTags = Array.isArray(req.body.workTags)
@@ -1085,8 +1149,13 @@ app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res)
       areas: req.body.areas || req.body.department || "",
       skills: req.body.skills || req.body.workContent || workTags.join(", "),
       department: req.body.department || req.body.areas || "",
+      role: req.body.role || req.body.position || req.body.title || "",
+      position: req.body.position || "",
+      title: req.body.title || "",
       workContent: req.body.workContent || req.body.skills || workTags.join(", "),
       workTags,
+      note: req.body.note || req.body.introduction || "",
+      introduction: req.body.introduction || "",
       status: req.body.status || "active",
       createdAt: new Date()
     });
@@ -1107,7 +1176,7 @@ app.put("/admin/staff/:id", requireAdmin, upload.single("avatar"), async (req, r
     const staff = await Staff.findById(req.params.id);
     if (!staff) return res.status(404).json({ message: "Staff not found" });
 
-    ["name", "phone", "email", "areas", "skills", "department", "workContent", "status"].forEach(field => {
+    ["name", "phone", "email", "areas", "skills", "department", "role", "position", "title", "workContent", "note", "introduction", "status"].forEach(field => {
       if (req.body[field] !== undefined) staff[field] = req.body[field];
     });
 
@@ -1426,9 +1495,12 @@ app.get("/api/requests/staff/:staffId/history", async (req, res) => {
       return res.json({ data: [] });
     }
 
-    const requests = await Request.find(query).sort({ createdAt: -1 }).limit(50);
+    const requests = await Request.find(query).sort({ createdAt: -1 }).limit(100);
+    const sorted = requests
+      .sort((left, right) => handledRequestRank(left) - handledRequestRank(right) || latestRequestTime(right) - latestRequestTime(left))
+      .slice(0, 50);
     res.json({
-      data: requests.map(publicAssigneeHistoryRequest)
+      data: sorted.map(publicAssigneeHistoryRequest)
     });
 
   } catch (error) {
