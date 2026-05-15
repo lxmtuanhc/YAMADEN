@@ -1,105 +1,178 @@
 # HANDOFF CONTEXT
 
-## 1. Tình trạng deploy hiện tại
+## 1. Current Deploy State
 
-- Render URL hiện tại: `https://yamaden.onrender.com`
-- Backend đã chạy được trên Render sau các lần sửa deploy.
-- MongoDB: logs trước đó đã qua giai đoạn lỗi Node module; cần kiểm tra Render logs mới nhất để xác nhận dòng `MongoDB connected` trong lần deploy hiện tại.
-- Các lỗi deploy đã sửa:
-  - Đã sửa lỗi CommonJS/ES Module: `server.js` dùng `require(...)` nhưng `package.json` có `"type": "module"`. Đã xóa `"type": "module"`.
-  - Đã sửa lỗi frontend production load trực tiếp `/src/main.tsx`: `server.js` chuyển sang serve Vite build từ `dist`.
-  - Đã sửa lỗi thiếu `dist/index.html`: `package.json` có `"build": "vite build"`, `"start": "node server.js"`, và `"postinstall": "npm run build"` để Render tạo `dist`.
-  - Đã sửa/nghi ngờ lỗi legacy service worker/PWA cache:
-    - `js/service-worker.js` hiện chỉ xóa cache legacy và tự unregister.
-    - `src/components/LegacyServiceWorkerCleanup.tsx` unregister service worker cũ và xóa cache `yamaden-support*` khi React app chạy.
-    - `server.js` serve `/js/service-worker.js` với `Cache-Control: no-store`.
+- Render URL: `https://yamaden.onrender.com`
+- Render auto-deploys from `main` after `git push origin main`.
+- Backend runs from `server.js` and serves the Vite production build from `dist`.
+- `package.json` uses:
+  - `build`: `vite build`
+  - `start`: `node server.js`
+  - `postinstall`: `npm run build`
+- MongoDB and Cloudinary are active on Render.
+- Cloudinary env names in use:
+  - `CLOUDINARY_CLOUD_NAME`
+  - `CLOUDINARY_API_KEY`
+  - `CLOUDINARY_API_SECRET`
+- Legacy service worker/PWA cache cleanup exists:
+  - `js/service-worker.js` unregisters/clears old cache.
+  - `src/components/LegacyServiceWorkerCleanup.tsx` clears legacy `yamaden-support*` caches.
+  - `server.js` serves `/js/service-worker.js` with `Cache-Control: no-store`.
 
-## 2. Vấn đề đang xử lý hiện tại
+## 2. Current Product State
 
-- Layout JP/VN trên mobile/PWA vẫn bị nhảy khi đổi ngôn ngữ.
-- Desktop web có thể ổn, nhưng PWA/mobile thật vẫn có hiện tượng card/button/section/nav thay đổi kích thước hoặc lệch vị trí.
-- Nguyên nhân nghi ngờ:
-  - Text tiếng Việt/Nhật dài ngắn khác nhau làm card/button/section giãn.
-  - PWA/service worker cũ có thể cache bản cũ, làm CSS mới không áp dụng.
-  - Các lớp CSS global trước đó chưa đủ hoặc chưa đánh đúng class thật.
-  - Một số component có thể vẫn đang dùng layout auto-height theo text.
+- User approval flow is working.
+- Main request create form is working.
+- Issue dropdown exists and sends `issueTags`.
+- Image/video picker and preview work.
+- Image/video upload works through multer + Cloudinary.
+- Cloudinary upload is OK.
+- Requests with media are created successfully in MongoDB.
+- Duplicate-looking admin request entries were addressed:
+  - customer form has a duplicate-submit guard.
+  - admin request list no longer merges localStorage request cache with backend rows.
+- Customer request detail syncs status with admin/backend.
+- Customer request detail has an icon refresh button.
+- Refresh refetches latest request detail without polling.
+- Media in customer detail renders thumbnail/video preview instead of raw Cloudinary URL.
+- Request detail supports `mediaFiles` first, with fallback to `mediaUrl`, `image`, and old `images`.
+- Admin status update pushes timeline object entries.
 
-## 3. Hướng xử lý đã thống nhất
+## 3. Important Current Status Mapping
 
-- Ưu tiên sửa layout JP/VN mobile/PWA trước, chưa nâng cấp chức năng khác.
-- Không rewrite app.
-- Không đổi UI tổng thể.
-- Không xóa chức năng cũ.
-- Chỉ sửa CSS/layout/i18n text ngắn gọn nếu thật sự cần cho vị trí hẹp như button/tab.
-- Chiến lược đúng:
-  - Chừa sẵn vùng text cố định thay vì để text quyết định kích thước khung.
-  - Title reserve 2 dòng.
-  - Subtitle/description reserve 2-3 dòng.
-  - Tăng spacing/min-height cho card.
-  - Button/input giữ height cố định.
-  - Bottom nav dùng label ngắn, 1 dòng, ellipsis nếu cần.
-  - Mobile layout ưu tiên dọc/full-width.
-  - Khi đổi JP/VN, chỉ text thay đổi, DOM/class/layout không đổi.
+Backend/admin status values currently used:
 
-## 4. Các màn cần test layout
+- `untreated`: Chua xu ly / 未対応
+- `processing`: Dang xu ly / 対応中
+- `estimating`: Dang bao gia / 見積中
+- `quoted`: Da bao gia / 見積済み
+- `ordered`: Da nhan don / 受注済み
+- `completed`: Hoan thanh / 完了
+- `lost`: Khong hoan thanh / 未完了
 
-- Intro
-- Login
-- Home
-- Gửi yêu cầu
-- Danh sách yêu cầu
-- Chi tiết yêu cầu
-- Lịch sử xử lý/timeline
-- Bottom nav
-- Profile/account nếu có
+Customer request detail uses backend/MongoDB as source of truth:
 
-## 5. Cách test bắt buộc
+- `request.status`
+- `request.timeline`
+- `request.adminReply`
+- fallback fields: `adminResponse`, `response`, `feedback`, `note`, `timeline.note`
 
-- Test trên mobile/PWA thật.
-- Test width 390px và 430px bằng DevTools.
-- Chuyển JP -> VN -> JP ít nhất 5 lần.
-- Kiểm tra card/button/nav/form/timeline không bị đè, chạm, hoặc nhảy mạnh.
-- Nếu PWA không đổi sau deploy:
-  - Clear service worker/cache.
-  - Đóng/mở lại PWA.
-  - Nếu vẫn không đổi, gỡ PWA cũ và cài lại.
+Do not map `estimating` or `quoted` back to `waiting_customer`; that was the source of the old wrong "Cho phan hoi" display.
 
-## 6. Các nâng cấp để sau khi layout ổn
+## 4. Latest Completed Work
 
-- Khôi phục dropdown “vấn đề cần giải quyết” trong form gửi yêu cầu, lấy từ nội dung công việc trong hồ sơ nhân viên.
-- Tự động điền thông tin user khi gửi yêu cầu.
-- Thêm nút quay về các màn con.
-- Thêm màn chỉnh sửa thông tin tài khoản.
-- Thêm nút xóa yêu cầu.
-- Cải tiến timeline/lịch sử xử lý.
-- Build/hoàn thiện Schedule module nếu chưa đạt yêu cầu thực tế.
+Latest completed customer detail work:
 
-## 7. Các file quan trọng đã hoặc có thể đã sửa
+- Status/timeline sync with admin is done.
+- Refresh icon is placed in the request detail header beside the status badge.
+- Refresh calls `requestService.getRequestById(id)`, which fetches `/request/:id` with `cache: "no-store"` and updates Zustand store.
+- Media grid in detail is already fixed.
+- Timeline UI was updated to split each item into:
+  - status label
+  - timestamp
+  - note, only if present
+- Timeline classes added:
+  - `.request-timeline-list`
+  - `.request-timeline-item`
+  - `.request-timeline-dot`
+  - `.request-timeline-content`
+  - `.request-timeline-status`
+  - `.request-timeline-time`
+  - `.request-timeline-note`
+- Date/time formatting in customer detail is handled by `formatTimelineDate()` in `src/pages/requests/RequestDetailPage.tsx`.
 
-- `package.json`
+## 5. Next Priority
+
+Priority order for the next session:
+
+1. Re-test timeline UI on real mobile/PWA after deploy:
+   - confirm status/time/note no longer stick together.
+   - confirm JP -> VN -> JP language switching does not break layout.
+2. Add "Nguoi phu trach" / assigned staff display in customer detail.
+3. Add staff profile viewing from customer/admin where needed.
+4. Then add smaller navigation/account features:
+   - back button on sub pages.
+   - profile edit.
+   - delete request.
+5. After that, handle remaining admin bugs.
+
+Do not start new feature work before confirming the latest timeline/detail deploy on mobile/PWA.
+
+## 6. Areas To Avoid Touching Unless Asked
+
+- Do not rewrite the app.
+- Do not change upload provider.
+- Do not change Cloudinary env names.
+- Do not touch upload backend unless upload breaks again.
+- Do not touch user approval flow unless explicitly requested.
+- Do not redo the issue dropdown unless there is a specific bug.
+- Do not make large admin UI redesigns.
+- Do not remove old compatibility fields such as `image`, `mediaUrl`, or `images`.
+
+## 7. Files Recently Important
+
 - `server.js`
+  - request schema
+  - upload route
+  - admin status update route
+  - timeline object push
+- `src/pages/requests/RequestCreatePage.tsx`
+  - request form
+  - issue dropdown
+  - media picker
+  - duplicate submit guard
+- `src/pages/requests/RequestDetailPage.tsx`
+  - customer detail
+  - refresh icon
+  - status/timeline rendering
+  - admin reply rendering
+  - media thumbnail/video rendering
+- `src/services/requestService.ts`
+  - backend request normalization
+  - status mapping
+  - media normalization
+  - request detail refetch/update store
+- `src/types.ts`
+  - request status and media types
+- `src/constants/requestStatus.ts`
+  - status label/timeline i18n keys
+- `src/components/ui/StatusBadge.tsx`
+  - customer status badge labels
 - `src/styles/app.css`
-- `js/service-worker.js`
-- `src/components/LegacyServiceWorkerCleanup.tsx`
-- `src/App.tsx`
+  - mobile layout
+  - issue dropdown styles
+  - media grid
+  - timeline layout
 - `src/i18n/vi.ts`
 - `src/i18n/ja.ts`
-- Các service/module liên quan Schedule:
-  - `src/services/scheduleService.ts`
-  - `src/constants/scheduleStatus.ts`
-  - `src/pages/schedule/SchedulePage.tsx`
-  - `src/pages/requests/RequestDetailPage.tsx`
+- `js/admin.js`
+  - admin request list
+  - no longer merge localStorage requests into backend request list
 
-## 8. Quy tắc cho người tiếp tục
+## 8. Required Read Before Continuing
 
-- Đọc các file sau trước khi làm:
-  - `PROJECT_CONTEXT.md`
-  - `API_CONTRACT.md`
-  - `DEVELOPMENT_RULES.md`
-  - `HANDOFF_CONTEXT.md`
-- Continue from current codebase.
-- Không tạo project mới.
-- Không rewrite app.
-- Không sửa lan man.
-- Ưu tiên issue hiện tại: layout JP/VN mobile/PWA stability.
-- Nếu sửa xong trong phiên này, commit và push để Render auto deploy.
+Before the next coding session, read:
+
+- `PROJECT_CONTEXT.md`
+- `API_CONTRACT.md`
+- `DEVELOPMENT_RULES.md`
+- `HANDOFF_CONTEXT.md`
+
+Then continue from the current codebase. Do not create a new project.
+
+## 9. Testing Checklist For Next Session
+
+- Run `npm run build`.
+- On mobile/PWA or DevTools 390px/430px:
+  - login as active user.
+  - create request with issue tags.
+  - create request with media.
+  - open customer request detail.
+  - update status in admin.
+  - click refresh in customer detail.
+  - verify status, timeline, admin reply, media preview.
+  - switch JP -> VN -> JP at least 3 times.
+- If PWA does not reflect latest deploy:
+  - clear browser cache/service worker.
+  - close and reopen PWA.
+  - reinstall PWA only if needed.
