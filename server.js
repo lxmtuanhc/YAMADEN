@@ -157,6 +157,16 @@ const MediaFileSchema = new mongoose.Schema({
   type: { type: String }
 }, { _id: false });
 
+const TimelineEventSchema = new mongoose.Schema({
+  id: { type: String },
+  type: { type: String },
+  status: { type: String },
+  message: { type: String },
+  note: { type: String },
+  actor: { type: String },
+  createdAt: { type: Date, default: Date.now }
+}, { _id: false });
+
 const RequestSchema = new mongoose.Schema({
   id: mongoose.Schema.Types.Mixed,
   requestCode: String,
@@ -187,13 +197,7 @@ const RequestSchema = new mongoose.Schema({
   assigneeName: String,
   issueTags: [String],
   quoteRequested: Boolean,
-  timeline: [{
-    id: String,
-    type: String,
-    message: String,
-    note: String,
-    createdAt: Date
-  }]
+  timeline: [TimelineEventSchema]
 });
 
 const UserSchema = new mongoose.Schema({
@@ -388,6 +392,45 @@ function mergeStatusTimeline(item, status, note) {
       note: String(note || "").trim(),
       createdAt: new Date()
     }]);
+}
+
+function normalizeTimelineEvents(value) {
+  const rawItems = Array.isArray(value) ? value : [];
+  const items = rawItems.length ? rawItems : [{
+    id: "tl-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+    type: "submitted",
+    status: "submitted",
+    message: "request.timelineSubmitted",
+    note: "",
+    actor: "user",
+    createdAt: new Date()
+  }];
+
+  return items.map((item, index) => {
+    if (typeof item === "string") {
+      return {
+        id: "tl-string-" + Date.now() + "-" + index,
+        type: "submitted",
+        status: "submitted",
+        message: item || "request.timelineSubmitted",
+        note: "",
+        actor: "",
+        createdAt: new Date()
+      };
+    }
+
+    const event = item && typeof item === "object" ? item : {};
+    const type = String(event.type || event.status || "submitted");
+    return {
+      id: String(event.id || "tl-" + Date.now() + "-" + index),
+      type,
+      status: String(event.status || type),
+      message: String(event.message || "request.timelineSubmitted"),
+      note: String(event.note || ""),
+      actor: String(event.actor || ""),
+      createdAt: event.createdAt ? new Date(event.createdAt) : new Date()
+    };
+  });
 }
 
 function applyStatusTimestamps(item, nextStatus) {
@@ -1155,6 +1198,15 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
     const firstMedia = mediaFiles[0] || { url: "", type: "" };
     const issueTags = parseRequestTags(req.body.issueTags);
     const bestAssignee = await findBestAssignee(issueTags);
+    const timeline = normalizeTimelineEvents([{
+      id: "tl-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+      type: "submitted",
+      status: "submitted",
+      message: "request.timelineSubmitted",
+      note: "",
+      actor: "user",
+      createdAt: new Date()
+    }]);
     const requestPayload = {
       id: requestCode,
       requestCode,
@@ -1177,13 +1229,7 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
       assigneeName: bestAssignee ? bestAssignee.name : "",
       status: "untreated",
       adminReply: "",
-      timeline: [{
-        id: "tl-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
-        type: "submitted",
-        message: "request.timelineSubmitted",
-        note: "",
-        createdAt: new Date()
-      }],
+      timeline,
       createdAt: new Date()
     };
 
@@ -1201,6 +1247,9 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
       mediaUrl: requestPayload.mediaUrl,
       mediaType: requestPayload.mediaType,
       image: requestPayload.image,
+      timelineIsArray: Array.isArray(requestPayload.timeline),
+      timelineFirstType: typeof requestPayload.timeline[0],
+      timelineFirst: requestPayload.timeline[0],
       userId: requestPayload.userId
     });
 

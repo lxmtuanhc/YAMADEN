@@ -139,13 +139,26 @@ function normalizeBackendStatus(status?: string): RequestStatus {
 
 function backendTimeline(item: any, status: RequestStatus, createdAt: string): TimelineEvent[] {
   if (Array.isArray(item.timeline) && item.timeline.length) {
-    return dedupeTimeline(item.timeline.map((event: any) => ({
-      id: String(event.id || `tl-${event.type || status}-${event.createdAt || Date.now()}`),
-      type: normalizeBackendStatus(event.type) as TimelineEvent["type"],
-      message: event.message || REQUEST_TIMELINE_MESSAGE_KEYS[normalizeBackendStatus(event.type)],
-      note: event.note || "",
-      createdAt: event.createdAt ? new Date(event.createdAt).toLocaleString() : createdAt
-    })));
+    return dedupeTimeline(item.timeline.map((event: any, index: number) => {
+      if (typeof event === "string") {
+        return {
+          id: `tl-string-${index}-${Date.now()}`,
+          type: status,
+          message: event || REQUEST_TIMELINE_MESSAGE_KEYS[status],
+          note: "",
+          createdAt
+        };
+      }
+
+      const eventStatus = normalizeBackendStatus(event?.type || event?.status);
+      return {
+        id: String(event?.id || `tl-${eventStatus}-${event?.createdAt || Date.now()}`),
+        type: eventStatus as TimelineEvent["type"],
+        message: event?.message || REQUEST_TIMELINE_MESSAGE_KEYS[eventStatus],
+        note: event?.note || "",
+        createdAt: event?.createdAt ? new Date(event.createdAt).toLocaleString() : createdAt
+      };
+    }));
   }
 
   const events: TimelineEvent[] = [
