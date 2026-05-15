@@ -145,6 +145,18 @@ function notifySlack(text) {
   });
 }
 
+const MediaFileSchema = new mongoose.Schema({
+  url: String,
+  secureUrl: String,
+  publicId: String,
+  resourceType: String,
+  format: String,
+  originalName: String,
+  mimetype: String,
+  size: Number,
+  type: { type: String }
+}, { _id: false });
+
 const RequestSchema = new mongoose.Schema({
   id: mongoose.Schema.Types.Mixed,
   requestCode: String,
@@ -160,7 +172,7 @@ const RequestSchema = new mongoose.Schema({
   image: String,
   mediaUrl: String,
   mediaType: String,
-  mediaFiles: [{ url: String, type: { type: String } }],
+  mediaFiles: [MediaFileSchema],
   status: String,
   adminReply: String,
   createdAt: Date,
@@ -1112,6 +1124,13 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
 
           return {
             url: uploadResult.secure_url,
+            secureUrl: uploadResult.secure_url,
+            publicId: uploadResult.public_id,
+            resourceType: uploadResult.resource_type,
+            format: uploadResult.format,
+            originalName: file.originalname,
+            mimetype: file.mimetype,
+            size: file.size,
             type
           };
 
@@ -1136,8 +1155,7 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
     const firstMedia = mediaFiles[0] || { url: "", type: "" };
     const issueTags = parseRequestTags(req.body.issueTags);
     const bestAssignee = await findBestAssignee(issueTags);
-
-    const newRequest = new Request({
+    const requestPayload = {
       id: requestCode,
       requestCode,
       requestId: requestCode,
@@ -1167,7 +1185,26 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
         createdAt: new Date()
       }],
       createdAt: new Date()
+    };
+
+    console.info("[request:create] save payload debug", {
+      requestCode,
+      bodyKeys: Object.keys(req.body || {}),
+      title: requestPayload.title,
+      name: requestPayload.name,
+      phone: requestPayload.phone,
+      contact: requestPayload.contact,
+      address: requestPayload.address,
+      content: requestPayload.content,
+      issueTags: requestPayload.issueTags,
+      mediaFiles: requestPayload.mediaFiles,
+      mediaUrl: requestPayload.mediaUrl,
+      mediaType: requestPayload.mediaType,
+      image: requestPayload.image,
+      userId: requestPayload.userId
     });
+
+    const newRequest = new Request(requestPayload);
 
     await newRequest.save();
 
@@ -1193,17 +1230,26 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
     });
 
   } catch (error) {
-    console.error("[request:create] save failed", {
+    const validationErrors = error.errors
+      ? Object.keys(error.errors).reduce((acc, field) => {
+        acc[field] = error.errors[field].message;
+        return acc;
+      }, {})
+      : undefined;
+
+    console.error("REQUEST_SAVE_ERROR", {
       name: error.name,
       code: error.code,
       message: error.message,
-      errors: error.errors ? Object.keys(error.errors) : undefined
+      errors: validationErrors,
+      stack: error.stack
     });
     res.status(500).json({
       success: false,
       code: error.name === "ValidationError" ? "MONGOOSE_VALIDATION_FAILED" : "REQUEST_SAVE_FAILED",
       message: "Save failed",
-      error: error.message
+      detail: error.message,
+      fields: validationErrors
     });
   }
 });
