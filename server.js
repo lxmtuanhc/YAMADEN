@@ -1256,6 +1256,10 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
     const newRequest = new Request(requestPayload);
 
     await newRequest.save();
+    console.info("[request:create] saved", {
+      requestCode,
+      mongoId: String(newRequest._id)
+    });
 
     const mediaSummary = mediaFiles.length > 0
       ? mediaFiles.length + " file (" + mediaFiles.map(file => file.type).join(", ") + ")"

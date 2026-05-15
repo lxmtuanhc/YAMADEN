@@ -116,6 +116,20 @@ function commitRequests(requests: SupportRequest[]) {
   useAppStore.setState({ requests });
 }
 
+function sameRequest(left: SupportRequest, right: SupportRequest) {
+  return Boolean(
+    (left.id && right.id && left.id === right.id) ||
+    (left.requestCode && right.requestCode && left.requestCode === right.requestCode)
+  );
+}
+
+function upsertRequest(request: SupportRequest, requests: SupportRequest[]) {
+  const normalized = normalizeRequest(request);
+  const exists = requests.some(item => sameRequest(item, normalized));
+  if (!exists) return [normalized, ...requests];
+  return requests.map(item => sameRequest(item, normalized) ? normalized : item);
+}
+
 function normalizeBackendStatus(status?: string): RequestStatus {
   if (status === "untreated") return "submitted";
   if (status === "contacted") return "received";
@@ -371,7 +385,7 @@ export const requestService = {
     const user = useAppStore.getState().user;
     const backendRequest = await createBackendRequest(input);
     if (backendRequest) {
-      commitRequests([backendRequest, ...readRequests()]);
+      commitRequests(upsertRequest(backendRequest, readRequests()));
       return backendRequest;
     }
 

@@ -925,7 +925,7 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
     return [];
   }
   function localRequests(){
-    return (Array.isArray(state().requests)?state().requests:[]).map(localRequestToAdmin);
+    return [];
   }
   function hasLocalUser(id){
     return false;
@@ -1026,7 +1026,7 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
         apiRows=Array.isArray(data)?data:(data.requests||[]);
       }
     }catch(e){}
-    requests=mergeById(apiRows,localRequests());
+    requests=mergeById(apiRows,[]);
     renderAll();
   };
   const oldUpdateStatus=window.updateStatus||updateStatus;

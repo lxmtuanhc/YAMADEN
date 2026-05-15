@@ -34,6 +34,7 @@ export function RequestCreatePage() {
   const [mediaPreviews, setMediaPreviews] = useState<Array<{ key: string; name: string; type: string; url: string }>>([]);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitInFlightRef = useRef(false);
   const issueDropdownRef = useRef<HTMLDivElement | null>(null);
   const mediaInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -97,6 +98,10 @@ export function RequestCreatePage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitInFlightRef.current || isSubmitting) {
+      console.warn("[request:create] duplicate submit blocked");
+      return;
+    }
     if (!selectedIssues.length) {
       setError(t("request.issueRequired"));
       return;
@@ -106,6 +111,7 @@ export function RequestCreatePage() {
       return;
     }
     setError("");
+    submitInFlightRef.current = true;
     setIsSubmitting(true);
     try {
       console.log("[request:create] submit media state", {
@@ -133,6 +139,7 @@ export function RequestCreatePage() {
       console.warn("Request submit failed", submitError);
       setError(selectedMediaFiles.length ? t("request.uploadFailed") : t("common.required"));
     } finally {
+      submitInFlightRef.current = false;
       setIsSubmitting(false);
     }
   }
