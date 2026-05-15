@@ -19,7 +19,7 @@ import { REQUEST_STATUS_LABEL_KEYS, REQUEST_TIMELINE_MESSAGE_KEYS } from "../../
 export function RequestDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [request, setRequest] = useState<SupportRequest | null>(null);
   const [relatedQuotes, setRelatedQuotes] = useState<Quote[]>([]);
   const [relatedSchedules, setRelatedSchedules] = useState<Schedule[]>([]);
@@ -208,17 +208,21 @@ export function RequestDetailPage() {
 
       <Card>
         <h2 className="section-title">{t("request.timeline")}</h2>
-        <div className="timeline">
-          {timelineItems.map(item => (
-            <div className="timeline-item done" key={item.id}>
-              <div className="timeline-dot">{null}</div>
-              <div className="timeline-text">
-                <strong>{t(item.labelKey)}</strong>
-                {item.createdAt ? <span>{item.createdAt}</span> : null}
-                {item.note ? <em>{item.note}</em> : null}
+        <div className="timeline request-timeline-list">
+          {timelineItems.map(item => {
+            const statusLabel = t(item.labelKey);
+            const note = visibleTimelineNote(item.note, statusLabel);
+            return (
+              <div className="timeline-item done request-timeline-item" key={item.id}>
+                <div className="timeline-dot request-timeline-dot">{null}</div>
+                <div className="timeline-text request-timeline-content">
+                  <strong className="request-timeline-status">{statusLabel}</strong>
+                  {item.createdAt ? <span className="request-timeline-time">{formatTimelineDate(item.createdAt, language)}</span> : null}
+                  {note ? <em className="request-timeline-note">{note}</em> : null}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Card>
 
@@ -302,8 +306,51 @@ function normalizeTimelineStatus(status: string, currentStatus?: string) {
 }
 
 function dateValue(value: string) {
-  const timestamp = new Date(value).getTime();
+  const timestamp = parseTimelineDate(value)?.getTime() ?? 0;
   return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function parseTimelineDate(value: string) {
+  if (!value) return null;
+  const direct = new Date(value);
+  if (!Number.isNaN(direct.getTime())) return direct;
+
+  const match = value.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:,\s*|\s+)?(\d{1,2})?:?(\d{2})?:?(\d{2})?/);
+  if (!match) return null;
+
+  const first = Number(match[1]);
+  const second = Number(match[2]);
+  const year = Number(match[3]);
+  const day = first > 12 ? first : second;
+  const month = first > 12 ? second : first;
+  const hour = Number(match[4] || 0);
+  const minute = Number(match[5] || 0);
+  const secondValue = Number(match[6] || 0);
+  return new Date(year, month - 1, day, hour, minute, secondValue);
+}
+
+function formatTimelineDate(value: string, language: "vi" | "ja") {
+  const date = parseTimelineDate(value);
+  if (!date) return value;
+  const pad = (number: number) => String(number).padStart(2, "0");
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hour = pad(date.getHours());
+  const minute = pad(date.getMinutes());
+  const second = pad(date.getSeconds());
+  return language === "ja"
+    ? `${year}/${month}/${day} ${hour}:${minute}`
+    : `${hour}:${minute}:${second} ${day}/${month}/${year}`;
+}
+
+function visibleTimelineNote(note: string, statusLabel: string) {
+  const value = note.trim();
+  if (!value) return "";
+  const normalizedNote = value.toLowerCase();
+  const normalizedStatus = statusLabel.trim().toLowerCase();
+  if (normalizedNote === normalizedStatus) return "";
+  return value;
 }
 
 function requestMediaItems(request: SupportRequest): DetailMedia[] {
