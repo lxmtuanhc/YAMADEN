@@ -286,6 +286,7 @@ export function RequestCreatePage() {
             <Upload size={22} />
             <span>{t("request.attachments")}</span>
             <span>{selectedMediaFiles.length ? t("request.filesSelected").replace("{count}", String(selectedMediaFiles.length)) : t("request.uploadHint")}</span>
+            <span className="upload-limit-text">{t("request.fileLimit").replace("{count}", String(maxUploadFiles))}</span>
             <button className="media-picker-button" type="button" onClick={() => mediaInputRef.current?.click()}>
               {t("request.chooseMedia")}
             </button>

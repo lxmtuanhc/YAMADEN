@@ -840,6 +840,13 @@ p {
   font-weight: 950;
 }
 
+.upload-limit-text {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 .upload-file-list {
   display: grid;
   gap: 6px;
