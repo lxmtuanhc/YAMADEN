@@ -309,7 +309,6 @@ type SafeAssignee = {
   department: string;
   role: string;
   workContents: string[];
-  skills: string[];
   contact: string;
   email: string;
   phone: string;
@@ -445,7 +444,6 @@ function requestAssignee(request: SupportRequest, profile?: StaffProfile | null)
     department: "",
     role: "",
     workContents: [],
-    skills: [],
     contact: "",
     email: "",
     phone: "",
@@ -464,7 +462,6 @@ function safeAssigneeFromProfile(profile: StaffProfile): SafeAssignee {
     department: cleanText(profile.department || profile.areas),
     role: cleanText(profile.role || profile.position || profile.title),
     workContents,
-    skills: withoutDuplicateItems(normalizeTextList(profile.skills), workContents),
     contact: [email, phone].filter(Boolean).join(" / "),
     email,
     phone,
@@ -483,7 +480,6 @@ function safeAssigneeFromValue(value: RequestAssignee | string | undefined): Saf
       department: "",
       role: "",
       workContents: [],
-      skills: [],
       contact: "",
       email: "",
       phone: "",
@@ -500,7 +496,6 @@ function safeAssigneeFromValue(value: RequestAssignee | string | undefined): Saf
     department: cleanText(value.department || value.areas),
     role: cleanText(value.role || value.position || value.title),
     workContents,
-    skills: withoutDuplicateItems(normalizeTextList(value.skills), workContents),
     contact: [value.email, value.phone].map(cleanText).filter(Boolean).join(" / "),
     email: cleanText(value.email),
     phone: cleanText(value.phone),
@@ -537,11 +532,6 @@ function normalizedListKey(value: string) {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff]+/g, "");
-}
-
-function withoutDuplicateItems(items: string[], existing: string[]) {
-  const existingKeys = new Set(existing.map(normalizedListKey));
-  return items.filter(item => !existingKeys.has(normalizedListKey(item)));
 }
 
 function timelineActorName(event: TimelineEvent) {
@@ -610,13 +600,6 @@ function AssigneeModal({
                 emptyLabel={t("request.assigneeWorkEmpty")}
                 moreLabel={t("request.assigneeMoreWork")}
               />
-              {assignee.skills.length ? (
-                <AssigneeChipSection
-                  title={t("request.assigneeSkills")}
-                  items={assignee.skills}
-                  moreLabel={t("request.assigneeMoreWork")}
-                />
-              ) : null}
             </>
           ) : null}
           <div className="assignee-history">
