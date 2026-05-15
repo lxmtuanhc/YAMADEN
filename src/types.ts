@@ -63,6 +63,20 @@ export interface TimelineEvent {
   createdAt: string;
   note?: string;
   actor?: string;
+  actorName?: string;
+  staffName?: string;
+}
+
+export interface RequestAssignee {
+  id?: string;
+  name?: string;
+  department?: string;
+  areas?: string;
+  skills?: string;
+  workContent?: string;
+  email?: string;
+  phone?: string;
+  note?: string;
 }
 
 export interface RequestMediaFile {
@@ -99,6 +113,13 @@ export interface Request {
   contact?: string;
   issueTags?: string[];
   adminReply?: string;
+  assigneeId?: string;
+  assigneeName?: string;
+  assignedStaff?: RequestAssignee | string;
+  assignee?: RequestAssignee | string;
+  staff?: RequestAssignee | string;
+  responsiblePerson?: RequestAssignee | string;
+  assignedTo?: RequestAssignee | string;
 }
 
 export type SupportRequest = Request;

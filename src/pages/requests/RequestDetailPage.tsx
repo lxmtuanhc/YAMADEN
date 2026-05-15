@@ -1,4 +1,4 @@
-import { MessageCircle, RefreshCw } from "lucide-react";
+import { ChevronRight, MessageCircle, RefreshCw, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { QuoteCard } from "../../components/quotes/QuoteCard";
@@ -12,7 +12,7 @@ import { useTranslation } from "../../hooks/useTranslation";
 import { quoteService } from "../../services/quoteService";
 import { requestService } from "../../services/requestService";
 import { scheduleService } from "../../services/scheduleService";
-import type { Quote, RequestMediaFile, Schedule, SupportRequest } from "../../types";
+import type { Quote, RequestAssignee, RequestMediaFile, Schedule, SupportRequest, TimelineEvent } from "../../types";
 import { categoryOptions } from "./requestHelpers";
 import { REQUEST_STATUS_LABEL_KEYS, REQUEST_TIMELINE_MESSAGE_KEYS } from "../../constants/requestStatus";
 
@@ -27,8 +27,11 @@ export function RequestDetailPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [refreshMessage, setRefreshMessage] = useState("");
+  const [isAssigneeModalOpen, setIsAssigneeModalOpen] = useState(false);
 
   const timelineItems = useMemo(() => request ? requestTimelineItems(request) : [], [request]);
+  const timelineHistoryItems = useMemo(() => request ? requestTimelineHistoryItems(request) : [], [request]);
+  const assignee = useMemo(() => request ? requestAssignee(request) : null, [request]);
 
   const fetchRequestDetail = useCallback(async () => {
     if (!id) return null;
@@ -151,6 +154,23 @@ export function RequestDetailPage() {
         </div>
       </Card>
 
+      <Card className="assignee-card">
+        <button className="assignee-summary" type="button" onClick={() => setIsAssigneeModalOpen(true)}>
+          <div className="assignee-summary-text">
+            <span>{t("request.assigneeTitle")}</span>
+            {assignee?.name ? (
+              <>
+                <strong>{assignee.name}</strong>
+                {assignee.department ? <em>{assignee.department}</em> : null}
+              </>
+            ) : (
+              <strong className="assignee-empty">{t("request.assigneeEmpty")}</strong>
+            )}
+          </div>
+          <ChevronRight size={18} />
+        </button>
+      </Card>
+
       <Card>
         <h2 className="section-title">{t("request.images")}</h2>
         <div className="request-media-grid">
@@ -236,6 +256,17 @@ export function RequestDetailPage() {
       {error ? <ErrorState message={error} /> : null}
 
       <Button icon={<MessageCircle size={18} />}>{t("request.support")}</Button>
+
+      {isAssigneeModalOpen ? (
+        <AssigneeModal
+          assignee={assignee}
+          request={request}
+          timelineItems={timelineHistoryItems}
+          language={language}
+          t={t}
+          onClose={() => setIsAssigneeModalOpen(false)}
+        />
+      ) : null}
     </section>
   );
 }
@@ -245,6 +276,16 @@ type DetailTimelineItem = {
   id: string;
   labelKey: TranslationKey;
   createdAt: string;
+  note: string;
+  actorName: string;
+};
+
+type SafeAssignee = {
+  name: string;
+  department: string;
+  work: string;
+  email: string;
+  phone: string;
   note: string;
 };
 
@@ -267,7 +308,8 @@ function requestTimelineItems(request: SupportRequest): DetailTimelineItem[] {
         status,
         labelKey: REQUEST_TIMELINE_MESSAGE_KEYS[status] || REQUEST_STATUS_LABEL_KEYS[status],
         createdAt: event.createdAt || request.createdAt,
-        note: event.note || ""
+        note: event.note || "",
+        actorName: timelineActorName(event)
       };
     })
     .sort((left, right) => dateValue(left.createdAt) - dateValue(right.createdAt))
@@ -284,11 +326,36 @@ function requestTimelineItems(request: SupportRequest): DetailTimelineItem[] {
       id: `status-${currentStatus}`,
       labelKey: REQUEST_TIMELINE_MESSAGE_KEYS[currentStatus] || REQUEST_STATUS_LABEL_KEYS[currentStatus],
       createdAt: request.createdAt,
-      note: ""
+      note: "",
+      actorName: ""
     });
   }
 
   return Array.from(byStatus.values()).sort((left, right) => dateValue(left.createdAt) - dateValue(right.createdAt));
+}
+
+function requestTimelineHistoryItems(request: SupportRequest): DetailTimelineItem[] {
+  const source = Array.isArray(request.timeline) && request.timeline.length
+    ? request.timeline
+    : [{
+        id: `status-${request.status}`,
+        type: request.status,
+        message: REQUEST_TIMELINE_MESSAGE_KEYS[request.status],
+        createdAt: request.createdAt
+      }];
+
+  return source
+    .map(event => {
+      const status = normalizeTimelineStatus(event.type || event.status || request.status, request.status);
+      return {
+        id: event.id || `tl-${status}-${event.createdAt || request.createdAt}`,
+        labelKey: REQUEST_TIMELINE_MESSAGE_KEYS[status] || REQUEST_STATUS_LABEL_KEYS[status],
+        createdAt: event.createdAt || request.createdAt,
+        note: event.note || "",
+        actorName: timelineActorName(event)
+      };
+    })
+    .sort((left, right) => dateValue(left.createdAt) - dateValue(right.createdAt));
 }
 
 function normalizeTimelineStatus(status: string, currentStatus?: string) {
@@ -351,6 +418,132 @@ function visibleTimelineNote(note: string, statusLabel: string) {
   const normalizedStatus = statusLabel.trim().toLowerCase();
   if (normalizedNote === normalizedStatus) return "";
   return value;
+}
+
+function requestAssignee(request: SupportRequest): SafeAssignee | null {
+  const candidates = [
+    request.assignedStaff,
+    request.assignee,
+    request.staff,
+    request.responsiblePerson,
+    request.assignedTo
+  ];
+  const profile = candidates.map(safeAssigneeFromValue).find(item => item?.name) || null;
+  if (profile) return profile;
+  const fallbackName = cleanText(request.assigneeName);
+  if (!fallbackName) return null;
+  return {
+    name: fallbackName,
+    department: "",
+    work: "",
+    email: "",
+    phone: "",
+    note: ""
+  };
+}
+
+function safeAssigneeFromValue(value: RequestAssignee | string | undefined): SafeAssignee | null {
+  if (!value) return null;
+  if (typeof value === "string") {
+    const name = cleanText(value);
+    return name ? { name, department: "", work: "", email: "", phone: "", note: "" } : null;
+  }
+  const name = cleanText(value.name);
+  if (!name) return null;
+  return {
+    name,
+    department: cleanText(value.department || value.areas),
+    work: cleanText(value.workContent || value.skills),
+    email: cleanText(value.email),
+    phone: cleanText(value.phone),
+    note: cleanText(value.note)
+  };
+}
+
+function cleanText(value: unknown) {
+  return String(value || "").trim();
+}
+
+function timelineActorName(event: TimelineEvent) {
+  return cleanText(event.actorName || event.staffName || event.actor);
+}
+
+function AssigneeModal({
+  assignee,
+  request,
+  timelineItems,
+  language,
+  t,
+  onClose
+}: {
+  assignee: SafeAssignee | null;
+  request: SupportRequest;
+  timelineItems: DetailTimelineItem[];
+  language: "vi" | "ja";
+  t: (key: TranslationKey) => string;
+  onClose: () => void;
+}) {
+  const fields = assignee
+    ? [
+        [t("request.assigneeName"), assignee.name],
+        [t("request.assigneeDepartment"), assignee.department],
+        [t("request.assigneeWork"), assignee.work],
+        [t("request.assigneeEmail"), assignee.email],
+        [t("request.assigneePhone"), assignee.phone],
+        [t("request.assigneeNote"), assignee.note]
+      ].filter(([, value]) => cleanText(value))
+    : [];
+
+  return (
+    <div className="assignee-modal-backdrop" role="presentation" onClick={onClose}>
+      <div className="assignee-modal" role="dialog" aria-modal="true" aria-labelledby="assignee-modal-title" onClick={event => event.stopPropagation()}>
+        <div className="assignee-modal-header">
+          <h2 id="assignee-modal-title">{t("request.assigneeTitle")}</h2>
+          <button type="button" className="assignee-modal-close" aria-label={t("common.cancel")} onClick={onClose}>
+            <X size={18} />
+          </button>
+        </div>
+        {assignee ? (
+          <div className="assignee-profile">
+            <div className="assignee-avatar" aria-hidden="true">{assignee.name.slice(0, 1).toUpperCase()}</div>
+            <div>
+              <strong>{assignee.name}</strong>
+              {assignee.department ? <span>{assignee.department}</span> : null}
+            </div>
+          </div>
+        ) : (
+          <div className="assignee-modal-empty">{t("request.assigneeEmpty")}</div>
+        )}
+        {fields.length ? (
+          <div className="assignee-info-grid">
+            {fields.map(([label, value]) => (
+              <InfoRow key={label} label={label} value={value} />
+            ))}
+          </div>
+        ) : null}
+        <div className="assignee-history">
+          <h3>{t("request.assigneeHistoryTitle")}</h3>
+          <div className="timeline request-timeline-list">
+            {timelineItems.length ? timelineItems.map(item => {
+              const statusLabel = t(item.labelKey);
+              const note = visibleTimelineNote(item.note, statusLabel);
+              return (
+                <div className="timeline-item done request-timeline-item" key={`modal-${request.id}-${item.id}`}>
+                  <div className="timeline-dot request-timeline-dot">{null}</div>
+                  <div className="timeline-text request-timeline-content">
+                    <strong className="request-timeline-status">{statusLabel}</strong>
+                    {item.actorName ? <span className="request-timeline-actor">{item.actorName}</span> : null}
+                    {item.createdAt ? <span className="request-timeline-time">{formatTimelineDate(item.createdAt, language)}</span> : null}
+                    {note ? <em className="request-timeline-note">{note}</em> : null}
+                  </div>
+                </div>
+              );
+            }) : <div className="muted-line">{t("common.empty")}</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function requestMediaItems(request: SupportRequest): DetailMedia[] {

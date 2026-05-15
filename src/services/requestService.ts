@@ -71,7 +71,7 @@ function normalizeRequest(request: SupportRequest): SupportRequest {
   const requestCode = request.requestCode || stableRequestCode(request.id);
   const fallbackTimeline =
     request.timeline && request.timeline.length
-      ? dedupeTimeline(request.timeline)
+      ? request.timeline
       : [createTimelineEvent(request.status || "submitted", REQUEST_TIMELINE_MESSAGE_KEYS[request.status || "submitted"], request.createdAt)];
 
   return {
@@ -81,20 +81,6 @@ function normalizeRequest(request: SupportRequest): SupportRequest {
     mediaFiles: request.mediaFiles || [],
     timeline: fallbackTimeline
   };
-}
-
-function dedupeTimeline(timeline: TimelineEvent[]): TimelineEvent[] {
-  const latestByType = new Map<string, TimelineEvent>();
-  timeline.forEach(event => {
-    if (!event?.type) return;
-    const previous = latestByType.get(event.type);
-    if (!previous || new Date(event.createdAt || 0).getTime() >= new Date(previous.createdAt || 0).getTime()) {
-      latestByType.set(event.type, event);
-    }
-  });
-  return Array.from(latestByType.values()).sort((a, b) => (
-    new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
-  ));
 }
 
 function readRequests(): SupportRequest[] {
@@ -164,11 +150,15 @@ function timelineMessageForStatus(status: RequestStatus): TranslationKey {
 
 function backendTimeline(item: any, status: RequestStatus, createdAt: string): TimelineEvent[] {
   const addCurrentStatusIfMissing = (events: TimelineEvent[]) => {
-    const normalized = dedupeTimeline(events);
+    const normalized = [...events].sort((a, b) => (
+      new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
+    ));
     if (!normalized.some(event => normalizeBackendStatus(event.type) === status)) {
       normalized.push(createTimelineEvent(status, timelineMessageForStatus(status), createdAt));
     }
-    return dedupeTimeline(normalized);
+    return normalized.sort((a, b) => (
+      new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
+    ));
   };
 
   if (Array.isArray(item.timeline) && item.timeline.length) {
@@ -181,6 +171,8 @@ function backendTimeline(item: any, status: RequestStatus, createdAt: string): T
           message: event || timelineMessageForStatus(status),
           note: "",
           actor: "",
+          actorName: "",
+          staffName: "",
           createdAt
         };
       }
@@ -196,6 +188,8 @@ function backendTimeline(item: any, status: RequestStatus, createdAt: string): T
         message: timelineMessageForStatus(eventStatus),
         note: event?.note || "",
         actor: event?.actor || "",
+        actorName: event?.actorName || "",
+        staffName: event?.staffName || "",
         createdAt: event?.createdAt ? new Date(event.createdAt).toLocaleString() : createdAt
       };
     }));
@@ -274,7 +268,14 @@ function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): 
     phone: item.phone || input?.phone || "",
     contact: item.contact || input?.contact || "",
     issueTags: Array.isArray(item.issueTags) ? item.issueTags : input?.issueTags || [],
-    adminReply: item.adminReply || item.adminResponse || item.response || item.feedback || item.note || latestTimelineNote(item.timeline) || ""
+    adminReply: item.adminReply || item.adminResponse || item.response || item.feedback || item.note || latestTimelineNote(item.timeline) || "",
+    assigneeId: item.assigneeId || "",
+    assigneeName: item.assigneeName || "",
+    assignedStaff: item.assignedStaff,
+    assignee: item.assignee,
+    staff: item.staff,
+    responsiblePerson: item.responsiblePerson,
+    assignedTo: item.assignedTo
   });
 }
 
