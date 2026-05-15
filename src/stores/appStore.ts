@@ -6,6 +6,7 @@ import { authService } from "../services/authService";
 import type { Language, Quote, QuoteStatus, RequestStatus, Schedule, SupportRequest, User, UserStatus } from "../types";
 
 type ProfileInput = Pick<User, "name" | "email" | "phone" | "address" | "projectName" | "accountType" | "companyName" | "contactPerson">;
+type ProfileUpdateInput = Partial<Pick<User, "name" | "email" | "phone" | "address" | "projectName" | "companyName" | "contactPerson" | "companyAddress" | "taxId" | "constructionType" | "note" | "notificationsEnabled">>;
 
 interface AppState {
   language: Language;
@@ -19,6 +20,7 @@ interface AppState {
   login: (phone: string, pin: string) => Promise<boolean>;
   register: (phone: string, pin: string) => Promise<void>;
   saveProfile: (profile: ProfileInput) => Promise<void>;
+  updateUserProfile: (profile: ProfileUpdateInput) => Promise<User>;
   logout: () => void;
   updateQuoteStatus: (id: string, status: QuoteStatus) => void;
 }
@@ -109,6 +111,15 @@ export const useAppStore = create<AppState>()(
           users: upsertUser(get().users || [], user),
           authStatus: user.status === "active" ? "active" : "pendingApproval"
         });
+      },
+      updateUserProfile: async profile => {
+        const { user } = await authService.updateProfile(profile);
+        set({
+          user,
+          users: upsertUser(get().users || [], user),
+          authStatus: user.status === "active" ? "active" : get().authStatus
+        });
+        return user;
       },
       logout: () => {
         authService.logout();

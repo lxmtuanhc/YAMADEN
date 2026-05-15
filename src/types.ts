@@ -38,6 +38,11 @@ export interface User {
   accountType?: "personal" | "company";
   companyName?: string;
   contactPerson?: string;
+  companyAddress?: string;
+  taxId?: string;
+  constructionType?: string;
+  note?: string;
+  notificationsEnabled?: boolean;
 }
 
 export type TimelineEventType =

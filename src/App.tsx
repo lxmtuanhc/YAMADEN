@@ -48,6 +48,7 @@ export function App() {
           <Route path="/quotes/:id" element={<QuoteDetailPage />} />
           <Route path="/schedule" element={<SchedulePage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/account/:section" element={<AccountPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>

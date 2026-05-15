@@ -215,6 +215,10 @@ const UserSchema = new mongoose.Schema({
   province: String,
   projectName: String,
   address: String,
+  companyAddress: String,
+  taxId: String,
+  constructionType: String,
+  notificationsEnabled: Boolean,
   note: String,
   pinHash: String,
   profileCompleted: { type: Boolean, default: false },
@@ -942,6 +946,51 @@ app.get("/user/me", requireUser, async (req, res) => {
   }
 });
 
+app.put("/api/users/profile", requireUser, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const fieldMap = {
+      name: ["name", "fullName"],
+      email: ["email"],
+      phone: ["phone"],
+      company: ["companyName"],
+      contact: ["personInCharge", "contactPerson"],
+      companyAddress: ["companyAddress"],
+      taxId: ["taxId"],
+      projectName: ["projectName"],
+      address: ["siteAddress", "address"],
+      province: ["siteAddress", "address"],
+      constructionType: ["constructionType"],
+      note: ["notes", "note"]
+    };
+
+    Object.entries(fieldMap).forEach(([target, sources]) => {
+      const key = sources.find(source => req.body[source] !== undefined);
+      if (!key) return;
+      user[target] = String(req.body[key] || "").trim();
+    });
+
+    if (req.body.notificationsEnabled !== undefined) {
+      user.notificationsEnabled = Boolean(req.body.notificationsEnabled);
+    }
+
+    user.profileCompleted = Boolean(user.name && user.email && user.address && user.projectName);
+    await user.save();
+
+    res.json({
+      data: {
+        user: publicUser(user),
+        status: normalizeUserStatus(user.status)
+      },
+      message: "Profile updated"
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Profile update failed", error: error.message });
+  }
+});
+
 app.get("/user/requests", requireUser, async (req, res) => {
   try {
     const requests = await Request.find({ userId: req.user.userId }).sort({ createdAt: -1 });
@@ -972,6 +1021,20 @@ app.get("/api/admin/users", requireAdmin, async (req, res) => {
       return item;
     }));
 
+  } catch (error) {
+    res.status(500).json({ message: "Read failed", error: error.message });
+  }
+});
+
+app.get("/api/admin/users/:id", requireAdmin, async (req, res) => {
+  try {
+    res.set("Cache-Control", "no-store");
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    const requestCount = await Request.countDocuments({ userId: String(user._id) });
+    const item = publicUser(user);
+    item.requestCount = requestCount;
+    res.json({ data: item });
   } catch (error) {
     res.status(500).json({ message: "Read failed", error: error.message });
   }

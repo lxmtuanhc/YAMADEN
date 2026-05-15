@@ -672,6 +672,16 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
     var users=Array.isArray(window.currentUsers)?window.currentUsers:(Array.isArray(currentUsers)?currentUsers:[]);
     var user=users.find(function(item){return uid(item)===String(id)});
     if(!user)return;
+    try{
+      var freshRes=await apiFetch(API+'/api/admin/users/'+encodeURIComponent(uid(user))+'?_ts='+Date.now(),{cache:'no-store'});
+      if(freshRes.ok){
+        var freshPayload=await freshRes.json();
+        user=freshPayload.data||freshPayload.user||user;
+        currentUsers=users.map(function(item){return uid(item)===uid(user)?user:item});
+        window.currentUsers=currentUsers;
+        if(typeof renderUsers==='function')renderUsers();
+      }
+    }catch(e){}
     close();
     var history=await loadHistory(uid(user));
     var fields=[
@@ -679,10 +689,14 @@ document.addEventListener('DOMContentLoaded',()=>{checkAuth();applyLanguage();lo
       [T('phone'),user.phone||'-'],
       [T('email'),user.email||'-'],
       [T('company'),user.company||user.customerType||'-'],
+      [currentLang==='vi'?'Địa chỉ công ty':'会社住所',user.companyAddress||'-'],
+      [currentLang==='vi'?'Mã số thuế':'税番号',user.taxId||'-'],
       [T('province'),user.province||'-'],
       [T('project'),user.projectName||'-'],
       [T('address'),user.address||'-'],
+      [currentLang==='vi'?'Loại công trình':'工事種別',user.constructionType||'-'],
       [T('contact'),user.contact||'-'],
+      [T('note'),user.note||'-'],
       [T('status'),user.status||'pending'],
       [T('created'),date(user.createdAt)],
       [T('lastLogin'),date(user.lastLoginAt)],

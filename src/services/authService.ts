@@ -12,6 +12,11 @@ type BackendUser = Partial<User> & {
   customerType?: "personal" | "company";
   province?: string;
   contact?: string;
+  companyAddress?: string;
+  taxId?: string;
+  constructionType?: string;
+  note?: string;
+  notificationsEnabled?: boolean;
   status?: string;
 };
 
@@ -53,7 +58,12 @@ function normalizeUser(user: BackendUser): User {
     projectName: user.projectName || "",
     accountType: user.accountType || user.customerType || "personal",
     companyName: user.companyName || user.company || "",
-    contactPerson: user.contactPerson || user.contact || ""
+    contactPerson: user.contactPerson || user.contact || "",
+    companyAddress: user.companyAddress || "",
+    taxId: user.taxId || "",
+    constructionType: user.constructionType || "",
+    note: user.note || "",
+    notificationsEnabled: user.notificationsEnabled
   };
 }
 
@@ -115,6 +125,34 @@ export const authService = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone, pin })
+    });
+    return parseAuthResponse(response);
+  },
+
+  async updateProfile(profile: Partial<Pick<User,
+    "name" | "email" | "phone" | "companyName" | "contactPerson" | "companyAddress" | "taxId" |
+    "projectName" | "address" | "constructionType" | "note" | "notificationsEnabled"
+  >>) {
+    const response = await fetch("/api/users/profile", {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify({
+        name: profile.name,
+        email: profile.email,
+        phone: profile.phone,
+        companyName: profile.companyName,
+        personInCharge: profile.contactPerson,
+        contactPerson: profile.contactPerson,
+        companyAddress: profile.companyAddress,
+        taxId: profile.taxId,
+        projectName: profile.projectName,
+        siteAddress: profile.address,
+        address: profile.address,
+        constructionType: profile.constructionType,
+        notes: profile.note,
+        note: profile.note,
+        notificationsEnabled: profile.notificationsEnabled
+      })
     });
     return parseAuthResponse(response);
   },
