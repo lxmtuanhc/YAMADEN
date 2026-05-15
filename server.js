@@ -290,6 +290,32 @@ function uploadMediaToCloudinary(fileBuffer) {
   });
 }
 
+function requestUploadMiddleware(req, res, next) {
+  upload.array("image", 12)(req, res, error => {
+    if (!error) return next();
+
+    const isMulterError = error instanceof multer.MulterError;
+    console.error("[request:create] multer failed before handler", {
+      method: req.method,
+      path: req.path,
+      expectedField: "image",
+      code: error.code || "UPLOAD_ERROR",
+      message: error.message,
+      field: error.field,
+      contentType: req.headers["content-type"] || "",
+      contentLength: req.headers["content-length"] || ""
+    });
+
+    return res.status(isMulterError ? 400 : 415).json({
+      success: false,
+      code: error.code || "UPLOAD_ERROR",
+      message: "Upload failed",
+      error: error.message,
+      field: error.field
+    });
+  });
+}
+
 function normalizeRequestStatus(status) {
   if (status === "pending") return "untreated";
   if (status === "received") return "contacted";
@@ -1017,7 +1043,7 @@ app.get("/api/work-options", requireUser, async (req, res) => {
   }
 });
 
-app.post("/request", requireUser, upload.array("image", 12), async (req, res) => {
+app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
   try {
     const requestCode = await generateRequestCode();
 
@@ -1032,17 +1058,29 @@ app.post("/request", requireUser, upload.array("image", 12), async (req, res) =>
 
     const mediaFiles = [];
     const files = Array.isArray(req.files) ? req.files : [];
-    console.info("[request:create] received media files", {
+    console.info("[request:create] multipart debug", {
       requestCode,
-      count: files.length,
-      field: "image",
+      method: req.method,
+      path: req.path,
       contentType: req.headers["content-type"] || "",
       contentLength: req.headers["content-length"] || "",
+      bodyKeys: Object.keys(req.body || {}),
+      hasReqFile: Boolean(req.file),
+      hasReqFiles: Boolean(req.files),
+      reqFilesLength: files.length,
+      multerField: "image",
+      cloudinaryEnv: {
+        CLOUDINARY_CLOUD_NAME: Boolean(process.env.CLOUDINARY_CLOUD_NAME),
+        CLOUDINARY_API_KEY: Boolean(process.env.CLOUDINARY_API_KEY),
+        CLOUDINARY_API_SECRET: Boolean(process.env.CLOUDINARY_API_SECRET)
+      },
       files: files.map(file => ({
-        field: file.fieldname,
-        name: file.originalname,
+        fieldname: file.fieldname,
+        originalname: file.originalname,
         mimetype: file.mimetype,
-        size: file.size
+        size: file.size,
+        hasBuffer: Boolean(file.buffer),
+        bufferLength: file.buffer ? file.buffer.length : 0
       }))
     });
 
@@ -1059,6 +1097,14 @@ app.post("/request", requireUser, upload.array("image", 12), async (req, res) =>
       const batch = files.slice(i, i + CONCURRENT_LIMIT);
       const results = await Promise.all(batch.map(async file => {
         try {
+          console.info("[request:create] cloudinary upload start", {
+            requestCode,
+            fieldname: file.fieldname,
+            originalname: file.originalname,
+            mimetype: file.mimetype,
+            size: file.size,
+            hasBuffer: Boolean(file.buffer)
+          });
           const uploadResult = await uploadMediaToCloudinary(file.buffer);
           const type = uploadResult.resource_type === "video" || (file.mimetype || "").startsWith("video/")
             ? "video"
@@ -1076,6 +1122,8 @@ app.post("/request", requireUser, upload.array("image", 12), async (req, res) =>
             mimeType: file.mimetype,
             size: file.size,
             code: uploadError.http_code || uploadError.code,
+            http_code: uploadError.http_code,
+            name: uploadError.name,
             message: uploadError.message
           });
           return null;
@@ -1145,7 +1193,15 @@ app.post("/request", requireUser, upload.array("image", 12), async (req, res) =>
     });
 
   } catch (error) {
+    console.error("[request:create] save failed", {
+      name: error.name,
+      code: error.code,
+      message: error.message,
+      errors: error.errors ? Object.keys(error.errors) : undefined
+    });
     res.status(500).json({
+      success: false,
+      code: error.name === "ValidationError" ? "MONGOOSE_VALIDATION_FAILED" : "REQUEST_SAVE_FAILED",
       message: "Save failed",
       error: error.message
     });

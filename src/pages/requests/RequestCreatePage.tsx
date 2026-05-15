@@ -108,6 +108,14 @@ export function RequestCreatePage() {
     setError("");
     setIsSubmitting(true);
     try {
+      console.log("[request:create] submit media state", {
+        selectedMediaFilesLength: selectedMediaFiles.length,
+        files: selectedMediaFiles.map(file => ({
+          name: file.name,
+          type: file.type,
+          size: file.size
+        }))
+      });
       const request = await requestService.createRequest({
         category: defaultCategory,
         title: title.trim(),

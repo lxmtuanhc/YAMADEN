@@ -228,9 +228,13 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
 
   if (hasFiles && body instanceof FormData) {
     const uploadFiles = input.files?.slice(0, 12) || [];
-    console.debug("[request:create] appending media files", {
+    console.log("[request:create] selected media files", {
       count: uploadFiles.length,
-      field: "image"
+      files: uploadFiles.map(file => ({
+        name: file.name,
+        type: file.type,
+        size: file.size
+      }))
     });
     body.append("name", input.name || "");
     body.append("phone", input.phone || "");
@@ -242,11 +246,16 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
     body.append("quoteRequested", "false");
     (input.issueTags || []).forEach(tag => body.append("issueTags", tag));
     uploadFiles.forEach(file => body.append("image", file));
-    console.debug("[request:create] FormData fields", Array.from(body.entries()).map(([field, value]) => (
+    const debugEntries = Array.from(body.entries()).map(([field, value]) => (
       value instanceof File
         ? { field, name: value.name, type: value.type, size: value.size }
         : { field, value }
-    )));
+    ));
+    console.log("[request:create] FormData debug", {
+      endpoint: "/request",
+      imageFieldCount: debugEntries.filter(entry => entry.field === "image").length,
+      entries: debugEntries
+    });
   }
 
   const endpoint = "/request";
@@ -278,7 +287,10 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
     console.error("[request:create] backend response failed", {
       endpoint,
       status: response.status,
-      body: responseBody
+      body: responseBody,
+      code: responseBody && typeof responseBody === "object"
+        ? (responseBody as { code?: string }).code
+        : undefined
     });
     throw new BackendRequestError(message, response.status, responseBody, endpoint);
   }
