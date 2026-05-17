@@ -16,6 +16,7 @@ import {
 import type { FormEvent, ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { LogoutConfirmModal } from "../../components/LogoutConfirmModal";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import type { TranslationKey } from "../../i18n";
@@ -45,6 +46,7 @@ export function AccountPage() {
   const logout = useAppStore(state => state.logout);
   const setLanguage = useAppStore(state => state.setLanguage);
   const updateUserProfile = useAppStore(state => state.updateUserProfile);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     const stored = localStorage.getItem(notificationKey);
     if (stored) return stored === "true";
@@ -67,8 +69,12 @@ export function AccountPage() {
   }, [location.pathname]);
 
   function handleLogout() {
-    if (!window.confirm(t("account.logoutConfirm"))) return;
+    setIsLogoutConfirmOpen(true);
+  }
+
+  function confirmLogout() {
     logout();
+    setIsLogoutConfirmOpen(false);
     navigate("/login");
   }
 
@@ -231,6 +237,7 @@ export function AccountPage() {
       <Card className="account-logout-card">
         <Button variant="danger" icon={<LogOut size={18} />} onClick={handleLogout}>{t("account.logout")}</Button>
       </Card>
+      <LogoutConfirmModal open={isLogoutConfirmOpen} onCancel={() => setIsLogoutConfirmOpen(false)} onConfirm={confirmLogout} />
     </section>
   );
 }

@@ -1775,6 +1775,27 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
+app.get("/api/auth/me", requireUser, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(401).json({ message: "User not found" });
+    if (user.status === "deleted") return res.status(403).json({ message: "User was deleted. Please register again." });
+    if (user.status === "blocked") return res.status(403).json({ message: "User is blocked" });
+
+    user.status = normalizeUserStatus(user.status);
+
+    res.set("Cache-Control", "no-store");
+    res.json({
+      data: {
+        user: publicUser(user),
+        status: normalizeUserStatus(user.status)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Read failed", error: error.message });
+  }
+});
+
 app.get("*", (req, res, next) => {
   if (path.extname(req.path)) return next();
   res.sendFile(path.join(distPath, "index.html"));

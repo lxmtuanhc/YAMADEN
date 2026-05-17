@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { APP_STORAGE_KEY } from "../constants/storageKeys";
 import { initialQuotes, initialRequests, initialSchedules } from "../data/mockData";
-import { authService } from "../services/authService";
+import { authService, isAuthRejected } from "../services/authService";
 import type { Language, Quote, QuoteStatus, RequestStatus, Schedule, SupportRequest, User, UserStatus } from "../types";
 
 type ProfileInput = Pick<User, "name" | "email" | "phone" | "address" | "projectName" | "accountType" | "companyName" | "contactPerson">;
@@ -17,6 +17,7 @@ interface AppState {
   quotes: Quote[];
   schedules: Schedule[];
   setLanguage: (language: Language) => void;
+  initializeAuth: () => Promise<void>;
   login: (phone: string, pin: string) => Promise<boolean>;
   register: (phone: string, pin: string) => Promise<void>;
   saveProfile: (profile: ProfileInput) => Promise<void>;
@@ -79,6 +80,13 @@ function cleanupPersistedSecrets() {
 
 cleanupPersistedSecrets();
 
+function authStatusForUser(user: User): UserStatus {
+  if (user.status === "active") return "active";
+  if (user.status === "pendingApproval") return "pendingApproval";
+  if (user.status === "profileIncomplete") return "profileIncomplete";
+  return "notLoggedIn";
+}
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
@@ -90,10 +98,29 @@ export const useAppStore = create<AppState>()(
       quotes: initialQuotes,
       schedules: initialSchedules,
       setLanguage: language => set({ language }),
+      initializeAuth: async () => {
+        if (!authService.hasToken()) {
+          set({ user: null, authStatus: "notLoggedIn" });
+          return;
+        }
+
+        try {
+          const { user } = await authService.verifySession();
+          set({
+            user,
+            users: upsertUser(get().users || [], user),
+            authStatus: authStatusForUser(user)
+          });
+        } catch (error) {
+          if (isAuthRejected(error)) {
+            authService.logout();
+            set({ user: null, authStatus: "notLoggedIn" });
+          }
+        }
+      },
       login: async (phone, pin) => {
         const { user } = await authService.login(phone.trim(), pin);
-        const authStatus = user.status === "active" ? "active" : user.status === "pendingApproval" ? "pendingApproval" : "notLoggedIn";
-        set({ user, users: upsertUser(get().users || [], user), authStatus });
+        set({ user, users: upsertUser(get().users || [], user), authStatus: authStatusForUser(user) });
         return user.status === "active";
       },
       register: async (phone, pin) => {
@@ -123,7 +150,7 @@ export const useAppStore = create<AppState>()(
       },
       logout: () => {
         authService.logout();
-        set({ authStatus: "notLoggedIn" });
+        set({ user: null, authStatus: "notLoggedIn" });
       },
       updateQuoteStatus: (id, status) => {
         set({ quotes: get().quotes.map(item => (item.id === id ? { ...item, status } : item)) });

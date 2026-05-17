@@ -1,9 +1,18 @@
 import type { User, UserStatus } from "../types";
 
 const USER_TOKEN_KEY = "yamaden-user-token";
+const LEGACY_USER_TOKEN_KEY = "userToken";
 
 export function getUserToken() {
-  return localStorage.getItem(USER_TOKEN_KEY) || "";
+  const token = localStorage.getItem(USER_TOKEN_KEY) || localStorage.getItem(LEGACY_USER_TOKEN_KEY) || "";
+  if (token && !localStorage.getItem(USER_TOKEN_KEY)) {
+    localStorage.setItem(USER_TOKEN_KEY, token);
+  }
+  return token;
+}
+
+export function hasUserToken() {
+  return Boolean(getUserToken());
 }
 
 type BackendUser = Partial<User> & {
@@ -30,6 +39,15 @@ type AuthResponse = {
   token?: string;
   status?: UserStatus;
 };
+
+export type AuthRequestError = Error & {
+  status?: number;
+};
+
+export function isAuthRejected(error: unknown) {
+  const status = (error as AuthRequestError | undefined)?.status;
+  return status === 401 || status === 403;
+}
 
 function authHeaders() {
   const token = getUserToken();
@@ -68,10 +86,12 @@ function normalizeUser(user: BackendUser): User {
 }
 
 async function parseAuthResponse(response: Response): Promise<{ user: User; token?: string; status: UserStatus }> {
-  const payload = (await response.json()) as AuthResponse;
+  const payload = (await response.json().catch(() => ({}))) as AuthResponse;
 
   if (!response.ok) {
-    throw new Error("Auth request failed");
+    const error = new Error("Auth request failed") as AuthRequestError;
+    error.status = response.status;
+    throw error;
   }
 
   const user = payload.data?.user || payload.user;
@@ -82,6 +102,7 @@ async function parseAuthResponse(response: Response): Promise<{ user: User; toke
   const token = payload.data?.token || payload.token;
   if (token) {
     localStorage.setItem(USER_TOKEN_KEY, token);
+    localStorage.setItem(LEGACY_USER_TOKEN_KEY, token);
   }
 
   const normalizedUser = normalizeUser(user);
@@ -93,6 +114,8 @@ async function parseAuthResponse(response: Response): Promise<{ user: User; toke
 }
 
 export const authService = {
+  hasToken: hasUserToken,
+
   async register(phone: string, pin: string) {
     const response = await fetch("/api/auth/register", {
       method: "POST",
@@ -157,7 +180,26 @@ export const authService = {
     return parseAuthResponse(response);
   },
 
+  async verifySession() {
+    const response = await fetch("/api/auth/me", {
+      method: "GET",
+      headers: authHeaders(),
+      cache: "no-store"
+    });
+    if (response.status === 404 || response.status === 405) {
+      const legacyResponse = await fetch("/user/me", {
+        method: "GET",
+        headers: authHeaders(),
+        cache: "no-store"
+      });
+      return parseAuthResponse(legacyResponse);
+    }
+    return parseAuthResponse(response);
+  },
+
   logout() {
     localStorage.removeItem(USER_TOKEN_KEY);
+    localStorage.removeItem(LEGACY_USER_TOKEN_KEY);
+    localStorage.removeItem("userProfile");
   }
 };
