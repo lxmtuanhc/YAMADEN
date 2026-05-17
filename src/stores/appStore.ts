@@ -6,7 +6,7 @@ import { authService, isAuthRejected } from "../services/authService";
 import type { Language, Quote, QuoteStatus, RequestStatus, Schedule, SupportRequest, User, UserStatus } from "../types";
 
 type ProfileInput = Pick<User, "name" | "email" | "phone" | "address" | "projectName" | "accountType" | "companyName" | "contactPerson">;
-type ProfileUpdateInput = Partial<Pick<User, "name" | "email" | "phone" | "address" | "projectName" | "companyName" | "contactPerson" | "companyAddress" | "taxId" | "constructionType" | "note" | "notificationsEnabled">>;
+type ProfileUpdateInput = Partial<Pick<User, "name" | "email" | "address" | "projectName" | "companyName" | "contactPerson" | "companyAddress" | "taxId" | "constructionType" | "note" | "notificationsEnabled">>;
 
 interface AppState {
   language: Language;

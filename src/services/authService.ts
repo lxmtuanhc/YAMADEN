@@ -153,7 +153,7 @@ export const authService = {
   },
 
   async updateProfile(profile: Partial<Pick<User,
-    "name" | "email" | "phone" | "companyName" | "contactPerson" | "companyAddress" | "taxId" |
+    "name" | "email" | "companyName" | "contactPerson" | "companyAddress" | "taxId" |
     "projectName" | "address" | "constructionType" | "note" | "notificationsEnabled"
   >>) {
     const response = await fetch("/api/users/profile", {
@@ -162,7 +162,6 @@ export const authService = {
       body: JSON.stringify({
         name: profile.name,
         email: profile.email,
-        phone: profile.phone,
         companyName: profile.companyName,
         personInCharge: profile.contactPerson,
         contactPerson: profile.contactPerson,

@@ -98,7 +98,7 @@ export function AccountPage() {
         fields={[
           { name: "name", labelKey: "auth.name", value: user?.name || "", required: true },
           { name: "email", labelKey: "auth.email", value: user?.email || "", type: "email" },
-          { name: "phone", labelKey: "auth.phone", value: user?.phone || "", required: true }
+          { name: "phone", labelKey: "auth.phone", value: user?.phone || "", disabled: true }
         ]}
         onSave={updateUserProfile}
       />
@@ -272,6 +272,7 @@ type AccountField = {
   type?: string;
   required?: boolean;
   multiline?: boolean;
+  disabled?: boolean;
 };
 
 function AccountEditScreen({
@@ -310,7 +311,8 @@ function AccountEditScreen({
     setError("");
     setIsSaving(true);
     try {
-      await onSave(values as Partial<User>);
+      const enabledValues = Object.fromEntries(fields.filter(field => !field.disabled).map(field => [field.name, values[field.name]]));
+      await onSave(enabledValues as Partial<User>);
       setMessage(t(successKey));
     } catch {
       setError(t("account.updateError"));
@@ -333,6 +335,7 @@ function AccountEditScreen({
                 <input
                   type={field.type || "text"}
                   value={values[field.name] || ""}
+                  disabled={field.disabled}
                   onChange={event => setValues(current => ({ ...current, [field.name]: event.target.value }))}
                 />
               )}

@@ -659,6 +659,17 @@ p {
   padding: 12px 13px;
 }
 
+.field input:disabled,
+.field textarea:disabled,
+.field select:disabled {
+  color: #64748b;
+  background: #f1f5f9;
+  border-color: #dbe4ef;
+  opacity: 1;
+  -webkit-text-fill-color: #64748b;
+  cursor: not-allowed;
+}
+
 .field textarea {
   width: 100%;
   max-width: 100%;
