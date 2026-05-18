@@ -917,12 +917,29 @@
     const priority = sortRequests(state.requests
       .filter(item => !["completed", "lost"].includes(normalizeRequestStatus(item.status)))
       .filter(item => ["untreated", "contacted", "site_done", "quoted"].includes(normalizeRequestStatus(item.status)) || getPriorityScore(item) > 0))
-      .slice(0, 6);
+      .slice(0, 5);
+    const dashboardSubtitle = state.lang === "vi"
+      ? "Trung tâm vận hành YAMADEN CS - Tổng quan tình trạng xử lý yêu cầu, khách hàng và nhân viên."
+      : "YAMADEN CSオペレーションセンター - 依頼、顧客、スタッフの対応状況を確認できます。";
+    const todayLabel = state.lang === "vi" ? "Hôm nay" : "今日";
+    const aiItems = [
+      [t("aiUrgency"), state.lang === "vi" ? "Phân tích độ khẩn từ nội dung và trạng thái." : "内容と状態から緊急度を分析します。", "!"],
+      [t("aiAssign"), state.lang === "vi" ? "Đề xuất người phụ trách phù hợp." : "最適な担当者を提案します。", "◎"],
+      [t("aiPriority"), state.lang === "vi" ? "Tự động chọn yêu cầu cần ưu tiên." : "優先すべき案件を抽出します。", "★"]
+    ];
     $("viewRoot").innerHTML = `
-      <div class="page-intro">
-        <p>${escapeHtml(t("operationCenter"))} - ${escapeHtml(t("dashboardSubtitle"))}</p>
-      </div>
-      <div class="kpi-grid">
+      <header class="dashboard-header">
+        <div>
+          <p class="eyebrow">YAMADEN ADMIN</p>
+          <h1>${escapeHtml(t("dashboard"))}</h1>
+          <p>${escapeHtml(dashboardSubtitle)}</p>
+        </div>
+        <div class="dashboard-actions">
+          <span class="date-pill">${escapeHtml(todayLabel)} · ${escapeHtml(new Date().toLocaleDateString(state.lang === "ja" ? "ja-JP" : "vi-VN"))}</span>
+          <button class="refresh-button" type="button" data-retry>${escapeHtml(t("refresh"))}</button>
+        </div>
+      </header>
+      <div class="kpi-grid dashboard-kpis">
         ${statCard(t("totalRequests"), state.requests.length, t("realData"), "total")}
         ${statCard(t("untreated"), untreated.length, t("realData"), "danger")}
         ${statCard(t("overdue"), overdue.length, t("realData"), "warning")}
@@ -932,35 +949,41 @@
         ${statCard(t("quoteRate"), quoted.length ? Math.round(ordered.length / Math.max(quoted.length, 1) * 100) + "%" : "-", quoted.length ? t("realData") : t("planned"), "success")}
         ${statCard(t("firstResponse"), "-", t("planned"), "info")}
       </div>
-      <div class="dashboard-grid">
-        <section class="section-card dashboard-main">
-          <div class="panel-head"><h2>${escapeHtml(t("priorityRequests"))}</h2><button class="mini-button" type="button" data-view="requests">${escapeHtml(t("all"))} →</button></div>
-          <div class="panel-body">
-            ${priority.length ? `<div class="table-wrap table-card compact-table-wrap"><table class="data-table operation-table"><thead><tr><th>${t("id")}</th><th>${t("customer")}</th><th>${t("content")}</th><th>${t("urgency")}</th><th>${t("assignee")}</th><th>${t("status")}</th><th>${t("elapsed")}</th><th>${t("deadline")}</th></tr></thead><tbody>${priority.map(renderPriorityRequest).join("")}</tbody></table></div>` : showEmptyState(t("noPriorityRequests"))}
-          </div>
-        </section>
-        <aside class="section-card">
-          <div class="panel-head"><h2>${escapeHtml(t("aiPanel"))}</h2></div>
-          <div class="panel-body ai-list">
-            ${[t("aiUrgency"), t("aiAssign"), t("aiPriority")].map(label => `<div class="ai-item"><span>${escapeHtml(label)}</span><b>${escapeHtml(t("preparing"))}</b></div>`).join("")}
-          </div>
-          <div class="panel-head"><h2>${escapeHtml(t("quickActions"))}</h2></div>
-          <div class="panel-body quick-actions">
-            ${[t("createRequest"), t("assignStaffAction"), t("createQuote"), t("addNote")].map(label => `<button class="btn btn-soft" disabled>${escapeHtml(label)}</button>`).join("")}
-          </div>
+      <div class="dashboard-main-grid">
+        <div class="dashboard-left-stack">
+          <section class="section-card priority-card">
+            <div class="panel-head"><h2>${escapeHtml(t("priorityRequests"))}</h2><span class="dashboard-count">${priority.length}</span><button class="mini-button" type="button" data-view="requests">${escapeHtml(t("all"))} →</button></div>
+            <div class="panel-body">
+              ${priority.length ? `<div class="table-wrap table-card dashboard-priority-wrap"><table class="data-table operation-table priority-table"><thead><tr><th>${t("id")}</th><th>${t("customer")}</th><th>${t("content")}</th><th>${t("status")}</th><th>${t("assignee")}</th><th>${t("elapsed")}</th><th>${t("action")}</th></tr></thead><tbody>${priority.map(renderPriorityRequest).join("")}</tbody></table></div>` : compactEmptyState(t("noPriorityRequests"))}
+            </div>
+          </section>
+          <section class="section-card dashboard-preview-card">
+            <div class="panel-head"><h2>${escapeHtml(t("staffPreview"))}</h2></div>
+            <div class="panel-body mini-list">
+              ${state.staff.length ? state.staff.slice(0, 4).map(staff => `<div class="mini-list-item">${avatarHtml(staff)}<div><strong>${escapeHtml(staff.name || "-")}</strong><span>${escapeHtml(staff.department || staff.areas || "-")}</span></div><span class="status-badge status-${escapeHtml(staff.status || "active")}">${escapeHtml(staffStatusMap[staff.status || "active"] || staff.status || "active")}</span></div>`).join("") : compactEmptyState()}
+            </div>
+          </section>
+        </div>
+        <aside class="dashboard-side-stack">
+          <section class="section-card ai-panel">
+            <div class="panel-head"><div><h2>${escapeHtml(t("aiPanel"))}</h2><p class="note">${escapeHtml(state.lang === "vi" ? "Tự động phân tích và đề xuất thao tác vận hành." : "自動分析で運用アクションを提案します。")}</p></div></div>
+            <div class="panel-body ai-list">
+              ${aiItems.map(([label, desc, icon]) => `<div class="ai-item"><i>${escapeHtml(icon)}</i><div><strong>${escapeHtml(label)}</strong><span>${escapeHtml(desc)}</span></div><b>${escapeHtml(t("preparing"))}</b></div>`).join("")}
+            </div>
+          </section>
+          <section class="section-card quick-actions-card">
+            <div class="panel-head"><h2>${escapeHtml(t("quickActions"))}</h2></div>
+            <div class="panel-body quick-action-grid">
+              ${[t("createRequest"), t("assignStaffAction"), t("createQuote"), t("addNote")].map(label => `<button class="btn btn-soft" disabled title="${escapeHtml(t("planned"))}">${escapeHtml(label)}<small>${escapeHtml(t("planned"))}</small></button>`).join("")}
+            </div>
+          </section>
+          <section class="section-card dashboard-preview-card">
+            <div class="panel-head"><h2>${escapeHtml(t("customerPreview"))}</h2></div>
+            <div class="panel-body mini-list">
+              ${pendingUsers.length ? pendingUsers.slice(0, 3).map(user => `<div class="mini-list-item">${avatarHtml(user)}<div><strong>${escapeHtml(user.name || user.phone || "-")}</strong><span>${escapeHtml(user.phone || "")}</span></div><span class="status-badge status-pendingApproval">${escapeHtml(userStatusMap[user.status] || user.status)}</span></div>`).join("") : compactEmptyState()}
+            </div>
+          </section>
         </aside>
-        <section class="section-card">
-          <div class="panel-head"><h2>${escapeHtml(t("customerPreview"))}</h2></div>
-          <div class="panel-body priority-list">
-            ${pendingUsers.length ? pendingUsers.slice(0, 4).map(user => `<div class="compact-row"><strong>${escapeHtml(user.name || user.phone || "-")}</strong><span>${escapeHtml(user.phone || "")}</span><span class="status-badge status-pendingApproval">${escapeHtml(userStatusMap[user.status] || user.status)}</span></div>`).join("") : showEmptyState()}
-          </div>
-        </section>
-        <section class="section-card">
-          <div class="panel-head"><h2>${escapeHtml(t("staffPreview"))}</h2></div>
-          <div class="panel-body priority-list">
-            ${state.staff.length ? state.staff.slice(0, 4).map(staff => `<div class="compact-row"><strong>${escapeHtml(staff.name || "-")}</strong><span>${escapeHtml(staff.department || staff.areas || staff.workContent || "")}</span><span class="status-badge status-${escapeHtml(staff.status || "active")}">${escapeHtml(staffStatusMap[staff.status || "active"] || staff.status || "active")}</span></div>`).join("") : showEmptyState()}
-          </div>
-        </section>
       </div>
     `;
   }
@@ -975,17 +998,19 @@
 
   function renderPriorityRequest(item) {
     const id = getRowId(item);
-    const urgency = getUrgency(item);
     return `<tr data-request-detail="${escapeHtml(id)}">
       <td><strong>${escapeHtml(getRequestDisplayId(item))}</strong></td>
       <td>${escapeHtml(getCustomerName(item))}</td>
       <td><div class="text-clamp-1">${escapeHtml(getRequestContent(item))}</div></td>
-      <td>${urgency ? `<span class="urgency-badge urgency-${escapeHtml(urgency)}">${escapeHtml(urgency)}</span>` : `<span class="muted-dash">-</span>`}</td>
-      <td>${escapeHtml(getAssigneeName(item))}</td>
       <td><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></td>
+      <td>${escapeHtml(getAssigneeName(item))}</td>
       <td>${escapeHtml(computeWaitingTime(item))}</td>
-      <td>${escapeHtml(getDeadline(item) ? formatDateTime(getDeadline(item)) : "-")}</td>
+      <td><button class="btn btn-soft" type="button" data-request-detail="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button></td>
     </tr>`;
+  }
+
+  function compactEmptyState(message) {
+    return `<div class="compact-empty-state"><span>○</span><strong>${escapeHtml(message || t("noData"))}</strong></div>`;
   }
 
   function emptyHtml(message) {
