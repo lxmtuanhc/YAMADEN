@@ -1361,20 +1361,33 @@
   }
 
   function renderQuotes() {
+    const stages = ["作成中", "承認待ち", "送付済み", "交渉中", "受注", "失注"];
     $("viewRoot").innerHTML = `
-      ${emptyHtml(t("quoteShell"))}
-      <div class="actions" style="margin-top:16px">
-        <button class="ghost-button" disabled>${escapeHtml(t("quoteRegister"))}</button>
-        <button class="ghost-button" disabled>${escapeHtml(t("proposalCreate"))}</button>
-        <button class="ghost-button" disabled>${escapeHtml(t("pdfExport"))}</button>
-      </div>
+      <section class="section-card">
+        <div class="panel-head">
+          <div>
+            <h2>${escapeHtml(t("quotes"))}</h2>
+            <p class="note">${escapeHtml(t("quoteShell"))}</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="quote-pipeline">
+            ${stages.map((stage, index) => `<div class="pipeline-stage"><span>${index + 1}</span><strong>${escapeHtml(stage)}</strong><small class="note">${escapeHtml(t("planned"))}</small></div>`).join("")}
+          </div>
+          <div class="actions" style="margin-top:16px">
+            <button class="ghost-button" disabled>${escapeHtml(t("quoteRegister"))}</button>
+            <button class="ghost-button" disabled>${escapeHtml(t("proposalCreate"))}</button>
+            <button class="ghost-button" disabled>${escapeHtml(t("pdfExport"))}</button>
+          </div>
+        </div>
+      </section>
     `;
   }
 
   function renderNotifications() {
     const oldUntreated = state.requests.filter(isOverdue).length;
     const pendingUsers = state.users.filter(user => user.status === "pendingApproval" || user.status === "pending").length;
-    $("viewRoot").innerHTML = `<div class="grid">
+    $("viewRoot").innerHTML = `<div class="notification-grid">
       ${notificationCard(t("longUntreated"), oldUntreated)}
       ${notificationCard(t("pendingUsers"), pendingUsers)}
       ${notificationCard(t("quoteDeadline"), 0)}
@@ -1382,12 +1395,12 @@
   }
 
   function notificationCard(label, count) {
-    return `<div class="card"><strong>${escapeHtml(label)}</strong><span class="stat-value">${escapeHtml(count)}</span></div>`;
+    return `<div class="notification-card"><strong>${escapeHtml(label)}</strong><span class="stat-value">${escapeHtml(count)}</span><p class="note">${escapeHtml(count ? t("realData") : t("planned"))}</p></div>`;
   }
 
   function renderSettings() {
     const items = ["settingsSla", "settingsAssign", "settingsUrgency", "settingsNotice", "settingsColor", "settingsSystem"];
-    $("viewRoot").innerHTML = `<div class="grid two">${items.map(key => `<section class="card"><h2>${escapeHtml(t(key))}</h2><p class="note">${escapeHtml(t("kpiPlanned"))}</p></section>`).join("")}</div>`;
+    $("viewRoot").innerHTML = `<div class="settings-grid">${items.map(key => `<section class="settings-card"><h2>${escapeHtml(t(key))}</h2><p class="note">${escapeHtml(t("kpiPlanned"))}</p></section>`).join("")}</div>`;
   }
 
   async function saveRequestFromDrawer(id) {
