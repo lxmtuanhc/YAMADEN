@@ -13,11 +13,11 @@
 <body>
   <div class="admin-v2 app-shell" id="appShell">
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-logo-wrap">
-        <img src="/assets/yamaden-logo-wide.png" alt="株式会社 山電 YAMADEN.CO.LTD" class="sidebar-logo-img" />
-        <div class="sidebar-brand-fallback">
-          <strong>株式会社 山電</strong>
-          <span>YAMADEN.CO.LTD</span>
+      <div class="sidebar-brand">
+        <img src="/assets/icon-admin-192.png" alt="YAMADEN" class="sidebar-brand-icon" />
+        <div class="sidebar-brand-text">
+          <strong>YAMADEN</strong>
+          <span>YAMADEN CO.,LTD</span>
         </div>
       </div>
       <nav class="side-nav" id="sideNav" aria-label="Admin navigation"></nav>
@@ -44,13 +44,7 @@
         <button class="icon-button menu-button" id="mobileMenuButton" type="button" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
-        <label class="search-box">
-          <span>⌕</span>
-          <input id="globalSearch" type="search" autocomplete="off" />
-          <kbd>Ctrl + K</kbd>
-        </label>
-        <button class="icon-button topbar-alert" type="button" aria-label="Notifications">⌁<b>3</b></button>
-        <button class="icon-button topbar-alert" type="button" aria-label="Messages">□<b>1</b></button>
+        <div class="topbar-spacer"></div>
         <select class="language-select" id="languageSelect" aria-label="Language">
           <option value="ja">日本語</option>
           <option value="vi">Tiếng Việt</option>
@@ -58,8 +52,7 @@
         <div class="admin-profile">
           <div class="avatar">A</div>
           <div>
-            <strong>山田 太郎</strong>
-            <span>Admin</span>
+            <strong>Admin</strong>
           </div>
         </div>
         <button class="logout-button" id="logoutButton" type="button">ログアウト</button>

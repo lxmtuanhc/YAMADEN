@@ -834,7 +834,7 @@
     const pendingUserCount = state.users.filter(user => user.status === "pendingApproval" || user.status === "pending").length;
     const warningCount = state.requests.filter(isOverdue).length + pendingUserCount;
     const badgeByView = { requests: untreatedCount, customers: pendingUserCount, notifications: warningCount };
-    $("globalSearch").placeholder = t("search");
+    if ($("globalSearch")) $("globalSearch").placeholder = t("search");
     $("languageSelect").value = state.lang;
     $("logoutButton").textContent = t("logout");
     $("refreshButton").textContent = t("refresh");
@@ -941,14 +941,14 @@
         </div>
       </header>
       <div class="kpi-grid dashboard-kpis">
-        ${statCard(t("totalRequests"), state.requests.length, t("realData"), "total")}
-        ${statCard(t("untreated"), untreated.length, t("realData"), "danger")}
-        ${statCard(t("overdue"), overdue.length, t("realData"), "warning")}
-        ${statCard(t("customersCount"), state.users.length, t("realData"), "info")}
-        ${statCard(t("staffCount"), state.staff.length, activeStaff.length + " active", "success")}
-        ${statCard(t("quotingCount"), quoted.length, t("realData"), "warning")}
-        ${statCard(t("quoteRate"), quoted.length ? Math.round(ordered.length / Math.max(quoted.length, 1) * 100) + "%" : "-", quoted.length ? t("realData") : t("planned"), "success")}
-        ${statCard(t("firstResponse"), "-", t("planned"), "info")}
+        ${statCard(t("totalRequests"), state.requests.length, t("realData"), "total", "clipboard")}
+        ${statCard(t("untreated"), untreated.length, t("realData"), "danger", "clock")}
+        ${statCard(t("overdue"), overdue.length, t("realData"), "warning", "alert")}
+        ${statCard(t("customersCount"), state.users.length, t("realData"), "info", "building")}
+        ${statCard(t("staffCount"), state.staff.length, activeStaff.length + " active", "success", "users")}
+        ${statCard(t("quotingCount"), quoted.length, t("realData"), "warning", "receipt")}
+        ${statCard(t("quoteRate"), quoted.length ? Math.round(ordered.length / Math.max(quoted.length, 1) * 100) + "%" : "-", quoted.length ? t("realData") : t("planned"), "success", "trend")}
+        ${statCard(t("firstResponse"), "-", t("planned"), "info", "timer")}
       </div>
       <div class="dashboard-main-grid">
         <div class="dashboard-left-stack">
@@ -989,8 +989,23 @@
     `;
   }
 
-  function statCard(label, value, helper, tone) {
-    return `<div class="kpi-card kpi-${escapeHtml(tone || "total")}"><div class="kpi-icon"></div><span class="stat-label">${escapeHtml(label)}</span><strong class="stat-value">${escapeHtml(value)}</strong><small>${escapeHtml(helper || "")}</small></div>`;
+  function statCard(label, value, helper, tone, icon) {
+    return `<div class="kpi-card kpi-${escapeHtml(tone || "total")}"><div class="kpi-icon">${kpiIconSvg(icon || "clipboard")}</div><span class="stat-label">${escapeHtml(label)}</span><strong class="stat-value">${escapeHtml(value)}</strong><small>${escapeHtml(helper || "")}</small></div>`;
+  }
+
+  function kpiIconSvg(name) {
+    const common = `fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"`;
+    const icons = {
+      clipboard: `<svg ${common}><rect x="8" y="3" width="8" height="4" rx="1"></rect><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path><path d="M9 12h6M9 16h4"></path></svg>`,
+      clock: `<svg ${common}><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>`,
+      alert: `<svg ${common}><path d="M10.3 4.4 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.4a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg>`,
+      building: `<svg ${common}><path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h7v18"></path><path d="M14 8h3a2 2 0 0 1 2 2v11"></path><path d="M8 7h2M8 11h2M8 15h2"></path></svg>`,
+      users: `<svg ${common}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.9"></path><path d="M16 3.1a4 4 0 0 1 0 7.8"></path></svg>`,
+      receipt: `<svg ${common}><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M8 8h8M8 12h8M8 16h5"></path></svg>`,
+      trend: `<svg ${common}><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg>`,
+      timer: `<svg ${common}><path d="M10 2h4"></path><path d="M12 14v-4"></path><circle cx="12" cy="14" r="8"></circle><path d="m17 7 1.5-1.5"></path></svg>`
+    };
+    return icons[name] || icons.clipboard;
   }
 
   function miniMetric(label, value) {
@@ -1656,10 +1671,12 @@
       localStorage.setItem("language", state.lang);
       renderCurrentView();
     });
-    $("globalSearch").addEventListener("input", event => {
-      state.filters.search = event.target.value || "";
-      if (state.currentView === "requests") renderRequests();
-    });
+    if ($("globalSearch")) {
+      $("globalSearch").addEventListener("input", event => {
+        state.filters.search = event.target.value || "";
+        if (state.currentView === "requests") renderRequests();
+      });
+    }
     $("drawer").addEventListener("click", event => {
       const tab = event.target.closest("[data-drawer-tab]");
       if (tab) {

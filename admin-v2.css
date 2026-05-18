@@ -2945,3 +2945,122 @@ body {
     width: 170px;
   }
 }
+
+/* Final topbar, sidebar brand, and KPI icon cleanup */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 12px 22px;
+}
+
+.sidebar-brand-icon {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.sidebar-brand-text strong {
+  display: block;
+  color: #fff;
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  line-height: 1;
+}
+
+.sidebar-brand-text span {
+  display: block;
+  margin-top: 6px;
+  color: rgba(255, 255, 255, .82);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.topbar {
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+}
+
+.topbar-spacer {
+  min-width: 0;
+}
+
+.language-select {
+  min-width: 146px;
+  height: 42px;
+  padding: 0 14px;
+}
+
+.admin-profile {
+  min-width: 92px;
+  height: 42px;
+  padding: 4px 12px 4px 4px;
+}
+
+.admin-profile div:last-child {
+  display: grid;
+  place-items: center;
+}
+
+.admin-profile strong {
+  font-size: 13px;
+}
+
+.logout-button {
+  height: 42px;
+}
+
+.dashboard-kpis .kpi-icon,
+.admin-v2[data-view="dashboard"] .dashboard-kpis .kpi-icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  opacity: 1;
+  color: currentColor;
+  background: color-mix(in srgb, currentColor 13%, white);
+}
+
+.dashboard-kpis .kpi-icon svg {
+  width: 22px;
+  height: 22px;
+  color: currentColor;
+}
+
+.admin-v2[data-view="dashboard"] .kpi-grid.dashboard-kpis {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 1199px) {
+  .admin-v2[data-view="dashboard"] .kpi-grid.dashboard-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+  }
+
+  .language-select {
+    min-width: 122px;
+  }
+
+  .admin-profile {
+    min-width: 82px;
+  }
+
+  .admin-profile .avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .admin-v2[data-view="dashboard"] .kpi-grid.dashboard-kpis {
+    grid-template-columns: 1fr !important;
+  }
+}
