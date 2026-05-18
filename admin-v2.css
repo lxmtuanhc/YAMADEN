@@ -1240,6 +1240,118 @@ h1 {
   }
 }
 
+/* Dashboard final fixes + wide YAMADEN logo */
+.sidebar-logo-wrap {
+  display: flex;
+  align-items: center;
+  padding: 12px 8px 22px;
+  min-height: 72px;
+}
+
+.sidebar-logo-img {
+  display: block;
+  width: 204px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.sidebar-brand-fallback {
+  display: none;
+  color: #fff;
+}
+
+.sidebar-brand-fallback strong,
+.sidebar-brand-fallback span {
+  display: block;
+}
+
+.sidebar-brand-fallback strong {
+  font-size: 17px;
+  font-weight: 850;
+}
+
+.sidebar-brand-fallback span {
+  margin-top: 3px;
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.admin-v2[data-view="dashboard"] .view-head {
+  display: none !important;
+}
+
+.admin-v2[data-view="dashboard"] .content {
+  padding-top: 18px;
+}
+
+.dashboard-header {
+  margin-bottom: 12px;
+}
+
+.dashboard-header h1 {
+  margin-bottom: 5px;
+}
+
+.kpi-grid.dashboard-kpis,
+.admin-v2[data-view="dashboard"] .kpi-grid.dashboard-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dashboard-kpis .kpi-card,
+.admin-v2[data-view="dashboard"] .dashboard-kpis .kpi-card {
+  min-height: 136px;
+  padding: 18px;
+}
+
+.dashboard-kpis .kpi-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.dashboard-kpis .stat-label {
+  font-size: 13px;
+}
+
+.dashboard-kpis .stat-value {
+  font-size: 31px;
+}
+
+.dashboard-kpis .kpi-card small {
+  font-size: 12px;
+}
+
+@media (max-width: 1199px) {
+  .kpi-grid.dashboard-kpis,
+  .admin-v2[data-view="dashboard"] .kpi-grid.dashboard-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .sidebar-logo-wrap {
+    padding: 10px 8px 18px;
+  }
+
+  .sidebar-logo-img {
+    width: 170px;
+  }
+
+  .kpi-grid.dashboard-kpis,
+  .admin-v2[data-view="dashboard"] .kpi-grid.dashboard-kpis {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-kpis .kpi-card,
+  .admin-v2[data-view="dashboard"] .dashboard-kpis .kpi-card {
+    min-height: 122px;
+  }
+}
+
 /* Final demo polish: tighter typography, compact cards, calmer badges. */
 :root {
   --sidebar-width: 260px;
@@ -2771,5 +2883,65 @@ body {
   .notification-grid,
   .settings-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Final dashboard/logo override: keep after all legacy responsive blocks. */
+.admin-v2[data-view="dashboard"] .view-head {
+  display: none !important;
+}
+
+.admin-v2[data-view="dashboard"] .content {
+  padding-top: 18px;
+}
+
+.admin-v2[data-view="dashboard"] .dashboard-header {
+  margin-bottom: 12px;
+}
+
+.admin-v2[data-view="dashboard"] .kpi-grid.dashboard-kpis {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+}
+
+.admin-v2[data-view="dashboard"] .dashboard-kpis .kpi-card {
+  min-height: 136px;
+  padding: 18px;
+}
+
+.sidebar-logo-wrap {
+  display: flex;
+  align-items: center;
+  padding: 12px 8px 22px;
+  min-height: 72px;
+}
+
+.sidebar-logo-img {
+  display: block;
+  width: 204px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.sidebar-brand-fallback {
+  display: none;
+  color: #fff;
+}
+
+@media (max-width: 1199px) {
+  .admin-v2[data-view="dashboard"] .kpi-grid.dashboard-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-v2[data-view="dashboard"] .kpi-grid.dashboard-kpis {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sidebar-logo-img {
+    width: 170px;
   }
 }

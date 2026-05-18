@@ -829,6 +829,7 @@
 
   function renderLayout() {
     document.documentElement.lang = state.lang;
+    $("appShell").dataset.view = state.currentView;
     const untreatedCount = state.requests.filter(item => normalizeRequestStatus(item.status) === "untreated").length;
     const pendingUserCount = state.users.filter(user => user.status === "pendingApproval" || user.status === "pending").length;
     const warningCount = state.requests.filter(isOverdue).length + pendingUserCount;
