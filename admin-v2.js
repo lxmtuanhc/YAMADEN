@@ -285,6 +285,71 @@
     retry: "Th\u1eed l\u1ea1i"
   });
 
+  Object.assign(i18n.ja, {
+    customerSubtitle: "\u9867\u5ba2\u60c5\u5831\u3001\u30a2\u30ab\u30a6\u30f3\u30c8\u72b6\u614b\u3001\u4f9d\u983c\u5c65\u6b74\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002",
+    staffSubtitle: "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3001\u90e8\u7f72\u3001\u30b9\u30ad\u30eb\u3001\u62c5\u5f53\u4f5c\u696d\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002",
+    active: "\u6709\u52b9",
+    blocked: "\u505c\u6b62",
+    deleted: "\u524a\u9664\u6e08\u307f",
+    hasRequests: "\u4f9d\u983c\u3042\u308a",
+    requestCount: "\u4f9d\u983c\u6570",
+    info: "\u60c5\u5831",
+    history: "\u4f9d\u983c\u5c65\u6b74",
+    work: "\u62c5\u5f53\u4f5c\u696d",
+    customerType: "\u9867\u5ba2\u7a2e\u5225",
+    province: "\u5730\u57df",
+    projectName: "\u5de5\u4e8b\u540d",
+    companyAddress: "\u4f1a\u793e\u4f4f\u6240",
+    taxId: "\u7a0e\u52d9ID",
+    constructionType: "\u5de5\u4e8b\u7a2e\u5225",
+    notificationsEnabled: "\u901a\u77e5",
+    note: "\u30e1\u30e2",
+    approvedAt: "\u627f\u8a8d\u65e5",
+    lastLoginAt: "\u6700\u7d42\u30ed\u30b0\u30a4\u30f3",
+    totalTags: "\u4f5c\u696d\u30bf\u30b0\u6570",
+    departments: "\u90e8\u7f72\u6570",
+    off: "\u4f11\u6b62",
+    statusFilter: "\u30b9\u30c6\u30fc\u30bf\u30b9",
+    sortName: "\u540d\u524d\u9806",
+    sortCreated: "\u767b\u9332\u65e5\u9806",
+    sortStatus: "\u72b6\u614b\u9806",
+    allDepartments: "\u5168\u90e8\u7f72",
+    detail: "\u8a73\u7d30",
+    staffHistoryPlaceholder: "\u5c65\u6b74\u30c7\u30fc\u30bf\u306f\u4eca\u5f8c\u9023\u643a\u4e88\u5b9a\u3067\u3059"
+  });
+
+  Object.assign(i18n.vi, {
+    customerSubtitle: "Qu\u1ea3n l\u00fd th\u00f4ng tin kh\u00e1ch h\u00e0ng, tr\u1ea1ng th\u00e1i t\u00e0i kho\u1ea3n v\u00e0 l\u1ecbch s\u1eed y\u00eau c\u1ea7u.",
+    staffSubtitle: "Qu\u1ea3n l\u00fd h\u1ed3 s\u01a1, b\u1ed9 ph\u1eadn, k\u1ef9 n\u0103ng v\u00e0 n\u1ed9i dung c\u00f4ng vi\u1ec7c ph\u1ee5 tr\u00e1ch.",
+    active: "\u0110ang ho\u1ea1t \u0111\u1ed9ng",
+    blocked: "B\u1ecb kh\u00f3a",
+    deleted: "\u0110\u00e3 x\u00f3a",
+    hasRequests: "C\u00f3 y\u00eau c\u1ea7u",
+    requestCount: "S\u1ed1 y\u00eau c\u1ea7u",
+    info: "Th\u00f4ng tin",
+    history: "L\u1ecbch s\u1eed y\u00eau c\u1ea7u",
+    work: "C\u00f4ng vi\u1ec7c ph\u1ee5 tr\u00e1ch",
+    customerType: "Lo\u1ea1i kh\u00e1ch",
+    province: "Khu v\u1ef1c",
+    projectName: "T\u00ean c\u00f4ng tr\u00ecnh",
+    companyAddress: "\u0110\u1ecba ch\u1ec9 c\u00f4ng ty",
+    taxId: "M\u00e3 s\u1ed1 thu\u1ebf",
+    constructionType: "Lo\u1ea1i thi c\u00f4ng",
+    notificationsEnabled: "Th\u00f4ng b\u00e1o",
+    note: "Ghi ch\u00fa",
+    approvedAt: "Ng\u00e0y duy\u1ec7t",
+    lastLoginAt: "\u0110\u0103ng nh\u1eadp cu\u1ed1i",
+    totalTags: "T\u1ed5ng tag c\u00f4ng vi\u1ec7c",
+    departments: "S\u1ed1 b\u1ed9 ph\u1eadn",
+    off: "Ngh\u1ec9/off",
+    statusFilter: "Tr\u1ea1ng th\u00e1i",
+    sortName: "Theo t\u00ean",
+    sortCreated: "Theo ng\u00e0y t\u1ea1o",
+    sortStatus: "Theo tr\u1ea1ng th\u00e1i",
+    allDepartments: "T\u1ea5t c\u1ea3 b\u1ed9 ph\u1eadn",
+    staffHistoryPlaceholder: "D\u1eef li\u1ec7u l\u1ecbch s\u1eed s\u1ebd li\u00ean k\u1ebft sau"
+  });
+
   Object.assign(requestStatusMap, {
     untreated: "\u672a\u5bfe\u5fdc",
     contacted: "\u9023\u7d61\u6e08",
@@ -418,6 +483,9 @@
     },
     getStaff() {
       return requestJson("/admin/staff");
+    },
+    getStaffHistory(id) {
+      return requestJson("/api/requests/staff/" + encodeURIComponent(id) + "/history");
     },
     createStaff(payload) {
       return requestJson("/admin/staff", {
@@ -982,13 +1050,108 @@
     }).join("")}</select>`;
   }
 
+  function compactText(value, fallback) {
+    return String(value || fallback || "-").trim() || "-";
+  }
+
+  function initials(value) {
+    const source = compactText(value, "A");
+    return source.slice(0, 1).toUpperCase();
+  }
+
+  function toList(value) {
+    if (Array.isArray(value)) return value.map(item => String(item || "").trim()).filter(Boolean);
+    if (value === null || value === undefined) return [];
+    return String(value).split(/[,;\n]/).map(item => item.trim()).filter(Boolean);
+  }
+
+  function tagChips(value, max) {
+    const items = toList(value);
+    const visible = typeof max === "number" ? items.slice(0, max) : items;
+    const rest = typeof max === "number" ? Math.max(0, items.length - visible.length) : 0;
+    if (!items.length) return `<span class="muted-dash">-</span>`;
+    return `<div class="tag-list">${visible.map(item => `<span class="tag-chip">${escapeHtml(item)}</span>`).join("")}${rest ? `<span class="tag-chip tag-more">+${rest}</span>` : ""}</div>`;
+  }
+
+  function avatarHtml(item, sizeClass) {
+    const name = item?.name || item?.phone || item?.email || "A";
+    const avatar = item?.avatar;
+    return `<div class="avatar ${sizeClass || ""}">${avatar ? `<img class="avatar-img" src="${escapeHtml(avatar)}" alt="">` : escapeHtml(initials(name))}</div>`;
+  }
+
+  function userRequestCount(user) {
+    return Number(user?.requestCount || state.requests.filter(request => String(request.userId || "") === String(getRowId(user))).length || 0);
+  }
+
+  function filterUsers() {
+    const search = state.filters.customerSearch || "";
+    const status = state.filters.customerStatus || "all";
+    const sort = state.filters.customerSort || "created";
+    return [...state.users].filter(user => {
+      const statusOk = status === "all" || String(user.status || "pendingApproval") === status;
+      const text = [user.name, user.phone, user.email, user.company, user.companyName, user.customerType, user.address, user.province].join(" ").toLowerCase();
+      return statusOk && text.includes(search.toLowerCase());
+    }).sort((a, b) => {
+      if (sort === "name") return compactText(a.name || a.phone).localeCompare(compactText(b.name || b.phone));
+      if (sort === "status") return compactText(a.status).localeCompare(compactText(b.status));
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
+  }
+
+  function staffDepartment(staff) {
+    return compactText(staff?.department || staff?.areas);
+  }
+
+  function staffRole(staff) {
+    return compactText(staff?.role || staff?.position || staff?.title);
+  }
+
+  function filterStaff() {
+    const search = state.filters.staffSearch || "";
+    const dept = state.filters.staffDepartment || "all";
+    const status = state.filters.staffStatus || "all";
+    const sort = state.filters.staffSort || "name";
+    return [...state.staff].filter(staff => {
+      const deptText = staffDepartment(staff);
+      const statusText = staff.status || "active";
+      const text = [staff.name, staff.email, staff.phone, deptText, staffRole(staff), staff.workContent, staff.skills, toList(staff.workTags).join(" ")].join(" ").toLowerCase();
+      return (dept === "all" || deptText === dept) && (status === "all" || statusText === status) && text.includes(search.toLowerCase());
+    }).sort((a, b) => {
+      if (sort === "status") return compactText(a.status).localeCompare(compactText(b.status));
+      if (sort === "created") return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      return compactText(a.name).localeCompare(compactText(b.name));
+    });
+  }
+
+  function drawerTabs(active, tabs) {
+    return `<div class="drawer-tabs">${tabs.map(([key, label]) => `<button class="tab-button ${active === key ? "active" : ""}" type="button" data-drawer-tab="${key}">${escapeHtml(label)}</button>`).join("")}</div>`;
+  }
+
   function renderCustomers() {
+    const rows = filterUsers();
+    const totalWithRequests = state.users.filter(user => userRequestCount(user) > 0).length;
+    const statusOptions = ["all", "pendingApproval", "active", "blocked", "deleted"];
     $("viewRoot").innerHTML = `
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>${t("name")}</th><th>${t("phone")}</th><th>${t("company")}</th><th>${t("address")}</th><th>${t("status")}</th><th>${t("createdAt")}</th><th>${t("action")}</th></tr></thead>
-          <tbody>${state.users.length ? state.users.map(renderCustomerRow).join("") : `<tr><td colspan="7">${emptyHtml()}</td></tr>`}</tbody>
-        </table>
+      <div class="page-intro"><p>${escapeHtml(t("customerSubtitle"))}</p></div>
+      <div class="kpi-grid kpi-grid-small">
+        ${statCard(t("customersCount"), state.users.length, t("realData"), "info")}
+        ${statCard(userStatusMap.pendingApproval, state.users.filter(user => user.status === "pendingApproval" || user.status === "pending").length, t("realData"), "warning")}
+        ${statCard(t("active"), state.users.filter(user => user.status === "active").length, t("realData"), "success")}
+        ${statCard(t("blocked"), state.users.filter(user => user.status === "blocked").length, t("realData"), "danger")}
+        ${statCard(t("deleted"), state.users.filter(user => user.status === "deleted").length, t("realData"), "total")}
+        ${statCard(t("hasRequests"), totalWithRequests, t("realData"), "info")}
+      </div>
+      <div class="crm-filter-bar">
+        <input class="filter-input" data-customer-filter="search" value="${escapeHtml(state.filters.customerSearch || "")}" placeholder="${escapeHtml(t("search"))}" />
+        <select class="filter-input" data-customer-filter="status">${statusOptions.map(status => `<option value="${status}" ${String(state.filters.customerStatus || "all") === status ? "selected" : ""}>${escapeHtml(status === "all" ? t("all") : userStatusMap[status] || status)}</option>`).join("")}</select>
+        <select class="filter-input" data-customer-filter="sort">
+          <option value="created" ${(state.filters.customerSort || "created") === "created" ? "selected" : ""}>${escapeHtml(t("sortCreated"))}</option>
+          <option value="name" ${state.filters.customerSort === "name" ? "selected" : ""}>${escapeHtml(t("sortName"))}</option>
+          <option value="status" ${state.filters.customerSort === "status" ? "selected" : ""}>${escapeHtml(t("sortStatus"))}</option>
+        </select>
+      </div>
+      <div class="crm-grid">
+        ${rows.length ? rows.map(renderCustomerRow).join("") : showEmptyState()}
       </div>
     `;
   }
@@ -996,50 +1159,100 @@
   function renderCustomerRow(user) {
     const id = getRowId(user);
     const status = user.status || "pendingApproval";
-    return `<tr>
-      <td data-label="${t("name")}"><strong>${escapeHtml(user.name || "-")}</strong></td>
-      <td data-label="${t("phone")}">${escapeHtml(user.phone || "-")}</td>
-      <td data-label="${t("company")}">${escapeHtml(user.company || user.companyName || user.customerType || "-")}</td>
-      <td data-label="${t("address")}">${escapeHtml(user.address || user.province || "-")}</td>
-      <td data-label="${t("status")}"><span class="status-pill status-${escapeHtml(status)}">${escapeHtml(userStatusMap[status] || status)}</span></td>
-      <td data-label="${t("createdAt")}">${escapeHtml(formatDate(user.createdAt))}</td>
-      <td data-label="${t("action")}"><div class="actions">
-        ${status === "pendingApproval" || status === "pending" ? `<button class="mini-button" data-approve-user="${escapeHtml(id)}">${t("approve")}</button>` : ""}
-        <button class="mini-button" data-customer-detail="${escapeHtml(id)}">${t("detail")}</button>
-        <button class="mini-button" data-toggle-user="${escapeHtml(id)}" data-next-status="${status === "blocked" ? "active" : "blocked"}">${status === "blocked" ? t("activate") : t("block")}</button>
-      </div></td>
-    </tr>`;
+    return `<article class="customer-row">
+      ${avatarHtml(user)}
+      <div class="customer-main">
+        <strong>${escapeHtml(user.name || user.phone || "-")}</strong>
+        <span>${escapeHtml(user.phone || "-")} ${user.email ? "/ " + escapeHtml(user.email) : ""}</span>
+      </div>
+      <div class="customer-company text-clamp">${escapeHtml(user.company || user.companyName || user.customerType || "-")}</div>
+      <div class="customer-address text-clamp">${escapeHtml(user.address || user.province || "-")}</div>
+      <span class="status-badge status-${escapeHtml(status)}">${escapeHtml(userStatusMap[status] || status)}</span>
+      <div class="customer-meta"><b>${escapeHtml(formatDate(user.createdAt))}</b><span>${escapeHtml(userRequestCount(user))} ${escapeHtml(t("requestCount"))}</span></div>
+      <div class="actions crm-actions">
+        <button class="btn btn-soft" data-customer-detail="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
+        ${status === "pendingApproval" || status === "pending" ? `<button class="btn btn-soft" data-approve-user="${escapeHtml(id)}">${escapeHtml(t("approve"))}</button>` : ""}
+        <button class="btn btn-soft" data-toggle-user="${escapeHtml(id)}" data-next-status="${status === "blocked" ? "active" : "blocked"}">${status === "blocked" ? escapeHtml(t("activate")) : escapeHtml(t("block"))}</button>
+        <button class="btn btn-danger" data-delete-user="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>
+      </div>
+    </article>`;
   }
 
-  async function renderCustomerDetail(user) {
-    let history = [];
-    try {
-      history = normalizeList(await AdminAPI.getUserRequests(getRowId(user)));
-    } catch {}
+  async function renderCustomerDetail(user, activeTab = "info") {
+    const id = getRowId(user);
+    let history = user.__history || [];
+    if (activeTab === "history" && !user.__historyLoaded) {
+      try {
+        history = normalizeList(await AdminAPI.getUserRequests(id));
+        user.__history = history;
+        user.__historyLoaded = true;
+      } catch {
+        history = [];
+      }
+    }
+    const status = user.status || "pendingApproval";
+    const infoFields = [
+      [t("name"), user.name],
+      [t("phone"), user.phone],
+      [t("email"), user.email],
+      ["Contact", user.contact],
+      [t("company"), user.company || user.companyName],
+      [t("customerType"), user.customerType || user.accountType],
+      [t("province"), user.province],
+      [t("projectName"), user.projectName],
+      [t("address"), user.address],
+      [t("companyAddress"), user.companyAddress],
+      [t("taxId"), user.taxId],
+      [t("constructionType"), user.constructionType],
+      [t("notificationsEnabled"), user.notificationsEnabled === undefined ? "-" : String(Boolean(user.notificationsEnabled))],
+      [t("note"), user.note],
+      [t("createdAt"), formatDate(user.createdAt)],
+      [t("approvedAt"), formatDate(user.approvedAt)],
+      [t("lastLoginAt"), formatDate(user.lastLoginAt)]
+    ];
     openDrawer(`
-      <article class="drawer-panel">
-        <header class="drawer-head"><div><h2>${escapeHtml(user.name || user.phone || "-")}</h2><p class="note">${escapeHtml(user.phone || "")}</p></div><button class="close-button" type="button" data-close-drawer>×</button></header>
+      <article class="drawer-panel profile-drawer">
+        <header class="drawer-head drawer-header">
+          <div class="profile-title">${avatarHtml(user, "avatar-large")}<div><h2>${escapeHtml(user.name || user.phone || "-")}</h2><p class="note">${escapeHtml(user.phone || "-")}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(userStatusMap[status] || status)}</span></div></div>
+          <button class="close-button" type="button" data-close-drawer>×</button>
+        </header>
+        ${drawerTabs(activeTab, [["info", t("info")], ["history", t("history")]])}
         <div class="drawer-body">
-          <div class="info-grid">
-            ${infoItem(t("email"), user.email)}
-            ${infoItem(t("company"), user.company || user.companyName || user.customerType)}
-            ${infoItem(t("address"), user.address || user.province)}
-            ${infoItem(t("status"), userStatusMap[user.status] || user.status)}
-          </div>
-          <section><h3>${escapeHtml(t("userHistory"))}</h3><div class="priority-list">${history.length ? history.map(item => `<div class="priority-item"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getRequestContent(item))}</span><span class="status-pill ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></div>`).join("") : emptyHtml()}</div></section>
+          ${activeTab === "info" ? `<div class="info-grid">${infoFields.map(([label, value]) => infoItem(label, value)).join("")}</div>` : `<section><div class="priority-list">${history.length ? history.map(item => `<div class="priority-item"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getRequestContent(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span><small>${escapeHtml(formatDate(item.createdAt))}</small></div>`).join("") : showEmptyState()}</div></section>`}
         </div>
       </article>
     `);
+    $("drawer").dataset.drawerType = "customer";
+    $("drawer").dataset.drawerId = id;
   }
 
   function renderStaff() {
+    const rows = filterStaff();
+    const departments = [...new Set(state.staff.map(staffDepartment).filter(value => value && value !== "-"))];
+    const allTags = state.staff.flatMap(staff => toList(staff.workTags));
     $("viewRoot").innerHTML = `
+      <div class="page-intro"><p>${escapeHtml(t("staffSubtitle"))}</p></div>
       <div class="toolbar"><button class="primary-button" type="button" data-staff-new>${escapeHtml(t("addStaff"))}</button></div>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>${t("name")}</th><th>${t("department")}</th><th>${t("role")}</th><th>${t("phone")}</th><th>${t("email")}</th><th>${t("workContent")}</th><th>${t("workTags")}</th><th>${t("status")}</th><th>${t("action")}</th></tr></thead>
-          <tbody>${state.staff.length ? state.staff.map(renderStaffRow).join("") : `<tr><td colspan="9">${emptyHtml()}</td></tr>`}</tbody>
-        </table>
+      <div class="kpi-grid kpi-grid-small">
+        ${statCard(t("staffCount"), state.staff.length, t("realData"), "info")}
+        ${statCard(t("active"), state.staff.filter(staff => (staff.status || "active") === "active").length, t("realData"), "success")}
+        ${statCard(staffStatusMap.busy, state.staff.filter(staff => staff.status === "busy").length, t("realData"), "warning")}
+        ${statCard(t("off"), state.staff.filter(staff => ["off", "inactive"].includes(staff.status)).length, t("realData"), "danger")}
+        ${statCard(t("departments"), departments.length, t("realData"), "total")}
+        ${statCard(t("totalTags"), new Set(allTags).size, t("realData"), "info")}
+      </div>
+      <div class="crm-filter-bar">
+        <input class="filter-input" data-staff-filter="search" value="${escapeHtml(state.filters.staffSearch || "")}" placeholder="${escapeHtml(t("search"))}" />
+        <select class="filter-input" data-staff-filter="department"><option value="all">${escapeHtml(t("allDepartments"))}</option>${departments.map(item => `<option value="${escapeHtml(item)}" ${state.filters.staffDepartment === item ? "selected" : ""}>${escapeHtml(item)}</option>`).join("")}</select>
+        <select class="filter-input" data-staff-filter="status"><option value="all">${escapeHtml(t("statusFilter"))}</option>${["active", "busy", "off", "inactive"].map(status => `<option value="${status}" ${state.filters.staffStatus === status ? "selected" : ""}>${escapeHtml(staffStatusMap[status] || status)}</option>`).join("")}</select>
+        <select class="filter-input" data-staff-filter="sort">
+          <option value="name" ${(state.filters.staffSort || "name") === "name" ? "selected" : ""}>${escapeHtml(t("sortName"))}</option>
+          <option value="created" ${state.filters.staffSort === "created" ? "selected" : ""}>${escapeHtml(t("sortCreated"))}</option>
+          <option value="status" ${state.filters.staffSort === "status" ? "selected" : ""}>${escapeHtml(t("sortStatus"))}</option>
+        </select>
+      </div>
+      <div class="staff-card-grid">
+        ${rows.length ? rows.map(renderStaffRow).join("") : showEmptyState()}
       </div>
     `;
   }
@@ -1047,17 +1260,67 @@
   function renderStaffRow(staff) {
     const id = getRowId(staff);
     const status = staff.status || "active";
-    return `<tr>
-      <td data-label="${t("name")}"><strong>${escapeHtml(staff.name || "-")}</strong></td>
-      <td data-label="${t("department")}">${escapeHtml(staff.department || staff.areas || "-")}</td>
-      <td data-label="${t("role")}">${escapeHtml(staff.role || staff.position || staff.title || "-")}</td>
-      <td data-label="${t("phone")}">${escapeHtml(staff.phone || "-")}</td>
-      <td data-label="${t("email")}">${escapeHtml(staff.email || "-")}</td>
-      <td data-label="${t("workContent")}">${escapeHtml(staff.workContent || staff.skills || "-")}</td>
-      <td data-label="${t("workTags")}">${escapeHtml(Array.isArray(staff.workTags) ? staff.workTags.join(", ") : "")}</td>
-      <td data-label="${t("status")}"><span class="status-pill status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span></td>
-      <td data-label="${t("action")}"><div class="actions"><button class="mini-button" data-staff-edit="${escapeHtml(id)}">${t("edit")}</button><button class="mini-button" data-staff-delete="${escapeHtml(id)}">${t("delete")}</button></div></td>
-    </tr>`;
+    return `<article class="staff-card">
+      <div class="staff-card-head">
+        ${avatarHtml(staff)}
+        <div><strong>${escapeHtml(staff.name || "-")}</strong><span>${escapeHtml(staffDepartment(staff))}</span></div>
+        <span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span>
+      </div>
+      <div class="staff-contact"><span>${escapeHtml(staffRole(staff))}</span><span>${escapeHtml(staff.email || staff.phone || "-")}</span></div>
+      <p class="text-clamp">${escapeHtml(staff.workContent || staff.skills || "-")}</p>
+      ${tagChips(staff.workTags || staff.skills || staff.areas, 5)}
+      <div class="actions crm-actions">
+        <button class="btn btn-soft" data-staff-detail="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
+        <button class="btn btn-soft" data-staff-edit="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button>
+        <button class="btn btn-danger" data-staff-delete="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>
+      </div>
+    </article>`;
+  }
+
+  async function renderStaffDetail(staff, activeTab = "info") {
+    const id = getRowId(staff);
+    let history = staff.__history || [];
+    let historyLoaded = staff.__historyLoaded;
+    if (activeTab === "history" && !historyLoaded) {
+      try {
+        history = normalizeList(await AdminAPI.getStaffHistory(id));
+        staff.__history = history;
+        staff.__historyLoaded = true;
+      } catch {
+        history = [];
+        staff.__historyLoaded = true;
+      }
+    }
+    const status = staff.status || "active";
+    const infoFields = [
+      [t("name"), staff.name],
+      [t("phone"), staff.phone],
+      [t("email"), staff.email],
+      [t("department"), staff.department],
+      ["Role", staff.role],
+      ["Position", staff.position],
+      ["Title", staff.title],
+      [t("status"), staffStatusMap[status] || status],
+      [t("note"), staff.note],
+      ["Introduction", staff.introduction],
+      [t("createdAt"), formatDate(staff.createdAt)]
+    ];
+    openDrawer(`
+      <article class="drawer-panel profile-drawer">
+        <header class="drawer-head drawer-header">
+          <div class="profile-title">${avatarHtml(staff, "avatar-large")}<div><h2>${escapeHtml(staff.name || "-")}</h2><p class="note">${escapeHtml(staffDepartment(staff))}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span></div></div>
+          <button class="close-button" type="button" data-close-drawer>×</button>
+        </header>
+        ${drawerTabs(activeTab, [["info", t("info")], ["work", t("work")], ["history", t("history")]])}
+        <div class="drawer-body">
+          ${activeTab === "info" ? `<div class="info-grid">${infoFields.map(([label, value]) => infoItem(label, value)).join("")}</div>` : ""}
+          ${activeTab === "work" ? `<section class="work-detail"><h3>${escapeHtml(t("workContent"))}</h3><p>${escapeHtml(staff.workContent || "-")}</p><h3>${escapeHtml(t("workTags"))}</h3>${tagChips(staff.workTags)}<h3>Skills</h3>${tagChips(staff.skills)}<h3>Areas</h3>${tagChips(staff.areas)}</section>` : ""}
+          ${activeTab === "history" ? `<section><div class="priority-list">${history.length ? history.map(item => `<div class="priority-item"><strong>${escapeHtml(item.requestCode || item.id || "-")}</strong><span>${escapeHtml(item.title || getRequestContent(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span><small>${escapeHtml(item.createdAt || "")}</small></div>`).join("") : showEmptyState(t("staffHistoryPlaceholder"))}</div></section>` : ""}
+        </div>
+      </article>
+    `);
+    $("drawer").dataset.drawerType = "staff";
+    $("drawer").dataset.drawerId = id;
   }
 
   function renderStaffForm(staff) {
@@ -1072,14 +1335,14 @@
             ${field("avatar", "Avatar URL", item.avatar)}
             ${field("phone", t("phone"), item.phone)}
             ${field("email", t("email"), item.email)}
-            ${field("areas", "Areas", item.areas)}
-            ${field("skills", "Skills", item.skills)}
+            ${field("areas", "Areas", toList(item.areas).join(", "))}
+            ${field("skills", "Skills", toList(item.skills).join(", "))}
             ${field("department", t("department"), item.department)}
             ${field("role", "Role", item.role)}
             ${field("position", "Position", item.position)}
             ${field("title", "Title", item.title)}
             ${field("workContent", t("workContent"), item.workContent, true)}
-            ${field("workTags", t("workTags"), Array.isArray(item.workTags) ? item.workTags.join(", ") : item.workTags)}
+            ${field("workTags", t("workTags"), toList(item.workTags).join(", "))}
             ${field("note", "Note", item.note, true)}
             ${field("introduction", "Introduction", item.introduction, true)}
             <label class="field"><span>${escapeHtml(t("status"))}</span><select name="status">${["active", "busy", "off", "inactive"].map(status => `<option value="${status}" ${item.status === status ? "selected" : ""}>${escapeHtml(staffStatusMap[status])}</option>`).join("")}</select></label>
@@ -1171,6 +1434,20 @@
       if (state.currentView === "requests") renderRequests();
     });
     $("drawer").addEventListener("click", event => {
+      const tab = event.target.closest("[data-drawer-tab]");
+      if (tab) {
+        const type = $("drawer").dataset.drawerType;
+        const id = $("drawer").dataset.drawerId;
+        if (type === "customer") {
+          const user = state.users.find(item => getRowId(item) === id);
+          if (user) renderCustomerDetail(user, tab.dataset.drawerTab);
+        }
+        if (type === "staff") {
+          const staff = state.staff.find(item => getRowId(item) === id);
+          if (staff) renderStaffDetail(staff, tab.dataset.drawerTab);
+        }
+        return;
+      }
       const confirmYes = event.target.closest("[data-confirm-yes]");
       const confirmNo = event.target.closest("[data-confirm-no]");
       const confirmOverlay = event.target.id === "drawer" && window.__adminV2ConfirmResolve;
@@ -1270,6 +1547,18 @@
         return;
       }
 
+      const deleteUser = event.target.closest("[data-delete-user]");
+      if (deleteUser && await confirmAction(t("confirmDelete"))) {
+        try {
+          await AdminAPI.deleteUser(deleteUser.dataset.deleteUser, false);
+          await refreshData();
+          toast(t("saved"));
+        } catch {
+          toast(t("failed"));
+        }
+        return;
+      }
+
       if (event.target.closest("[data-staff-new]")) {
         renderStaffForm(null);
         return;
@@ -1279,6 +1568,13 @@
       if (staffEdit) {
         const staff = state.staff.find(item => getRowId(item) === staffEdit.dataset.staffEdit);
         renderStaffForm(staff);
+        return;
+      }
+
+      const staffDetail = event.target.closest("[data-staff-detail]");
+      if (staffDetail) {
+        const staff = state.staff.find(item => getRowId(item) === staffDetail.dataset.staffDetail);
+        if (staff) renderStaffDetail(staff);
         return;
       }
 
@@ -1299,7 +1595,11 @@
       event.preventDefault();
       const form = event.target;
       const payload = Object.fromEntries(new FormData(form).entries());
-      payload.workTags = String(payload.workTags || "").split(",").map(item => item.trim()).filter(Boolean);
+      const areas = toList(payload.areas);
+      const skills = toList(payload.skills);
+      payload.areas = areas.join(", ");
+      payload.skills = skills.join(", ");
+      payload.workTags = toList(payload.workTags);
       try {
         if (form.dataset.staffId) await AdminAPI.updateStaff(form.dataset.staffId, payload);
         else await AdminAPI.createStaff(payload);
@@ -1316,13 +1616,36 @@
         state.filters.search = event.target.value || "";
         renderRequests();
       }
+      const customerFilter = event.target.closest("[data-customer-filter]");
+      if (customerFilter) {
+        state.filters["customer" + customerFilter.dataset.customerFilter.charAt(0).toUpperCase() + customerFilter.dataset.customerFilter.slice(1)] = customerFilter.value || "";
+        renderCustomers();
+      }
+      const staffFilter = event.target.closest("[data-staff-filter]");
+      if (staffFilter) {
+        state.filters["staff" + staffFilter.dataset.staffFilter.charAt(0).toUpperCase() + staffFilter.dataset.staffFilter.slice(1)] = staffFilter.value || "";
+        renderStaff();
+      }
     });
 
     document.addEventListener("change", event => {
       const select = event.target.closest("[data-filter-select]");
-      if (!select) return;
-      state.filters[select.dataset.filterSelect] = select.value;
-      renderRequests();
+      if (select) {
+        state.filters[select.dataset.filterSelect] = select.value;
+        renderRequests();
+        return;
+      }
+      const customerFilter = event.target.closest("[data-customer-filter]");
+      if (customerFilter) {
+        state.filters["customer" + customerFilter.dataset.customerFilter.charAt(0).toUpperCase() + customerFilter.dataset.customerFilter.slice(1)] = customerFilter.value || "";
+        renderCustomers();
+        return;
+      }
+      const staffFilter = event.target.closest("[data-staff-filter]");
+      if (staffFilter) {
+        state.filters["staff" + staffFilter.dataset.staffFilter.charAt(0).toUpperCase() + staffFilter.dataset.staffFilter.slice(1)] = staffFilter.value || "";
+        renderStaff();
+      }
     });
   }
 
