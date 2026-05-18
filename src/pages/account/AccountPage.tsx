@@ -230,14 +230,14 @@ export function AccountPage() {
       </Card>
 
       <SettingsSection>
-        <SettingsRow icon={<UserRound size={18} />} label={t("account.personalInfo")} value={user?.name} onClick={() => navigate("/account/personal")} />
-        <SettingsRow icon={<MapPin size={18} />} label={t("account.siteAddress")} value={user?.address} onClick={() => navigate("/account/address")} />
-        {isCompany ? <SettingsRow icon={<Building2 size={18} />} label={t("account.companyInfo")} value={user?.companyName} onClick={() => navigate("/account/company")} /> : null}
+        <SettingsRow icon={<UserRound size={18} />} label={t("account.personalInfo")} onClick={() => navigate("/account/personal")} />
+        <SettingsRow icon={<MapPin size={18} />} label={t("account.siteAddress")} onClick={() => navigate("/account/address")} />
+        {isCompany ? <SettingsRow icon={<Building2 size={18} />} label={t("account.companyInfo")} onClick={() => navigate("/account/company")} /> : null}
       </SettingsSection>
 
       <SettingsSection>
-        <SettingsRow icon={<Bell size={18} />} label={t("account.notifications")} value={notificationsEnabled ? t("account.notificationsOn") : t("account.notificationsOff")} onClick={() => navigate("/account/notifications")} />
-        <SettingsRow icon={<Languages size={18} />} label={t("account.language")} value={language.toUpperCase()} onClick={() => navigate("/account/language")} />
+        <SettingsRow icon={<Bell size={18} />} label={t("account.notifications")} onClick={() => navigate("/account/notifications")} />
+        <SettingsRow icon={<Languages size={18} />} label={t("account.language")} onClick={() => navigate("/account/language")} />
         <SettingsRow icon={<Trash2 size={18} />} label={t("deleted.title")} onClick={() => navigate("/account/deleted")} />
       </SettingsSection>
 
@@ -464,13 +464,12 @@ function SettingsSection({ children }: { children: ReactNode }) {
   return <Card className="settings-card">{children}</Card>;
 }
 
-function SettingsRow({ icon, label, value, onClick }: { icon: ReactNode; label: string; value?: string; onClick: () => void }) {
+function SettingsRow({ icon, label, onClick }: { icon: ReactNode; label: string; onClick: () => void }) {
   return (
     <button className="settings-row" type="button" onClick={onClick}>
       <span className="settings-icon">{icon}</span>
       <span className="settings-label">{label}</span>
-      {value ? <span className="settings-value">{value}</span> : null}
-      <ChevronRight size={18} />
+      <ChevronRight className="settings-chevron" size={18} />
     </button>
   );
 }
