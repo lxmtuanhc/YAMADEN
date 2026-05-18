@@ -197,6 +197,130 @@
     deleted: "削除済み"
   };
 
+  Object.assign(i18n.ja, {
+    dashboard: "\u30c0\u30c3\u30b7\u30e5\u30dc\u30fc\u30c9",
+    requests: "\u4f9d\u983c\u7ba1\u7406",
+    customers: "\u9867\u5ba2\u7ba1\u7406",
+    staff: "\u30b9\u30bf\u30c3\u30d5\u7ba1\u7406",
+    quotes: "\u898b\u7a4d\u30fb\u63d0\u6848",
+    notifications: "\u901a\u77e5",
+    settings: "\u8a2d\u5b9a",
+    search: "\u691c\u7d22...",
+    logout: "\u30ed\u30b0\u30a2\u30a6\u30c8",
+    refresh: "\u66f4\u65b0",
+    dashboardSubtitle: "\u4f9d\u983c\u3001\u9867\u5ba2\u3001\u30b9\u30bf\u30c3\u30d5\u306e\u5bfe\u5fdc\u72b6\u6cc1\u3092\u4e00\u89a7\u3067\u78ba\u8a8d\u3067\u304d\u307e\u3059\u3002",
+    requestSubtitle: "\u9867\u5ba2\u304b\u3089\u306e\u4f9d\u983c\u3092\u691c\u7d22\u3001\u7d5e\u308a\u8fbc\u307f\u3001\u5bfe\u5fdc\u3067\u304d\u307e\u3059\u3002",
+    totalRequests: "\u7dcf\u4f9d\u983c\u6570",
+    untreated: "\u672a\u5bfe\u5fdc",
+    overdue: "\u671f\u9650\u8d85\u904e",
+    customersCount: "\u9867\u5ba2\u6570",
+    staffCount: "\u30b9\u30bf\u30c3\u30d5",
+    quotingCount: "\u898b\u7a4d\u4e2d",
+    quoteRate: "\u898b\u7a4d\u2192\u53d7\u6ce8\u7387",
+    firstResponse: "\u521d\u52d5\u5bfe\u5fdc\u6642\u9593",
+    planned: "\u4eca\u5f8c\u9023\u643a\u4e88\u5b9a",
+    realData: "\u5b9f\u30c7\u30fc\u30bf\u9023\u643a\u4e2d",
+    priorityRequests: "\u512a\u5148\u5bfe\u5fdc\u304c\u5fc5\u8981\u306a\u4f9d\u983c",
+    noPriorityRequests: "\u73fe\u5728\u3001\u512a\u5148\u5bfe\u5fdc\u304c\u5fc5\u8981\u306a\u4f9d\u983c\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
+    aiPanel: "AI\u904b\u7528\u30b5\u30dd\u30fc\u30c8",
+    preparing: "\u6e96\u5099\u4e2d",
+    quickActions: "\u30af\u30a4\u30c3\u30af\u30a2\u30af\u30b7\u30e7\u30f3",
+    createRequest: "\u4f9d\u983c\u4f5c\u6210",
+    assignStaffAction: "\u30b9\u30bf\u30c3\u30d5\u5272\u5f53",
+    createQuote: "\u898b\u7a4d\u4f5c\u6210",
+    addNote: "\u5bfe\u5fdc\u30e1\u30e2\u8ffd\u52a0",
+    customerPreview: "\u65b0\u898f\u30fb\u627f\u8a8d\u5f85\u3061\u9867\u5ba2",
+    staffPreview: "\u30b9\u30bf\u30c3\u30d5\u7a3c\u50cd\u72b6\u6cc1",
+    tableView: "\u8868",
+    kanbanView: "\u30ab\u30f3\u30d0\u30f3",
+    newest: "\u65b0\u3057\u3044\u9806",
+    oldest: "\u53e4\u3044\u9806",
+    prioritySort: "\u512a\u5148\u9806",
+    overdueFirst: "\u671f\u9650\u8d85\u904e\u512a\u5148",
+    urgency: "\u7dca\u6025\u5ea6",
+    unjudged: "\u672a\u5224\u5b9a",
+    media: "\u30e1\u30c7\u30a3\u30a2",
+    noRequests: "\u4f9d\u983c\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
+    loadRequestsError: "\u4f9d\u983c\u4e00\u89a7\u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093",
+    retry: "\u518d\u8a66\u884c"
+  });
+
+  Object.assign(i18n.vi, {
+    dashboard: "Dashboard",
+    requests: "Qu\u1ea3n l\u00fd y\u00eau c\u1ea7u",
+    customers: "Qu\u1ea3n l\u00fd kh\u00e1ch h\u00e0ng",
+    staff: "Qu\u1ea3n l\u00fd staff",
+    quotes: "B\u00e1o gi\u00e1 / \u0111\u1ec1 xu\u1ea5t",
+    notifications: "Th\u00f4ng b\u00e1o",
+    settings: "C\u00e0i \u0111\u1eb7t",
+    search: "T\u00ecm ki\u1ebfm...",
+    logout: "\u0110\u0103ng xu\u1ea5t",
+    refresh: "L\u00e0m m\u1edbi",
+    dashboardSubtitle: "T\u1ed5ng quan t\u00ecnh tr\u1ea1ng x\u1eed l\u00fd y\u00eau c\u1ea7u, kh\u00e1ch h\u00e0ng v\u00e0 nh\u00e2n vi\u00ean.",
+    requestSubtitle: "Theo d\u00f5i, l\u1ecdc v\u00e0 x\u1eed l\u00fd c\u00e1c y\u00eau c\u1ea7u c\u1ee7a kh\u00e1ch h\u00e0ng.",
+    quotingCount: "\u0110ang b\u00e1o gi\u00e1",
+    quoteRate: "T\u1ec9 l\u1ec7 b\u00e1o gi\u00e1 \u2192 \u0111\u01a1n",
+    firstResponse: "Th\u1eddi gian ph\u1ea3n h\u1ed3i \u0111\u1ea7u",
+    planned: "S\u1ebd li\u00ean k\u1ebft sau",
+    realData: "\u0110ang d\u00f9ng d\u1eef li\u1ec7u th\u1eadt",
+    noPriorityRequests: "Hi\u1ec7n ch\u01b0a c\u00f3 y\u00eau c\u1ea7u n\u00e0o c\u1ea7n x\u1eed l\u00fd.",
+    preparing: "Chu\u1ea9n b\u1ecb",
+    quickActions: "Thao t\u00e1c nhanh",
+    createRequest: "T\u1ea1o y\u00eau c\u1ea7u",
+    assignStaffAction: "G\u00e1n staff",
+    createQuote: "T\u1ea1o b\u00e1o gi\u00e1",
+    addNote: "Th\u00eam ghi ch\u00fa x\u1eed l\u00fd",
+    customerPreview: "Kh\u00e1ch h\u00e0ng m\u1edbi / ch\u1edd duy\u1ec7t",
+    staffPreview: "T\u1ea3i staff",
+    tableView: "B\u1ea3ng",
+    kanbanView: "Kanban",
+    newest: "M\u1edbi nh\u1ea5t",
+    oldest: "C\u0169 nh\u1ea5t",
+    prioritySort: "\u01afu ti\u00ean x\u1eed l\u00fd",
+    overdueFirst: "Qu\u00e1 h\u1ea1n tr\u01b0\u1edbc",
+    urgency: "\u0110\u1ed9 kh\u1ea9n",
+    unjudged: "Ch\u01b0a \u0111\u00e1nh gi\u00e1",
+    noRequests: "Kh\u00f4ng c\u00f3 y\u00eau c\u1ea7u.",
+    loadRequestsError: "Kh\u00f4ng th\u1ec3 t\u1ea3i danh s\u00e1ch y\u00eau c\u1ea7u",
+    retry: "Th\u1eed l\u1ea1i"
+  });
+
+  Object.assign(requestStatusMap, {
+    untreated: "\u672a\u5bfe\u5fdc",
+    contacted: "\u9023\u7d61\u6e08",
+    site_done: "\u73fe\u5730\u6e08",
+    quoted: "\u898b\u7a4d",
+    ordered: "\u53d7\u6ce8",
+    completed: "\u5b8c\u4e86",
+    lost: "\u5931\u6ce8"
+  });
+
+  Object.assign(requestStatusMapVi, {
+    untreated: "Ch\u01b0a x\u1eed l\u00fd",
+    contacted: "\u0110\u00e3 li\u00ean h\u1ec7",
+    site_done: "\u0110\u00e3 kh\u1ea3o s\u00e1t",
+    quoted: "B\u00e1o gi\u00e1",
+    ordered: "Nh\u1eadn \u0111\u01a1n",
+    completed: "Ho\u00e0n th\u00e0nh",
+    lost: "M\u1ea5t \u0111\u01a1n"
+  });
+
+  Object.assign(userStatusMap, {
+    pendingApproval: "\u627f\u8a8d\u5f85\u3061",
+    pending: "\u627f\u8a8d\u5f85\u3061",
+    active: "\u6709\u52b9",
+    blocked: "\u505c\u6b62",
+    deleted: "\u524a\u9664\u6e08\u307f"
+  });
+
+  Object.assign(staffStatusMap, {
+    active: "\u7a3c\u50cd\u4e2d",
+    busy: "\u5bfe\u5fdc\u4e2d",
+    off: "\u4f11\u6b62\u4e2d",
+    inactive: "\u505c\u6b62\u4e2d",
+    deleted: "\u524a\u9664\u6e08\u307f"
+  });
+
   const views = [
     ["dashboard", "dashboard", "▦"],
     ["requests", "requests", "◆"],
@@ -215,9 +339,14 @@
     selectedRequest: null,
     selectedUser: null,
     selectedStaff: null,
+    errors: {},
     filters: {
       requestStatus: "all",
-      search: ""
+      search: "",
+      staff: "all",
+      urgency: "all",
+      sort: "priority",
+      requestViewMode: "table"
     },
     lang: localStorage.getItem("language") || "ja"
   };
@@ -409,6 +538,100 @@
     return normalizeRequestStatus(request.status) === "untreated" && Date.now() - new Date(request.createdAt).getTime() > 24 * 60 * 60 * 1000;
   }
 
+  function formatDateTime(value) {
+    return formatDate(value);
+  }
+
+  function formatRelativeTime(value) {
+    return elapsedText(value);
+  }
+
+  function getStatusLabel(status) {
+    return formatStatus(status);
+  }
+
+  function getRequestPhone(request) {
+    return request?.phone || request?.contact || request?.tel || "";
+  }
+
+  function getRequestMediaCount(request) {
+    return collectMedia(request).length;
+  }
+
+  function requestStatusTime(request) {
+    const status = normalizeRequestStatus(request?.status);
+    if (status === "completed" || status === "lost") return "";
+    if (status === "ordered") return request?.orderedAt || request?.quotedAt || request?.createdAt;
+    if (status === "quoted") return request?.quotedAt || request?.firstResponseAt || request?.createdAt;
+    if (status === "site_done") return request?.siteVisitedAt || request?.contactedAt || request?.createdAt;
+    if (status === "contacted") return request?.contactedAt || request?.firstResponseAt || request?.createdAt;
+    return request?.updatedAt || request?.createdAt;
+  }
+
+  function computeWaitingTime(request) {
+    const value = requestStatusTime(request);
+    return value ? formatRelativeTime(value) : "-";
+  }
+
+  function getDeadline(request) {
+    return request?.deadline || request?.dueDate || request?.responseDeadline || "";
+  }
+
+  function getUrgency(request) {
+    const raw = String(request?.urgency || request?.priority || "").toLowerCase();
+    if (["urgent", "high", "medium", "low"].includes(raw)) return raw;
+    const tags = Array.isArray(request?.issueTags) ? request.issueTags.join(" ").toLowerCase() : "";
+    if (/urgent|khẩn|緊急|漏電|火災|停電|cháy|chập/.test(tags)) return "urgent";
+    return "";
+  }
+
+  function getPriorityScore(request) {
+    const status = normalizeRequestStatus(request?.status);
+    const urgency = getUrgency(request);
+    let score = 0;
+    if (["untreated", "contacted", "site_done", "quoted"].includes(status)) score += 40;
+    if (urgency === "urgent") score += 40;
+    if (urgency === "high") score += 25;
+    if (isOverdue(request) || getDeadline(request) && new Date(getDeadline(request)).getTime() < Date.now()) score += 30;
+    const created = new Date(request?.createdAt || 0).getTime();
+    if (created) score += Math.max(0, 10 - Math.floor((Date.now() - created) / 86400000));
+    return score;
+  }
+
+  function sortRequests(items) {
+    const sort = state.filters.sort;
+    return [...items].sort((left, right) => {
+      if (sort === "oldest") return new Date(left.createdAt || 0) - new Date(right.createdAt || 0);
+      if (sort === "overdue") return Number(isOverdue(right)) - Number(isOverdue(left)) || getPriorityScore(right) - getPriorityScore(left);
+      if (sort === "priority") return getPriorityScore(right) - getPriorityScore(left) || new Date(right.createdAt || 0) - new Date(left.createdAt || 0);
+      return new Date(right.createdAt || 0) - new Date(left.createdAt || 0);
+    });
+  }
+
+  function filterRequests(items) {
+    const search = state.filters.search.toLowerCase();
+    return items.filter(item => {
+      const statusOk = state.filters.requestStatus === "all" || normalizeRequestStatus(item.status) === state.filters.requestStatus;
+      const staffOk = state.filters.staff === "all" || String(item.assigneeId || item.assigneeName || "") === state.filters.staff;
+      const urgency = getUrgency(item) || "none";
+      const urgencyOk = state.filters.urgency === "all" || urgency === state.filters.urgency;
+      const text = [getRequestDisplayId(item), getCustomerName(item), getRequestContent(item), getRequestPhone(item), item.address, getAssigneeName(item)].join(" ").toLowerCase();
+      return statusOk && staffOk && urgencyOk && text.includes(search);
+    });
+  }
+
+  function showToast(message) {
+    toast(message);
+  }
+
+  function showEmptyState(message) {
+    return `<div class="empty-state">${escapeHtml(message || t("noData"))}</div>`;
+  }
+
+  function showErrorState(message) {
+    return `<div class="error-state"><strong>${escapeHtml(message || t("failed"))}</strong><button class="btn btn-soft" type="button" data-retry>${escapeHtml(t("retry"))}</button></div>`;
+  }
+
   function toast(message) {
     const el = $("toast");
     el.textContent = message;
@@ -466,6 +689,10 @@
 
   function renderLayout() {
     document.documentElement.lang = state.lang;
+    const untreatedCount = state.requests.filter(item => normalizeRequestStatus(item.status) === "untreated").length;
+    const pendingUserCount = state.users.filter(user => user.status === "pendingApproval" || user.status === "pending").length;
+    const warningCount = state.requests.filter(isOverdue).length + pendingUserCount;
+    const badgeByView = { requests: untreatedCount, customers: pendingUserCount, notifications: warningCount };
     $("globalSearch").placeholder = t("search");
     $("languageSelect").value = state.lang;
     $("logoutButton").textContent = t("logout");
@@ -474,9 +701,11 @@
       <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}">
         <span class="nav-icon">${icon}</span>
         <span>${escapeHtml(t(labelKey))}</span>
+        ${badgeByView[view] ? `<span class="nav-badge">${badgeByView[view]}</span>` : ""}
       </button>
     `).join("");
     $("viewTitle").textContent = t(state.currentView);
+    $("viewEyebrow").textContent = state.currentView === "dashboard" ? "YAMADEN ADMIN" : t(state.currentView).toUpperCase();
   }
 
   async function loadAll() {
@@ -488,6 +717,9 @@
     state.requests = requests.status === "fulfilled" ? normalizeList(requests.value) : [];
     state.users = users.status === "fulfilled" ? normalizeList(users.value) : [];
     state.staff = staff.status === "fulfilled" ? normalizeList(staff.value) : [];
+    state.errors.requests = requests.status === "rejected" ? requests.reason?.message || "failed" : "";
+    state.errors.users = users.status === "rejected" ? users.reason?.message || "failed" : "";
+    state.errors.staff = staff.status === "rejected" ? staff.reason?.message || "failed" : "";
   }
 
   function normalizeList(payload) {
@@ -516,45 +748,76 @@
   function renderDashboard() {
     const untreated = state.requests.filter(item => normalizeRequestStatus(item.status) === "untreated");
     const overdue = state.requests.filter(isOverdue);
-    const priority = [...state.requests]
+    const quoted = state.requests.filter(item => normalizeRequestStatus(item.status) === "quoted");
+    const ordered = state.requests.filter(item => normalizeRequestStatus(item.status) === "ordered");
+    const pendingUsers = state.users.filter(user => user.status === "pendingApproval" || user.status === "pending");
+    const activeStaff = state.staff.filter(item => !["off", "inactive", "deleted"].includes(String(item.status || "active")));
+    const priority = sortRequests(state.requests
       .filter(item => !["completed", "lost"].includes(normalizeRequestStatus(item.status)))
-      .sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0))
+      .filter(item => ["untreated", "contacted", "site_done", "quoted"].includes(normalizeRequestStatus(item.status)) || getPriorityScore(item) > 0))
       .slice(0, 6);
     $("viewRoot").innerHTML = `
-      <div class="grid stats-grid">
-        ${statCard(t("totalRequests"), state.requests.length)}
-        ${statCard(t("untreated"), untreated.length)}
-        ${statCard(t("overdue"), overdue.length)}
-        ${statCard(t("customersCount"), state.users.length)}
-        ${statCard(t("staffCount"), state.staff.length)}
+      <div class="page-intro">
+        <p>${escapeHtml(t("dashboardSubtitle"))}</p>
       </div>
-      <div class="grid two" style="margin-top:16px">
-        <section class="panel">
+      <div class="kpi-grid">
+        ${statCard(t("totalRequests"), state.requests.length, t("realData"), "total")}
+        ${statCard(t("untreated"), untreated.length, t("realData"), "danger")}
+        ${statCard(t("overdue"), overdue.length, t("realData"), "warning")}
+        ${statCard(t("customersCount"), state.users.length, t("realData"), "info")}
+        ${statCard(t("staffCount"), state.staff.length, activeStaff.length + " active", "success")}
+        ${statCard(t("quotingCount"), quoted.length, t("realData"), "warning")}
+        ${statCard(t("quoteRate"), quoted.length ? Math.round(ordered.length / Math.max(quoted.length, 1) * 100) + "%" : "-", quoted.length ? t("realData") : t("planned"), "success")}
+        ${statCard(t("firstResponse"), "-", t("planned"), "info")}
+      </div>
+      <div class="dashboard-grid">
+        <section class="section-card dashboard-main">
           <div class="panel-head"><h2>${escapeHtml(t("priorityRequests"))}</h2><span class="note">${escapeHtml(t("kpiPlanned"))}</span></div>
           <div class="panel-body priority-list">
-            ${priority.length ? priority.map(item => `
-              <div class="priority-item">
-                <strong>${escapeHtml(getRequestDisplayId(item))} / ${escapeHtml(getCustomerName(item))}</strong>
-                <span>${escapeHtml(getRequestContent(item))}</span>
-                <span class="status-pill ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span>
-              </div>
-            `).join("") : emptyHtml()}
+            ${priority.length ? priority.map(renderPriorityRequest).join("") : showEmptyState(t("noPriorityRequests"))}
           </div>
         </section>
-        <section class="panel">
+        <aside class="section-card">
           <div class="panel-head"><h2>${escapeHtml(t("aiPanel"))}</h2></div>
           <div class="panel-body ai-list">
-            <div class="ai-item">${escapeHtml(t("aiUrgency"))}</div>
-            <div class="ai-item">${escapeHtml(t("aiAssign"))}</div>
-            <div class="ai-item">${escapeHtml(t("aiPriority"))}</div>
+            ${[t("aiUrgency"), t("aiAssign"), t("aiPriority")].map(label => `<div class="ai-item"><span>${escapeHtml(label)}</span><b>${escapeHtml(t("preparing"))}</b></div>`).join("")}
+          </div>
+          <div class="panel-head"><h2>${escapeHtml(t("quickActions"))}</h2></div>
+          <div class="panel-body quick-actions">
+            ${[t("createRequest"), t("assignStaffAction"), t("createQuote"), t("addNote")].map(label => `<button class="btn btn-soft" disabled>${escapeHtml(label)}</button>`).join("")}
+          </div>
+        </aside>
+        <section class="section-card">
+          <div class="panel-head"><h2>${escapeHtml(t("customerPreview"))}</h2></div>
+          <div class="panel-body priority-list">
+            ${pendingUsers.length ? pendingUsers.slice(0, 4).map(user => `<div class="compact-row"><strong>${escapeHtml(user.name || user.phone || "-")}</strong><span>${escapeHtml(user.phone || "")}</span><span class="status-badge status-pendingApproval">${escapeHtml(userStatusMap[user.status] || user.status)}</span></div>`).join("") : showEmptyState()}
+          </div>
+        </section>
+        <section class="section-card">
+          <div class="panel-head"><h2>${escapeHtml(t("staffPreview"))}</h2></div>
+          <div class="panel-body priority-list">
+            ${state.staff.length ? state.staff.slice(0, 4).map(staff => `<div class="compact-row"><strong>${escapeHtml(staff.name || "-")}</strong><span>${escapeHtml(staff.department || staff.areas || staff.workContent || "")}</span><span class="status-badge status-${escapeHtml(staff.status || "active")}">${escapeHtml(staffStatusMap[staff.status || "active"] || staff.status || "active")}</span></div>`).join("") : showEmptyState()}
           </div>
         </section>
       </div>
     `;
   }
 
-  function statCard(label, value) {
-    return `<div class="card"><span class="stat-label">${escapeHtml(label)}</span><strong class="stat-value">${escapeHtml(value)}</strong></div>`;
+  function statCard(label, value, helper, tone) {
+    return `<div class="kpi-card kpi-${escapeHtml(tone || "total")}"><div class="kpi-icon"></div><span class="stat-label">${escapeHtml(label)}</span><strong class="stat-value">${escapeHtml(value)}</strong><small>${escapeHtml(helper || "")}</small></div>`;
+  }
+
+  function renderPriorityRequest(item) {
+    const id = getRowId(item);
+    return `<div class="priority-item rich">
+      <div><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span></div>
+      <div>${escapeHtml(getRequestContent(item))}</div>
+      <span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span>
+      <span>${escapeHtml(getAssigneeName(item))}</span>
+      <span>${escapeHtml(computeWaitingTime(item))}</span>
+      <span>${escapeHtml(getDeadline(item) ? formatDateTime(getDeadline(item)) : "-")}</span>
+      <button class="btn btn-soft" type="button" data-request-detail="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
+    </div>`;
   }
 
   function emptyHtml(message) {
@@ -563,42 +826,79 @@
 
   function renderRequests() {
     const statuses = ["all", "untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"];
-    const search = state.filters.search.toLowerCase();
-    const filtered = state.requests.filter(item => {
-      const statusOk = state.filters.requestStatus === "all" || normalizeRequestStatus(item.status) === state.filters.requestStatus;
-      const text = [getRequestDisplayId(item), getCustomerName(item), getRequestContent(item), item.phone, item.address, getAssigneeName(item)].join(" ").toLowerCase();
-      return statusOk && text.includes(search);
-    });
+    const filtered = sortRequests(filterRequests(state.requests));
+    const staffOptions = state.staff.map(staff => `<option value="${escapeHtml(getRowId(staff) || staff.name || "")}">${escapeHtml(staff.name || "-")}</option>`).join("");
+    if (state.errors.requests) {
+      $("viewRoot").innerHTML = showErrorState(t("loadRequestsError"));
+      return;
+    }
     $("viewRoot").innerHTML = `
-      <div class="toolbar">
-        <div class="chips">
-          ${statuses.map(status => `<button class="chip ${state.filters.requestStatus === status ? "active" : ""}" type="button" data-request-filter="${status}">${escapeHtml(status === "all" ? t("all") : formatStatus(status))}</button>`).join("")}
+      <div class="page-intro">
+        <p>${escapeHtml(t("requestSubtitle"))}</p>
+      </div>
+      <div class="request-command-bar">
+        <div class="segmented">
+          <button class="${state.filters.requestViewMode === "table" ? "active" : ""}" type="button" data-view-mode="table">${escapeHtml(t("tableView"))}</button>
+          <button class="${state.filters.requestViewMode === "kanban" ? "active" : ""}" type="button" data-view-mode="kanban">${escapeHtml(t("kanbanView"))}</button>
         </div>
       </div>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>${t("id")}</th><th>${t("customer")}</th><th>${t("content")}</th><th>${t("status")}</th><th>${t("assignee")}</th><th>${t("elapsed")}</th><th>${t("deadline")}</th><th>${t("action")}</th></tr></thead>
-          <tbody>
-            ${filtered.length ? filtered.map(renderRequestRow).join("") : `<tr><td colspan="8">${emptyHtml()}</td></tr>`}
-          </tbody>
-        </table>
+      <div class="chips status-filter-row">
+        ${statuses.map(status => {
+          const count = status === "all" ? state.requests.length : state.requests.filter(item => normalizeRequestStatus(item.status) === status).length;
+          return `<button class="filter-chip ${state.filters.requestStatus === status ? "active" : ""}" type="button" data-request-filter="${status}"><span>${escapeHtml(status === "all" ? t("all") : formatStatus(status))}</span><b>${count}</b></button>`;
+        }).join("")}
       </div>
+      <div class="filter-bar">
+        <input id="requestSearch" class="filter-input" value="${escapeHtml(state.filters.search)}" placeholder="${escapeHtml(t("search"))}" />
+        <select class="filter-input" data-filter-select="requestStatus">${statuses.map(status => `<option value="${status}" ${state.filters.requestStatus === status ? "selected" : ""}>${escapeHtml(status === "all" ? t("all") : formatStatus(status))}</option>`).join("")}</select>
+        <select class="filter-input" data-filter-select="staff"><option value="all">${escapeHtml(t("assignee"))}</option>${staffOptions}</select>
+        <select class="filter-input" data-filter-select="urgency">
+          <option value="all">${escapeHtml(t("urgency"))}</option>
+          <option value="urgent">urgent</option><option value="high">high</option><option value="medium">medium</option><option value="low">low</option><option value="none">${escapeHtml(t("unjudged"))}</option>
+        </select>
+        <select class="filter-input" data-filter-select="sort">
+          <option value="priority" ${state.filters.sort === "priority" ? "selected" : ""}>${escapeHtml(t("prioritySort"))}</option>
+          <option value="newest" ${state.filters.sort === "newest" ? "selected" : ""}>${escapeHtml(t("newest"))}</option>
+          <option value="oldest" ${state.filters.sort === "oldest" ? "selected" : ""}>${escapeHtml(t("oldest"))}</option>
+          <option value="overdue" ${state.filters.sort === "overdue" ? "selected" : ""}>${escapeHtml(t("overdueFirst"))}</option>
+        </select>
+      </div>
+      ${state.filters.requestViewMode === "kanban" ? renderRequestKanban(filtered, statuses.slice(1)) : `
+        <div class="table-wrap request-table-wrap">
+          <table class="data-table request-table">
+            <thead><tr><th>${t("id")}</th><th>${t("customer")}</th><th>${t("content")}</th><th>${t("status")}</th><th>${t("urgency")}</th><th>${t("assignee")}</th><th>${t("elapsed")}</th><th>${t("deadline")}</th><th>${t("media")}</th><th>${t("action")}</th></tr></thead>
+            <tbody>
+              ${filtered.length ? filtered.map(renderRequestRow).join("") : `<tr><td colspan="10">${showEmptyState(t("noRequests"))}</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      `}
     `;
   }
 
   function renderRequestRow(item) {
     const id = getRowId(item);
-    const deadline = isOverdue(item) ? t("overdue") : "-";
+    const deadline = getDeadline(item) ? formatDateTime(getDeadline(item)) : "-";
+    const urgency = getUrgency(item);
     return `<tr>
       <td data-label="${t("id")}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong></td>
-      <td data-label="${t("customer")}"><div class="row-title">${escapeHtml(getCustomerName(item))}</div><div class="subtext">${escapeHtml(item.phone || item.contact || "")}</div></td>
+      <td data-label="${t("customer")}"><div class="row-title">${escapeHtml(getCustomerName(item))}</div><div class="subtext">${escapeHtml(getRequestPhone(item))}</div></td>
       <td data-label="${t("content")}">${escapeHtml(getRequestContent(item))}<div class="subtext">${escapeHtml(item.address || "")}</div></td>
-      <td data-label="${t("status")}"><span class="status-pill ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></td>
+      <td data-label="${t("status")}"><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></td>
+      <td data-label="${t("urgency")}">${urgency ? `<span class="urgency-badge urgency-${escapeHtml(urgency)}">${escapeHtml(urgency)}</span>` : `<span class="muted-dash">-</span>`}</td>
       <td data-label="${t("assignee")}">${escapeHtml(getAssigneeName(item))}</td>
-      <td data-label="${t("elapsed")}">${escapeHtml(elapsedText(item.createdAt))}</td>
+      <td data-label="${t("elapsed")}">${escapeHtml(computeWaitingTime(item))}</td>
       <td data-label="${t("deadline")}">${escapeHtml(deadline)}</td>
-      <td data-label="${t("action")}"><div class="actions"><button class="mini-button" type="button" data-request-detail="${escapeHtml(id)}">${t("detail")}</button>${statusSelectHtml(id, item.status)}</div></td>
+      <td data-label="${t("media")}">${escapeHtml(getRequestMediaCount(item) || "-")}</td>
+      <td data-label="${t("action")}"><div class="actions"><button class="btn btn-soft" type="button" data-request-detail="${escapeHtml(id)}">${t("detail")}</button>${statusSelectHtml(id, item.status)}</div></td>
     </tr>`;
+  }
+
+  function renderRequestKanban(items, statuses) {
+    return `<div class="kanban-board">${statuses.map(status => {
+      const rows = items.filter(item => normalizeRequestStatus(item.status) === status);
+      return `<section class="kanban-column"><h3>${escapeHtml(formatStatus(status))}<span>${rows.length}</span></h3>${rows.length ? rows.map(item => `<button class="request-mobile-card" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span><p>${escapeHtml(getRequestContent(item))}</p><small>${escapeHtml(getCustomerName(item))} / ${escapeHtml(computeWaitingTime(item))}</small></button>`).join("") : showEmptyState()}</section>`;
+    }).join("")}</div>`;
   }
 
   function statusSelectHtml(id, current) {
@@ -618,12 +918,14 @@
         </header>
         <div class="drawer-body">
           <div class="info-grid">
-            ${infoItem(t("phone"), request.phone || request.contact)}
+            ${infoItem(t("phone"), getRequestPhone(request))}
             ${infoItem(t("address"), request.address)}
             ${infoItem(t("content"), getRequestContent(request))}
             ${infoItem(t("issueTags"), Array.isArray(request.issueTags) ? request.issueTags.join(", ") : "")}
             ${infoItem(t("status"), formatStatus(request.status))}
             ${infoItem(t("assignee"), getAssigneeName(request))}
+            ${infoItem(t("urgency"), getUrgency(request) || t("unjudged"))}
+            ${infoItem(t("createdAt"), formatDateTime(request.createdAt))}
           </div>
           <section>
             <h3>${escapeHtml(t("media"))}</h3>
@@ -904,6 +1206,18 @@
         return;
       }
 
+      const mode = event.target.closest("[data-view-mode]");
+      if (mode) {
+        state.filters.requestViewMode = mode.dataset.viewMode;
+        renderRequests();
+        return;
+      }
+
+      if (event.target.closest("[data-retry]")) {
+        refreshData();
+        return;
+      }
+
       const requestButton = event.target.closest("[data-request-detail]");
       if (requestButton) {
         const id = requestButton.dataset.requestDetail;
@@ -995,6 +1309,20 @@
       } catch {
         toast(t("failed"));
       }
+    });
+
+    document.addEventListener("input", event => {
+      if (event.target.id === "requestSearch") {
+        state.filters.search = event.target.value || "";
+        renderRequests();
+      }
+    });
+
+    document.addEventListener("change", event => {
+      const select = event.target.closest("[data-filter-select]");
+      if (!select) return;
+      state.filters[select.dataset.filterSelect] = select.value;
+      renderRequests();
     });
   }
 
