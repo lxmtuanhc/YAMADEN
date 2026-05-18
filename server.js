@@ -783,6 +783,18 @@ app.get("/admin.html", (req, res) => {
   res.sendFile(path.join(__dirname, "admin.html"));
 });
 
+app.get("/admin-v2.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin-v2.html"));
+});
+
+app.get("/admin-v2.css", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin-v2.css"));
+});
+
+app.get("/admin-v2.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin-v2.js"));
+});
+
 app.get("/login.html", (req, res) => {
   res.sendFile(path.join(__dirname, "login.html"));
 });
