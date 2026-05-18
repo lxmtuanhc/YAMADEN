@@ -350,6 +350,78 @@
     staffHistoryPlaceholder: "D\u1eef li\u1ec7u l\u1ecbch s\u1eed s\u1ebd li\u00ean k\u1ebft sau"
   });
 
+  Object.assign(i18n.ja, {
+    dashboard: "\u4eca\u65e5\u306e\u904b\u7528\u30c0\u30c3\u30b7\u30e5\u30dc\u30fc\u30c9",
+    requestBacklog: "\u4f9d\u983c\u7ba1\u7406",
+    operationCenter: "YAMADEN CS\u30aa\u30da\u30ec\u30fc\u30b7\u30e7\u30f3\u30bb\u30f3\u30bf\u30fc",
+    export: "\u30a8\u30af\u30b9\u30dd\u30fc\u30c8",
+    newRequest: "\u65b0\u898f\u4f9d\u983c\u767b\u9332",
+    detailFilter: "\u8a73\u7d30\u30d5\u30a3\u30eb\u30bf\u30fc",
+    tableFormat: "\u8868\u5f62\u5f0f",
+    kanbanPreview: "\u30ab\u30f3\u30d0\u30f3\u3067\u78ba\u8a8d\uff08\u30d7\u30ec\u30d3\u30e5\u30fc\uff09",
+    amount: "\u91d1\u984d",
+    customerRank: "\u9867\u5ba2\u30e9\u30f3\u30af",
+    lastActivity: "\u6700\u7d42\u5bfe\u5fdc",
+    contactCards: "\u9023\u7d61\u5148",
+    recentRequests: "\u6700\u65b0\u306e\u4f9d\u983c\u30fb\u6848\u4ef6\u5c65\u6b74",
+    internalNotes: "\u793e\u5185\u30e1\u30e2",
+    tags: "\u30bf\u30b0",
+    selectedDetail: "\u8a73\u7d30\u30d1\u30cd\u30eb",
+    activeRequests: "\u5bfe\u5fdc\u4e2d",
+    lastRequest: "\u6700\u7d42\u4f9d\u983c",
+    workload: "\u7a3c\u50cd\u7387",
+    assignedCount: "\u5bfe\u5fdc\u4e2d\u6848\u4ef6",
+    performance: "\u30d1\u30d5\u30a9\u30fc\u30de\u30f3\u30b9",
+    aiSuitability: "AI\u63a8\u85a6\u9069\u5408\u5ea6",
+    strengths: "\u5f37\u307f\u30fb\u5c02\u9580\u6027",
+    pipelineTitle: "\u898b\u7a4d\u30fb\u63d0\u6848\u30d1\u30a4\u30d7\u30e9\u30a4\u30f3",
+    quoteTotal: "\u898b\u7a4d\u7dcf\u984d",
+    quoteWinRate: "\u53d7\u6ce8\u7387",
+    averageUnitPrice: "\u5e73\u5747\u5358\u4fa1",
+    grossMargin: "\u7c97\u5229\u7387",
+    emptyColumn: "\u30c7\u30fc\u30bf\u306f\u3042\u308a\u307e\u305b\u3093",
+    automationGoal: "\u81ea\u52d5\u5316\u306e\u30b4\u30fc\u30eb",
+    roles: "\u6a29\u9650\u3068\u30ed\u30fc\u30eb",
+    companyInfo: "\u4f1a\u793e\u60c5\u5831",
+    dataApi: "\u30c7\u30fc\u30bf\u9023\u643a / API"
+  });
+
+  Object.assign(i18n.vi, {
+    dashboard: "Dashboard vận hành hôm nay",
+    requestBacklog: "Quản lý yêu cầu",
+    operationCenter: "Trung tâm vận hành YAMADEN CS",
+    export: "Xuất dữ liệu",
+    newRequest: "Tạo yêu cầu mới",
+    detailFilter: "Bộ lọc chi tiết",
+    tableFormat: "Dạng bảng",
+    kanbanPreview: "Kanban preview",
+    amount: "Số tiền",
+    customerRank: "Hạng khách",
+    lastActivity: "Hoạt động cuối",
+    contactCards: "Liên hệ",
+    recentRequests: "Lịch sử yêu cầu gần đây",
+    internalNotes: "Ghi chú nội bộ",
+    tags: "Tag",
+    selectedDetail: "Panel chi tiết",
+    activeRequests: "Đang xử lý",
+    lastRequest: "Yêu cầu cuối",
+    workload: "Tải công việc",
+    assignedCount: "Đang phụ trách",
+    performance: "Hiệu suất",
+    aiSuitability: "Độ phù hợp AI",
+    strengths: "Điểm mạnh / chuyên môn",
+    pipelineTitle: "Pipeline báo giá / đề xuất",
+    quoteTotal: "Tổng báo giá",
+    quoteWinRate: "Tỉ lệ nhận đơn",
+    averageUnitPrice: "Đơn giá TB",
+    grossMargin: "Biên lợi nhuận",
+    emptyColumn: "Chưa có dữ liệu",
+    automationGoal: "Mục tiêu tự động hóa",
+    roles: "Quyền và vai trò",
+    companyInfo: "Thông tin công ty",
+    dataApi: "Liên kết dữ liệu / API"
+  });
+
   Object.assign(requestStatusMap, {
     untreated: "\u672a\u5bfe\u5fdc",
     contacted: "\u9023\u7d61\u6e08",
@@ -387,12 +459,12 @@
   });
 
   const views = [
-    ["dashboard", "dashboard", "▦"],
-    ["requests", "requests", "◆"],
-    ["customers", "customers", "●"],
-    ["staff", "staff", "◎"],
-    ["quotes", "quotes", "□"],
-    ["notifications", "notifications", "!"],
+    ["dashboard", "dashboard", "⌂"],
+    ["requests", "requests", "▤"],
+    ["customers", "customers", "◉"],
+    ["staff", "staff", "♙"],
+    ["quotes", "quotes", "▣"],
+    ["notifications", "notifications", "⌁"],
     ["settings", "settings", "⚙"]
   ];
 
@@ -826,7 +898,7 @@
       .slice(0, 6);
     $("viewRoot").innerHTML = `
       <div class="page-intro">
-        <p>${escapeHtml(t("dashboardSubtitle"))}</p>
+        <p>${escapeHtml(t("operationCenter"))} - ${escapeHtml(t("dashboardSubtitle"))}</p>
       </div>
       <div class="kpi-grid">
         ${statCard(t("totalRequests"), state.requests.length, t("realData"), "total")}
@@ -840,9 +912,9 @@
       </div>
       <div class="dashboard-grid">
         <section class="section-card dashboard-main">
-          <div class="panel-head"><h2>${escapeHtml(t("priorityRequests"))}</h2><span class="note">${escapeHtml(t("kpiPlanned"))}</span></div>
-          <div class="panel-body priority-list">
-            ${priority.length ? priority.map(renderPriorityRequest).join("") : showEmptyState(t("noPriorityRequests"))}
+          <div class="panel-head"><h2>${escapeHtml(t("priorityRequests"))}</h2><button class="mini-button" type="button" data-view="requests">${escapeHtml(t("all"))} →</button></div>
+          <div class="panel-body">
+            ${priority.length ? `<div class="table-wrap table-card compact-table-wrap"><table class="data-table operation-table"><thead><tr><th>${t("id")}</th><th>${t("customer")}</th><th>${t("content")}</th><th>${t("urgency")}</th><th>${t("assignee")}</th><th>${t("status")}</th><th>${t("elapsed")}</th><th>${t("deadline")}</th></tr></thead><tbody>${priority.map(renderPriorityRequest).join("")}</tbody></table></div>` : showEmptyState(t("noPriorityRequests"))}
           </div>
         </section>
         <aside class="section-card">
@@ -875,17 +947,23 @@
     return `<div class="kpi-card kpi-${escapeHtml(tone || "total")}"><div class="kpi-icon"></div><span class="stat-label">${escapeHtml(label)}</span><strong class="stat-value">${escapeHtml(value)}</strong><small>${escapeHtml(helper || "")}</small></div>`;
   }
 
+  function miniMetric(label, value) {
+    return `<div class="mini-metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value || "-")}</strong></div>`;
+  }
+
   function renderPriorityRequest(item) {
     const id = getRowId(item);
-    return `<div class="priority-item rich">
-      <div><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span></div>
-      <div>${escapeHtml(getRequestContent(item))}</div>
-      <span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span>
-      <span>${escapeHtml(getAssigneeName(item))}</span>
-      <span>${escapeHtml(computeWaitingTime(item))}</span>
-      <span>${escapeHtml(getDeadline(item) ? formatDateTime(getDeadline(item)) : "-")}</span>
-      <button class="btn btn-soft" type="button" data-request-detail="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
-    </div>`;
+    const urgency = getUrgency(item);
+    return `<tr data-request-detail="${escapeHtml(id)}">
+      <td><strong>${escapeHtml(getRequestDisplayId(item))}</strong></td>
+      <td>${escapeHtml(getCustomerName(item))}</td>
+      <td><div class="text-clamp-1">${escapeHtml(getRequestContent(item))}</div></td>
+      <td>${urgency ? `<span class="urgency-badge urgency-${escapeHtml(urgency)}">${escapeHtml(urgency)}</span>` : `<span class="muted-dash">-</span>`}</td>
+      <td>${escapeHtml(getAssigneeName(item))}</td>
+      <td><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></td>
+      <td>${escapeHtml(computeWaitingTime(item))}</td>
+      <td>${escapeHtml(getDeadline(item) ? formatDateTime(getDeadline(item)) : "-")}</td>
+    </tr>`;
   }
 
   function emptyHtml(message) {
@@ -904,10 +982,12 @@
       <div class="page-intro">
         <p>${escapeHtml(t("requestSubtitle"))}</p>
       </div>
-      <div class="request-command-bar">
+      <div class="request-command-bar demo-actions">
+        <button class="btn btn-soft" disabled>${escapeHtml(t("export"))}</button>
+        <button class="btn btn-primary" disabled>+ ${escapeHtml(t("newRequest"))}</button>
         <div class="segmented">
-          <button class="${state.filters.requestViewMode === "table" ? "active" : ""}" type="button" data-view-mode="table">${escapeHtml(t("tableView"))}</button>
-          <button class="${state.filters.requestViewMode === "kanban" ? "active" : ""}" type="button" data-view-mode="kanban">${escapeHtml(t("kanbanView"))}</button>
+          <button class="active" type="button" data-view-mode="table">${escapeHtml(t("tableFormat"))}</button>
+          <button type="button" data-view-mode="kanban">${escapeHtml(t("kanbanView"))}</button>
         </div>
       </div>
       <div class="chips status-filter-row">
@@ -918,7 +998,7 @@
       </div>
       <div class="filter-bar">
         <input id="requestSearch" class="filter-input" value="${escapeHtml(state.filters.search)}" placeholder="${escapeHtml(t("search"))}" />
-        <select class="filter-input" data-filter-select="requestStatus">${statuses.map(status => `<option value="${status}" ${state.filters.requestStatus === status ? "selected" : ""}>${escapeHtml(status === "all" ? t("all") : formatStatus(status))}</option>`).join("")}</select>
+        <button class="filter-input filter-button" type="button" disabled>${escapeHtml(t("detailFilter"))}</button>
         <select class="filter-input" data-filter-select="staff"><option value="all">${escapeHtml(t("assignee"))}</option>${staffOptions}</select>
         <select class="filter-input" data-filter-select="urgency">
           <option value="all">${escapeHtml(t("urgency"))}</option>
@@ -931,16 +1011,15 @@
           <option value="overdue" ${state.filters.sort === "overdue" ? "selected" : ""}>${escapeHtml(t("overdueFirst"))}</option>
         </select>
       </div>
-      ${state.filters.requestViewMode === "kanban" ? renderRequestKanban(filtered, statuses.slice(1)) : `
-        <div class="table-wrap request-table-wrap">
-          <table class="data-table request-table">
-            <thead><tr><th>${t("id")}</th><th>${t("customer")}</th><th>${t("content")}</th><th>${t("status")}</th><th>${t("urgency")}</th><th>${t("assignee")}</th><th>${t("elapsed")}</th><th>${t("deadline")}</th><th>${t("media")}</th><th>${t("action")}</th></tr></thead>
-            <tbody>
-              ${filtered.length ? filtered.map(renderRequestRow).join("") : `<tr><td colspan="10">${showEmptyState(t("noRequests"))}</td></tr>`}
-            </tbody>
-          </table>
-        </div>
-      `}
+      <div class="table-wrap request-table-wrap">
+        <table class="data-table request-table">
+          <thead><tr><th>${t("id")}</th><th>${t("customer")}</th><th>${t("content")}</th><th>${t("urgency")}</th><th>${t("assignee")}</th><th>${t("status")}</th><th>${t("elapsed")}</th><th>${t("deadline")}</th><th>${t("amount")}</th><th>${t("action")}</th></tr></thead>
+          <tbody>
+            ${filtered.length ? filtered.map(renderRequestRow).join("") : `<tr><td colspan="10">${showEmptyState(t("noRequests"))}</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+      ${renderRequestKanbanPreview(filtered, statuses.slice(1))}
     `;
   }
 
@@ -951,15 +1030,22 @@
     return `<tr>
       <td data-label="${t("id")}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong></td>
       <td data-label="${t("customer")}"><div class="row-title">${escapeHtml(getCustomerName(item))}</div><div class="subtext">${escapeHtml(getRequestPhone(item))}</div></td>
-      <td data-label="${t("content")}">${escapeHtml(getRequestContent(item))}<div class="subtext">${escapeHtml(item.address || "")}</div></td>
-      <td data-label="${t("status")}"><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></td>
+      <td data-label="${t("content")}"><div class="text-clamp-1">${escapeHtml(getRequestContent(item))}</div><div class="subtext text-clamp-1">${escapeHtml(item.address || "")}</div></td>
       <td data-label="${t("urgency")}">${urgency ? `<span class="urgency-badge urgency-${escapeHtml(urgency)}">${escapeHtml(urgency)}</span>` : `<span class="muted-dash">-</span>`}</td>
       <td data-label="${t("assignee")}">${escapeHtml(getAssigneeName(item))}</td>
+      <td data-label="${t("status")}"><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></td>
       <td data-label="${t("elapsed")}">${escapeHtml(computeWaitingTime(item))}</td>
       <td data-label="${t("deadline")}">${escapeHtml(deadline)}</td>
-      <td data-label="${t("media")}">${escapeHtml(getRequestMediaCount(item) || "-")}</td>
+      <td data-label="${t("amount")}">${escapeHtml(item.amount || item.totalAmount || "-")}</td>
       <td data-label="${t("action")}"><div class="actions"><button class="btn btn-soft" type="button" data-request-detail="${escapeHtml(id)}">${t("detail")}</button>${statusSelectHtml(id, item.status)}</div></td>
     </tr>`;
+  }
+
+  function renderRequestKanbanPreview(items, statuses) {
+    return `<section class="section-card kanban-preview-section">
+      <div class="panel-head"><h2>${escapeHtml(t("kanbanPreview"))}</h2><button class="mini-button" disabled>${escapeHtml(t("all"))} →</button></div>
+      <div class="panel-body">${renderRequestKanban(items, statuses)}</div>
+    </section>`;
   }
 
   function renderRequestKanban(items, statuses) {
@@ -1131,6 +1217,8 @@
     const rows = filterUsers();
     const totalWithRequests = state.users.filter(user => userRequestCount(user) > 0).length;
     const statusOptions = ["all", "pendingApproval", "active", "blocked", "deleted"];
+    const selected = rows.find(user => getRowId(user) === state.selectedUser) || rows[0] || null;
+    if (selected) state.selectedUser = getRowId(selected);
     $("viewRoot").innerHTML = `
       <div class="page-intro"><p>${escapeHtml(t("customerSubtitle"))}</p></div>
       <div class="kpi-grid kpi-grid-small">
@@ -1150,32 +1238,65 @@
           <option value="status" ${state.filters.customerSort === "status" ? "selected" : ""}>${escapeHtml(t("sortStatus"))}</option>
         </select>
       </div>
-      <div class="crm-grid">
-        ${rows.length ? rows.map(renderCustomerRow).join("") : showEmptyState()}
+      <div class="split-layout customer-crm-layout">
+        <section class="section-card split-main">
+          <div class="panel-head"><h2>${escapeHtml(t("customers"))}</h2><span class="note">${rows.length} / ${state.users.length}</span></div>
+          <div class="panel-body crm-table-body">
+            ${rows.length ? `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table"><thead><tr><th>${t("company")}</th><th>${t("phone")}</th><th>${t("customerRank")}</th><th>${t("status")}</th><th>${t("lastActivity")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(user => renderCustomerRow(user, selected)).join("")}</tbody></table></div>` : showEmptyState()}
+          </div>
+        </section>
+        ${renderCustomerPanel(selected)}
       </div>
     `;
   }
 
-  function renderCustomerRow(user) {
+  function renderCustomerRow(user, selected) {
     const id = getRowId(user);
     const status = user.status || "pendingApproval";
-    return `<article class="customer-row">
-      ${avatarHtml(user)}
-      <div class="customer-main">
-        <strong>${escapeHtml(user.name || user.phone || "-")}</strong>
-        <span>${escapeHtml(user.phone || "-")} ${user.email ? "/ " + escapeHtml(user.email) : ""}</span>
-      </div>
-      <div class="customer-company text-clamp">${escapeHtml(user.company || user.companyName || user.customerType || "-")}</div>
-      <div class="customer-address text-clamp">${escapeHtml(user.address || user.province || "-")}</div>
-      <span class="status-badge status-${escapeHtml(status)}">${escapeHtml(userStatusMap[status] || status)}</span>
-      <div class="customer-meta"><b>${escapeHtml(formatDate(user.createdAt))}</b><span>${escapeHtml(userRequestCount(user))} ${escapeHtml(t("requestCount"))}</span></div>
-      <div class="actions crm-actions">
-        <button class="btn btn-soft" data-customer-detail="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
+    const isSelected = selected && getRowId(selected) === id;
+    return `<tr class="${isSelected ? "selected-row" : ""}" data-select-customer="${escapeHtml(id)}">
+      <td><div class="identity-cell">${avatarHtml(user)}<div><strong>${escapeHtml(user.company || user.companyName || user.name || user.phone || "-")}</strong><span>${escapeHtml(user.name || user.contact || "-")}</span></div></div></td>
+      <td>${escapeHtml(user.phone || "-")}<div class="subtext">${escapeHtml(user.email || "")}</div></td>
+      <td><span class="rank-badge">${escapeHtml(user.rank || user.customerType || "-")}</span></td>
+      <td><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(userStatusMap[status] || status)}</span></td>
+      <td>${escapeHtml(formatDate(user.lastLoginAt || user.updatedAt || user.createdAt))}</td>
+      <td><div class="actions crm-actions">
+        <button class="btn btn-soft" data-select-customer="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
         ${status === "pendingApproval" || status === "pending" ? `<button class="btn btn-soft" data-approve-user="${escapeHtml(id)}">${escapeHtml(t("approve"))}</button>` : ""}
         <button class="btn btn-soft" data-toggle-user="${escapeHtml(id)}" data-next-status="${status === "blocked" ? "active" : "blocked"}">${status === "blocked" ? escapeHtml(t("activate")) : escapeHtml(t("block"))}</button>
         <button class="btn btn-danger" data-delete-user="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>
+      </div></td>
+    </tr>`;
+  }
+
+  function renderCustomerPanel(user) {
+    if (!user) return `<aside class="detail-panel">${showEmptyState()}</aside>`;
+    const id = getRowId(user);
+    const status = user.status || "pendingApproval";
+    const related = state.requests.filter(request => String(request.userId || request.customerId || "") === String(id)).slice(0, 5);
+    const activeRequests = related.filter(request => !["completed", "lost"].includes(normalizeRequestStatus(request.status))).length;
+    const lastRequest = related[0]?.createdAt || user.lastRequestAt || user.updatedAt || user.createdAt;
+    return `<aside class="detail-panel customer-detail-panel">
+      <div class="detail-panel-head">
+        ${avatarHtml(user, "avatar-large")}
+        <div><h2>${escapeHtml(user.company || user.companyName || user.name || user.phone || "-")}</h2><p>${escapeHtml(user.name || user.contact || t("selectedDetail"))}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(userStatusMap[status] || status)}</span></div>
+        <button class="btn btn-soft" data-customer-detail="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button>
       </div>
-    </article>`;
+      <div class="contact-grid">
+        ${infoItem(t("phone"), user.phone)}
+        ${infoItem(t("email"), user.email)}
+        ${infoItem(t("address"), user.address || user.companyAddress)}
+      </div>
+      <div class="mini-kpi-row">
+        ${miniMetric(t("requestCount"), userRequestCount(user))}
+        ${miniMetric(t("activeRequests"), activeRequests)}
+        ${miniMetric(t("quoteRegister"), "-")}
+        ${miniMetric(t("lastRequest"), formatDate(lastRequest))}
+      </div>
+      <section><h3>${escapeHtml(t("recentRequests"))}</h3><div class="priority-list">${related.length ? related.map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getRequestContent(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState()}</div></section>
+      <section><h3>${escapeHtml(t("internalNotes"))}</h3><div class="note-card">${escapeHtml(user.note || t("planned"))}</div></section>
+      <section><h3>${escapeHtml(t("tags"))}</h3>${tagChips([user.customerType, user.province, user.constructionType].filter(Boolean))}</section>
+    </aside>`;
   }
 
   async function renderCustomerDetail(user, activeTab = "info") {
@@ -1230,9 +1351,11 @@
     const rows = filterStaff();
     const departments = [...new Set(state.staff.map(staffDepartment).filter(value => value && value !== "-"))];
     const allTags = state.staff.flatMap(staff => toList(staff.workTags));
+    const selected = rows.find(staff => getRowId(staff) === state.selectedStaff) || rows[0] || null;
+    if (selected) state.selectedStaff = getRowId(selected);
     $("viewRoot").innerHTML = `
       <div class="page-intro"><p>${escapeHtml(t("staffSubtitle"))}</p></div>
-      <div class="toolbar"><button class="primary-button" type="button" data-staff-new>${escapeHtml(t("addStaff"))}</button></div>
+      <div class="toolbar demo-actions"><button class="btn btn-soft" disabled>CSV ${escapeHtml(t("export"))}</button><button class="primary-button" type="button" data-staff-new>+ ${escapeHtml(t("addStaff"))}</button></div>
       <div class="kpi-grid kpi-grid-small">
         ${statCard(t("staffCount"), state.staff.length, t("realData"), "info")}
         ${statCard(t("active"), state.staff.filter(staff => (staff.status || "active") === "active").length, t("realData"), "success")}
@@ -1251,30 +1374,62 @@
           <option value="status" ${state.filters.staffSort === "status" ? "selected" : ""}>${escapeHtml(t("sortStatus"))}</option>
         </select>
       </div>
-      <div class="staff-card-grid">
-        ${rows.length ? rows.map(renderStaffRow).join("") : showEmptyState()}
+      <div class="split-layout staff-workforce-layout">
+        <section class="section-card split-main">
+          <div class="panel-head"><h2>${escapeHtml(t("staff"))}</h2><span class="note">${rows.length} / ${state.staff.length}</span></div>
+          <div class="panel-body crm-table-body">
+            ${rows.length ? `<div class="table-wrap crm-table-wrap"><table class="data-table staff-table"><thead><tr><th>${t("staff")}</th><th>${t("role")} / ${t("department")}</th><th>Skills</th><th>${t("assignedCount")}</th><th>${t("workload")}</th><th>${t("status")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(staff => renderStaffRow(staff, selected)).join("")}</tbody></table></div>` : showEmptyState()}
+          </div>
+        </section>
+        ${renderStaffPanel(selected)}
       </div>
     `;
   }
 
-  function renderStaffRow(staff) {
+  function renderStaffRow(staff, selected) {
     const id = getRowId(staff);
     const status = staff.status || "active";
-    return `<article class="staff-card">
-      <div class="staff-card-head">
-        ${avatarHtml(staff)}
-        <div><strong>${escapeHtml(staff.name || "-")}</strong><span>${escapeHtml(staffDepartment(staff))}</span></div>
-        <span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span>
-      </div>
-      <div class="staff-contact"><span>${escapeHtml(staffRole(staff))}</span><span>${escapeHtml(staff.email || staff.phone || "-")}</span></div>
-      <p class="text-clamp">${escapeHtml(staff.workContent || staff.skills || "-")}</p>
-      ${tagChips(staff.workTags || staff.skills || staff.areas, 5)}
-      <div class="actions crm-actions">
-        <button class="btn btn-soft" data-staff-detail="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
+    const assigned = state.requests.filter(request => String(request.assigneeId || request.assignedStaffId || "") === String(id) || getAssigneeName(request) === staff.name).length;
+    const workload = assigned ? Math.min(95, 30 + assigned * 8) : 0;
+    const isSelected = selected && getRowId(selected) === id;
+    return `<tr class="${isSelected ? "selected-row" : ""}" data-select-staff="${escapeHtml(id)}">
+      <td><div class="identity-cell">${avatarHtml(staff)}<div><strong>${escapeHtml(staff.name || "-")}</strong><span>${escapeHtml(staff.email || staff.phone || "-")}</span></div></div></td>
+      <td>${escapeHtml(staffRole(staff))}<div class="subtext">${escapeHtml(staffDepartment(staff))}</div></td>
+      <td>${tagChips(staff.workTags || staff.skills || staff.areas, 4)}<div class="subtext text-clamp-1">${escapeHtml(staff.workContent || "")}</div></td>
+      <td>${assigned}</td>
+      <td><div class="progress-cell"><span style="width:${workload}%"></span></div><small>${workload}%</small></td>
+      <td><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span></td>
+      <td><div class="actions crm-actions">
+        <button class="btn btn-soft" data-select-staff="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
         <button class="btn btn-soft" data-staff-edit="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button>
         <button class="btn btn-danger" data-staff-delete="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>
+      </div></td>
+    </tr>`;
+  }
+
+  function renderStaffPanel(staff) {
+    if (!staff) return `<aside class="detail-panel">${showEmptyState()}</aside>`;
+    const id = getRowId(staff);
+    const status = staff.status || "active";
+    const assigned = state.requests.filter(request => String(request.assigneeId || request.assignedStaffId || "") === String(id) || getAssigneeName(request) === staff.name).slice(0, 5);
+    return `<aside class="detail-panel staff-detail-panel">
+      <div class="detail-panel-head">
+        ${avatarHtml(staff, "avatar-large")}
+        <div><h2>${escapeHtml(staff.name || "-")}</h2><p>ID: ${escapeHtml(id || "-")}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span></div>
+        <button class="close-button" type="button" data-staff-detail="${escapeHtml(id)}">×</button>
       </div>
-    </article>`;
+      <div class="contact-grid">
+        ${infoItem(t("phone"), staff.phone)}
+        ${infoItem(t("email"), staff.email)}
+        ${infoItem(t("department"), staffDepartment(staff))}
+        ${infoItem(t("role"), staffRole(staff))}
+      </div>
+      <section><h3>${escapeHtml(t("strengths"))}</h3>${tagChips(staff.workTags || staff.skills || staff.areas)}</section>
+      <section><h3>${escapeHtml(t("recentRequests"))} (${assigned.length})</h3><div class="priority-list">${assigned.length ? assigned.map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState(t("planned"))}</div></section>
+      <section><h3>${escapeHtml(t("performance"))}</h3><div class="mini-kpi-row">${miniMetric(t("assignedCount"), assigned.length)}${miniMetric(t("workload"), assigned.length ? Math.min(95, 30 + assigned.length * 8) + "%" : "0%")}</div></section>
+      <section><h3>${escapeHtml(t("aiSuitability"))}</h3><div class="score-list">${["緊急対応", "現場管理", "提案対応"].map(label => `<div><span>${label}</span><b>${escapeHtml(t("preparing"))}</b><i style="width:0%"></i></div>`).join("")}</div></section>
+      <div class="modal-actions"><button class="btn btn-soft" data-staff-edit="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button><button class="btn btn-primary" data-staff-detail="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button></div>
+    </aside>`;
   }
 
   async function renderStaffDetail(staff, activeTab = "info") {
@@ -1363,16 +1518,27 @@
   function renderQuotes() {
     const stages = ["作成中", "承認待ち", "送付済み", "交渉中", "受注", "失注"];
     $("viewRoot").innerHTML = `
+      <div class="page-intro"><p>${escapeHtml(t("quoteShell"))}</p></div>
+      <div class="kpi-grid kpi-grid-small">
+        ${statCard(t("quoteTotal"), "-", t("planned"), "info")}
+        ${statCard(t("quoteWinRate"), "-", t("planned"), "success")}
+        ${statCard(t("averageUnitPrice"), "-", t("planned"), "warning")}
+        ${statCard(t("grossMargin"), "-", t("planned"), "total")}
+      </div>
+      <div class="request-command-bar demo-actions">
+        <button class="btn btn-soft" disabled>${escapeHtml(t("pdfExport"))}</button>
+        <button class="btn btn-primary" disabled>+ ${escapeHtml(t("quoteRegister"))}</button>
+      </div>
       <section class="section-card">
         <div class="panel-head">
           <div>
-            <h2>${escapeHtml(t("quotes"))}</h2>
-            <p class="note">${escapeHtml(t("quoteShell"))}</p>
+            <h2>${escapeHtml(t("pipelineTitle"))}</h2>
+            <p class="note">MongoDB API連携予定</p>
           </div>
         </div>
         <div class="panel-body">
-          <div class="quote-pipeline">
-            ${stages.map((stage, index) => `<div class="pipeline-stage"><span>${index + 1}</span><strong>${escapeHtml(stage)}</strong><small class="note">${escapeHtml(t("planned"))}</small></div>`).join("")}
+          <div class="pipeline-board">
+            ${stages.map(stage => `<section class="pipeline-column"><header><strong>${escapeHtml(stage)}</strong><span>0</span></header>${showEmptyState(t("emptyColumn"))}<button class="mini-button" disabled>+ ${escapeHtml(t("quoteRegister"))}</button></section>`).join("")}
           </div>
           <div class="actions" style="margin-top:16px">
             <button class="ghost-button" disabled>${escapeHtml(t("quoteRegister"))}</button>
@@ -1399,8 +1565,8 @@
   }
 
   function renderSettings() {
-    const items = ["settingsSla", "settingsAssign", "settingsUrgency", "settingsNotice", "settingsColor", "settingsSystem"];
-    $("viewRoot").innerHTML = `<div class="settings-grid">${items.map(key => `<section class="settings-card"><h2>${escapeHtml(t(key))}</h2><p class="note">${escapeHtml(t("kpiPlanned"))}</p></section>`).join("")}</div>`;
+    const items = ["automationGoal", "settingsSla", "settingsAssign", "settingsUrgency", "settingsNotice", "roles", "companyInfo", "dataApi", "settingsColor"];
+    $("viewRoot").innerHTML = `<div class="settings-grid settings-demo-grid">${items.map((key, index) => `<section class="settings-card"><div class="settings-card-head"><h2>${escapeHtml(t(key))}</h2><span class="status-badge status-${index % 3 === 0 ? "active" : "quoted"}">${escapeHtml(index % 3 === 0 ? t("active") : t("preparing"))}</span></div><div class="settings-placeholder"><label>${escapeHtml(t("status"))}</label><div class="placeholder-input">${escapeHtml(t("planned"))}</div><label>${escapeHtml(t("settingsSystem"))}</label><div class="placeholder-toggle"><span></span></div></div><p class="note">${escapeHtml(t("kpiPlanned"))}</p></section>`).join("")}</div>`;
   }
 
   async function saveRequestFromDrawer(id) {
@@ -1489,6 +1655,13 @@
     });
 
     document.addEventListener("click", async event => {
+      const navButton = event.target.closest("[data-view]");
+      if (navButton && !navButton.closest("#sideNav")) {
+        state.currentView = navButton.dataset.view;
+        renderCurrentView();
+        return;
+      }
+
       const filter = event.target.closest("[data-request-filter]");
       if (filter) {
         state.filters.requestStatus = filter.dataset.requestFilter;
@@ -1560,6 +1733,13 @@
         return;
       }
 
+      const selectCustomer = event.target.closest("[data-select-customer]");
+      if (selectCustomer) {
+        state.selectedUser = selectCustomer.dataset.selectCustomer;
+        renderCustomers();
+        return;
+      }
+
       const deleteUser = event.target.closest("[data-delete-user]");
       if (deleteUser && await confirmAction(t("confirmDelete"))) {
         try {
@@ -1588,6 +1768,13 @@
       if (staffDetail) {
         const staff = state.staff.find(item => getRowId(item) === staffDetail.dataset.staffDetail);
         if (staff) renderStaffDetail(staff);
+        return;
+      }
+
+      const selectStaff = event.target.closest("[data-select-staff]");
+      if (selectStaff) {
+        state.selectedStaff = selectStaff.dataset.selectStaff;
+        renderStaff();
         return;
       }
 
