@@ -840,12 +840,34 @@
     $("sideNav").innerHTML = views.map(([view, labelKey, icon]) => `
       <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}">
         <span class="nav-icon">${icon}</span>
-        <span>${escapeHtml(t(labelKey))}</span>
+        <span>${escapeHtml(navLabel(view, labelKey))}</span>
         ${badgeByView[view] ? `<span class="nav-badge">${badgeByView[view]}</span>` : ""}
       </button>
     `).join("");
     $("viewTitle").textContent = t(state.currentView);
     $("viewEyebrow").textContent = state.currentView === "dashboard" ? "YAMADEN ADMIN" : t(state.currentView).toUpperCase();
+  }
+
+  function navLabel(view, fallbackKey) {
+    const ja = {
+      dashboard: "\u30c0\u30c3\u30b7\u30e5\u30dc\u30fc\u30c9",
+      requests: "\u4f9d\u983c\u7ba1\u7406",
+      customers: "\u9867\u5ba2\u7ba1\u7406",
+      staff: "\u30b9\u30bf\u30c3\u30d5\u7ba1\u7406",
+      quotes: "\u898b\u7a4d\u30fb\u63d0\u6848",
+      notifications: "\u901a\u77e5",
+      settings: "\u8a2d\u5b9a"
+    };
+    const vi = {
+      dashboard: "Dashboard",
+      requests: "Y\u00eau c\u1ea7u",
+      customers: "Kh\u00e1ch h\u00e0ng",
+      staff: "Staff",
+      quotes: "B\u00e1o gi\u00e1",
+      notifications: "Th\u00f4ng b\u00e1o",
+      settings: "C\u00e0i \u0111\u1eb7t"
+    };
+    return (state.lang === "vi" ? vi[view] : ja[view]) || t(fallbackKey);
   }
 
   async function loadAll() {
