@@ -2,6 +2,8 @@ import { Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FilterTabs } from "../../components/FilterTabs";
+import { ActionConfirmModal } from "../../components/ActionConfirmModal";
+import { AppToast } from "../../components/AppToast";
 import { RequestCard } from "../../components/requests/RequestCard";
 import { Button } from "../../components/ui/Button";
 import { EmptyState } from "../../components/ui/EmptyState";
@@ -21,6 +23,8 @@ export function RequestsPage() {
   const [filter, setFilter] = useState<RequestStatus | "all">("all");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<SupportRequest | null>(null);
+  const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -41,6 +45,25 @@ export function RequestsPage() {
       mounted = false;
     };
   }, [language, t]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = window.setTimeout(() => setToast(null), 2600);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    try {
+      await requestService.deleteRequest(deleteTarget.id);
+      setRequests(current => current.filter(request => request.id !== deleteTarget.id && request.requestCode !== deleteTarget.requestCode));
+      setToast({ message: t("request.deleteSuccess"), tone: "success" });
+    } catch {
+      setToast({ message: t("request.deleteError"), tone: "error" });
+    } finally {
+      setDeleteTarget(null);
+    }
+  }
 
   const filteredRequests = useMemo(() => {
     const keyword = query.trim().toLowerCase();
@@ -76,9 +99,18 @@ export function RequestsPage() {
       <div className="list-stack">
         {isLoading ? <LoadingState /> : null}
         {!isLoading && error ? <ErrorState message={error} /> : null}
-        {!isLoading && !error && filteredRequests.length ? filteredRequests.map(request => <RequestCard key={request.id} request={request} />) : null}
+        {!isLoading && !error && filteredRequests.length ? filteredRequests.map(request => <RequestCard key={request.id} request={request} onDelete={setDeleteTarget} />) : null}
         {!isLoading && !error && !filteredRequests.length ? <EmptyState /> : null}
       </div>
+      <ActionConfirmModal
+        open={Boolean(deleteTarget)}
+        title={t("request.deleteTitle")}
+        message={t("request.deleteConfirmText")}
+        confirmLabel={t("common.delete")}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+      />
+      {toast ? <AppToast message={toast.message} tone={toast.tone} /> : null}
     </section>
   );
 }

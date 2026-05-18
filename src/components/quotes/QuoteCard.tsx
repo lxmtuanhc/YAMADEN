@@ -1,4 +1,4 @@
-import { ChevronRight, ReceiptText } from "lucide-react";
+import { ChevronRight, ReceiptText, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { calculateQuoteTotal } from "../../constants/quoteStatus";
 import { useTranslation } from "../../hooks/useTranslation";
@@ -7,7 +7,7 @@ import { formatCurrency } from "../../utils/format";
 import { Card } from "../ui/Card";
 import { StatusBadge } from "../ui/StatusBadge";
 
-export function QuoteCard({ quote }: { quote: Quote }) {
+export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote: Quote) => void }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -30,6 +30,19 @@ export function QuoteCard({ quote }: { quote: Quote }) {
           <span>{t("quote.validUntil")}</span>
           <span>{quote.validUntil}</span>
         </p>
+        {onDelete ? (
+          <button
+            className="inline-danger-action"
+            type="button"
+            onClick={event => {
+              event.stopPropagation();
+              onDelete(quote);
+            }}
+          >
+            <Trash2 size={14} />
+            <span>{t("quote.deleteAction")}</span>
+          </button>
+        ) : null}
       </div>
       <ChevronRight className="list-arrow" size={18} />
     </Card>

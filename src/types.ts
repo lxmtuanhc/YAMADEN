@@ -162,6 +162,11 @@ export interface Request {
   staff?: RequestAssignee | string;
   responsiblePerson?: RequestAssignee | string;
   assignedTo?: RequestAssignee | string;
+  isDeleted?: boolean;
+  deletedAt?: string | null;
+  deletedBy?: string;
+  deletedByRole?: string;
+  daysLeftBeforePermanentDelete?: number;
 }
 
 export type SupportRequest = Request;
@@ -174,11 +179,18 @@ export interface QuoteItem {
 
 export interface Quote {
   id: string;
+  quoteCode?: string;
   requestId: string;
   projectName: string;
   validUntil: string;
   status: QuoteStatus;
   items: QuoteItem[];
+  title?: string;
+  isDeleted?: boolean;
+  deletedAt?: string | null;
+  deletedBy?: string;
+  deletedByRole?: string;
+  daysLeftBeforePermanentDelete?: number;
 }
 
 export interface Schedule {

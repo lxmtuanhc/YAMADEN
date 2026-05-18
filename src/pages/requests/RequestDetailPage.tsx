@@ -1,6 +1,8 @@
-import { ChevronRight, MessageCircle, RefreshCw, X } from "lucide-react";
+import { ChevronRight, MessageCircle, RefreshCw, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { ActionConfirmModal } from "../../components/ActionConfirmModal";
+import { AppToast } from "../../components/AppToast";
 import { QuoteCard } from "../../components/quotes/QuoteCard";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
@@ -30,6 +32,8 @@ export function RequestDetailPage() {
   const [isAssigneeModalOpen, setIsAssigneeModalOpen] = useState(false);
   const [assigneeHistory, setAssigneeHistory] = useState<AssigneeRequestHistoryItem[]>([]);
   const [assigneeProfile, setAssigneeProfile] = useState<StaffProfile | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
 
   const timelineItems = useMemo(() => request ? requestTimelineItems(request) : [], [request]);
   const assignee = useMemo(() => request ? requestAssignee(request, assigneeProfile) : null, [request, assigneeProfile]);
@@ -113,6 +117,25 @@ export function RequestDetailPage() {
     const timeout = window.setTimeout(() => setRefreshMessage(""), 2600);
     return () => window.clearTimeout(timeout);
   }, [refreshMessage, t]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = window.setTimeout(() => setToast(null), 2200);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
+
+  async function confirmDeleteRequest() {
+    if (!request) return;
+    try {
+      await requestService.deleteRequest(request.id);
+      setToast({ message: t("request.deleteSuccess"), tone: "success" });
+      window.setTimeout(() => navigate("/requests"), 360);
+    } catch {
+      setToast({ message: t("request.deleteError"), tone: "error" });
+    } finally {
+      setIsDeleteConfirmOpen(false);
+    }
+  }
 
   if (!id) return <Navigate to="/requests" replace />;
 
@@ -278,7 +301,10 @@ export function RequestDetailPage() {
 
       {error ? <ErrorState message={error} /> : null}
 
-      <Button icon={<MessageCircle size={18} />}>{t("request.support")}</Button>
+      <div className="two-actions">
+        <Button variant="outline" icon={<MessageCircle size={18} />}>{t("request.support")}</Button>
+        <Button variant="danger" icon={<Trash2 size={18} />} onClick={() => setIsDeleteConfirmOpen(true)}>{t("request.deleteAction")}</Button>
+      </div>
 
       {isAssigneeModalOpen ? (
         <AssigneeModal
@@ -289,6 +315,15 @@ export function RequestDetailPage() {
           onClose={() => setIsAssigneeModalOpen(false)}
         />
       ) : null}
+      <ActionConfirmModal
+        open={isDeleteConfirmOpen}
+        title={t("request.deleteTitle")}
+        message={t("request.deleteConfirmText")}
+        confirmLabel={t("common.delete")}
+        onCancel={() => setIsDeleteConfirmOpen(false)}
+        onConfirm={confirmDeleteRequest}
+      />
+      {toast ? <AppToast message={toast.message} tone={toast.tone} /> : null}
     </section>
   );
 }

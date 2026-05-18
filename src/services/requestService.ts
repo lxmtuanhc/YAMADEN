@@ -79,7 +79,12 @@ function normalizeRequest(request: SupportRequest): SupportRequest {
     requestCode,
     images: request.images || [],
     mediaFiles: request.mediaFiles || [],
-    timeline: fallbackTimeline
+    timeline: fallbackTimeline,
+    isDeleted: Boolean(request.isDeleted),
+    deletedAt: request.deletedAt || null,
+    deletedBy: request.deletedBy || "",
+    deletedByRole: request.deletedByRole || "",
+    daysLeftBeforePermanentDelete: request.daysLeftBeforePermanentDelete
   };
 }
 
@@ -275,7 +280,12 @@ function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): 
     assignee: item.assignee,
     staff: item.staff,
     responsiblePerson: item.responsiblePerson,
-    assignedTo: item.assignedTo
+    assignedTo: item.assignedTo,
+    isDeleted: Boolean(item.isDeleted),
+    deletedAt: item.deletedAt || null,
+    deletedBy: item.deletedBy || "",
+    deletedByRole: item.deletedByRole || "",
+    daysLeftBeforePermanentDelete: item.daysLeftBeforePermanentDelete
   });
 }
 
@@ -362,6 +372,67 @@ async function fetchBackendRequestById(id: string): Promise<SupportRequest | nul
   if (!response.ok) throw new Error("Request load failed");
   const payload = await response.json();
   return backendRequestToSupportRequest(payload.data || payload);
+}
+
+async function fetchBackendRequests(): Promise<SupportRequest[] | null> {
+  const token = getUserToken();
+  if (!token) return null;
+  const response = await fetch("/user/requests", {
+    cache: "no-store",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!response.ok) throw new Error("Requests load failed");
+  const payload = await response.json();
+  const items = Array.isArray(payload.data) ? payload.data : Array.isArray(payload) ? payload : [];
+  return items.map(item => backendRequestToSupportRequest(item));
+}
+
+async function fetchDeletedBackendRequests(): Promise<SupportRequest[] | null> {
+  const token = getUserToken();
+  if (!token) return null;
+  const response = await fetch("/api/customer/requests/deleted", {
+    cache: "no-store",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!response.ok) throw new Error("Deleted requests load failed");
+  const payload = await response.json();
+  const items = Array.isArray(payload.data) ? payload.data : Array.isArray(payload) ? payload : [];
+  return items.map(item => backendRequestToSupportRequest(item));
+}
+
+async function deleteBackendRequest(id: string): Promise<SupportRequest | null> {
+  const token = getUserToken();
+  if (!token) return null;
+  const response = await fetch(`/api/customer/requests/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!response.ok) throw new Error("Request delete failed");
+  const payload = await response.json();
+  return backendRequestToSupportRequest(payload.data || payload);
+}
+
+async function restoreBackendRequest(id: string): Promise<SupportRequest | null> {
+  const token = getUserToken();
+  if (!token) return null;
+  const response = await fetch(`/api/customer/requests/${encodeURIComponent(id)}/restore`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!response.ok) throw new Error("Request restore failed");
+  const payload = await response.json();
+  return backendRequestToSupportRequest(payload.data || payload);
+}
+
+async function permanentDeleteBackendRequest(id: string): Promise<boolean | null> {
+  const token = getUserToken();
+  if (!token) return null;
+  const response = await fetch(`/api/customer/requests/${encodeURIComponent(id)}/permanent`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!response.ok) throw new Error("Request permanent delete failed");
+  return true;
 }
 
 async function fetchBackendAssigneeHistory(staffId: string): Promise<AssigneeRequestHistoryItem[]> {
@@ -507,9 +578,20 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
 export const requestService = {
   async getRequests(): Promise<SupportRequest[]> {
     await delay();
+    try {
+      const backendRequests = await fetchBackendRequests();
+      if (backendRequests) {
+        const deletedLocal = readRequests().filter(request => request.isDeleted);
+        const requests = [...backendRequests, ...deletedLocal.filter(deleted => !backendRequests.some(item => sameRequest(item, deleted)))];
+        commitRequests(requests);
+        return backendRequests.filter(request => !request.isDeleted);
+      }
+    } catch (error) {
+      console.warn("Unable to load requests from backend", error);
+    }
     const requests = readRequests();
     commitRequests(requests);
-    return requests;
+    return requests.filter(request => !request.isDeleted);
   },
 
   async getRequestById(id: string): Promise<SupportRequest | null> {
@@ -610,6 +692,86 @@ export const requestService = {
     const updated: SupportRequest = normalizeRequest({ ...existing, ...input });
     commitRequests(requests.map(request => (request.id === id ? updated : request)));
     return updated;
+  },
+
+  async deleteRequest(id: string): Promise<SupportRequest> {
+    await delay();
+    try {
+      const deleted = await deleteBackendRequest(id);
+      if (deleted) {
+        const current = readRequests();
+        commitRequests(current.map(request => (request.id === id || request.requestCode === id ? deleted : request)));
+        return deleted;
+      }
+    } catch (error) {
+      console.warn("Unable to delete request in backend", error);
+    }
+
+    const requests = readRequests();
+    const existing = requests.find(request => request.id === id || request.requestCode === id);
+    if (!existing) throw new Error("Request not found");
+    const deleted = normalizeRequest({
+      ...existing,
+      isDeleted: true,
+      deletedAt: new Date().toISOString(),
+      deletedBy: useAppStore.getState().user?.id || "",
+      deletedByRole: "user",
+      daysLeftBeforePermanentDelete: 30
+    });
+    commitRequests(requests.map(request => (sameRequest(request, deleted) ? deleted : request)));
+    return deleted;
+  },
+
+  async getDeletedRequests(): Promise<SupportRequest[]> {
+    await delay();
+    try {
+      const deleted = await fetchDeletedBackendRequests();
+      if (deleted) {
+        const activeLocal = readRequests().filter(request => !request.isDeleted);
+        commitRequests([...activeLocal, ...deleted]);
+        return deleted;
+      }
+    } catch (error) {
+      console.warn("Unable to load deleted requests from backend", error);
+    }
+    return readRequests()
+      .filter(request => request.isDeleted)
+      .sort((left, right) => new Date(right.deletedAt || 0).getTime() - new Date(left.deletedAt || 0).getTime());
+  },
+
+  async restoreRequest(id: string): Promise<SupportRequest> {
+    await delay();
+    try {
+      const restored = await restoreBackendRequest(id);
+      if (restored) {
+        const current = readRequests();
+        commitRequests(current.map(request => (request.id === id || request.requestCode === id ? restored : request)));
+        return restored;
+      }
+    } catch (error) {
+      console.warn("Unable to restore request in backend", error);
+    }
+
+    const requests = readRequests();
+    const existing = requests.find(request => request.id === id || request.requestCode === id);
+    if (!existing) throw new Error("Request not found");
+    const restored = normalizeRequest({ ...existing, isDeleted: false, deletedAt: null, deletedBy: "", deletedByRole: "" });
+    commitRequests(requests.map(request => (sameRequest(request, restored) ? restored : request)));
+    return restored;
+  },
+
+  async permanentDeleteRequest(id: string): Promise<void> {
+    await delay();
+    try {
+      const deleted = await permanentDeleteBackendRequest(id);
+      if (deleted) {
+        commitRequests(readRequests().filter(request => request.id !== id && request.requestCode !== id));
+        return;
+      }
+    } catch (error) {
+      console.warn("Unable to permanently delete request in backend", error);
+    }
+    commitRequests(readRequests().filter(request => request.id !== id && request.requestCode !== id));
   },
 
   async addTimelineEvent(id: string, input: AddTimelineEventInput): Promise<SupportRequest> {

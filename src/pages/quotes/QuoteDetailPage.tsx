@@ -1,6 +1,9 @@
+import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { ActionConfirmModal } from "../../components/ActionConfirmModal";
+import { AppToast } from "../../components/AppToast";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { ErrorState } from "../../components/ui/ErrorState";
@@ -14,11 +17,14 @@ import { formatCurrency } from "../../utils/format";
 
 export function QuoteDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { t, language } = useTranslation();
   const [quote, setQuote] = useState<Quote | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState("");
   const [error, setError] = useState("");
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -47,6 +53,12 @@ export function QuoteDetailPage() {
     };
   }, [id, language, t]);
 
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = window.setTimeout(() => setToast(null), 2200);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
+
   if (!id) return <Navigate to="/quotes" replace />;
 
   async function updateStatus(status: "approved" | "revision_requested") {
@@ -63,6 +75,19 @@ export function QuoteDetailPage() {
       setError(t("common.empty"));
     } finally {
       setActionLoading("");
+    }
+  }
+
+  async function confirmDeleteQuote() {
+    if (!quote) return;
+    try {
+      await quoteService.deleteQuote(quote.id);
+      setToast({ message: t("quote.deleteSuccess"), tone: "success" });
+      window.setTimeout(() => navigate("/quotes"), 360);
+    } catch {
+      setToast({ message: t("quote.deleteError"), tone: "error" });
+    } finally {
+      setIsDeleteConfirmOpen(false);
     }
   }
 
@@ -135,6 +160,18 @@ export function QuoteDetailPage() {
           {actionLoading === "approved" ? t("common.loading") : t("quote.approve")}
         </Button>
       </div>
+      <Button variant="danger" icon={<Trash2 size={18} />} onClick={() => setIsDeleteConfirmOpen(true)}>
+        {t("quote.deleteAction")}
+      </Button>
+      <ActionConfirmModal
+        open={isDeleteConfirmOpen}
+        title={t("quote.deleteTitle")}
+        message={t("quote.deleteConfirmText")}
+        confirmLabel={t("common.delete")}
+        onCancel={() => setIsDeleteConfirmOpen(false)}
+        onConfirm={confirmDeleteQuote}
+      />
+      {toast ? <AppToast message={toast.message} tone={toast.tone} /> : null}
     </section>
   );
 }

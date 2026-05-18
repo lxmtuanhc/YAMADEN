@@ -68,7 +68,11 @@ const SLACK_ENABLED = process.env.SLACK_ENABLED === "true";
 const ADMIN_URL = process.env.ADMIN_URL || "https://yamaden.onrender.com/admin.html";
 
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("MongoDB connected"))
+  .then(() => {
+    console.log("MongoDB connected");
+    cleanupExpiredDeletedItems();
+    setInterval(cleanupExpiredDeletedItems, 6 * 60 * 60 * 1000).unref?.();
+  })
   .catch(err => console.log("MongoDB error:", err));
 
 function requireAdmin(req, res, next) {
@@ -202,7 +206,34 @@ const RequestSchema = new mongoose.Schema({
   responsiblePerson: mongoose.Schema.Types.Mixed,
   issueTags: [String],
   quoteRequested: Boolean,
-  timeline: [TimelineEventSchema]
+  timeline: [TimelineEventSchema],
+  isDeleted: { type: Boolean, default: false },
+  deletedAt: { type: Date, default: null },
+  deletedBy: String,
+  deletedByRole: String
+});
+
+const QuoteItemSchema = new mongoose.Schema({
+  name: String,
+  quantity: Number,
+  unitPrice: Number
+}, { _id: false });
+
+const QuoteSchema = new mongoose.Schema({
+  id: String,
+  quoteCode: String,
+  requestId: String,
+  userId: String,
+  projectName: String,
+  title: String,
+  validUntil: String,
+  status: String,
+  items: [QuoteItemSchema],
+  createdAt: { type: Date, default: Date.now },
+  isDeleted: { type: Boolean, default: false },
+  deletedAt: { type: Date, default: null },
+  deletedBy: String,
+  deletedByRole: String
 });
 
 const UserSchema = new mongoose.Schema({
@@ -250,10 +281,13 @@ const StaffSchema = new mongoose.Schema({
 });
 
 const Request = mongoose.model("Request", RequestSchema);
+const Quote = mongoose.model("Quote", QuoteSchema);
 const User = mongoose.model("User", UserSchema);
 const Staff = mongoose.model("Staff", StaffSchema);
 
 const USER_STATUS_PENDING = "pendingApproval";
+const SOFT_DELETE_RETENTION_DAYS = 30;
+const SOFT_DELETE_RETENTION_MS = SOFT_DELETE_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
 function normalizeUserStatus(status) {
   if (status === "pending") return USER_STATUS_PENDING;
@@ -266,6 +300,35 @@ function publicUser(user) {
   item.status = normalizeUserStatus(item.status);
   delete item.pinHash;
   return item;
+}
+
+function daysLeftBeforePermanentDelete(deletedAt) {
+  if (!deletedAt) return SOFT_DELETE_RETENTION_DAYS;
+  const expiresAt = new Date(deletedAt).getTime() + SOFT_DELETE_RETENTION_MS;
+  return Math.max(0, Math.ceil((expiresAt - Date.now()) / (24 * 60 * 60 * 1000)));
+}
+
+function publicDeletedItem(item) {
+  const data = item && item.toObject ? item.toObject() : { ...(item || {}) };
+  data.id = String(data.id || data.requestCode || data.quoteCode || data._id || "");
+  data.daysLeftBeforePermanentDelete = daysLeftBeforePermanentDelete(data.deletedAt);
+  return data;
+}
+
+async function cleanupExpiredDeletedItems() {
+  try {
+    const cutoff = new Date(Date.now() - SOFT_DELETE_RETENTION_MS);
+    const [requestResult, quoteResult] = await Promise.all([
+      Request.deleteMany({ isDeleted: true, deletedAt: { $lt: cutoff } }),
+      Quote.deleteMany({ isDeleted: true, deletedAt: { $lt: cutoff } })
+    ]);
+    console.info("[soft-delete-cleanup] completed", {
+      requests: requestResult.deletedCount || 0,
+      quotes: quoteResult.deletedCount || 0
+    });
+  } catch (error) {
+    console.error("[soft-delete-cleanup] failed", error.message);
+  }
 }
 
 function makeIdQuery(id) {
@@ -993,13 +1056,169 @@ app.put("/api/users/profile", requireUser, async (req, res) => {
 
 app.get("/user/requests", requireUser, async (req, res) => {
   try {
-    const requests = await Request.find({ userId: req.user.userId }).sort({ createdAt: -1 });
+    const requests = await Request.find({
+      userId: req.user.userId,
+      isDeleted: { $ne: true }
+    }).sort({ createdAt: -1 });
     res.json(requests);
   } catch (error) {
     res.status(500).json({
       message: "Read failed",
       error: error.message
     });
+  }
+});
+
+function customerItemQuery(id, userId) {
+  return { $and: [makeIdQuery(id), { userId }, { isDeleted: { $ne: true } }] };
+}
+
+function customerDeletedItemQuery(id, userId) {
+  return { $and: [makeIdQuery(id), { userId }, { isDeleted: true }] };
+}
+
+async function findCustomerQuote(id, userId, deleted) {
+  const idQuery = { $or: [{ id }, { quoteCode: id }] };
+  if (mongoose.Types.ObjectId.isValid(id)) idQuery.$or.push({ _id: id });
+  const direct = await Quote.findOne({
+    $and: [
+      idQuery,
+      { userId },
+      deleted ? { isDeleted: true } : { isDeleted: { $ne: true } }
+    ]
+  });
+  if (direct) return direct;
+
+  const requestIds = await Request.find({ userId }).distinct("id");
+  const requestCodes = await Request.find({ userId }).distinct("requestCode");
+  return Quote.findOne({
+    $and: [
+      idQuery,
+      { requestId: { $in: [...requestIds, ...requestCodes].filter(Boolean) } },
+      deleted ? { isDeleted: true } : { isDeleted: { $ne: true } }
+    ]
+  });
+}
+
+app.get("/api/customer/requests/deleted", requireUser, async (req, res) => {
+  try {
+    const requests = await Request.find({
+      userId: req.user.userId,
+      isDeleted: true
+    }).sort({ deletedAt: -1 });
+    res.set("Cache-Control", "no-store");
+    res.json({ data: requests.map(publicDeletedItem) });
+  } catch (error) {
+    res.status(500).json({ message: "Deleted requests load failed", error: error.message });
+  }
+});
+
+app.delete("/api/customer/requests/:id", requireUser, async (req, res) => {
+  try {
+    const item = await Request.findOne(customerItemQuery(req.params.id, req.user.userId));
+    if (!item) return res.status(404).json({ message: "Not found" });
+    item.isDeleted = true;
+    item.deletedAt = new Date();
+    item.deletedBy = req.user.userId;
+    item.deletedByRole = "user";
+    await item.save();
+    res.json({ data: publicDeletedItem(item), message: "Deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Delete failed", error: error.message });
+  }
+});
+
+app.patch("/api/customer/requests/:id/restore", requireUser, async (req, res) => {
+  try {
+    const item = await Request.findOne(customerDeletedItemQuery(req.params.id, req.user.userId));
+    if (!item) return res.status(404).json({ message: "Not found" });
+    item.isDeleted = false;
+    item.deletedAt = null;
+    item.deletedBy = "";
+    item.deletedByRole = "";
+    await item.save();
+    res.json({ data: item, message: "Restored" });
+  } catch (error) {
+    res.status(500).json({ message: "Restore failed", error: error.message });
+  }
+});
+
+app.delete("/api/customer/requests/:id/permanent", requireUser, async (req, res) => {
+  try {
+    const result = await Request.deleteOne(customerDeletedItemQuery(req.params.id, req.user.userId));
+    if (result.deletedCount === 0) return res.status(404).json({ message: "Not found" });
+    res.json({ data: { success: true }, message: "Permanently deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Permanent delete failed", error: error.message });
+  }
+});
+
+app.get("/api/customer/quotes", requireUser, async (req, res) => {
+  try {
+    const quotes = await Quote.find({
+      userId: req.user.userId,
+      isDeleted: { $ne: true }
+    }).sort({ createdAt: -1 });
+    res.set("Cache-Control", "no-store");
+    res.json({ data: quotes });
+  } catch (error) {
+    res.status(500).json({ message: "Quotes load failed", error: error.message });
+  }
+});
+
+app.get("/api/customer/quotes/deleted", requireUser, async (req, res) => {
+  try {
+    const quotes = await Quote.find({
+      userId: req.user.userId,
+      isDeleted: true
+    }).sort({ deletedAt: -1 });
+    res.set("Cache-Control", "no-store");
+    res.json({ data: quotes.map(publicDeletedItem) });
+  } catch (error) {
+    res.status(500).json({ message: "Deleted quotes load failed", error: error.message });
+  }
+});
+
+app.delete("/api/customer/quotes/:id", requireUser, async (req, res) => {
+  try {
+    const quote = await findCustomerQuote(req.params.id, req.user.userId, false);
+    if (!quote) return res.status(404).json({ message: "Not found" });
+    quote.isDeleted = true;
+    quote.deletedAt = new Date();
+    quote.deletedBy = req.user.userId;
+    quote.deletedByRole = "user";
+    if (!quote.userId) quote.userId = req.user.userId;
+    await quote.save();
+    res.json({ data: publicDeletedItem(quote), message: "Deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Delete failed", error: error.message });
+  }
+});
+
+app.patch("/api/customer/quotes/:id/restore", requireUser, async (req, res) => {
+  try {
+    const quote = await findCustomerQuote(req.params.id, req.user.userId, true);
+    if (!quote) return res.status(404).json({ message: "Not found" });
+    quote.isDeleted = false;
+    quote.deletedAt = null;
+    quote.deletedBy = "";
+    quote.deletedByRole = "";
+    if (!quote.userId) quote.userId = req.user.userId;
+    await quote.save();
+    res.json({ data: quote, message: "Restored" });
+  } catch (error) {
+    res.status(500).json({ message: "Restore failed", error: error.message });
+  }
+});
+
+app.delete("/api/customer/quotes/:id/permanent", requireUser, async (req, res) => {
+  try {
+    const quote = await findCustomerQuote(req.params.id, req.user.userId, true);
+    if (!quote) return res.status(404).json({ message: "Not found" });
+    await Quote.deleteOne({ _id: quote._id });
+    res.json({ data: { success: true }, message: "Permanently deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Permanent delete failed", error: error.message });
   }
 });
 

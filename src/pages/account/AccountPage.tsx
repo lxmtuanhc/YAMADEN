@@ -10,19 +10,27 @@ import {
   LogOut,
   MapPin,
   MessageCircle,
+  RotateCcw,
   ShieldCheck,
+  Trash2,
   UserRound
 } from "lucide-react";
 import type { FormEvent, ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LogoutConfirmModal } from "../../components/LogoutConfirmModal";
+import { ActionConfirmModal } from "../../components/ActionConfirmModal";
+import { AppToast } from "../../components/AppToast";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
+import { EmptyState } from "../../components/ui/EmptyState";
+import { LoadingState } from "../../components/ui/LoadingState";
 import type { TranslationKey } from "../../i18n";
 import { useTranslation } from "../../hooks/useTranslation";
+import { quoteService } from "../../services/quoteService";
+import { requestService } from "../../services/requestService";
 import { useAppStore } from "../../stores/appStore";
-import type { Language, User } from "../../types";
+import type { Language, Quote, SupportRequest, User } from "../../types";
 
 const notificationKey = "yamaden-notifications-enabled";
 
@@ -33,6 +41,7 @@ type AccountScreen =
   | "address"
   | "notifications"
   | "language"
+  | "deleted"
   | "support"
   | "chat"
   | "terms"
@@ -62,7 +71,7 @@ export function AccountPage() {
   const screen = useMemo<AccountScreen>(() => {
     const name = location.pathname.replace(/^\/account\/?/, "");
     if (!name) return "main";
-    if (["personal", "company", "address", "notifications", "language", "support", "chat", "terms", "privacy"].includes(name)) {
+    if (["personal", "company", "address", "notifications", "language", "deleted", "support", "chat", "terms", "privacy"].includes(name)) {
       return name as AccountScreen;
     }
     return "main";
@@ -179,6 +188,10 @@ export function AccountPage() {
     );
   }
 
+  if (screen === "deleted") {
+    return <DeletedDataScreen />;
+  }
+
   if (["support", "chat", "terms", "privacy"].includes(screen)) {
     const meta: Record<string, { title: TranslationKey; body: TranslationKey; Icon: typeof CircleHelp }> = {
       support: { title: "account.supportCenter", body: "account.supportPlaceholder", Icon: CircleHelp },
@@ -225,6 +238,7 @@ export function AccountPage() {
       <SettingsSection>
         <SettingsRow icon={<Bell size={18} />} label={t("account.notifications")} value={notificationsEnabled ? t("account.notificationsOn") : t("account.notificationsOff")} onClick={() => navigate("/account/notifications")} />
         <SettingsRow icon={<Languages size={18} />} label={t("account.language")} value={language.toUpperCase()} onClick={() => navigate("/account/language")} />
+        <SettingsRow icon={<Trash2 size={18} />} label={t("deleted.title")} onClick={() => navigate("/account/deleted")} />
       </SettingsSection>
 
       <SettingsSection>
@@ -240,6 +254,202 @@ export function AccountPage() {
       <LogoutConfirmModal open={isLogoutConfirmOpen} onCancel={() => setIsLogoutConfirmOpen(false)} onConfirm={confirmLogout} />
     </section>
   );
+}
+
+type DeletedTab = "requests" | "quotes";
+type DeletedAction =
+  | { type: "restore-request"; item: SupportRequest }
+  | { type: "delete-request"; item: SupportRequest }
+  | { type: "restore-quote"; item: Quote }
+  | { type: "delete-quote"; item: Quote };
+
+function DeletedDataScreen() {
+  const { t, language } = useTranslation();
+  const [tab, setTab] = useState<DeletedTab>("requests");
+  const [requests, setRequests] = useState<SupportRequest[]>([]);
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [action, setAction] = useState<DeletedAction | null>(null);
+  const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    setIsLoading(true);
+    Promise.all([requestService.getDeletedRequests(), quoteService.getDeletedQuotes()])
+      .then(([deletedRequests, deletedQuotes]) => {
+        if (!mounted) return;
+        setRequests(deletedRequests);
+        setQuotes(deletedQuotes);
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [language]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = window.setTimeout(() => setToast(null), 2600);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
+
+  async function confirmAction() {
+    if (!action) return;
+    try {
+      if (action.type === "restore-request") {
+        await requestService.restoreRequest(action.item.id);
+        setRequests(current => current.filter(item => item.id !== action.item.id));
+        setToast({ message: t("deleted.restoreSuccess"), tone: "success" });
+      }
+      if (action.type === "delete-request") {
+        await requestService.permanentDeleteRequest(action.item.id);
+        setRequests(current => current.filter(item => item.id !== action.item.id));
+        setToast({ message: t("deleted.permanentDeleteSuccess"), tone: "success" });
+      }
+      if (action.type === "restore-quote") {
+        await quoteService.restoreQuote(action.item.id);
+        setQuotes(current => current.filter(item => item.id !== action.item.id));
+        setToast({ message: t("deleted.restoreSuccess"), tone: "success" });
+      }
+      if (action.type === "delete-quote") {
+        await quoteService.permanentDeleteQuote(action.item.id);
+        setQuotes(current => current.filter(item => item.id !== action.item.id));
+        setToast({ message: t("deleted.permanentDeleteSuccess"), tone: "success" });
+      }
+    } catch {
+      setToast({
+        message: action.type.startsWith("restore") ? t("deleted.restoreError") : t("deleted.permanentDeleteError"),
+        tone: "error"
+      });
+    } finally {
+      setAction(null);
+    }
+  }
+
+  const visibleItems = tab === "requests" ? requests : quotes;
+  const modalCopy = action?.type.startsWith("restore")
+    ? {
+        title: t("deleted.restoreTitle"),
+        message: t("deleted.restoreConfirmText"),
+        label: t("deleted.restore"),
+        variant: "primary" as const,
+        icon: <RotateCcw size={24} />
+      }
+    : {
+        title: t("deleted.permanentDeleteTitle"),
+        message: t("deleted.permanentDeleteConfirmText"),
+        label: t("deleted.permanentDelete"),
+        variant: "danger" as const,
+        icon: <Trash2 size={24} />
+      };
+
+  return (
+    <section className="page account-page">
+      <AccountHeader title={t("deleted.title")} />
+      <div className="deleted-tabs" role="tablist" aria-label={t("deleted.title")}>
+        <button className={tab === "requests" ? "active" : ""} type="button" onClick={() => setTab("requests")}>
+          {t("deleted.requests")}
+        </button>
+        <button className={tab === "quotes" ? "active" : ""} type="button" onClick={() => setTab("quotes")}>
+          {t("deleted.quotes")}
+        </button>
+      </div>
+      <div className="list-stack">
+        {isLoading ? <LoadingState /> : null}
+        {!isLoading && visibleItems.length ? (
+          tab === "requests"
+            ? requests.map(item => (
+                <DeletedDataCard
+                  key={item.id}
+                  code={item.requestCode || item.id}
+                  title={item.title}
+                  status={item.status}
+                  deletedAt={item.deletedAt}
+                  daysLeft={item.daysLeftBeforePermanentDelete}
+                  onRestore={() => setAction({ type: "restore-request", item })}
+                  onPermanentDelete={() => setAction({ type: "delete-request", item })}
+                />
+              ))
+            : quotes.map(item => (
+                <DeletedDataCard
+                  key={item.id}
+                  code={item.quoteCode || item.id}
+                  title={item.title || item.projectName}
+                  status={item.status}
+                  deletedAt={item.deletedAt}
+                  daysLeft={item.daysLeftBeforePermanentDelete}
+                  onRestore={() => setAction({ type: "restore-quote", item })}
+                  onPermanentDelete={() => setAction({ type: "delete-quote", item })}
+                />
+              ))
+        ) : null}
+        {!isLoading && !visibleItems.length ? <EmptyState message={t("deleted.empty")} /> : null}
+      </div>
+      <ActionConfirmModal
+        open={Boolean(action)}
+        title={modalCopy.title}
+        message={modalCopy.message}
+        confirmLabel={modalCopy.label}
+        confirmVariant={modalCopy.variant}
+        icon={modalCopy.icon}
+        onCancel={() => setAction(null)}
+        onConfirm={confirmAction}
+      />
+      {toast ? <AppToast message={toast.message} tone={toast.tone} /> : null}
+    </section>
+  );
+}
+
+function DeletedDataCard({
+  code,
+  title,
+  status,
+  deletedAt,
+  daysLeft,
+  onRestore,
+  onPermanentDelete
+}: {
+  code: string;
+  title: string;
+  status: string;
+  deletedAt?: string | null;
+  daysLeft?: number;
+  onRestore: () => void;
+  onPermanentDelete: () => void;
+}) {
+  const { t } = useTranslation();
+  const remainingDays = typeof daysLeft === "number" ? daysLeft : calculateDeletedDaysLeft(deletedAt);
+  return (
+    <Card className="deleted-data-card">
+      <div className="deleted-data-top">
+        <span className="list-id">{code}</span>
+        <span className="deleted-status">{status}</span>
+      </div>
+      <h2>{title || "-"}</h2>
+      <p>{deletedAt ? new Date(deletedAt).toLocaleString() : "-"}</p>
+      <strong className={remainingDays <= 0 ? "expired" : ""}>
+        {remainingDays > 0
+          ? t("deleted.daysLeft").replace("{days}", String(remainingDays))
+          : t("deleted.expired")}
+      </strong>
+      <div className="deleted-data-actions">
+        <Button type="button" variant="outline" icon={<RotateCcw size={17} />} onClick={onRestore}>
+          {t("deleted.restore")}
+        </Button>
+        <Button type="button" variant="danger" icon={<Trash2 size={17} />} onClick={onPermanentDelete}>
+          {t("deleted.permanentDelete")}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+function calculateDeletedDaysLeft(deletedAt?: string | null) {
+  if (!deletedAt) return 30;
+  const expiresAt = new Date(deletedAt).getTime() + 30 * 24 * 60 * 60 * 1000;
+  return Math.max(0, Math.ceil((expiresAt - Date.now()) / (24 * 60 * 60 * 1000)));
 }
 
 function AccountHeader({ title }: { title: string }) {
