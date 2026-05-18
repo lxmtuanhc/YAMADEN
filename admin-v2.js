@@ -3,6 +3,7 @@
 
   const ADMIN_TOKEN_KEY = "adminToken";
   const LOGIN_TIME_KEY = "loginTime";
+  const SIDEBAR_COLLAPSED_KEY = "adminV2SidebarCollapsed";
 
   const i18n = {
     ja: {
@@ -830,6 +831,7 @@
   function renderLayout() {
     document.documentElement.lang = state.lang;
     $("appShell").dataset.view = state.currentView;
+    updateSidebarToggleLabel();
     const untreatedCount = state.requests.filter(item => normalizeRequestStatus(item.status) === "untreated").length;
     const pendingUserCount = state.users.filter(user => user.status === "pendingApproval" || user.status === "pending").length;
     const warningCount = state.requests.filter(isOverdue).length + pendingUserCount;
@@ -1653,6 +1655,34 @@
     renderCurrentView();
   }
 
+  function isDesktopLayout() {
+    return window.matchMedia("(min-width: 1100px)").matches;
+  }
+
+  function applySavedSidebarState() {
+    const collapsed = localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1";
+    $("appShell").classList.toggle("sidebar-collapsed", collapsed);
+    updateSidebarToggleLabel();
+  }
+
+  function setSidebarCollapsed(collapsed) {
+    $("appShell").classList.toggle("sidebar-collapsed", collapsed);
+    if (collapsed) localStorage.setItem(SIDEBAR_COLLAPSED_KEY, "1");
+    else localStorage.removeItem(SIDEBAR_COLLAPSED_KEY);
+    updateSidebarToggleLabel();
+  }
+
+  function updateSidebarToggleLabel() {
+    const button = $("mobileMenuButton");
+    if (!button) return;
+    const collapsed = $("appShell").classList.contains("sidebar-collapsed");
+    const label = collapsed
+      ? (state.lang === "vi" ? "Hiện thanh bên" : "サイドバーを表示")
+      : (state.lang === "vi" ? "Ẩn thanh bên" : "サイドバーを隠す");
+    button.setAttribute("aria-label", label);
+    button.setAttribute("title", label);
+  }
+
   function bindEvents() {
     $("sideNav").addEventListener("click", event => {
       const button = event.target.closest("[data-view]");
@@ -1662,8 +1692,18 @@
       renderCurrentView();
     });
 
-    $("mobileMenuButton").addEventListener("click", () => $("appShell").classList.toggle("sidebar-open"));
+    $("mobileMenuButton").addEventListener("click", () => {
+      if (isDesktopLayout()) {
+        $("appShell").classList.remove("sidebar-open");
+        setSidebarCollapsed(!$("appShell").classList.contains("sidebar-collapsed"));
+        return;
+      }
+      $("appShell").classList.toggle("sidebar-open");
+    });
     $("mobileScrim").addEventListener("click", () => $("appShell").classList.remove("sidebar-open"));
+    window.addEventListener("resize", () => {
+      if (isDesktopLayout()) $("appShell").classList.remove("sidebar-open");
+    });
     $("logoutButton").addEventListener("click", logout);
     $("refreshButton").addEventListener("click", refreshData);
     $("languageSelect").addEventListener("change", event => {
@@ -1916,6 +1956,7 @@
 
   async function init() {
     if (!requireAuth()) return;
+    applySavedSidebarState();
     bindEvents();
     renderLayout();
     $("viewRoot").innerHTML = emptyHtml("Loading...");

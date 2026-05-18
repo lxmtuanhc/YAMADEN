@@ -3064,3 +3064,50 @@ body {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* Collapsible sidebar: desktop behaves like ChatGPT, mobile keeps drawer. */
+.menu-button {
+  display: grid;
+}
+
+.sidebar,
+.main {
+  transition: transform .22s ease, opacity .22s ease, margin-left .22s ease, width .22s ease;
+}
+
+@media (min-width: 1100px) {
+  .admin-v2.sidebar-collapsed .sidebar {
+    transform: translateX(-104%) !important;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .admin-v2.sidebar-collapsed .main {
+    margin-left: 0 !important;
+    width: 100vw !important;
+  }
+
+  .admin-v2.sidebar-collapsed .topbar {
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .055);
+  }
+}
+
+@media (max-width: 1099px) {
+  .admin-v2.sidebar-collapsed .sidebar {
+    transform: translateX(-104%);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .admin-v2.sidebar-collapsed.sidebar-open .sidebar,
+  .admin-v2.sidebar-open .sidebar {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .admin-v2.sidebar-collapsed .main {
+    margin-left: 0 !important;
+    width: 100vw !important;
+  }
+}
