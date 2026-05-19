@@ -8,14 +8,17 @@
   <link rel="icon" type="image/png" href="/assets/icon-admin-192.png" />
   <link rel="apple-touch-icon" href="/assets/icon-admin-192.png" />
   <link rel="manifest" href="/data/admin-manifest.json" />
-  <link rel="stylesheet" href="/admin-v2.css?v=20260519-select-restore" />
+  <link rel="stylesheet" href="/admin-v2.css?v=20260519-panel-toggle" />
 </head>
 <body>
   <div class="admin-v2 admin-shell app-shell" id="appShell">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <button class="icon-button sidebar-toggle" id="sidebarToggleButton" type="button" aria-label="Toggle sidebar">
-          <span></span><span></span><span></span>
+          <svg class="sidebar-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="4" y="5" width="16" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.8" />
+            <path d="M10 5v14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
         </button>
         <div class="sidebar-brand">
           <img src="/assets/icon-admin-192.png" alt="YAMADEN" class="sidebar-brand-logo" />

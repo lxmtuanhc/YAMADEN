@@ -49,7 +49,6 @@ button { cursor: pointer; }
 .menu-button { display: none; }
 .icon-button { width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--navy); display: grid; place-items: center; }
 .menu-button span { width: 18px; height: 2px; background: currentColor; display: block; margin: 2px 0; border-radius: 99px; }
-.sidebar-toggle span { width: 18px; height: 2px; background: currentColor; display: block; margin: 2px 0; border-radius: 99px; }
 .search-box { height: 44px; border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 0 12px; display: flex; align-items: center; gap: 8px; min-width: 0; }
 .search-box input { width: 100%; border: 0; outline: 0; min-width: 0; background: transparent; }
 .language-select, .status-select, .field input, .field select, .field textarea { border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 10px 12px; color: var(--text); }
@@ -2954,6 +2953,7 @@ body {
   --sidebar-width: var(--sidebar-expanded-width);
   --topbar-height: 72px;
   --sidebar-icon-size: 48px;
+  --sidebar-icon-inner-size: 22px;
   --sidebar-icon-left: 16px;
   --sidebar-toggle-size: 48px;
   --layout-transition: 220ms cubic-bezier(.2,.8,.2,1);
@@ -3002,25 +3002,38 @@ body,
 }
 
 .sidebar-toggle {
-  width: var(--sidebar-toggle-size);
-  height: var(--sidebar-toggle-size);
-  flex: 0 0 var(--sidebar-toggle-size);
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
+  min-width: var(--sidebar-icon-size);
+  flex: 0 0 var(--sidebar-icon-size);
   display: grid;
   place-items: center;
-  border-radius: 15px;
+  box-sizing: border-box;
+  border-radius: 16px;
   margin: 0;
   align-self: center;
   justify-self: start;
-  border-color: rgba(255, 255, 255, .18);
-  background: rgba(15, 23, 42, .32);
-  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .16);
+  background: rgba(255, 255, 255, .08);
+  color: #e5edf8;
+  cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
-  transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  transition: background .16s ease, border-color .16s ease, transform .16s ease;
 }
 
 .sidebar-toggle:hover {
-  border-color: rgba(255, 255, 255, .28);
-  background: rgba(37, 99, 235, .28);
+  border-color: rgba(255, 255, 255, .24);
+  background: rgba(255, 255, 255, .14);
+}
+
+.sidebar-toggle:active {
+  transform: scale(.97);
+}
+
+.sidebar-toggle-icon {
+  width: var(--sidebar-icon-inner-size);
+  height: var(--sidebar-icon-inner-size);
+  display: block;
 }
 
 .sidebar-brand {
@@ -3180,8 +3193,8 @@ body,
 }
 
 .admin-v2.sidebar-collapsed .sidebar-toggle {
-  width: var(--sidebar-toggle-size);
-  height: var(--sidebar-toggle-size);
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
   margin: 0;
 }
 
@@ -3217,17 +3230,19 @@ body,
   width: var(--sidebar-icon-size);
   height: var(--sidebar-icon-size);
   min-width: var(--sidebar-icon-size);
+  flex: 0 0 var(--sidebar-icon-size);
   display: grid;
   place-items: center;
+  box-sizing: border-box;
   border-radius: 14px;
   justify-self: start;
-  flex: 0 0 var(--sidebar-icon-size);
   margin: 0;
 }
 
 .nav-icon svg {
-  width: 21px;
-  height: 21px;
+  width: var(--sidebar-icon-inner-size);
+  height: var(--sidebar-icon-inner-size);
+  display: block;
   stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
