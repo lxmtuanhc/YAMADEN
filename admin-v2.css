@@ -3067,6 +3067,9 @@ body {
 }
 
 .topbar-philosophy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   min-width: 0;
   color: var(--text);
 }
@@ -3184,6 +3187,26 @@ body {
   .topbar-brand {
     display: none;
   }
+}
+
+.admin-shell:not(.sidebar-collapsed) .sidebar-brand {
+  display: flex;
+}
+
+.admin-shell:not(.sidebar-collapsed) .topbar-brand {
+  display: none !important;
+}
+
+.admin-shell.sidebar-collapsed .sidebar-brand {
+  display: none !important;
+}
+
+.admin-shell.sidebar-collapsed .topbar-brand {
+  display: flex;
+}
+
+.admin-shell .topbar-philosophy {
+  display: flex;
 }
 
 .language-select {
