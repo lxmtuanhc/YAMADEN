@@ -3474,6 +3474,34 @@ body,
   transform: translateY(-50%) translateX(0);
 }
 
+.admin-shell,
+.main-shell,
+.topbar,
+.sidebar,
+.content,
+.page,
+.nav-item,
+button,
+select,
+input,
+textarea {
+  pointer-events: auto;
+}
+
+.mobile-scrim,
+.drawer {
+  pointer-events: none;
+}
+
+.admin-v2.sidebar-open .mobile-scrim,
+.drawer.open {
+  pointer-events: auto !important;
+}
+
+.drawer:not(.open) {
+  pointer-events: none !important;
+}
+
 @media (max-width: 1099px) {
   .admin-shell.sidebar-collapsed .sidebar-brand {
     display: flex !important;

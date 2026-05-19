@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  console.log("[admin-v2] script loaded");
+
   const ADMIN_TOKEN_KEY = "adminToken";
   const LOGIN_TIME_KEY = "loginTime";
   const TOKEN_MAX_AGE = 24 * 60 * 60 * 1000;
@@ -851,6 +853,7 @@
 
   function toast(message) {
     const el = $("toast");
+    if (!el) return;
     el.textContent = message;
     el.classList.add("show");
     window.setTimeout(() => el.classList.remove("show"), 1800);
@@ -1882,55 +1885,71 @@
   }
 
   function bindEvents() {
+    console.log("[admin-v2] binding events");
     const savedSidebarState = localStorage.getItem("adminV2SidebarCollapsed");
     $("appShell").classList.toggle("sidebar-collapsed", savedSidebarState === "true");
+    const bind = (target, eventName, handler) => {
+      if (!target) {
+        console.warn("[admin-v2] missing bind target", eventName);
+        return;
+      }
+      target.addEventListener(eventName, handler);
+    };
 
     const bindSidebarNav = nav => {
-      nav.addEventListener("click", event => {
+      if (!nav) {
+        console.warn("[admin-v2] sidebar nav missing");
+        return;
+      }
+      bind(nav, "click", event => {
         const button = event.target.closest("[data-view]");
         if (!button) return;
+        event.preventDefault();
+        event.stopPropagation();
         hideSidebarTooltip();
+        console.log("[admin-v2] nav click", button.dataset.view);
         state.currentView = button.dataset.view;
+        console.log("[admin-v2] currentView", state.currentView);
         $("appShell").classList.remove("sidebar-open");
         renderCurrentView();
       });
-      nav.addEventListener("pointerover", event => showSidebarTooltip(event.target.closest(".nav-item")));
-      nav.addEventListener("pointerout", event => {
+      bind(nav, "pointerover", event => showSidebarTooltip(event.target.closest(".nav-item")));
+      bind(nav, "pointerout", event => {
         const item = event.target.closest(".nav-item");
         if (item && !item.contains(event.relatedTarget)) hideSidebarTooltip();
       });
-      nav.addEventListener("focusin", event => showSidebarTooltip(event.target.closest(".nav-item")));
-      nav.addEventListener("focusout", hideSidebarTooltip);
+      bind(nav, "focusin", event => showSidebarTooltip(event.target.closest(".nav-item")));
+      bind(nav, "focusout", hideSidebarTooltip);
     };
 
     bindSidebarNav($("sideNav"));
     bindSidebarNav($("sideNavBottom"));
 
-    $("mobileMenuButton").addEventListener("click", () => $("appShell").classList.toggle("sidebar-open"));
-    $("sidebarToggleButton").addEventListener("click", () => {
+    bind($("mobileMenuButton"), "click", () => $("appShell").classList.toggle("sidebar-open"));
+    bind($("sidebarToggleButton"), "click", () => {
       hideSidebarTooltip();
       const collapsed = $("appShell").classList.toggle("sidebar-collapsed");
       localStorage.setItem("adminV2SidebarCollapsed", String(collapsed));
     });
-    $("mobileScrim").addEventListener("click", () => {
+    bind($("mobileScrim"), "click", () => {
       hideSidebarTooltip();
       $("appShell").classList.remove("sidebar-open");
     });
-    $("logoutButton").addEventListener("click", logout);
-    $("refreshButton").addEventListener("click", refreshData);
-    $("languageSelect").addEventListener("change", event => {
+    bind($("logoutButton"), "click", logout);
+    bind($("refreshButton"), "click", refreshData);
+    bind($("languageSelect"), "change", event => {
       hideSidebarTooltip();
       state.lang = event.target.value === "vi" ? "vi" : "ja";
       localStorage.setItem("language", state.lang);
       renderCurrentView();
     });
     if ($("globalSearch")) {
-      $("globalSearch").addEventListener("input", event => {
+      bind($("globalSearch"), "input", event => {
         state.filters.search = event.target.value || "";
         if (state.currentView === "requests") renderRequests();
       });
     }
-    $("drawer").addEventListener("click", event => {
+    bind($("drawer"), "click", event => {
       const tab = event.target.closest("[data-drawer-tab]");
       if (tab) {
         const type = $("drawer").dataset.drawerType;
@@ -1958,7 +1977,7 @@
       if (event.target.id === "drawer" || event.target.closest("[data-close-drawer]")) closeDrawer();
     });
 
-    document.addEventListener("change", async event => {
+    bind(document, "change", async event => {
       const select = event.target.closest("[data-request-status]");
       if (!select || $("drawer").classList.contains("open")) return;
       try {
@@ -1972,10 +1991,15 @@
       }
     });
 
-    document.addEventListener("click", async event => {
+    bind(document, "click", async event => {
       const navButton = event.target.closest("[data-view]");
-      if (navButton && !navButton.closest("#sideNav") && !navButton.closest("#sideNavBottom")) {
+      if (navButton) {
+        event.preventDefault();
+        hideSidebarTooltip();
+        console.log("[admin-v2] nav click", navButton.dataset.view);
         state.currentView = navButton.dataset.view;
+        console.log("[admin-v2] currentView", state.currentView);
+        $("appShell").classList.remove("sidebar-open");
         renderCurrentView();
         return;
       }
@@ -2140,7 +2164,7 @@
       }
     });
 
-    document.addEventListener("submit", async event => {
+    bind(document, "submit", async event => {
       if (event.target.id !== "staffForm") return;
       event.preventDefault();
       const form = event.target;
@@ -2161,7 +2185,7 @@
       }
     });
 
-    document.addEventListener("input", event => {
+    bind(document, "input", event => {
       if (event.target.id === "requestSearch") {
         state.filters.search = event.target.value || "";
         renderRequests();
@@ -2178,7 +2202,7 @@
       }
     });
 
-    document.addEventListener("change", event => {
+    bind(document, "change", event => {
       const select = event.target.closest("[data-filter-select]");
       if (select) {
         state.filters[select.dataset.filterSelect] = select.value;
@@ -2200,11 +2224,18 @@
   }
 
   async function init() {
+    console.log("[admin-v2] init start");
     if (!requireAuth()) return;
-    bindEvents();
-    renderLayout();
-    $("viewRoot").innerHTML = emptyHtml("Loading...");
-    await refreshData();
+    try {
+      bindEvents();
+      renderLayout();
+      $("viewRoot").innerHTML = emptyHtml(t("loading"));
+      await refreshData();
+      console.log("[admin-v2] init done");
+    } catch (error) {
+      console.error("[admin-v2] init failed", error);
+      if ($("viewRoot")) $("viewRoot").innerHTML = showErrorState(error.message || t("failed"));
+    }
   }
 
   document.addEventListener("DOMContentLoaded", init);
