@@ -3,6 +3,8 @@
 
   const ADMIN_TOKEN_KEY = "adminToken";
   const LOGIN_TIME_KEY = "loginTime";
+  const TOKEN_MAX_AGE = 24 * 60 * 60 * 1000;
+  const ADMIN_V2_PATH = "/admin-v2.html";
 
   const i18n = {
     ja: {
@@ -69,6 +71,19 @@
       longUntreated: "未対応が長時間放置されています",
       pendingUsers: "新規ユーザー承認待ち",
       quoteDeadline: "見積期限が近い案件",
+      sessionExpired: "セッションが切れました。再ログインしてください。",
+      loading: "読み込み中...",
+      mediaFilter: "メディア",
+      hasMedia: "メディアあり",
+      noMedia: "メディアなし",
+      mediaCount: "メディア",
+      quoteRequested: "見積希望",
+      suggestAssignee: "担当者を提案",
+      applyAssignee: "この担当者に決定",
+      noAssigneeSuggestion: "適合する担当者が見つかりません",
+      assigneeReason: "一致タグ",
+      savedAssignee: "担当者を更新しました",
+      nearQuoteDeadline: "見積希望案件",
       settingsSla: "SLA / 対応期限ルール",
       settingsAssign: "AI自動担当者アサイン",
       settingsUrgency: "緊急度判定",
@@ -146,6 +161,19 @@
       longUntreated: "Yêu cầu chưa xử lý bị để lâu",
       pendingUsers: "User mới chờ duyệt",
       quoteDeadline: "Báo giá gần hết hạn",
+      sessionExpired: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+      loading: "Đang tải...",
+      mediaFilter: "Media",
+      hasMedia: "Có media",
+      noMedia: "Không media",
+      mediaCount: "Media",
+      quoteRequested: "Muốn báo giá",
+      suggestAssignee: "Đề xuất phụ trách",
+      applyAssignee: "Xác nhận gán",
+      noAssigneeSuggestion: "Chưa tìm thấy nhân sự phù hợp",
+      assigneeReason: "Tag trùng",
+      savedAssignee: "Đã cập nhật phụ trách",
+      nearQuoteDeadline: "Yêu cầu muốn báo giá",
       settingsSla: "SLA / quy tắc hạn xử lý",
       settingsAssign: "AI tự động gán phụ trách",
       settingsUrgency: "Đánh giá độ khẩn cấp",
@@ -477,11 +505,17 @@
     selectedUser: null,
     selectedStaff: null,
     errors: {},
+    loading: {
+      requests: false,
+      users: false,
+      staff: false
+    },
     filters: {
       requestStatus: "all",
       search: "",
       staff: "all",
       urgency: "all",
+      media: "all",
       sort: "priority",
       requestViewMode: "table"
     },
@@ -498,15 +532,33 @@
     return Object.assign({}, extra || {}, { Authorization: "Bearer " + token() });
   }
 
+  function loginRedirectUrl() {
+    const path = window.location.pathname + window.location.search;
+    localStorage.setItem("adminRedirectAfterLogin", path || ADMIN_V2_PATH);
+    return "/login.html?redirect=" + encodeURIComponent(path || ADMIN_V2_PATH);
+  }
+
+  function handleAuthFailure() {
+    localStorage.removeItem(ADMIN_TOKEN_KEY);
+    localStorage.removeItem(LOGIN_TIME_KEY);
+    toast(t("sessionExpired"));
+    window.setTimeout(() => {
+      window.location.href = loginRedirectUrl();
+    }, 650);
+  }
+
   async function requestJson(url, options) {
     const response = await fetch(url, Object.assign({ cache: "no-store" }, options || {}, {
       headers: authHeaders((options && options.headers) || {})
     }));
     if (response.status === 401 || response.status === 403) {
-      logout();
+      handleAuthFailure();
       throw new Error("Unauthorized");
     }
-    if (!response.ok) throw new Error("API failed: " + response.status);
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(body.message || body.error || "API failed: " + response.status);
+    }
     return response.json().catch(() => ({}));
   }
 
@@ -528,6 +580,7 @@
       try {
         return await requestJson("/api/admin/users");
       } catch (error) {
+        if (error.message === "Unauthorized") throw error;
         return requestJson("/admin/users");
       }
     },
@@ -651,6 +704,10 @@
     return request?.content || request?.description || request?.title || request?.category || "-";
   }
 
+  function getRequestAddress(request) {
+    return request?.address || request?.location || "";
+  }
+
   function getAssigneeName(request) {
     if (request?.assigneeName) return request.assigneeName;
     const staffLike = request?.assignedStaff || request?.assignee || request?.staff || request?.responsiblePerson;
@@ -698,6 +755,10 @@
     return collectMedia(request).length;
   }
 
+  function hasQuoteRequested(request) {
+    return request?.quoteRequested === true || request?.quoteRequested === "true" || String(request?.quote || "").toLowerCase() === "true";
+  }
+
   function requestStatusTime(request) {
     const status = normalizeRequestStatus(request?.status);
     if (status === "completed" || status === "lost") return "";
@@ -742,6 +803,8 @@
     const sort = state.filters.sort;
     return [...items].sort((left, right) => {
       if (sort === "oldest") return new Date(left.createdAt || 0) - new Date(right.createdAt || 0);
+      if (sort === "waiting") return new Date(requestStatusTime(left) || left.createdAt || 0) - new Date(requestStatusTime(right) || right.createdAt || 0);
+      if (sort === "deadline") return (new Date(getDeadline(left) || 8640000000000000) - new Date(getDeadline(right) || 8640000000000000));
       if (sort === "overdue") return Number(isOverdue(right)) - Number(isOverdue(left)) || getPriorityScore(right) - getPriorityScore(left);
       if (sort === "priority") return getPriorityScore(right) - getPriorityScore(left) || new Date(right.createdAt || 0) - new Date(left.createdAt || 0);
       return new Date(right.createdAt || 0) - new Date(left.createdAt || 0);
@@ -752,11 +815,25 @@
     const search = state.filters.search.toLowerCase();
     return items.filter(item => {
       const statusOk = state.filters.requestStatus === "all" || normalizeRequestStatus(item.status) === state.filters.requestStatus;
-      const staffOk = state.filters.staff === "all" || String(item.assigneeId || item.assigneeName || "") === state.filters.staff;
+      const selectedStaff = state.staff.find(staff => getRowId(staff) === state.filters.staff);
+      const staffOk = state.filters.staff === "all"
+        || String(item.assigneeId || "") === state.filters.staff
+        || String(item.assigneeName || "") === state.filters.staff
+        || Boolean(selectedStaff && getAssigneeName(item) === selectedStaff.name);
       const urgency = getUrgency(item) || "none";
       const urgencyOk = state.filters.urgency === "all" || urgency === state.filters.urgency;
-      const text = [getRequestDisplayId(item), getCustomerName(item), getRequestContent(item), getRequestPhone(item), item.address, getAssigneeName(item)].join(" ").toLowerCase();
-      return statusOk && staffOk && urgencyOk && text.includes(search);
+      const mediaOk = state.filters.media === "all" || (state.filters.media === "has" ? getRequestMediaCount(item) > 0 : getRequestMediaCount(item) === 0);
+      const text = [
+        getRequestDisplayId(item),
+        getCustomerName(item),
+        getRequestContent(item),
+        getRequestPhone(item),
+        getRequestAddress(item),
+        getAssigneeName(item),
+        formatStatus(item.status),
+        normalizeRequestStatus(item.status)
+      ].join(" ").toLowerCase();
+      return statusOk && staffOk && urgencyOk && mediaOk && text.includes(search);
     });
   }
 
@@ -782,12 +859,14 @@
   function logout() {
     localStorage.removeItem(ADMIN_TOKEN_KEY);
     localStorage.removeItem(LOGIN_TIME_KEY);
-    window.location.href = "/login.html";
+    localStorage.setItem("adminRedirectAfterLogin", ADMIN_V2_PATH);
+    window.location.href = "/login.html?redirect=" + encodeURIComponent(ADMIN_V2_PATH);
   }
 
   function requireAuth() {
-    if (!token()) {
-      window.location.href = "/login.html";
+    const loginTime = Number(localStorage.getItem(LOGIN_TIME_KEY) || 0);
+    if (!token() || !loginTime || Date.now() - loginTime > TOKEN_MAX_AGE) {
+      window.location.href = loginRedirectUrl();
       return false;
     }
     return true;
@@ -888,6 +967,10 @@
   }
 
   async function loadAll() {
+    state.loading.requests = true;
+    state.loading.users = true;
+    state.loading.staff = true;
+    state.errors = {};
     const [requests, users, staff] = await Promise.allSettled([
       AdminAPI.getRequests(),
       AdminAPI.getUsers(),
@@ -899,6 +982,9 @@
     state.errors.requests = requests.status === "rejected" ? requests.reason?.message || "failed" : "";
     state.errors.users = users.status === "rejected" ? users.reason?.message || "failed" : "";
     state.errors.staff = staff.status === "rejected" ? staff.reason?.message || "failed" : "";
+    state.loading.requests = false;
+    state.loading.users = false;
+    state.loading.staff = false;
   }
 
   function normalizeList(payload) {
@@ -957,10 +1043,10 @@
         </div>
       </header>
       <div class="kpi-grid dashboard-kpis">
-        ${statCard(t("totalRequests"), state.requests.length, t("realData"), "total", "clipboard")}
-        ${statCard(t("untreated"), untreated.length, t("realData"), "danger", "clock")}
-        ${statCard(t("overdue"), overdue.length, t("realData"), "warning", "alert")}
-        ${statCard(t("customersCount"), state.users.length, t("realData"), "info", "building")}
+        ${statCard(t("totalRequests"), state.requests.length, t("realData"), "total", "clipboard", "requests:requestStatus:all")}
+        ${statCard(t("untreated"), untreated.length, t("realData"), "danger", "clock", "requests:requestStatus:untreated")}
+        ${statCard(t("overdue"), overdue.length, t("realData"), "warning", "alert", "requests:requestStatus:untreated")}
+        ${statCard(t("customersCount"), state.users.length, t("realData"), "info", "building", "customers:customerStatus:all")}
         ${statCard(t("staffCount"), state.staff.length, activeStaff.length + " active", "success", "users")}
         ${statCard(t("quotingCount"), quoted.length, t("realData"), "warning", "receipt")}
         ${statCard(t("quoteRate"), quoted.length ? Math.round(ordered.length / Math.max(quoted.length, 1) * 100) + "%" : "-", quoted.length ? t("realData") : t("planned"), "success", "trend")}
@@ -1005,8 +1091,9 @@
     `;
   }
 
-  function statCard(label, value, helper, tone, icon) {
-    return `<div class="kpi-card kpi-${escapeHtml(tone || "total")}"><div class="kpi-icon">${kpiIconSvg(icon || "clipboard")}</div><span class="stat-label">${escapeHtml(label)}</span><strong class="stat-value">${escapeHtml(value)}</strong><small>${escapeHtml(helper || "")}</small></div>`;
+  function statCard(label, value, helper, tone, icon, dashboardFilter) {
+    const attrs = dashboardFilter ? ` role="button" tabindex="0" data-dashboard-filter="${escapeHtml(dashboardFilter)}"` : "";
+    return `<div class="kpi-card kpi-${escapeHtml(tone || "total")}${dashboardFilter ? " clickable-kpi" : ""}"${attrs}><div class="kpi-icon">${kpiIconSvg(icon || "clipboard")}</div><span class="stat-label">${escapeHtml(label)}</span><strong class="stat-value">${escapeHtml(value)}</strong><small>${escapeHtml(helper || "")}</small></div>`;
   }
 
   function kpiIconSvg(name) {
@@ -1053,6 +1140,10 @@
     const statuses = ["all", "untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"];
     const filtered = sortRequests(filterRequests(state.requests));
     const staffOptions = state.staff.map(staff => `<option value="${escapeHtml(getRowId(staff) || staff.name || "")}">${escapeHtml(staff.name || "-")}</option>`).join("");
+    if (state.loading.requests) {
+      $("viewRoot").innerHTML = `<div class="loading-state">${escapeHtml(t("loading"))}</div>`;
+      return;
+    }
     if (state.errors.requests) {
       $("viewRoot").innerHTML = showErrorState(t("loadRequestsError"));
       return;
@@ -1065,8 +1156,8 @@
         <button class="btn btn-soft" disabled>${escapeHtml(t("export"))}</button>
         <button class="btn btn-primary" disabled>+ ${escapeHtml(t("newRequest"))}</button>
         <div class="segmented">
-          <button class="active" type="button" data-view-mode="table">${escapeHtml(t("tableFormat"))}</button>
-          <button type="button" data-view-mode="kanban">${escapeHtml(t("kanbanView"))}</button>
+          <button class="${state.filters.requestViewMode === "table" ? "active" : ""}" type="button" data-view-mode="table">${escapeHtml(t("tableFormat"))}</button>
+          <button class="${state.filters.requestViewMode === "kanban" ? "active" : ""}" type="button" data-view-mode="kanban">${escapeHtml(t("kanbanView"))}</button>
         </div>
       </div>
       <div class="chips status-filter-row">
@@ -1078,27 +1169,33 @@
       <div class="filter-bar">
         <input id="requestSearch" class="filter-input" value="${escapeHtml(state.filters.search)}" placeholder="${escapeHtml(t("search"))}" />
         <button class="filter-input filter-button" type="button" disabled>${escapeHtml(t("detailFilter"))}</button>
-        <select class="filter-input" data-filter-select="staff"><option value="all">${escapeHtml(t("assignee"))}</option>${staffOptions}</select>
+        <select class="filter-input" data-filter-select="staff"><option value="all" ${state.filters.staff === "all" ? "selected" : ""}>${escapeHtml(t("assignee"))}</option>${state.staff.map(staff => `<option value="${escapeHtml(getRowId(staff) || staff.name || "")}" ${state.filters.staff === getRowId(staff) ? "selected" : ""}>${escapeHtml(staff.name || "-")}</option>`).join("")}</select>
         <select class="filter-input" data-filter-select="urgency">
-          <option value="all">${escapeHtml(t("urgency"))}</option>
-          <option value="urgent">urgent</option><option value="high">high</option><option value="medium">medium</option><option value="low">low</option><option value="none">${escapeHtml(t("unjudged"))}</option>
+          <option value="all" ${state.filters.urgency === "all" ? "selected" : ""}>${escapeHtml(t("urgency"))}</option>
+          <option value="urgent" ${state.filters.urgency === "urgent" ? "selected" : ""}>urgent</option><option value="high" ${state.filters.urgency === "high" ? "selected" : ""}>high</option><option value="medium" ${state.filters.urgency === "medium" ? "selected" : ""}>medium</option><option value="low" ${state.filters.urgency === "low" ? "selected" : ""}>low</option><option value="none" ${state.filters.urgency === "none" ? "selected" : ""}>${escapeHtml(t("unjudged"))}</option>
+        </select>
+        <select class="filter-input" data-filter-select="media">
+          <option value="all" ${state.filters.media === "all" ? "selected" : ""}>${escapeHtml(t("mediaFilter"))}</option>
+          <option value="has" ${state.filters.media === "has" ? "selected" : ""}>${escapeHtml(t("hasMedia"))}</option>
+          <option value="none" ${state.filters.media === "none" ? "selected" : ""}>${escapeHtml(t("noMedia"))}</option>
         </select>
         <select class="filter-input" data-filter-select="sort">
           <option value="priority" ${state.filters.sort === "priority" ? "selected" : ""}>${escapeHtml(t("prioritySort"))}</option>
           <option value="newest" ${state.filters.sort === "newest" ? "selected" : ""}>${escapeHtml(t("newest"))}</option>
           <option value="oldest" ${state.filters.sort === "oldest" ? "selected" : ""}>${escapeHtml(t("oldest"))}</option>
+          <option value="waiting" ${state.filters.sort === "waiting" ? "selected" : ""}>${escapeHtml(t("elapsed"))}</option>
+          <option value="deadline" ${state.filters.sort === "deadline" ? "selected" : ""}>${escapeHtml(t("deadline"))}</option>
           <option value="overdue" ${state.filters.sort === "overdue" ? "selected" : ""}>${escapeHtml(t("overdueFirst"))}</option>
         </select>
       </div>
-      <div class="table-wrap request-table-wrap">
+      ${state.filters.requestViewMode === "table" ? `<div class="table-wrap request-table-wrap">
         <table class="data-table request-table">
-          <thead><tr><th>${t("id")}</th><th>${t("customer")}</th><th>${t("content")}</th><th>${t("urgency")}</th><th>${t("assignee")}</th><th>${t("status")}</th><th>${t("elapsed")}</th><th>${t("deadline")}</th><th>${t("amount")}</th><th>${t("action")}</th></tr></thead>
+          <thead><tr><th>${t("id")}</th><th>${t("customer")}</th><th>${t("content")}</th><th>${t("urgency")}</th><th>${t("assignee")}</th><th>${t("status")}</th><th>${t("elapsed")}</th><th>${t("deadline")}</th><th>${t("mediaCount")}</th><th>${t("amount")}</th><th>${t("action")}</th></tr></thead>
           <tbody>
-            ${filtered.length ? filtered.map(renderRequestRow).join("") : `<tr><td colspan="10">${showEmptyState(t("noRequests"))}</td></tr>`}
+            ${filtered.length ? filtered.map(renderRequestRow).join("") : `<tr><td colspan="11">${showEmptyState(t("noRequests"))}</td></tr>`}
           </tbody>
         </table>
-      </div>
-      ${renderRequestKanbanPreview(filtered, statuses.slice(1))}
+      </div>` : renderRequestKanbanPreview(filtered, statuses.slice(1))}
     `;
   }
 
@@ -1106,15 +1203,17 @@
     const id = getRowId(item);
     const deadline = getDeadline(item) ? formatDateTime(getDeadline(item)) : "-";
     const urgency = getUrgency(item);
+    const mediaCount = getRequestMediaCount(item);
     return `<tr>
       <td data-label="${t("id")}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong></td>
       <td data-label="${t("customer")}"><div class="row-title">${escapeHtml(getCustomerName(item))}</div><div class="subtext">${escapeHtml(getRequestPhone(item))}</div></td>
-      <td data-label="${t("content")}"><div class="text-clamp-1">${escapeHtml(getRequestContent(item))}</div><div class="subtext text-clamp-1">${escapeHtml(item.address || "")}</div></td>
+      <td data-label="${t("content")}"><div class="text-clamp-1">${escapeHtml(getRequestContent(item))}</div><div class="subtext text-clamp-1">${escapeHtml(getRequestAddress(item))}</div>${hasQuoteRequested(item) ? `<span class="mini-flag">${escapeHtml(t("quoteRequested"))}</span>` : ""}${isOverdue(item) ? `<span class="mini-flag danger">${escapeHtml(t("overdue"))}</span>` : ""}</td>
       <td data-label="${t("urgency")}">${urgency ? `<span class="urgency-badge urgency-${escapeHtml(urgency)}">${escapeHtml(urgency)}</span>` : `<span class="muted-dash">-</span>`}</td>
       <td data-label="${t("assignee")}">${escapeHtml(getAssigneeName(item))}</td>
       <td data-label="${t("status")}"><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></td>
       <td data-label="${t("elapsed")}">${escapeHtml(computeWaitingTime(item))}</td>
       <td data-label="${t("deadline")}">${escapeHtml(deadline)}</td>
+      <td data-label="${t("mediaCount")}">${mediaCount ? `<button class="media-count" type="button" data-request-detail="${escapeHtml(id)}">${mediaCount}</button>` : `<span class="muted-dash">0</span>`}</td>
       <td data-label="${t("amount")}">${escapeHtml(item.amount || item.totalAmount || "-")}</td>
       <td data-label="${t("action")}"><div class="actions"><button class="btn btn-soft" type="button" data-request-detail="${escapeHtml(id)}">${t("detail")}</button>${statusSelectHtml(id, item.status)}</div></td>
     </tr>`;
@@ -1130,7 +1229,7 @@
   function renderRequestKanban(items, statuses) {
     return `<div class="kanban-board">${statuses.map(status => {
       const rows = items.filter(item => normalizeRequestStatus(item.status) === status);
-      return `<section class="kanban-column"><h3>${escapeHtml(formatStatus(status))}<span>${rows.length}</span></h3>${rows.length ? rows.map(item => `<button class="request-mobile-card" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span><p>${escapeHtml(getRequestContent(item))}</p><small>${escapeHtml(getCustomerName(item))} / ${escapeHtml(computeWaitingTime(item))}</small></button>`).join("") : showEmptyState()}</section>`;
+      return `<section class="kanban-column"><h3>${escapeHtml(formatStatus(status))}<span>${rows.length}</span></h3>${rows.length ? rows.map(item => `<button class="request-mobile-card" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span><p>${escapeHtml(getRequestContent(item))}</p><small>${escapeHtml(getCustomerName(item))} / ${escapeHtml(computeWaitingTime(item))}</small><span class="kanban-meta">${getRequestMediaCount(item) ? escapeHtml(t("mediaCount")) + ": " + getRequestMediaCount(item) : ""}${hasQuoteRequested(item) ? " / " + escapeHtml(t("quoteRequested")) : ""}</span></button>`).join("") : showEmptyState()}</section>`;
     }).join("")}</div>`;
   }
 
@@ -1143,6 +1242,7 @@
     const id = getRowId(request);
     const media = collectMedia(request);
     const timeline = Array.isArray(request.timeline) ? request.timeline : [];
+    const suggestion = recommendAssignee(request);
     openDrawer(`
       <article class="drawer-panel">
         <header class="drawer-head">
@@ -1155,6 +1255,7 @@
             ${infoItem(t("address"), request.address)}
             ${infoItem(t("content"), getRequestContent(request))}
             ${infoItem(t("issueTags"), Array.isArray(request.issueTags) ? request.issueTags.join(", ") : "")}
+            ${infoItem(t("quoteRequested"), hasQuoteRequested(request) ? t("quoteRequested") : "-")}
             ${infoItem(t("status"), formatStatus(request.status))}
             ${infoItem(t("assignee"), getAssigneeName(request))}
             ${infoItem(t("urgency"), getUrgency(request) || t("unjudged"))}
@@ -1172,9 +1273,16 @@
             <label class="field"><span>${escapeHtml(t("updateStatus"))}</span>${statusSelectHtml(id, request.status)}</label>
             <label class="field"><span>${escapeHtml(t("assignStaff"))}</span>${staffSelectHtml(request.assigneeId)}</label>
           </section>
+          <section class="assign-suggestion">
+            <div>
+              <strong>${escapeHtml(t("suggestAssignee"))}</strong>
+              <p class="note">${suggestion ? `${escapeHtml(suggestion.staff.name || "-")} - ${escapeHtml(t("assigneeReason"))}: ${escapeHtml(suggestion.matched.join(", "))}` : escapeHtml(t("noAssigneeSuggestion"))}</p>
+            </div>
+            ${suggestion ? `<button class="btn btn-soft" type="button" data-apply-assignee="${escapeHtml(id)}" data-staff-id="${escapeHtml(getRowId(suggestion.staff))}">${escapeHtml(t("applyAssignee"))}</button>` : ""}
+          </section>
           <div class="actions">
             <button class="primary-button" type="button" data-save-request="${escapeHtml(id)}">${escapeHtml(t("save"))}</button>
-            <button class="ghost-button" type="button" disabled>${escapeHtml(t("quoteRegister"))}</button>
+            <button class="ghost-button" type="button" disabled title="${escapeHtml(t("planned"))}">${escapeHtml(t("quoteRegister"))}</button>
             <button class="ghost-button" type="button" disabled>${escapeHtml(t("proposalCreate"))}</button>
             <button class="ghost-button" type="button" disabled>${escapeHtml(t("recordAdd"))}</button>
           </div>
@@ -1197,6 +1305,7 @@
     if (request.mediaUrl) media.push({ url: request.mediaUrl, type: request.mediaType });
     if (request.image) media.push({ url: request.image, type: "image" });
     if (Array.isArray(request.images)) request.images.forEach(url => media.push({ url, type: "image" }));
+    if (Array.isArray(request.files)) request.files.forEach(item => media.push(typeof item === "string" ? { url: item, type: "image" } : item));
     return media.filter(item => item && (item.url || item.secureUrl));
   }
 
@@ -1238,6 +1347,60 @@
     return `<div class="tag-list">${visible.map(item => `<span class="tag-chip">${escapeHtml(item)}</span>`).join("")}${rest ? `<span class="tag-chip tag-more">+${rest}</span>` : ""}</div>`;
   }
 
+  function normalizeTag(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/[、，,;；\s]+/g, "")
+      .trim();
+  }
+
+  function requestTags(request) {
+    const raw = []
+      .concat(toList(request?.issueTags))
+      .concat(toList(request?.category))
+      .concat(toList(request?.title))
+      .concat(toList(request?.content));
+    return [...new Set(raw.map(item => String(item || "").trim()).filter(Boolean))];
+  }
+
+  function staffTags(staff) {
+    const raw = []
+      .concat(toList(staff?.workTags))
+      .concat(toList(staff?.skills))
+      .concat(toList(staff?.workContent))
+      .concat(toList(staff?.areas))
+      .concat(toList(staff?.department));
+    return [...new Set(raw.map(item => String(item || "").trim()).filter(Boolean))];
+  }
+
+  function activeAssignmentCount(staff) {
+    const id = getRowId(staff);
+    return state.requests.filter(request => {
+      const status = normalizeRequestStatus(request.status);
+      return !["completed", "lost"].includes(status)
+        && (String(request.assigneeId || "") === id || getAssigneeName(request) === staff.name);
+    }).length;
+  }
+
+  function recommendAssignee(request) {
+    const reqTags = requestTags(request);
+    const normalizedReqTags = reqTags.map(normalizeTag).filter(Boolean);
+    let best = null;
+    state.staff.filter(staff => !["off", "inactive", "deleted"].includes(String(staff.status || "active"))).forEach(staff => {
+      const tags = staffTags(staff);
+      const normalizedStaffTags = tags.map(normalizeTag);
+      const matched = reqTags.filter((tag, index) => {
+        const normalized = normalizedReqTags[index];
+        return normalized && normalizedStaffTags.some(staffTag => staffTag === normalized || staffTag.includes(normalized) || normalized.includes(staffTag));
+      });
+      const workload = activeAssignmentCount(staff);
+      const score = matched.length * 100 - workload;
+      const candidate = { staff, matched: [...new Set(matched)], workload, score };
+      if (!best || candidate.score > best.score) best = candidate;
+    });
+    return best && best.matched.length ? best : null;
+  }
+
   function avatarHtml(item, sizeClass) {
     const name = item?.name || item?.phone || item?.email || "A";
     const avatar = item?.avatar;
@@ -1253,7 +1416,8 @@
     const status = state.filters.customerStatus || "all";
     const sort = state.filters.customerSort || "created";
     return [...state.users].filter(user => {
-      const statusOk = status === "all" || String(user.status || "pendingApproval") === status;
+      const userStatus = String(user.status || "pendingApproval");
+      const statusOk = status === "all" || userStatus === status || (status === "pendingApproval" && userStatus === "pending");
       const text = [user.name, user.phone, user.email, user.company, user.companyName, user.customerType, user.address, user.province].join(" ").toLowerCase();
       return statusOk && text.includes(search.toLowerCase());
     }).sort((a, b) => {
@@ -1293,6 +1457,14 @@
   }
 
   function renderCustomers() {
+    if (state.loading.users) {
+      $("viewRoot").innerHTML = `<div class="loading-state">${escapeHtml(t("loading"))}</div>`;
+      return;
+    }
+    if (state.errors.users) {
+      $("viewRoot").innerHTML = showErrorState(state.lang === "vi" ? "Không thể tải khách hàng" : "顧客一覧を読み込めません");
+      return;
+    }
     const rows = filterUsers();
     const totalWithRequests = state.users.filter(user => userRequestCount(user) > 0).length;
     const statusOptions = ["all", "pendingApproval", "active", "blocked", "deleted"];
@@ -1427,6 +1599,14 @@
   }
 
   function renderStaff() {
+    if (state.loading.staff) {
+      $("viewRoot").innerHTML = `<div class="loading-state">${escapeHtml(t("loading"))}</div>`;
+      return;
+    }
+    if (state.errors.staff) {
+      $("viewRoot").innerHTML = showErrorState(state.lang === "vi" ? "Không thể tải staff" : "スタッフ一覧を読み込めません");
+      return;
+    }
     const rows = filterStaff();
     const departments = [...new Set(state.staff.map(staffDepartment).filter(value => value && value !== "-"))];
     const allTags = state.staff.flatMap(staff => toList(staff.workTags));
@@ -1595,6 +1775,9 @@
   }
 
   function renderQuotes() {
+    const quoteStages = state.lang === "vi"
+      ? ["Đang tạo", "Chờ duyệt", "Đã gửi", "Đang thương lượng", "Nhận đơn", "Mất đơn"]
+      : ["作成中", "承認待ち", "送付済み", "交渉中", "受注", "失注"];
     const stages = ["作成中", "承認待ち", "送付済み", "交渉中", "受注", "失注"];
     $("viewRoot").innerHTML = `
       <div class="page-intro"><p>${escapeHtml(t("quoteShell"))}</p></div>
@@ -1617,7 +1800,7 @@
         </div>
         <div class="panel-body">
           <div class="pipeline-board">
-            ${stages.map(stage => `<section class="pipeline-column"><header><strong>${escapeHtml(stage)}</strong><span>0</span></header>${showEmptyState(t("emptyColumn"))}<button class="mini-button" disabled>+ ${escapeHtml(t("quoteRegister"))}</button></section>`).join("")}
+            ${quoteStages.map(stage => `<section class="pipeline-column"><header><strong>${escapeHtml(stage)}</strong><span>0</span></header>${showEmptyState(t("emptyColumn"))}<button class="mini-button" disabled>+ ${escapeHtml(t("quoteRegister"))}</button></section>`).join("")}
           </div>
           <div class="actions" style="margin-top:16px">
             <button class="ghost-button" disabled>${escapeHtml(t("quoteRegister"))}</button>
@@ -1632,24 +1815,28 @@
   function renderNotifications() {
     const oldUntreated = state.requests.filter(isOverdue).length;
     const pendingUsers = state.users.filter(user => user.status === "pendingApproval" || user.status === "pending").length;
+    const quoteRequested = state.requests.filter(hasQuoteRequested).length;
+    const mediaRequests = state.requests.filter(item => getRequestMediaCount(item) > 0).length;
     $("viewRoot").innerHTML = `<div class="notification-grid">
-      ${notificationCard(t("longUntreated"), oldUntreated)}
-      ${notificationCard(t("pendingUsers"), pendingUsers)}
-      ${notificationCard(t("quoteDeadline"), 0)}
+      ${notificationCard(t("longUntreated"), oldUntreated, "requests:requestStatus:untreated")}
+      ${notificationCard(t("pendingUsers"), pendingUsers, "customers:customerStatus:pendingApproval")}
+      ${notificationCard(t("nearQuoteDeadline"), quoteRequested, "requests:requestStatus:quoted")}
+      ${notificationCard(t("hasMedia"), mediaRequests, "requests:media:has")}
     </div>`;
   }
 
-  function notificationCard(label, count) {
-    return `<div class="notification-card"><strong>${escapeHtml(label)}</strong><span class="stat-value">${escapeHtml(count)}</span><p class="note">${escapeHtml(count ? t("realData") : t("planned"))}</p></div>`;
+  function notificationCard(label, count, filter) {
+    return `<button class="notification-card" type="button" data-dashboard-filter="${escapeHtml(filter || "notification")}"><strong>${escapeHtml(label)}</strong><span class="stat-value">${escapeHtml(count)}</span><p class="note">${escapeHtml(count ? t("realData") : t("planned"))}</p></button>`;
   }
 
   function renderSettings() {
     const items = ["automationGoal", "settingsSla", "settingsAssign", "settingsUrgency", "settingsNotice", "roles", "companyInfo", "dataApi", "settingsColor"];
-    $("viewRoot").innerHTML = `<div class="settings-grid settings-demo-grid">${items.map((key, index) => `<section class="settings-card"><div class="settings-card-head"><h2>${escapeHtml(t(key))}</h2><span class="status-badge status-${index % 3 === 0 ? "active" : "quoted"}">${escapeHtml(index % 3 === 0 ? t("active") : t("preparing"))}</span></div><div class="settings-placeholder"><label>${escapeHtml(t("status"))}</label><div class="placeholder-input">${escapeHtml(t("planned"))}</div><label>${escapeHtml(t("settingsSystem"))}</label><div class="placeholder-toggle"><span></span></div></div><p class="note">${escapeHtml(t("kpiPlanned"))}</p></section>`).join("")}</div>`;
+    $("viewRoot").innerHTML = `<div class="settings-grid settings-demo-grid">${items.map(key => `<section class="settings-card"><div class="settings-card-head"><h2>${escapeHtml(t(key))}</h2><span class="status-badge status-quoted">${escapeHtml(t("preparing"))}</span></div><div class="settings-placeholder"><label>${escapeHtml(t("status"))}</label><div class="placeholder-input">${escapeHtml(t("planned"))}</div><label>${escapeHtml(t("settingsSystem"))}</label><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("planned"))}</button></div><p class="note">${escapeHtml(t("kpiPlanned"))}</p></section>`).join("")}</div>`;
   }
 
   async function saveRequestFromDrawer(id) {
-    const status = document.querySelector("[data-request-status='" + CSS.escape(id) + "']")?.value;
+    const drawer = $("drawer");
+    const status = drawer.querySelector("[data-request-status='" + CSS.escape(id) + "']")?.value;
     const reply = $("requestReplyInput")?.value || "";
     const staffId = $("requestStaffSelect")?.value || "";
     const staff = state.staff.find(item => getRowId(item) === staffId);
@@ -1793,6 +1980,19 @@
         return;
       }
 
+      const kpi = event.target.closest("[data-dashboard-filter]");
+      if (kpi) {
+        const [view, filter, value] = kpi.dataset.dashboardFilter.split(":");
+        state.currentView = view || "requests";
+        if (state.currentView === "requests" && filter !== "requestStatus") state.filters.requestStatus = "all";
+        if (filter === "requestStatus") state.filters.requestStatus = value || "all";
+        if (filter === "customerStatus") state.filters.customerStatus = value || "all";
+        if (filter === "media") state.filters.media = value || "all";
+        if (filter === "notification") state.currentView = "notifications";
+        renderCurrentView();
+        return;
+      }
+
       const filter = event.target.closest("[data-request-filter]");
       if (filter) {
         state.filters.requestStatus = filter.dataset.requestFilter;
@@ -1828,6 +2028,25 @@
         try {
           await saveRequestFromDrawer(saveRequest.dataset.saveRequest);
         } catch {
+          toast(t("failed"));
+        }
+        return;
+      }
+
+      const applyAssignee = event.target.closest("[data-apply-assignee]");
+      if (applyAssignee) {
+        const staff = state.staff.find(item => getRowId(item) === applyAssignee.dataset.staffId);
+        if (!staff) return;
+        try {
+          await AdminAPI.updateRequest(applyAssignee.dataset.applyAssignee, {
+            assigneeId: getRowId(staff),
+            assigneeName: staff.name || ""
+          });
+          await refreshData();
+          closeDrawer();
+          toast(t("savedAssignee"));
+        } catch (error) {
+          console.error(error);
           toast(t("failed"));
         }
         return;

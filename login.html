@@ -573,12 +573,19 @@ async function login() {
     localStorage.setItem("adminToken", data.token);
     localStorage.setItem("loginTime", Date.now());
     localStorage.setItem("language", lang);
-    window.location.href = "/admin.html";
+    window.location.href = getAdminRedirectPath();
   } catch (err) {
     $("error").innerText = t.wrong;
     $("loginBtn").disabled = false;
     $("loginBtn").innerText = t.login;
   }
+}
+function getAdminRedirectPath() {
+  const params = new URLSearchParams(window.location.search);
+  const requested = params.get("redirect") || localStorage.getItem("adminRedirectAfterLogin") || "/admin-v2.html";
+  const safe = requested.startsWith("/admin-v2.html") || requested.startsWith("/admin.html") ? requested : "/admin-v2.html";
+  localStorage.removeItem("adminRedirectAfterLogin");
+  return safe;
 }
 function handleEnter(event) {
   if (event.key === "Enter") login();
@@ -587,7 +594,7 @@ function redirectIfLoggedIn() {
   const token = localStorage.getItem("adminToken");
   const loginTime = Number(localStorage.getItem("loginTime") || 0);
   if (token && loginTime && Date.now() - loginTime <= TOKEN_MAX_AGE) {
-    window.location.href = "/admin.html";
+    window.location.href = getAdminRedirectPath();
   }
 }
 
