@@ -3114,61 +3114,54 @@ body {
 
 /* Refactor shell: topbar branding + icon sidebar with expanded/collapsed states. */
 :root {
-  --sidebar-collapsed-width: 88px;
-  --sidebar-expanded-width: 270px;
+  --sidebar-collapsed-width: 76px;
+  --sidebar-expanded-width: 260px;
 }
 
 .topbar {
-  grid-template-columns: auto auto minmax(180px, 1fr) minmax(0, 1fr) auto;
-  min-height: 76px;
-  height: 76px;
-  padding: 10px 18px;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  min-height: 64px;
+  height: 64px;
+  padding: 8px 18px;
+  background: #fff;
 }
 
-.topbar-brand {
+.topbar-company-logo {
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
 }
 
-.topbar-brand-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 13px;
+.topbar-company-logo img {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
   object-fit: cover;
   flex: 0 0 auto;
 }
 
-.topbar-brand-text {
+.topbar-company-logo > div {
   display: grid;
   gap: 4px;
   min-width: 0;
 }
 
-.topbar-brand-text strong {
+.topbar-company-logo strong {
   color: var(--text);
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 900;
   letter-spacing: .04em;
   line-height: 1;
+  white-space: nowrap;
 }
 
-.topbar-brand-text span {
+.topbar-company-logo span {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: .08em;
-}
-
-.topbar-slogan {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .topbar-right {
@@ -3188,7 +3181,7 @@ body {
     transform: translateX(0) !important;
     opacity: 1 !important;
     pointer-events: auto !important;
-    padding: 18px 12px;
+    padding: 14px 10px;
   }
 
   .main {
@@ -3201,7 +3194,7 @@ body {
     transform: translateX(0) !important;
     opacity: 1 !important;
     pointer-events: auto !important;
-    padding: 18px 10px;
+    padding: 14px 8px;
   }
 
   .admin-v2.sidebar-collapsed .main {
@@ -3215,12 +3208,12 @@ body {
   }
 
   .side-nav {
-    padding-top: 4px;
+    padding-top: 2px;
   }
 
   .nav-item {
     position: relative;
-    min-height: 52px;
+    min-height: 50px;
     grid-template-columns: 36px minmax(0, 1fr) auto;
     justify-items: start;
   }
@@ -3283,12 +3276,8 @@ body {
 @media (max-width: 1099px) {
   .topbar {
     grid-template-columns: auto auto minmax(0, 1fr) auto;
-    height: auto;
-    min-height: 70px;
-  }
-
-  .topbar-slogan {
-    display: none;
+    height: 64px;
+    min-height: 64px;
   }
 
   .topbar-right {
@@ -3317,18 +3306,20 @@ body {
   .topbar {
     grid-template-columns: auto auto minmax(0, 1fr);
     gap: 8px;
+    height: auto;
+    min-height: 64px;
   }
 
-  .topbar-brand-icon {
-    width: 40px;
-    height: 40px;
+  .topbar-company-logo img {
+    width: 38px;
+    height: 38px;
   }
 
-  .topbar-brand-text strong {
+  .topbar-company-logo strong {
     font-size: 16px;
   }
 
-  .topbar-brand-text span {
+  .topbar-company-logo span {
     display: none;
   }
 
@@ -3336,5 +3327,10 @@ body {
     grid-column: 1 / -1;
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .language-select {
+    min-width: 132px;
+    max-width: 150px;
   }
 }
