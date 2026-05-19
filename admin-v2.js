@@ -840,13 +840,27 @@
     $("refreshButton").textContent = t("refresh");
     $("sideNav").innerHTML = views.map(([view, labelKey, icon]) => `
       <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}" title="${escapeHtml(navLabel(view, labelKey))}" aria-label="${escapeHtml(navLabel(view, labelKey))}">
-        <span class="nav-icon">${icon}</span>
-        <span>${escapeHtml(navLabel(view, labelKey))}</span>
+        <span class="nav-icon">${navIcon(view, icon)}</span>
+        <span class="nav-label">${escapeHtml(navLabel(view, labelKey))}</span>
         ${badgeByView[view] ? `<span class="nav-badge">${badgeByView[view]}</span>` : ""}
       </button>
     `).join("");
     $("viewTitle").textContent = t(state.currentView);
     $("viewEyebrow").textContent = state.currentView === "dashboard" ? "YAMADEN ADMIN" : t(state.currentView).toUpperCase();
+  }
+
+  function navIcon(view, fallback) {
+    const attrs = 'viewBox="0 0 24 24" aria-hidden="true" focusable="false"';
+    const icons = {
+      dashboard: `<svg ${attrs}><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>`,
+      requests: `<svg ${attrs}><path d="M9 5h6"/><path d="M9 3h6v4H9z"/><path d="M7 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><path d="M8 12h8"/><path d="M8 16h6"/></svg>`,
+      customers: `<svg ${attrs}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+      staff: `<svg ${attrs}><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10"/><path d="M8 13h3"/><path d="M8 17h8"/></svg>`,
+      quotes: `<svg ${attrs}><path d="M7 3h10a2 2 0 0 1 2 2v16l-3-2-3 2-3-2-3 2-2-1.33V5a2 2 0 0 1 2-2z"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>`,
+      notifications: `<svg ${attrs}><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>`,
+      settings: `<svg ${attrs}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3 1a7.6 7.6 0 0 0-1.7-1L15.2 7h-4.4l-.3 2.3a7.6 7.6 0 0 0-1.7 1l-2.3-1-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 2l-2 1.2 2 3.5 2.3-1a7.6 7.6 0 0 0 1.7 1l.3 2.3h4.4l.3-2.3a7.6 7.6 0 0 0 1.7-1l2.3 1 2-3.5-2.2-1.2z"/></svg>`
+    };
+    return icons[view] || escapeHtml(fallback || "");
   }
 
   function navLabel(view, fallbackKey) {

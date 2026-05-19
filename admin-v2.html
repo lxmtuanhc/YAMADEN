@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="/assets/icon-admin-192.png" />
   <link rel="apple-touch-icon" href="/assets/icon-admin-192.png" />
   <link rel="manifest" href="/data/admin-manifest.json" />
-  <link rel="stylesheet" href="/admin-v2.css?v=20260519-chatgpt-brand" />
+  <link rel="stylesheet" href="/admin-v2.css?v=20260519-chatgpt-mazii-polish" />
 </head>
 <body>
   <div class="admin-v2 admin-shell app-shell" id="appShell">
@@ -20,12 +20,12 @@
         <div class="sidebar-brand">
           <img src="/assets/icon-admin-192.png" alt="YAMADEN" class="sidebar-brand-logo" />
           <div class="sidebar-brand-text">
-            <div class="sidebar-brand-title">株式会社 山電</div>
-            <div class="sidebar-brand-sub">YAMADEN.CO.LTD</div>
+            <div class="sidebar-brand-title">株式会社山電</div>
+            <div class="sidebar-brand-sub">YAMADEN CO.,LTD</div>
           </div>
         </div>
       </div>
-      <nav class="side-nav" id="sideNav" aria-label="Admin navigation"></nav>
+      <nav class="side-nav sidebar-nav" id="sideNav" aria-label="Admin navigation"></nav>
       <div class="sidebar-footer">
         <div class="sidebar-company">
           <span class="company-mark">Y</span>
@@ -44,33 +44,37 @@
 
     <div class="mobile-scrim" id="mobileScrim"></div>
 
-    <main class="main">
+    <main class="main main-shell">
       <header class="topbar">
         <button class="icon-button menu-button" id="mobileMenuButton" type="button" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
-        <div class="topbar-brand">
-          <img src="/assets/icon-admin-192.png" alt="YAMADEN" />
-          <div>
-            <strong>YAMADEN</strong>
-            <span>YAMADEN CO.,LTD</span>
+        <div class="topbar-left">
+          <div class="topbar-brand">
+            <img src="/assets/icon-admin-192.png" alt="YAMADEN" class="topbar-brand-logo" />
+            <div class="topbar-brand-text">
+              <div class="topbar-brand-title">株式会社山電</div>
+              <div class="topbar-brand-sub">YAMADEN CO.,LTD</div>
+            </div>
+          </div>
+          <div class="topbar-philosophy" aria-label="Company philosophy">
+            <strong>人を守り、幸せを創る</strong>
+            <span>Protecting people. Creating happiness.</span>
           </div>
         </div>
-        <div class="topbar-philosophy" aria-label="Company philosophy">
-          <strong>人を守り、幸せを創る</strong>
-          <span>Protecting people. Creating happiness.</span>
-        </div>
-        <select class="language-select" id="languageSelect" aria-label="Language">
-          <option value="ja">日本語</option>
-          <option value="vi">Tiếng Việt</option>
-        </select>
-        <div class="admin-profile">
-          <div class="avatar">A</div>
-          <div>
-            <strong>Admin</strong>
+        <div class="topbar-actions">
+          <select class="language-select" id="languageSelect" aria-label="Language">
+            <option value="ja">日本語</option>
+            <option value="vi">Tiếng Việt</option>
+          </select>
+          <div class="admin-profile">
+            <div class="avatar">A</div>
+            <div>
+              <strong>Admin</strong>
+            </div>
           </div>
+          <button class="logout-button" id="logoutButton" type="button">ログアウト</button>
         </div>
-        <button class="logout-button" id="logoutButton" type="button">ログアウト</button>
       </header>
 
       <section class="content page">
@@ -89,6 +93,6 @@
   <div class="drawer" id="drawer" aria-hidden="true"></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="/admin-v2.js?v=20260519-chatgpt-brand" defer></script>
+  <script src="/admin-v2.js?v=20260519-chatgpt-mazii-polish" defer></script>
 </body>
 </html>
