@@ -582,8 +582,8 @@ async function login() {
 }
 function getAdminRedirectPath() {
   const params = new URLSearchParams(window.location.search);
-  const requested = params.get("redirect") || localStorage.getItem("adminRedirectAfterLogin") || "/admin-v2.html";
-  const safe = requested.startsWith("/admin-v2.html") ? requested : "/admin-v2.html";
+  const requested = params.get("redirect") || localStorage.getItem("adminRedirectAfterLogin") || "/admin.html";
+  const safe = requested.startsWith("/admin.html") ? requested : "/admin.html";
   localStorage.removeItem("adminRedirectAfterLogin");
   return safe;
 }

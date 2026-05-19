@@ -65,7 +65,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const USER_JWT_SECRET = process.env.USER_JWT_SECRET || JWT_SECRET;
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || "";
 const SLACK_ENABLED = process.env.SLACK_ENABLED === "true";
-const ADMIN_URL = process.env.ADMIN_URL || "https://yamaden.onrender.com/admin-v2.html";
+const ADMIN_URL = process.env.ADMIN_URL || "https://yamaden.onrender.com/admin.html";
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
@@ -780,19 +780,31 @@ app.get("/", (req, res) => {
 });
 
 app.get("/admin.html", (req, res) => {
-  res.redirect(302, "/admin-v2.html");
+  res.sendFile(path.join(__dirname, "admin.html"));
 });
 
 app.get("/admin-v2.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "admin-v2.html"));
+  res.redirect(302, "/admin.html");
+});
+
+app.get("/admin-reference.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin-reference.html"));
+});
+
+app.get("/admin.css", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin.css"));
+});
+
+app.get("/admin.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin.js"));
 });
 
 app.get("/admin-v2.css", (req, res) => {
-  res.sendFile(path.join(__dirname, "admin-v2.css"));
+  res.redirect(302, "/admin.css");
 });
 
 app.get("/admin-v2.js", (req, res) => {
-  res.sendFile(path.join(__dirname, "admin-v2.js"));
+  res.redirect(302, "/admin.js");
 });
 
 app.get("/login.html", (req, res) => {

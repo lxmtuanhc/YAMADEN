@@ -4,7 +4,7 @@
   const ADMIN_TOKEN_KEY = "adminToken";
   const LOGIN_TIME_KEY = "loginTime";
   const TOKEN_MAX_AGE = 24 * 60 * 60 * 1000;
-  const ADMIN_V2_PATH = "/admin-v2.html";
+  const ADMIN_PATH = "/admin.html";
 
   const i18n = {
     ja: {
@@ -534,8 +534,8 @@
 
   function loginRedirectUrl() {
     const path = window.location.pathname + window.location.search;
-    localStorage.setItem("adminRedirectAfterLogin", path || ADMIN_V2_PATH);
-    return "/login.html?redirect=" + encodeURIComponent(path || ADMIN_V2_PATH);
+    localStorage.setItem("adminRedirectAfterLogin", path || ADMIN_PATH);
+    return "/login.html?redirect=" + encodeURIComponent(path || ADMIN_PATH);
   }
 
   function handleAuthFailure() {
@@ -859,8 +859,8 @@
   function logout() {
     localStorage.removeItem(ADMIN_TOKEN_KEY);
     localStorage.removeItem(LOGIN_TIME_KEY);
-    localStorage.setItem("adminRedirectAfterLogin", ADMIN_V2_PATH);
-    window.location.href = "/login.html?redirect=" + encodeURIComponent(ADMIN_V2_PATH);
+    localStorage.setItem("adminRedirectAfterLogin", ADMIN_PATH);
+    window.location.href = "/login.html?redirect=" + encodeURIComponent(ADMIN_PATH);
   }
 
   function requireAuth() {
