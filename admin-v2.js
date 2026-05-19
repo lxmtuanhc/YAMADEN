@@ -1686,7 +1686,27 @@
   function setSidebarCollapsed(collapsed) {
     $("appShell").classList.toggle("sidebar-collapsed", collapsed);
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? "1" : "0");
+    hideSidebarTooltip();
     updateSidebarToggleLabel();
+  }
+
+  function showSidebarTooltip(button) {
+    if (!isDesktopLayout() || !$("appShell").classList.contains("sidebar-collapsed")) return;
+    const tooltip = $("sidebarTooltip");
+    if (!tooltip || !button) return;
+    const label = button.dataset.label || button.getAttribute("title") || "";
+    if (!label) return;
+    const rect = button.getBoundingClientRect();
+    tooltip.textContent = label;
+    tooltip.style.left = Math.round(rect.right + 12) + "px";
+    tooltip.style.top = Math.round(rect.top + rect.height / 2) + "px";
+    tooltip.style.transform = "translateY(-50%)";
+    tooltip.classList.add("show");
+  }
+
+  function hideSidebarTooltip() {
+    const tooltip = $("sidebarTooltip");
+    if (tooltip) tooltip.classList.remove("show");
   }
 
   function updateSidebarToggleLabel() {
@@ -1707,8 +1727,17 @@
       if (!button) return;
       state.currentView = button.dataset.view;
       $("appShell").classList.remove("sidebar-open");
+      hideSidebarTooltip();
       renderCurrentView();
     });
+    $("sideNav").addEventListener("mouseover", event => {
+      const button = event.target.closest("[data-view]");
+      if (button) showSidebarTooltip(button);
+    });
+    $("sideNav").addEventListener("mouseout", event => {
+      if (!event.relatedTarget || !event.currentTarget.contains(event.relatedTarget)) hideSidebarTooltip();
+    });
+    $("sideNav").addEventListener("mouseleave", hideSidebarTooltip);
 
     $("sidebarToggleButton").addEventListener("click", () => {
       if (isDesktopLayout()) {
@@ -1724,6 +1753,7 @@
     });
     $("mobileScrim").addEventListener("click", () => $("appShell").classList.remove("sidebar-open"));
     window.addEventListener("resize", () => {
+      hideSidebarTooltip();
       if (isDesktopLayout()) $("appShell").classList.remove("sidebar-open");
     });
     $("logoutButton").addEventListener("click", logout);
@@ -1731,6 +1761,7 @@
     $("languageSelect").addEventListener("change", event => {
       state.lang = event.target.value === "vi" ? "vi" : "ja";
       localStorage.setItem("language", state.lang);
+      hideSidebarTooltip();
       renderCurrentView();
     });
     if ($("globalSearch")) {
