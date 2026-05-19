@@ -13,6 +13,11 @@
 <body>
   <div class="admin-v2 app-shell sidebar-collapsed" id="appShell">
     <aside class="sidebar" id="sidebar">
+      <div class="sidebar-toggle-row">
+        <button class="sidebar-toggle" id="sidebarToggleButton" type="button" aria-label="Thu gọn / mở rộng menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
       <nav class="side-nav" id="sideNav" aria-label="Admin navigation"></nav>
       <div class="sidebar-footer">
         <div class="sidebar-company">
@@ -34,14 +39,20 @@
 
     <main class="main">
       <header class="topbar">
-        <button class="icon-button menu-button" id="mobileMenuButton" type="button" aria-label="Menu">
+        <button class="icon-button menu-button mobile-menu-button" id="mobileMenuButton" type="button" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
-        <div class="topbar-company-logo" aria-label="株式会社 山電 YAMADEN.CO.LTD">
-          <img src="/assets/icon-admin-192.png" alt="YAMADEN" />
-          <div>
-            <strong>株式会社 山電</strong>
-            <span>YAMADEN.CO.LTD</span>
+        <div class="topbar-brand-area">
+          <div class="topbar-company-logo" aria-label="株式会社 山電 YAMADEN.CO.LTD">
+            <img src="/assets/icon-admin-192.png" alt="YAMADEN" />
+            <div>
+              <strong>株式会社 山電</strong>
+              <span>YAMADEN.CO.LTD</span>
+            </div>
+          </div>
+          <div class="company-philosophy" aria-label="Company philosophy">
+            <strong>人を守り、幸せを創る</strong>
+            <span>Protecting people. Creating happiness.</span>
           </div>
         </div>
         <div class="topbar-spacer"></div>
