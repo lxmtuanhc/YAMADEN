@@ -1139,10 +1139,52 @@
     return `<div class="empty">${escapeHtml(message || t("noData"))}</div>`;
   }
 
+  function requestFilterStatuses() {
+    return ["all", "untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"];
+  }
+
+  function requestBoardStatuses() {
+    return requestFilterStatuses().slice(1);
+  }
+
+  function renderRequestFilterChips() {
+    return requestFilterStatuses().map(status => {
+      const count = status === "all" ? state.requests.length : state.requests.filter(item => normalizeRequestStatus(item.status) === status).length;
+      return `<button class="filter-chip ${state.filters.requestStatus === status ? "active" : ""}" type="button" data-request-filter="${status}"><span>${escapeHtml(status === "all" ? t("all") : formatStatus(status))}</span><b>${count}</b></button>`;
+    }).join("");
+  }
+
+  function renderRequestResultsHtml(filtered) {
+    return state.filters.requestViewMode === "table" ? `<div class="table-wrap request-table-wrap">
+      <table class="data-table request-table">
+        <thead><tr><th>${t("id")}</th><th>${t("customer")}</th><th>${t("content")}</th><th>${t("urgency")}</th><th>${t("assignee")}</th><th>${t("status")}</th><th>${t("elapsed")}</th><th>${t("deadline")}</th><th>${t("mediaCount")}</th><th>${t("amount")}</th><th>${t("action")}</th></tr></thead>
+        <tbody>
+          ${filtered.length ? filtered.map(renderRequestRow).join("") : `<tr><td colspan="11">${showEmptyState(t("noRequests"))}</td></tr>`}
+        </tbody>
+      </table>
+    </div>` : renderRequestKanbanPreview(filtered, requestBoardStatuses());
+  }
+
+  function syncRequestControls() {
+    const chipRow = document.querySelector(".status-filter-row");
+    if (chipRow) chipRow.innerHTML = renderRequestFilterChips();
+    document.querySelectorAll("[data-view-mode]").forEach(button => {
+      button.classList.toggle("active", button.dataset.viewMode === state.filters.requestViewMode);
+    });
+  }
+
+  function renderRequestResults() {
+    syncRequestControls();
+    const results = $("requestResults");
+    if (!results) {
+      renderRequests();
+      return;
+    }
+    results.innerHTML = renderRequestResultsHtml(sortRequests(filterRequests(state.requests)));
+  }
+
   function renderRequests() {
-    const statuses = ["all", "untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"];
     const filtered = sortRequests(filterRequests(state.requests));
-    const staffOptions = state.staff.map(staff => `<option value="${escapeHtml(getRowId(staff) || staff.name || "")}">${escapeHtml(staff.name || "-")}</option>`).join("");
     if (state.loading.requests) {
       $("viewRoot").innerHTML = `<div class="loading-state">${escapeHtml(t("loading"))}</div>`;
       return;
@@ -1164,10 +1206,7 @@
         </div>
       </div>
       <div class="chips status-filter-row">
-        ${statuses.map(status => {
-          const count = status === "all" ? state.requests.length : state.requests.filter(item => normalizeRequestStatus(item.status) === status).length;
-          return `<button class="filter-chip ${state.filters.requestStatus === status ? "active" : ""}" type="button" data-request-filter="${status}"><span>${escapeHtml(status === "all" ? t("all") : formatStatus(status))}</span><b>${count}</b></button>`;
-        }).join("")}
+        ${renderRequestFilterChips()}
       </div>
       <div class="filter-bar">
         <input id="requestSearch" class="filter-input" value="${escapeHtml(state.filters.search)}" placeholder="${escapeHtml(t("search"))}" />
@@ -1191,14 +1230,9 @@
           <option value="overdue" ${state.filters.sort === "overdue" ? "selected" : ""}>${escapeHtml(t("overdueFirst"))}</option>
         </select>
       </div>
-      ${state.filters.requestViewMode === "table" ? `<div class="table-wrap request-table-wrap">
-        <table class="data-table request-table">
-          <thead><tr><th>${t("id")}</th><th>${t("customer")}</th><th>${t("content")}</th><th>${t("urgency")}</th><th>${t("assignee")}</th><th>${t("status")}</th><th>${t("elapsed")}</th><th>${t("deadline")}</th><th>${t("mediaCount")}</th><th>${t("amount")}</th><th>${t("action")}</th></tr></thead>
-          <tbody>
-            ${filtered.length ? filtered.map(renderRequestRow).join("") : `<tr><td colspan="11">${showEmptyState(t("noRequests"))}</td></tr>`}
-          </tbody>
-        </table>
-      </div>` : renderRequestKanbanPreview(filtered, statuses.slice(1))}
+      <div id="requestResults">
+        ${renderRequestResultsHtml(filtered)}
+      </div>
     `;
   }
 
@@ -1903,7 +1937,7 @@
       event.stopPropagation();
       state.filters.requestStatus = filter.dataset.requestFilter;
       console.log("[admin-v2] request filter", state.filters.requestStatus);
-      renderRequests();
+      renderRequestResults();
       return true;
     }
 
@@ -1913,7 +1947,7 @@
       event.stopPropagation();
       state.filters.requestViewMode = mode.dataset.viewMode;
       console.log("[admin-v2] request view mode", state.filters.requestViewMode);
-      renderRequests();
+      renderRequestResults();
       return true;
     }
 
@@ -1948,7 +1982,7 @@
         await AdminAPI.updateRequest(statusSelect.dataset.requestStatus, { status: statusSelect.value });
         const item = state.requests.find(request => getRowId(request) === statusSelect.dataset.requestStatus || getRequestDisplayId(request) === statusSelect.dataset.requestStatus);
         if (item) item.status = statusSelect.value;
-        renderRequests();
+        renderRequestResults();
         toast(t("saved"));
       } catch (error) {
         console.error("[admin-v2] request status update failed", error);
@@ -1962,7 +1996,7 @@
       event.stopPropagation();
       state.filters[select.dataset.filterSelect] = select.value;
       console.log("[admin-v2] request select filter", select.dataset.filterSelect, select.value);
-      renderRequests();
+      renderRequestResults();
       return true;
     }
 
@@ -1976,8 +2010,7 @@
     const start = input.selectionStart;
     const end = input.selectionEnd;
     state.filters.search = value;
-    renderRequests();
-    keepRequestSearchFocus(value, start, end);
+    renderRequestResults();
     return true;
   }
 
@@ -2048,7 +2081,7 @@
     if ($("globalSearch")) {
       bind($("globalSearch"), "input", event => {
         state.filters.search = event.target.value || "";
-        if (state.currentView === "requests") renderRequests();
+        if (state.currentView === "requests") renderRequestResults();
       });
     }
     bind($("drawer"), "click", event => {
@@ -2086,7 +2119,7 @@
         await AdminAPI.updateRequest(select.dataset.requestStatus, { status: select.value });
         const item = state.requests.find(request => getRowId(request) === select.dataset.requestStatus || getRequestDisplayId(request) === select.dataset.requestStatus);
         if (item) item.status = select.value;
-        renderRequests();
+        renderRequestResults();
         toast(t("saved"));
       } catch {
         toast(t("failed"));
@@ -2094,6 +2127,8 @@
     });
 
     bind(document, "click", async event => {
+      if (event.target.closest("select,input,textarea,option")) return;
+
       const navButton = event.target.closest("[data-view]");
       if (navButton) {
         event.preventDefault();
@@ -2122,14 +2157,14 @@
       const filter = event.target.closest("[data-request-filter]");
       if (filter) {
         state.filters.requestStatus = filter.dataset.requestFilter;
-        renderRequests();
+        renderRequestResults();
         return;
       }
 
       const mode = event.target.closest("[data-view-mode]");
       if (mode) {
         state.filters.requestViewMode = mode.dataset.viewMode;
-        renderRequests();
+        renderRequestResults();
         return;
       }
 
@@ -2290,7 +2325,7 @@
     bind(document, "input", event => {
       if (event.target.id === "requestSearch") {
         state.filters.search = event.target.value || "";
-        renderRequests();
+        renderRequestResults();
       }
       const customerFilter = event.target.closest("[data-customer-filter]");
       if (customerFilter) {
@@ -2308,7 +2343,7 @@
       const select = event.target.closest("[data-filter-select]");
       if (select) {
         state.filters[select.dataset.filterSelect] = select.value;
-        renderRequests();
+        renderRequestResults();
         return;
       }
       const customerFilter = event.target.closest("[data-customer-filter]");
