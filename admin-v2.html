@@ -11,15 +11,8 @@
   <link rel="stylesheet" href="/admin-v2.css" />
 </head>
 <body>
-  <div class="admin-v2 app-shell" id="appShell">
+  <div class="admin-v2 app-shell sidebar-collapsed" id="appShell">
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-brand">
-        <img src="/assets/icon-admin-192.png" alt="YAMADEN" class="sidebar-brand-icon" />
-        <div class="sidebar-brand-text">
-          <strong>YAMADEN</strong>
-          <span>YAMADEN CO.,LTD</span>
-        </div>
-      </div>
       <nav class="side-nav" id="sideNav" aria-label="Admin navigation"></nav>
       <div class="sidebar-footer">
         <div class="sidebar-company">
@@ -44,18 +37,28 @@
         <button class="icon-button menu-button" id="mobileMenuButton" type="button" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
-        <div class="topbar-spacer"></div>
-        <select class="language-select" id="languageSelect" aria-label="Language">
-          <option value="ja">日本語</option>
-          <option value="vi">Tiếng Việt</option>
-        </select>
-        <div class="admin-profile">
-          <div class="avatar">A</div>
-          <div>
-            <strong>Admin</strong>
+        <div class="topbar-brand">
+          <img src="/assets/icon-admin-192.png" alt="YAMADEN" class="topbar-brand-icon" />
+          <div class="topbar-brand-text">
+            <strong>YAMADEN</strong>
+            <span>YAMADEN CO., LTD</span>
           </div>
         </div>
-        <button class="logout-button" id="logoutButton" type="button">ログアウト</button>
+        <p class="topbar-slogan">Kết nối công việc, tận dụng dữ liệu, hỗ trợ ra quyết định tốt hơn.</p>
+        <div class="topbar-spacer"></div>
+        <div class="topbar-right">
+          <select class="language-select" id="languageSelect" aria-label="Language">
+            <option value="ja">日本語</option>
+            <option value="vi">Tiếng Việt</option>
+          </select>
+          <div class="admin-profile">
+            <div class="avatar">A</div>
+            <div>
+              <strong>Admin</strong>
+            </div>
+          </div>
+          <button class="logout-button" id="logoutButton" type="button">ログアウト</button>
+        </div>
       </header>
 
       <section class="content page">

@@ -3,7 +3,7 @@
 
   const ADMIN_TOKEN_KEY = "adminToken";
   const LOGIN_TIME_KEY = "loginTime";
-  const SIDEBAR_COLLAPSED_KEY = "adminV2SidebarCollapsed";
+  const SIDEBAR_COLLAPSED_KEY = "yamaden-admin-v2-sidebar-collapsed";
 
   const i18n = {
     ja: {
@@ -840,13 +840,15 @@
     $("languageSelect").value = state.lang;
     $("logoutButton").textContent = t("logout");
     $("refreshButton").textContent = t("refresh");
-    $("sideNav").innerHTML = views.map(([view, labelKey, icon]) => `
-      <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}">
+    $("sideNav").innerHTML = views.map(([view, labelKey, icon]) => {
+      const label = navLabel(view, labelKey);
+      return `
+      <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}" data-label="${escapeHtml(label)}" title="${escapeHtml(label)}">
         <span class="nav-icon">${icon}</span>
-        <span>${escapeHtml(navLabel(view, labelKey))}</span>
+        <span>${escapeHtml(label)}</span>
         ${badgeByView[view] ? `<span class="nav-badge">${badgeByView[view]}</span>` : ""}
       </button>
-    `).join("");
+    `}).join("");
     $("viewTitle").textContent = t(state.currentView);
     $("viewEyebrow").textContent = state.currentView === "dashboard" ? "YAMADEN ADMIN" : t(state.currentView).toUpperCase();
   }
@@ -1660,15 +1662,15 @@
   }
 
   function applySavedSidebarState() {
-    const collapsed = localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1";
+    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    const collapsed = saved === null ? true : saved !== "0";
     $("appShell").classList.toggle("sidebar-collapsed", collapsed);
     updateSidebarToggleLabel();
   }
 
   function setSidebarCollapsed(collapsed) {
     $("appShell").classList.toggle("sidebar-collapsed", collapsed);
-    if (collapsed) localStorage.setItem(SIDEBAR_COLLAPSED_KEY, "1");
-    else localStorage.removeItem(SIDEBAR_COLLAPSED_KEY);
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? "1" : "0");
     updateSidebarToggleLabel();
   }
 
