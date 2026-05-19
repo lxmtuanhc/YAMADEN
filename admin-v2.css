@@ -3130,8 +3130,7 @@ body,
   flex-direction: column;
   justify-content: center;
   min-width: 0;
-  max-width: 520px;
-  height: 100%;
+  height: auto;
   overflow: visible;
   color: var(--text);
 }
@@ -3142,8 +3141,6 @@ body,
   font-weight: 950;
   line-height: 1.25;
   white-space: nowrap;
-  overflow: visible;
-  text-overflow: clip;
 }
 
 .topbar-philosophy-sub {
@@ -3154,8 +3151,6 @@ body,
   font-weight: 700;
   line-height: 1.25;
   white-space: nowrap;
-  overflow: visible;
-  text-overflow: clip;
 }
 
 .admin-v2.sidebar-collapsed {
@@ -3387,18 +3382,6 @@ body,
   }
 }
 
-@media (max-width: 900px) {
-  .topbar-philosophy {
-    max-width: 320px;
-  }
-
-  .topbar-philosophy-main,
-  .topbar-philosophy-sub {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
 @media (max-width: 640px) {
   .topbar {
     gap: 10px;
@@ -3418,42 +3401,14 @@ body,
 }
 
 .language-select {
-  height: 48px;
-  min-width: 150px;
-  max-width: 170px;
-  border-radius: 999px;
-  border: 1px solid #dbe3ef;
-  background-color: #fff;
-  color: #0f172a;
-  font-weight: 800;
-  font-size: 14px;
-  padding-left: 20px;
-  padding-right: 44px;
-  line-height: 48px;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image:
-    linear-gradient(45deg, transparent 50%, #334155 50%),
-    linear-gradient(135deg, #334155 50%, transparent 50%);
-  background-position:
-    calc(100% - 24px) 50%,
-    calc(100% - 18px) 50%;
-  background-size:
-    6px 6px,
-    6px 6px;
-  background-repeat: no-repeat;
-  cursor: pointer;
-}
-
-.language-select:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
+  min-width: 146px;
+  height: 42px;
+  padding: 0 14px;
 }
 
 .admin-profile {
   min-width: 92px;
-  height: 48px;
+  height: 42px;
   padding: 4px 12px 4px 4px;
 }
 
@@ -3467,10 +3422,7 @@ body,
 }
 
 .logout-button {
-  height: 48px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  height: 42px;
 }
 
 .dashboard-kpis .kpi-icon,
