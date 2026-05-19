@@ -3,7 +3,6 @@
 
   const ADMIN_TOKEN_KEY = "adminToken";
   const LOGIN_TIME_KEY = "loginTime";
-  const SIDEBAR_COLLAPSED_KEY = "yamaden-admin-v2-sidebar-collapsed";
 
   const i18n = {
     ja: {
@@ -459,28 +458,14 @@
     deleted: "\u524a\u9664\u6e08\u307f"
   });
 
-  function iconSvg(paths) {
-    return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${paths}</svg>`;
-  }
-
-  const navIcons = {
-    dashboard: iconSvg(`<path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/>`),
-    requests: iconSvg(`<path d="M9 4h6l1 2h3v15H5V6h3l1-2Z"/><path d="M9 11h6"/><path d="M9 15h6"/>`),
-    customers: iconSvg(`<path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`),
-    staff: iconSvg(`<rect x="4" y="3" width="16" height="18" rx="3"/><circle cx="12" cy="9" r="3"/><path d="M8 17a4 4 0 0 1 8 0"/><path d="M16.5 5.5h1"/>`),
-    quotes: iconSvg(`<path d="M6 2h12v20l-2-1-2 1-2-1-2 1-2-1-2 1V2Z"/><path d="M9 7h6"/><path d="M9 11h6"/><path d="M9 15h3"/>`),
-    notifications: iconSvg(`<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>`),
-    settings: iconSvg(`<path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.06V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.06-.4H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.06V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.4.17.73.45 1 .8.24.32.37.7.4 1.1V11a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.31 0Z"/>`)
-  };
-
   const views = [
-    ["dashboard", "dashboard"],
-    ["requests", "requests"],
-    ["customers", "customers"],
-    ["staff", "staff"],
-    ["quotes", "quotes"],
-    ["notifications", "notifications"],
-    ["settings", "settings"]
+    ["dashboard", "dashboard", "⌂"],
+    ["requests", "requests", "▤"],
+    ["customers", "customers", "◉"],
+    ["staff", "staff", "♙"],
+    ["quotes", "quotes", "▣"],
+    ["notifications", "notifications", "⌁"],
+    ["settings", "settings", "⚙"]
   ];
 
   const state = {
@@ -845,7 +830,6 @@
   function renderLayout() {
     document.documentElement.lang = state.lang;
     $("appShell").dataset.view = state.currentView;
-    updateSidebarToggleLabel();
     const untreatedCount = state.requests.filter(item => normalizeRequestStatus(item.status) === "untreated").length;
     const pendingUserCount = state.users.filter(user => user.status === "pendingApproval" || user.status === "pending").length;
     const warningCount = state.requests.filter(isOverdue).length + pendingUserCount;
@@ -854,16 +838,13 @@
     $("languageSelect").value = state.lang;
     $("logoutButton").textContent = t("logout");
     $("refreshButton").textContent = t("refresh");
-    $("sideNav").innerHTML = views.map(([view, labelKey]) => {
-      const label = navLabel(view, labelKey);
-      const icon = navIcons[view] || "";
-      return `
-      <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}" data-label="${escapeHtml(label)}" title="${escapeHtml(label)}">
+    $("sideNav").innerHTML = views.map(([view, labelKey, icon]) => `
+      <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}">
         <span class="nav-icon">${icon}</span>
-        <span class="nav-label">${escapeHtml(label)}</span>
+        <span>${escapeHtml(navLabel(view, labelKey))}</span>
         ${badgeByView[view] ? `<span class="nav-badge">${badgeByView[view]}</span>` : ""}
       </button>
-    `}).join("");
+    `).join("");
     $("viewTitle").textContent = t(state.currentView);
     $("viewEyebrow").textContent = state.currentView === "dashboard" ? "YAMADEN ADMIN" : t(state.currentView).toUpperCase();
   }
@@ -1672,96 +1653,22 @@
     renderCurrentView();
   }
 
-  function isDesktopLayout() {
-    return window.matchMedia("(min-width: 1100px)").matches;
-  }
-
-  function applySavedSidebarState() {
-    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
-    const collapsed = saved === null ? true : saved !== "0";
-    $("appShell").classList.toggle("sidebar-collapsed", collapsed);
-    updateSidebarToggleLabel();
-  }
-
-  function setSidebarCollapsed(collapsed) {
-    $("appShell").classList.toggle("sidebar-collapsed", collapsed);
-    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? "1" : "0");
-    hideSidebarTooltip();
-    updateSidebarToggleLabel();
-  }
-
-  function showSidebarTooltip(button) {
-    if (!isDesktopLayout() || !$("appShell").classList.contains("sidebar-collapsed")) return;
-    const tooltip = $("sidebarTooltip");
-    if (!tooltip || !button) return;
-    const label = button.dataset.label || button.getAttribute("title") || "";
-    if (!label) return;
-    const rect = button.getBoundingClientRect();
-    tooltip.textContent = label;
-    tooltip.style.left = Math.round(rect.right + 12) + "px";
-    tooltip.style.top = Math.round(rect.top + rect.height / 2) + "px";
-    tooltip.style.transform = "translateY(-50%)";
-    tooltip.classList.add("show");
-  }
-
-  function hideSidebarTooltip() {
-    const tooltip = $("sidebarTooltip");
-    if (tooltip) tooltip.classList.remove("show");
-  }
-
-  function updateSidebarToggleLabel() {
-    const collapsed = $("appShell").classList.contains("sidebar-collapsed");
-    const label = collapsed
-      ? (state.lang === "vi" ? "Hiện thanh bên" : "サイドバーを表示")
-      : (state.lang === "vi" ? "Ẩn thanh bên" : "サイドバーを隠す");
-    [$("sidebarToggleButton"), $("mobileMenuButton")].forEach(button => {
-      if (!button) return;
-      button.setAttribute("aria-label", label);
-      button.setAttribute("title", label);
-    });
-  }
-
   function bindEvents() {
     $("sideNav").addEventListener("click", event => {
       const button = event.target.closest("[data-view]");
       if (!button) return;
       state.currentView = button.dataset.view;
       $("appShell").classList.remove("sidebar-open");
-      hideSidebarTooltip();
       renderCurrentView();
     });
-    $("sideNav").addEventListener("mouseover", event => {
-      const button = event.target.closest("[data-view]");
-      if (button) showSidebarTooltip(button);
-    });
-    $("sideNav").addEventListener("mouseout", event => {
-      if (!event.relatedTarget || !event.currentTarget.contains(event.relatedTarget)) hideSidebarTooltip();
-    });
-    $("sideNav").addEventListener("mouseleave", hideSidebarTooltip);
 
-    $("sidebarToggleButton").addEventListener("click", () => {
-      if (isDesktopLayout()) {
-        $("appShell").classList.remove("sidebar-open");
-        setSidebarCollapsed(!$("appShell").classList.contains("sidebar-collapsed"));
-        return;
-      }
-      $("appShell").classList.toggle("sidebar-open");
-    });
-    $("mobileMenuButton").addEventListener("click", () => {
-      if (isDesktopLayout()) return;
-      $("appShell").classList.toggle("sidebar-open");
-    });
+    $("mobileMenuButton").addEventListener("click", () => $("appShell").classList.toggle("sidebar-open"));
     $("mobileScrim").addEventListener("click", () => $("appShell").classList.remove("sidebar-open"));
-    window.addEventListener("resize", () => {
-      hideSidebarTooltip();
-      if (isDesktopLayout()) $("appShell").classList.remove("sidebar-open");
-    });
     $("logoutButton").addEventListener("click", logout);
     $("refreshButton").addEventListener("click", refreshData);
     $("languageSelect").addEventListener("change", event => {
       state.lang = event.target.value === "vi" ? "vi" : "ja";
       localStorage.setItem("language", state.lang);
-      hideSidebarTooltip();
       renderCurrentView();
     });
     if ($("globalSearch")) {
@@ -2009,7 +1916,6 @@
 
   async function init() {
     if (!requireAuth()) return;
-    applySavedSidebarState();
     bindEvents();
     renderLayout();
     $("viewRoot").innerHTML = emptyHtml("Loading...");
