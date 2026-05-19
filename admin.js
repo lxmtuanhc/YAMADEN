@@ -1884,6 +1884,103 @@
     tooltip.setAttribute("aria-hidden", "true");
   }
 
+  function keepRequestSearchFocus(value, start, end) {
+    window.requestAnimationFrame(() => {
+      const input = $("requestSearch");
+      if (!input) return;
+      input.focus({ preventScroll: true });
+      if (typeof input.setSelectionRange === "function") {
+        const position = value.length;
+        input.setSelectionRange(start ?? position, end ?? position);
+      }
+    });
+  }
+
+  async function handleRequestViewClick(event) {
+    const filter = event.target.closest("[data-request-filter]");
+    if (filter) {
+      event.preventDefault();
+      event.stopPropagation();
+      state.filters.requestStatus = filter.dataset.requestFilter;
+      console.log("[admin-v2] request filter", state.filters.requestStatus);
+      renderRequests();
+      return true;
+    }
+
+    const mode = event.target.closest("[data-view-mode]");
+    if (mode) {
+      event.preventDefault();
+      event.stopPropagation();
+      state.filters.requestViewMode = mode.dataset.viewMode;
+      console.log("[admin-v2] request view mode", state.filters.requestViewMode);
+      renderRequests();
+      return true;
+    }
+
+    if (event.target.closest("[data-retry]")) {
+      event.preventDefault();
+      event.stopPropagation();
+      await refreshData();
+      return true;
+    }
+
+    const requestButton = event.target.closest("[data-request-detail]");
+    if (requestButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      const id = requestButton.dataset.requestDetail;
+      let request = state.requests.find(item => getRowId(item) === id || getRequestDisplayId(item) === id);
+      try {
+        request = await AdminAPI.getRequest(id);
+      } catch {}
+      if (request) renderRequestDetail(request);
+      return true;
+    }
+
+    return false;
+  }
+
+  async function handleRequestViewChange(event) {
+    const statusSelect = event.target.closest("[data-request-status]");
+    if (statusSelect && !$("drawer").classList.contains("open")) {
+      event.stopPropagation();
+      try {
+        await AdminAPI.updateRequest(statusSelect.dataset.requestStatus, { status: statusSelect.value });
+        const item = state.requests.find(request => getRowId(request) === statusSelect.dataset.requestStatus || getRequestDisplayId(request) === statusSelect.dataset.requestStatus);
+        if (item) item.status = statusSelect.value;
+        renderRequests();
+        toast(t("saved"));
+      } catch (error) {
+        console.error("[admin-v2] request status update failed", error);
+        toast(t("failed"));
+      }
+      return true;
+    }
+
+    const select = event.target.closest("[data-filter-select]");
+    if (select) {
+      event.stopPropagation();
+      state.filters[select.dataset.filterSelect] = select.value;
+      console.log("[admin-v2] request select filter", select.dataset.filterSelect, select.value);
+      renderRequests();
+      return true;
+    }
+
+    return false;
+  }
+
+  function handleRequestViewInput(event) {
+    if (event.target.id !== "requestSearch") return false;
+    const input = event.target;
+    const value = input.value || "";
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    state.filters.search = value;
+    renderRequests();
+    keepRequestSearchFocus(value, start, end);
+    return true;
+  }
+
   function bindEvents() {
     console.log("[admin-v2] binding events");
     const savedSidebarState = localStorage.getItem("adminV2SidebarCollapsed");
@@ -1942,6 +2039,11 @@
       state.lang = event.target.value === "vi" ? "vi" : "ja";
       localStorage.setItem("language", state.lang);
       renderCurrentView();
+    });
+    bind($("viewRoot"), "click", handleRequestViewClick);
+    bind($("viewRoot"), "change", handleRequestViewChange);
+    bind($("viewRoot"), "input", event => {
+      if (handleRequestViewInput(event)) event.stopPropagation();
     });
     if ($("globalSearch")) {
       bind($("globalSearch"), "input", event => {
