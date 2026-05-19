@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="/assets/icon-admin-192.png" />
   <link rel="apple-touch-icon" href="/assets/icon-admin-192.png" />
   <link rel="manifest" href="/data/admin-manifest.json" />
-  <link rel="stylesheet" href="/admin-v2.css?v=20260519-panel-toggle" />
+  <link rel="stylesheet" href="/admin-v2.css?v=20260519-sidebar-clean" />
 </head>
 <body>
   <div class="admin-v2 admin-shell app-shell" id="appShell">
@@ -28,21 +28,9 @@
           </div>
         </div>
       </div>
-      <nav class="side-nav sidebar-nav" id="sideNav" aria-label="Admin navigation"></nav>
-      <div class="sidebar-footer">
-        <div class="sidebar-company">
-          <span class="company-mark">Y</span>
-          <div>
-            <strong>株式会社 山電</strong>
-            <small>YAMADEN CO.,LTD</small>
-          </div>
-        </div>
-        <div class="sidebar-version">
-          <span>システムバージョン</span>
-          <strong>v2.4.1</strong>
-        </div>
-        <button class="support-button" type="button">サポートに連絡</button>
-      </div>
+      <nav class="side-nav sidebar-nav sidebar-nav-main" id="sideNav" aria-label="Admin navigation"></nav>
+      <div class="sidebar-spacer" aria-hidden="true"></div>
+      <nav class="side-nav sidebar-nav sidebar-nav-bottom" id="sideNavBottom" aria-label="Admin settings"></nav>
     </aside>
 
     <div class="mobile-scrim" id="mobileScrim"></div>

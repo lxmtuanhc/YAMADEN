@@ -838,13 +838,15 @@
     $("languageSelect").value = state.lang;
     $("logoutButton").textContent = t("logout");
     $("refreshButton").textContent = t("refresh");
-    $("sideNav").innerHTML = views.map(([view, labelKey, icon]) => `
+    const renderNavItem = ([view, labelKey, icon]) => `
       <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}" data-tooltip="${escapeHtml(navLabel(view, labelKey))}" aria-label="${escapeHtml(navLabel(view, labelKey))}">
         <span class="nav-icon">${navIcon(view, icon)}</span>
         <span class="nav-label">${escapeHtml(navLabel(view, labelKey))}</span>
         ${badgeByView[view] ? `<span class="nav-badge">${badgeByView[view]}</span>` : ""}
       </button>
-    `).join("");
+    `;
+    $("sideNav").innerHTML = views.filter(([view]) => view !== "settings").map(renderNavItem).join("");
+    $("sideNavBottom").innerHTML = views.filter(([view]) => view === "settings").map(renderNavItem).join("");
     $("viewTitle").textContent = t(state.currentView);
     $("viewEyebrow").textContent = state.currentView === "dashboard" ? "YAMADEN ADMIN" : t(state.currentView).toUpperCase();
   }
@@ -1696,22 +1698,26 @@
     const savedSidebarState = localStorage.getItem("adminV2SidebarCollapsed");
     $("appShell").classList.toggle("sidebar-collapsed", savedSidebarState === "true");
 
-    $("sideNav").addEventListener("click", event => {
-      const button = event.target.closest("[data-view]");
-      if (!button) return;
-      hideSidebarTooltip();
-      state.currentView = button.dataset.view;
-      $("appShell").classList.remove("sidebar-open");
-      renderCurrentView();
-    });
+    const bindSidebarNav = nav => {
+      nav.addEventListener("click", event => {
+        const button = event.target.closest("[data-view]");
+        if (!button) return;
+        hideSidebarTooltip();
+        state.currentView = button.dataset.view;
+        $("appShell").classList.remove("sidebar-open");
+        renderCurrentView();
+      });
+      nav.addEventListener("pointerover", event => showSidebarTooltip(event.target.closest(".nav-item")));
+      nav.addEventListener("pointerout", event => {
+        const item = event.target.closest(".nav-item");
+        if (item && !item.contains(event.relatedTarget)) hideSidebarTooltip();
+      });
+      nav.addEventListener("focusin", event => showSidebarTooltip(event.target.closest(".nav-item")));
+      nav.addEventListener("focusout", hideSidebarTooltip);
+    };
 
-    $("sideNav").addEventListener("pointerover", event => showSidebarTooltip(event.target.closest(".nav-item")));
-    $("sideNav").addEventListener("pointerout", event => {
-      const item = event.target.closest(".nav-item");
-      if (item && !item.contains(event.relatedTarget)) hideSidebarTooltip();
-    });
-    $("sideNav").addEventListener("focusin", event => showSidebarTooltip(event.target.closest(".nav-item")));
-    $("sideNav").addEventListener("focusout", hideSidebarTooltip);
+    bindSidebarNav($("sideNav"));
+    bindSidebarNav($("sideNavBottom"));
 
     $("mobileMenuButton").addEventListener("click", () => $("appShell").classList.toggle("sidebar-open"));
     $("sidebarToggleButton").addEventListener("click", () => {
@@ -1781,7 +1787,7 @@
 
     document.addEventListener("click", async event => {
       const navButton = event.target.closest("[data-view]");
-      if (navButton && !navButton.closest("#sideNav")) {
+      if (navButton && !navButton.closest("#sideNav") && !navButton.closest("#sideNavBottom")) {
         state.currentView = navButton.dataset.view;
         renderCurrentView();
         return;

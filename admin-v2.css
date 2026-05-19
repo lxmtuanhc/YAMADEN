@@ -2985,6 +2985,8 @@ body,
 
 .sidebar {
   padding: 0;
+  display: flex;
+  flex-direction: column;
   overflow-x: hidden;
   will-change: width;
 }
@@ -3211,6 +3213,20 @@ body,
   flex-direction: column;
   gap: 10px;
   padding: 12px var(--sidebar-icon-left);
+}
+
+.sidebar-nav-main {
+  flex: 0 0 auto;
+}
+
+.sidebar-spacer {
+  flex: 1 1 auto;
+  min-height: 24px;
+}
+
+.sidebar-nav-bottom {
+  flex: 0 0 auto;
+  padding-bottom: 18px;
 }
 
 .nav-item {
@@ -3499,4 +3515,16 @@ body,
   .admin-v2[data-view="dashboard"] .kpi-grid.dashboard-kpis {
     grid-template-columns: 1fr !important;
   }
+}
+
+.sidebar-footer,
+.sidebar-company,
+.sidebar-version,
+.sidebar-support,
+.sidebar-support-btn,
+.sidebar-footer-text,
+.sidebar-version-row,
+.sidebar-company-text,
+.support-button {
+  display: none !important;
 }
