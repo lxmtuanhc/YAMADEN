@@ -839,7 +839,7 @@
     $("logoutButton").textContent = t("logout");
     $("refreshButton").textContent = t("refresh");
     $("sideNav").innerHTML = views.map(([view, labelKey, icon]) => `
-      <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}">
+      <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}" title="${escapeHtml(navLabel(view, labelKey))}" aria-label="${escapeHtml(navLabel(view, labelKey))}">
         <span class="nav-icon">${icon}</span>
         <span>${escapeHtml(navLabel(view, labelKey))}</span>
         ${badgeByView[view] ? `<span class="nav-badge">${badgeByView[view]}</span>` : ""}
@@ -1654,6 +1654,9 @@
   }
 
   function bindEvents() {
+    const savedSidebarState = localStorage.getItem("adminV2SidebarCollapsed");
+    $("appShell").classList.toggle("sidebar-collapsed", savedSidebarState === "true");
+
     $("sideNav").addEventListener("click", event => {
       const button = event.target.closest("[data-view]");
       if (!button) return;
@@ -1663,6 +1666,10 @@
     });
 
     $("mobileMenuButton").addEventListener("click", () => $("appShell").classList.toggle("sidebar-open"));
+    $("sidebarToggleButton").addEventListener("click", () => {
+      const collapsed = $("appShell").classList.toggle("sidebar-collapsed");
+      localStorage.setItem("adminV2SidebarCollapsed", String(collapsed));
+    });
     $("mobileScrim").addEventListener("click", () => $("appShell").classList.remove("sidebar-open"));
     $("logoutButton").addEventListener("click", logout);
     $("refreshButton").addEventListener("click", refreshData);
