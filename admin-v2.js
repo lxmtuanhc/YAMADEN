@@ -839,7 +839,7 @@
     $("logoutButton").textContent = t("logout");
     $("refreshButton").textContent = t("refresh");
     $("sideNav").innerHTML = views.map(([view, labelKey, icon]) => `
-      <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}" title="${escapeHtml(navLabel(view, labelKey))}" aria-label="${escapeHtml(navLabel(view, labelKey))}">
+      <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}" data-tooltip="${escapeHtml(navLabel(view, labelKey))}" aria-label="${escapeHtml(navLabel(view, labelKey))}">
         <span class="nav-icon">${navIcon(view, icon)}</span>
         <span class="nav-label">${escapeHtml(navLabel(view, labelKey))}</span>
         ${badgeByView[view] ? `<span class="nav-badge">${badgeByView[view]}</span>` : ""}
@@ -1667,6 +1667,31 @@
     renderCurrentView();
   }
 
+  function sidebarTooltip() {
+    return $("sidebarTooltip");
+  }
+
+  function shouldShowSidebarTooltip() {
+    return $("appShell").classList.contains("sidebar-collapsed") && window.matchMedia("(min-width: 1100px)").matches;
+  }
+
+  function showSidebarTooltip(item) {
+    if (!item || !shouldShowSidebarTooltip()) return hideSidebarTooltip();
+    const tooltip = sidebarTooltip();
+    const rect = item.getBoundingClientRect();
+    tooltip.textContent = item.dataset.tooltip || item.getAttribute("aria-label") || "";
+    tooltip.style.top = `${rect.top + rect.height / 2}px`;
+    tooltip.style.left = `calc(var(--sidebar-collapsed-width) + 10px)`;
+    tooltip.classList.add("visible");
+    tooltip.setAttribute("aria-hidden", "false");
+  }
+
+  function hideSidebarTooltip() {
+    const tooltip = sidebarTooltip();
+    tooltip.classList.remove("visible");
+    tooltip.setAttribute("aria-hidden", "true");
+  }
+
   function bindEvents() {
     const savedSidebarState = localStorage.getItem("adminV2SidebarCollapsed");
     $("appShell").classList.toggle("sidebar-collapsed", savedSidebarState === "true");
@@ -1674,20 +1699,34 @@
     $("sideNav").addEventListener("click", event => {
       const button = event.target.closest("[data-view]");
       if (!button) return;
+      hideSidebarTooltip();
       state.currentView = button.dataset.view;
       $("appShell").classList.remove("sidebar-open");
       renderCurrentView();
     });
 
+    $("sideNav").addEventListener("pointerover", event => showSidebarTooltip(event.target.closest(".nav-item")));
+    $("sideNav").addEventListener("pointerout", event => {
+      const item = event.target.closest(".nav-item");
+      if (item && !item.contains(event.relatedTarget)) hideSidebarTooltip();
+    });
+    $("sideNav").addEventListener("focusin", event => showSidebarTooltip(event.target.closest(".nav-item")));
+    $("sideNav").addEventListener("focusout", hideSidebarTooltip);
+
     $("mobileMenuButton").addEventListener("click", () => $("appShell").classList.toggle("sidebar-open"));
     $("sidebarToggleButton").addEventListener("click", () => {
+      hideSidebarTooltip();
       const collapsed = $("appShell").classList.toggle("sidebar-collapsed");
       localStorage.setItem("adminV2SidebarCollapsed", String(collapsed));
     });
-    $("mobileScrim").addEventListener("click", () => $("appShell").classList.remove("sidebar-open"));
+    $("mobileScrim").addEventListener("click", () => {
+      hideSidebarTooltip();
+      $("appShell").classList.remove("sidebar-open");
+    });
     $("logoutButton").addEventListener("click", logout);
     $("refreshButton").addEventListener("click", refreshData);
     $("languageSelect").addEventListener("change", event => {
+      hideSidebarTooltip();
       state.lang = event.target.value === "vi" ? "vi" : "ja";
       localStorage.setItem("language", state.lang);
       renderCurrentView();
