@@ -277,6 +277,8 @@
     createQuote: "\u898b\u7a4d\u4f5c\u6210",
     addNote: "\u5bfe\u5fdc\u30e1\u30e2\u8ffd\u52a0",
     customerPreview: "\u65b0\u898f\u30fb\u627f\u8a8d\u5f85\u3061\u9867\u5ba2",
+    customerDetailEmpty: "\u9867\u5ba2\u3092\u9078\u629e\u3059\u308b\u3068\u8a73\u7d30\u304c\u8868\u793a\u3055\u308c\u307e\u3059\u3002",
+    closeCustomerDetail: "\u9867\u5ba2\u8a73\u7d30\u3092\u9589\u3058\u308b",
     staffPreview: "\u30b9\u30bf\u30c3\u30d5\u7a3c\u50cd\u72b6\u6cc1",
     all: "\u3059\u3079\u3066",
     tableView: "\u8868",
@@ -329,6 +331,8 @@
     createQuote: "T\u1ea1o b\u00e1o gi\u00e1",
     addNote: "Th\u00eam ghi ch\u00fa x\u1eed l\u00fd",
     customerPreview: "Kh\u00e1ch h\u00e0ng m\u1edbi / ch\u1edd duy\u1ec7t",
+    customerDetailEmpty: "Ch\u1ecdn m\u1ed9t kh\u00e1ch h\u00e0ng \u0111\u1ec3 xem chi ti\u1ebft.",
+    closeCustomerDetail: "\u0110\u00f3ng chi ti\u1ebft kh\u00e1ch h\u00e0ng",
     staffPreview: "T\u1ea3i staff",
     all: "T\u1ea5t c\u1ea3",
     tableView: "B\u1ea3ng",
@@ -1794,6 +1798,17 @@
     return rows.length ? `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table"><thead><tr><th>${t("company")}</th><th>${t("phone")}</th><th>${t("customerRank")}</th><th>${t("status")}</th><th>${t("lastActivity")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(user => renderCustomerRow(user, selected)).join("")}</tbody></table></div>` : showEmptyState();
   }
 
+  function closeCustomerDetail() {
+    state.selectedUser = "";
+    const rows = filterUsers();
+    if (!$("customerTableRoot") || !$("customerPanelRoot")) {
+      renderCustomers();
+      return;
+    }
+    $("customerTableRoot").innerHTML = renderCustomerTable(rows, null);
+    $("customerPanelRoot").innerHTML = renderCustomerPanel(null);
+  }
+
   function renderCustomerResultsOnly() {
     const rows = filterUsers();
     const selected = rows.find(user => getRowId(user) === state.selectedUser) || rows[0] || null;
@@ -1809,6 +1824,11 @@
   }
 
   async function handleCustomerAction(action, trigger) {
+    if (action === "close-detail") {
+      closeCustomerDetail();
+      return;
+    }
+
     const id = trigger?.dataset.customerId || trigger?.closest("[data-customer-id]")?.dataset.customerId || "";
     if (!id) return;
     const user = state.users.find(item => getRowId(item) === id);
@@ -1875,7 +1895,7 @@
   }
 
   function renderCustomerPanel(user) {
-    if (!user) return `<aside class="detail-panel">${showEmptyState()}</aside>`;
+    if (!user) return `<aside class="detail-panel customer-detail-panel">${showEmptyState(t("customerDetailEmpty"))}</aside>`;
     const id = getRowId(user);
     const status = normalizeUserStatusValue(user.status);
     const related = state.requests.filter(request => String(request.userId || request.customerId || "") === String(id)).slice(0, 5);
@@ -1885,7 +1905,7 @@
       <div class="detail-panel-head">
         ${avatarHtml(user, "avatar-large")}
         <div><h2>${escapeHtml(user.company || user.companyName || user.name || user.phone || "-")}</h2><p>${escapeHtml(user.name || user.contact || t("selectedDetail"))}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(customerStatusLabel(status))}</span></div>
-        <button class="btn btn-soft" type="button" data-customer-action="detail" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
+        <button class="customer-detail-close" type="button" data-customer-action="close-detail" aria-label="${escapeHtml(t("closeCustomerDetail"))}">×</button>
       </div>
       <div class="contact-grid">
         ${infoItem(t("phone"), user.phone)}
@@ -2404,6 +2424,11 @@
         event.preventDefault();
         state.filters.search = event.target.value || "";
         renderRequestResults();
+      }
+    });
+    bind(document, "keydown", event => {
+      if (event.key === "Escape" && state.currentView === "customers" && state.selectedUser) {
+        closeCustomerDetail();
       }
     });
     if ($("globalSearch")) {
