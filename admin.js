@@ -1382,8 +1382,8 @@
         <p>${escapeHtml(t("requestSubtitle"))}</p>
       </div>
       <div class="request-command-bar demo-actions">
-        <button class="btn btn-soft" disabled>${escapeHtml(t("export"))}</button>
-        <button class="btn btn-primary" disabled>+ ${escapeHtml(t("newRequest"))}</button>
+        <button class="btn btn-soft request-action-btn export" disabled>${escapeHtml(t("export"))}</button>
+        <button class="btn btn-primary request-action-btn create" disabled>+ ${escapeHtml(t("newRequest"))}</button>
         <div class="segmented request-view-toggle">
           <button class="request-action-btn ${state.filters.requestViewMode === "table" ? "active" : ""}" type="button" data-view-mode="table">${escapeHtml(t("tableFormat"))}</button>
           <button class="request-action-btn ${state.filters.requestViewMode === "kanban" ? "active" : ""}" type="button" data-view-mode="kanban">${escapeHtml(t("kanbanView"))}</button>
