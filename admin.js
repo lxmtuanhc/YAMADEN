@@ -518,6 +518,100 @@
     ["settings", "settings", "⚙"]
   ];
 
+  Object.assign(i18n.ja, {
+    requests: "\u4f9d\u983c\u7ba1\u7406",
+    requestSubtitle: "\u9867\u5ba2\u304b\u3089\u306e\u4f9d\u983c\u3092\u691c\u7d22\u3001\u7d5e\u308a\u8fbc\u307f\u3001\u5bfe\u5fdc\u3067\u304d\u307e\u3059\u3002",
+    search: "\u691c\u7d22...",
+    searchButton: "\u691c\u7d22",
+    export: "\u30a8\u30af\u30b9\u30dd\u30fc\u30c8",
+    newRequest: "\u65b0\u898f\u4f9d\u983c\u767b\u9332",
+    tableFormat: "\u8868\u5f62\u5f0f",
+    kanbanView: "\u30ab\u30f3\u30d0\u30f3",
+    all: "\u3059\u3079\u3066",
+    id: "ID",
+    customer: "\u9867\u5ba2",
+    content: "\u5185\u5bb9",
+    urgency: "\u7dca\u6025\u5ea6",
+    assignee: "\u62c5\u5f53\u8005",
+    status: "\u30b9\u30c6\u30fc\u30bf\u30b9",
+    elapsed: "\u7d4c\u904e\u6642\u9593",
+    deadline: "\u5bfe\u5fdc\u671f\u9650",
+    mediaFilter: "\u30e1\u30c7\u30a3\u30a2",
+    mediaCount: "\u30e1\u30c7\u30a3\u30a2",
+    amount: "\u91d1\u984d",
+    action: "\u64cd\u4f5c",
+    departmentFilter: "\u90e8\u9580",
+    allRequestDepartments: "\u3059\u3079\u3066\u306e\u90e8\u9580",
+    departmentConstruction: "\u5de5\u52d9\u90e8",
+    departmentExecutive: "\u4ee3\u8868\u30fb\u5f79\u54e1",
+    departmentSales: "\u55b6\u696d\u90e8",
+    departmentDesign: "\u8a2d\u8a08\u90e8",
+    departmentOperation: "\u696d\u52d9\u90e8",
+    departmentMaintenance: "\u30e1\u30f3\u30c6\u30ca\u30f3\u30b9\u90e8",
+    departmentSurvey: "\u8abf\u67fb\u90e8",
+    departmentOther: "\u305d\u306e\u4ed6",
+    prioritySort: "\u512a\u5148\u9806",
+    newest: "\u65b0\u3057\u3044\u9806",
+    oldest: "\u53e4\u3044\u9806",
+    overdueFirst: "\u671f\u9650\u8d85\u904e\u512a\u5148",
+    hasMedia: "\u30e1\u30c7\u30a3\u30a2\u3042\u308a",
+    noMedia: "\u30e1\u30c7\u30a3\u30a2\u306a\u3057",
+    unjudged: "\u672a\u5224\u5b9a",
+    urgencyUrgent: "\u7dca\u6025",
+    urgencyHigh: "\u9ad8",
+    urgencyMedium: "\u4e2d",
+    urgencyLow: "\u4f4e",
+    noRequests: "\u4f9d\u983c\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
+    loadRequestsError: "\u4f9d\u983c\u4e00\u89a7\u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093"
+  });
+
+  Object.assign(i18n.vi, {
+    requests: "Qu\u1ea3n l\u00fd y\u00eau c\u1ea7u",
+    requestSubtitle: "Theo d\u00f5i, l\u1ecdc v\u00e0 x\u1eed l\u00fd c\u00e1c y\u00eau c\u1ea7u c\u1ee7a kh\u00e1ch h\u00e0ng.",
+    search: "T\u00ecm ki\u1ebfm...",
+    searchButton: "T\u00ecm ki\u1ebfm",
+    export: "Xu\u1ea5t d\u1eef li\u1ec7u",
+    newRequest: "T\u1ea1o y\u00eau c\u1ea7u m\u1edbi",
+    tableFormat: "D\u1ea1ng b\u1ea3ng",
+    kanbanView: "Kanban",
+    all: "T\u1ea5t c\u1ea3",
+    id: "ID",
+    customer: "Kh\u00e1ch h\u00e0ng",
+    content: "N\u1ed9i dung",
+    urgency: "\u0110\u1ed9 kh\u1ea9n",
+    assignee: "Ph\u1ee5 tr\u00e1ch",
+    status: "Tr\u1ea1ng th\u00e1i",
+    elapsed: "Th\u1eddi gian ch\u1edd",
+    deadline: "H\u1ea1n x\u1eed l\u00fd",
+    mediaFilter: "Media",
+    mediaCount: "Media",
+    amount: "S\u1ed1 ti\u1ec1n",
+    action: "Thao t\u00e1c",
+    departmentFilter: "B\u1ed9 ph\u1eadn",
+    allRequestDepartments: "T\u1ea5t c\u1ea3 b\u1ed9 ph\u1eadn",
+    departmentConstruction: "B\u1ed9 thi c\u00f4ng",
+    departmentExecutive: "Ban gi\u00e1m \u0111\u1ed1c",
+    departmentSales: "B\u1ed9 kinh doanh",
+    departmentDesign: "B\u1ed9 thi\u1ebft k\u1ebf",
+    departmentOperation: "B\u1ed9 nghi\u1ec7p v\u1ee5",
+    departmentMaintenance: "B\u1ed9 b\u1ea3o tr\u00ec",
+    departmentSurvey: "B\u1ed9 kh\u1ea3o s\u00e1t",
+    departmentOther: "B\u1ed9 kh\u00e1c",
+    prioritySort: "\u01afu ti\u00ean x\u1eed l\u00fd",
+    newest: "M\u1edbi nh\u1ea5t",
+    oldest: "C\u0169 nh\u1ea5t",
+    overdueFirst: "Qu\u00e1 h\u1ea1n tr\u01b0\u1edbc",
+    hasMedia: "C\u00f3 media",
+    noMedia: "Kh\u00f4ng media",
+    unjudged: "Ch\u01b0a \u0111\u00e1nh gi\u00e1",
+    urgencyUrgent: "Kh\u1ea9n c\u1ea5p",
+    urgencyHigh: "Cao",
+    urgencyMedium: "Trung b\u00ecnh",
+    urgencyLow: "Th\u1ea5p",
+    noRequests: "Kh\u00f4ng c\u00f3 y\u00eau c\u1ea7u.",
+    loadRequestsError: "Kh\u00f4ng th\u1ec3 t\u1ea3i danh s\u00e1ch y\u00eau c\u1ea7u"
+  });
+
   const state = {
     currentView: "dashboard",
     requests: [],
@@ -852,19 +946,42 @@
     });
   }
 
+  function requestDepartmentKeys() {
+    return ["construction", "executive", "sales", "design", "operation", "maintenance", "survey", "other"];
+  }
+
+  function normalizeDepartmentKey(value) {
+    const text = String(value || "").trim().toLowerCase();
+    if (!text || text === "-") return "";
+    if (/工務|工事|施工|thi công|construction|install/.test(text)) return "construction";
+    if (/社長|代表|役員|giám đốc|giam doc|executive|director|president/.test(text)) return "executive";
+    if (/営業|kinh doanh|sales|business/.test(text)) return "sales";
+    if (/設計|thiết kế|thiet ke|design|cad/.test(text)) return "design";
+    if (/業務|nghiệp vụ|nghiep vu|operation|admin|office/.test(text)) return "operation";
+    if (/メンテ|保守|修理|bảo trì|bao tri|maintenance|repair/.test(text)) return "maintenance";
+    if (/調査| khảo sát|khảo sát|khao sat|survey/.test(text)) return "survey";
+    if (/その他|khác|khac|other|misc/.test(text)) return "other";
+    return "other";
+  }
+
+  function departmentLabel(key) {
+    const labels = {
+      construction: t("departmentConstruction"),
+      executive: t("departmentExecutive"),
+      sales: t("departmentSales"),
+      design: t("departmentDesign"),
+      operation: t("departmentOperation"),
+      maintenance: t("departmentMaintenance"),
+      survey: t("departmentSurvey"),
+      other: t("departmentOther")
+    };
+    return labels[key] || labels.other;
+  }
+
   function requestDepartmentOptions() {
-    const defaults = [
-      t("departmentDesign"),
-      t("departmentConstruction"),
-      t("departmentOperation"),
-      t("departmentMaintenance"),
-      t("departmentSurvey"),
-      t("departmentSales"),
-      t("departmentOther")
-    ];
-    const fromStaff = state.staff.map(staff => staffDepartment(staff)).filter(value => value && value !== "-");
-    const departments = [...new Set(fromStaff.concat(defaults))];
-    return [["", t("departmentFilter")], ["all", t("allRequestDepartments")]].concat(departments.map(value => [value, value]));
+    const fromStaff = state.staff.map(staff => normalizeDepartmentKey(staffDepartment(staff))).filter(Boolean);
+    const keys = [...new Set(fromStaff.concat(requestDepartmentKeys()))];
+    return [["", t("departmentFilter")], ["all", t("allRequestDepartments")]].concat(keys.map(key => [key, departmentLabel(key)]));
   }
 
   function getRequestAssigneeDepartment(item) {
@@ -875,7 +992,7 @@
       const name = String(member?.name || "");
       return (id && id === assigneeId) || (name && name === assigneeName);
     });
-    return staff ? staffDepartment(staff) : "";
+    return staff ? normalizeDepartmentKey(staffDepartment(staff)) : "";
   }
 
   function filterRequests(items) {
@@ -983,6 +1100,7 @@
     const warningCount = state.requests.filter(isOverdue).length + pendingUserCount;
     const badgeByView = { requests: untreatedCount, customers: pendingUserCount, notifications: warningCount };
     if ($("globalSearch")) $("globalSearch").placeholder = t("search");
+    $("languageSelect").innerHTML = `<option value="vi">Ti\u1ebfng Vi\u1ec7t</option><option value="ja">\u65e5\u672c\u8a9e</option>`;
     $("languageSelect").value = state.lang;
     $("logoutButton").textContent = t("logout");
     $("refreshButton").textContent = t("refresh");
@@ -1283,7 +1401,7 @@
         <select class="request-filter-select" data-filter-select="staff"><option value="all" ${state.filters.staff === "all" ? "selected" : ""}>${escapeHtml(t("assignee"))}</option>${state.staff.map(staff => `<option value="${escapeHtml(getRowId(staff) || staff.name || "")}" ${state.filters.staff === getRowId(staff) ? "selected" : ""}>${escapeHtml(staff.name || "-")}</option>`).join("")}</select>
         <select class="request-filter-select" data-filter-select="urgency">
           <option value="all" ${state.filters.urgency === "all" ? "selected" : ""}>${escapeHtml(t("urgency"))}</option>
-          <option value="urgent" ${state.filters.urgency === "urgent" ? "selected" : ""}>urgent</option><option value="high" ${state.filters.urgency === "high" ? "selected" : ""}>high</option><option value="medium" ${state.filters.urgency === "medium" ? "selected" : ""}>medium</option><option value="low" ${state.filters.urgency === "low" ? "selected" : ""}>low</option><option value="none" ${state.filters.urgency === "none" ? "selected" : ""}>${escapeHtml(t("unjudged"))}</option>
+          <option value="urgent" ${state.filters.urgency === "urgent" ? "selected" : ""}>${escapeHtml(t("urgencyUrgent"))}</option><option value="high" ${state.filters.urgency === "high" ? "selected" : ""}>${escapeHtml(t("urgencyHigh"))}</option><option value="medium" ${state.filters.urgency === "medium" ? "selected" : ""}>${escapeHtml(t("urgencyMedium"))}</option><option value="low" ${state.filters.urgency === "low" ? "selected" : ""}>${escapeHtml(t("urgencyLow"))}</option><option value="none" ${state.filters.urgency === "none" ? "selected" : ""}>${escapeHtml(t("unjudged"))}</option>
         </select>
         <select class="request-filter-select" data-filter-select="media">
           <option value="all" ${state.filters.media === "all" ? "selected" : ""}>${escapeHtml(t("mediaFilter"))}</option>

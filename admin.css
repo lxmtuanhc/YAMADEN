@@ -52,6 +52,16 @@ button { cursor: pointer; }
 .search-box { height: 44px; border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 0 12px; display: flex; align-items: center; gap: 8px; min-width: 0; }
 .search-box input { width: 100%; border: 0; outline: 0; min-width: 0; background: transparent; }
 .language-select, .status-select, .field input, .field select, .field textarea { border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 10px 12px; color: var(--text); }
+.language-select,
+.request-filter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #64748b 50%), linear-gradient(135deg, #64748b 50%, transparent 50%);
+  background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%;
+  background-repeat: no-repeat;
+  background-size: 6px 6px, 6px 6px;
+}
 .admin-profile { display: flex; align-items: center; gap: 10px; min-width: 132px; }
 .admin-profile .avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--blue); font-weight: 900; }
 .admin-profile strong, .admin-profile span { display: block; line-height: 1.15; }
@@ -170,18 +180,18 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .segmented button { border: 0; border-radius: 9px; padding: 8px 12px; background: transparent; font-weight: 900; color: var(--muted); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-sizing: border-box; }
 .segmented button.active { background: #fff; color: var(--primary); box-shadow: 0 6px 16px rgba(15, 23, 42, .08); }
 .request-status-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; width: 100%; margin-bottom: 12px; }
-.request-status-chip { height: 54px; width: 100%; min-width: 0; border: 1px solid var(--border); background: #fff; color: var(--text); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 14px; box-sizing: border-box; font-weight: 900; white-space: nowrap; overflow: hidden; }
+.request-status-chip { height: 54px; width: 100%; min-width: 0; border: 1px solid var(--border); background: #fff; color: var(--text); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 0 14px; box-sizing: border-box; font-weight: 900; white-space: nowrap; overflow: hidden; }
 .request-status-chip .chip-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .request-status-chip .chip-count { min-width: 22px; height: 22px; border-radius: 999px; display: grid; place-items: center; background: #f1f5f9; color: var(--muted); font-size: 11px; flex: 0 0 auto; }
 .request-status-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .request-status-chip.active .chip-count { background: rgba(255,255,255,.2); color: #fff; }
-.request-filter-bar { display: grid; grid-template-columns: minmax(320px, 1.5fr) 140px repeat(5, minmax(170px, 1fr)); gap: 14px; align-items: center; width: 100%; margin-bottom: 14px; }
+.request-filter-bar { display: grid; grid-template-columns: minmax(300px, 1.5fr) 160px repeat(5, minmax(170px, 1fr)); gap: 14px; align-items: center; width: 100%; margin-bottom: 14px; }
 .request-search-input,
 .request-search-btn,
 .request-filter-select { height: 52px; width: 100%; min-width: 0; border-radius: 16px; box-sizing: border-box; font-size: 14px; }
 .request-search-input { border: 1px solid #dbe3ef; background: #fff; padding: 0 18px; color: #0f172a; font-weight: 700; }
 .request-search-btn { border: 0; background: linear-gradient(135deg, #2563eb, #06b6d4); color: #fff; font-weight: 900; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.request-filter-select { border: 1px solid #dbe3ef; background: #fff; color: #0f172a; font-weight: 800; padding: 0 40px 0 16px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.request-filter-select { border: 1px solid #dbe3ef; background-color: #fff; color: #0f172a; font-weight: 800; padding: 0 46px 0 16px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .request-view-toggle,
 .request-action-btn { min-width: 0; max-width: 100%; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .filter-input { min-height: 40px; border: 1px solid var(--border); border-radius: 10px; background: #fff; padding: 0 12px; min-width: 0; }
@@ -473,7 +483,7 @@ body {
 .field textarea {
   border-color: var(--border);
   border-radius: 14px;
-  background: #fff;
+  background-color: #fff;
   box-shadow: 0 1px 0 rgba(15, 23, 42, .02);
 }
 
@@ -1515,7 +1525,7 @@ body {
 
 .language-select {
   min-height: 40px;
-  padding: 8px 12px;
+  padding: 8px 46px 8px 14px;
   font-weight: 700;
 }
 
@@ -3500,7 +3510,7 @@ textarea {
 .language-select {
   min-width: 146px;
   height: 42px;
-  padding: 0 14px;
+  padding: 0 46px 0 14px;
 }
 
 .admin-profile {
