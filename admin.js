@@ -497,6 +497,82 @@
     dataApi: "Liên kết dữ liệu / API"
   });
 
+  Object.assign(i18n.ja, {
+    basicInfo: "\u57fa\u672c\u60c5\u5831",
+    contactInfo: "\u9023\u7d61\u5148\u60c5\u5831",
+    accountSecurity: "\u30a2\u30ab\u30a6\u30f3\u30c8\u30fb\u30bb\u30ad\u30e5\u30ea\u30c6\u30a3",
+    requestSummary: "\u4f9d\u983c\u30b5\u30de\u30ea\u30fc",
+    accountActions: "\u30a2\u30ab\u30a6\u30f3\u30c8\u64cd\u4f5c",
+    recentRequests: "\u6700\u8fd1\u306e\u4f9d\u983c\u5c65\u6b74",
+    customerId: "\u9867\u5ba2ID",
+    customerName: "\u9867\u5ba2\u540d",
+    displayName: "\u8868\u793a\u540d",
+    company: "\u4f1a\u793e",
+    customerType: "\u9867\u5ba2\u7a2e\u5225",
+    status: "\u30b9\u30c6\u30fc\u30bf\u30b9",
+    createdAt: "\u767b\u9332\u65e5",
+    updatedAt: "\u66f4\u65b0\u65e5",
+    lastLoginAt: "\u6700\u7d42\u30ed\u30b0\u30a4\u30f3",
+    profileCompleted: "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u5b8c\u4e86",
+    phone: "\u96fb\u8a71\u756a\u53f7",
+    email: "\u30e1\u30fc\u30eb",
+    contact: "\u9023\u7d61\u5148",
+    address: "\u4f4f\u6240",
+    province: "\u90fd\u9053\u5e9c\u770c\u30fb\u5730\u57df",
+    projectName: "\u5de5\u4e8b\u540d",
+    systemData: "\u305d\u306e\u4ed6\u30b7\u30b9\u30c6\u30e0\u30c7\u30fc\u30bf",
+    quoteRequests: "\u898b\u7a4d\u4f9d\u983c",
+    pinStatus: "PIN\u72b6\u614b",
+    pinSet: "PIN\u8a2d\u5b9a\u6e08\u307f",
+    pinUnset: "PIN\u672a\u8a2d\u5b9a",
+    pinSecurityNote: "PIN\u306f\u6697\u53f7\u5316\u3055\u308c\u3066\u3044\u308b\u305f\u3081\u3001\u7ba1\u7406\u8005\u306f\u73fe\u5728\u306ePIN\u3092\u78ba\u8a8d\u3067\u304d\u307e\u305b\u3093\u3002",
+    approve: "\u627f\u8a8d",
+    block: "\u505c\u6b62",
+    activate: "\u505c\u6b62\u89e3\u9664",
+    delete: "\u524a\u9664",
+    restore: "\u5fa9\u5143",
+    userHistory: "\u4f9d\u983c\u5c65\u6b74",
+    resetPin: "PIN\u30ea\u30bb\u30c3\u30c8"
+  });
+
+  Object.assign(i18n.vi, {
+    basicInfo: "Th\u00f4ng tin c\u01a1 b\u1ea3n",
+    contactInfo: "Th\u00f4ng tin li\u00ean h\u1ec7",
+    accountSecurity: "T\u00e0i kho\u1ea3n & b\u1ea3o m\u1eadt",
+    requestSummary: "T\u00f3m t\u1eaft y\u00eau c\u1ea7u",
+    accountActions: "Thao t\u00e1c t\u00e0i kho\u1ea3n",
+    recentRequests: "L\u1ecbch s\u1eed y\u00eau c\u1ea7u g\u1ea7n \u0111\u00e2y",
+    customerId: "ID kh\u00e1ch h\u00e0ng",
+    customerName: "T\u00ean kh\u00e1ch",
+    displayName: "T\u00ean hi\u1ec3n th\u1ecb",
+    company: "C\u00f4ng ty",
+    customerType: "Lo\u1ea1i kh\u00e1ch",
+    status: "Tr\u1ea1ng th\u00e1i",
+    createdAt: "Ng\u00e0y \u0111\u0103ng k\u00fd",
+    updatedAt: "Ng\u00e0y c\u1eadp nh\u1eadt",
+    lastLoginAt: "\u0110\u0103ng nh\u1eadp cu\u1ed1i",
+    profileCompleted: "H\u1ed3 s\u01a1 ho\u00e0n t\u1ea5t",
+    phone: "S\u1ed1 \u0111i\u1ec7n tho\u1ea1i",
+    email: "Email",
+    contact: "Ng\u01b0\u1eddi li\u00ean h\u1ec7",
+    address: "\u0110\u1ecba ch\u1ec9",
+    province: "T\u1ec9nh/khu v\u1ef1c",
+    projectName: "T\u00ean c\u00f4ng tr\u00ecnh",
+    systemData: "D\u1eef li\u1ec7u h\u1ec7 th\u1ed1ng kh\u00e1c",
+    quoteRequests: "Y\u00eau c\u1ea7u b\u00e1o gi\u00e1",
+    pinStatus: "Tr\u1ea1ng th\u00e1i PIN",
+    pinSet: "\u0110\u00e3 thi\u1ebft l\u1eadp PIN",
+    pinUnset: "Ch\u01b0a thi\u1ebft l\u1eadp PIN",
+    pinSecurityNote: "PIN \u0111\u01b0\u1ee3c m\u00e3 h\u00f3a, admin kh\u00f4ng th\u1ec3 xem PIN hi\u1ec7n t\u1ea1i.",
+    approve: "Duy\u1ec7t",
+    block: "Kh\u00f3a",
+    activate: "M\u1edf kh\u00f3a",
+    delete: "X\u00f3a",
+    restore: "Kh\u00f4i ph\u1ee5c",
+    userHistory: "L\u1ecbch s\u1eed y\u00eau c\u1ea7u",
+    resetPin: "Reset PIN"
+  });
+
   Object.assign(requestStatusMap, {
     untreated: "\u672a\u5bfe\u5fdc",
     contacted: "\u9023\u7d61\u6e08",
@@ -1548,6 +1624,30 @@
     return `<div class="info-item"><b>${escapeHtml(label)}</b><span>${escapeHtml(value || "-")}</span></div>`;
   }
 
+  function customerInfoItem(label, value) {
+    return `<div class="customer-info-item"><div class="customer-info-label">${escapeHtml(label)}</div><div class="customer-info-value">${escapeHtml(value || "-")}</div></div>`;
+  }
+
+  function displayBoolean(value) {
+    if (value === true) return state.lang === "vi" ? "C\u00f3" : "\u3042\u308a";
+    if (value === false) return state.lang === "vi" ? "Kh\u00f4ng" : "\u306a\u3057";
+    return "-";
+  }
+
+  function displayCustomerValue(value) {
+    if (value === true || value === false) return displayBoolean(value);
+    if (Array.isArray(value)) return value.filter(item => item !== undefined && item !== null && item !== "").map(item => displayCustomerValue(item)).join(", ");
+    if (value && typeof value === "object") {
+      const safeObject = Object.fromEntries(Object.entries(value).filter(([key]) => !isSensitiveCustomerField(key)));
+      return Object.keys(safeObject).length ? JSON.stringify(safeObject) : "-";
+    }
+    return value || "-";
+  }
+
+  function isSensitiveCustomerField(key) {
+    return /pin|password|hash|token|secret|jwt|credential|session/i.test(String(key || ""));
+  }
+
   function collectMedia(request) {
     const media = [];
     if (Array.isArray(request.mediaFiles)) media.push(...request.mediaFiles);
@@ -1905,7 +2005,7 @@
       <td><div class="actions crm-actions">
         <button class="btn btn-soft" type="button" data-customer-action="detail" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
         ${canApprove ? `<button class="btn btn-soft" type="button" data-customer-action="approve" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("approve"))}</button>` : ""}
-        ${status === "deleted" ? `<button class="btn btn-soft" type="button" data-customer-action="restore" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("activate"))}</button>` : `<button class="btn btn-soft" type="button" data-customer-action="${toggleAction}" data-customer-id="${escapeHtml(id)}">${escapeHtml(toggleLabel)}</button>`}
+        ${status === "deleted" ? `<button class="btn btn-soft" type="button" data-customer-action="restore" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("restore"))}</button>` : `<button class="btn btn-soft" type="button" data-customer-action="${toggleAction}" data-customer-id="${escapeHtml(id)}">${escapeHtml(toggleLabel)}</button>`}
         <button class="btn btn-danger" type="button" data-customer-action="delete" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>
       </div></td>
     </tr>`;
@@ -1915,44 +2015,71 @@
     if (!user) return "";
     const id = getRowId(user);
     const status = normalizeUserStatusValue(user.status);
-    const related = state.requests.filter(request => String(request.userId || request.customerId || "") === String(id)).slice(0, 5);
-    const activeRequests = related.filter(request => !["completed", "lost"].includes(normalizeRequestStatus(request.status))).length;
-    const lastRequest = related[0]?.createdAt || user.lastRequestAt || user.updatedAt || user.createdAt;
+    const allRelated = state.requests.filter(request => {
+      const requestUserId = request.userId || request.customerId || request.user?._id || request.user?.id || "";
+      return String(requestUserId) === String(id);
+    });
+    const related = allRelated.slice(0, 5);
+    const activeRequests = allRelated.filter(request => !["completed", "lost"].includes(normalizeRequestStatus(request.status))).length;
+    const quoteRequests = allRelated.filter(request => request.quoteRequested || normalizeRequestStatus(request.status) === "quoted").length;
+    const lastRequest = allRelated[0]?.createdAt || user.lastRequestAt || user.updatedAt || user.createdAt;
+    const hasPin = user.hasPin === true || user.pinSet === true;
+    const shownKeys = new Set([
+      "_id", "id", "name", "displayName", "fullName", "company", "companyName", "customerType", "accountType", "status",
+      "createdAt", "updatedAt", "lastLoginAt", "profileCompleted", "phone", "email", "contact", "contactPerson",
+      "address", "companyAddress", "province", "region", "projectName", "note", "contactNote", "requestCount",
+      "lastRequestAt", "hasPin", "pinSet", "__history", "__historyLoaded"
+    ]);
+    const systemItems = Object.entries(user)
+      .filter(([key, value]) => !shownKeys.has(key) && !isSensitiveCustomerField(key) && value !== undefined && value !== null && value !== "")
+      .filter(([, value]) => typeof value !== "function")
+      .slice(0, 12);
     return `<aside class="detail-panel customer-detail-panel">
       <div class="detail-panel-head">
         ${avatarHtml(user, "avatar-large")}
         <div><h2>${escapeHtml(user.company || user.companyName || user.name || user.phone || "-")}</h2><p>${escapeHtml(user.name || user.contact || t("selectedDetail"))}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(customerStatusLabel(status))}</span></div>
         <button class="customer-detail-close" type="button" data-customer-action="close-detail" aria-label="${escapeHtml(t("closeCustomerDetail"))}">&times;</button>
       </div>
-      <section><h3>${escapeHtml(t("contactInfo"))}</h3><div class="contact-grid">
-          ${infoItem(t("phone"), user.phone)}
-          ${infoItem(t("email"), user.email)}
-          ${infoItem(t("address"), user.address || user.companyAddress)}
-          ${infoItem(t("contact"), user.contact)}
+      <section><h3>${escapeHtml(t("basicInfo"))}</h3><div class="customer-info-grid">
+          ${customerInfoItem(t("customerId"), id)}
+          ${customerInfoItem(t("customerName"), user.name)}
+          ${customerInfoItem(t("displayName"), user.displayName || user.fullName)}
+          ${customerInfoItem(t("company"), user.company || user.companyName)}
+          ${customerInfoItem(t("customerType"), user.customerType || user.accountType)}
+          ${customerInfoItem(t("status"), customerStatusLabel(status))}
+          ${customerInfoItem(t("createdAt"), formatDate(user.createdAt))}
+          ${customerInfoItem(t("updatedAt"), formatDate(user.updatedAt))}
+          ${customerInfoItem(t("lastLoginAt"), formatDate(user.lastLoginAt))}
+          ${customerInfoItem(t("profileCompleted"), user.profileCompleted === undefined ? "-" : displayBoolean(Boolean(user.profileCompleted)))}
         </div></section>
-      <section><h3>${escapeHtml(t("accountInfo"))}</h3><div class="contact-grid">
-          ${infoItem(t("customerType"), user.customerType || user.accountType)}
-          ${infoItem(t("company"), user.company || user.companyName)}
-          ${infoItem(t("lastLoginAt"), formatDate(user.lastLoginAt))}
-          ${infoItem(t("createdAt"), formatDate(user.createdAt))}
+      <section><h3>${escapeHtml(t("contactInfo"))}</h3><div class="customer-info-grid">
+          ${customerInfoItem(t("phone"), user.phone)}
+          ${customerInfoItem(t("email"), user.email)}
+          ${customerInfoItem(t("contact"), user.contact || user.contactPerson)}
+          ${customerInfoItem(t("address"), user.address || user.companyAddress)}
+          ${customerInfoItem(t("province"), user.province || user.region)}
+          ${customerInfoItem(t("projectName"), user.projectName)}
+          ${customerInfoItem(t("note"), user.contactNote || user.note)}
         </div></section>
-      <section><h3>${escapeHtml(t("performance"))}</h3><div class="mini-kpi-row">
+      <section><h3>${escapeHtml(t("accountSecurity"))}</h3><div class="customer-info-grid">
+          ${customerInfoItem(t("pinStatus"), hasPin ? t("pinSet") : t("pinUnset"))}
+        </div><div class="note-card">${escapeHtml(t("pinSecurityNote"))}</div></section>
+      <section><h3>${escapeHtml(t("requestSummary"))}</h3><div class="mini-kpi-row">
           ${miniMetric(t("requestCount"), userRequestCount(user))}
           ${miniMetric(t("activeRequests"), activeRequests)}
-          ${miniMetric(t("quoteRegister"), "-")}
+          ${miniMetric(t("quoteRequests"), quoteRequests)}
           ${miniMetric(t("lastRequest"), formatDate(lastRequest))}
         </div></section>
-      <div class="modal-actions">
+      ${systemItems.length ? `<section><h3>${escapeHtml(t("systemData"))}</h3><div class="customer-info-grid">${systemItems.map(([key, value]) => customerInfoItem(key, displayCustomerValue(value))).join("")}</div></section>` : ""}
+      <section><h3>${escapeHtml(t("accountActions"))}</h3><div class="modal-actions">
         ${status === "pendingApproval" ? `<button class="btn btn-soft" type="button" data-customer-action="approve" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("approve"))}</button>` : ""}
         ${status === "blocked" ? `<button class="btn btn-soft" type="button" data-customer-action="unblock" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("activate"))}</button>` : ""}
         ${status === "active" ? `<button class="btn btn-soft" type="button" data-customer-action="block" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("block"))}</button>` : ""}
-        ${status === "deleted" ? `<button class="btn btn-soft" type="button" data-customer-action="restore" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("activate"))}</button>` : ""}
+        ${status === "deleted" ? `<button class="btn btn-soft" type="button" data-customer-action="restore" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("restore"))}</button>` : ""}
         <button class="btn btn-soft" type="button" data-customer-action="view-requests" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("userHistory"))}</button>
         <button class="btn btn-danger" type="button" data-customer-action="delete" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>
-      </div>
+      </div></section>
       <section><h3>${escapeHtml(t("recentRequests"))}</h3><div class="priority-list">${related.length ? related.map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getRequestContent(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState()}</div></section>
-      <section><h3>${escapeHtml(t("internalNotes"))}</h3><div class="note-card">${escapeHtml(user.note || t("planned"))}</div></section>
-      <section><h3>${escapeHtml(t("tags"))}</h3>${tagChips([user.customerType, user.province, user.constructionType].filter(Boolean))}</section>
     </aside>`;
   }
 

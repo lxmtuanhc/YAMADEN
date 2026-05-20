@@ -298,6 +298,7 @@ function publicUser(user) {
   const item = user.toObject ? user.toObject() : { ...user };
   item.id = String(item._id || item.id || "");
   item.status = normalizeUserStatus(item.status);
+  item.hasPin = Boolean(item.pinHash);
   delete item.pinHash;
   return item;
 }
