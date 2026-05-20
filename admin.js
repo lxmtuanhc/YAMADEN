@@ -1129,7 +1129,7 @@
   }
 
   function getRequestMediaCount(request) {
-    return collectMedia(request).length;
+    return normalizeRequestMedia(request).length;
   }
 
   function hasQuoteRequested(request) {
@@ -1792,7 +1792,7 @@
 
   function renderRequestDetail(request) {
     const id = getRowId(request);
-    const media = collectMedia(request);
+    const media = normalizeRequestMedia(request);
     const timeline = Array.isArray(request.timeline) ? request.timeline : [];
     const suggestion = recommendAssignee(request);
     const existing = $("requestDetailOverlay");
@@ -1885,19 +1885,102 @@
     return "-";
   }
 
+  function guessMediaType(url) {
+    const clean = String(url || "").split("?")[0].toLowerCase();
+    if (/\.(mp4|mov|webm|m4v|avi)$/i.test(clean)) return "video";
+    if (/\.(jpg|jpeg|png|gif|webp|heic|heif|bmp)$/i.test(clean)) return "image";
+    if (clean.includes("/video/upload/")) return "video";
+    if (clean.includes("/image/upload/")) return "image";
+    return "image";
+  }
+
+  function normalizeMediaUrl(url) {
+    return String(url || "")
+      .trim()
+      .replace(/^http:\/\//i, "https://")
+      .replace(/\?.*$/, "")
+      .replace(/#.*$/, "");
+  }
+
+  function dedupeMedia(items) {
+    const seen = new Set();
+    const result = [];
+    for (const item of items || []) {
+      if (!item || !item.url) continue;
+      const key = normalizeMediaUrl(item.url);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      result.push(Object.assign({}, item, {
+        url: item.url,
+        type: item.type || guessMediaType(item.url)
+      }));
+    }
+    return result;
+  }
+
+  function normalizeRequestMedia(request) {
+    const raw = [];
+    if (Array.isArray(request?.mediaFiles)) {
+      request.mediaFiles.forEach(item => {
+        if (!item) return;
+        if (typeof item === "string") {
+          raw.push({ url: item, type: guessMediaType(item), source: "mediaFiles" });
+          return;
+        }
+        const url = item.url || item.secureUrl || item.secure_url || item.path || item.src;
+        if (!url) return;
+        raw.push({
+          url,
+          type: item.type || item.mediaType || guessMediaType(url),
+          source: "mediaFiles"
+        });
+      });
+    }
+    if (request?.mediaUrl) {
+      raw.push({ url: request.mediaUrl, type: request.mediaType || guessMediaType(request.mediaUrl), source: "mediaUrl" });
+    }
+    if (request?.image) {
+      raw.push({ url: request.image, type: "image", source: "image" });
+    }
+    if (Array.isArray(request?.images)) {
+      request.images.forEach(url => {
+        if (url) raw.push({ url, type: "image", source: "images" });
+      });
+    }
+    if (Array.isArray(request?.attachments)) {
+      request.attachments.forEach(item => {
+        if (!item) return;
+        const url = typeof item === "string" ? item : (item.url || item.secureUrl || item.secure_url || item.path || item.src);
+        if (!url) return;
+        raw.push({
+          url,
+          type: typeof item === "string" ? guessMediaType(url) : (item.type || item.mediaType || guessMediaType(url)),
+          source: "attachments"
+        });
+      });
+    }
+    if (Array.isArray(request?.files)) {
+      request.files.forEach(item => {
+        if (!item) return;
+        const url = typeof item === "string" ? item : (item.url || item.secureUrl || item.secure_url || item.path || item.src);
+        if (!url) return;
+        raw.push({
+          url,
+          type: typeof item === "string" ? guessMediaType(url) : (item.type || item.mediaType || guessMediaType(url)),
+          source: "files"
+        });
+      });
+    }
+    return dedupeMedia(raw);
+  }
+
   function collectMedia(request) {
-    const media = [];
-    if (Array.isArray(request.mediaFiles)) media.push(...request.mediaFiles);
-    if (request.mediaUrl) media.push({ url: request.mediaUrl, type: request.mediaType });
-    if (request.image) media.push({ url: request.image, type: "image" });
-    if (Array.isArray(request.images)) request.images.forEach(url => media.push({ url, type: "image" }));
-    if (Array.isArray(request.files)) request.files.forEach(item => media.push(typeof item === "string" ? { url: item, type: "image" } : item));
-    return media.filter(item => item && (item.url || item.secureUrl));
+    return normalizeRequestMedia(request);
   }
 
   function renderMedia(item) {
     const url = item.secureUrl || item.url;
-    const type = item.type || item.resourceType || (/(\.mp4|\.mov|\.webm|\.m4v)(\?|$)/i.test(url) ? "video" : "image");
+    const type = item.type || item.resourceType || guessMediaType(url);
     return type === "video"
       ? `<video src="${escapeHtml(url)}" controls playsinline></video>`
       : `<img src="${escapeHtml(url)}" alt="">`;
