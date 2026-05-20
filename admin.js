@@ -1311,10 +1311,9 @@
       overlay.innerHTML = `
         <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="adminConfirmTitle">
           <div class="confirm-header">
-            <h3 id="adminConfirmTitle">${escapeHtml(config.title)}</h3>
-            <button class="confirm-close" type="button" data-confirm-cancel aria-label="${escapeHtml(t("close"))}">&times;</button>
+            <h3 class="confirm-title" id="adminConfirmTitle">${escapeHtml(config.title)}</h3>
           </div>
-          ${config.message ? `<div class="confirm-body"><p>${escapeHtml(config.message)}</p></div>` : ""}
+          ${config.message ? `<div class="confirm-body"><p class="confirm-message">${escapeHtml(config.message)}</p></div>` : ""}
           <div class="confirm-footer">
             <button class="confirm-cancel-btn" type="button" data-confirm-cancel>${escapeHtml(config.cancelLabel)}</button>
             <button class="confirm-submit-btn${config.danger ? " danger" : ""}" type="button" data-confirm-submit>${escapeHtml(config.confirmLabel)}</button>
