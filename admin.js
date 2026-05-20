@@ -277,8 +277,9 @@
     createQuote: "\u898b\u7a4d\u4f5c\u6210",
     addNote: "\u5bfe\u5fdc\u30e1\u30e2\u8ffd\u52a0",
     customerPreview: "\u65b0\u898f\u30fb\u627f\u8a8d\u5f85\u3061\u9867\u5ba2",
-    customerDetailEmpty: "\u9867\u5ba2\u3092\u9078\u629e\u3059\u308b\u3068\u8a73\u7d30\u304c\u8868\u793a\u3055\u308c\u307e\u3059\u3002",
     closeCustomerDetail: "\u9867\u5ba2\u8a73\u7d30\u3092\u9589\u3058\u308b",
+    contactInfo: "\u9023\u7d61\u5148\u60c5\u5831",
+    accountInfo: "\u30a2\u30ab\u30a6\u30f3\u30c8\u60c5\u5831",
     staffPreview: "\u30b9\u30bf\u30c3\u30d5\u7a3c\u50cd\u72b6\u6cc1",
     all: "\u3059\u3079\u3066",
     tableView: "\u8868",
@@ -331,8 +332,9 @@
     createQuote: "T\u1ea1o b\u00e1o gi\u00e1",
     addNote: "Th\u00eam ghi ch\u00fa x\u1eed l\u00fd",
     customerPreview: "Kh\u00e1ch h\u00e0ng m\u1edbi / ch\u1edd duy\u1ec7t",
-    customerDetailEmpty: "Ch\u1ecdn m\u1ed9t kh\u00e1ch h\u00e0ng \u0111\u1ec3 xem chi ti\u1ebft.",
     closeCustomerDetail: "\u0110\u00f3ng chi ti\u1ebft kh\u00e1ch h\u00e0ng",
+    contactInfo: "Th\u00f4ng tin li\u00ean h\u1ec7",
+    accountInfo: "Th\u00f4ng tin t\u00e0i kho\u1ea3n",
     staffPreview: "T\u1ea3i staff",
     all: "T\u1ea5t c\u1ea3",
     tableView: "B\u1ea3ng",
@@ -1753,8 +1755,8 @@
     const rows = filterUsers();
     const totalWithRequests = state.users.filter(user => userRequestCount(user) > 0).length;
     const statusOptions = ["all", "pendingApproval", "active", "blocked", "deleted"];
-    const selected = rows.find(user => getRowId(user) === state.selectedUser) || rows[0] || null;
-    if (selected) state.selectedUser = getRowId(selected);
+    const selected = rows.find(user => getRowId(user) === state.selectedUser) || null;
+    if (state.selectedUser && !selected) state.selectedUser = "";
     $("viewRoot").innerHTML = `
       <div class="page-intro"><p>${escapeHtml(t("customerSubtitle"))}</p></div>
       <div class="kpi-grid kpi-grid-small" id="customerKpiGrid">
@@ -1771,14 +1773,14 @@
           <option value="status" ${state.filters.customerSort === "status" ? "selected" : ""}>${escapeHtml(t("sortStatus"))}</option>
         </select>
       </div>
-      <div class="split-layout customer-crm-layout">
-        <section class="section-card split-main">
+      <div class="customer-layout ${selected ? "has-detail" : "is-list-only"}">
+        <section class="section-card customer-list-panel">
           <div class="panel-head"><h2>${escapeHtml(t("customers"))}</h2><span class="note" id="customerCountNote">${rows.length} / ${state.users.length}</span></div>
           <div class="panel-body crm-table-body" id="customerTableRoot">
             ${renderCustomerTable(rows, selected)}
           </div>
         </section>
-        <div id="customerPanelRoot">${renderCustomerPanel(selected)}</div>
+        ${selected ? `<div id="customerPanelRoot">${renderCustomerPanel(selected)}</div>` : ""}
       </div>
     `;
   }
@@ -1800,27 +1802,25 @@
 
   function closeCustomerDetail() {
     state.selectedUser = "";
-    const rows = filterUsers();
-    if (!$("customerTableRoot") || !$("customerPanelRoot")) {
-      renderCustomers();
-      return;
-    }
-    $("customerTableRoot").innerHTML = renderCustomerTable(rows, null);
-    $("customerPanelRoot").innerHTML = renderCustomerPanel(null);
+    renderCustomers();
   }
 
   function renderCustomerResultsOnly() {
     const rows = filterUsers();
-    const selected = rows.find(user => getRowId(user) === state.selectedUser) || rows[0] || null;
-    state.selectedUser = selected ? getRowId(selected) : "";
-    if (!$("customerTableRoot") || !$("customerPanelRoot")) {
+    const selected = rows.find(user => getRowId(user) === state.selectedUser) || null;
+    if (state.selectedUser && !selected) {
+      state.selectedUser = "";
+      renderCustomers();
+      return;
+    }
+    if (!$("customerTableRoot")) {
       renderCustomers();
       return;
     }
     if ($("customerKpiGrid")) $("customerKpiGrid").innerHTML = renderCustomerKpis();
     if ($("customerCountNote")) $("customerCountNote").textContent = `${rows.length} / ${state.users.length}`;
     $("customerTableRoot").innerHTML = renderCustomerTable(rows, selected);
-    $("customerPanelRoot").innerHTML = renderCustomerPanel(selected);
+    if ($("customerPanelRoot")) $("customerPanelRoot").innerHTML = renderCustomerPanel(selected);
   }
 
   async function handleCustomerAction(action, trigger) {
@@ -1836,12 +1836,11 @@
     state.selectedUser = id;
 
     if (action === "select") {
-      renderCustomerResultsOnly();
+      renderCustomers();
       return;
     }
     if (action === "detail") {
-      renderCustomerResultsOnly();
-      await renderCustomerDetail(user);
+      renderCustomers();
       return;
     }
     if (action === "view-requests") {
@@ -1895,7 +1894,7 @@
   }
 
   function renderCustomerPanel(user) {
-    if (!user) return `<aside class="detail-panel customer-detail-panel">${showEmptyState(t("customerDetailEmpty"))}</aside>`;
+    if (!user) return "";
     const id = getRowId(user);
     const status = normalizeUserStatusValue(user.status);
     const related = state.requests.filter(request => String(request.userId || request.customerId || "") === String(id)).slice(0, 5);
@@ -1905,22 +1904,26 @@
       <div class="detail-panel-head">
         ${avatarHtml(user, "avatar-large")}
         <div><h2>${escapeHtml(user.company || user.companyName || user.name || user.phone || "-")}</h2><p>${escapeHtml(user.name || user.contact || t("selectedDetail"))}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(customerStatusLabel(status))}</span></div>
-        <button class="customer-detail-close" type="button" data-customer-action="close-detail" aria-label="${escapeHtml(t("closeCustomerDetail"))}">×</button>
+        <button class="customer-detail-close" type="button" data-customer-action="close-detail" aria-label="${escapeHtml(t("closeCustomerDetail"))}">&times;</button>
       </div>
-      <div class="contact-grid">
-        ${infoItem(t("phone"), user.phone)}
-        ${infoItem(t("email"), user.email)}
-        ${infoItem(t("address"), user.address || user.companyAddress)}
-        ${infoItem(t("customerType"), user.customerType || user.accountType)}
-        ${infoItem(t("company"), user.company || user.companyName)}
-        ${infoItem(t("lastLoginAt"), formatDate(user.lastLoginAt))}
-      </div>
-      <div class="mini-kpi-row">
-        ${miniMetric(t("requestCount"), userRequestCount(user))}
-        ${miniMetric(t("activeRequests"), activeRequests)}
-        ${miniMetric(t("quoteRegister"), "-")}
-        ${miniMetric(t("lastRequest"), formatDate(lastRequest))}
-      </div>
+      <section><h3>${escapeHtml(t("contactInfo"))}</h3><div class="contact-grid">
+          ${infoItem(t("phone"), user.phone)}
+          ${infoItem(t("email"), user.email)}
+          ${infoItem(t("address"), user.address || user.companyAddress)}
+          ${infoItem(t("contact"), user.contact)}
+        </div></section>
+      <section><h3>${escapeHtml(t("accountInfo"))}</h3><div class="contact-grid">
+          ${infoItem(t("customerType"), user.customerType || user.accountType)}
+          ${infoItem(t("company"), user.company || user.companyName)}
+          ${infoItem(t("lastLoginAt"), formatDate(user.lastLoginAt))}
+          ${infoItem(t("createdAt"), formatDate(user.createdAt))}
+        </div></section>
+      <section><h3>${escapeHtml(t("performance"))}</h3><div class="mini-kpi-row">
+          ${miniMetric(t("requestCount"), userRequestCount(user))}
+          ${miniMetric(t("activeRequests"), activeRequests)}
+          ${miniMetric(t("quoteRegister"), "-")}
+          ${miniMetric(t("lastRequest"), formatDate(lastRequest))}
+        </div></section>
       <div class="modal-actions">
         ${status === "pendingApproval" ? `<button class="btn btn-soft" type="button" data-customer-action="approve" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("approve"))}</button>` : ""}
         ${status === "blocked" ? `<button class="btn btn-soft" type="button" data-customer-action="unblock" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("activate"))}</button>` : ""}
