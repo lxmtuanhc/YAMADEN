@@ -30,6 +30,8 @@ export const ja = {
   "auth.loginErrorRequired": "入力が不足しています",
   "auth.loginErrorInvalid": "電話番号またはPINが正しくありません",
   "auth.loginErrorPending": "アカウントは現在承認待ちです",
+  "auth.loginErrorBlocked": "アカウントが停止されています。サポートまでお問い合わせください。",
+  "auth.loginErrorDeleted": "このアカウントは削除済み、または利用できません。",
   "auth.register": "新規登録",
   "auth.phone": "電話番号",
   "auth.pin": "6桁のPINコード",

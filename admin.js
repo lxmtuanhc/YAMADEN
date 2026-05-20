@@ -526,6 +526,27 @@
     confirmBlock: "\u3053\u306e\u9867\u5ba2\u30a2\u30ab\u30a6\u30f3\u30c8\u3092\u505c\u6b62\u3057\u307e\u3059\u304b\uff1f",
     confirmResetPin: "PIN\u3092\u30ea\u30bb\u30c3\u30c8\u3057\u307e\u3059\u304b\uff1f",
     backendPlanned: "\u3053\u306e\u6a5f\u80fd\u306f\u5f8c\u3067\u30d0\u30c3\u30af\u30a8\u30f3\u30c9\u306b\u63a5\u7d9a\u3055\u308c\u307e\u3059\u3002",
+    cancel: "\u30ad\u30e3\u30f3\u30bb\u30eb",
+    confirm: "\u78ba\u8a8d",
+    blockCustomerTitle: "\u9867\u5ba2\u30a2\u30ab\u30a6\u30f3\u30c8\u3092\u505c\u6b62\u3057\u307e\u3059\u304b\uff1f",
+    blockCustomerText: "\u505c\u6b62\u3059\u308b\u3068\u3001\u3053\u306e\u9867\u5ba2\u306f\u89e3\u9664\u3055\u308c\u308b\u307e\u3067\u30a2\u30d7\u30ea\u306b\u30ed\u30b0\u30a4\u30f3\u3067\u304d\u307e\u305b\u3093\u3002",
+    blockCustomerConfirm: "\u505c\u6b62\u3059\u308b",
+    unblockCustomerTitle: "\u505c\u6b62\u3092\u89e3\u9664\u3057\u307e\u3059\u304b\uff1f",
+    unblockCustomerText: "\u9867\u5ba2\u306f\u518d\u3073\u30a2\u30d7\u30ea\u3092\u5229\u7528\u3067\u304d\u308b\u3088\u3046\u306b\u306a\u308a\u307e\u3059\u3002",
+    deleteCustomerTitle: "\u3053\u306e\u9867\u5ba2\u3092\u524a\u9664\u3057\u307e\u3059\u304b\uff1f",
+    deleteCustomerText: "\u9867\u5ba2\u306f\u30b4\u30df\u7bb1\u3078\u79fb\u52d5\u3055\u308c\u307e\u3059\u3002\u5b8c\u5168\u524a\u9664\u3055\u308c\u308b\u524d\u306b\u5fa9\u5143\u3067\u304d\u307e\u3059\u3002",
+    moveToTrash: "\u30b4\u30df\u7bb1\u3078\u79fb\u52d5",
+    customerMovedToTrash: "\u9867\u5ba2\u3092\u30b4\u30df\u7bb1\u3078\u79fb\u52d5\u3057\u307e\u3057\u305f\u3002",
+    restoreCustomerTitle: "\u9867\u5ba2\u3092\u5fa9\u5143\u3057\u307e\u3059\u304b\uff1f",
+    restoreCustomerText: "\u5fa9\u5143\u3059\u308b\u3068\u3001\u9867\u5ba2\u306f\u518d\u3073\u30a2\u30d7\u30ea\u3092\u5229\u7528\u3067\u304d\u308b\u3088\u3046\u306b\u306a\u308a\u307e\u3059\u3002",
+    customerRestored: "\u9867\u5ba2\u3092\u5fa9\u5143\u3057\u307e\u3057\u305f\u3002",
+    permanentDelete: "\u5b8c\u5168\u524a\u9664",
+    permanentDeleteCustomerTitle: "\u9867\u5ba2\u3092\u5b8c\u5168\u306b\u524a\u9664\u3057\u307e\u3059\u304b\uff1f",
+    permanentDeleteCustomerText: "\u3053\u306e\u64cd\u4f5c\u306f\u5143\u306b\u623b\u305b\u307e\u305b\u3093\u3002\u672c\u5f53\u306b\u524a\u9664\u3057\u3066\u3088\u3044\u5834\u5408\u306e\u307f\u5b9f\u884c\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+    permanentDeletePlanned: "\u5b8c\u5168\u524a\u9664\u6a5f\u80fd\u306f\u5f8c\u3067\u30d0\u30c3\u30af\u30a8\u30f3\u30c9\u306b\u63a5\u7d9a\u3055\u308c\u307e\u3059\u3002",
+    resetPinTitle: "\u9867\u5ba2\u306ePIN\u3092\u30ea\u30bb\u30c3\u30c8\u3057\u307e\u3059\u304b\uff1f",
+    resetPinText: "\u73fe\u5728\u306ePIN\u306f\u7121\u52b9\u306b\u306a\u308a\u307e\u3059\u3002\u9867\u5ba2\u306f\u65b0\u3057\u3044PIN\u3092\u8a2d\u5b9a\u3059\u308b\u5fc5\u8981\u304c\u3042\u308a\u307e\u3059\u3002",
+    trashRetentionNote: "\u524a\u9664\u65e5\u304b\u308930\u65e5\u5f8c\u306b\u5b8c\u5168\u524a\u9664\u3055\u308c\u307e\u3059\u3002",
     pinStatus: "PIN\u72b6\u614b",
     pinSet: "PIN\u8a2d\u5b9a\u6e08\u307f",
     pinUnset: "PIN\u672a\u8a2d\u5b9a",
@@ -568,6 +589,27 @@
     confirmBlock: "B\u1ea1n mu\u1ed1n kh\u00f3a t\u00e0i kho\u1ea3n kh\u00e1ch h\u00e0ng n\u00e0y?",
     confirmResetPin: "B\u1ea1n mu\u1ed1n reset PIN cho kh\u00e1ch h\u00e0ng n\u00e0y?",
     backendPlanned: "Ch\u1ee9c n\u0103ng n\u00e0y s\u1ebd \u0111\u01b0\u1ee3c k\u1ebft n\u1ed1i backend sau.",
+    cancel: "H\u1ee7y",
+    confirm: "X\u00e1c nh\u1eadn",
+    blockCustomerTitle: "Kh\u00f3a t\u00e0i kho\u1ea3n kh\u00e1ch h\u00e0ng?",
+    blockCustomerText: "Kh\u00e1ch h\u00e0ng s\u1ebd kh\u00f4ng th\u1ec3 \u0111\u0103ng nh\u1eadp v\u00e0 s\u1eed d\u1ee5ng app cho \u0111\u1ebfn khi \u0111\u01b0\u1ee3c m\u1edf kh\u00f3a.",
+    blockCustomerConfirm: "X\u00e1c nh\u1eadn kh\u00f3a",
+    unblockCustomerTitle: "M\u1edf kh\u00f3a kh\u00e1ch h\u00e0ng?",
+    unblockCustomerText: "Kh\u00e1ch h\u00e0ng s\u1ebd \u0111\u01b0\u1ee3c k\u00edch ho\u1ea1t l\u1ea1i v\u00e0 c\u00f3 th\u1ec3 s\u1eed d\u1ee5ng app.",
+    deleteCustomerTitle: "X\u00f3a kh\u00e1ch h\u00e0ng n\u00e0y?",
+    deleteCustomerText: "Kh\u00e1ch h\u00e0ng s\u1ebd \u0111\u01b0\u1ee3c chuy\u1ec3n v\u00e0o th\u00f9ng r\u00e1c. B\u1ea1n c\u00f3 th\u1ec3 kh\u00f4i ph\u1ee5c trong v\u00f2ng 30 ng\u00e0y tr\u01b0\u1edbc khi x\u00f3a v\u0129nh vi\u1ec5n.",
+    moveToTrash: "Chuy\u1ec3n v\u00e0o th\u00f9ng r\u00e1c",
+    customerMovedToTrash: "Kh\u00e1ch h\u00e0ng \u0111\u00e3 \u0111\u01b0\u1ee3c chuy\u1ec3n v\u00e0o th\u00f9ng r\u00e1c.",
+    restoreCustomerTitle: "Kh\u00f4i ph\u1ee5c kh\u00e1ch h\u00e0ng?",
+    restoreCustomerText: "Kh\u00e1ch h\u00e0ng s\u1ebd \u0111\u01b0\u1ee3c k\u00edch ho\u1ea1t l\u1ea1i v\u00e0 c\u00f3 th\u1ec3 s\u1eed d\u1ee5ng app n\u1ebfu t\u00e0i kho\u1ea3n h\u1ee3p l\u1ec7.",
+    customerRestored: "Kh\u00f4i ph\u1ee5c kh\u00e1ch h\u00e0ng th\u00e0nh c\u00f4ng.",
+    permanentDelete: "X\u00f3a v\u0129nh vi\u1ec5n",
+    permanentDeleteCustomerTitle: "X\u00f3a v\u0129nh vi\u1ec5n kh\u00e1ch h\u00e0ng?",
+    permanentDeleteCustomerText: "Thao t\u00e1c n\u00e0y kh\u00f4ng th\u1ec3 kh\u00f4i ph\u1ee5c. Ch\u1ec9 th\u1ef1c hi\u1ec7n khi ch\u1eafc ch\u1eafn kh\u00f4ng c\u1ea7n gi\u1eef d\u1eef li\u1ec7u kh\u00e1ch h\u00e0ng n\u00e0y.",
+    permanentDeletePlanned: "Ch\u1ee9c n\u0103ng x\u00f3a v\u0129nh vi\u1ec5n s\u1ebd \u0111\u01b0\u1ee3c k\u1ebft n\u1ed1i backend sau.",
+    resetPinTitle: "Reset PIN kh\u00e1ch h\u00e0ng?",
+    resetPinText: "PIN hi\u1ec7n t\u1ea1i s\u1ebd b\u1ecb v\u00f4 hi\u1ec7u h\u00f3a. Kh\u00e1ch h\u00e0ng c\u1ea7n thi\u1ebft l\u1eadp PIN m\u1edbi ho\u1eb7c d\u00f9ng PIN t\u1ea1m n\u1ebfu backend h\u1ed7 tr\u1ee3.",
+    trashRetentionNote: "S\u1ebd x\u00f3a v\u0129nh vi\u1ec5n sau 30 ng\u00e0y k\u1ec3 t\u1eeb ng\u00e0y x\u00f3a.",
     pinStatus: "Tr\u1ea1ng th\u00e1i PIN",
     pinSet: "\u0110\u00e3 thi\u1ebft l\u1eadp PIN",
     pinUnset: "Ch\u01b0a thi\u1ebft l\u1eadp PIN",
@@ -1181,18 +1223,21 @@
     drawer.setAttribute("aria-hidden", "false");
   }
 
-  function confirmAction(message) {
+  function confirmAction(options) {
+    const config = typeof options === "string"
+      ? { title: options, message: "", cancelLabel: t("close"), confirmLabel: t("delete"), danger: true }
+      : Object.assign({ title: "", message: "", cancelLabel: t("cancel"), confirmLabel: t("confirm"), danger: false }, options || {});
     return new Promise(resolve => {
       openDrawer(`
         <article class="drawer-panel" style="max-width:420px">
           <header class="drawer-head">
-            <div><h2>${escapeHtml(message)}</h2></div>
+            <div><h2>${escapeHtml(config.title)}</h2>${config.message ? `<p>${escapeHtml(config.message)}</p>` : ""}</div>
             <button class="close-button" type="button" data-confirm-no>×</button>
           </header>
           <div class="drawer-body">
             <div class="actions">
-              <button class="ghost-button" type="button" data-confirm-no>${escapeHtml(t("close"))}</button>
-              <button class="danger-button" type="button" data-confirm-yes>${escapeHtml(t("delete"))}</button>
+              <button class="ghost-button" type="button" data-confirm-no>${escapeHtml(config.cancelLabel)}</button>
+              <button class="${config.danger ? "danger-button" : "btn btn-primary"}" type="button" data-confirm-yes>${escapeHtml(config.confirmLabel)}</button>
             </div>
           </div>
         </article>
@@ -1965,16 +2010,55 @@
       let response;
       if (action === "approve") response = await AdminAPI.approveUser(id);
       if (action === "block") {
-        if (!await confirmAction(t("confirmBlock"))) return;
+        if (!await confirmAction({
+          title: t("blockCustomerTitle"),
+          message: t("blockCustomerText"),
+          confirmLabel: t("blockCustomerConfirm"),
+          danger: true
+        })) return;
         response = await AdminAPI.updateUser(id, { status: "blocked" });
       }
-      if (action === "unblock" || action === "restore") response = await AdminAPI.updateUser(id, { status: "active" });
+      if (action === "unblock") {
+        if (!await confirmAction({
+          title: t("unblockCustomerTitle"),
+          message: t("unblockCustomerText"),
+          confirmLabel: t("activate")
+        })) return;
+        response = await AdminAPI.updateUser(id, { status: "active" });
+      }
+      if (action === "restore") {
+        if (!await confirmAction({
+          title: t("restoreCustomerTitle"),
+          message: t("restoreCustomerText"),
+          confirmLabel: t("restore")
+        })) return;
+        response = await AdminAPI.updateUser(id, { status: "active" });
+      }
       if (action === "delete") {
-        if (!await confirmAction(t("confirmDelete"))) return;
+        if (!await confirmAction({
+          title: t("deleteCustomerTitle"),
+          message: t("deleteCustomerText"),
+          confirmLabel: t("moveToTrash"),
+          danger: true
+        })) return;
         response = await AdminAPI.deleteUser(id, false);
       }
+      if (action === "permanent-delete") {
+        if (!await confirmAction({
+          title: t("permanentDeleteCustomerTitle"),
+          message: t("permanentDeleteCustomerText"),
+          confirmLabel: t("permanentDelete"),
+          danger: true
+        })) return;
+        response = await AdminAPI.deleteUser(id, true);
+      }
       if (action === "reset-pin") {
-        if (!await confirmAction(t("confirmResetPin"))) return;
+        if (!await confirmAction({
+          title: t("resetPinTitle"),
+          message: t("resetPinText"),
+          confirmLabel: t("resetPin"),
+          danger: true
+        })) return;
         toast(t("backendPlanned"));
         return;
       }
@@ -1983,8 +2067,18 @@
       if (updated && getRowId(updated)) replaceUserInState(updated);
       else if (action === "delete") await reloadCustomerUsers();
 
+      if (action === "permanent-delete") {
+        await reloadCustomerUsers();
+        state.selectedUser = "";
+        renderCustomers();
+        toast(t("saved"));
+        return;
+      }
+
       renderCustomerResultsOnly();
-      toast(t("saved"));
+      if (action === "delete") toast(t("customerMovedToTrash"));
+      else if (action === "restore") toast(t("customerRestored"));
+      else toast(t("saved"));
     } catch (error) {
       console.error(error);
       toast(t("failed"));
@@ -2029,6 +2123,16 @@
     ].filter(Boolean);
     const rawInternalNote = user.internalNote || user.adminNote || user.note || user.contactNote || "";
     const internalNote = String(rawInternalNote || "").trim();
+    const accountActions = [
+      status === "pendingApproval" ? `<button class="btn btn-soft" type="button" data-customer-action="approve" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("approve"))}</button>` : "",
+      status === "pendingApproval" ? `<button class="btn btn-soft" type="button" data-customer-action="block" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("block"))}</button>` : "",
+      status === "active" ? `<button class="btn btn-soft" type="button" data-customer-action="block" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("block"))}</button>` : "",
+      status === "blocked" ? `<button class="btn btn-soft" type="button" data-customer-action="unblock" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("activate"))}</button>` : "",
+      status === "deleted" ? `<button class="btn btn-soft" type="button" data-customer-action="restore" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("restore"))}</button>` : "",
+      status !== "pendingApproval" ? `<button class="btn btn-soft" type="button" data-customer-action="view-requests" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("userHistory"))}</button>` : "",
+      ["active", "blocked"].includes(status) ? `<button class="btn btn-soft" type="button" data-customer-action="reset-pin" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("resetPin"))}</button>` : "",
+      status === "deleted" ? `<button class="btn btn-danger" type="button" data-customer-action="permanent-delete" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("permanentDelete"))}</button>` : `<button class="btn btn-danger" type="button" data-customer-action="delete" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>`
+    ].filter(Boolean).join("");
     return `<aside class="detail-panel customer-detail-panel">
       <div class="detail-panel-head">
         ${avatarHtml(user, "avatar-large")}
@@ -2062,17 +2166,9 @@
           ${miniMetric(t("quoteRequests"), quoteRequests)}
           ${miniMetric(t("lastRequest"), formatDate(lastRequest))}
         </div></section>
-      <section><h3>${escapeHtml(t("accountActions"))}</h3><div class="modal-actions">
-        ${status === "pendingApproval" ? `<button class="btn btn-soft" type="button" data-customer-action="approve" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("approve"))}</button>` : ""}
-        ${status === "blocked" ? `<button class="btn btn-soft" type="button" data-customer-action="unblock" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("activate"))}</button>` : ""}
-        ${status === "active" ? `<button class="btn btn-soft" type="button" data-customer-action="block" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("block"))}</button>` : ""}
-        ${status === "deleted" ? `<button class="btn btn-soft" type="button" data-customer-action="restore" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("restore"))}</button>` : ""}
-        <button class="btn btn-soft" type="button" data-customer-action="view-requests" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("userHistory"))}</button>
-        <button class="btn btn-soft" type="button" data-customer-action="reset-pin" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("resetPin"))}</button>
-        <button class="btn btn-danger" type="button" data-customer-action="delete" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>
-      </div></section>
       <section><h3>${escapeHtml(t("recentRequests"))}</h3><div class="priority-list">${related.length ? related.map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getRequestContent(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState()}</div></section>
-      ${systemItems.length ? `<section><h3>${escapeHtml(t("systemInfo"))}</h3><div class="customer-info-grid">${systemItems.map(([label, value]) => customerInfoItem(label, value)).join("")}</div></section>` : ""}
+      ${systemItems.length ? `<section><h3>${escapeHtml(t("systemInfo"))}</h3><div class="customer-info-grid">${systemItems.map(([label, value]) => customerInfoItem(label, value)).join("")}</div>${status === "deleted" ? `<div class="note-card">${escapeHtml(t("trashRetentionNote"))}</div>` : ""}</section>` : ""}
+      <section><h3>${escapeHtml(t("accountActions"))}</h3><div class="modal-actions">${accountActions}</div></section>
     </aside>`;
   }
 

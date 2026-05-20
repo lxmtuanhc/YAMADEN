@@ -102,11 +102,30 @@ function getUserFromRequest(req) {
   return null;
 }
 
-function requireUser(req, res, next) {
+async function requireUser(req, res, next) {
   const user = getUserFromRequest(req);
   if (!user) return res.status(401).json({ message: "User login required" });
-  req.user = user;
-  next();
+  try {
+    const account = await User.findById(user.userId);
+    if (!account) return res.status(401).json({ message: "User not found" });
+    if (account.status === "blocked") {
+      return res.status(403).json({
+        error: "ACCOUNT_BLOCKED",
+        message: "Account is blocked. Please contact YAMADEN support."
+      });
+    }
+    if (account.status === "deleted") {
+      return res.status(403).json({
+        error: "ACCOUNT_DELETED",
+        message: "This account is deleted or inactive."
+      });
+    }
+    req.user = user;
+    req.accountUser = account;
+    next();
+  } catch (error) {
+    next(error);
+  }
 }
 
 function truncateText(text, max = 220) {
@@ -299,6 +318,7 @@ function publicUser(user) {
   item.id = String(item._id || item.id || "");
   item.status = normalizeUserStatus(item.status);
   item.hasPin = Boolean(item.pinHash);
+  if (item.deletedAt) item.daysUntilPermanentDelete = daysLeftBeforePermanentDelete(item.deletedAt);
   delete item.pinHash;
   return item;
 }
@@ -948,11 +968,11 @@ app.post("/user/login", async (req, res) => {
     }
 
     if (user.status === "deleted") {
-      return res.status(403).json({ message: "User was deleted. Please register again." });
+      return res.status(403).json({ error: "ACCOUNT_DELETED", message: "This account is deleted or inactive." });
     }
 
     if (user.status === "blocked") {
-      return res.status(403).json({ message: "User is blocked" });
+      return res.status(403).json({ error: "ACCOUNT_BLOCKED", message: "Account is blocked. Please contact YAMADEN support." });
     }
 
     user.lastLoginAt = new Date();
@@ -1382,7 +1402,7 @@ app.delete("/admin/users/:id", requireAdmin, async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (req.query.permanent === "true" || user.status === "pending" || user.status === USER_STATUS_PENDING) {
+    if (req.query.permanent === "true") {
       await Request.updateMany({ userId }, { $set: { userId: "" } });
       await User.deleteOne({ _id: userId });
       return res.json({ message: "User permanently deleted" });
@@ -1993,8 +2013,8 @@ app.post("/api/auth/login", async (req, res) => {
     const ok = await bcrypt.compare(pin, user.pinHash);
     if (!ok) return res.status(401).json({ message: "Invalid phone or PIN" });
 
-    if (user.status === "deleted") return res.status(403).json({ message: "User was deleted. Please register again." });
-    if (user.status === "blocked") return res.status(403).json({ message: "User is blocked" });
+    if (user.status === "deleted") return res.status(403).json({ error: "ACCOUNT_DELETED", message: "This account is deleted or inactive." });
+    if (user.status === "blocked") return res.status(403).json({ error: "ACCOUNT_BLOCKED", message: "Account is blocked. Please contact YAMADEN support." });
 
     user.status = normalizeUserStatus(user.status);
     user.lastLoginAt = new Date();
@@ -2023,8 +2043,8 @@ app.get("/api/auth/me", requireUser, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
     if (!user) return res.status(401).json({ message: "User not found" });
-    if (user.status === "deleted") return res.status(403).json({ message: "User was deleted. Please register again." });
-    if (user.status === "blocked") return res.status(403).json({ message: "User is blocked" });
+    if (user.status === "deleted") return res.status(403).json({ error: "ACCOUNT_DELETED", message: "This account is deleted or inactive." });
+    if (user.status === "blocked") return res.status(403).json({ error: "ACCOUNT_BLOCKED", message: "Account is blocked. Please contact YAMADEN support." });
 
     user.status = normalizeUserStatus(user.status);
 

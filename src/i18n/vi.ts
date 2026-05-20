@@ -30,6 +30,8 @@ export const vi = {
   "auth.loginErrorRequired": "Vui lòng nhập đầy đủ thông tin.",
   "auth.loginErrorInvalid": "Số điện thoại hoặc mã PIN không đúng.",
   "auth.loginErrorPending": "Tài khoản đang chờ duyệt. Vui lòng thử lại sau.",
+  "auth.loginErrorBlocked": "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ YAMADEN để được hỗ trợ.",
+  "auth.loginErrorDeleted": "Tài khoản này đã bị xóa hoặc không còn hoạt động.",
   "auth.register": "Đăng ký",
   "auth.phone": "Số điện thoại",
   "auth.pin": "Mã PIN 6 số",

@@ -4,6 +4,7 @@ import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { useTranslation } from "../../hooks/useTranslation";
 import { useAppStore } from "../../stores/appStore";
+import type { AuthRequestError } from "../../services/authService";
 
 export function LoginPage() {
   const { t } = useTranslation();
@@ -36,7 +37,16 @@ export function LoginPage() {
         return;
       }
       setError(isPendingAccount ? t("auth.loginErrorPending") : t("auth.loginErrorInvalid"));
-    } catch {
+    } catch (caught) {
+      const error = caught as AuthRequestError;
+      if (error.code === "ACCOUNT_BLOCKED") {
+        setError(t("auth.loginErrorBlocked"));
+        return;
+      }
+      if (error.code === "ACCOUNT_DELETED") {
+        setError(t("auth.loginErrorDeleted"));
+        return;
+      }
       setError(t("auth.loginErrorInvalid"));
     }
   }

@@ -38,9 +38,12 @@ type AuthResponse = {
   user?: BackendUser;
   token?: string;
   status?: UserStatus;
+  error?: string;
+  message?: string;
 };
 
 export type AuthRequestError = Error & {
+  code?: string;
   status?: number;
 };
 
@@ -89,7 +92,8 @@ async function parseAuthResponse(response: Response): Promise<{ user: User; toke
   const payload = (await response.json().catch(() => ({}))) as AuthResponse;
 
   if (!response.ok) {
-    const error = new Error("Auth request failed") as AuthRequestError;
+    const error = new Error(payload.message || payload.error || "Auth request failed") as AuthRequestError;
+    error.code = payload.error;
     error.status = response.status;
     throw error;
   }
