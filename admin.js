@@ -1302,6 +1302,8 @@
     const config = typeof options === "string"
       ? { title: options, message: "", cancelLabel: t("close"), confirmLabel: t("delete"), danger: true }
       : Object.assign({ title: "", message: "", cancelLabel: t("cancel"), confirmLabel: t("confirm"), danger: false }, options || {});
+    const variant = config.variant || (config.danger ? "danger" : "default");
+    const icon = config.icon || (variant === "danger" ? "!" : variant === "warning" ? "!" : "↺");
     return new Promise(resolve => {
       const existingResolve = window.__adminV2ConfirmResolve;
       if (typeof existingResolve === "function") closeConfirm(existingResolve, false);
@@ -1310,13 +1312,14 @@
       overlay.dataset.confirmOverlay = "";
       overlay.innerHTML = `
         <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="adminConfirmTitle">
-          <div class="confirm-header">
+          <div class="confirm-content">
+            <div class="confirm-icon confirm-icon--${escapeHtml(variant)}" aria-hidden="true">${escapeHtml(icon)}</div>
             <h3 class="confirm-title" id="adminConfirmTitle">${escapeHtml(config.title)}</h3>
+            ${config.message ? `<p class="confirm-message">${escapeHtml(config.message)}</p>` : ""}
           </div>
-          ${config.message ? `<div class="confirm-body"><p class="confirm-message">${escapeHtml(config.message)}</p></div>` : ""}
           <div class="confirm-footer">
             <button class="confirm-cancel-btn" type="button" data-confirm-cancel>${escapeHtml(config.cancelLabel)}</button>
-            <button class="confirm-submit-btn${config.danger ? " danger" : ""}" type="button" data-confirm-submit>${escapeHtml(config.confirmLabel)}</button>
+            <button class="confirm-submit-btn ${escapeHtml(variant)}" type="button" data-confirm-submit>${escapeHtml(config.confirmLabel)}</button>
           </div>
         </div>
       `;
@@ -2129,7 +2132,7 @@
           title: t("blockCustomerTitle"),
           message: t("blockCustomerText"),
           confirmLabel: t("blockCustomerConfirm"),
-          danger: true
+          variant: "warning"
         })) return;
         response = await AdminAPI.updateUser(id, { status: "blocked" });
       }
@@ -2172,7 +2175,7 @@
           title: t("resetPinTitle"),
           message: t("resetPinText"),
           confirmLabel: t("resetPin"),
-          danger: true
+          variant: "warning"
         })) return;
         toast(t("backendPlanned"));
         return;
