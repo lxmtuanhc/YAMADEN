@@ -539,15 +539,17 @@
     customerMovedToTrash: "\u9867\u5ba2\u3092\u30b4\u30df\u7bb1\u3078\u79fb\u52d5\u3057\u307e\u3057\u305f\u3002",
     restoreCustomerTitle: "\u9867\u5ba2\u3092\u5fa9\u5143\u3057\u307e\u3059\u304b\uff1f",
     restoreCustomerText: "\u5fa9\u5143\u3059\u308b\u3068\u3001\u9867\u5ba2\u306f\u518d\u3073\u30a2\u30d7\u30ea\u3092\u5229\u7528\u3067\u304d\u308b\u3088\u3046\u306b\u306a\u308a\u307e\u3059\u3002",
-    restoreTrashTitle: "\u5fa9\u5143\u3057\u307e\u3059\u304b\uff1f",
-    restoreTrashText: "\u5fa9\u5143\u3059\u308b\u3068\u3001\u3053\u306e\u30c7\u30fc\u30bf\u306f\u901a\u5e38\u306e\u4e00\u89a7\u306b\u623b\u308a\u307e\u3059\u3002",
+    restoreTrashTitle: "\u3053\u306e\u30c7\u30fc\u30bf\u3092\u5fa9\u5143\u3057\u307e\u3059\u304b\uff1f",
+    restoreTrashText: "\u5fa9\u5143\u3059\u308b\u3068\u3001\u30b4\u30df\u7bb1\u304b\u3089\u623b\u3055\u308c\u3001\u5bfe\u5fdc\u3059\u308b\u7ba1\u7406\u753b\u9762\u306b\u518d\u8868\u793a\u3055\u308c\u307e\u3059\u3002",
     customerRestored: "\u9867\u5ba2\u3092\u5fa9\u5143\u3057\u307e\u3057\u305f\u3002",
     permanentDelete: "\u5b8c\u5168\u524a\u9664",
     permanentDeleteCustomerTitle: "\u9867\u5ba2\u3092\u5b8c\u5168\u306b\u524a\u9664\u3057\u307e\u3059\u304b\uff1f",
     permanentDeleteCustomerText: "\u3053\u306e\u64cd\u4f5c\u306f\u5143\u306b\u623b\u305b\u307e\u305b\u3093\u3002\u672c\u5f53\u306b\u524a\u9664\u3057\u3066\u3088\u3044\u5834\u5408\u306e\u307f\u5b9f\u884c\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
-    permanentDeleteTrashTitle: "\u5b8c\u5168\u306b\u524a\u9664\u3057\u307e\u3059\u304b\uff1f",
+    permanentDeleteTrashTitle: "\u3053\u306e\u30c7\u30fc\u30bf\u3092\u5b8c\u5168\u306b\u524a\u9664\u3057\u307e\u3059\u304b\uff1f",
     permanentDeleteTrashText: "\u3053\u306e\u64cd\u4f5c\u306f\u5143\u306b\u623b\u305b\u307e\u305b\u3093\u3002\u672c\u5f53\u306b\u524a\u9664\u3057\u3066\u3088\u3044\u5834\u5408\u306e\u307f\u5b9f\u884c\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
     permanentDeletePlanned: "\u5b8c\u5168\u524a\u9664\u6a5f\u80fd\u306f\u5f8c\u3067\u30d0\u30c3\u30af\u30a8\u30f3\u30c9\u306b\u63a5\u7d9a\u3055\u308c\u307e\u3059\u3002",
+    restorePlanned: "\u5fa9\u5143\u6a5f\u80fd\u306f\u5f8c\u3067\u30d0\u30c3\u30af\u30a8\u30f3\u30c9\u306b\u63a5\u7d9a\u3055\u308c\u307e\u3059\u3002",
+    permanentDeletedSuccess: "\u5b8c\u5168\u306b\u524a\u9664\u3057\u307e\u3057\u305f\u3002",
     resetPinTitle: "\u9867\u5ba2\u306ePIN\u3092\u30ea\u30bb\u30c3\u30c8\u3057\u307e\u3059\u304b\uff1f",
     resetPinText: "\u73fe\u5728\u306ePIN\u306f\u7121\u52b9\u306b\u306a\u308a\u307e\u3059\u3002\u9867\u5ba2\u306f\u65b0\u3057\u3044PIN\u3092\u8a2d\u5b9a\u3059\u308b\u5fc5\u8981\u304c\u3042\u308a\u307e\u3059\u3002",
     trashRetentionNote: "\u524a\u9664\u65e5\u304b\u308930\u65e5\u5f8c\u306b\u5b8c\u5168\u524a\u9664\u3055\u308c\u307e\u3059\u3002",
@@ -621,15 +623,17 @@
     customerMovedToTrash: "Kh\u00e1ch h\u00e0ng \u0111\u00e3 \u0111\u01b0\u1ee3c chuy\u1ec3n v\u00e0o th\u00f9ng r\u00e1c.",
     restoreCustomerTitle: "Kh\u00f4i ph\u1ee5c kh\u00e1ch h\u00e0ng?",
     restoreCustomerText: "Kh\u00e1ch h\u00e0ng s\u1ebd \u0111\u01b0\u1ee3c k\u00edch ho\u1ea1t l\u1ea1i v\u00e0 c\u00f3 th\u1ec3 s\u1eed d\u1ee5ng app n\u1ebfu t\u00e0i kho\u1ea3n h\u1ee3p l\u1ec7.",
-    restoreTrashTitle: "Kh\u00f4i ph\u1ee5c?",
-    restoreTrashText: "Sau khi kh\u00f4i ph\u1ee5c, d\u1eef li\u1ec7u n\u00e0y s\u1ebd quay l\u1ea1i danh s\u00e1ch ch\u00ednh.",
+    restoreTrashTitle: "Kh\u00f4i ph\u1ee5c d\u1eef li\u1ec7u n\u00e0y?",
+    restoreTrashText: "D\u1eef li\u1ec7u s\u1ebd \u0111\u01b0\u1ee3c \u0111\u01b0a ra kh\u1ecfi th\u00f9ng r\u00e1c v\u00e0 hi\u1ec3n th\u1ecb l\u1ea1i trong m\u00e0n qu\u1ea3n l\u00fd t\u01b0\u01a1ng \u1ee9ng.",
     customerRestored: "Kh\u00f4i ph\u1ee5c kh\u00e1ch h\u00e0ng th\u00e0nh c\u00f4ng.",
     permanentDelete: "X\u00f3a v\u0129nh vi\u1ec5n",
     permanentDeleteCustomerTitle: "X\u00f3a v\u0129nh vi\u1ec5n kh\u00e1ch h\u00e0ng?",
     permanentDeleteCustomerText: "Thao t\u00e1c n\u00e0y kh\u00f4ng th\u1ec3 kh\u00f4i ph\u1ee5c. Ch\u1ec9 th\u1ef1c hi\u1ec7n khi ch\u1eafc ch\u1eafn kh\u00f4ng c\u1ea7n gi\u1eef d\u1eef li\u1ec7u kh\u00e1ch h\u00e0ng n\u00e0y.",
-    permanentDeleteTrashTitle: "X\u00f3a v\u0129nh vi\u1ec5n?",
+    permanentDeleteTrashTitle: "X\u00f3a v\u0129nh vi\u1ec5n d\u1eef li\u1ec7u n\u00e0y?",
     permanentDeleteTrashText: "Thao t\u00e1c n\u00e0y kh\u00f4ng th\u1ec3 kh\u00f4i ph\u1ee5c. Ch\u1ec9 th\u1ef1c hi\u1ec7n khi ch\u1eafc ch\u1eafn kh\u00f4ng c\u1ea7n gi\u1eef d\u1eef li\u1ec7u n\u00e0y.",
     permanentDeletePlanned: "Ch\u1ee9c n\u0103ng x\u00f3a v\u0129nh vi\u1ec5n s\u1ebd \u0111\u01b0\u1ee3c k\u1ebft n\u1ed1i backend sau.",
+    restorePlanned: "Ch\u1ee9c n\u0103ng kh\u00f4i ph\u1ee5c s\u1ebd \u0111\u01b0\u1ee3c k\u1ebft n\u1ed1i backend sau.",
+    permanentDeletedSuccess: "\u0110\u00e3 x\u00f3a v\u0129nh vi\u1ec5n.",
     resetPinTitle: "Reset PIN kh\u00e1ch h\u00e0ng?",
     resetPinText: "PIN hi\u1ec7n t\u1ea1i s\u1ebd b\u1ecb v\u00f4 hi\u1ec7u h\u00f3a. Kh\u00e1ch h\u00e0ng c\u1ea7n thi\u1ebft l\u1eadp PIN m\u1edbi ho\u1eb7c d\u00f9ng PIN t\u1ea1m n\u1ebfu backend h\u1ed7 tr\u1ee3.",
     trashRetentionNote: "S\u1ebd x\u00f3a v\u0129nh vi\u1ec5n sau 30 ng\u00e0y k\u1ec3 t\u1eeb ng\u00e0y x\u00f3a.",
@@ -2612,15 +2616,108 @@
 
   function trashActions(type, id) {
     return `<div class="actions crm-actions">
-      <button class="btn btn-soft" type="button" data-trash-detail="${escapeHtml(type)}:${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
-      <button class="btn btn-soft" type="button" data-trash-restore="${escapeHtml(type)}:${escapeHtml(id)}">${escapeHtml(t("restore"))}</button>
-      <button class="btn btn-danger" type="button" data-trash-permanent="${escapeHtml(type)}:${escapeHtml(id)}">${escapeHtml(t("permanentDelete"))}</button>
+      <button class="btn btn-soft trash-action-btn" type="button" data-trash-action="detail" data-trash-type="${escapeHtml(type)}" data-trash-id="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
+      <button class="btn btn-soft trash-action-btn" type="button" data-trash-action="restore" data-trash-type="${escapeHtml(type)}" data-trash-id="${escapeHtml(id)}">${escapeHtml(t("restore"))}</button>
+      <button class="btn btn-danger trash-action-btn danger" type="button" data-trash-action="permanent-delete" data-trash-type="${escapeHtml(type)}" data-trash-id="${escapeHtml(id)}">${escapeHtml(t("permanentDelete"))}</button>
     </div>`;
   }
 
   function trashItemByType(type, id) {
     const rows = deletedRowsFor(type);
     return rows.find(item => String(getRowId(item) || item.id || item.quoteCode || getRequestDisplayId(item)) === String(id));
+  }
+
+  function trashDetailItems(type, item) {
+    if (type === "customers") {
+      return [
+        [t("customerName"), item.name || item.company || item.companyName || item.phone],
+        [t("phone"), item.phone],
+        [t("email"), item.email],
+        [t("status"), customerStatusLabel(item.previousStatus || item.status || "deleted")],
+        [t("deletedAt"), formatDate(item.deletedAt)],
+        ["deletedAt", item.deletedAt || "-"],
+        [t("customerId"), getRowId(item)],
+        [state.lang === "vi" ? "Lý do xóa" : "削除理由", item.deleteReason || item.deletedReason || item.reason]
+      ];
+    }
+    if (type === "requests") {
+      return [
+        [t("id"), getRequestDisplayId(item)],
+        [t("customer"), getCustomerName(item)],
+        [t("content"), getRequestContent(item)],
+        [t("status"), formatStatus(item.status)],
+        [t("createdAt"), formatDate(item.createdAt)],
+        [t("deletedAt"), formatDate(item.deletedAt)]
+      ];
+    }
+    if (type === "quotes") {
+      const total = Array.isArray(item.items) ? item.items.reduce((sum, line) => sum + Number(line.quantity || 0) * Number(line.unitPrice || 0), 0) : "";
+      return [
+        [t("quote"), item.quoteCode || item.id || getRowId(item)],
+        [t("customer"), item.customerName || item.name],
+        [t("relatedRequest"), item.requestId],
+        [t("amount"), total || item.amount || item.totalAmount],
+        [t("status"), item.status],
+        [t("deletedAt"), formatDate(item.deletedAt)]
+      ];
+    }
+    return [
+      [t("staff"), item.name],
+      [t("department"), staffDepartment(item)],
+      [t("status"), staffStatusMap[item.status] || item.status],
+      [t("deletedAt"), formatDate(item.deletedAt)]
+    ];
+  }
+
+  function openTrashDetail(type, id) {
+    const item = trashItemByType(type, id);
+    if (!item) {
+      toast(t("failed"));
+      return;
+    }
+    const titleMap = {
+      customers: item.name || item.company || item.companyName || item.phone || t("customer"),
+      requests: getRequestDisplayId(item),
+      quotes: item.quoteCode || item.id || getRowId(item) || t("quote"),
+      staff: item.name || t("staff")
+    };
+    openDrawer(`
+      <article class="drawer-panel">
+        <header class="drawer-head drawer-header">
+          <div><h2>${escapeHtml(titleMap[type] || t("trash"))}</h2><p class="note">${escapeHtml(trashTitle(type))}</p></div>
+          <button class="close-button" type="button" data-close-drawer>&times;</button>
+        </header>
+        <div class="drawer-body">
+          <div class="info-grid">
+            ${trashDetailItems(type, item).map(([label, value]) => infoItem(label, value)).join("")}
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-soft trash-action-btn" type="button" data-trash-action="restore" data-trash-type="${escapeHtml(type)}" data-trash-id="${escapeHtml(id)}">${escapeHtml(t("restore"))}</button>
+            <button class="btn btn-danger trash-action-btn danger" type="button" data-trash-action="permanent-delete" data-trash-type="${escapeHtml(type)}" data-trash-id="${escapeHtml(id)}">${escapeHtml(t("permanentDelete"))}</button>
+          </div>
+        </div>
+      </article>
+    `);
+  }
+
+  async function handleTrashAction(action, type, id) {
+    if (!action || !type || !id) {
+      toast(t("failed"));
+      return;
+    }
+    if (action === "detail") {
+      openTrashDetail(type, id);
+      return;
+    }
+    if (action === "restore") {
+      await restoreTrashItem(type, id);
+      return;
+    }
+    if (action === "permanent-delete") {
+      await permanentDeleteTrashItem(type, id);
+      return;
+    }
+    toast(t("failed"));
   }
 
   async function restoreTrashItem(type, id) {
@@ -2630,9 +2727,14 @@
     if (type === "requests") response = await AdminAPI.restoreRequest(id);
     if (type === "quotes") response = await AdminAPI.restoreQuote(id);
     if (type === "staff") response = await AdminAPI.restoreStaff(id);
+    if (!response) {
+      toast(t("restorePlanned"));
+      return;
+    }
     updateTrashState(type, response, id);
+    closeDrawer();
     toast(t("restoredSuccess"));
-    renderTrash();
+    renderCurrentView();
   }
 
   async function permanentDeleteTrashItem(type, id) {
@@ -2642,8 +2744,9 @@
     if (type === "quotes") await AdminAPI.deleteQuote(id, true);
     if (type === "staff") await AdminAPI.deleteStaff(id, true);
     removeTrashState(type, id);
-    toast(t("saved"));
-    renderTrash();
+    closeDrawer();
+    toast(t("permanentDeletedSuccess"));
+    renderCurrentView();
   }
 
   function updateTrashState(type, response, id) {
@@ -2820,6 +2923,25 @@
     return true;
   }
 
+  async function handleTrashDelegatedClick(event) {
+    const trashBtn = event.target.closest("[data-trash-action]");
+    if (!trashBtn) return false;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    try {
+      await handleTrashAction(
+        trashBtn.dataset.trashAction,
+        trashBtn.dataset.trashType,
+        trashBtn.dataset.trashId
+      );
+    } catch (error) {
+      console.error(error);
+      toast(t("failed"));
+    }
+    return true;
+  }
+
   async function handleCustomerDelegatedClick(event) {
     if (state.currentView !== "customers") return false;
 
@@ -2913,6 +3035,9 @@
         renderRequestResults();
       }
     });
+    document.addEventListener("click", event => {
+      void handleTrashDelegatedClick(event);
+    }, true);
     document.addEventListener("click", event => {
       void handleCustomerDelegatedClick(event);
     }, true);
@@ -3008,42 +3133,6 @@
       if (trashCategory) {
         state.filters.trashCategory = trashCategory.dataset.trashCategory || "customers";
         renderTrash();
-        return;
-      }
-
-      const trashDetail = event.target.closest("[data-trash-detail]");
-      if (trashDetail) {
-        const [type, id] = trashDetail.dataset.trashDetail.split(":");
-        const item = trashItemByType(type, id);
-        if (type === "customers" && item) renderCustomerDetail(item);
-        else if (type === "requests" && item) renderRequestDetail(item);
-        else if (type === "staff" && item) renderStaffDetail(item);
-        else if (type === "quotes" && item) renderQuoteDetail(item);
-        else toast(t("backendPlanned"));
-        return;
-      }
-
-      const trashRestore = event.target.closest("[data-trash-restore]");
-      if (trashRestore) {
-        const [type, id] = trashRestore.dataset.trashRestore.split(":");
-        try {
-          await restoreTrashItem(type, id);
-        } catch (error) {
-          console.error(error);
-          toast(t("failed"));
-        }
-        return;
-      }
-
-      const trashPermanent = event.target.closest("[data-trash-permanent]");
-      if (trashPermanent) {
-        const [type, id] = trashPermanent.dataset.trashPermanent.split(":");
-        try {
-          await permanentDeleteTrashItem(type, id);
-        } catch (error) {
-          console.error(error);
-          toast(t("failed"));
-        }
         return;
       }
 
