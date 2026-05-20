@@ -1289,26 +1289,57 @@
     drawer.setAttribute("aria-hidden", "false");
   }
 
+  function closeConfirm(resolve, value) {
+    const overlay = document.querySelector("[data-confirm-overlay]");
+    if (overlay) overlay.remove();
+    if (window.__adminV2ConfirmKeydown) document.removeEventListener("keydown", window.__adminV2ConfirmKeydown);
+    window.__adminV2ConfirmKeydown = null;
+    window.__adminV2ConfirmResolve = null;
+    if (typeof resolve === "function") resolve(Boolean(value));
+  }
+
   function confirmAction(options) {
     const config = typeof options === "string"
       ? { title: options, message: "", cancelLabel: t("close"), confirmLabel: t("delete"), danger: true }
       : Object.assign({ title: "", message: "", cancelLabel: t("cancel"), confirmLabel: t("confirm"), danger: false }, options || {});
     return new Promise(resolve => {
-      openDrawer(`
-        <article class="drawer-panel" style="max-width:420px">
-          <header class="drawer-head">
-            <div><h2>${escapeHtml(config.title)}</h2>${config.message ? `<p>${escapeHtml(config.message)}</p>` : ""}</div>
-            <button class="close-button" type="button" data-confirm-no>×</button>
-          </header>
-          <div class="drawer-body">
-            <div class="actions">
-              <button class="ghost-button" type="button" data-confirm-no>${escapeHtml(config.cancelLabel)}</button>
-              <button class="${config.danger ? "danger-button" : "btn btn-primary"}" type="button" data-confirm-yes>${escapeHtml(config.confirmLabel)}</button>
-            </div>
+      const existingResolve = window.__adminV2ConfirmResolve;
+      if (typeof existingResolve === "function") closeConfirm(existingResolve, false);
+      const overlay = document.createElement("div");
+      overlay.className = "confirm-overlay";
+      overlay.dataset.confirmOverlay = "";
+      overlay.innerHTML = `
+        <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="adminConfirmTitle">
+          <div class="confirm-header">
+            <h3 id="adminConfirmTitle">${escapeHtml(config.title)}</h3>
+            <button class="confirm-close" type="button" data-confirm-cancel aria-label="${escapeHtml(t("close"))}">&times;</button>
           </div>
-        </article>
-      `);
+          ${config.message ? `<div class="confirm-body"><p>${escapeHtml(config.message)}</p></div>` : ""}
+          <div class="confirm-footer">
+            <button class="confirm-cancel-btn" type="button" data-confirm-cancel>${escapeHtml(config.cancelLabel)}</button>
+            <button class="confirm-submit-btn${config.danger ? " danger" : ""}" type="button" data-confirm-submit>${escapeHtml(config.confirmLabel)}</button>
+          </div>
+        </div>
+      `;
+      overlay.addEventListener("click", event => {
+        if (event.target === overlay || event.target.closest("[data-confirm-cancel]")) {
+          closeConfirm(resolve, false);
+          return;
+        }
+        const submit = event.target.closest("[data-confirm-submit]");
+        if (submit) {
+          submit.disabled = true;
+          submit.setAttribute("aria-busy", "true");
+          closeConfirm(resolve, true);
+        }
+      });
+      window.__adminV2ConfirmKeydown = event => {
+        if (event.key === "Escape") closeConfirm(resolve, false);
+      };
       window.__adminV2ConfirmResolve = resolve;
+      document.addEventListener("keydown", window.__adminV2ConfirmKeydown);
+      document.body.appendChild(overlay);
+      overlay.querySelector("[data-confirm-submit]")?.focus();
     });
   }
 
@@ -3065,16 +3096,6 @@
           const staff = state.staff.find(item => getRowId(item) === id);
           if (staff) renderStaffDetail(staff, tab.dataset.drawerTab);
         }
-        return;
-      }
-      const confirmYes = event.target.closest("[data-confirm-yes]");
-      const confirmNo = event.target.closest("[data-confirm-no]");
-      const confirmOverlay = event.target.id === "drawer" && window.__adminV2ConfirmResolve;
-      if (confirmYes || confirmNo || confirmOverlay) {
-        const resolve = window.__adminV2ConfirmResolve;
-        window.__adminV2ConfirmResolve = null;
-        closeDrawer();
-        if (typeof resolve === "function") resolve(Boolean(confirmYes));
         return;
       }
       if (event.target.id === "drawer" || event.target.closest("[data-close-drawer]")) closeDrawer();
