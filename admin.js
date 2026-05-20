@@ -261,6 +261,7 @@
     addNote: "\u5bfe\u5fdc\u30e1\u30e2\u8ffd\u52a0",
     customerPreview: "\u65b0\u898f\u30fb\u627f\u8a8d\u5f85\u3061\u9867\u5ba2",
     staffPreview: "\u30b9\u30bf\u30c3\u30d5\u7a3c\u50cd\u72b6\u6cc1",
+    all: "\u3059\u3079\u3066",
     tableView: "\u8868",
     kanbanView: "\u30ab\u30f3\u30d0\u30f3",
     newest: "\u65b0\u3057\u3044\u9806",
@@ -313,6 +314,7 @@
     addNote: "Th\u00eam ghi ch\u00fa x\u1eed l\u00fd",
     customerPreview: "Kh\u00e1ch h\u00e0ng m\u1edbi / ch\u1edd duy\u1ec7t",
     staffPreview: "T\u1ea3i staff",
+    all: "T\u1ea5t c\u1ea3",
     tableView: "B\u1ea3ng",
     kanbanView: "Kanban",
     newest: "M\u1edbi nh\u1ea5t",
@@ -707,26 +709,26 @@
 
   function formatStatus(status) {
     const normalized = normalizeRequestStatus(status);
-    const labelsJa = {
-      untreated: "未対応",
-      contacted: "連絡済",
-      site_done: "現地済",
-      quoted: "見積",
-      ordered: "受注",
-      completed: "完了",
-      lost: "失注"
+    const cleanLabelsJa = {
+      untreated: "\u672a\u5bfe\u5fdc",
+      contacted: "\u9023\u7d61\u6e08",
+      site_done: "\u73fe\u5730\u6e08",
+      quoted: "\u898b\u7a4d",
+      ordered: "\u53d7\u6ce8",
+      completed: "\u5b8c\u4e86",
+      lost: "\u5931\u6ce8"
     };
-    const labelsVi = {
-      untreated: "Chưa xử lý",
-      contacted: "Đã liên hệ",
-      site_done: "Đã khảo sát",
-      quoted: "Báo giá",
-      ordered: "Đã nhận đơn",
-      completed: "Hoàn thành",
-      lost: "Mất đơn"
+    const cleanLabelsVi = {
+      untreated: "Ch\u01b0a x\u1eed l\u00fd",
+      contacted: "\u0110\u00e3 li\u00ean h\u1ec7",
+      site_done: "\u0110\u00e3 kh\u1ea3o s\u00e1t",
+      quoted: "B\u00e1o gi\u00e1",
+      ordered: "\u0110\u00e3 nh\u1eadn \u0111\u01a1n",
+      completed: "Ho\u00e0n th\u00e0nh",
+      lost: "M\u1ea5t \u0111\u01a1n"
     };
-    const labels = state.lang === "vi" ? labelsVi : labelsJa;
-    return labels[normalized] || labelsJa[normalized] || normalized;
+    const cleanLabels = state.lang === "vi" ? cleanLabelsVi : cleanLabelsJa;
+    return cleanLabels[normalized] || cleanLabelsJa[normalized] || normalized;
   }
 
   function getStatusClass(status) {
@@ -854,7 +856,7 @@
 
   function requestWorkTypeOptions() {
     return [
-      ["all", t("workType")],
+      ["all", t("allWorkTypes")],
       ["drawing", t("workTypeDrawing")],
       ["construction", t("workTypeConstruction")],
       ["survey", t("workTypeSurvey")],
