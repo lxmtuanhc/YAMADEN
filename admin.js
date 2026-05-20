@@ -272,16 +272,15 @@
     unjudged: "\u672a\u5224\u5b9a",
     media: "\u30e1\u30c7\u30a3\u30a2",
     searchButton: "\u691c\u7d22",
-    workType: "\u4f5c\u696d\u7a2e\u5225",
-    allWorkTypes: "\u3059\u3079\u3066\u306e\u4f5c\u696d\u7a2e\u5225",
-    workTypeDrawing: "\u96fb\u6c17\u56f3\u9762\u8a2d\u8a08",
-    workTypeConstruction: "\u96fb\u6c17\u5de5\u4e8b",
-    workTypeSurvey: "\u73fe\u5730\u8abf\u67fb",
-    workTypeInspection: "\u5de5\u4e8b\u78ba\u8a8d",
-    workTypeMaintenance: "\u4fdd\u5b88\u30fb\u4fee\u7406",
-    workTypeOutage: "\u505c\u96fb\u30fb\u96fb\u6c17\u30c8\u30e9\u30d6\u30eb",
-    workTypeQuote: "\u898b\u7a4d\u30fb\u76f8\u8ac7",
-    workTypeOther: "\u305d\u306e\u4ed6",
+    departmentFilter: "\u90e8\u9580",
+    allRequestDepartments: "\u3059\u3079\u3066\u306e\u90e8\u9580",
+    departmentDesign: "\u8a2d\u8a08\u90e8",
+    departmentConstruction: "\u5de5\u4e8b\u90e8",
+    departmentOperation: "\u696d\u52d9\u90e8",
+    departmentMaintenance: "\u30e1\u30f3\u30c6\u30ca\u30f3\u30b9\u90e8",
+    departmentSurvey: "\u8abf\u67fb\u90e8",
+    departmentSales: "\u55b6\u696d\u90e8",
+    departmentOther: "\u305d\u306e\u4ed6",
     noRequests: "\u4f9d\u983c\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
     loadRequestsError: "\u4f9d\u983c\u4e00\u89a7\u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093",
     retry: "\u518d\u8a66\u884c"
@@ -324,16 +323,15 @@
     urgency: "\u0110\u1ed9 kh\u1ea9n",
     unjudged: "Ch\u01b0a \u0111\u00e1nh gi\u00e1",
     searchButton: "T\u00ecm ki\u1ebfm",
-    workType: "Lo\u1ea1i c\u00f4ng vi\u1ec7c",
-    allWorkTypes: "T\u1ea5t c\u1ea3 lo\u1ea1i c\u00f4ng vi\u1ec7c",
-    workTypeDrawing: "Thi\u1ebft k\u1ebf b\u1ea3n v\u1ebd",
-    workTypeConstruction: "Thi c\u00f4ng \u0111i\u1ec7n",
-    workTypeSurvey: "Kh\u1ea3o s\u00e1t hi\u1ec7n tr\u01b0\u1eddng",
-    workTypeInspection: "Ki\u1ec3m tra c\u00f4ng tr\u00ecnh",
-    workTypeMaintenance: "B\u1ea3o tr\u00ec / s\u1eeda ch\u1eefa",
-    workTypeOutage: "M\u1ea5t \u0111i\u1ec7n / s\u1ef1 c\u1ed1 \u0111i\u1ec7n",
-    workTypeQuote: "B\u00e1o gi\u00e1 / t\u01b0 v\u1ea5n",
-    workTypeOther: "Kh\u00e1c",
+    departmentFilter: "B\u1ed9 ph\u1eadn",
+    allRequestDepartments: "T\u1ea5t c\u1ea3 b\u1ed9 ph\u1eadn",
+    departmentDesign: "B\u1ed9 thi\u1ebft k\u1ebf",
+    departmentConstruction: "B\u1ed9 thi c\u00f4ng",
+    departmentOperation: "B\u1ed9 nghi\u1ec7p v\u1ee5",
+    departmentMaintenance: "B\u1ed9 b\u1ea3o tr\u00ec",
+    departmentSurvey: "B\u1ed9 kh\u1ea3o s\u00e1t",
+    departmentSales: "B\u1ed9 kinh doanh",
+    departmentOther: "B\u1ed9 kh\u00e1c",
     noRequests: "Kh\u00f4ng c\u00f3 y\u00eau c\u1ea7u.",
     loadRequestsError: "Kh\u00f4ng th\u1ec3 t\u1ea3i danh s\u00e1ch y\u00eau c\u1ea7u",
     retry: "Th\u1eed l\u1ea1i"
@@ -537,7 +535,7 @@
     filters: {
       requestStatus: "all",
       search: "",
-      workType: "all",
+      department: "",
       staff: "all",
       urgency: "all",
       media: "all",
@@ -854,45 +852,37 @@
     });
   }
 
-  function requestWorkTypeOptions() {
-    return [
-      ["all", t("allWorkTypes")],
-      ["drawing", t("workTypeDrawing")],
-      ["construction", t("workTypeConstruction")],
-      ["survey", t("workTypeSurvey")],
-      ["inspection", t("workTypeInspection")],
-      ["maintenance", t("workTypeMaintenance")],
-      ["outage", t("workTypeOutage")],
-      ["quote", t("workTypeQuote")],
-      ["other", t("workTypeOther")]
+  function requestDepartmentOptions() {
+    const defaults = [
+      t("departmentDesign"),
+      t("departmentConstruction"),
+      t("departmentOperation"),
+      t("departmentMaintenance"),
+      t("departmentSurvey"),
+      t("departmentSales"),
+      t("departmentOther")
     ];
+    const fromStaff = state.staff.map(staff => staffDepartment(staff)).filter(value => value && value !== "-");
+    const departments = [...new Set(fromStaff.concat(defaults))];
+    return [["", t("departmentFilter")], ["all", t("allRequestDepartments")]].concat(departments.map(value => [value, value]));
   }
 
-  function getRequestWorkType(item) {
-    const source = [
-      item?.workType,
-      item?.jobType,
-      item?.category,
-      item?.serviceType,
-      Array.isArray(item?.issueTags) ? item.issueTags.join(" ") : item?.issueTags
-    ].filter(value => String(value || "").trim()).join(" ").toLowerCase();
-    if (!source) return "";
-    if (/drawing|design|cad|\u56f3\u9762|\u8a2d\u8a08|b\u1ea3n v\u1ebd|thi\u1ebft k\u1ebf/.test(source)) return "drawing";
-    if (/construction|install|wiring|\u5de5\u4e8b|\u65bd\u5de5|\u914d\u7dda|thi c\u00f4ng|l\u1eafp \u0111\u1eb7t/.test(source)) return "construction";
-    if (/survey|site visit|\u73fe\u5730\u8abf\u67fb|\u8abf\u67fb|kh\u1ea3o s\u00e1t|hi\u1ec7n tr\u01b0\u1eddng/.test(source)) return "survey";
-    if (/inspection|check|\u78ba\u8a8d|\u691c\u67fb|ki\u1ec3m tra/.test(source)) return "inspection";
-    if (/maintenance|repair|fix|\u4fdd\u5b88|\u4fee\u7406|s\u1eeda ch\u1eefa|b\u1ea3o tr\u00ec/.test(source)) return "maintenance";
-    if (/outage|blackout|trouble|\u505c\u96fb|\u30c8\u30e9\u30d6\u30eb|m\u1ea5t \u0111i\u1ec7n|s\u1ef1 c\u1ed1/.test(source)) return "outage";
-    if (/quote|estimate|consult|\u898b\u7a4d|\u76f8\u8ac7|b\u00e1o gi\u00e1|t\u01b0 v\u1ea5n/.test(source)) return "quote";
-    if (/other|misc|\u305d\u306e\u4ed6|kh\u00e1c/.test(source)) return "other";
-    return "";
+  function getRequestAssigneeDepartment(item) {
+    const assigneeId = String(item?.assigneeId || item?.assignedStaffId || "");
+    const assigneeName = String(item?.assigneeName || getAssigneeName(item) || "");
+    const staff = state.staff.find(member => {
+      const id = String(getRowId(member) || "");
+      const name = String(member?.name || "");
+      return (id && id === assigneeId) || (name && name === assigneeName);
+    });
+    return staff ? staffDepartment(staff) : "";
   }
 
   function filterRequests(items) {
     const search = state.filters.search.toLowerCase();
     return items.filter(item => {
       const statusOk = state.filters.requestStatus === "all" || normalizeRequestStatus(item.status) === state.filters.requestStatus;
-      const workTypeOk = state.filters.workType === "all" || getRequestWorkType(item) === state.filters.workType;
+      const departmentOk = !state.filters.department || state.filters.department === "all" || getRequestAssigneeDepartment(item) === state.filters.department;
       const selectedStaff = state.staff.find(staff => getRowId(staff) === state.filters.staff);
       const staffOk = state.filters.staff === "all"
         || String(item.assigneeId || "") === state.filters.staff
@@ -911,7 +901,7 @@
         formatStatus(item.status),
         normalizeRequestStatus(item.status)
       ].join(" ").toLowerCase();
-      return statusOk && workTypeOk && staffOk && urgencyOk && mediaOk && text.includes(search);
+      return statusOk && departmentOk && staffOk && urgencyOk && mediaOk && text.includes(search);
     });
   }
 
@@ -1276,9 +1266,9 @@
       <div class="request-command-bar demo-actions">
         <button class="btn btn-soft" disabled>${escapeHtml(t("export"))}</button>
         <button class="btn btn-primary" disabled>+ ${escapeHtml(t("newRequest"))}</button>
-        <div class="segmented">
-          <button class="${state.filters.requestViewMode === "table" ? "active" : ""}" type="button" data-view-mode="table">${escapeHtml(t("tableFormat"))}</button>
-          <button class="${state.filters.requestViewMode === "kanban" ? "active" : ""}" type="button" data-view-mode="kanban">${escapeHtml(t("kanbanView"))}</button>
+        <div class="segmented request-view-toggle">
+          <button class="request-action-btn ${state.filters.requestViewMode === "table" ? "active" : ""}" type="button" data-view-mode="table">${escapeHtml(t("tableFormat"))}</button>
+          <button class="request-action-btn ${state.filters.requestViewMode === "kanban" ? "active" : ""}" type="button" data-view-mode="kanban">${escapeHtml(t("kanbanView"))}</button>
         </div>
       </div>
       <div class="request-status-row">
@@ -1287,8 +1277,8 @@
       <div class="request-filter-bar">
         <input id="requestSearch" class="request-search-input" value="${escapeHtml(state.filters.search)}" placeholder="${escapeHtml(t("search"))}" />
         <button class="request-search-btn" type="button" data-request-search>${escapeHtml(t("searchButton"))}</button>
-        <select class="request-filter-select" data-filter-select="workType" aria-label="${escapeHtml(t("workType"))}">
-          ${requestWorkTypeOptions().map(([value, label]) => `<option value="${escapeHtml(value)}" ${state.filters.workType === value ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}
+        <select class="request-filter-select" data-filter-select="department" aria-label="${escapeHtml(t("departmentFilter"))}">
+          ${requestDepartmentOptions().map(([value, label]) => `<option value="${escapeHtml(value)}" ${state.filters.department === value ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}
         </select>
         <select class="request-filter-select" data-filter-select="staff"><option value="all" ${state.filters.staff === "all" ? "selected" : ""}>${escapeHtml(t("assignee"))}</option>${state.staff.map(staff => `<option value="${escapeHtml(getRowId(staff) || staff.name || "")}" ${state.filters.staff === getRowId(staff) ? "selected" : ""}>${escapeHtml(staff.name || "-")}</option>`).join("")}</select>
         <select class="request-filter-select" data-filter-select="urgency">

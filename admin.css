@@ -166,8 +166,8 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 
 .request-command-bar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
-.segmented { display: inline-flex; padding: 4px; border-radius: 12px; background: #e2e8f0; gap: 4px; }
-.segmented button { border: 0; border-radius: 9px; padding: 8px 12px; background: transparent; font-weight: 900; color: var(--muted); }
+.segmented { display: inline-flex; padding: 4px; border-radius: 12px; background: #e2e8f0; gap: 4px; min-width: 0; }
+.segmented button { border: 0; border-radius: 9px; padding: 8px 12px; background: transparent; font-weight: 900; color: var(--muted); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-sizing: border-box; }
 .segmented button.active { background: #fff; color: var(--primary); box-shadow: 0 6px 16px rgba(15, 23, 42, .08); }
 .request-status-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; width: 100%; margin-bottom: 12px; }
 .request-status-chip { height: 54px; width: 100%; min-width: 0; border: 1px solid var(--border); background: #fff; color: var(--text); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 14px; box-sizing: border-box; font-weight: 900; white-space: nowrap; overflow: hidden; }
@@ -175,22 +175,24 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .request-status-chip .chip-count { min-width: 22px; height: 22px; border-radius: 999px; display: grid; place-items: center; background: #f1f5f9; color: var(--muted); font-size: 11px; flex: 0 0 auto; }
 .request-status-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .request-status-chip.active .chip-count { background: rgba(255,255,255,.2); color: #fff; }
-.request-filter-bar { display: grid; grid-template-columns: minmax(320px, 1.4fr) 112px repeat(5, minmax(150px, 1fr)); gap: 12px; align-items: center; width: 100%; margin-bottom: 14px; }
+.request-filter-bar { display: grid; grid-template-columns: minmax(320px, 1.5fr) 140px repeat(5, minmax(170px, 1fr)); gap: 14px; align-items: center; width: 100%; margin-bottom: 14px; }
 .request-search-input,
 .request-search-btn,
-.request-filter-select { height: 48px; width: 100%; min-width: 0; border-radius: 14px; box-sizing: border-box; font-size: 14px; }
-.request-search-input { border: 1px solid #dbe3ef; background: #fff; padding: 0 16px; color: #0f172a; font-weight: 700; }
-.request-search-btn { border: 0; background: linear-gradient(135deg, #2563eb, #06b6d4); color: #fff; font-weight: 900; cursor: pointer; white-space: nowrap; }
-.request-filter-select { border: 1px solid #dbe3ef; background: #fff; color: #0f172a; font-weight: 800; padding: 0 38px 0 14px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.request-filter-select { height: 52px; width: 100%; min-width: 0; border-radius: 16px; box-sizing: border-box; font-size: 14px; }
+.request-search-input { border: 1px solid #dbe3ef; background: #fff; padding: 0 18px; color: #0f172a; font-weight: 700; }
+.request-search-btn { border: 0; background: linear-gradient(135deg, #2563eb, #06b6d4); color: #fff; font-weight: 900; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.request-filter-select { border: 1px solid #dbe3ef; background: #fff; color: #0f172a; font-weight: 800; padding: 0 40px 0 16px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.request-view-toggle,
+.request-action-btn { min-width: 0; max-width: 100%; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .filter-input { min-height: 40px; border: 1px solid var(--border); border-radius: 10px; background: #fff; padding: 0 12px; min-width: 0; }
 
-@media (max-width: 1280px) {
+@media (max-width: 1360px) {
   .request-filter-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .request-search-input { grid-column: span 2; }
   .request-search-btn { grid-column: span 1; }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .request-filter-bar { grid-template-columns: 1fr; }
   .request-search-input,
   .request-search-btn,
