@@ -1805,6 +1805,20 @@
     renderCustomers();
   }
 
+  function findCustomerById(id) {
+    return state.users.find(user => String(getRowId(user)) === String(id));
+  }
+
+  function openCustomerDetail(customerId) {
+    const id = String(customerId || "");
+    if (!id || !findCustomerById(id)) {
+      toast(t("failed"));
+      return;
+    }
+    state.selectedUser = id;
+    renderCustomers();
+  }
+
   function renderCustomerResultsOnly() {
     const rows = filterUsers();
     const selected = rows.find(user => getRowId(user) === state.selectedUser) || null;
@@ -1824,30 +1838,34 @@
   }
 
   async function handleCustomerAction(action, trigger) {
+    const id = trigger?.dataset.customerId || trigger?.closest("[data-customer-id]")?.dataset.customerId || "";
+    console.log("[customer] action", action, id);
+
     if (action === "close-detail") {
       closeCustomerDetail();
       return;
     }
 
-    const id = trigger?.dataset.customerId || trigger?.closest("[data-customer-id]")?.dataset.customerId || "";
     if (!id) return;
-    const user = state.users.find(item => getRowId(item) === id);
+    const user = findCustomerById(id);
     if (!user) return;
-    state.selectedUser = id;
 
     if (action === "select") {
-      renderCustomers();
+      openCustomerDetail(id);
       return;
     }
     if (action === "detail") {
-      renderCustomers();
+      openCustomerDetail(id);
       return;
     }
     if (action === "view-requests") {
+      state.selectedUser = id;
       renderCustomerResultsOnly();
       await renderCustomerDetail(user, "history");
       return;
     }
+
+    state.selectedUser = id;
 
     try {
       let response;
@@ -2358,6 +2376,28 @@
     return true;
   }
 
+  async function handleCustomerDelegatedClick(event) {
+    if (state.currentView !== "customers") return false;
+
+    const actionButton = event.target.closest("[data-customer-action]");
+    if (actionButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      await handleCustomerAction(actionButton.dataset.customerAction, actionButton);
+      return true;
+    }
+
+    const customerRow = event.target.closest("[data-customer-id]");
+    if (customerRow && customerRow.closest(".customer-list-panel")) {
+      event.preventDefault();
+      event.stopPropagation();
+      await handleCustomerAction("select", customerRow);
+      return true;
+    }
+
+    return false;
+  }
+
   function bindEvents() {
     console.log("[admin-v2] binding events");
     const savedSidebarState = localStorage.getItem("adminV2SidebarCollapsed");
@@ -2429,6 +2469,9 @@
         renderRequestResults();
       }
     });
+    document.addEventListener("click", event => {
+      void handleCustomerDelegatedClick(event);
+    }, true);
     bind(document, "keydown", event => {
       if (event.key === "Escape" && state.currentView === "customers" && state.selectedUser) {
         closeCustomerDetail();
@@ -2483,6 +2526,7 @@
     });
 
     bind(document, "click", async event => {
+      if (event.defaultPrevented) return;
       if (event.target.closest("select,input,textarea,option")) return;
 
       const navButton = event.target.closest("[data-view]");
@@ -2552,20 +2596,6 @@
           console.error(error);
           toast(t("failed"));
         }
-        return;
-      }
-
-      const customerAction = event.target.closest("[data-customer-action]");
-      if (customerAction) {
-        event.preventDefault();
-        await handleCustomerAction(customerAction.dataset.customerAction, customerAction);
-        return;
-      }
-
-      const customerRow = event.target.closest("[data-customer-id]");
-      if (customerRow) {
-        event.preventDefault();
-        await handleCustomerAction("select", customerRow);
         return;
       }
 
