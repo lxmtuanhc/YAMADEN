@@ -539,10 +539,14 @@
     customerMovedToTrash: "\u9867\u5ba2\u3092\u30b4\u30df\u7bb1\u3078\u79fb\u52d5\u3057\u307e\u3057\u305f\u3002",
     restoreCustomerTitle: "\u9867\u5ba2\u3092\u5fa9\u5143\u3057\u307e\u3059\u304b\uff1f",
     restoreCustomerText: "\u5fa9\u5143\u3059\u308b\u3068\u3001\u9867\u5ba2\u306f\u518d\u3073\u30a2\u30d7\u30ea\u3092\u5229\u7528\u3067\u304d\u308b\u3088\u3046\u306b\u306a\u308a\u307e\u3059\u3002",
+    restoreTrashTitle: "\u5fa9\u5143\u3057\u307e\u3059\u304b\uff1f",
+    restoreTrashText: "\u5fa9\u5143\u3059\u308b\u3068\u3001\u3053\u306e\u30c7\u30fc\u30bf\u306f\u901a\u5e38\u306e\u4e00\u89a7\u306b\u623b\u308a\u307e\u3059\u3002",
     customerRestored: "\u9867\u5ba2\u3092\u5fa9\u5143\u3057\u307e\u3057\u305f\u3002",
     permanentDelete: "\u5b8c\u5168\u524a\u9664",
     permanentDeleteCustomerTitle: "\u9867\u5ba2\u3092\u5b8c\u5168\u306b\u524a\u9664\u3057\u307e\u3059\u304b\uff1f",
     permanentDeleteCustomerText: "\u3053\u306e\u64cd\u4f5c\u306f\u5143\u306b\u623b\u305b\u307e\u305b\u3093\u3002\u672c\u5f53\u306b\u524a\u9664\u3057\u3066\u3088\u3044\u5834\u5408\u306e\u307f\u5b9f\u884c\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+    permanentDeleteTrashTitle: "\u5b8c\u5168\u306b\u524a\u9664\u3057\u307e\u3059\u304b\uff1f",
+    permanentDeleteTrashText: "\u3053\u306e\u64cd\u4f5c\u306f\u5143\u306b\u623b\u305b\u307e\u305b\u3093\u3002\u672c\u5f53\u306b\u524a\u9664\u3057\u3066\u3088\u3044\u5834\u5408\u306e\u307f\u5b9f\u884c\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
     permanentDeletePlanned: "\u5b8c\u5168\u524a\u9664\u6a5f\u80fd\u306f\u5f8c\u3067\u30d0\u30c3\u30af\u30a8\u30f3\u30c9\u306b\u63a5\u7d9a\u3055\u308c\u307e\u3059\u3002",
     resetPinTitle: "\u9867\u5ba2\u306ePIN\u3092\u30ea\u30bb\u30c3\u30c8\u3057\u307e\u3059\u304b\uff1f",
     resetPinText: "\u73fe\u5728\u306ePIN\u306f\u7121\u52b9\u306b\u306a\u308a\u307e\u3059\u3002\u9867\u5ba2\u306f\u65b0\u3057\u3044PIN\u3092\u8a2d\u5b9a\u3059\u308b\u5fc5\u8981\u304c\u3042\u308a\u307e\u3059\u3002",
@@ -551,6 +555,21 @@
     pinSet: "PIN\u8a2d\u5b9a\u6e08\u307f",
     pinUnset: "PIN\u672a\u8a2d\u5b9a",
     pinSecurityNote: "PIN\u306f\u6697\u53f7\u5316\u3055\u308c\u3066\u3044\u308b\u305f\u3081\u3001\u7ba1\u7406\u8005\u306f\u73fe\u5728\u306ePIN\u3092\u78ba\u8a8d\u3067\u304d\u307e\u305b\u3093\u3002",
+    trash: "\u30b4\u30df\u7bb1",
+    trashSubtitle: "\u4e00\u6642\u524a\u9664\u3055\u308c\u305f\u30c7\u30fc\u30bf\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002\u5fa9\u5143\u307e\u305f\u306f\u5b8c\u5168\u524a\u9664\u3067\u304d\u307e\u3059\u3002",
+    trashEmpty: "\u30b4\u30df\u7bb1\u306f\u7a7a\u3067\u3059\u3002",
+    trashCustomers: "\u9867\u5ba2\u30b4\u30df\u7bb1",
+    trashRequests: "\u524a\u9664\u6e08\u307f\u4f9d\u983c",
+    trashQuotes: "\u524a\u9664\u6e08\u307f\u898b\u7a4d",
+    trashStaff: "\u524a\u9664\u6e08\u307f\u30b9\u30bf\u30c3\u30d5",
+    request: "\u4f9d\u983c",
+    quote: "\u898b\u7a4d",
+    deletedBeforeStatus: "\u524a\u9664\u524d\u30b9\u30c6\u30fc\u30bf\u30b9",
+    relatedRequest: "\u95a2\u9023\u4f9d\u983c",
+    skillsWork: "\u30b9\u30ad\u30eb\u30fb\u696d\u52d9",
+    movedToTrash: "\u30b4\u30df\u7bb1\u3078\u79fb\u52d5\u3057\u307e\u3057\u305f\u3002",
+    restoredSuccess: "\u5fa9\u5143\u3057\u307e\u3057\u305f\u3002",
+    softDeletePlanned: "\u4e00\u6642\u524a\u9664\u6a5f\u80fd\u306f\u5f8c\u3067\u30d0\u30c3\u30af\u30a8\u30f3\u30c9\u306b\u63a5\u7d9a\u3055\u308c\u307e\u3059\u3002",
     approve: "\u627f\u8a8d",
     block: "\u505c\u6b62",
     activate: "\u505c\u6b62\u89e3\u9664",
@@ -602,10 +621,14 @@
     customerMovedToTrash: "Kh\u00e1ch h\u00e0ng \u0111\u00e3 \u0111\u01b0\u1ee3c chuy\u1ec3n v\u00e0o th\u00f9ng r\u00e1c.",
     restoreCustomerTitle: "Kh\u00f4i ph\u1ee5c kh\u00e1ch h\u00e0ng?",
     restoreCustomerText: "Kh\u00e1ch h\u00e0ng s\u1ebd \u0111\u01b0\u1ee3c k\u00edch ho\u1ea1t l\u1ea1i v\u00e0 c\u00f3 th\u1ec3 s\u1eed d\u1ee5ng app n\u1ebfu t\u00e0i kho\u1ea3n h\u1ee3p l\u1ec7.",
+    restoreTrashTitle: "Kh\u00f4i ph\u1ee5c?",
+    restoreTrashText: "Sau khi kh\u00f4i ph\u1ee5c, d\u1eef li\u1ec7u n\u00e0y s\u1ebd quay l\u1ea1i danh s\u00e1ch ch\u00ednh.",
     customerRestored: "Kh\u00f4i ph\u1ee5c kh\u00e1ch h\u00e0ng th\u00e0nh c\u00f4ng.",
     permanentDelete: "X\u00f3a v\u0129nh vi\u1ec5n",
     permanentDeleteCustomerTitle: "X\u00f3a v\u0129nh vi\u1ec5n kh\u00e1ch h\u00e0ng?",
     permanentDeleteCustomerText: "Thao t\u00e1c n\u00e0y kh\u00f4ng th\u1ec3 kh\u00f4i ph\u1ee5c. Ch\u1ec9 th\u1ef1c hi\u1ec7n khi ch\u1eafc ch\u1eafn kh\u00f4ng c\u1ea7n gi\u1eef d\u1eef li\u1ec7u kh\u00e1ch h\u00e0ng n\u00e0y.",
+    permanentDeleteTrashTitle: "X\u00f3a v\u0129nh vi\u1ec5n?",
+    permanentDeleteTrashText: "Thao t\u00e1c n\u00e0y kh\u00f4ng th\u1ec3 kh\u00f4i ph\u1ee5c. Ch\u1ec9 th\u1ef1c hi\u1ec7n khi ch\u1eafc ch\u1eafn kh\u00f4ng c\u1ea7n gi\u1eef d\u1eef li\u1ec7u n\u00e0y.",
     permanentDeletePlanned: "Ch\u1ee9c n\u0103ng x\u00f3a v\u0129nh vi\u1ec5n s\u1ebd \u0111\u01b0\u1ee3c k\u1ebft n\u1ed1i backend sau.",
     resetPinTitle: "Reset PIN kh\u00e1ch h\u00e0ng?",
     resetPinText: "PIN hi\u1ec7n t\u1ea1i s\u1ebd b\u1ecb v\u00f4 hi\u1ec7u h\u00f3a. Kh\u00e1ch h\u00e0ng c\u1ea7n thi\u1ebft l\u1eadp PIN m\u1edbi ho\u1eb7c d\u00f9ng PIN t\u1ea1m n\u1ebfu backend h\u1ed7 tr\u1ee3.",
@@ -614,6 +637,21 @@
     pinSet: "\u0110\u00e3 thi\u1ebft l\u1eadp PIN",
     pinUnset: "Ch\u01b0a thi\u1ebft l\u1eadp PIN",
     pinSecurityNote: "PIN \u0111\u01b0\u1ee3c m\u00e3 h\u00f3a, admin kh\u00f4ng th\u1ec3 xem PIN hi\u1ec7n t\u1ea1i.",
+    trash: "Th\u00f9ng r\u00e1c",
+    trashSubtitle: "Qu\u1ea3n l\u00fd d\u1eef li\u1ec7u \u0111\u00e3 x\u00f3a t\u1ea1m. B\u1ea1n c\u00f3 th\u1ec3 kh\u00f4i ph\u1ee5c ho\u1eb7c x\u00f3a v\u0129nh vi\u1ec5n.",
+    trashEmpty: "Th\u00f9ng r\u00e1c \u0111ang tr\u1ed1ng.",
+    trashCustomers: "Th\u00f9ng r\u00e1c kh\u00e1ch h\u00e0ng",
+    trashRequests: "Y\u00eau c\u1ea7u \u0111\u00e3 x\u00f3a",
+    trashQuotes: "B\u00e1o gi\u00e1 \u0111\u00e3 x\u00f3a",
+    trashStaff: "Nh\u00e2n vi\u00ean \u0111\u00e3 x\u00f3a",
+    request: "Y\u00eau c\u1ea7u",
+    quote: "B\u00e1o gi\u00e1",
+    deletedBeforeStatus: "Tr\u1ea1ng th\u00e1i tr\u01b0\u1edbc khi x\u00f3a",
+    relatedRequest: "Y\u00eau c\u1ea7u li\u00ean quan",
+    skillsWork: "K\u1ef9 n\u0103ng / c\u00f4ng vi\u1ec7c",
+    movedToTrash: "\u0110\u00e3 chuy\u1ec3n v\u00e0o th\u00f9ng r\u00e1c.",
+    restoredSuccess: "Kh\u00f4i ph\u1ee5c th\u00e0nh c\u00f4ng.",
+    softDeletePlanned: "Ch\u1ee9c n\u0103ng x\u00f3a t\u1ea1m s\u1ebd \u0111\u01b0\u1ee3c k\u1ebft n\u1ed1i backend sau.",
     approve: "Duy\u1ec7t",
     block: "Kh\u00f3a",
     activate: "M\u1edf kh\u00f3a",
@@ -666,6 +704,7 @@
     ["staff", "staff", "♙"],
     ["quotes", "quotes", "▣"],
     ["notifications", "notifications", "⌁"],
+    ["trash", "trash", "♻"],
     ["settings", "settings", "⚙"]
   ];
 
@@ -768,6 +807,7 @@
     requests: [],
     users: [],
     staff: [],
+    quotes: [],
     selectedRequest: null,
     selectedUser: null,
     selectedStaff: null,
@@ -775,7 +815,8 @@
     loading: {
       requests: false,
       users: false,
-      staff: false
+      staff: false,
+      quotes: false
     },
     filters: {
       requestStatus: "all",
@@ -785,7 +826,9 @@
       urgency: "all",
       media: "all",
       sort: "priority",
-      requestViewMode: "table"
+      requestViewMode: "table",
+      trashCategory: "customers",
+      trashSearch: ""
     },
     lang: localStorage.getItem("language") || "ja"
   };
@@ -844,6 +887,21 @@
         body: JSON.stringify(payload || {})
       });
     },
+    deleteRequest(id, permanent) {
+      return requestJson("/request/" + encodeURIComponent(id) + (permanent ? "?permanent=true" : ""), { method: "DELETE" });
+    },
+    restoreRequest(id) {
+      return requestJson("/request/" + encodeURIComponent(id) + "/restore", { method: "PATCH" });
+    },
+    getQuotes() {
+      return requestJson("/admin/quotes");
+    },
+    deleteQuote(id, permanent) {
+      return requestJson("/admin/quotes/" + encodeURIComponent(id) + (permanent ? "?permanent=true" : ""), { method: "DELETE" });
+    },
+    restoreQuote(id) {
+      return requestJson("/admin/quotes/" + encodeURIComponent(id) + "/restore", { method: "PATCH" });
+    },
     async getUsers() {
       try {
         return await requestJson("/api/admin/users");
@@ -894,8 +952,11 @@
         body: JSON.stringify(payload || {})
       });
     },
-    deleteStaff(id) {
-      return requestJson("/admin/staff/" + encodeURIComponent(id), { method: "DELETE" });
+    deleteStaff(id, permanent) {
+      return requestJson("/admin/staff/" + encodeURIComponent(id) + (permanent ? "?permanent=true" : ""), { method: "DELETE" });
+    },
+    restoreStaff(id) {
+      return requestJson("/admin/staff/" + encodeURIComponent(id) + "/restore", { method: "PATCH" });
     }
   };
 
@@ -1149,6 +1210,7 @@
   function filterRequests(items) {
     const search = state.filters.search.toLowerCase();
     return items.filter(item => {
+      if (isSoftDeleted(item)) return false;
       const statusOk = state.filters.requestStatus === "all" || normalizeRequestStatus(item.status) === state.filters.requestStatus;
       const departmentOk = !state.filters.department || state.filters.department === "all" || getRequestAssigneeDepartment(item) === state.filters.department;
       const selectedStaff = state.staff.find(staff => getRowId(staff) === state.filters.staff);
@@ -1249,9 +1311,9 @@
   function renderLayout() {
     document.documentElement.lang = state.lang;
     $("appShell").dataset.view = state.currentView;
-    const untreatedCount = state.requests.filter(item => normalizeRequestStatus(item.status) === "untreated").length;
+    const untreatedCount = state.requests.filter(item => !isSoftDeleted(item) && normalizeRequestStatus(item.status) === "untreated").length;
     const pendingUserCount = state.users.filter(user => user.status === "pendingApproval" || user.status === "pending").length;
-    const warningCount = state.requests.filter(isOverdue).length + pendingUserCount;
+    const warningCount = state.requests.filter(item => !isSoftDeleted(item) && isOverdue(item)).length + pendingUserCount;
     const badgeByView = { requests: untreatedCount, customers: pendingUserCount, notifications: warningCount };
     if ($("globalSearch")) $("globalSearch").placeholder = t("search");
     $("languageSelect").innerHTML = `<option value="vi">Ti\u1ebfng Vi\u1ec7t</option><option value="ja">\u65e5\u672c\u8a9e</option>`;
@@ -1280,6 +1342,7 @@
       staff: `<svg ${attrs}><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10"/><path d="M8 13h3"/><path d="M8 17h8"/></svg>`,
       quotes: `<svg ${attrs}><path d="M7 3h10a2 2 0 0 1 2 2v16l-3-2-3 2-3-2-3 2-2-1.33V5a2 2 0 0 1 2-2z"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>`,
       notifications: `<svg ${attrs}><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>`,
+      trash: `<svg ${attrs}><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 15H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>`,
       settings: `<svg ${attrs}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3 1a7.6 7.6 0 0 0-1.7-1L15.2 7h-4.4l-.3 2.3a7.6 7.6 0 0 0-1.7 1l-2.3-1-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 2l-2 1.2 2 3.5 2.3-1a7.6 7.6 0 0 0 1.7 1l.3 2.3h4.4l.3-2.3a7.6 7.6 0 0 0 1.7-1l2.3 1 2-3.5-2.2-1.2z"/></svg>`
     };
     return icons[view] || escapeHtml(fallback || "");
@@ -1293,6 +1356,7 @@
       staff: "\u30b9\u30bf\u30c3\u30d5\u7ba1\u7406",
       quotes: "\u898b\u7a4d\u30fb\u63d0\u6848",
       notifications: "\u901a\u77e5",
+      trash: "\u30b4\u30df\u7bb1",
       settings: "\u8a2d\u5b9a"
     };
     const vi = {
@@ -1302,6 +1366,7 @@
       staff: "Staff",
       quotes: "B\u00e1o gi\u00e1",
       notifications: "Th\u00f4ng b\u00e1o",
+      trash: "Th\u00f9ng r\u00e1c",
       settings: "C\u00e0i \u0111\u1eb7t"
     };
     return (state.lang === "vi" ? vi[view] : ja[view]) || t(fallbackKey);
@@ -1312,20 +1377,25 @@
     state.loading.users = true;
     state.loading.staff = true;
     state.errors = {};
-    const [requests, users, staff] = await Promise.allSettled([
+    state.loading.quotes = true;
+    const [requests, users, staff, quotes] = await Promise.allSettled([
       AdminAPI.getRequests(),
       AdminAPI.getUsers(),
-      AdminAPI.getStaff()
+      AdminAPI.getStaff(),
+      AdminAPI.getQuotes()
     ]);
     state.requests = requests.status === "fulfilled" ? normalizeList(requests.value) : [];
     state.users = users.status === "fulfilled" ? normalizeList(users.value) : [];
     state.staff = staff.status === "fulfilled" ? normalizeList(staff.value) : [];
+    state.quotes = quotes.status === "fulfilled" ? normalizeList(quotes.value) : [];
     state.errors.requests = requests.status === "rejected" ? requests.reason?.message || "failed" : "";
     state.errors.users = users.status === "rejected" ? users.reason?.message || "failed" : "";
     state.errors.staff = staff.status === "rejected" ? staff.reason?.message || "failed" : "";
+    state.errors.quotes = quotes.status === "rejected" ? quotes.reason?.message || "failed" : "";
     state.loading.requests = false;
     state.loading.users = false;
     state.loading.staff = false;
+    state.loading.quotes = false;
   }
 
   function normalizeList(payload) {
@@ -1334,7 +1404,12 @@
     if (Array.isArray(payload?.users)) return payload.users;
     if (Array.isArray(payload?.requests)) return payload.requests;
     if (Array.isArray(payload?.staff)) return payload.staff;
+    if (Array.isArray(payload?.quotes)) return payload.quotes;
     return [];
+  }
+
+  function isSoftDeleted(item) {
+    return Boolean(item?.isDeleted) || Boolean(item?.deletedAt) || normalizeUserStatusValue(item?.status) === "deleted";
   }
 
   function renderCurrentView() {
@@ -1345,6 +1420,7 @@
       customers: renderCustomers,
       staff: renderStaff,
       quotes: renderQuotes,
+      trash: renderTrash,
       notifications: renderNotifications,
       settings: renderSettings
     };
@@ -1352,13 +1428,14 @@
   }
 
   function renderDashboard() {
-    const untreated = state.requests.filter(item => normalizeRequestStatus(item.status) === "untreated");
-    const overdue = state.requests.filter(isOverdue);
-    const quoted = state.requests.filter(item => normalizeRequestStatus(item.status) === "quoted");
-    const ordered = state.requests.filter(item => normalizeRequestStatus(item.status) === "ordered");
+    const activeRequests = state.requests.filter(item => !isSoftDeleted(item));
+    const untreated = activeRequests.filter(item => normalizeRequestStatus(item.status) === "untreated");
+    const overdue = activeRequests.filter(isOverdue);
+    const quoted = activeRequests.filter(item => normalizeRequestStatus(item.status) === "quoted");
+    const ordered = activeRequests.filter(item => normalizeRequestStatus(item.status) === "ordered");
     const pendingUsers = state.users.filter(user => user.status === "pendingApproval" || user.status === "pending");
     const activeStaff = state.staff.filter(item => !["off", "inactive", "deleted"].includes(String(item.status || "active")));
-    const priority = sortRequests(state.requests
+    const priority = sortRequests(activeRequests
       .filter(item => !["completed", "lost"].includes(normalizeRequestStatus(item.status)))
       .filter(item => ["untreated", "contacted", "site_done", "quoted"].includes(normalizeRequestStatus(item.status)) || getPriorityScore(item) > 0))
       .slice(0, 5);
@@ -1384,7 +1461,7 @@
         </div>
       </header>
       <div class="kpi-grid dashboard-kpis">
-        ${statCard(t("totalRequests"), state.requests.length, t("realData"), "total", "clipboard", "requests:requestStatus:all")}
+        ${statCard(t("totalRequests"), activeRequests.length, t("realData"), "total", "clipboard", "requests:requestStatus:all")}
         ${statCard(t("untreated"), untreated.length, t("realData"), "danger", "clock", "requests:requestStatus:untreated")}
         ${statCard(t("overdue"), overdue.length, t("realData"), "warning", "alert", "requests:requestStatus:untreated")}
         ${statCard(t("customersCount"), state.users.length, t("realData"), "info", "building", "customers:customerStatus:all")}
@@ -1486,8 +1563,9 @@
   }
 
   function renderRequestFilterChips() {
+    const activeRequests = state.requests.filter(item => !isSoftDeleted(item));
     return requestFilterStatuses().map(status => {
-      const count = status === "all" ? state.requests.length : state.requests.filter(item => normalizeRequestStatus(item.status) === status).length;
+      const count = status === "all" ? activeRequests.length : activeRequests.filter(item => normalizeRequestStatus(item.status) === status).length;
       return `<button class="request-status-chip ${state.filters.requestStatus === status ? "active" : ""}" type="button" data-request-filter="${status}"><span class="chip-label">${escapeHtml(status === "all" ? t("all") : formatStatus(status))}</span><b class="chip-count">${count}</b></button>`;
     }).join("");
   }
@@ -1841,6 +1919,7 @@
     const sort = state.filters.customerSort || "created";
     return [...state.users].filter(user => {
       const userStatus = normalizeUserStatusValue(user.status);
+      if (userStatus === "deleted") return false;
       const statusOk = status === "all" || userStatus === status;
       const text = [user.name, user.phone, user.email, user.company, user.companyName, user.customerType, user.address, user.province].join(" ").toLowerCase();
       return statusOk && text.includes(search.toLowerCase());
@@ -1869,6 +1948,7 @@
     return [...state.staff].filter(staff => {
       const deptText = staffDepartment(staff);
       const statusText = staff.status || "active";
+      if (statusText === "deleted" || staff.deletedAt) return false;
       const text = [staff.name, staff.email, staff.phone, deptText, staffRole(staff), staff.workContent, staff.skills, toList(staff.workTags).join(" ")].join(" ").toLowerCase();
       return (dept === "all" || deptText === dept) && (status === "all" || statusText === status) && text.includes(search.toLowerCase());
     }).sort((a, b) => {
@@ -1893,7 +1973,7 @@
     }
     const rows = filterUsers();
     const totalWithRequests = state.users.filter(user => userRequestCount(user) > 0).length;
-    const statusOptions = ["all", "pendingApproval", "active", "blocked", "deleted"];
+    const statusOptions = ["all", "pendingApproval", "active", "blocked"];
     const selected = rows.find(user => getRowId(user) === state.selectedUser) || null;
     if (state.selectedUser && !selected) state.selectedUser = "";
     $("viewRoot").innerHTML = `
@@ -1924,13 +2004,14 @@
     `;
   }
 
-  function renderCustomerKpis(totalWithRequests = state.users.filter(user => userRequestCount(user) > 0).length) {
+  function renderCustomerKpis(totalWithRequests = state.users.filter(user => normalizeUserStatusValue(user.status) !== "deleted" && userRequestCount(user) > 0).length) {
+    const visibleUsers = state.users.filter(user => normalizeUserStatusValue(user.status) !== "deleted");
     return `
-      ${statCard(t("customersCount"), state.users.length, t("realData"), "info")}
+      ${statCard(t("customersCount"), visibleUsers.length, t("realData"), "info")}
       ${statCard(customerStatusLabel("pendingApproval"), state.users.filter(user => normalizeUserStatusValue(user.status) === "pendingApproval").length, t("realData"), "warning")}
       ${statCard(customerStatusLabel("active"), state.users.filter(user => normalizeUserStatusValue(user.status) === "active").length, t("realData"), "success")}
       ${statCard(customerStatusLabel("blocked"), state.users.filter(user => normalizeUserStatusValue(user.status) === "blocked").length, t("realData"), "danger")}
-      ${statCard(customerStatusLabel("deleted"), state.users.filter(user => normalizeUserStatusValue(user.status) === "deleted").length, t("realData"), "total")}
+      ${statCard(customerStatusLabel("deleted"), state.users.filter(user => normalizeUserStatusValue(user.status) === "deleted").length, t("realData"), "total", "trash", "trash:trashCategory:customers")}
       ${statCard(t("hasRequests"), totalWithRequests, t("realData"), "info")}
     `;
   }
@@ -2434,6 +2515,153 @@
     `;
   }
 
+  function renderQuoteDetail(quote) {
+    openDrawer(`
+      <article class="drawer-panel profile-drawer">
+        <header class="drawer-head drawer-header">
+          <div><h2>${escapeHtml(quote.quoteCode || quote.id || t("quote"))}</h2><p class="note">${escapeHtml(quote.projectName || quote.title || "-")}</p></div>
+          <button class="close-button" type="button" data-close-drawer>×</button>
+        </header>
+        <div class="drawer-body">
+          <div class="info-grid">
+            ${infoItem(t("quote"), quote.quoteCode || quote.id)}
+            ${infoItem(t("relatedRequest"), quote.requestId)}
+            ${infoItem(t("customer"), quote.customerName || quote.name)}
+            ${infoItem(t("status"), quote.status)}
+            ${infoItem(t("createdAt"), formatDate(quote.createdAt))}
+            ${infoItem(t("deletedAt"), formatDate(quote.deletedAt))}
+          </div>
+        </div>
+      </article>
+    `);
+  }
+
+  function trashCategories() {
+    return [
+      ["customers", t("customers")],
+      ["requests", t("requests")],
+      ["quotes", t("quotes")],
+      ["staff", t("staff")]
+    ];
+  }
+
+  function deletedRowsFor(category) {
+    if (category === "customers") return state.users.filter(user => normalizeUserStatusValue(user.status) === "deleted" || user.deletedAt);
+    if (category === "requests") return state.requests.filter(isSoftDeleted);
+    if (category === "quotes") return state.quotes.filter(isSoftDeleted);
+    if (category === "staff") return state.staff.filter(staff => staff.status === "deleted" || staff.deletedAt);
+    return [];
+  }
+
+  function renderTrash() {
+    const category = state.filters.trashCategory || "customers";
+    const search = (state.filters.trashSearch || "").toLowerCase();
+    const rows = deletedRowsFor(category).filter(item => JSON.stringify(item || {}).toLowerCase().includes(search));
+    const counts = Object.fromEntries(trashCategories().map(([key]) => [key, deletedRowsFor(key).length]));
+    $("viewRoot").innerHTML = `
+      <div class="page-intro"><p>${escapeHtml(t("trashSubtitle"))}</p></div>
+      <div class="request-status-row">
+        ${trashCategories().map(([key, label]) => `<button class="request-status-chip ${category === key ? "active" : ""}" type="button" data-trash-category="${escapeHtml(key)}"><span class="chip-label">${escapeHtml(label)}</span><b class="chip-count">${counts[key] || 0}</b></button>`).join("")}
+      </div>
+      <div class="crm-filter-bar">
+        <input class="filter-input" data-trash-search value="${escapeHtml(state.filters.trashSearch || "")}" placeholder="${escapeHtml(t("search"))}" />
+      </div>
+      <section class="section-card">
+        <div class="panel-head"><h2>${escapeHtml(trashTitle(category))}</h2><span class="note">${rows.length}</span></div>
+        <div class="panel-body crm-table-body">${renderTrashTable(category, rows)}</div>
+      </section>
+    `;
+  }
+
+  function trashTitle(category) {
+    const map = {
+      customers: t("trashCustomers"),
+      requests: t("trashRequests"),
+      quotes: t("trashQuotes"),
+      staff: t("trashStaff")
+    };
+    return map[category] || t("trash");
+  }
+
+  function renderTrashTable(category, rows) {
+    if (!rows.length) return showEmptyState(t("trashEmpty"));
+    if (category === "customers") {
+      return `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table"><thead><tr><th>${t("customerName")}</th><th>${t("phone")}</th><th>${t("email")}</th><th>${t("deletedBeforeStatus")}</th><th>${t("deletedAt")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(user => {
+        const id = getRowId(user);
+        return `<tr><td>${escapeHtml(user.name || user.company || user.phone || "-")}</td><td>${escapeHtml(user.phone || "-")}</td><td>${escapeHtml(user.email || "-")}</td><td>${escapeHtml(customerStatusLabel(user.previousStatus || user.status || "deleted"))}</td><td>${escapeHtml(formatDate(user.deletedAt))}</td><td>${trashActions("customers", id)}</td></tr>`;
+      }).join("")}</tbody></table></div>`;
+    }
+    if (category === "requests") {
+      return `<div class="table-wrap crm-table-wrap"><table class="data-table request-table"><thead><tr><th>${t("id")}</th><th>${t("customer")}</th><th>${t("content")}</th><th>${t("status")}</th><th>${t("createdAt")}</th><th>${t("deletedAt")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(item => {
+        const id = getRowId(item) || getRequestDisplayId(item);
+        return `<tr><td>${escapeHtml(getRequestDisplayId(item))}</td><td>${escapeHtml(getCustomerName(item))}</td><td>${escapeHtml(getRequestContent(item))}</td><td>${escapeHtml(formatStatus(item.status))}</td><td>${escapeHtml(formatDate(item.createdAt))}</td><td>${escapeHtml(formatDate(item.deletedAt))}</td><td>${trashActions("requests", id)}</td></tr>`;
+      }).join("")}</tbody></table></div>`;
+    }
+    if (category === "quotes") {
+      return `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table"><thead><tr><th>${t("quote")}</th><th>${t("customer")}</th><th>${t("relatedRequest")}</th><th>${t("amount")}</th><th>${t("status")}</th><th>${t("deletedAt")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(item => {
+        const id = getRowId(item) || item.quoteCode || item.id;
+        const total = Array.isArray(item.items) ? item.items.reduce((sum, line) => sum + Number(line.quantity || 0) * Number(line.unitPrice || 0), 0) : "";
+        return `<tr><td>${escapeHtml(item.quoteCode || item.id || id)}</td><td>${escapeHtml(item.customerName || item.name || "-")}</td><td>${escapeHtml(item.requestId || "-")}</td><td>${escapeHtml(total || item.amount || "-")}</td><td>${escapeHtml(item.status || "-")}</td><td>${escapeHtml(formatDate(item.deletedAt))}</td><td>${trashActions("quotes", id)}</td></tr>`;
+      }).join("")}</tbody></table></div>`;
+    }
+    return `<div class="table-wrap crm-table-wrap"><table class="data-table staff-table"><thead><tr><th>${t("staff")}</th><th>${t("department")}</th><th>${t("skillsWork")}</th><th>${t("status")}</th><th>${t("deletedAt")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(staff => {
+      const id = getRowId(staff);
+      return `<tr><td>${escapeHtml(staff.name || "-")}</td><td>${escapeHtml(staffDepartment(staff))}</td><td>${escapeHtml(staff.workContent || staff.skills || "-")}</td><td>${escapeHtml(staffStatusMap[staff.status] || staff.status || "-")}</td><td>${escapeHtml(formatDate(staff.deletedAt))}</td><td>${trashActions("staff", id)}</td></tr>`;
+    }).join("")}</tbody></table></div>`;
+  }
+
+  function trashActions(type, id) {
+    return `<div class="actions crm-actions">
+      <button class="btn btn-soft" type="button" data-trash-detail="${escapeHtml(type)}:${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
+      <button class="btn btn-soft" type="button" data-trash-restore="${escapeHtml(type)}:${escapeHtml(id)}">${escapeHtml(t("restore"))}</button>
+      <button class="btn btn-danger" type="button" data-trash-permanent="${escapeHtml(type)}:${escapeHtml(id)}">${escapeHtml(t("permanentDelete"))}</button>
+    </div>`;
+  }
+
+  function trashItemByType(type, id) {
+    const rows = deletedRowsFor(type);
+    return rows.find(item => String(getRowId(item) || item.id || item.quoteCode || getRequestDisplayId(item)) === String(id));
+  }
+
+  async function restoreTrashItem(type, id) {
+    if (!await confirmAction({ title: t("restoreTrashTitle"), message: t("restoreTrashText"), confirmLabel: t("restore") })) return;
+    let response;
+    if (type === "customers") response = await AdminAPI.updateUser(id, { status: "active" });
+    if (type === "requests") response = await AdminAPI.restoreRequest(id);
+    if (type === "quotes") response = await AdminAPI.restoreQuote(id);
+    if (type === "staff") response = await AdminAPI.restoreStaff(id);
+    updateTrashState(type, response, id);
+    toast(t("restoredSuccess"));
+    renderTrash();
+  }
+
+  async function permanentDeleteTrashItem(type, id) {
+    if (!await confirmAction({ title: t("permanentDeleteTrashTitle"), message: t("permanentDeleteTrashText"), confirmLabel: t("permanentDelete"), danger: true })) return;
+    if (type === "customers") await AdminAPI.deleteUser(id, true);
+    if (type === "requests") await AdminAPI.deleteRequest(id, true);
+    if (type === "quotes") await AdminAPI.deleteQuote(id, true);
+    if (type === "staff") await AdminAPI.deleteStaff(id, true);
+    removeTrashState(type, id);
+    toast(t("saved"));
+    renderTrash();
+  }
+
+  function updateTrashState(type, response, id) {
+    const data = response?.data || response;
+    const apply = item => Object.assign({}, item, data || {}, { isDeleted: false, deletedAt: null, status: item.status === "deleted" ? "active" : item.status });
+    if (type === "customers") replaceUserInState(data || { id, status: "active", deletedAt: null });
+    if (type === "requests") state.requests = state.requests.map(item => String(getRowId(item) || getRequestDisplayId(item)) === String(id) ? apply(item) : item);
+    if (type === "quotes") state.quotes = state.quotes.map(item => String(getRowId(item) || item.id || item.quoteCode) === String(id) ? apply(item) : item);
+    if (type === "staff") state.staff = state.staff.map(item => String(getRowId(item)) === String(id) ? apply(item) : item);
+  }
+
+  function removeTrashState(type, id) {
+    if (type === "customers") state.users = state.users.filter(item => String(getRowId(item)) !== String(id));
+    if (type === "requests") state.requests = state.requests.filter(item => String(getRowId(item) || getRequestDisplayId(item)) !== String(id));
+    if (type === "quotes") state.quotes = state.quotes.filter(item => String(getRowId(item) || item.id || item.quoteCode) !== String(id));
+    if (type === "staff") state.staff = state.staff.filter(item => String(getRowId(item)) !== String(id));
+  }
+
   function renderNotifications() {
     const oldUntreated = state.requests.filter(isOverdue).length;
     const pendingUsers = state.users.filter(user => user.status === "pendingApproval" || user.status === "pending").length;
@@ -2764,6 +2992,7 @@
         if (state.currentView === "requests" && filter !== "requestStatus") state.filters.requestStatus = "all";
         if (filter === "requestStatus") state.filters.requestStatus = value || "all";
         if (filter === "customerStatus") state.filters.customerStatus = value || "all";
+        if (filter === "trashCategory") state.filters.trashCategory = value || "customers";
         if (filter === "media") state.filters.media = value || "all";
         if (filter === "notification") state.currentView = "notifications";
         renderCurrentView();
@@ -2772,6 +3001,49 @@
 
       if (event.target.closest("[data-retry]")) {
         refreshData();
+        return;
+      }
+
+      const trashCategory = event.target.closest("[data-trash-category]");
+      if (trashCategory) {
+        state.filters.trashCategory = trashCategory.dataset.trashCategory || "customers";
+        renderTrash();
+        return;
+      }
+
+      const trashDetail = event.target.closest("[data-trash-detail]");
+      if (trashDetail) {
+        const [type, id] = trashDetail.dataset.trashDetail.split(":");
+        const item = trashItemByType(type, id);
+        if (type === "customers" && item) renderCustomerDetail(item);
+        else if (type === "requests" && item) renderRequestDetail(item);
+        else if (type === "staff" && item) renderStaffDetail(item);
+        else if (type === "quotes" && item) renderQuoteDetail(item);
+        else toast(t("backendPlanned"));
+        return;
+      }
+
+      const trashRestore = event.target.closest("[data-trash-restore]");
+      if (trashRestore) {
+        const [type, id] = trashRestore.dataset.trashRestore.split(":");
+        try {
+          await restoreTrashItem(type, id);
+        } catch (error) {
+          console.error(error);
+          toast(t("failed"));
+        }
+        return;
+      }
+
+      const trashPermanent = event.target.closest("[data-trash-permanent]");
+      if (trashPermanent) {
+        const [type, id] = trashPermanent.dataset.trashPermanent.split(":");
+        try {
+          await permanentDeleteTrashItem(type, id);
+        } catch (error) {
+          console.error(error);
+          toast(t("failed"));
+        }
         return;
       }
 
@@ -2887,6 +3159,11 @@
       if (staffFilter) {
         state.filters["staff" + staffFilter.dataset.staffFilter.charAt(0).toUpperCase() + staffFilter.dataset.staffFilter.slice(1)] = staffFilter.value || "";
         renderStaff();
+      }
+      const trashSearch = event.target.closest("[data-trash-search]");
+      if (trashSearch) {
+        state.filters.trashSearch = trashSearch.value || "";
+        renderTrash();
       }
     });
 

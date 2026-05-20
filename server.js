@@ -296,7 +296,8 @@ const StaffSchema = new mongoose.Schema({
   note: String,
   introduction: String,
   status: { type: String, default: "active" },
-  createdAt: Date
+  createdAt: Date,
+  deletedAt: Date
 });
 
 const Request = mongoose.model("Request", RequestSchema);
@@ -1362,6 +1363,55 @@ app.get("/admin/users/:id/requests", requireAdmin, async (req, res) => {
   }
 });
 
+app.get("/admin/quotes", requireAdmin, async (req, res) => {
+  try {
+    res.set("Cache-Control", "no-store");
+    const quotes = await Quote.find().sort({ createdAt: -1 });
+    res.json(quotes);
+  } catch (error) {
+    res.status(500).json({ message: "Read failed", error: error.message });
+  }
+});
+
+function adminQuoteQuery(id) {
+  const clauses = [{ id }, { quoteCode: id }];
+  if (mongoose.Types.ObjectId.isValid(id)) clauses.unshift({ _id: id });
+  return { $or: clauses };
+}
+
+app.delete("/admin/quotes/:id", requireAdmin, async (req, res) => {
+  try {
+    const quote = await Quote.findOne(adminQuoteQuery(req.params.id));
+    if (!quote) return res.status(404).json({ message: "Quote not found" });
+    if (req.query.permanent === "true") {
+      await Quote.deleteOne({ _id: quote._id });
+      return res.json({ message: "Quote permanently deleted" });
+    }
+    quote.isDeleted = true;
+    quote.deletedAt = new Date();
+    quote.deletedByRole = "admin";
+    await quote.save();
+    res.json({ message: "Quote moved to trash", data: quote });
+  } catch (error) {
+    res.status(500).json({ message: "Quote delete failed", error: error.message });
+  }
+});
+
+app.patch("/admin/quotes/:id/restore", requireAdmin, async (req, res) => {
+  try {
+    const quote = await Quote.findOne(adminQuoteQuery(req.params.id));
+    if (!quote) return res.status(404).json({ message: "Quote not found" });
+    quote.isDeleted = false;
+    quote.deletedAt = null;
+    quote.deletedBy = "";
+    quote.deletedByRole = "";
+    await quote.save();
+    res.json({ message: "Quote restored", data: quote });
+  } catch (error) {
+    res.status(500).json({ message: "Quote restore failed", error: error.message });
+  }
+});
+
 app.put("/admin/users/:id", requireAdmin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -1536,13 +1586,20 @@ app.delete("/admin/staff/:id", requireAdmin, async (req, res) => {
     const staff = await Staff.findById(req.params.id);
     if (!staff) return res.status(404).json({ message: "Staff not found" });
 
-    await Staff.deleteOne({ _id: req.params.id });
-    await Request.updateMany(
-      { assigneeId: req.params.id },
-      { $set: { assigneeId: "", assigneeName: "" } }
-    );
+    if (req.query.permanent === "true") {
+      await Staff.deleteOne({ _id: req.params.id });
+      await Request.updateMany(
+        { assigneeId: req.params.id },
+        { $set: { assigneeId: "", assigneeName: "" } }
+      );
+      return res.json({ message: "Staff permanently deleted" });
+    }
 
-    res.json({ message: "Deleted" });
+    staff.status = "deleted";
+    staff.deletedAt = new Date();
+    await staff.save();
+
+    res.json({ message: "Staff moved to trash", data: staff });
 
   } catch (error) {
     res.status(500).json({
@@ -1552,9 +1609,25 @@ app.delete("/admin/staff/:id", requireAdmin, async (req, res) => {
   }
 });
 
+app.patch("/admin/staff/:id/restore", requireAdmin, async (req, res) => {
+  try {
+    const staff = await Staff.findById(req.params.id);
+    if (!staff) return res.status(404).json({ message: "Staff not found" });
+    staff.status = "active";
+    staff.deletedAt = undefined;
+    await staff.save();
+    res.json({ message: "Staff restored", data: staff });
+  } catch (error) {
+    res.status(500).json({
+      message: "Staff restore failed",
+      error: error.message
+    });
+  }
+});
+
 app.get("/api/work-options", requireUser, async (req, res) => {
   try {
-    const staff = await Staff.find({ status: { $ne: "off" } }).sort({ createdAt: -1 });
+    const staff = await Staff.find({ status: { $nin: ["off", "deleted"] } }).sort({ createdAt: -1 });
     res.set("Cache-Control", "no-store");
     res.json({ data: uniqueStaffWorkOptions(staff) });
   } catch (error) {
@@ -1886,17 +1959,45 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
 
 app.delete("/request/:id", requireAdmin, async (req, res) => {
   try {
-    const result = await Request.deleteOne(makeIdQuery(req.params.id));
+    const item = await Request.findOne(makeIdQuery(req.params.id));
 
-    if (result.deletedCount === 0) {
+    if (!item) {
       return res.status(404).json({ message: "Not found" });
     }
 
-    res.json({ message: "Deleted" });
+    if (req.query.permanent === "true") {
+      await Request.deleteOne({ _id: item._id });
+      return res.json({ message: "Permanently deleted" });
+    }
+
+    item.isDeleted = true;
+    item.deletedAt = new Date();
+    item.deletedByRole = "admin";
+    await item.save();
+
+    res.json({ message: "Moved to trash", data: item });
 
   } catch (error) {
     res.status(500).json({
       message: "Delete failed",
+      error: error.message
+    });
+  }
+});
+
+app.patch("/request/:id/restore", requireAdmin, async (req, res) => {
+  try {
+    const item = await Request.findOne(makeIdQuery(req.params.id));
+    if (!item) return res.status(404).json({ message: "Not found" });
+    item.isDeleted = false;
+    item.deletedAt = null;
+    item.deletedBy = "";
+    item.deletedByRole = "";
+    await item.save();
+    res.json({ message: "Restored", data: item });
+  } catch (error) {
+    res.status(500).json({
+      message: "Restore failed",
       error: error.message
     });
   }
