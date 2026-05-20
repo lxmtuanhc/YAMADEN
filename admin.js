@@ -520,8 +520,12 @@
     address: "\u4f4f\u6240",
     province: "\u90fd\u9053\u5e9c\u770c\u30fb\u5730\u57df",
     projectName: "\u5de5\u4e8b\u540d",
-    systemData: "\u305d\u306e\u4ed6\u30b7\u30b9\u30c6\u30e0\u30c7\u30fc\u30bf",
+    systemInfo: "\u30b7\u30b9\u30c6\u30e0\u60c5\u5831",
     quoteRequests: "\u898b\u7a4d\u4f9d\u983c",
+    deletedAt: "\u524a\u9664\u65e5",
+    confirmBlock: "\u3053\u306e\u9867\u5ba2\u30a2\u30ab\u30a6\u30f3\u30c8\u3092\u505c\u6b62\u3057\u307e\u3059\u304b\uff1f",
+    confirmResetPin: "PIN\u3092\u30ea\u30bb\u30c3\u30c8\u3057\u307e\u3059\u304b\uff1f",
+    backendPlanned: "\u3053\u306e\u6a5f\u80fd\u306f\u5f8c\u3067\u30d0\u30c3\u30af\u30a8\u30f3\u30c9\u306b\u63a5\u7d9a\u3055\u308c\u307e\u3059\u3002",
     pinStatus: "PIN\u72b6\u614b",
     pinSet: "PIN\u8a2d\u5b9a\u6e08\u307f",
     pinUnset: "PIN\u672a\u8a2d\u5b9a",
@@ -558,8 +562,12 @@
     address: "\u0110\u1ecba ch\u1ec9",
     province: "T\u1ec9nh/khu v\u1ef1c",
     projectName: "T\u00ean c\u00f4ng tr\u00ecnh",
-    systemData: "D\u1eef li\u1ec7u h\u1ec7 th\u1ed1ng kh\u00e1c",
+    systemInfo: "Th\u00f4ng tin h\u1ec7 th\u1ed1ng",
     quoteRequests: "Y\u00eau c\u1ea7u b\u00e1o gi\u00e1",
+    deletedAt: "Ng\u00e0y x\u00f3a",
+    confirmBlock: "B\u1ea1n mu\u1ed1n kh\u00f3a t\u00e0i kho\u1ea3n kh\u00e1ch h\u00e0ng n\u00e0y?",
+    confirmResetPin: "B\u1ea1n mu\u1ed1n reset PIN cho kh\u00e1ch h\u00e0ng n\u00e0y?",
+    backendPlanned: "Ch\u1ee9c n\u0103ng n\u00e0y s\u1ebd \u0111\u01b0\u1ee3c k\u1ebft n\u1ed1i backend sau.",
     pinStatus: "Tr\u1ea1ng th\u00e1i PIN",
     pinSet: "\u0110\u00e3 thi\u1ebft l\u1eadp PIN",
     pinUnset: "Ch\u01b0a thi\u1ebft l\u1eadp PIN",
@@ -1634,20 +1642,6 @@
     return "-";
   }
 
-  function displayCustomerValue(value) {
-    if (value === true || value === false) return displayBoolean(value);
-    if (Array.isArray(value)) return value.filter(item => item !== undefined && item !== null && item !== "").map(item => displayCustomerValue(item)).join(", ");
-    if (value && typeof value === "object") {
-      const safeObject = Object.fromEntries(Object.entries(value).filter(([key]) => !isSensitiveCustomerField(key)));
-      return Object.keys(safeObject).length ? JSON.stringify(safeObject) : "-";
-    }
-    return value || "-";
-  }
-
-  function isSensitiveCustomerField(key) {
-    return /pin|password|hash|token|secret|jwt|credential|session/i.test(String(key || ""));
-  }
-
   function collectMedia(request) {
     const media = [];
     if (Array.isArray(request.mediaFiles)) media.push(...request.mediaFiles);
@@ -1970,11 +1964,19 @@
     try {
       let response;
       if (action === "approve") response = await AdminAPI.approveUser(id);
-      if (action === "block") response = await AdminAPI.updateUser(id, { status: "blocked" });
+      if (action === "block") {
+        if (!await confirmAction(t("confirmBlock"))) return;
+        response = await AdminAPI.updateUser(id, { status: "blocked" });
+      }
       if (action === "unblock" || action === "restore") response = await AdminAPI.updateUser(id, { status: "active" });
       if (action === "delete") {
         if (!await confirmAction(t("confirmDelete"))) return;
         response = await AdminAPI.deleteUser(id, false);
+      }
+      if (action === "reset-pin") {
+        if (!await confirmAction(t("confirmResetPin"))) return;
+        toast(t("backendPlanned"));
+        return;
       }
 
       const updated = customerApiData(response);
@@ -1993,9 +1995,6 @@
     const id = getRowId(user);
     const status = normalizeUserStatusValue(user.status);
     const isSelected = selected && getRowId(selected) === id;
-    const canApprove = status === "pendingApproval";
-    const toggleAction = status === "blocked" ? "unblock" : "block";
-    const toggleLabel = status === "blocked" ? t("activate") : t("block");
     return `<tr class="${isSelected ? "selected-row" : ""}" data-customer-id="${escapeHtml(id)}">
       <td><div class="identity-cell">${avatarHtml(user)}<div><strong>${escapeHtml(user.company || user.companyName || user.name || user.phone || "-")}</strong><span>${escapeHtml(user.name || user.contact || "-")}</span></div></div></td>
       <td>${escapeHtml(user.phone || "-")}<div class="subtext">${escapeHtml(user.email || "")}</div></td>
@@ -2004,9 +2003,6 @@
       <td>${escapeHtml(formatDate(user.lastLoginAt || user.updatedAt || user.createdAt))}</td>
       <td><div class="actions crm-actions">
         <button class="btn btn-soft" type="button" data-customer-action="detail" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
-        ${canApprove ? `<button class="btn btn-soft" type="button" data-customer-action="approve" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("approve"))}</button>` : ""}
-        ${status === "deleted" ? `<button class="btn btn-soft" type="button" data-customer-action="restore" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("restore"))}</button>` : `<button class="btn btn-soft" type="button" data-customer-action="${toggleAction}" data-customer-id="${escapeHtml(id)}">${escapeHtml(toggleLabel)}</button>`}
-        <button class="btn btn-danger" type="button" data-customer-action="delete" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>
       </div></td>
     </tr>`;
   }
@@ -2024,16 +2020,15 @@
     const quoteRequests = allRelated.filter(request => request.quoteRequested || normalizeRequestStatus(request.status) === "quoted").length;
     const lastRequest = allRelated[0]?.createdAt || user.lastRequestAt || user.updatedAt || user.createdAt;
     const hasPin = user.hasPin === true || user.pinSet === true;
-    const shownKeys = new Set([
-      "_id", "id", "name", "displayName", "fullName", "company", "companyName", "customerType", "accountType", "status",
-      "createdAt", "updatedAt", "lastLoginAt", "profileCompleted", "phone", "email", "contact", "contactPerson",
-      "address", "companyAddress", "province", "region", "projectName", "note", "contactNote", "requestCount",
-      "lastRequestAt", "hasPin", "pinSet", "__history", "__historyLoaded"
-    ]);
-    const systemItems = Object.entries(user)
-      .filter(([key, value]) => !shownKeys.has(key) && !isSensitiveCustomerField(key) && value !== undefined && value !== null && value !== "")
-      .filter(([, value]) => typeof value !== "function")
-      .slice(0, 12);
+    const systemItems = [
+      [t("customerId"), id],
+      user.approvedAt ? [t("approvedAt"), formatDate(user.approvedAt)] : null,
+      user.updatedAt ? [t("updatedAt"), formatDate(user.updatedAt)] : null,
+      user.deletedAt ? [t("deletedAt"), formatDate(user.deletedAt)] : null,
+      user.profileCompleted !== undefined ? [t("profileCompleted"), displayBoolean(Boolean(user.profileCompleted))] : null
+    ].filter(Boolean);
+    const rawInternalNote = user.internalNote || user.adminNote || user.note || user.contactNote || "";
+    const internalNote = String(rawInternalNote || "").trim();
     return `<aside class="detail-panel customer-detail-panel">
       <div class="detail-panel-head">
         ${avatarHtml(user, "avatar-large")}
@@ -2041,45 +2036,43 @@
         <button class="customer-detail-close" type="button" data-customer-action="close-detail" aria-label="${escapeHtml(t("closeCustomerDetail"))}">&times;</button>
       </div>
       <section><h3>${escapeHtml(t("basicInfo"))}</h3><div class="customer-info-grid">
-          ${customerInfoItem(t("customerId"), id)}
           ${customerInfoItem(t("customerName"), user.name)}
-          ${customerInfoItem(t("displayName"), user.displayName || user.fullName)}
+          ${user.displayName || user.fullName ? customerInfoItem(t("displayName"), user.displayName || user.fullName) : ""}
           ${customerInfoItem(t("company"), user.company || user.companyName)}
           ${customerInfoItem(t("customerType"), user.customerType || user.accountType)}
           ${customerInfoItem(t("status"), customerStatusLabel(status))}
           ${customerInfoItem(t("createdAt"), formatDate(user.createdAt))}
-          ${customerInfoItem(t("updatedAt"), formatDate(user.updatedAt))}
           ${customerInfoItem(t("lastLoginAt"), formatDate(user.lastLoginAt))}
-          ${customerInfoItem(t("profileCompleted"), user.profileCompleted === undefined ? "-" : displayBoolean(Boolean(user.profileCompleted)))}
         </div></section>
       <section><h3>${escapeHtml(t("contactInfo"))}</h3><div class="customer-info-grid">
           ${customerInfoItem(t("phone"), user.phone)}
           ${customerInfoItem(t("email"), user.email)}
           ${customerInfoItem(t("contact"), user.contact || user.contactPerson)}
           ${customerInfoItem(t("address"), user.address || user.companyAddress)}
-          ${customerInfoItem(t("province"), user.province || user.region)}
-          ${customerInfoItem(t("projectName"), user.projectName)}
-          ${customerInfoItem(t("note"), user.contactNote || user.note)}
+          ${user.province || user.region ? customerInfoItem(t("province"), user.province || user.region) : ""}
+          ${user.projectName ? customerInfoItem(t("projectName"), user.projectName) : ""}
         </div></section>
       <section><h3>${escapeHtml(t("accountSecurity"))}</h3><div class="customer-info-grid">
           ${customerInfoItem(t("pinStatus"), hasPin ? t("pinSet") : t("pinUnset"))}
         </div><div class="note-card">${escapeHtml(t("pinSecurityNote"))}</div></section>
+      ${internalNote && internalNote !== "-" ? `<section><h3>${escapeHtml(t("internalNotes"))}</h3><div class="note-card">${escapeHtml(internalNote)}</div></section>` : ""}
       <section><h3>${escapeHtml(t("requestSummary"))}</h3><div class="mini-kpi-row">
           ${miniMetric(t("requestCount"), userRequestCount(user))}
           ${miniMetric(t("activeRequests"), activeRequests)}
           ${miniMetric(t("quoteRequests"), quoteRequests)}
           ${miniMetric(t("lastRequest"), formatDate(lastRequest))}
         </div></section>
-      ${systemItems.length ? `<section><h3>${escapeHtml(t("systemData"))}</h3><div class="customer-info-grid">${systemItems.map(([key, value]) => customerInfoItem(key, displayCustomerValue(value))).join("")}</div></section>` : ""}
       <section><h3>${escapeHtml(t("accountActions"))}</h3><div class="modal-actions">
         ${status === "pendingApproval" ? `<button class="btn btn-soft" type="button" data-customer-action="approve" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("approve"))}</button>` : ""}
         ${status === "blocked" ? `<button class="btn btn-soft" type="button" data-customer-action="unblock" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("activate"))}</button>` : ""}
         ${status === "active" ? `<button class="btn btn-soft" type="button" data-customer-action="block" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("block"))}</button>` : ""}
         ${status === "deleted" ? `<button class="btn btn-soft" type="button" data-customer-action="restore" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("restore"))}</button>` : ""}
         <button class="btn btn-soft" type="button" data-customer-action="view-requests" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("userHistory"))}</button>
+        <button class="btn btn-soft" type="button" data-customer-action="reset-pin" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("resetPin"))}</button>
         <button class="btn btn-danger" type="button" data-customer-action="delete" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>
       </div></section>
       <section><h3>${escapeHtml(t("recentRequests"))}</h3><div class="priority-list">${related.length ? related.map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getRequestContent(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState()}</div></section>
+      ${systemItems.length ? `<section><h3>${escapeHtml(t("systemInfo"))}</h3><div class="customer-info-grid">${systemItems.map(([label, value]) => customerInfoItem(label, value)).join("")}</div></section>` : ""}
     </aside>`;
   }
 
