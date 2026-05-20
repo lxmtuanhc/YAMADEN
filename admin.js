@@ -219,6 +219,23 @@
     deleted: "削除済み"
   };
 
+  const userStatusLabels = {
+    ja: {
+      pendingApproval: "\u627f\u8a8d\u5f85\u3061",
+      pending: "\u627f\u8a8d\u5f85\u3061",
+      active: "\u6709\u52b9",
+      blocked: "\u505c\u6b62\u4e2d",
+      deleted: "\u524a\u9664\u6e08\u307f"
+    },
+    vi: {
+      pendingApproval: "Ch\u1edd duy\u1ec7t",
+      pending: "Ch\u1edd duy\u1ec7t",
+      active: "\u0110ang ho\u1ea1t \u0111\u1ed9ng",
+      blocked: "B\u1ecb kh\u00f3a",
+      deleted: "\u0110\u00e3 x\u00f3a"
+    }
+  };
+
   const staffStatusMap = {
     active: "稼働中",
     busy: "対応中",
@@ -349,6 +366,7 @@
     history: "\u4f9d\u983c\u5c65\u6b74",
     work: "\u62c5\u5f53\u4f5c\u696d",
     customerType: "\u9867\u5ba2\u7a2e\u5225",
+    contact: "\u9023\u7d61\u62c5\u5f53",
     province: "\u5730\u57df",
     projectName: "\u5de5\u4e8b\u540d",
     companyAddress: "\u4f1a\u793e\u4f4f\u6240",
@@ -382,6 +400,7 @@
     history: "L\u1ecbch s\u1eed y\u00eau c\u1ea7u",
     work: "C\u00f4ng vi\u1ec7c ph\u1ee5 tr\u00e1ch",
     customerType: "Lo\u1ea1i kh\u00e1ch",
+    contact: "Ng\u01b0\u1eddi li\u00ean h\u1ec7",
     province: "Khu v\u1ef1c",
     projectName: "T\u00ean c\u00f4ng tr\u00ecnh",
     companyAddress: "\u0110\u1ecba ch\u1ec9 c\u00f4ng ty",
@@ -1635,18 +1654,56 @@
     return Number(user?.requestCount || state.requests.filter(request => String(request.userId || "") === String(getRowId(user))).length || 0);
   }
 
+  function normalizeUserStatusValue(status) {
+    const value = String(status || "pendingApproval");
+    if (value === "pending") return "pendingApproval";
+    if (["active", "blocked", "deleted", "pendingApproval"].includes(value)) return value;
+    return value;
+  }
+
+  function customerStatusLabel(status) {
+    const value = normalizeUserStatusValue(status);
+    return userStatusLabels[state.lang]?.[value] || userStatusMap[value] || value;
+  }
+
+  function customerLastActivity(user) {
+    const relatedDates = state.requests
+      .filter(request => String(request.userId || request.customerId || "") === String(getRowId(user)))
+      .map(request => new Date(request.updatedAt || request.createdAt || 0).getTime())
+      .filter(Boolean);
+    return Math.max(new Date(user?.lastLoginAt || user?.updatedAt || user?.createdAt || 0).getTime() || 0, ...relatedDates, 0);
+  }
+
+  function customerApiData(payload) {
+    return payload?.data || payload?.user || payload;
+  }
+
+  function replaceUserInState(user) {
+    if (!user) return;
+    const id = getRowId(user);
+    const index = state.users.findIndex(item => getRowId(item) === id);
+    if (index >= 0) state.users[index] = Object.assign({}, state.users[index], user);
+    else state.users.unshift(user);
+  }
+
+  async function reloadCustomerUsers() {
+    state.users = normalizeList(await AdminAPI.getUsers());
+  }
+
   function filterUsers() {
     const search = state.filters.customerSearch || "";
     const status = state.filters.customerStatus || "all";
     const sort = state.filters.customerSort || "created";
     return [...state.users].filter(user => {
-      const userStatus = String(user.status || "pendingApproval");
-      const statusOk = status === "all" || userStatus === status || (status === "pendingApproval" && userStatus === "pending");
+      const userStatus = normalizeUserStatusValue(user.status);
+      const statusOk = status === "all" || userStatus === status;
       const text = [user.name, user.phone, user.email, user.company, user.companyName, user.customerType, user.address, user.province].join(" ").toLowerCase();
       return statusOk && text.includes(search.toLowerCase());
     }).sort((a, b) => {
       if (sort === "name") return compactText(a.name || a.phone).localeCompare(compactText(b.name || b.phone));
       if (sort === "status") return compactText(a.status).localeCompare(compactText(b.status));
+      if (sort === "lastActivity") return customerLastActivity(b) - customerLastActivity(a);
+      if (sort === "requestCount") return userRequestCount(b) - userRequestCount(a);
       return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
     });
   }
@@ -1696,50 +1753,123 @@
     if (selected) state.selectedUser = getRowId(selected);
     $("viewRoot").innerHTML = `
       <div class="page-intro"><p>${escapeHtml(t("customerSubtitle"))}</p></div>
-      <div class="kpi-grid kpi-grid-small">
-        ${statCard(t("customersCount"), state.users.length, t("realData"), "info")}
-        ${statCard(userStatusMap.pendingApproval, state.users.filter(user => user.status === "pendingApproval" || user.status === "pending").length, t("realData"), "warning")}
-        ${statCard(t("active"), state.users.filter(user => user.status === "active").length, t("realData"), "success")}
-        ${statCard(t("blocked"), state.users.filter(user => user.status === "blocked").length, t("realData"), "danger")}
-        ${statCard(t("deleted"), state.users.filter(user => user.status === "deleted").length, t("realData"), "total")}
-        ${statCard(t("hasRequests"), totalWithRequests, t("realData"), "info")}
+      <div class="kpi-grid kpi-grid-small" id="customerKpiGrid">
+        ${renderCustomerKpis(totalWithRequests)}
       </div>
       <div class="crm-filter-bar">
         <input class="filter-input" data-customer-filter="search" value="${escapeHtml(state.filters.customerSearch || "")}" placeholder="${escapeHtml(t("search"))}" />
-        <select class="filter-input" data-customer-filter="status">${statusOptions.map(status => `<option value="${status}" ${String(state.filters.customerStatus || "all") === status ? "selected" : ""}>${escapeHtml(status === "all" ? t("all") : userStatusMap[status] || status)}</option>`).join("")}</select>
+        <select class="filter-input" data-customer-filter="status">${statusOptions.map(status => `<option value="${status}" ${String(state.filters.customerStatus || "all") === status ? "selected" : ""}>${escapeHtml(status === "all" ? t("all") : customerStatusLabel(status))}</option>`).join("")}</select>
         <select class="filter-input" data-customer-filter="sort">
           <option value="created" ${(state.filters.customerSort || "created") === "created" ? "selected" : ""}>${escapeHtml(t("sortCreated"))}</option>
+          <option value="lastActivity" ${state.filters.customerSort === "lastActivity" ? "selected" : ""}>${escapeHtml(t("lastActivity"))}</option>
           <option value="name" ${state.filters.customerSort === "name" ? "selected" : ""}>${escapeHtml(t("sortName"))}</option>
+          <option value="requestCount" ${state.filters.customerSort === "requestCount" ? "selected" : ""}>${escapeHtml(t("requestCount"))}</option>
           <option value="status" ${state.filters.customerSort === "status" ? "selected" : ""}>${escapeHtml(t("sortStatus"))}</option>
         </select>
       </div>
       <div class="split-layout customer-crm-layout">
         <section class="section-card split-main">
-          <div class="panel-head"><h2>${escapeHtml(t("customers"))}</h2><span class="note">${rows.length} / ${state.users.length}</span></div>
-          <div class="panel-body crm-table-body">
-            ${rows.length ? `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table"><thead><tr><th>${t("company")}</th><th>${t("phone")}</th><th>${t("customerRank")}</th><th>${t("status")}</th><th>${t("lastActivity")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(user => renderCustomerRow(user, selected)).join("")}</tbody></table></div>` : showEmptyState()}
+          <div class="panel-head"><h2>${escapeHtml(t("customers"))}</h2><span class="note" id="customerCountNote">${rows.length} / ${state.users.length}</span></div>
+          <div class="panel-body crm-table-body" id="customerTableRoot">
+            ${renderCustomerTable(rows, selected)}
           </div>
         </section>
-        ${renderCustomerPanel(selected)}
+        <div id="customerPanelRoot">${renderCustomerPanel(selected)}</div>
       </div>
     `;
   }
 
+  function renderCustomerKpis(totalWithRequests = state.users.filter(user => userRequestCount(user) > 0).length) {
+    return `
+      ${statCard(t("customersCount"), state.users.length, t("realData"), "info")}
+      ${statCard(customerStatusLabel("pendingApproval"), state.users.filter(user => normalizeUserStatusValue(user.status) === "pendingApproval").length, t("realData"), "warning")}
+      ${statCard(customerStatusLabel("active"), state.users.filter(user => normalizeUserStatusValue(user.status) === "active").length, t("realData"), "success")}
+      ${statCard(customerStatusLabel("blocked"), state.users.filter(user => normalizeUserStatusValue(user.status) === "blocked").length, t("realData"), "danger")}
+      ${statCard(customerStatusLabel("deleted"), state.users.filter(user => normalizeUserStatusValue(user.status) === "deleted").length, t("realData"), "total")}
+      ${statCard(t("hasRequests"), totalWithRequests, t("realData"), "info")}
+    `;
+  }
+
+  function renderCustomerTable(rows, selected) {
+    return rows.length ? `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table"><thead><tr><th>${t("company")}</th><th>${t("phone")}</th><th>${t("customerRank")}</th><th>${t("status")}</th><th>${t("lastActivity")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(user => renderCustomerRow(user, selected)).join("")}</tbody></table></div>` : showEmptyState();
+  }
+
+  function renderCustomerResultsOnly() {
+    const rows = filterUsers();
+    const selected = rows.find(user => getRowId(user) === state.selectedUser) || rows[0] || null;
+    state.selectedUser = selected ? getRowId(selected) : "";
+    if (!$("customerTableRoot") || !$("customerPanelRoot")) {
+      renderCustomers();
+      return;
+    }
+    if ($("customerKpiGrid")) $("customerKpiGrid").innerHTML = renderCustomerKpis();
+    if ($("customerCountNote")) $("customerCountNote").textContent = `${rows.length} / ${state.users.length}`;
+    $("customerTableRoot").innerHTML = renderCustomerTable(rows, selected);
+    $("customerPanelRoot").innerHTML = renderCustomerPanel(selected);
+  }
+
+  async function handleCustomerAction(action, trigger) {
+    const id = trigger?.dataset.customerId || trigger?.closest("[data-customer-id]")?.dataset.customerId || "";
+    if (!id) return;
+    const user = state.users.find(item => getRowId(item) === id);
+    if (!user) return;
+    state.selectedUser = id;
+
+    if (action === "select") {
+      renderCustomerResultsOnly();
+      return;
+    }
+    if (action === "detail") {
+      renderCustomerResultsOnly();
+      await renderCustomerDetail(user);
+      return;
+    }
+    if (action === "view-requests") {
+      renderCustomerResultsOnly();
+      await renderCustomerDetail(user, "history");
+      return;
+    }
+
+    try {
+      let response;
+      if (action === "approve") response = await AdminAPI.approveUser(id);
+      if (action === "block") response = await AdminAPI.updateUser(id, { status: "blocked" });
+      if (action === "unblock" || action === "restore") response = await AdminAPI.updateUser(id, { status: "active" });
+      if (action === "delete") {
+        if (!await confirmAction(t("confirmDelete"))) return;
+        response = await AdminAPI.deleteUser(id, false);
+      }
+
+      const updated = customerApiData(response);
+      if (updated && getRowId(updated)) replaceUserInState(updated);
+      else if (action === "delete") await reloadCustomerUsers();
+
+      renderCustomerResultsOnly();
+      toast(t("saved"));
+    } catch (error) {
+      console.error(error);
+      toast(t("failed"));
+    }
+  }
+
   function renderCustomerRow(user, selected) {
     const id = getRowId(user);
-    const status = user.status || "pendingApproval";
+    const status = normalizeUserStatusValue(user.status);
     const isSelected = selected && getRowId(selected) === id;
-    return `<tr class="${isSelected ? "selected-row" : ""}" data-select-customer="${escapeHtml(id)}">
+    const canApprove = status === "pendingApproval";
+    const toggleAction = status === "blocked" ? "unblock" : "block";
+    const toggleLabel = status === "blocked" ? t("activate") : t("block");
+    return `<tr class="${isSelected ? "selected-row" : ""}" data-customer-id="${escapeHtml(id)}">
       <td><div class="identity-cell">${avatarHtml(user)}<div><strong>${escapeHtml(user.company || user.companyName || user.name || user.phone || "-")}</strong><span>${escapeHtml(user.name || user.contact || "-")}</span></div></div></td>
       <td>${escapeHtml(user.phone || "-")}<div class="subtext">${escapeHtml(user.email || "")}</div></td>
       <td><span class="rank-badge">${escapeHtml(user.rank || user.customerType || "-")}</span></td>
-      <td><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(userStatusMap[status] || status)}</span></td>
+      <td><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(customerStatusLabel(status))}</span></td>
       <td>${escapeHtml(formatDate(user.lastLoginAt || user.updatedAt || user.createdAt))}</td>
       <td><div class="actions crm-actions">
-        <button class="btn btn-soft" data-select-customer="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
-        ${status === "pendingApproval" || status === "pending" ? `<button class="btn btn-soft" data-approve-user="${escapeHtml(id)}">${escapeHtml(t("approve"))}</button>` : ""}
-        <button class="btn btn-soft" data-toggle-user="${escapeHtml(id)}" data-next-status="${status === "blocked" ? "active" : "blocked"}">${status === "blocked" ? escapeHtml(t("activate")) : escapeHtml(t("block"))}</button>
-        <button class="btn btn-danger" data-delete-user="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>
+        <button class="btn btn-soft" type="button" data-customer-action="detail" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
+        ${canApprove ? `<button class="btn btn-soft" type="button" data-customer-action="approve" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("approve"))}</button>` : ""}
+        ${status === "deleted" ? `<button class="btn btn-soft" type="button" data-customer-action="restore" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("activate"))}</button>` : `<button class="btn btn-soft" type="button" data-customer-action="${toggleAction}" data-customer-id="${escapeHtml(id)}">${escapeHtml(toggleLabel)}</button>`}
+        <button class="btn btn-danger" type="button" data-customer-action="delete" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>
       </div></td>
     </tr>`;
   }
@@ -1747,26 +1877,37 @@
   function renderCustomerPanel(user) {
     if (!user) return `<aside class="detail-panel">${showEmptyState()}</aside>`;
     const id = getRowId(user);
-    const status = user.status || "pendingApproval";
+    const status = normalizeUserStatusValue(user.status);
     const related = state.requests.filter(request => String(request.userId || request.customerId || "") === String(id)).slice(0, 5);
     const activeRequests = related.filter(request => !["completed", "lost"].includes(normalizeRequestStatus(request.status))).length;
     const lastRequest = related[0]?.createdAt || user.lastRequestAt || user.updatedAt || user.createdAt;
     return `<aside class="detail-panel customer-detail-panel">
       <div class="detail-panel-head">
         ${avatarHtml(user, "avatar-large")}
-        <div><h2>${escapeHtml(user.company || user.companyName || user.name || user.phone || "-")}</h2><p>${escapeHtml(user.name || user.contact || t("selectedDetail"))}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(userStatusMap[status] || status)}</span></div>
-        <button class="btn btn-soft" data-customer-detail="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button>
+        <div><h2>${escapeHtml(user.company || user.companyName || user.name || user.phone || "-")}</h2><p>${escapeHtml(user.name || user.contact || t("selectedDetail"))}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(customerStatusLabel(status))}</span></div>
+        <button class="btn btn-soft" type="button" data-customer-action="detail" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
       </div>
       <div class="contact-grid">
         ${infoItem(t("phone"), user.phone)}
         ${infoItem(t("email"), user.email)}
         ${infoItem(t("address"), user.address || user.companyAddress)}
+        ${infoItem(t("customerType"), user.customerType || user.accountType)}
+        ${infoItem(t("company"), user.company || user.companyName)}
+        ${infoItem(t("lastLoginAt"), formatDate(user.lastLoginAt))}
       </div>
       <div class="mini-kpi-row">
         ${miniMetric(t("requestCount"), userRequestCount(user))}
         ${miniMetric(t("activeRequests"), activeRequests)}
         ${miniMetric(t("quoteRegister"), "-")}
         ${miniMetric(t("lastRequest"), formatDate(lastRequest))}
+      </div>
+      <div class="modal-actions">
+        ${status === "pendingApproval" ? `<button class="btn btn-soft" type="button" data-customer-action="approve" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("approve"))}</button>` : ""}
+        ${status === "blocked" ? `<button class="btn btn-soft" type="button" data-customer-action="unblock" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("activate"))}</button>` : ""}
+        ${status === "active" ? `<button class="btn btn-soft" type="button" data-customer-action="block" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("block"))}</button>` : ""}
+        ${status === "deleted" ? `<button class="btn btn-soft" type="button" data-customer-action="restore" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("activate"))}</button>` : ""}
+        <button class="btn btn-soft" type="button" data-customer-action="view-requests" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("userHistory"))}</button>
+        <button class="btn btn-danger" type="button" data-customer-action="delete" data-customer-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>
       </div>
       <section><h3>${escapeHtml(t("recentRequests"))}</h3><div class="priority-list">${related.length ? related.map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getRequestContent(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState()}</div></section>
       <section><h3>${escapeHtml(t("internalNotes"))}</h3><div class="note-card">${escapeHtml(user.note || t("planned"))}</div></section>
@@ -1786,12 +1927,12 @@
         history = [];
       }
     }
-    const status = user.status || "pendingApproval";
+    const status = normalizeUserStatusValue(user.status);
     const infoFields = [
       [t("name"), user.name],
       [t("phone"), user.phone],
       [t("email"), user.email],
-      ["Contact", user.contact],
+      [t("contact"), user.contact],
       [t("company"), user.company || user.companyName],
       [t("customerType"), user.customerType || user.accountType],
       [t("province"), user.province],
@@ -1809,7 +1950,7 @@
     openDrawer(`
       <article class="drawer-panel profile-drawer">
         <header class="drawer-head drawer-header">
-          <div class="profile-title">${avatarHtml(user, "avatar-large")}<div><h2>${escapeHtml(user.name || user.phone || "-")}</h2><p class="note">${escapeHtml(user.phone || "-")}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(userStatusMap[status] || status)}</span></div></div>
+          <div class="profile-title">${avatarHtml(user, "avatar-large")}<div><h2>${escapeHtml(user.name || user.phone || "-")}</h2><p class="note">${escapeHtml(user.phone || "-")}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(customerStatusLabel(status))}</span></div></div>
           <button class="close-button" type="button" data-close-drawer>×</button>
         </header>
         ${drawerTabs(activeTab, [["info", t("info")], ["history", t("history")]])}
@@ -2386,53 +2527,17 @@
         return;
       }
 
-      const approve = event.target.closest("[data-approve-user]");
-      if (approve) {
-        try {
-          await AdminAPI.approveUser(approve.dataset.approveUser);
-          await refreshData();
-          toast(t("saved"));
-        } catch {
-          toast(t("failed"));
-        }
+      const customerAction = event.target.closest("[data-customer-action]");
+      if (customerAction) {
+        event.preventDefault();
+        await handleCustomerAction(customerAction.dataset.customerAction, customerAction);
         return;
       }
 
-      const toggleUser = event.target.closest("[data-toggle-user]");
-      if (toggleUser) {
-        try {
-          await AdminAPI.updateUser(toggleUser.dataset.toggleUser, { status: toggleUser.dataset.nextStatus });
-          await refreshData();
-          toast(t("saved"));
-        } catch {
-          toast(t("failed"));
-        }
-        return;
-      }
-
-      const customerDetail = event.target.closest("[data-customer-detail]");
-      if (customerDetail) {
-        const user = state.users.find(item => getRowId(item) === customerDetail.dataset.customerDetail);
-        if (user) renderCustomerDetail(user);
-        return;
-      }
-
-      const selectCustomer = event.target.closest("[data-select-customer]");
-      if (selectCustomer) {
-        state.selectedUser = selectCustomer.dataset.selectCustomer;
-        renderCustomers();
-        return;
-      }
-
-      const deleteUser = event.target.closest("[data-delete-user]");
-      if (deleteUser && await confirmAction(t("confirmDelete"))) {
-        try {
-          await AdminAPI.deleteUser(deleteUser.dataset.deleteUser, false);
-          await refreshData();
-          toast(t("saved"));
-        } catch {
-          toast(t("failed"));
-        }
+      const customerRow = event.target.closest("[data-customer-id]");
+      if (customerRow) {
+        event.preventDefault();
+        await handleCustomerAction("select", customerRow);
         return;
       }
 
@@ -2502,7 +2607,7 @@
       const customerFilter = event.target.closest("[data-customer-filter]");
       if (customerFilter) {
         state.filters["customer" + customerFilter.dataset.customerFilter.charAt(0).toUpperCase() + customerFilter.dataset.customerFilter.slice(1)] = customerFilter.value || "";
-        renderCustomers();
+        renderCustomerResultsOnly();
       }
       const staffFilter = event.target.closest("[data-staff-filter]");
       if (staffFilter) {
@@ -2515,7 +2620,7 @@
       const customerFilter = event.target.closest("[data-customer-filter]");
       if (customerFilter) {
         state.filters["customer" + customerFilter.dataset.customerFilter.charAt(0).toUpperCase() + customerFilter.dataset.customerFilter.slice(1)] = customerFilter.value || "";
-        renderCustomers();
+        renderCustomerResultsOnly();
         return;
       }
       const staffFilter = event.target.closest("[data-staff-filter]");
