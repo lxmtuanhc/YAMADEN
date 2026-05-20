@@ -270,6 +270,17 @@
     urgency: "\u7dca\u6025\u5ea6",
     unjudged: "\u672a\u5224\u5b9a",
     media: "\u30e1\u30c7\u30a3\u30a2",
+    searchButton: "\u691c\u7d22",
+    workType: "\u4f5c\u696d\u7a2e\u5225",
+    allWorkTypes: "\u3059\u3079\u3066\u306e\u4f5c\u696d\u7a2e\u5225",
+    workTypeDrawing: "\u96fb\u6c17\u56f3\u9762\u8a2d\u8a08",
+    workTypeConstruction: "\u96fb\u6c17\u5de5\u4e8b",
+    workTypeSurvey: "\u73fe\u5730\u8abf\u67fb",
+    workTypeInspection: "\u5de5\u4e8b\u78ba\u8a8d",
+    workTypeMaintenance: "\u4fdd\u5b88\u30fb\u4fee\u7406",
+    workTypeOutage: "\u505c\u96fb\u30fb\u96fb\u6c17\u30c8\u30e9\u30d6\u30eb",
+    workTypeQuote: "\u898b\u7a4d\u30fb\u76f8\u8ac7",
+    workTypeOther: "\u305d\u306e\u4ed6",
     noRequests: "\u4f9d\u983c\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
     loadRequestsError: "\u4f9d\u983c\u4e00\u89a7\u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093",
     retry: "\u518d\u8a66\u884c"
@@ -310,6 +321,17 @@
     overdueFirst: "Qu\u00e1 h\u1ea1n tr\u01b0\u1edbc",
     urgency: "\u0110\u1ed9 kh\u1ea9n",
     unjudged: "Ch\u01b0a \u0111\u00e1nh gi\u00e1",
+    searchButton: "T\u00ecm ki\u1ebfm",
+    workType: "Lo\u1ea1i c\u00f4ng vi\u1ec7c",
+    allWorkTypes: "T\u1ea5t c\u1ea3 lo\u1ea1i c\u00f4ng vi\u1ec7c",
+    workTypeDrawing: "Thi\u1ebft k\u1ebf b\u1ea3n v\u1ebd",
+    workTypeConstruction: "Thi c\u00f4ng \u0111i\u1ec7n",
+    workTypeSurvey: "Kh\u1ea3o s\u00e1t hi\u1ec7n tr\u01b0\u1eddng",
+    workTypeInspection: "Ki\u1ec3m tra c\u00f4ng tr\u00ecnh",
+    workTypeMaintenance: "B\u1ea3o tr\u00ec / s\u1eeda ch\u1eefa",
+    workTypeOutage: "M\u1ea5t \u0111i\u1ec7n / s\u1ef1 c\u1ed1 \u0111i\u1ec7n",
+    workTypeQuote: "B\u00e1o gi\u00e1 / t\u01b0 v\u1ea5n",
+    workTypeOther: "Kh\u00e1c",
     noRequests: "Kh\u00f4ng c\u00f3 y\u00eau c\u1ea7u.",
     loadRequestsError: "Kh\u00f4ng th\u1ec3 t\u1ea3i danh s\u00e1ch y\u00eau c\u1ea7u",
     retry: "Th\u1eed l\u1ea1i"
@@ -386,7 +408,6 @@
     operationCenter: "YAMADEN CS\u30aa\u30da\u30ec\u30fc\u30b7\u30e7\u30f3\u30bb\u30f3\u30bf\u30fc",
     export: "\u30a8\u30af\u30b9\u30dd\u30fc\u30c8",
     newRequest: "\u65b0\u898f\u4f9d\u983c\u767b\u9332",
-    detailFilter: "\u8a73\u7d30\u30d5\u30a3\u30eb\u30bf\u30fc",
     tableFormat: "\u8868\u5f62\u5f0f",
     kanbanPreview: "\u30ab\u30f3\u30d0\u30f3\u3067\u78ba\u8a8d\uff08\u30d7\u30ec\u30d3\u30e5\u30fc\uff09",
     amount: "\u91d1\u984d",
@@ -422,7 +443,6 @@
     operationCenter: "Trung tâm vận hành YAMADEN CS",
     export: "Xuất dữ liệu",
     newRequest: "Tạo yêu cầu mới",
-    detailFilter: "Bộ lọc chi tiết",
     tableFormat: "Dạng bảng",
     kanbanPreview: "Kanban preview",
     amount: "Số tiền",
@@ -467,7 +487,7 @@
     contacted: "\u0110\u00e3 li\u00ean h\u1ec7",
     site_done: "\u0110\u00e3 kh\u1ea3o s\u00e1t",
     quoted: "B\u00e1o gi\u00e1",
-    ordered: "Nh\u1eadn \u0111\u01a1n",
+    ordered: "\u0110\u00e3 nh\u1eadn \u0111\u01a1n",
     completed: "Ho\u00e0n th\u00e0nh",
     lost: "M\u1ea5t \u0111\u01a1n"
   });
@@ -515,6 +535,7 @@
     filters: {
       requestStatus: "all",
       search: "",
+      workType: "all",
       staff: "all",
       urgency: "all",
       media: "all",
@@ -686,8 +707,26 @@
 
   function formatStatus(status) {
     const normalized = normalizeRequestStatus(status);
-    const labels = state.lang === "vi" ? requestStatusMapVi : requestStatusMap;
-    return labels[normalized] || requestStatusMap[normalized] || normalized;
+    const labelsJa = {
+      untreated: "未対応",
+      contacted: "連絡済",
+      site_done: "現地済",
+      quoted: "見積",
+      ordered: "受注",
+      completed: "完了",
+      lost: "失注"
+    };
+    const labelsVi = {
+      untreated: "Chưa xử lý",
+      contacted: "Đã liên hệ",
+      site_done: "Đã khảo sát",
+      quoted: "Báo giá",
+      ordered: "Đã nhận đơn",
+      completed: "Hoàn thành",
+      lost: "Mất đơn"
+    };
+    const labels = state.lang === "vi" ? labelsVi : labelsJa;
+    return labels[normalized] || labelsJa[normalized] || normalized;
   }
 
   function getStatusClass(status) {
@@ -813,10 +852,45 @@
     });
   }
 
+  function requestWorkTypeOptions() {
+    return [
+      ["all", t("workType")],
+      ["drawing", t("workTypeDrawing")],
+      ["construction", t("workTypeConstruction")],
+      ["survey", t("workTypeSurvey")],
+      ["inspection", t("workTypeInspection")],
+      ["maintenance", t("workTypeMaintenance")],
+      ["outage", t("workTypeOutage")],
+      ["quote", t("workTypeQuote")],
+      ["other", t("workTypeOther")]
+    ];
+  }
+
+  function getRequestWorkType(item) {
+    const source = [
+      item?.workType,
+      item?.jobType,
+      item?.category,
+      item?.serviceType,
+      Array.isArray(item?.issueTags) ? item.issueTags.join(" ") : item?.issueTags
+    ].filter(value => String(value || "").trim()).join(" ").toLowerCase();
+    if (!source) return "";
+    if (/drawing|design|cad|\u56f3\u9762|\u8a2d\u8a08|b\u1ea3n v\u1ebd|thi\u1ebft k\u1ebf/.test(source)) return "drawing";
+    if (/construction|install|wiring|\u5de5\u4e8b|\u65bd\u5de5|\u914d\u7dda|thi c\u00f4ng|l\u1eafp \u0111\u1eb7t/.test(source)) return "construction";
+    if (/survey|site visit|\u73fe\u5730\u8abf\u67fb|\u8abf\u67fb|kh\u1ea3o s\u00e1t|hi\u1ec7n tr\u01b0\u1eddng/.test(source)) return "survey";
+    if (/inspection|check|\u78ba\u8a8d|\u691c\u67fb|ki\u1ec3m tra/.test(source)) return "inspection";
+    if (/maintenance|repair|fix|\u4fdd\u5b88|\u4fee\u7406|s\u1eeda ch\u1eefa|b\u1ea3o tr\u00ec/.test(source)) return "maintenance";
+    if (/outage|blackout|trouble|\u505c\u96fb|\u30c8\u30e9\u30d6\u30eb|m\u1ea5t \u0111i\u1ec7n|s\u1ef1 c\u1ed1/.test(source)) return "outage";
+    if (/quote|estimate|consult|\u898b\u7a4d|\u76f8\u8ac7|b\u00e1o gi\u00e1|t\u01b0 v\u1ea5n/.test(source)) return "quote";
+    if (/other|misc|\u305d\u306e\u4ed6|kh\u00e1c/.test(source)) return "other";
+    return "";
+  }
+
   function filterRequests(items) {
     const search = state.filters.search.toLowerCase();
     return items.filter(item => {
       const statusOk = state.filters.requestStatus === "all" || normalizeRequestStatus(item.status) === state.filters.requestStatus;
+      const workTypeOk = state.filters.workType === "all" || getRequestWorkType(item) === state.filters.workType;
       const selectedStaff = state.staff.find(staff => getRowId(staff) === state.filters.staff);
       const staffOk = state.filters.staff === "all"
         || String(item.assigneeId || "") === state.filters.staff
@@ -835,7 +909,7 @@
         formatStatus(item.status),
         normalizeRequestStatus(item.status)
       ].join(" ").toLowerCase();
-      return statusOk && staffOk && urgencyOk && mediaOk && text.includes(search);
+      return statusOk && workTypeOk && staffOk && urgencyOk && mediaOk && text.includes(search);
     });
   }
 
@@ -1140,17 +1214,17 @@
   }
 
   function requestFilterStatuses() {
-    return ["all", "untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"];
+    return ["all", "untreated", "contacted", "site_done", "quoted", "completed", "lost"];
   }
 
   function requestBoardStatuses() {
-    return requestFilterStatuses().slice(1);
+    return ["untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"];
   }
 
   function renderRequestFilterChips() {
     return requestFilterStatuses().map(status => {
       const count = status === "all" ? state.requests.length : state.requests.filter(item => normalizeRequestStatus(item.status) === status).length;
-      return `<button class="filter-chip ${state.filters.requestStatus === status ? "active" : ""}" type="button" data-request-filter="${status}"><span>${escapeHtml(status === "all" ? t("all") : formatStatus(status))}</span><b>${count}</b></button>`;
+      return `<button class="request-status-chip ${state.filters.requestStatus === status ? "active" : ""}" type="button" data-request-filter="${status}"><span class="chip-label">${escapeHtml(status === "all" ? t("all") : formatStatus(status))}</span><b class="chip-count">${count}</b></button>`;
     }).join("");
   }
 
@@ -1166,7 +1240,7 @@
   }
 
   function syncRequestControls() {
-    const chipRow = document.querySelector(".status-filter-row");
+    const chipRow = document.querySelector(".request-status-row");
     if (chipRow) chipRow.innerHTML = renderRequestFilterChips();
     document.querySelectorAll("[data-view-mode]").forEach(button => {
       button.classList.toggle("active", button.dataset.viewMode === state.filters.requestViewMode);
@@ -1205,23 +1279,26 @@
           <button class="${state.filters.requestViewMode === "kanban" ? "active" : ""}" type="button" data-view-mode="kanban">${escapeHtml(t("kanbanView"))}</button>
         </div>
       </div>
-      <div class="chips status-filter-row">
+      <div class="request-status-row">
         ${renderRequestFilterChips()}
       </div>
-      <div class="filter-bar">
-        <input id="requestSearch" class="filter-input" value="${escapeHtml(state.filters.search)}" placeholder="${escapeHtml(t("search"))}" />
-        <button class="filter-input filter-button" type="button" disabled>${escapeHtml(t("detailFilter"))}</button>
-        <select class="filter-input" data-filter-select="staff"><option value="all" ${state.filters.staff === "all" ? "selected" : ""}>${escapeHtml(t("assignee"))}</option>${state.staff.map(staff => `<option value="${escapeHtml(getRowId(staff) || staff.name || "")}" ${state.filters.staff === getRowId(staff) ? "selected" : ""}>${escapeHtml(staff.name || "-")}</option>`).join("")}</select>
-        <select class="filter-input" data-filter-select="urgency">
+      <div class="request-filter-bar">
+        <input id="requestSearch" class="request-search-input" value="${escapeHtml(state.filters.search)}" placeholder="${escapeHtml(t("search"))}" />
+        <button class="request-search-btn" type="button" data-request-search>${escapeHtml(t("searchButton"))}</button>
+        <select class="request-filter-select" data-filter-select="workType" aria-label="${escapeHtml(t("workType"))}">
+          ${requestWorkTypeOptions().map(([value, label]) => `<option value="${escapeHtml(value)}" ${state.filters.workType === value ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}
+        </select>
+        <select class="request-filter-select" data-filter-select="staff"><option value="all" ${state.filters.staff === "all" ? "selected" : ""}>${escapeHtml(t("assignee"))}</option>${state.staff.map(staff => `<option value="${escapeHtml(getRowId(staff) || staff.name || "")}" ${state.filters.staff === getRowId(staff) ? "selected" : ""}>${escapeHtml(staff.name || "-")}</option>`).join("")}</select>
+        <select class="request-filter-select" data-filter-select="urgency">
           <option value="all" ${state.filters.urgency === "all" ? "selected" : ""}>${escapeHtml(t("urgency"))}</option>
           <option value="urgent" ${state.filters.urgency === "urgent" ? "selected" : ""}>urgent</option><option value="high" ${state.filters.urgency === "high" ? "selected" : ""}>high</option><option value="medium" ${state.filters.urgency === "medium" ? "selected" : ""}>medium</option><option value="low" ${state.filters.urgency === "low" ? "selected" : ""}>low</option><option value="none" ${state.filters.urgency === "none" ? "selected" : ""}>${escapeHtml(t("unjudged"))}</option>
         </select>
-        <select class="filter-input" data-filter-select="media">
+        <select class="request-filter-select" data-filter-select="media">
           <option value="all" ${state.filters.media === "all" ? "selected" : ""}>${escapeHtml(t("mediaFilter"))}</option>
           <option value="has" ${state.filters.media === "has" ? "selected" : ""}>${escapeHtml(t("hasMedia"))}</option>
           <option value="none" ${state.filters.media === "none" ? "selected" : ""}>${escapeHtml(t("noMedia"))}</option>
         </select>
-        <select class="filter-input" data-filter-select="sort">
+        <select class="request-filter-select" data-filter-select="sort">
           <option value="priority" ${state.filters.sort === "priority" ? "selected" : ""}>${escapeHtml(t("prioritySort"))}</option>
           <option value="newest" ${state.filters.sort === "newest" ? "selected" : ""}>${escapeHtml(t("newest"))}</option>
           <option value="oldest" ${state.filters.sort === "oldest" ? "selected" : ""}>${escapeHtml(t("oldest"))}</option>
@@ -1918,18 +1995,6 @@
     tooltip.setAttribute("aria-hidden", "true");
   }
 
-  function keepRequestSearchFocus(value, start, end) {
-    window.requestAnimationFrame(() => {
-      const input = $("requestSearch");
-      if (!input) return;
-      input.focus({ preventScroll: true });
-      if (typeof input.setSelectionRange === "function") {
-        const position = value.length;
-        input.setSelectionRange(start ?? position, end ?? position);
-      }
-    });
-  }
-
   async function handleRequestViewClick(event) {
     const filter = event.target.closest("[data-request-filter]");
     if (filter) {
@@ -1947,6 +2012,15 @@
       event.stopPropagation();
       state.filters.requestViewMode = mode.dataset.viewMode;
       console.log("[admin-v2] request view mode", state.filters.requestViewMode);
+      renderRequestResults();
+      return true;
+    }
+
+    const searchButton = event.target.closest("[data-request-search]");
+    if (searchButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      state.filters.search = $("requestSearch")?.value || "";
       renderRequestResults();
       return true;
     }
@@ -2006,11 +2080,7 @@
   function handleRequestViewInput(event) {
     if (event.target.id !== "requestSearch") return false;
     const input = event.target;
-    const value = input.value || "";
-    const start = input.selectionStart;
-    const end = input.selectionEnd;
-    state.filters.search = value;
-    renderRequestResults();
+    state.filters.search = input.value || "";
     return true;
   }
 
@@ -2077,6 +2147,13 @@
     bind($("viewRoot"), "change", handleRequestViewChange);
     bind($("viewRoot"), "input", event => {
       if (handleRequestViewInput(event)) event.stopPropagation();
+    });
+    bind($("viewRoot"), "keydown", event => {
+      if (event.target.id === "requestSearch" && event.key === "Enter") {
+        event.preventDefault();
+        state.filters.search = event.target.value || "";
+        renderRequestResults();
+      }
     });
     if ($("globalSearch")) {
       bind($("globalSearch"), "input", event => {
@@ -2151,20 +2228,6 @@
         if (filter === "media") state.filters.media = value || "all";
         if (filter === "notification") state.currentView = "notifications";
         renderCurrentView();
-        return;
-      }
-
-      const filter = event.target.closest("[data-request-filter]");
-      if (filter) {
-        state.filters.requestStatus = filter.dataset.requestFilter;
-        renderRequestResults();
-        return;
-      }
-
-      const mode = event.target.closest("[data-view-mode]");
-      if (mode) {
-        state.filters.requestViewMode = mode.dataset.viewMode;
-        renderRequestResults();
         return;
       }
 
@@ -2325,7 +2388,6 @@
     bind(document, "input", event => {
       if (event.target.id === "requestSearch") {
         state.filters.search = event.target.value || "";
-        renderRequestResults();
       }
       const customerFilter = event.target.closest("[data-customer-filter]");
       if (customerFilter) {
@@ -2340,12 +2402,6 @@
     });
 
     bind(document, "change", event => {
-      const select = event.target.closest("[data-filter-select]");
-      if (select) {
-        state.filters[select.dataset.filterSelect] = select.value;
-        renderRequestResults();
-        return;
-      }
       const customerFilter = event.target.closest("[data-customer-filter]");
       if (customerFilter) {
         state.filters["customer" + customerFilter.dataset.customerFilter.charAt(0).toUpperCase() + customerFilter.dataset.customerFilter.slice(1)] = customerFilter.value || "";
