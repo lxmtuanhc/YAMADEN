@@ -578,7 +578,20 @@
     delete: "\u524a\u9664",
     restore: "\u5fa9\u5143",
     userHistory: "\u4f9d\u983c\u5c65\u6b74",
-    resetPin: "PIN\u30ea\u30bb\u30c3\u30c8"
+    resetPin: "PIN\u30ea\u30bb\u30c3\u30c8",
+    requestDetailTitle: "\u4f9d\u983c\u8a73\u7d30",
+    requestInfo: "\u4f9d\u983c\u60c5\u5831",
+    adminEditSection: "\u5bfe\u5fdc\u5185\u5bb9\u306e\u7de8\u96c6",
+    adminNote: "\u7ba1\u7406\u8005\u30e1\u30e2",
+    dueAt: "\u5bfe\u5fdc\u671f\u9650",
+    saveChanges: "\u5909\u66f4\u3092\u4fdd\u5b58",
+    unsavedChanges: "\u672a\u4fdd\u5b58\u306e\u5909\u66f4\u304c\u3042\u308a\u307e\u3059",
+    unsavedChangesText: "\u3053\u306e\u307e\u307e\u9589\u3058\u308b\u3068\u3001\u5909\u66f4\u5185\u5bb9\u306f\u4fdd\u5b58\u3055\u308c\u307e\u305b\u3093\u3002",
+    stay: "\u623b\u308b",
+    closeWithoutSave: "\u4fdd\u5b58\u305b\u305a\u306b\u9589\u3058\u308b",
+    savedChanges: "\u5909\u66f4\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002",
+    saveChangesFailed: "\u5909\u66f4\u3092\u4fdd\u5b58\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002\u3082\u3046\u4e00\u5ea6\u304a\u8a66\u3057\u304f\u3060\u3055\u3044\u3002",
+    noMediaDetail: "\u30e1\u30c7\u30a3\u30a2\u306f\u3042\u308a\u307e\u305b\u3093\u3002"
   });
 
   Object.assign(i18n.vi, {
@@ -662,7 +675,20 @@
     delete: "X\u00f3a",
     restore: "Kh\u00f4i ph\u1ee5c",
     userHistory: "L\u1ecbch s\u1eed y\u00eau c\u1ea7u",
-    resetPin: "Reset PIN"
+    resetPin: "Reset PIN",
+    requestDetailTitle: "Chi ti\u1ebft y\u00eau c\u1ea7u",
+    requestInfo: "Th\u00f4ng tin y\u00eau c\u1ea7u",
+    adminEditSection: "\u0110i\u1ec1u ch\u1ec9nh x\u1eed l\u00fd",
+    adminNote: "Ghi ch\u00fa admin",
+    dueAt: "H\u1ea1n x\u1eed l\u00fd",
+    saveChanges: "L\u01b0u thay \u0111\u1ed5i",
+    unsavedChanges: "C\u00f3 thay \u0111\u1ed5i ch\u01b0a l\u01b0u",
+    unsavedChangesText: "N\u1ebfu \u0111\u00f3ng b\u00e2y gi\u1edd, c\u00e1c thay \u0111\u1ed5i s\u1ebd b\u1ecb m\u1ea5t.",
+    stay: "\u1ede l\u1ea1i",
+    closeWithoutSave: "\u0110\u00f3ng kh\u00f4ng l\u01b0u",
+    savedChanges: "\u0110\u00e3 l\u01b0u thay \u0111\u1ed5i.",
+    saveChangesFailed: "Kh\u00f4ng th\u1ec3 l\u01b0u thay \u0111\u1ed5i. Vui l\u00f2ng th\u1eed l\u1ea1i.",
+    noMediaDetail: "Kh\u00f4ng c\u00f3 media."
   });
 
   Object.assign(requestStatusMap, {
@@ -1731,61 +1757,118 @@
     return `<select class="status-select" data-request-status="${escapeHtml(id)}">${statuses.map(status => `<option value="${status}" ${normalizeRequestStatus(current) === status ? "selected" : ""}>${escapeHtml(formatStatus(status))}</option>`).join("")}</select>`;
   }
 
+  function requestStatusOptions(current) {
+    return ["untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"]
+      .map(status => `<option value="${status}" ${normalizeRequestStatus(current) === status ? "selected" : ""}>${escapeHtml(formatStatus(status))}</option>`)
+      .join("");
+  }
+
+  function requestUrgencyOptions(current) {
+    const value = getUrgency({ urgency: current }) || "none";
+    return [
+      ["none", t("unjudged")],
+      ["urgent", t("urgencyUrgent")],
+      ["high", t("urgencyHigh")],
+      ["medium", t("urgencyMedium")],
+      ["low", t("urgencyLow")]
+    ].map(([key, label]) => `<option value="${escapeHtml(key)}" ${value === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("");
+  }
+
+  function formatDateInput(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toISOString().slice(0, 10);
+  }
+
+  function renderRequestMediaItem(item, index) {
+    const url = item.secureUrl || item.url;
+    const type = item.type || item.resourceType || (/(\.mp4|\.mov|\.webm|\.m4v)(\?|$)/i.test(url) ? "video" : "image");
+    const attrs = `data-media-preview="${escapeHtml(url)}" data-media-type="${escapeHtml(type)}"`;
+    return `<button class="request-media-item" type="button" ${attrs} aria-label="${escapeHtml(t("media"))} ${index + 1}">${type === "video"
+      ? `<video src="${escapeHtml(url)}" controls playsinline></video>`
+      : `<img src="${escapeHtml(url)}" alt="">`}</button>`;
+  }
+
   function renderRequestDetail(request) {
     const id = getRowId(request);
     const media = collectMedia(request);
     const timeline = Array.isArray(request.timeline) ? request.timeline : [];
     const suggestion = recommendAssignee(request);
-    openDrawer(`
-      <article class="drawer-panel">
-        <header class="drawer-head">
-          <div><h2>${escapeHtml(getRequestDisplayId(request))}</h2><p class="note">${escapeHtml(getCustomerName(request))}</p></div>
-          <button class="close-button" type="button" data-close-drawer>×</button>
+    const existing = $("requestDetailOverlay");
+    if (existing) existing.remove();
+    const overlay = document.createElement("div");
+    overlay.id = "requestDetailOverlay";
+    overlay.className = "request-detail-overlay";
+    overlay.dataset.requestDetailId = id;
+    overlay.dataset.dirty = "false";
+    overlay.innerHTML = `
+      <article class="request-detail-modal" role="dialog" aria-modal="true" aria-labelledby="requestDetailTitle">
+        <header class="request-detail-header">
+          <div>
+            <p class="eyebrow">${escapeHtml(t("requestDetailTitle"))}</p>
+            <h2 id="requestDetailTitle">${escapeHtml(getRequestDisplayId(request))}</h2>
+            <p class="note">${escapeHtml(getCustomerName(request))} · ${escapeHtml(formatDateTime(request.createdAt))}</p>
+          </div>
+          <div class="request-detail-header-actions">
+            <span class="status-badge ${getStatusClass(request.status)}">${escapeHtml(formatStatus(request.status))}</span>
+            <button class="close-button" type="button" data-close-request-detail aria-label="${escapeHtml(t("close"))}">&times;</button>
+          </div>
         </header>
-        <div class="drawer-body">
-          <div class="info-grid">
-            ${infoItem(t("phone"), getRequestPhone(request))}
-            ${infoItem(t("address"), request.address)}
-            ${infoItem(t("content"), getRequestContent(request))}
-            ${infoItem(t("issueTags"), Array.isArray(request.issueTags) ? request.issueTags.join(", ") : "")}
-            ${infoItem(t("quoteRequested"), hasQuoteRequested(request) ? t("quoteRequested") : "-")}
-            ${infoItem(t("status"), formatStatus(request.status))}
-            ${infoItem(t("assignee"), getAssigneeName(request))}
-            ${infoItem(t("urgency"), getUrgency(request) || t("unjudged"))}
-            ${infoItem(t("createdAt"), formatDateTime(request.createdAt))}
-          </div>
-          <section>
-            <h3>${escapeHtml(t("media"))}</h3>
-            <div class="media-grid">${media.length ? media.map(renderMedia).join("") : emptyHtml()}</div>
-          </section>
-          <section class="field">
-            <label>${escapeHtml(t("adminReply"))}</label>
-            <textarea id="requestReplyInput">${escapeHtml(request.adminReply || "")}</textarea>
-          </section>
-          <section class="form-grid">
-            <label class="field"><span>${escapeHtml(t("updateStatus"))}</span>${statusSelectHtml(id, request.status)}</label>
-            <label class="field"><span>${escapeHtml(t("assignStaff"))}</span>${staffSelectHtml(request.assigneeId)}</label>
-          </section>
-          <section class="assign-suggestion">
-            <div>
-              <strong>${escapeHtml(t("suggestAssignee"))}</strong>
-              <p class="note">${suggestion ? `${escapeHtml(suggestion.staff.name || "-")} - ${escapeHtml(t("assigneeReason"))}: ${escapeHtml(suggestion.matched.join(", "))}` : escapeHtml(t("noAssigneeSuggestion"))}</p>
+        <div class="request-detail-body">
+          <section class="request-detail-info">
+            <div class="request-detail-section-head"><h3>${escapeHtml(t("requestInfo"))}</h3></div>
+            <div class="request-info-grid">
+              ${infoItem(t("id"), getRequestDisplayId(request))}
+              ${infoItem(t("customer"), getCustomerName(request))}
+              ${infoItem(t("phone"), getRequestPhone(request))}
+              ${infoItem(t("status"), formatStatus(request.status))}
+              ${infoItem(t("assignee"), getAssigneeName(request))}
+              ${infoItem(t("urgency"), getUrgency(request) || t("unjudged"))}
+              ${infoItem(t("createdAt"), formatDateTime(request.createdAt))}
+              ${infoItem(t("elapsed"), computeWaitingTime(request))}
+              ${infoItem(t("deadline"), formatDateTime(getDeadline(request)))}
+              ${infoItem(t("quoteRequested"), hasQuoteRequested(request) ? t("quoteRequested") : "-")}
+              <div class="info-item wide"><b>${escapeHtml(t("address"))}</b><span>${escapeHtml(getRequestAddress(request) || "-")}</span></div>
+              <div class="info-item wide"><b>${escapeHtml(t("content"))}</b><span>${escapeHtml(getRequestContent(request) || "-")}</span></div>
+              <div class="info-item wide"><b>${escapeHtml(t("issueTags"))}</b><span>${escapeHtml(Array.isArray(request.issueTags) ? request.issueTags.join(", ") : "-")}</span></div>
             </div>
-            ${suggestion ? `<button class="btn btn-soft" type="button" data-apply-assignee="${escapeHtml(id)}" data-staff-id="${escapeHtml(getRowId(suggestion.staff))}">${escapeHtml(t("applyAssignee"))}</button>` : ""}
+            <section class="request-admin-edit">
+              <div class="request-detail-section-head"><h3>${escapeHtml(t("adminEditSection"))}</h3></div>
+              <div class="request-edit-grid">
+                <label class="field"><span>${escapeHtml(t("status"))}</span><select data-request-edit-field="status">${requestStatusOptions(request.status)}</select></label>
+                <label class="field"><span>${escapeHtml(t("assignee"))}</span>${staffSelectHtml(request.assigneeId, "data-request-edit-field=\"assigneeId\"")}</label>
+                <label class="field"><span>${escapeHtml(t("urgency"))}</span><select data-request-edit-field="urgency">${requestUrgencyOptions(request.urgency || request.priority)}</select></label>
+                <label class="field"><span>${escapeHtml(t("dueAt"))}</span><input type="date" data-request-edit-field="dueAt" value="${escapeHtml(formatDateInput(getDeadline(request)))}"></label>
+                <label class="field"><span>${escapeHtml(t("amount"))}</span><input type="text" data-request-edit-field="amount" value="${escapeHtml(request.amount || request.totalAmount || "")}"></label>
+                <label class="field full"><span>${escapeHtml(t("adminNote"))}</span><textarea data-request-edit-field="adminReply">${escapeHtml(request.adminReply || "")}</textarea></label>
+              </div>
+              <section class="assign-suggestion">
+                <div>
+                  <strong>${escapeHtml(t("suggestAssignee"))}</strong>
+                  <p class="note">${suggestion ? `${escapeHtml(suggestion.staff.name || "-")} - ${escapeHtml(t("assigneeReason"))}: ${escapeHtml(suggestion.matched.join(", "))}` : escapeHtml(t("noAssigneeSuggestion"))}</p>
+                </div>
+                ${suggestion ? `<button class="btn btn-soft" type="button" data-apply-assignee="${escapeHtml(id)}" data-staff-id="${escapeHtml(getRowId(suggestion.staff))}">${escapeHtml(t("applyAssignee"))}</button>` : ""}
+              </section>
+            </section>
+            <section>
+              <h3>${escapeHtml(t("timeline"))}</h3>
+              <div class="timeline">${timeline.length ? timeline.map(item => `<div class="timeline-item"><strong>${escapeHtml(formatStatus(item.status || item.type))}</strong><div class="subtext">${escapeHtml(formatDate(item.createdAt))}</div><div>${escapeHtml(item.note || item.message || "")}</div></div>`).join("") : emptyHtml()}</div>
+            </section>
           </section>
-          <div class="actions">
-            <button class="primary-button" type="button" data-save-request="${escapeHtml(id)}">${escapeHtml(t("save"))}</button>
-            <button class="ghost-button" type="button" disabled title="${escapeHtml(t("planned"))}">${escapeHtml(t("quoteRegister"))}</button>
-            <button class="ghost-button" type="button" disabled>${escapeHtml(t("proposalCreate"))}</button>
-            <button class="ghost-button" type="button" disabled>${escapeHtml(t("recordAdd"))}</button>
-          </div>
-          <section>
-            <h3>${escapeHtml(t("timeline"))}</h3>
-            <div class="timeline">${timeline.length ? timeline.map(item => `<div class="timeline-item"><strong>${escapeHtml(formatStatus(item.status || item.type))}</strong><div class="subtext">${escapeHtml(formatDate(item.createdAt))}</div><div>${escapeHtml(item.note || item.message || "")}</div></div>`).join("") : emptyHtml()}</div>
+          <section class="request-detail-media">
+            <div class="request-detail-section-head"><h3>${escapeHtml(t("media"))}</h3><span class="note">${media.length}</span></div>
+            ${media.length ? `<div class="request-media-grid">${media.map(renderRequestMediaItem).join("")}</div>` : `<div class="empty-state">${escapeHtml(t("noMediaDetail"))}</div>`}
           </section>
         </div>
+        <footer class="request-detail-footer">
+          <span class="request-unsaved-note" data-unsaved-note hidden>${escapeHtml(t("unsavedChanges"))}</span>
+          <button class="ghost-button" type="button" data-close-request-detail>${escapeHtml(t("close"))}</button>
+          <button class="primary-button" type="button" data-save-request="${escapeHtml(id)}" disabled>${escapeHtml(t("saveChanges"))}</button>
+        </footer>
       </article>
-    `);
+    `;
+    document.body.appendChild(overlay);
   }
 
   function infoItem(label, value) {
@@ -1820,8 +1903,8 @@
       : `<img src="${escapeHtml(url)}" alt="">`;
   }
 
-  function staffSelectHtml(selectedId) {
-    return `<select id="requestStaffSelect">${[""].concat(state.staff.map(item => getRowId(item))).map(id => {
+  function staffSelectHtml(selectedId, attrs = "") {
+    return `<select id="requestStaffSelect" ${attrs}>${[""].concat(state.staff.map(item => getRowId(item))).map(id => {
       const staff = state.staff.find(item => getRowId(item) === id);
       return `<option value="${escapeHtml(id)}" ${String(selectedId || "") === String(id) ? "selected" : ""}>${escapeHtml(staff ? staff.name : "-")}</option>`;
     }).join("")}</select>`;
@@ -2820,21 +2903,73 @@
     $("viewRoot").innerHTML = `<div class="settings-grid settings-demo-grid">${items.map(key => `<section class="settings-card"><div class="settings-card-head"><h2>${escapeHtml(t(key))}</h2><span class="status-badge status-quoted">${escapeHtml(t("preparing"))}</span></div><div class="settings-placeholder"><label>${escapeHtml(t("status"))}</label><div class="placeholder-input">${escapeHtml(t("planned"))}</div><label>${escapeHtml(t("settingsSystem"))}</label><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("planned"))}</button></div><p class="note">${escapeHtml(t("kpiPlanned"))}</p></section>`).join("")}</div>`;
   }
 
+  function setRequestDetailDirty(dirty) {
+    const overlay = $("requestDetailOverlay");
+    if (!overlay) return;
+    overlay.dataset.dirty = dirty ? "true" : "false";
+    const saveButton = overlay.querySelector("[data-save-request]");
+    const note = overlay.querySelector("[data-unsaved-note]");
+    if (saveButton) saveButton.disabled = !dirty;
+    if (note) note.hidden = !dirty;
+  }
+
+  async function closeRequestDetail(force = false) {
+    const overlay = $("requestDetailOverlay");
+    if (!overlay) return;
+    if (!force && overlay.dataset.dirty === "true") {
+      const discard = await confirmAction({
+        title: t("unsavedChanges"),
+        message: t("unsavedChangesText"),
+        cancelLabel: t("stay"),
+        confirmLabel: t("closeWithoutSave"),
+        variant: "warning"
+      });
+      if (!discard) return;
+    }
+    overlay.remove();
+  }
+
+  function openMediaPreview(url, type) {
+    const existing = $("mediaPreviewOverlay");
+    if (existing) existing.remove();
+    const overlay = document.createElement("div");
+    overlay.id = "mediaPreviewOverlay";
+    overlay.className = "media-preview-overlay";
+    overlay.innerHTML = `<div class="media-preview-panel"><button class="close-button" type="button" data-close-media-preview>&times;</button>${type === "video" ? `<video src="${escapeHtml(url)}" controls autoplay playsinline></video>` : `<img src="${escapeHtml(url)}" alt="">`}</div>`;
+    document.body.appendChild(overlay);
+  }
+
   async function saveRequestFromDrawer(id) {
-    const drawer = $("drawer");
-    const status = drawer.querySelector("[data-request-status='" + CSS.escape(id) + "']")?.value;
-    const reply = $("requestReplyInput")?.value || "";
-    const staffId = $("requestStaffSelect")?.value || "";
+    const root = $("requestDetailOverlay") || $("drawer");
+    const status = root.querySelector("[data-request-edit-field='status']")?.value || root.querySelector("[data-request-status='" + CSS.escape(id) + "']")?.value;
+    const reply = root.querySelector("[data-request-edit-field='adminReply']")?.value || $("requestReplyInput")?.value || "";
+    const staffId = root.querySelector("[data-request-edit-field='assigneeId']")?.value || $("requestStaffSelect")?.value || "";
+    const urgency = root.querySelector("[data-request-edit-field='urgency']")?.value || "";
+    const dueAt = root.querySelector("[data-request-edit-field='dueAt']")?.value || "";
+    const amount = root.querySelector("[data-request-edit-field='amount']")?.value || "";
     const staff = state.staff.find(item => getRowId(item) === staffId);
-    await AdminAPI.updateRequest(id, {
+    const response = await AdminAPI.updateRequest(id, {
       status,
       adminReply: reply,
       assigneeId: staff ? getRowId(staff) : "",
-      assigneeName: staff ? staff.name || "" : ""
+      assigneeName: staff ? staff.name || "" : "",
+      urgency: urgency === "none" ? "" : urgency,
+      dueAt,
+      amount
     });
+    const updated = response?.data || response;
+    const index = state.requests.findIndex(item => String(getRowId(item) || getRequestDisplayId(item)) === String(id));
+    if (index >= 0 && updated) state.requests[index] = Object.assign({}, state.requests[index], updated);
+    if ($("requestDetailOverlay")) {
+      setRequestDetailDirty(false);
+      if (updated) renderRequestDetail(state.requests[index] || updated);
+      if ($("requestResults")) renderRequestResults();
+      toast(t("savedChanges"));
+      return;
+    }
     closeDrawer();
-    await refreshData();
-    toast(t("saved"));
+    renderCurrentView();
+    toast(t("savedChanges"));
   }
 
   async function refreshData() {
@@ -3075,6 +3210,15 @@
       void handleCustomerDelegatedClick(event);
     }, true);
     bind(document, "keydown", event => {
+      if (event.key === "Escape" && $("mediaPreviewOverlay")) {
+        $("mediaPreviewOverlay").remove();
+        return;
+      }
+      if (event.key === "Escape" && $("requestDetailOverlay")) {
+        event.preventDefault();
+        void closeRequestDetail();
+        return;
+      }
       if (event.key === "Escape" && state.currentView === "customers" && state.selectedUser) {
         closeCustomerDetail();
       }
@@ -3104,6 +3248,10 @@
     });
 
     bind(document, "change", async event => {
+      if (event.target.closest("[data-request-edit-field]")) {
+        setRequestDetailDirty(true);
+        return;
+      }
       const select = event.target.closest("[data-request-status]");
       if (!select || $("drawer").classList.contains("open")) return;
       try {
@@ -3119,6 +3267,19 @@
 
     bind(document, "click", async event => {
       if (event.defaultPrevented) return;
+      if (event.target.closest("[data-close-media-preview]") || event.target.id === "mediaPreviewOverlay") {
+        $("mediaPreviewOverlay")?.remove();
+        return;
+      }
+      const mediaPreview = event.target.closest("[data-media-preview]");
+      if (mediaPreview) {
+        openMediaPreview(mediaPreview.dataset.mediaPreview, mediaPreview.dataset.mediaType);
+        return;
+      }
+      if (event.target.closest("[data-close-request-detail]") || event.target.id === "requestDetailOverlay") {
+        await closeRequestDetail();
+        return;
+      }
       if (event.target.closest("select,input,textarea,option")) return;
 
       const navButton = event.target.closest("[data-view]");
@@ -3174,8 +3335,9 @@
       if (saveRequest) {
         try {
           await saveRequestFromDrawer(saveRequest.dataset.saveRequest);
-        } catch {
-          toast(t("failed"));
+        } catch (error) {
+          console.error(error);
+          toast(t("saveChangesFailed"));
         }
         return;
       }
@@ -3184,6 +3346,13 @@
       if (applyAssignee) {
         const staff = state.staff.find(item => getRowId(item) === applyAssignee.dataset.staffId);
         if (!staff) return;
+        const detail = $("requestDetailOverlay");
+        if (detail && detail.contains(applyAssignee)) {
+          const select = detail.querySelector("[data-request-edit-field='assigneeId']");
+          if (select) select.value = getRowId(staff);
+          setRequestDetailDirty(true);
+          return;
+        }
         try {
           await AdminAPI.updateRequest(applyAssignee.dataset.applyAssignee, {
             assigneeId: getRowId(staff),
@@ -3259,6 +3428,9 @@
     });
 
     bind(document, "input", event => {
+      if (event.target.closest("[data-request-edit-field]")) {
+        setRequestDetailDirty(true);
+      }
       if (event.target.id === "requestSearch") {
         state.filters.search = event.target.value || "";
       }

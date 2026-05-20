@@ -207,6 +207,12 @@ const RequestSchema = new mongoose.Schema({
   mediaType: String,
   mediaFiles: [MediaFileSchema],
   status: String,
+  urgency: String,
+  priority: String,
+  dueAt: Date,
+  deadline: Date,
+  amount: mongoose.Schema.Types.Mixed,
+  totalAmount: mongoose.Schema.Types.Mixed,
   adminReply: String,
   createdAt: Date,
   firstResponseAt: Date,
@@ -1929,6 +1935,13 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
 
     if (req.body.assigneeId !== undefined) item.assigneeId = req.body.assigneeId;
     if (req.body.assigneeName !== undefined) item.assigneeName = req.body.assigneeName;
+    if (req.body.urgency !== undefined) item.urgency = req.body.urgency;
+    if (req.body.dueAt !== undefined) {
+      const dueAt = req.body.dueAt ? new Date(req.body.dueAt) : null;
+      item.dueAt = dueAt && !Number.isNaN(dueAt.getTime()) ? dueAt : null;
+      item.deadline = item.dueAt;
+    }
+    if (req.body.amount !== undefined) item.amount = req.body.amount;
 
     if (req.body.adminReply !== undefined) {
       item.adminReply = req.body.adminReply;
