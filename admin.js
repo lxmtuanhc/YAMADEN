@@ -834,9 +834,9 @@
     autoAssignParticipating: "参加中",
     autoAssignNotParticipating: "不参加",
     autoAssignHelp: "オンにすると、業務内容が一致した場合にこのスタッフが自動割り当ての対象になります。",
-    chooseDepartmentFirst: "業務内容を表示するには、先に部門を選択してください。",
+    chooseDepartmentFirst: "業務内容を表示するには、部門を選択してください。",
     workStepPick: "ステップ2：業務内容を選択",
-    workStepSelected: "ステップ3：スタッフ説明",
+    staffDescriptionSection: "スタッフ説明",
     selectedDepartment: "選択中の部門",
     changeDepartment: "部門を変更",
     workTypeSearchPlaceholder: "業務内容を検索...",
@@ -899,9 +899,9 @@
     autoAssignParticipating: "Đang tham gia",
     autoAssignNotParticipating: "Không tham gia",
     autoAssignHelp: "Khi bật, nhân viên này có thể được hệ thống tự động phân công nếu nội dung công việc phù hợp.",
-    chooseDepartmentFirst: "Vui lòng chọn bộ phận trước để xem nội dung công việc.",
+    chooseDepartmentFirst: "Vui lòng chọn bộ phận để hiển thị nội dung công việc.",
     workStepPick: "Bước 2: Chọn nội dung công việc",
-    workStepSelected: "Bước 3: Mô tả thêm về nhân viên",
+    staffDescriptionSection: "Mô tả nhân viên",
     selectedDepartment: "Bộ phận đang chọn",
     changeDepartment: "Đổi bộ phận",
     workTypeSearchPlaceholder: "Tìm nội dung công việc...",
@@ -3276,63 +3276,77 @@
       </section>
       <section class="staff-work-step">
         <div class="staff-work-step-head"><b>${escapeHtml(t("workStepPick"))}</b></div>
-        <p class="staff-work-summary">${escapeHtml(t("selectedDepartment"))}: <strong data-staff-work-department-label>-</strong></p>
-        <input class="filter-input" type="search" data-staff-work-search placeholder="${escapeHtml(t("workTypeSearchPlaceholder"))}">
-        <div class="staff-work-type-list" data-staff-work-type-list></div>
-        <div class="staff-selected-work-compact" data-staff-selected-work-list></div>
-        <div class="actions">
-          <button class="btn btn-soft" type="button" data-open-work-master-tab="workTypes">${escapeHtml(t("addWorkTypeQuick"))}</button>
-          <button class="btn btn-soft" type="button" data-open-work-master-tab="workTypes">${escapeHtml(t("manageWorkTypes"))}</button>
-        </div>
-      </section>
-      <section class="staff-work-step">
-        <div class="staff-work-step-head"><b>${escapeHtml(t("workStepSelected"))}</b><button class="mini-button" type="button" data-staff-selected-work-to-content>${escapeHtml(t("createDescriptionFromSelectedWork"))}</button></div>
-        <label class="staff-edit-field full"><span>${escapeHtml(t("staffDescription"))}</span><textarea name="introduction" placeholder="${escapeHtml(t("staffDescriptionPlaceholder"))}">${escapeHtml(staff?.introduction || "")}</textarea></label>
-        <label class="staff-edit-field full"><span>${escapeHtml(t("internalMemo"))}</span><textarea name="note">${escapeHtml(staff?.note || "")}</textarea></label>
+        <div data-staff-work-picker></div>
       </section>
     </div>`;
   }
 
-  function renderStaffWorkAssignment() {
+  function renderStaffDescriptionField(staff) {
+    return `<div class="staff-description-editor">
+      <div class="staff-work-step-head">
+        <b>${escapeHtml(t("staffDescriptionSection"))}</b>
+        <button class="mini-button" type="button" data-staff-selected-work-to-content>${escapeHtml(t("createDescriptionFromSelectedWork"))}</button>
+      </div>
+      <div class="staff-edit-grid">
+        <label class="staff-edit-field full"><span>${escapeHtml(t("staffDescription"))}</span><textarea name="introduction" placeholder="${escapeHtml(t("staffDescriptionPlaceholder"))}">${escapeHtml(staff?.introduction || "")}</textarea></label>
+        <label class="staff-edit-field full"><span>${escapeHtml(t("internalMemo"))}</span><textarea name="note">${escapeHtml(staff?.note || "")}</textarea></label>
+      </div>
+    </div>`;
+  }
+
+  function renderStaffWorkAssignment(options = {}) {
     const root = document.querySelector("[data-staff-work-assignment]");
     if (!root) return;
     const departmentCode = currentStaffDepartmentCode();
     const departmentLabel = currentStaffDepartmentLabel();
     const selected = readSelectedWorkEntries();
     const selectedIds = new Set(selected.map(item => normalizeTag(item.id || item.code || item.label)));
-    const search = (root.querySelector("[data-staff-work-search]")?.value || "").trim().toLowerCase();
-    const listTarget = root.querySelector("[data-staff-work-type-list]");
-    const selectedTarget = root.querySelector("[data-staff-selected-work-list]");
-    const labelTarget = root.querySelector("[data-staff-work-department-label]");
-    if (labelTarget) labelTarget.textContent = departmentLabel;
+    const rawSearch = options.searchValue ?? root.querySelector("[data-staff-work-search]")?.value ?? "";
+    const search = rawSearch.trim().toLowerCase();
+    const pickerTarget = root.querySelector("[data-staff-work-picker]");
     root.querySelectorAll("[data-staff-department-option]").forEach(button => {
       button.classList.toggle("active", button.dataset.staffDepartmentOption === departmentCode);
     });
+    if (!pickerTarget) return;
+    if (!departmentCode) {
+      pickerTarget.innerHTML = `<div class="staff-work-empty"><p>${escapeHtml(t("chooseDepartmentFirst"))}</p></div>`;
+      return;
+    }
     const workTypes = activeMasterItems("workTypes")
       .filter(item => item.departmentCode === departmentCode)
       .filter(item => {
         const haystack = [item.code, item.nameVi, item.nameJa, item.descriptionVi, item.descriptionJa].join(" ").toLowerCase();
         return !search || haystack.includes(search);
       });
-    if (listTarget) {
-      listTarget.innerHTML = !departmentCode
-        ? `<div class="staff-work-empty"><p>${escapeHtml(t("chooseDepartmentFirst"))}</p></div>`
-        : workTypes.length ? workTypes.map(item => {
-        const key = workTypeKey(item);
-        const checked = selectedIds.has(normalizeTag(key)) || selectedIds.has(normalizeTag(item.code));
-        const description = state.lang === "vi" ? item.descriptionVi || item.descriptionJa || "" : item.descriptionJa || item.descriptionVi || "";
-        return `<label class="staff-work-type-option ${checked ? "selected" : ""}">
-          <input type="checkbox" data-staff-worktype-item value="${escapeHtml(key)}" data-work-code="${escapeHtml(item.code || key)}" data-work-label="${escapeHtml(workMasterLabel(item))}" data-work-department="${escapeHtml(item.departmentCode || "")}" ${checked ? "checked" : ""}>
-          <span><b>${escapeHtml(workMasterLabel(item))}</b>${description ? `<small>${escapeHtml(description)}</small>` : ""}</span>
-        </label>`;
-      }).join("") : `<div class="staff-work-empty"><p>${escapeHtml(t("noWorkTypesInDepartment"))}</p><button class="btn btn-soft" type="button" data-open-work-master-tab="workTypes">${escapeHtml(t("addWorkTypeQuick"))}</button></div>`;
-    }
-    if (selectedTarget) {
-      const visible = selected.slice(0, 5);
-      const rest = Math.max(0, selected.length - visible.length);
-      selectedTarget.innerHTML = selected.length
-        ? `<span class="staff-selected-count">${escapeHtml(t("selectedCount"))}: ${selected.length} ${escapeHtml(t("itemCountSuffix"))}</span><div class="staff-selected-work-group">${visible.map(item => `<button class="staff-selected-work-chip" type="button" data-staff-work-remove="${escapeHtml(item.id || item.code || item.label)}">${escapeHtml(item.label || item.code || item.id)} <span aria-hidden="true">\u00d7</span></button>`).join("")}${rest ? `<span class="staff-selected-work-more">+${rest}</span>` : ""}</div>`
-        : `<span class="muted-dash">${escapeHtml(t("noSelectedWorkTypes"))}</span>`;
+    const selectedCount = selected.length
+      ? `<span class="staff-selected-count">${escapeHtml(t("selectedCount"))} ${selected.length} ${escapeHtml(t("itemCountSuffix"))}</span>`
+      : "";
+    const workTypeHtml = workTypes.length ? workTypes.map(item => {
+      const key = workTypeKey(item);
+      const checked = selectedIds.has(normalizeTag(key)) || selectedIds.has(normalizeTag(item.code));
+      const description = state.lang === "vi" ? item.descriptionVi || item.descriptionJa || "" : item.descriptionJa || item.descriptionVi || "";
+      return `<label class="staff-work-type-option ${checked ? "selected" : ""}">
+        <input type="checkbox" data-staff-worktype-item value="${escapeHtml(key)}" data-work-code="${escapeHtml(item.code || key)}" data-work-label="${escapeHtml(workMasterLabel(item))}" data-work-department="${escapeHtml(item.departmentCode || "")}" ${checked ? "checked" : ""}>
+        <span><b>${escapeHtml(workMasterLabel(item))}</b>${description ? `<small>${escapeHtml(description)}</small>` : ""}</span>
+      </label>`;
+    }).join("") : `<div class="staff-work-empty"><p>${escapeHtml(t("noWorkTypesInDepartment"))}</p><button class="btn btn-soft" type="button" data-open-work-master-tab="workTypes">${escapeHtml(t("addWorkTypeQuick"))}</button></div>`;
+    pickerTarget.innerHTML = `
+      <div class="staff-work-picker-head">
+        <p class="staff-work-summary">${escapeHtml(t("selectedDepartment"))}: <strong>${escapeHtml(departmentLabel)}</strong></p>
+        ${selectedCount}
+      </div>
+      <input class="filter-input" type="search" data-staff-work-search placeholder="${escapeHtml(t("workTypeSearchPlaceholder"))}" value="${escapeHtml(search)}">
+      <div class="staff-work-type-list" data-staff-work-type-list>${workTypeHtml}</div>
+      <div class="actions">
+        <button class="btn btn-soft" type="button" data-open-work-master-tab="workTypes">${escapeHtml(t("addWorkTypeQuick"))}</button>
+        <button class="btn btn-soft" type="button" data-open-work-master-tab="workTypes">${escapeHtml(t("manageWorkTypes"))}</button>
+      </div>`;
+    if (options.keepSearchFocus) {
+      const searchInput = pickerTarget.querySelector("[data-staff-work-search]");
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+      }
     }
   }
 
@@ -3378,7 +3392,6 @@
     const avatar = item.avatar || "";
     const statusOptions = ["active", "off"];
     const selectedStatus = ["off", "inactive"].includes(String(item.status || "")) ? "off" : "active";
-    const roleValue = item.role || item.position || item.title || "";
     document.querySelector("[data-staff-edit-overlay]")?.remove();
     const overlay = document.createElement("div");
     overlay.className = "staff-edit-overlay";
@@ -3431,6 +3444,9 @@
                 <section class="staff-edit-section">
                   <h3>${escapeHtml(t("staffAssignment"))}</h3>
                   ${renderStaffWorkAssignmentField(item)}
+                </section>
+                <section class="staff-edit-section">
+                  ${renderStaffDescriptionField(item)}
                 </section>
               </div>
             </div>
@@ -4835,7 +4851,7 @@
         setRequestDetailDirty(true);
       }
       if (event.target.closest("[data-staff-work-search]")) {
-        renderStaffWorkAssignment();
+        renderStaffWorkAssignment({ searchValue: event.target.value, keepSearchFocus: true });
         return;
       }
       if (event.target.closest("#staffForm")) {

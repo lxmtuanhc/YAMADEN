@@ -193,8 +193,10 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .staff-work-step { border: 1px solid #e2e8f0; border-radius: 16px; background: #f8fafc; padding: 14px; display: grid; gap: 12px; min-width: 0; }
 .staff-work-step-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }
 .staff-work-step-head b { color: #0f172a; font-size: 14px; }
+.staff-work-picker-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; min-width: 0; }
 .staff-work-summary { margin: 0; color: #475569; font-weight: 800; }
 .staff-work-summary strong { color: #0f172a; }
+.staff-description-editor { display: grid; gap: 14px; min-width: 0; }
 .staff-work-view-all { display: inline-flex; align-items: center; gap: 7px; color: #475569; font-size: 12px; font-weight: 900; white-space: nowrap; }
 .staff-work-view-all input { width: 16px; height: 16px; accent-color: #2563eb; }
 .staff-department-picker { display: grid; gap: 12px; min-width: 0; }
@@ -216,14 +218,7 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .staff-work-type-option.selected { border-color: #93c5fd; background: #eff6ff; }
 .staff-work-empty { border: 1px dashed #cbd5e1; border-radius: 14px; background: #fff; padding: 16px; display: grid; justify-items: start; gap: 10px; color: #64748b; font-weight: 800; }
 .staff-work-empty p { margin: 0; }
-.staff-selected-work-list { display: grid; gap: 10px; }
-.staff-selected-work-compact { display: grid; gap: 8px; }
 .staff-selected-count { color: #475569; font-size: 12px; font-weight: 900; }
-.staff-selected-work-group { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
-.staff-selected-work-chip { min-height: 34px; border: 1px solid #bfdbfe; border-radius: 999px; background: #eff6ff; color: #1d4ed8; padding: 0 11px; font-size: 12px; font-weight: 900; cursor: pointer; max-width: 100%; overflow-wrap: anywhere; }
-.staff-selected-work-more { min-height: 34px; display: inline-flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 999px; background: #fff; color: #64748b; padding: 0 11px; font-size: 12px; font-weight: 900; }
-.staff-selected-work-outside { display: grid; gap: 8px; }
-.staff-selected-work-outside strong { color: #d97706; font-size: 12px; }
 .staff-edit-footer { flex: 0 0 auto; display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 16px 28px; border-top: 1px solid #e2e8f0; background: #fff; }
 .confirm-overlay { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; padding: 24px; background: rgba(15, 23, 42, .38); backdrop-filter: blur(4px); }
 .confirm-dialog { width: min(480px, calc(100vw - 40px)); max-height: calc(100vh - 80px); overflow: auto; background: #fff; border-radius: 24px; box-shadow: 0 28px 80px rgba(15, 23, 42, .28), 0 8px 24px rgba(15, 23, 42, .12); border: 1px solid rgba(226, 232, 240, .9); animation: confirmPop .18s ease-out; }
