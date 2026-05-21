@@ -304,6 +304,7 @@ const StaffSchema = new mongoose.Schema({
   workTags: [String],
   workTypeIds: [String],
   departmentCode: String,
+  autoAssignEnabled: { type: Boolean, default: true },
   note: String,
   introduction: String,
   status: { type: String, default: "active" },
@@ -749,6 +750,9 @@ function publicStaffProfile(staff) {
     workContent: staff.workContent || "",
     skills: staff.skills || "",
     workTags: Array.isArray(staff.workTags) ? staff.workTags : [],
+    workTypeIds: Array.isArray(staff.workTypeIds) ? staff.workTypeIds : [],
+    departmentCode: staff.departmentCode || "",
+    autoAssignEnabled: staff.autoAssignEnabled !== false,
     email: staff.email || "",
     phone: staff.phone || "",
     note: staff.note || staff.introduction || "",
@@ -1093,7 +1097,11 @@ async function findBestAssignee(issueTags) {
   const tags = parseRequestTags(issueTags);
   if (!tags.length) return null;
 
-  const staffList = await Staff.find();
+  const staffList = await Staff.find({
+    status: { $nin: ["off", "inactive", "deleted"] },
+    $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+    autoAssignEnabled: { $ne: false }
+  });
   let best = null;
   let bestScore = 0;
 
@@ -1114,7 +1122,11 @@ async function findBestAssignee(issueTags) {
 async function findBestAssigneeForRequest({ issueTags, workTypeIds }) {
   const ids = normalizeTagList(workTypeIds);
   if (ids.length) {
-    const staffList = await Staff.find({ status: { $nin: ["off", "inactive", "deleted"] } });
+    const staffList = await Staff.find({
+      status: { $nin: ["off", "inactive", "deleted"] },
+      $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+      autoAssignEnabled: { $ne: false }
+    });
     const best = staffList.find(staff => {
       const staffIds = normalizeTagList(staff.workTypeIds);
       return ids.some(id => staffIds.includes(id));
@@ -1857,6 +1869,7 @@ app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res)
       skills: req.body.skills || req.body.workContent || workTags.join(", "),
       department: req.body.department || req.body.areas || "",
       departmentCode: req.body.departmentCode || "",
+      autoAssignEnabled: req.body.autoAssignEnabled === undefined ? true : req.body.autoAssignEnabled === true || req.body.autoAssignEnabled === "true",
       role: req.body.role || req.body.position || req.body.title || "",
       position: req.body.position || "",
       title: req.body.title || "",
@@ -1889,6 +1902,7 @@ app.put("/admin/staff/:id", requireAdmin, upload.single("avatar"), async (req, r
       if (req.body[field] !== undefined) staff[field] = req.body[field];
     });
     if (req.body.departmentCode !== undefined) staff.departmentCode = req.body.departmentCode;
+    if (req.body.autoAssignEnabled !== undefined) staff.autoAssignEnabled = req.body.autoAssignEnabled === true || req.body.autoAssignEnabled === "true";
 
     if (req.body.workTags !== undefined) {
       staff.workTags = Array.isArray(req.body.workTags)

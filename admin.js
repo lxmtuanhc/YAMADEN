@@ -824,22 +824,38 @@
     description: "説明",
     staffClassification: "スタッフ分類",
     primaryDepartment: "主部門",
-    staffWorkFlowHelp: "先に部門を選択し、その部門で対応できる業務内容を選択してください。",
-    workStepDepartment: "ステップ1：主部門",
-    workStepPick: "ステップ2：対応可能業務を選択",
-    workStepSelected: "ステップ3：選択済み業務",
+    staffAssignment: "業務割り当て",
+    staffWorkFlowHelp: "部門を選択し、その後スタッフが対応できる業務内容を選択してください。",
+    workStepDepartment: "ステップ1：部門を選択",
+    noDepartmentsInMaster: "部門がありません。新しい部門を追加してください。",
+    addDepartmentQuick: "+ 部門を追加",
+    manageDepartments: "部門を管理",
+    autoAssign: "自動割り当て",
+    autoAssignParticipating: "参加中",
+    autoAssignNotParticipating: "不参加",
+    autoAssignHelp: "オンにすると、業務内容が一致した場合にこのスタッフが自動割り当ての対象になります。",
+    chooseDepartmentFirst: "業務内容を表示するには、先に部門を選択してください。",
+    workStepPick: "ステップ2：業務内容を選択",
+    workStepSelected: "ステップ3：スタッフ説明",
     selectedDepartment: "選択中の部門",
     changeDepartment: "部門を変更",
-    workTypeSearchPlaceholder: "業務を検索...",
-    noWorkTypesInDepartment: "この部門には業務内容がありません。業務マスタで追加してください。",
+    workTypeSearchPlaceholder: "業務内容を検索...",
+    noWorkTypesInDepartment: "この部門には業務内容がありません。",
     openWorkMaster: "業務マスタを開く",
+    addWorkTypeQuick: "+ 業務内容を追加",
+    manageWorkTypes: "業務内容を管理",
     outsideCurrentDepartment: "現在の部門外",
     createContentFromSelectedWork: "選択業務から担当内容を作成",
     manageWorkMaster: "業務マスタを管理",
     noSelectedWorkTypes: "業務が選択されていません。",
     viewAllWorkTypes: "すべて表示",
     overwriteWorkContentTitle: "担当内容を上書きしますか？",
-    overwriteWorkContentText: "現在の担当内容は選択業務の一覧で置き換えられます。"
+    overwriteWorkContentText: "現在の担当内容は選択業務の一覧で置き換えられます。",
+    selectedCount: "選択済み",
+    itemCountSuffix: "件",
+    staffDescription: "スタッフの得意分野・説明",
+    staffDescriptionPlaceholder: "例：電気図面設計が得意で、施工図・竣工図にも対応できます。",
+    createDescriptionFromSelectedWork: "選択業務から説明を作成"
   });
 
   Object.assign(i18n.vi, {
@@ -873,22 +889,38 @@
     description: "Mô tả",
     staffClassification: "Phân loại nhân viên",
     primaryDepartment: "Bộ phận chính",
-    staffWorkFlowHelp: "Chọn bộ phận trước, sau đó chọn các nội dung công việc mà nhân viên có thể phụ trách.",
-    workStepDepartment: "Bước 1: Bộ phận chính",
+    staffAssignment: "Phân công công việc",
+    staffWorkFlowHelp: "Chọn bộ phận, sau đó chọn các nội dung công việc mà nhân viên có thể phụ trách.",
+    workStepDepartment: "Bước 1: Chọn bộ phận",
+    noDepartmentsInMaster: "Chưa có bộ phận. Hãy thêm bộ phận mới.",
+    addDepartmentQuick: "+ Thêm bộ phận",
+    manageDepartments: "Quản lý bộ phận",
+    autoAssign: "Tự động phân công",
+    autoAssignParticipating: "Đang tham gia",
+    autoAssignNotParticipating: "Không tham gia",
+    autoAssignHelp: "Khi bật, nhân viên này có thể được hệ thống tự động phân công nếu nội dung công việc phù hợp.",
+    chooseDepartmentFirst: "Vui lòng chọn bộ phận trước để xem nội dung công việc.",
     workStepPick: "Bước 2: Chọn nội dung công việc",
-    workStepSelected: "Bước 3: Công việc đã chọn",
+    workStepSelected: "Bước 3: Mô tả thêm về nhân viên",
     selectedDepartment: "Bộ phận đang chọn",
     changeDepartment: "Đổi bộ phận",
     workTypeSearchPlaceholder: "Tìm nội dung công việc...",
-    noWorkTypesInDepartment: "Chưa có nội dung công việc trong bộ phận này. Hãy thêm trong Danh mục công việc.",
+    noWorkTypesInDepartment: "Bộ phận này chưa có nội dung công việc.",
     openWorkMaster: "Mở Danh mục công việc",
+    addWorkTypeQuick: "+ Thêm nội dung công việc",
+    manageWorkTypes: "Quản lý nội dung công việc",
     outsideCurrentDepartment: "Ngoài bộ phận hiện tại",
     createContentFromSelectedWork: "Tạo nội dung phụ trách từ công việc đã chọn",
     manageWorkMaster: "Quản lý danh mục công việc",
     noSelectedWorkTypes: "Chưa chọn công việc nào.",
     viewAllWorkTypes: "Xem tất cả",
     overwriteWorkContentTitle: "Ghi đè nội dung phụ trách?",
-    overwriteWorkContentText: "Nội dung phụ trách hiện tại sẽ được thay bằng danh sách công việc đã chọn."
+    overwriteWorkContentText: "Nội dung phụ trách hiện tại sẽ được thay bằng danh sách công việc đã chọn.",
+    selectedCount: "Đã chọn",
+    itemCountSuffix: "công việc",
+    staffDescription: "Mô tả năng lực nhân viên",
+    staffDescriptionPlaceholder: "Ví dụ: Chuyên thiết kế bản vẽ điện, có thể xử lý bản vẽ thi công và hoàn công.",
+    createDescriptionFromSelectedWork: "Tạo mô tả từ công việc đã chọn"
   });
 
   Object.assign(requestStatusMap, {
@@ -2311,7 +2343,7 @@
     const requestWorkTypeIds = toList(request?.workTypeIds);
     const normalizedReqTags = reqTags.map(normalizeTag).filter(Boolean);
     let best = null;
-    state.staff.filter(staff => !["off", "inactive", "deleted"].includes(String(staff.status || "active"))).forEach(staff => {
+    state.staff.filter(staff => !["off", "inactive", "deleted"].includes(String(staff.status || "active")) && staff.autoAssignEnabled !== false && !staff.deletedAt).forEach(staff => {
       const staffWorkTypeIds = toList(staff.workTypeIds);
       const idMatches = requestWorkTypeIds.filter(id => staffWorkTypeIds.includes(id));
       const tags = staffTags(staff);
@@ -2778,6 +2810,10 @@
     });
   }
 
+  function staffAutoAssignText(staff) {
+    return staff?.autoAssignEnabled === false ? t("autoAssignNotParticipating") : t("autoAssignParticipating");
+  }
+
   function renderStaff() {
     if (state.loading.staff) {
       $("viewRoot").innerHTML = `<div class="loading-state">${escapeHtml(t("loading"))}</div>`;
@@ -2906,7 +2942,7 @@
       </div></section>
       <section><h3>${escapeHtml(t("staffSkillsWork"))}</h3>${tagChips(staffTags(staff))}</section>
       <section><h3>${escapeHtml(t("staffCurrentWorkload"))}</h3><div class="mini-kpi-row">${miniMetric(t("currentAssignments"), assignedActive.length)}${miniMetric(t("workload"), workload + "%")}${miniMetric(t("overdueAssigned"), overdue)}</div><div class="priority-list">${assignedActive.length ? assignedActive.slice(0, 4).map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState(t("noAssignedRequests"))}</div></section>
-      <section><h3>${escapeHtml(t("staffAutoAssign"))}</h3><div class="contact-grid">${infoItem(t("status"), isPaused || isDeleted ? t("off") : t("active"))}${infoItem(t("workTags"), staffTags(staff).join(", "))}${infoItem(t("department"), staffDepartment(staff))}${infoItem(t("workload"), workload + "%")}</div><p class="note">${escapeHtml(t("autoAssignPlanned"))}</p></section>
+      <section><h3>${escapeHtml(t("staffAutoAssign"))}</h3><div class="contact-grid">${infoItem(t("staffAutoAssign"), staffAutoAssignText(staff))}${infoItem(t("status"), isPaused || isDeleted ? t("off") : t("active"))}${infoItem(t("workTags"), staffTags(staff).join(", "))}${infoItem(t("department"), staffDepartment(staff))}</div></section>
       <section><h3>${escapeHtml(t("staffRecentHistory"))}</h3><div class="priority-list">${assigned.length ? assigned.map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState(t("noStaffHistory"))}</div></section>
       <section><h3>${escapeHtml(t("staffOperations"))}</h3><div class="modal-actions">${actionButtons}</div></section>
     </aside>`;
@@ -2932,12 +2968,10 @@
       [t("phone"), staff.phone],
       [t("email"), staff.email],
       [t("department"), staff.department],
-      ["Role", staff.role],
-      ["Position", staff.position],
-      ["Title", staff.title],
+      [t("staffAutoAssign"), staffAutoAssignText(staff)],
       [t("status"), staffStatusMap[status] || status],
       [t("note"), staff.note],
-      ["Introduction", staff.introduction],
+      [t("staffDescription"), staff.introduction],
       [t("createdAt"), formatDate(staff.createdAt)]
     ];
     openDrawer(`
@@ -2992,6 +3026,7 @@
   }
 
   function staffDepartmentCode(value) {
+    if (!compactText(value, "")) return "";
     const found = findDepartmentByCodeOrLabel(value);
     if (found) return found.code;
     return staffDepartmentKey(value);
@@ -3055,11 +3090,20 @@
 
   function staffDepartmentSelectField(item) {
     const departments = activeMasterItems("departments");
-    if (!departments.length) return staffSelectField("department", t("primaryDepartment"), staffDepartmentOptions(item.department), item.department);
-    const currentCode = item.departmentCode || findDepartmentByCodeOrLabel(item.department)?.code || departments[0]?.code || "";
-    return `<label class="staff-edit-field"><span>${escapeHtml(t("primaryDepartment"))}</span><select name="department" data-staff-department-select>
-      ${departments.map(dept => `<option value="${escapeHtml(dept.code)}" data-label="${escapeHtml(workMasterLabel(dept))}" ${dept.code === currentCode ? "selected" : ""}>${escapeHtml(workMasterLabel(dept))}</option>`).join("")}
-    </select></label>`;
+    const currentCode = item.departmentCode || findDepartmentByCodeOrLabel(item.department)?.code || "";
+    if (!departments.length) {
+      return `<div class="staff-work-empty"><p>${escapeHtml(t("noDepartmentsInMaster"))}</p><button class="btn btn-soft" type="button" data-open-work-master-tab="departments">${escapeHtml(t("addDepartmentQuick"))}</button></div>`;
+    }
+    return `<div class="staff-department-picker" data-staff-department-picker>
+      <input type="hidden" name="department" data-staff-department-value value="${escapeHtml(currentCode)}">
+      <div class="staff-department-options">
+        ${departments.map(dept => `<button class="staff-department-option ${dept.code === currentCode ? "active" : ""}" type="button" data-staff-department-option="${escapeHtml(dept.code)}" data-label="${escapeHtml(workMasterLabel(dept))}">${escapeHtml(workMasterLabel(dept))}</button>`).join("")}
+      </div>
+      <div class="actions">
+        <button class="btn btn-soft" type="button" data-open-work-master-tab="departments">${escapeHtml(t("addDepartmentQuick"))}</button>
+        <button class="btn btn-soft" type="button" data-open-work-master-tab="departments">${escapeHtml(t("manageDepartments"))}</button>
+      </div>
+    </div>`;
   }
 
   function staffWorkTagGroups() {
@@ -3178,15 +3222,15 @@
   }
 
   function currentStaffDepartmentCode() {
-    const department = document.querySelector("#staffForm select[name='department']");
+    const department = document.querySelector("#staffForm [data-staff-department-value]");
     return staffDepartmentCode(department?.value || "");
   }
 
   function currentStaffDepartmentLabel() {
-    const department = document.querySelector("#staffForm select[name='department']");
-    if (!department) return "-";
-    const selectedOption = department.selectedOptions && department.selectedOptions[0];
-    return selectedOption?.dataset.label || selectedOption?.textContent || staffDepartmentLabelByKey(department.value) || department.value || "-";
+    const code = currentStaffDepartmentCode();
+    if (!code) return "-";
+    const button = document.querySelector(`[data-staff-department-option="${CSS.escape(code)}"]`);
+    return button?.dataset.label || staffDepartmentLabelByKey(code) || code || "-";
   }
 
   function readSelectedWorkEntries() {
@@ -3217,17 +3261,34 @@
       <p class="note">${escapeHtml(t("staffWorkFlowHelp"))}</p>
       <div data-selected-work-holder>${entries.map(item => `<input type="hidden" data-selected-work-entry value="${escapeHtml(item.id || item.code || item.label)}" data-work-code="${escapeHtml(item.code || item.id || item.label)}" data-work-label="${escapeHtml(item.label || item.code || item.id)}" data-work-department="${escapeHtml(item.departmentCode || "")}" data-work-legacy="${item.legacy ? "true" : "false"}">`).join("")}</div>
       <section class="staff-work-step">
-        <div class="staff-work-step-head"><b>${escapeHtml(t("workStepDepartment"))}</b><button class="mini-button" type="button" data-focus-staff-department>${escapeHtml(t("changeDepartment"))}</button></div>
-        <p class="staff-work-summary">${escapeHtml(t("selectedDepartment"))}: <strong data-staff-work-department-label>-</strong></p>
+        <div class="staff-work-step-head"><b>${escapeHtml(t("workStepDepartment"))}</b></div>
+        ${staffDepartmentSelectField(staff || {})}
+        <div class="staff-auto-assign-box">
+          <div>
+            <strong>${escapeHtml(t("autoAssign"))}</strong>
+            <p>${escapeHtml(t("autoAssignHelp"))}</p>
+          </div>
+          <label class="staff-auto-assign-toggle">
+            <input name="autoAssignEnabled" type="checkbox" data-auto-assign-toggle ${staff?.autoAssignEnabled === false ? "" : "checked"}>
+            <span>${escapeHtml(t("autoAssignJoin"))}</span>
+          </label>
+        </div>
       </section>
       <section class="staff-work-step">
-        <div class="staff-work-step-head"><b>${escapeHtml(t("workStepPick"))}</b><label class="staff-work-view-all"><input type="checkbox" data-staff-work-view-all> ${escapeHtml(t("viewAllWorkTypes"))}</label></div>
+        <div class="staff-work-step-head"><b>${escapeHtml(t("workStepPick"))}</b></div>
+        <p class="staff-work-summary">${escapeHtml(t("selectedDepartment"))}: <strong data-staff-work-department-label>-</strong></p>
         <input class="filter-input" type="search" data-staff-work-search placeholder="${escapeHtml(t("workTypeSearchPlaceholder"))}">
         <div class="staff-work-type-list" data-staff-work-type-list></div>
+        <div class="staff-selected-work-compact" data-staff-selected-work-list></div>
+        <div class="actions">
+          <button class="btn btn-soft" type="button" data-open-work-master-tab="workTypes">${escapeHtml(t("addWorkTypeQuick"))}</button>
+          <button class="btn btn-soft" type="button" data-open-work-master-tab="workTypes">${escapeHtml(t("manageWorkTypes"))}</button>
+        </div>
       </section>
       <section class="staff-work-step">
-        <div class="staff-work-step-head"><b>${escapeHtml(t("workStepSelected"))}</b><button class="mini-button" type="button" data-open-work-master>${escapeHtml(t("manageWorkMaster"))}</button></div>
-        <div class="staff-selected-work-list" data-staff-selected-work-list></div>
+        <div class="staff-work-step-head"><b>${escapeHtml(t("workStepSelected"))}</b><button class="mini-button" type="button" data-staff-selected-work-to-content>${escapeHtml(t("createDescriptionFromSelectedWork"))}</button></div>
+        <label class="staff-edit-field full"><span>${escapeHtml(t("staffDescription"))}</span><textarea name="introduction" placeholder="${escapeHtml(t("staffDescriptionPlaceholder"))}">${escapeHtml(staff?.introduction || "")}</textarea></label>
+        <label class="staff-edit-field full"><span>${escapeHtml(t("internalMemo"))}</span><textarea name="note">${escapeHtml(staff?.note || "")}</textarea></label>
       </section>
     </div>`;
   }
@@ -3240,19 +3301,23 @@
     const selected = readSelectedWorkEntries();
     const selectedIds = new Set(selected.map(item => normalizeTag(item.id || item.code || item.label)));
     const search = (root.querySelector("[data-staff-work-search]")?.value || "").trim().toLowerCase();
-    const viewAll = root.querySelector("[data-staff-work-view-all]")?.checked;
     const listTarget = root.querySelector("[data-staff-work-type-list]");
     const selectedTarget = root.querySelector("[data-staff-selected-work-list]");
     const labelTarget = root.querySelector("[data-staff-work-department-label]");
     if (labelTarget) labelTarget.textContent = departmentLabel;
+    root.querySelectorAll("[data-staff-department-option]").forEach(button => {
+      button.classList.toggle("active", button.dataset.staffDepartmentOption === departmentCode);
+    });
     const workTypes = activeMasterItems("workTypes")
-      .filter(item => viewAll || item.departmentCode === departmentCode)
+      .filter(item => item.departmentCode === departmentCode)
       .filter(item => {
         const haystack = [item.code, item.nameVi, item.nameJa, item.descriptionVi, item.descriptionJa].join(" ").toLowerCase();
         return !search || haystack.includes(search);
       });
     if (listTarget) {
-      listTarget.innerHTML = workTypes.length ? workTypes.map(item => {
+      listTarget.innerHTML = !departmentCode
+        ? `<div class="staff-work-empty"><p>${escapeHtml(t("chooseDepartmentFirst"))}</p></div>`
+        : workTypes.length ? workTypes.map(item => {
         const key = workTypeKey(item);
         const checked = selectedIds.has(normalizeTag(key)) || selectedIds.has(normalizeTag(item.code));
         const description = state.lang === "vi" ? item.descriptionVi || item.descriptionJa || "" : item.descriptionJa || item.descriptionVi || "";
@@ -3260,14 +3325,13 @@
           <input type="checkbox" data-staff-worktype-item value="${escapeHtml(key)}" data-work-code="${escapeHtml(item.code || key)}" data-work-label="${escapeHtml(workMasterLabel(item))}" data-work-department="${escapeHtml(item.departmentCode || "")}" ${checked ? "checked" : ""}>
           <span><b>${escapeHtml(workMasterLabel(item))}</b>${description ? `<small>${escapeHtml(description)}</small>` : ""}</span>
         </label>`;
-      }).join("") : `<div class="staff-work-empty"><p>${escapeHtml(t("noWorkTypesInDepartment"))}</p><button class="btn btn-soft" type="button" data-open-work-master>${escapeHtml(t("openWorkMaster"))}</button></div>`;
+      }).join("") : `<div class="staff-work-empty"><p>${escapeHtml(t("noWorkTypesInDepartment"))}</p><button class="btn btn-soft" type="button" data-open-work-master-tab="workTypes">${escapeHtml(t("addWorkTypeQuick"))}</button></div>`;
     }
     if (selectedTarget) {
-      const inDepartment = selected.filter(item => item.departmentCode === departmentCode || !item.departmentCode);
-      const outside = selected.filter(item => item.departmentCode && item.departmentCode !== departmentCode);
-      const chips = items => items.map(item => `<button class="staff-selected-work-chip" type="button" data-staff-work-remove="${escapeHtml(item.id || item.code || item.label)}">${escapeHtml(item.label || item.code || item.id)} <span aria-hidden="true">\u00d7</span></button>`).join("");
+      const visible = selected.slice(0, 5);
+      const rest = Math.max(0, selected.length - visible.length);
       selectedTarget.innerHTML = selected.length
-        ? `${inDepartment.length ? `<div class="staff-selected-work-group">${chips(inDepartment)}</div>` : ""}${outside.length ? `<div class="staff-selected-work-outside"><strong>${escapeHtml(t("outsideCurrentDepartment"))}</strong><div class="staff-selected-work-group">${chips(outside)}</div></div>` : ""}`
+        ? `<span class="staff-selected-count">${escapeHtml(t("selectedCount"))}: ${selected.length} ${escapeHtml(t("itemCountSuffix"))}</span><div class="staff-selected-work-group">${visible.map(item => `<button class="staff-selected-work-chip" type="button" data-staff-work-remove="${escapeHtml(item.id || item.code || item.label)}">${escapeHtml(item.label || item.code || item.id)} <span aria-hidden="true">\u00d7</span></button>`).join("")}${rest ? `<span class="staff-selected-work-more">+${rest}</span>` : ""}</div>`
         : `<span class="muted-dash">${escapeHtml(t("noSelectedWorkTypes"))}</span>`;
     }
   }
@@ -3361,38 +3425,12 @@
                     <label class="staff-edit-field"><span>${escapeHtml(t("status"))}</span><select name="status">${statusOptions.map(status => `<option value="${status}" ${selectedStatus === status ? "selected" : ""}>${escapeHtml(staffStatusLabel(status))}</option>`).join("")}</select></label>
                   </div>
                 </section>
-
-                <section class="staff-edit-section">
-                  <h3>${escapeHtml(t("staffClassification"))}</h3>
-                  <div class="staff-edit-grid">
-                    ${staffDepartmentSelectField(item)}
-                    ${staffTextField("role", t("role"), roleValue)}
-                    ${staffTextField("areas", t("areas"), item.areas)}
-                    <label class="staff-edit-field staff-switch-field"><span>${escapeHtml(t("autoAssignJoin"))}</span><input type="checkbox" disabled></label>
-                    ${staffTextField("maxActiveRequests", t("maxActiveRequests"), "", "number", "disabled min=\"0\"")}
-                  </div>
-                </section>
               </div>
 
               <div class="staff-edit-column">
                 <section class="staff-edit-section">
-                  <h3>${escapeHtml(t("staffAssignableWork"))}</h3>
+                  <h3>${escapeHtml(t("staffAssignment"))}</h3>
                   ${renderStaffWorkAssignmentField(item)}
-                </section>
-
-                <section class="staff-edit-section">
-                  <h3>${escapeHtml(t("workContent"))}</h3>
-                  <div class="staff-edit-grid">
-                    <button class="btn btn-soft" type="button" data-staff-selected-work-to-content>${escapeHtml(t("createContentFromSelectedWork"))}</button>
-                    ${staffTextareaField("workContent", t("workContent"), item.workContent)}
-                  </div>
-                </section>
-
-                <section class="staff-edit-section">
-                  <h3>${escapeHtml(t("internalMemo"))}</h3>
-                  <div class="staff-edit-grid">
-                    ${staffTextareaField("note", t("internalMemo"), item.note)}
-                  </div>
                 </section>
               </div>
             </div>
@@ -4207,15 +4245,14 @@
   function staffFormPayload(form) {
     const raw = new FormData(form);
     const payload = new FormData();
-    ["name", "phone", "email", "department", "role", "areas", "workContent", "note", "status"].forEach(field => {
+    ["name", "phone", "email", "note", "introduction", "status"].forEach(field => {
       payload.set(field, raw.get(field) || "");
     });
-    const departmentSelect = form.querySelector("[data-staff-department-select]");
-    if (departmentSelect) {
-      const selectedOption = departmentSelect.selectedOptions && departmentSelect.selectedOptions[0];
-      payload.set("departmentCode", departmentSelect.value || "");
-      payload.set("department", selectedOption?.dataset.label || selectedOption?.textContent || departmentSelect.value || "");
-    }
+    const departmentInput = form.querySelector("[data-staff-department-value]");
+    const departmentCode = departmentInput?.value || "";
+    payload.set("departmentCode", departmentCode);
+    payload.set("department", currentStaffDepartmentLabel() === "-" ? "" : currentStaffDepartmentLabel());
+    payload.set("autoAssignEnabled", raw.get("autoAssignEnabled") === "on" ? "true" : "false");
     const selectedWork = readSelectedWorkEntries();
     const workTags = selectedWork.map(item => String(item.label || item.code || item.id || "").trim()).filter(Boolean);
     if (workTags.length) workTags.forEach(tag => payload.append("workTags", tag));
@@ -4223,6 +4260,7 @@
     const workTypeIds = selectedWork.filter(item => !item.legacy).map(item => item.id || item.code).filter(Boolean);
     if (workTypeIds.length) workTypeIds.forEach(id => payload.append("workTypeIds", id));
     else payload.set("workTypeIds", "");
+    if (workTags.length) payload.set("workContent", workTags.join(", "));
     payload.set("avatar", raw.get("avatar") || "");
     const file = raw.get("avatarFile");
     if (file && file.size > 0) payload.set("avatar", file);
@@ -4405,7 +4443,7 @@
           const file = event.target.files && event.target.files[0];
           if (file) previewStaffAvatar(file);
         }
-        if (event.target.matches("select[name='department']")) renderStaffWorkAssignment();
+        if (event.target.matches("[data-auto-assign-toggle]")) renderStaffWorkAssignment();
         const workTypeInput = event.target.closest("[data-staff-worktype-item]");
         if (workTypeInput) {
           const selected = readSelectedWorkEntries().filter(item => normalizeTag(item.id || item.code || item.label) !== normalizeTag(workTypeInput.value));
@@ -4419,9 +4457,6 @@
             });
           }
           writeSelectedWorkEntries(selected);
-          renderStaffWorkAssignment();
-        }
-        if (event.target.closest("[data-staff-work-view-all]")) {
           renderStaffWorkAssignment();
         }
         return;
@@ -4590,7 +4625,17 @@
 
       if (event.target.closest("[data-focus-staff-department]")) {
         event.preventDefault();
-        document.querySelector("#staffForm select[name='department']")?.focus();
+        document.querySelector("[data-staff-department-option]")?.focus();
+        return;
+      }
+
+      const departmentOption = event.target.closest("[data-staff-department-option]");
+      if (departmentOption) {
+        event.preventDefault();
+        const input = document.querySelector("[data-staff-department-value]");
+        if (input) input.value = departmentOption.dataset.staffDepartmentOption || "";
+        setStaffEditDirty(true);
+        renderStaffWorkAssignment();
         return;
       }
 
@@ -4604,11 +4649,12 @@
         return;
       }
 
-      if (event.target.closest("[data-open-work-master]")) {
+      const openWorkMaster = event.target.closest("[data-open-work-master-tab]");
+      if (openWorkMaster) {
         event.preventDefault();
         await closeStaffEditForm(true);
         state.currentView = "settings";
-        state.filters.workMasterTab = "workTypes";
+        state.filters.workMasterTab = openWorkMaster.dataset.openWorkMasterTab || "workTypes";
         state.filters.workMasterEditId = "";
         renderCurrentView();
         return;
@@ -4616,7 +4662,7 @@
 
       if (event.target.closest("[data-staff-selected-work-to-content]")) {
         event.preventDefault();
-        const content = document.querySelector("#staffForm textarea[name='workContent']");
+        const content = document.querySelector("#staffForm textarea[name='introduction']");
         if (!content) return;
         if (content.value.trim()) {
           const ok = await confirmAction({
@@ -4627,7 +4673,9 @@
           });
           if (!ok) return;
         }
-        content.value = selectedStaffWorkTags().join(", ");
+        const prefix = state.lang === "vi" ? "Có thể phụ trách: " : "対応可能業務：";
+        const suffix = state.lang === "vi" ? "." : "。";
+        content.value = selectedStaffWorkTags().length ? prefix + selectedStaffWorkTags().join(", ") + suffix : "";
         setStaffEditDirty(true);
         return;
       }
