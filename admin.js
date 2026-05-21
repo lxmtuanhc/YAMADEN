@@ -602,9 +602,9 @@
     staffEditTitle: "\u30b9\u30bf\u30c3\u30d5\u7de8\u96c6",
     editStaffProfile: "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u7de8\u96c6",
     staffProfileBasic: "\u57fa\u672c\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb",
-    staffOrganizationRole: "\u7d44\u7e54\u30fb\u5f79\u5272",
-    staffExpertise: "\u30b9\u30ad\u30eb\u30fb\u5c02\u9580",
-    staffIntroNotes: "\u30e1\u30e2",
+    staffOrganization: "\u7d44\u7e54",
+    staffAssignableWork: "\u5bfe\u5fdc\u53ef\u80fd\u696d\u52d9",
+    internalMemo: "\u5185\u90e8\u30e1\u30e2",
     avatar: "\u30a2\u30d0\u30bf\u30fc",
     area: "\u5bfe\u5fdc\u30a8\u30ea\u30a2",
     areas: "\u5bfe\u5fdc\u30a8\u30ea\u30a2",
@@ -736,9 +736,9 @@
     staffEditTitle: "Ch\u1ec9nh s\u1eeda staff",
     editStaffProfile: "Ch\u1ec9nh s\u1eeda h\u1ed3 s\u01a1",
     staffProfileBasic: "H\u1ed3 s\u01a1 c\u01a1 b\u1ea3n",
-    staffOrganizationRole: "T\u1ed5 ch\u1ee9c & vai tr\u00f2",
-    staffExpertise: "Chuy\u00ean m\u00f4n",
-    staffIntroNotes: "Ghi ch\u00fa",
+    staffOrganization: "T\u1ed5 ch\u1ee9c",
+    staffAssignableWork: "C\u00f4ng vi\u1ec7c c\u00f3 th\u1ec3 ph\u1ee5 tr\u00e1ch",
+    internalMemo: "Ghi ch\u00fa n\u1ed9i b\u1ed9",
     avatar: "\u1ea2nh \u0111\u1ea1i di\u1ec7n",
     area: "Khu v\u1ef1c",
     areas: "Khu v\u1ef1c",
@@ -2790,47 +2790,22 @@
 
   function staffDepartmentOptions(current) {
     const base = state.lang === "vi"
-      ? ["Bộ thiết kế", "Bộ thi công", "Bộ khảo sát", "Bộ bảo trì", "Bộ kinh doanh", "Bộ nghiệp vụ", "Bộ khác"]
-      : ["設計部", "工務部", "営業部", "保全部", "業務部", "その他"];
+      ? ["B\u1ed9 thi\u1ebft k\u1ebf", "B\u1ed9 thi c\u00f4ng", "B\u1ed9 kh\u1ea3o s\u00e1t", "B\u1ed9 b\u1ea3o tr\u00ec", "B\u1ed9 kinh doanh", "B\u1ed9 nghi\u1ec7p v\u1ee5", "B\u1ed9 kh\u00e1c"]
+      : ["\u8a2d\u8a08\u90e8", "\u5de5\u52d9\u90e8", "\u55b6\u696d\u90e8", "\u4fdd\u5168\u90e8", "\u696d\u52d9\u90e8", "\u305d\u306e\u4ed6"];
     return optionPool(base.concat(state.staff.map(staffDepartment)), current);
   }
 
-  function staffAreaOptions(current) {
-    const base = state.lang === "vi"
-      ? ["Tokyo", "Osaka", "Kanagawa", "Saitama", "Chiba", "Toàn khu vực"]
-      : ["東京都", "大阪府", "神奈川県", "埼玉県", "千葉県", "全エリア"];
-    return optionPool(base.concat(state.staff.flatMap(staff => toList(staff.areas))), current);
-  }
-
-  function staffRoleOptions(current) {
-    const base = state.lang === "vi"
-      ? ["Nhân viên", "Trưởng nhóm", "Quản lý", "Đại diện"]
-      : ["一般", "リーダー", "マネージャー", "代表"];
-    return optionPool(base.concat(state.staff.map(staffRole)), current);
-  }
-
-  function staffPositionOptions(current) {
-    const base = state.lang === "vi"
-      ? ["Kỹ sư", "Nhân viên khảo sát", "Thiết kế viên", "Nhân viên hiện trường", "Nhân viên kinh doanh"]
-      : ["技術者", "設計担当", "現場担当", "営業担当", "保全担当"];
-    return optionPool(base.concat(state.staff.map(staff => staff.position)), current);
-  }
-
-  function staffTitleOptions(current) {
-    const base = state.lang === "vi"
-      ? ["Kỹ sư", "Nhân viên khảo sát", "Thiết kế viên", "Trưởng nhóm"]
-      : ["技術者", "設計担当", "現場担当", "リーダー"];
-    return optionPool(base.concat(state.staff.map(staff => staff.title)), current);
-  }
-
   function staffTagOptions(current) {
-    return optionPool(state.staff.flatMap(staffTags), current);
+    const base = state.lang === "vi"
+      ? ["Thi\u1ebft k\u1ebf b\u1ea3n v\u1ebd", "Ch\u1ec9nh s\u1eeda b\u1ea3n v\u1ebd", "Thi\u1ebft k\u1ebf s\u01a1 \u0111\u1ed3 \u0111i\u1ec7n", "V\u1ebd CAD", "Kh\u1ea3o s\u00e1t hi\u1ec7n tr\u01b0\u1eddng", "B\u00e1o gi\u00e1", "Thi c\u00f4ng", "B\u1ea3o tr\u00ec"]
+      : ["\u56f3\u9762\u8a2d\u8a08", "\u56f3\u9762\u4fee\u6b63", "\u96fb\u6c17\u56f3\u9762\u8a2d\u8a08", "CAD\u4f5c\u56f3", "\u73fe\u5730\u8abf\u67fb", "\u898b\u7a4d", "\u65bd\u5de5", "\u4fdd\u5168"];
+    return optionPool(base.concat(state.staff.flatMap(staffTags)), current);
   }
 
   function staffStatusLabel(status) {
     const labels = state.lang === "vi"
-      ? { active: "Đang hoạt động", busy: "Đang phụ trách", off: "Nghỉ / off", inactive: "Tạm khóa", deleted: "Đã xóa" }
-      : { active: "稼働中", busy: "対応中", off: "休止中", inactive: "停止中", deleted: "削除済み" };
+      ? { active: "\u0110ang ho\u1ea1t \u0111\u1ed9ng", off: "Ngh\u1ec9 / off", deleted: "\u0110\u00e3 x\u00f3a" }
+      : { active: "\u7a3c\u50cd\u4e2d", off: "\u4f11\u6b62\u4e2d", deleted: "\u524a\u9664\u6e08\u307f" };
     return labels[status] || staffStatusMap[status] || status || "-";
   }
 
@@ -2838,12 +2813,6 @@
     const selectedValue = compactText(selected, "");
     const normalized = optionPool(options, selectedValue);
     return `${placeholder ? `<option value="">${escapeHtml(placeholder)}</option>` : ""}${normalized.map(value => `<option value="${escapeHtml(value)}" ${String(value) === String(selectedValue) ? "selected" : ""}>${escapeHtml(value)}</option>`).join("")}`;
-  }
-
-  function renderMultiOptions(options, selected) {
-    const selectedItems = toList(selected);
-    const selectedSet = new Set(selectedItems.map(item => item.toLowerCase()));
-    return optionPool(options, selectedItems).map(value => `<option value="${escapeHtml(value)}" ${selectedSet.has(value.toLowerCase()) ? "selected" : ""}>${escapeHtml(value)}</option>`).join("");
   }
 
   function staffTextField(name, label, value, type = "text", extra = "") {
@@ -2858,15 +2827,22 @@
     return `<label class="staff-edit-field"><span>${escapeHtml(label)}</span><select name="${escapeHtml(name)}">${renderSelectOptions(options, selected)}</select></label>`;
   }
 
-  function staffMultiSelectField(name, label, options, selected) {
-    return `<label class="staff-edit-field full"><span>${escapeHtml(label)}</span><select name="${escapeHtml(name)}" multiple size="6">${renderMultiOptions(options, selected)}</select><small>${escapeHtml(state.lang === "vi" ? "Có thể chọn nhiều mục." : "複数選択できます。")}</small></label>`;
+  function staffTagPickerField(name, label, options, selected) {
+    const selectedSet = new Set(toList(selected).map(item => item.toLowerCase()));
+    const html = optionPool(options, selected).map((tag, index) => {
+      const id = `${name}-${normalizeTag(tag) || "tag"}-${index}`;
+      return `<label class="staff-tag-option" for="${escapeHtml(id)}"><input id="${escapeHtml(id)}" type="checkbox" name="${escapeHtml(name)}" value="${escapeHtml(tag)}" ${selectedSet.has(tag.toLowerCase()) ? "checked" : ""}><span>${escapeHtml(tag)}</span></label>`;
+    }).join("");
+    return `<div class="staff-edit-field full"><span>${escapeHtml(label)}</span><div class="staff-tag-picker">${html || `<span class="muted-dash">-</span>`}</div></div>`;
   }
 
   function renderStaffForm(staff) {
     const item = staff || {};
     const id = getRowId(item);
     const avatar = item.avatar || "";
-    const statusOptions = ["active", "busy", "off", "inactive"];
+    const statusOptions = ["active", "off"];
+    const selectedStatus = ["off", "inactive"].includes(String(item.status || "")) ? "off" : "active";
+    const mergedTags = uniqueOptions([].concat(toList(item.skills)).concat(toList(item.workTags)));
     document.querySelector("[data-staff-edit-overlay]")?.remove();
     const overlay = document.createElement("div");
     overlay.className = "staff-edit-overlay";
@@ -2883,7 +2859,6 @@
             </div>
             <div class="staff-edit-header-actions">
               <button class="btn btn-soft" type="button" data-staff-edit-close>${escapeHtml(t("close"))}</button>
-              <button class="primary-button" type="submit" data-staff-edit-save disabled>${escapeHtml(t("saveChanges"))}</button>
             </div>
           </header>
           <div class="staff-edit-body">
@@ -2915,35 +2890,27 @@
                 </section>
 
                 <section class="staff-edit-section">
-                  <h3>${escapeHtml(t("staffOrganizationRole"))}</h3>
+                  <h3>${escapeHtml(t("staffOrganization"))}</h3>
                   <div class="staff-edit-grid">
-                    ${staffMultiSelectField("areas", t("areas"), staffAreaOptions(item.areas), item.areas)}
                     ${staffSelectField("department", t("department"), staffDepartmentOptions(item.department), item.department)}
-                    ${staffSelectField("role", t("role"), staffRoleOptions(item.role), item.role)}
-                    ${staffTextField("position", t("position"), item.position, "text", `list="staffPositionOptions"`)}
-                    ${staffTextField("title", t("title"), item.title, "text", `list="staffTitleOptions"`)}
-                    <label class="staff-edit-field"><span>${escapeHtml(t("status"))}</span><select name="status">${statusOptions.map(status => `<option value="${status}" ${String(item.status || "active") === status ? "selected" : ""}>${escapeHtml(staffStatusLabel(status))}</option>`).join("")}</select></label>
+                    <label class="staff-edit-field"><span>${escapeHtml(t("status"))}</span><select name="status">${statusOptions.map(status => `<option value="${status}" ${selectedStatus === status ? "selected" : ""}>${escapeHtml(staffStatusLabel(status))}</option>`).join("")}</select></label>
                   </div>
-                  <datalist id="staffPositionOptions">${staffPositionOptions(item.position).map(value => `<option value="${escapeHtml(value)}"></option>`).join("")}</datalist>
-                  <datalist id="staffTitleOptions">${staffTitleOptions(item.title).map(value => `<option value="${escapeHtml(value)}"></option>`).join("")}</datalist>
                 </section>
               </div>
 
               <div class="staff-edit-column">
                 <section class="staff-edit-section">
-                  <h3>${escapeHtml(t("staffExpertise"))}</h3>
+                  <h3>${escapeHtml(t("staffAssignableWork"))}</h3>
                   <div class="staff-edit-grid">
-                    ${staffMultiSelectField("skills", t("skills"), staffTagOptions(item.skills), item.skills)}
-                    ${staffMultiSelectField("workTags", t("workTags"), staffTagOptions(item.workTags), item.workTags)}
+                    ${staffTagPickerField("workTags", t("workTags"), staffTagOptions(mergedTags), mergedTags)}
                     ${staffTextareaField("workContent", t("workContent"), item.workContent)}
                   </div>
                 </section>
 
                 <section class="staff-edit-section">
-                  <h3>${escapeHtml(t("staffIntroNotes"))}</h3>
+                  <h3>${escapeHtml(t("internalMemo"))}</h3>
                   <div class="staff-edit-grid">
-                    ${staffTextareaField("note", t("note"), item.note)}
-                    ${staffTextareaField("introduction", t("introduction"), item.introduction)}
+                    ${staffTextareaField("note", t("internalMemo"), item.note)}
                   </div>
                 </section>
               </div>
@@ -3613,11 +3580,9 @@
   function staffFormPayload(form) {
     const raw = new FormData(form);
     const payload = new FormData();
-    ["name", "phone", "email", "department", "role", "position", "title", "workContent", "note", "introduction", "status"].forEach(field => {
+    ["name", "phone", "email", "department", "workContent", "note", "status"].forEach(field => {
       payload.set(field, raw.get(field) || "");
     });
-    payload.set("areas", raw.getAll("areas").map(item => String(item || "").trim()).filter(Boolean).join(", "));
-    payload.set("skills", raw.getAll("skills").map(item => String(item || "").trim()).filter(Boolean).join(", "));
     const workTags = raw.getAll("workTags").map(item => String(item || "").trim()).filter(Boolean);
     if (workTags.length) workTags.forEach(tag => payload.append("workTags", tag));
     else payload.set("workTags", "");
@@ -3955,6 +3920,7 @@
       if (event.target.id !== "staffForm") return;
       event.preventDefault();
       const form = event.target;
+      if (form.dataset.staffEditDirty !== "true") return;
       const payload = staffFormPayload(form);
       const submit = form.querySelector("button[type='submit']");
       if (submit) {
