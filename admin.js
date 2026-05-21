@@ -4293,6 +4293,20 @@
     return false;
   }
 
+  async function handleStaffStatusSwitchClick(event) {
+    const switchButton = event.target.closest("[data-action='toggle-staff-status']");
+    if (!switchButton) return false;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    if (switchButton.disabled) return true;
+    const staffId = switchButton.dataset.staffId || switchButton.dataset.staffStatusAction;
+    const nextStatus = switchButton.dataset.nextStatus;
+    if (!staffId || !nextStatus) return true;
+    await updateStaffStatusQuick(staffId, nextStatus, switchButton);
+    return true;
+  }
+
   async function updateStaffStatusQuick(id, status, trigger) {
     const staff = state.staff.find(item => String(getRowId(item)) === String(id));
     if (!staff) return;
@@ -4605,6 +4619,9 @@
         renderRequestResults();
       }
     });
+    document.addEventListener("click", event => {
+      void handleStaffStatusSwitchClick(event);
+    }, true);
     document.addEventListener("click", event => {
       void handleTrashDelegatedClick(event);
     }, true);
