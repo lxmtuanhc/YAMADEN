@@ -1102,6 +1102,196 @@
     loadRequestsError: "Kh\u00f4ng th\u1ec3 t\u1ea3i danh s\u00e1ch y\u00eau c\u1ea7u"
   });
 
+  Object.assign(i18n.ja, {
+    settingsSystemTitle: "\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a",
+    settingsSystemSubtitle: "\u30a2\u30d7\u30ea\u5168\u4f53\u3067\u5229\u7528\u3059\u308b\u5171\u901a\u8a2d\u5b9a\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002",
+    settingsOverview: "\u6982\u8981",
+    settingsOverviewSub: "\u4e3b\u8981\u8a2d\u5b9a",
+    settingsStaffWork: "\u30b9\u30bf\u30c3\u30d5\u30fb\u696d\u52d9",
+    settingsStaffWorkSub: "\u90e8\u9580\u3001\u696d\u52d9\u5185\u5bb9",
+    settingsQuoteTax: "\u898b\u7a4d\u30fb\u7a0e",
+    settingsQuoteTaxSub: "\u898b\u7a4d\u66f8\u3001\u7a0e\u3001\u4fa1\u683c",
+    settingsRequestStatus: "\u4f9d\u983c\u30fb\u30b9\u30c6\u30fc\u30bf\u30b9",
+    settingsRequestStatusSub: "\u4f9d\u983c\u51e6\u7406\u30d5\u30ed\u30fc",
+    settingsCustomers: "\u9867\u5ba2",
+    settingsCustomersSub: "\u30a2\u30ab\u30a6\u30f3\u30c8\u3001\u627f\u8a8d\u3001PIN",
+    settingsNotifications: "\u901a\u77e5",
+    settingsNotificationsSub: "Slack\u3001\u30e1\u30fc\u30eb\u3001LINE WORKS",
+    settingsAppearance: "\u753b\u9762\u8868\u793a",
+    settingsAppearanceSub: "\u8a00\u8a9e\u3001\u8272\u3001\u30ed\u30b4",
+    settingsPermissions: "\u6a29\u9650",
+    settingsPermissionsSub: "\u7ba1\u7406\u8005\u30ed\u30fc\u30eb",
+    settingsSystemData: "\u30b7\u30b9\u30c6\u30e0\u30c7\u30fc\u30bf",
+    settingsSystemDataSub: "\u30c7\u30fc\u30bf\u51fa\u529b\u3001\u30ed\u30b0",
+    linkLater: "\u5f8c\u3067\u9023\u643a\u4e88\u5b9a",
+    inUse: "\u4f7f\u7528\u4e2d",
+    configured: "\u8a2d\u5b9a\u6e08\u307f",
+    notConfigured: "\u672a\u8a2d\u5b9a",
+    prepareLater: "\u5f8c\u3067\u5bfe\u5fdc",
+    manageLater: "\u5f8c\u3067\u7ba1\u7406",
+    expandLater: "\u5f8c\u3067\u62e1\u5f35\u4e88\u5b9a",
+    languageRegion: "\u8a00\u8a9e\u30fb\u5730\u57df",
+    currentLanguage: "\u73fe\u5728\u306e\u8a00\u8a9e",
+    timezone: "\u30bf\u30a4\u30e0\u30be\u30fc\u30f3",
+    dateTimeFormat: "\u65e5\u6642\u8868\u793a\u5f62\u5f0f",
+    workMaster: "\u696d\u52d9\u30de\u30b9\u30bf",
+    workMasterLinked: "\u30b9\u30bf\u30c3\u30d5\u30fb\u9867\u5ba2\u30a2\u30d7\u30ea\u3068\u9023\u643a\u6e08\u307f",
+    quoteTax: "\u898b\u7a4d\u30fb\u7a0e",
+    defaultTax: "\u6a19\u6e96\u7a0e\u7387",
+    currency: "\u901a\u8ca8",
+    quoteTemplate: "\u898b\u7a4d\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8",
+    systemData: "\u30b7\u30b9\u30c6\u30e0\u30c7\u30fc\u30bf",
+    csvExport: "CSV\u51fa\u529b",
+    adminLogs: "\u7ba1\u7406\u753b\u9762\u64cd\u4f5c\u30ed\u30b0",
+    backup: "\u30d0\u30c3\u30af\u30a2\u30c3\u30d7",
+    totalDepartments: "\u90e8\u9580\u6570",
+    currentlyUsed: "\u4f7f\u7528\u4e2d",
+    departmentsPreview: "\u90e8\u9580\u30d7\u30ec\u30d3\u30e5\u30fc",
+    departmentsCardDesc: "\u30b9\u30bf\u30c3\u30d5\u60c5\u5831\u3068\u9867\u5ba2\u30a2\u30d7\u30ea\u3067\u5229\u7528\u3059\u308b\u90e8\u9580\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002",
+    workGroupsDesc: "\u90e8\u9580\u3054\u3068\u306b\u696d\u52d9\u5185\u5bb9\u3092\u5206\u985e\u3057\u307e\u3059\u3002",
+    workTypesDesc: "\u9867\u5ba2\u9078\u629e\u3068\u81ea\u52d5\u5272\u308a\u5f53\u3066\u306b\u5229\u7528\u3059\u308b\u696d\u52d9\u5185\u5bb9\u3067\u3059\u3002",
+    autoAssign: "\u81ea\u52d5\u5272\u308a\u5f53\u3066",
+    autoAssignDesc: "\u90e8\u9580\u30fb\u696d\u52d9\u30fb\u72b6\u614b\u30fb\u8ca0\u8377\u306b\u57fa\u3065\u3044\u3066\u30b9\u30bf\u30c3\u30d5\u3092\u5272\u308a\u5f53\u3066\u307e\u3059\u3002",
+    quoteConfig: "\u898b\u7a4d\u8a2d\u5b9a",
+    autoQuoteCode: "\u898b\u7a4d\u756a\u53f7\u81ea\u52d5\u751f\u6210",
+    quoteValidity: "\u898b\u7a4d\u6709\u52b9\u671f\u9650",
+    taxCurrency: "\u7a0e\u30fb\u901a\u8ca8",
+    autoTax: "\u7a0e\u81ea\u52d5\u8a08\u7b97",
+    priceRounding: "\u4fa1\u683c\u4e38\u3081",
+    defaultPriceItems: "\u6a19\u6e96\u4fa1\u683c\u9805\u76ee",
+    labor: "\u4eba\u5de5",
+    materials: "\u6750\u6599",
+    surveyFee: "\u8abf\u67fb\u8cbb",
+    deliveryFee: "\u904b\u9001\u8cbb",
+    otherCosts: "\u305d\u306e\u4ed6\u8cbb\u7528",
+    quoteTerms: "\u898b\u7a4d\u6761\u4ef6",
+    paymentTerms: "\u652f\u6255\u6761\u4ef6",
+    constructionTerms: "\u65bd\u5de5\u6761\u4ef6",
+    quoteNotes: "\u898b\u7a4d\u6ce8\u8a18",
+    requestStatusSettings: "\u4f9d\u983c\u30b9\u30c6\u30fc\u30bf\u30b9",
+    urgencyLevel: "\u7dca\u6025\u5ea6",
+    responseDeadlines: "\u5bfe\u5fdc\u671f\u9650",
+    firstResponseTime: "\u521d\u56de\u5fdc\u7b54\u6642\u9593",
+    handlingDeadline: "\u51e6\u7406\u671f\u9650",
+    overdueRule: "\u671f\u9650\u8d85\u904e",
+    statusColors: "\u30b9\u30c6\u30fc\u30bf\u30b9\u8272",
+    accountApproval: "\u30a2\u30ab\u30a6\u30f3\u30c8\u627f\u8a8d",
+    customerStatus: "\u9867\u5ba2\u30b9\u30c6\u30fc\u30bf\u30b9",
+    resetPin: "PIN\u30ea\u30bb\u30c3\u30c8",
+    softDeleteTrash: "\u4e00\u6642\u524a\u9664\u30fb\u30b4\u30df\u7bb1",
+    customerRequestHistory: "\u9867\u5ba2\u4f9d\u983c\u5c65\u6b74",
+    newRequestAdminNotice: "\u65b0\u898f\u4f9d\u983c\u6642\u306e\u7ba1\u7406\u8005\u901a\u77e5",
+    customerStatusNotice: "\u72b6\u614b\u5909\u66f4\u6642\u306e\u9867\u5ba2\u901a\u77e5",
+    notificationTemplates: "\u901a\u77e5\u6587\u9762\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8",
+    defaultLanguage: "\u6a19\u6e96\u8a00\u8a9e",
+    appLogo: "\u30a2\u30d7\u30ea\u30ed\u30b4",
+    primaryColor: "\u30e1\u30a4\u30f3\u30ab\u30e9\u30fc",
+    splashScreen: "\u30b9\u30d7\u30e9\u30c3\u30b7\u30e5\u753b\u9762",
+    appName: "\u30a2\u30d7\u30ea\u540d",
+    statusColorRules: "\u30b9\u30c6\u30fc\u30bf\u30b9\u8272\u30eb\u30fc\u30eb",
+    manager: "\u7ba1\u7406",
+    employee: "\u30b9\u30bf\u30c3\u30d5",
+    viewOnly: "\u95b2\u89a7\u306e\u307f",
+    apiWebhook: "API / webhook",
+    dataSync: "\u30c7\u30fc\u30bf\u540c\u671f",
+    trashCleanup: "\u30b4\u30df\u7bb130\u65e5\u5f8c\u30af\u30ea\u30fc\u30f3\u30a2\u30c3\u30d7"
+  });
+
+  Object.assign(i18n.vi, {
+    settingsSystemTitle: "C\u00e0i \u0111\u1eb7t h\u1ec7 th\u1ed1ng",
+    settingsSystemSubtitle: "Qu\u1ea3n l\u00fd c\u1ea5u h\u00ecnh d\u00f9ng chung cho to\u00e0n b\u1ed9 app.",
+    settingsOverview: "T\u1ed5ng quan",
+    settingsOverviewSub: "C\u1ea5u h\u00ecnh ch\u00ednh",
+    settingsStaffWork: "Nh\u00e2n vi\u00ean & c\u00f4ng vi\u1ec7c",
+    settingsStaffWorkSub: "B\u1ed9 ph\u1eadn, n\u1ed9i dung c\u00f4ng vi\u1ec7c",
+    settingsQuoteTax: "B\u00e1o gi\u00e1 & thu\u1ebf",
+    settingsQuoteTaxSub: "M\u1eabu b\u00e1o gi\u00e1, thu\u1ebf, gi\u00e1",
+    settingsRequestStatus: "Y\u00eau c\u1ea7u & tr\u1ea1ng th\u00e1i",
+    settingsRequestStatusSub: "Lu\u1ed3ng x\u1eed l\u00fd y\u00eau c\u1ea7u",
+    settingsCustomers: "Kh\u00e1ch h\u00e0ng",
+    settingsCustomersSub: "T\u00e0i kho\u1ea3n, duy\u1ec7t, PIN",
+    settingsNotifications: "Th\u00f4ng b\u00e1o",
+    settingsNotificationsSub: "Slack, email, LINE WORKS",
+    settingsAppearance: "Giao di\u1ec7n",
+    settingsAppearanceSub: "Ng\u00f4n ng\u1eef, m\u00e0u, logo",
+    settingsPermissions: "Quy\u1ec1n h\u1ea1n",
+    settingsPermissionsSub: "Vai tr\u00f2 admin",
+    settingsSystemData: "D\u1eef li\u1ec7u h\u1ec7 th\u1ed1ng",
+    settingsSystemDataSub: "Xu\u1ea5t d\u1eef li\u1ec7u, nh\u1eadt k\u00fd",
+    linkLater: "S\u1ebd li\u00ean k\u1ebft sau",
+    inUse: "\u0110ang d\u00f9ng",
+    configured: "\u0110\u00e3 c\u1ea5u h\u00ecnh",
+    notConfigured: "Ch\u01b0a c\u1ea5u h\u00ecnh",
+    prepareLater: "Chu\u1ea9n b\u1ecb sau",
+    manageLater: "Qu\u1ea3n l\u00fd sau",
+    expandLater: "S\u1ebd m\u1edf r\u1ed9ng sau",
+    languageRegion: "Ng\u00f4n ng\u1eef & khu v\u1ef1c",
+    currentLanguage: "Ng\u00f4n ng\u1eef hi\u1ec7n t\u1ea1i",
+    timezone: "M\u00fai gi\u1edd",
+    dateTimeFormat: "\u0110\u1ecbnh d\u1ea1ng ng\u00e0y gi\u1edd",
+    workMaster: "Danh m\u1ee5c c\u00f4ng vi\u1ec7c",
+    workMasterLinked: "\u0110\u00e3 li\u00ean k\u1ebft v\u1edbi Staff/App kh\u00e1ch h\u00e0ng",
+    quoteTax: "B\u00e1o gi\u00e1 & thu\u1ebf",
+    defaultTax: "Thu\u1ebf m\u1eb7c \u0111\u1ecbnh",
+    currency: "\u0110\u01a1n v\u1ecb ti\u1ec1n t\u1ec7",
+    quoteTemplate: "M\u1eabu b\u00e1o gi\u00e1",
+    systemData: "D\u1eef li\u1ec7u h\u1ec7 th\u1ed1ng",
+    csvExport: "Xu\u1ea5t CSV",
+    adminLogs: "Nh\u1eadt k\u00fd thao t\u00e1c admin",
+    backup: "Sao l\u01b0u",
+    totalDepartments: "T\u1ed5ng b\u1ed9 ph\u1eadn",
+    currentlyUsed: "\u0110ang s\u1eed d\u1ee5ng",
+    departmentsPreview: "Xem tr\u01b0\u1edbc b\u1ed9 ph\u1eadn",
+    departmentsCardDesc: "Qu\u1ea3n l\u00fd b\u1ed9 ph\u1eadn s\u1eed d\u1ee5ng trong h\u1ed3 s\u01a1 staff v\u00e0 app kh\u00e1ch h\u00e0ng.",
+    workGroupsDesc: "D\u00f9ng \u0111\u1ec3 nh\u00f3m n\u1ed9i dung c\u00f4ng vi\u1ec7c theo b\u1ed9 ph\u1eadn.",
+    workTypesDesc: "Danh s\u00e1ch c\u00f4ng vi\u1ec7c \u0111\u1ec3 kh\u00e1ch h\u00e0ng ch\u1ecdn v\u00e0 h\u1ec7 th\u1ed1ng t\u1ef1 \u0111\u1ed9ng ph\u00e2n c\u00f4ng.",
+    autoAssign: "T\u1ef1 \u0111\u1ed9ng ph\u00e2n c\u00f4ng",
+    autoAssignDesc: "Quy t\u1eafc ch\u1ecdn nh\u00e2n vi\u00ean theo b\u1ed9 ph\u1eadn, c\u00f4ng vi\u1ec7c, tr\u1ea1ng th\u00e1i v\u00e0 t\u1ea3i x\u1eed l\u00fd.",
+    quoteConfig: "C\u1ea5u h\u00ecnh b\u00e1o gi\u00e1",
+    autoQuoteCode: "M\u00e3 b\u00e1o gi\u00e1 t\u1ef1 \u0111\u1ed9ng",
+    quoteValidity: "Hi\u1ec7u l\u1ef1c b\u00e1o gi\u00e1",
+    taxCurrency: "Thu\u1ebf & ti\u1ec1n t\u1ec7",
+    autoTax: "T\u1ef1 \u0111\u1ed9ng t\u00ednh thu\u1ebf",
+    priceRounding: "L\u00e0m tr\u00f2n gi\u00e1",
+    defaultPriceItems: "M\u1ee5c gi\u00e1 m\u1eb7c \u0111\u1ecbnh",
+    labor: "Nh\u00e2n c\u00f4ng",
+    materials: "V\u1eadt t\u01b0",
+    surveyFee: "Ph\u00ed kh\u1ea3o s\u00e1t",
+    deliveryFee: "Ph\u00ed v\u1eadn chuy\u1ec3n",
+    otherCosts: "Chi ph\u00ed kh\u00e1c",
+    quoteTerms: "\u0110i\u1ec1u kho\u1ea3n b\u00e1o gi\u00e1",
+    paymentTerms: "\u0110i\u1ec1u kho\u1ea3n thanh to\u00e1n",
+    constructionTerms: "\u0110i\u1ec1u kho\u1ea3n thi c\u00f4ng",
+    quoteNotes: "Ghi ch\u00fa b\u00e1o gi\u00e1",
+    requestStatusSettings: "Tr\u1ea1ng th\u00e1i y\u00eau c\u1ea7u",
+    urgencyLevel: "\u0110\u1ed9 kh\u1ea9n",
+    responseDeadlines: "H\u1ea1n x\u1eed l\u00fd",
+    firstResponseTime: "Th\u1eddi gian ph\u1ea3n h\u1ed3i \u0111\u1ea7u ti\u00ean",
+    handlingDeadline: "H\u1ea1n x\u1eed l\u00fd",
+    overdueRule: "Qu\u00e1 h\u1ea1n",
+    statusColors: "M\u00e0u tr\u1ea1ng th\u00e1i",
+    accountApproval: "Duy\u1ec7t t\u00e0i kho\u1ea3n",
+    customerStatus: "Tr\u1ea1ng th\u00e1i kh\u00e1ch h\u00e0ng",
+    resetPin: "Reset PIN",
+    softDeleteTrash: "X\u00f3a t\u1ea1m / th\u00f9ng r\u00e1c",
+    customerRequestHistory: "L\u1ecbch s\u1eed y\u00eau c\u1ea7u kh\u00e1ch h\u00e0ng",
+    newRequestAdminNotice: "Th\u00f4ng b\u00e1o admin khi c\u00f3 y\u00eau c\u1ea7u m\u1edbi",
+    customerStatusNotice: "Th\u00f4ng b\u00e1o kh\u00e1ch h\u00e0ng khi tr\u1ea1ng th\u00e1i thay \u0111\u1ed5i",
+    notificationTemplates: "M\u1eabu n\u1ed9i dung th\u00f4ng b\u00e1o",
+    defaultLanguage: "Ng\u00f4n ng\u1eef m\u1eb7c \u0111\u1ecbnh",
+    appLogo: "Logo app",
+    primaryColor: "M\u00e0u ch\u00ednh",
+    splashScreen: "Splash screen",
+    appName: "T\u00ean app",
+    statusColorRules: "Quy t\u1eafc m\u00e0u status",
+    manager: "Qu\u1ea3n l\u00fd",
+    employee: "Nh\u00e2n vi\u00ean",
+    viewOnly: "Ch\u1ec9 xem",
+    apiWebhook: "API / webhook",
+    dataSync: "\u0110\u1ed3ng b\u1ed9 d\u1eef li\u1ec7u",
+    trashCleanup: "D\u1ecdn d\u1eef li\u1ec7u th\u00f9ng r\u00e1c sau 30 ng\u00e0y"
+  });
+
   const state = {
     currentView: "dashboard",
     requests: [],
@@ -1133,6 +1323,7 @@
       trashCategory: "customers",
       trashSearch: ""
     },
+    settingsTab: "overview",
     lang: localStorage.getItem("language") || "ja"
   };
 
@@ -4051,7 +4242,183 @@
   }
 
   function renderSettings() {
-    renderWorkMaster();
+    const activeTab = settingsTabs().some(tab => tab.id === state.settingsTab) ? state.settingsTab : "overview";
+    state.settingsTab = activeTab;
+    $("viewRoot").innerHTML = `
+      <section class="settings-shell">
+        <header class="settings-page-head">
+          <div>
+            <p class="eyebrow">YAMADEN ADMIN</p>
+            <h2>${escapeHtml(t("settingsSystemTitle"))}</h2>
+            <p>${escapeHtml(t("settingsSystemSubtitle"))}</p>
+          </div>
+        </header>
+        <div class="settings-layout">
+          <aside class="settings-menu-card" aria-label="${escapeHtml(t("settingsSystemTitle"))}">
+            ${settingsTabs().map(renderSettingsMenuItem).join("")}
+          </aside>
+          <div class="settings-content-grid">
+            ${renderSettingsContent(activeTab)}
+          </div>
+        </div>
+      </section>`;
+  }
+
+  function settingsTabs() {
+    return [
+      ["overview", "dashboard", "settingsOverview", "settingsOverviewSub"],
+      ["staffWork", "users", "settingsStaffWork", "settingsStaffWorkSub"],
+      ["quoteTax", "receipt", "settingsQuoteTax", "settingsQuoteTaxSub"],
+      ["requestStatus", "clipboard", "settingsRequestStatus", "settingsRequestStatusSub"],
+      ["customers", "userCheck", "settingsCustomers", "settingsCustomersSub"],
+      ["notifications", "bell", "settingsNotifications", "settingsNotificationsSub"],
+      ["appearance", "palette", "settingsAppearance", "settingsAppearanceSub"],
+      ["permissions", "shield", "settingsPermissions", "settingsPermissionsSub"],
+      ["systemData", "database", "settingsSystemData", "settingsSystemDataSub"]
+    ].map(([id, icon, titleKey, subtitleKey]) => ({ id, icon, titleKey, subtitleKey }));
+  }
+
+  function renderSettingsMenuItem(tab) {
+    const active = state.settingsTab === tab.id;
+    return `<button class="settings-menu-item ${active ? "active" : ""}" type="button" data-settings-tab="${escapeHtml(tab.id)}" aria-pressed="${active ? "true" : "false"}">
+      <span class="settings-menu-icon">${settingsIcon(tab.icon)}</span>
+      <span>
+        <strong>${escapeHtml(t(tab.titleKey))}</strong>
+        <small>${escapeHtml(t(tab.subtitleKey))}</small>
+      </span>
+    </button>`;
+  }
+
+  function settingsIcon(name) {
+    const attrs = 'viewBox="0 0 24 24" aria-hidden="true" focusable="false"';
+    const icons = {
+      dashboard: `<svg ${attrs}><rect x="3" y="3" width="7" height="8" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="15" width="7" height="6" rx="2"/></svg>`,
+      users: `<svg ${attrs}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.8"/><path d="M16 3.2a4 4 0 0 1 0 7.6"/></svg>`,
+      receipt: `<svg ${attrs}><path d="M7 3h10a2 2 0 0 1 2 2v16l-3-2-3 2-3-2-3 2-2-1.3V5a2 2 0 0 1 2-2z"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h3"/></svg>`,
+      clipboard: `<svg ${attrs}><path d="M9 5h6"/><path d="M9 3h6v4H9z"/><path d="M7 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><path d="m8 13 2 2 5-5"/><path d="M8 18h7"/></svg>`,
+      userCheck: `<svg ${attrs}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg>`,
+      bell: `<svg ${attrs}><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>`,
+      palette: `<svg ${attrs}><path d="M12 22a10 10 0 1 1 10-10c0 2.2-1.8 4-4 4h-1.5a2 2 0 0 0-1.7 3l.2.4A1.8 1.8 0 0 1 13.4 22H12z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/><circle cx="16.5" cy="11" r="1"/></svg>`,
+      shield: `<svg ${attrs}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-5"/></svg>`,
+      database: `<svg ${attrs}><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>`
+    };
+    return icons[name] || icons.dashboard;
+  }
+
+  function settingsBadge(label, tone) {
+    return `<span class="settings-badge ${tone || ""}">${escapeHtml(label)}</span>`;
+  }
+
+  function settingList(items) {
+    return `<ul class="settings-detail-list">${items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+  }
+
+  function settingCard(icon, title, items, status, tone, extra) {
+    return `<article class="settings-shell-card">
+      <div class="settings-card-head">
+        <span class="settings-card-icon">${settingsIcon(icon)}</span>
+        <div>
+          <h3>${escapeHtml(title)}</h3>
+          ${status ? settingsBadge(status, tone) : ""}
+        </div>
+      </div>
+      ${Array.isArray(items) ? settingList(items) : `<p class="settings-card-note">${escapeHtml(items || "")}</p>`}
+      ${extra || ""}
+    </article>`;
+  }
+
+  function renderSettingsContent(tab) {
+    const renderers = {
+      overview: renderSettingsOverview,
+      staffWork: renderSettingsStaffWork,
+      quoteTax: renderSettingsQuoteTax,
+      requestStatus: renderSettingsRequestStatus,
+      customers: renderSettingsCustomers,
+      notifications: renderSettingsNotifications,
+      appearance: renderSettingsAppearance,
+      permissions: renderSettingsPermissions,
+      systemData: renderSettingsSystemData
+    };
+    return (renderers[tab] || renderSettingsOverview)();
+  }
+
+  function renderSettingsOverview() {
+    const langLabel = state.lang === "vi" ? "Ti\u1ebfng Vi\u1ec7t" : "\u65e5\u672c\u8a9e";
+    const hasWorkMaster = (state.workMaster.departments || []).length || (state.workMaster.workGroups || []).length || (state.workMaster.workTypes || []).length;
+    return [
+      settingCard("palette", t("languageRegion"), [t("currentLanguage") + ": " + langLabel, t("timezone") + ": Asia/Tokyo", t("dateTimeFormat") + ": YYYY/MM/DD HH:mm"], t("inUse"), "is-live"),
+      settingCard("users", t("workMaster"), [t("department"), t("workGroups"), t("workTypes")], hasWorkMaster ? t("workMasterLinked") : t("linkLater"), hasWorkMaster ? "is-live" : "is-planned"),
+      settingCard("receipt", t("quoteTax"), [t("defaultTax"), t("currency") + ": JPY", t("quoteTemplate")], t("linkLater"), "is-planned"),
+      settingCard("bell", t("settingsNotifications"), ["Slack", "Email", "LINE WORKS"], t("linkLater"), "is-planned"),
+      settingCard("database", t("systemData"), [t("csvExport"), t("adminLogs"), t("backup")], t("linkLater"), "is-planned")
+    ].join("");
+  }
+
+  function renderSettingsStaffWork() {
+    const departments = activeMasterItems("departments");
+    const groups = activeMasterItems("workGroups");
+    const types = activeMasterItems("workTypes");
+    const fallbackDepartments = state.lang === "vi"
+      ? ["Gi\u00e1m \u0111\u1ed1c", "Koumu", "FS", "Kinh doanh", "Thi c\u00f4ng", "Thi\u1ebft k\u1ebf", "D\u1ef1 to\u00e1n"]
+      : ["\u4ee3\u8868", "\u5de5\u52d9\u90e8", "FS\u90e8", "\u55b6\u696d\u90e8", "\u5de5\u4e8b\u90e8", "\u8a2d\u8a08\u90e8", "\u4e88\u7b97\u66f8"];
+    const preview = (departments.length ? departments.map(workMasterLabel) : fallbackDepartments).slice(0, 8);
+    return [
+      settingCard("users", t("department"), t("departmentsCardDesc"), t("inUse"), "is-live", `<div class="settings-metrics"><span><b>${departments.length || preview.length}</b>${escapeHtml(t("totalDepartments"))}</span><span><b>${departments.length}</b>${escapeHtml(t("currentlyUsed"))}</span></div><div class="settings-chip-list">${preview.map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("manageLater"))}</button>`),
+      settingCard("clipboard", t("workGroups"), t("workGroupsDesc"), groups.length ? t("inUse") : t("linkLater"), groups.length ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${groups.length}</b>${escapeHtml(t("workGroups"))}</span></div><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("manageLater"))}</button>`),
+      settingCard("clipboard", t("workTypes"), t("workTypesDesc"), types.length ? t("inUse") : t("linkLater"), types.length ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${types.length}</b>${escapeHtml(t("workTypes"))}</span></div><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("manageLater"))}</button>`),
+      settingCard("shield", t("autoAssign"), t("autoAssignDesc"), t("linkLater"), "is-planned")
+    ].join("");
+  }
+
+  function renderSettingsQuoteTax() {
+    return [
+      settingCard("receipt", t("quoteConfig"), [t("autoQuoteCode"), t("quoteTemplate"), t("quoteValidity")], t("linkLater"), "is-planned", `<button class="btn btn-soft" type="button" disabled>${escapeHtml(t("prepareLater"))}</button>`),
+      settingCard("receipt", t("taxCurrency"), [t("currency") + ": JPY", t("defaultTax") + ": 10%", t("autoTax"), t("priceRounding")], t("linkLater"), "is-planned", `<button class="btn btn-soft" type="button" disabled>${escapeHtml(t("prepareLater"))}</button>`),
+      settingCard("database", t("defaultPriceItems"), [t("labor"), t("materials"), t("surveyFee"), t("deliveryFee"), t("otherCosts")], t("linkLater"), "is-planned", `<button class="btn btn-soft" type="button" disabled>${escapeHtml(t("prepareLater"))}</button>`),
+      settingCard("clipboard", t("quoteTerms"), [t("paymentTerms"), t("constructionTerms"), t("quoteNotes")], t("linkLater"), "is-planned", `<button class="btn btn-soft" type="button" disabled>${escapeHtml(t("prepareLater"))}</button>`)
+    ].join("");
+  }
+
+  function renderSettingsRequestStatus() {
+    const statuses = ["untreated", "contacted", "site_done", "quoted", "completed", "lost"];
+    const urgencies = ["urgent", "high", "medium", "low", t("unjudged")];
+    const statusPreview = `<div class="settings-status-preview">${statuses.map(status => `<span class="status-badge status-${escapeHtml(status)}">${escapeHtml(formatStatus(status))}</span>`).join("")}</div>`;
+    return [
+      settingCard("clipboard", t("requestStatusSettings"), statuses.map(formatStatus), t("linkLater"), "is-planned"),
+      settingCard("shield", t("urgencyLevel"), urgencies, t("linkLater"), "is-planned"),
+      settingCard("database", t("responseDeadlines"), [t("firstResponseTime"), t("handlingDeadline"), t("overdueRule")], t("linkLater"), "is-planned"),
+      settingCard("palette", t("statusColors"), "", t("linkLater"), "is-planned", statusPreview)
+    ].join("");
+  }
+
+  function renderSettingsCustomers() {
+    return [
+      settingCard("userCheck", t("settingsCustomers"), [t("accountApproval"), t("customerStatus"), t("resetPin"), t("softDeleteTrash"), t("customerRequestHistory")], t("linkLater"), "is-planned")
+    ].join("");
+  }
+
+  function renderSettingsNotifications() {
+    return [
+      settingCard("bell", t("settingsNotifications"), [t("newRequestAdminNotice"), t("customerStatusNotice"), "Slack", "Email", "LINE WORKS", t("notificationTemplates")], t("linkLater"), "is-planned")
+    ].join("");
+  }
+
+  function renderSettingsAppearance() {
+    return [
+      settingCard("palette", t("settingsAppearance"), [t("defaultLanguage"), t("appLogo"), t("primaryColor"), t("splashScreen"), t("appName"), t("statusColorRules")], t("linkLater"), "is-planned")
+    ].join("");
+  }
+
+  function renderSettingsPermissions() {
+    return [
+      settingCard("shield", t("settingsPermissions"), ["Admin", t("manager"), t("employee"), t("viewOnly")], t("expandLater"), "is-planned")
+    ].join("");
+  }
+
+  function renderSettingsSystemData() {
+    return [
+      settingCard("database", t("settingsSystemData"), [t("csvExport"), t("backup"), t("adminLogs"), t("apiWebhook"), t("dataSync"), t("trashCleanup")], t("linkLater"), "is-planned")
+    ].join("");
   }
 
   async function reloadWorkMaster() {
@@ -4795,6 +5162,13 @@
 
       if (event.target.closest("[data-retry]")) {
         refreshData();
+        return;
+      }
+
+      const settingsTab = event.target.closest("[data-settings-tab]");
+      if (settingsTab) {
+        state.settingsTab = settingsTab.dataset.settingsTab || "overview";
+        renderSettings();
         return;
       }
 
