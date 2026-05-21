@@ -1171,7 +1171,7 @@ function parseRequestTags(value) {
 function staffTags(staff) {
   const fromArray = Array.isArray(staff.workTags) ? staff.workTags : [];
   const departmentTokens = normalizeTagList([staff.department, staff.departmentCode, staff.areas]);
-  const fromText = [staff.skills, staff.workContent]
+  const fromText = [staff.skills]
     .join(",")
     .split(/[,;、；\n\r]+/);
 
@@ -1185,7 +1185,6 @@ function uniqueStaffWorkOptions(staffList) {
   staffList.forEach(staff => {
     const values = normalizeTagList(
       (Array.isArray(staff.workTags) ? staff.workTags : [])
-        .concat(parseRequestTags(staff.workContent))
         .concat(parseRequestTags(staff.skills))
     );
 
@@ -1981,14 +1980,14 @@ app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res)
       phone: req.body.phone || "",
       email: req.body.email || "",
       areas: req.body.areas || req.body.department || "",
-      skills: req.body.skills || req.body.workContent || cleanWorkTags.join(", "),
+      skills: req.body.skills || cleanWorkTags.join(", "),
       department: req.body.department || req.body.areas || "",
       departmentCode: req.body.departmentCode || "",
       autoAssignEnabled: req.body.autoAssignEnabled === undefined ? true : req.body.autoAssignEnabled === true || req.body.autoAssignEnabled === "true",
       role: req.body.role || req.body.position || req.body.title || "",
       position: req.body.position || "",
       title: req.body.title || "",
-      workContent: req.body.workContent || req.body.skills || cleanWorkTags.join(", "),
+      workContent: req.body.workContent || "",
       workTags: cleanWorkTags,
       workTypeIds,
       staffDescription: req.body.staffDescription || req.body.introduction || "",

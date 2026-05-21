@@ -859,6 +859,8 @@
     staffDetailNotes: "説明・メモ",
     noStaffDescription: "説明はありません。",
     noInternalMemo: "メモはありません。",
+    workContentDetail: "担当業務の詳細",
+    workContentDetailPlaceholder: "必要な場合のみ詳細を入力してください。選択済み業務の一覧を再入力する必要はありません。",
     showMore: "もっと見る",
     collapse: "閉じる"
   });
@@ -929,6 +931,8 @@
     staffDetailNotes: "Mô tả & ghi chú",
     noStaffDescription: "Chưa có mô tả.",
     noInternalMemo: "Không có ghi chú.",
+    workContentDetail: "Nội dung phụ trách chi tiết",
+    workContentDetailPlaceholder: "Nhập mô tả chi tiết nếu cần. Không cần nhập lại danh sách công việc đã chọn.",
     showMore: "Xem thêm",
     collapse: "Thu gọn"
   });
@@ -2345,8 +2349,7 @@
   function staffTags(staff) {
     const raw = []
       .concat(toList(staff?.workTags))
-      .concat(toList(staff?.skills))
-      .concat(toList(staff?.workContent));
+      .concat(toList(staff?.skills));
     return cleanStaffWorkTags(Object.assign({}, staff, { workTags: raw }));
   }
 
@@ -2368,7 +2371,6 @@
       });
     });
     const raw = toList(staff?.workTags).concat(toList(staff?.skills));
-    if (!raw.length) raw.push(...toList(staff?.workContent));
     const seen = new Set();
     return raw.map(item => String(item || "").trim()).filter(item => {
       const normalized = normalizeTag(item);
@@ -2410,12 +2412,22 @@
   function shouldShowStaffWorkContent(staff, workItems) {
     const content = compactText(staff?.workContent, "");
     if (!content) return false;
-    const contentKey = normalizeTag(content);
     const names = (workItems || []).map(item => item.name).filter(Boolean);
     if (!names.length) return true;
-    const joinedKey = normalizeTag(names.join(", "));
-    const sortedKey = normalizeTag([...names].sort().join(", "));
-    return contentKey !== joinedKey && contentKey !== sortedKey;
+    const normalizedContent = normalizeTextForCompare(content);
+    const normalizedJoined = normalizeTextForCompare(names.join(","));
+    if (normalizedContent === normalizedJoined) return false;
+    const allNamesIncluded = names.every(name => normalizedContent.includes(normalizeTextForCompare(name)));
+    const contentIsMostlyTags = allNamesIncluded && normalizedContent.length <= normalizedJoined.length + 20;
+    return !contentIsMostlyTags;
+  }
+
+  function normalizeTextForCompare(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/[、，,\n\r]+/g, ",")
+      .replace(/\s+/g, "")
+      .trim();
   }
 
   function activeAssignmentCount(staff) {
@@ -2963,10 +2975,12 @@
     const assigned = state.requests.filter(request => String(request.assigneeId || request.assignedStaffId || "") === String(id) || getAssigneeName(request) === staff.name).length;
     const workload = assigned ? Math.min(95, 30 + assigned * 8) : 0;
     const isSelected = selected && String(getRowId(selected)) === String(id);
+    const workItems = getStaffWorkItems(staff);
+    const workContentSummary = shouldShowStaffWorkContent(staff, workItems) ? staff.workContent || "" : "";
     return `<tr class="${isSelected ? "selected-row" : ""}">
       <td><div class="identity-cell">${avatarHtml(staff)}<div><strong>${escapeHtml(staff.name || "-")}</strong><span>${escapeHtml(staff.email || staff.phone || "-")}</span></div></div></td>
       <td>${escapeHtml(staffRole(staff))}<div class="subtext">${escapeHtml(staffDepartment(staff))}</div></td>
-      <td>${tagChips(getStaffWorkItems(staff).map(item => item.name), 3)}<div class="subtext text-clamp-1">${escapeHtml(staff.workContent || "")}</div></td>
+      <td>${tagChips(workItems.map(item => item.name), 3)}${workContentSummary ? `<div class="subtext text-clamp-1">${escapeHtml(workContentSummary)}</div>` : ""}</td>
       <td>${assigned}</td>
       <td><div class="progress-cell"><span style="width:${workload}%"></span></div><small>${workload}%</small></td>
       <td><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span></td>
@@ -3039,7 +3053,7 @@
       </section>
       <section class="staff-detail-section"><h3>${escapeHtml(t("staffDetailNotes"))}</h3>
         <div class="staff-readable-card"><h4>${escapeHtml(t("staffDescriptionSection"))}</h4><p>${escapeHtml(staffDescription || t("noStaffDescription"))}</p></div>
-        ${showWorkContent ? `<div class="staff-readable-card"><h4>${escapeHtml(t("workContent"))}</h4><p>${escapeHtml(staff.workContent)}</p></div>` : ""}
+        ${showWorkContent ? `<div class="staff-readable-card"><h4>${escapeHtml(t("workContentDetail"))}</h4><p>${escapeHtml(staff.workContent)}</p></div>` : ""}
         <div class="staff-readable-card"><h4>${escapeHtml(t("internalMemo"))}</h4><p>${escapeHtml(staff.note || t("noInternalMemo"))}</p></div>
       </section>
       <section class="staff-detail-section"><h3>${escapeHtml(t("staffCurrentWorkload"))}</h3><div class="mini-kpi-row">${miniMetric(t("currentAssignments"), assignedActive.length)}${miniMetric(t("workload"), workload + "%")}${miniMetric(t("overdueAssigned"), overdue)}</div><div class="priority-list">${assignedActive.length ? assignedActive.slice(0, 4).map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState(t("noAssignedRequests"))}</div></section>
@@ -3065,6 +3079,7 @@
     const status = staff.status || "active";
     const workItems = getStaffWorkItems(staff);
     const staffDescription = staff.staffDescription || staff.introduction || "";
+    const showWorkContent = shouldShowStaffWorkContent(staff, workItems);
     const infoFields = [
       [t("name"), staff.name],
       [t("phone"), staff.phone],
@@ -3090,12 +3105,12 @@
             <div class="info-grid">
               ${infoItem(t("primaryDepartment"), staffDepartment(staff))}
               ${infoItem(t("staffAutoAssign"), staffAutoAssignText(staff))}
-              ${infoItem(t("workContent"), staff.workContent)}
+              ${showWorkContent ? infoItem(t("workContentDetail"), staff.workContent) : ""}
               ${infoItem(t("staffDescriptionSection"), staffDescription)}
               ${infoItem(t("internalMemo"), staff.note)}
             </div>
             <h3>${escapeHtml(t("staffAssignableWork"))}</h3>
-            ${workItems.length ? tagChips(workItems.map(item => item.name)) : showEmptyState(t("noSelectedWorkTypes"))}
+            ${staffWorkChipList(workItems)}
           </section>` : ""}
           ${activeTab === "history" ? `<section><div class="priority-list">${history.length ? history.map(item => `<div class="priority-item"><strong>${escapeHtml(item.requestCode || item.id || "-")}</strong><span>${escapeHtml(item.title || getRequestContent(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span><small>${escapeHtml(item.createdAt || "")}</small></div>`).join("") : showEmptyState(t("staffHistoryPlaceholder"))}</div></section>` : ""}
         </div>
@@ -3395,7 +3410,8 @@
         <button class="mini-button" type="button" data-staff-selected-work-to-content>${escapeHtml(t("createDescriptionFromSelectedWork"))}</button>
       </div>
       <div class="staff-edit-grid">
-        <label class="staff-edit-field full"><span>${escapeHtml(t("staffDescription"))}</span><textarea name="introduction" placeholder="${escapeHtml(t("staffDescriptionPlaceholder"))}">${escapeHtml(staff?.introduction || "")}</textarea></label>
+        <label class="staff-edit-field full"><span>${escapeHtml(t("staffDescriptionSection"))}</span><textarea name="introduction" placeholder="${escapeHtml(t("staffDescriptionPlaceholder"))}">${escapeHtml(staff?.staffDescription || staff?.introduction || "")}</textarea></label>
+        <label class="staff-edit-field full"><span>${escapeHtml(t("workContentDetail"))}</span><textarea name="workContent" placeholder="${escapeHtml(t("workContentDetailPlaceholder"))}">${escapeHtml(staff?.workContent || "")}</textarea></label>
         <label class="staff-edit-field full"><span>${escapeHtml(t("internalMemo"))}</span><textarea name="note">${escapeHtml(staff?.note || "")}</textarea></label>
       </div>
     </div>`;
@@ -4364,7 +4380,7 @@
   function staffFormPayload(form) {
     const raw = new FormData(form);
     const payload = new FormData();
-    ["name", "phone", "email", "note", "introduction", "status"].forEach(field => {
+    ["name", "phone", "email", "workContent", "note", "introduction", "status"].forEach(field => {
       payload.set(field, raw.get(field) || "");
     });
     const departmentInput = form.querySelector("[data-staff-department-value]");
@@ -4387,7 +4403,9 @@
     const workTypeIds = selectedWork.filter(item => !item.legacy).map(item => item.id || item.code).filter(Boolean);
     if (workTypeIds.length) workTypeIds.forEach(id => payload.append("workTypeIds", id));
     else payload.set("workTypeIds", "");
-    if (workTags.length) payload.set("workContent", workTags.join(", "));
+    if (!shouldShowStaffWorkContent({ workContent: raw.get("workContent") || "" }, workTags.map(name => ({ name })))) {
+      payload.set("workContent", "");
+    }
     payload.set("avatar", raw.get("avatar") || "");
     const file = raw.get("avatarFile");
     if (file && file.size > 0) payload.set("avatar", file);
