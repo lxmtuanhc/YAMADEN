@@ -1084,6 +1084,7 @@
     selectedRequest: null,
     selectedUser: null,
     selectedStaff: null,
+    staffDetailWorkExpanded: false,
     errors: {},
     loading: {
       requests: false,
@@ -2316,14 +2317,11 @@
   function staffWorkChipList(items, limit = 12) {
     const names = toList(items).map(item => typeof item === "string" ? item : item?.name).filter(Boolean);
     if (!names.length) return showEmptyState(t("noSelectedWorkTypes"));
-    const visible = names.slice(0, limit);
-    const hidden = names.slice(limit);
+    const expanded = state.staffDetailWorkExpanded === true;
+    const visible = expanded ? names : names.slice(0, limit);
     const chipHtml = list => list.map(item => `<span class="tag-chip">${escapeHtml(item)}</span>`).join("");
-    if (!hidden.length) return `<div class="staff-work-chip-list">${chipHtml(visible)}</div>`;
-    return `<details class="staff-work-chip-details">
-      <summary>${escapeHtml(t("showMore"))}</summary>
-      <div class="staff-work-chip-list">${chipHtml(visible.concat(hidden))}</div>
-    </details>`;
+    return `<div class="staff-work-chip-list">${chipHtml(visible)}</div>
+      ${names.length > limit && visible.length ? `<button class="mini-button staff-work-chip-toggle" type="button" data-toggle-staff-work-items>${escapeHtml(expanded ? t("collapse") : t("showMore"))}</button>` : ""}`;
   }
 
   function normalizeTag(value) {
@@ -2396,12 +2394,17 @@
         name: workType ? workMasterLabel(workType) : fallback
       });
     };
-    ids.forEach(id => addWorkType(findWorkTypeByIdOrCode(id), String(id || "").trim()));
+    ids.forEach(id => {
+      const found = findWorkTypeByIdOrCode(id);
+      if (found) addWorkType(found, String(id || "").trim());
+    });
     if (items.length) return items;
     cleanStaffWorkTags(staff).forEach(tag => {
       const found = findWorkTypeByValue(tag);
       addWorkType(found, tag);
     });
+    if (items.length) return items;
+    ids.forEach(id => addWorkType(null, String(id || "").trim()));
     return items;
   }
 
@@ -4253,6 +4256,7 @@
     if (!staff && !["permanent-delete"].includes(action)) return;
     if (action === "detail") {
       state.selectedStaff = id;
+      state.staffDetailWorkExpanded = false;
       renderStaffResultsOnly();
       return;
     }
@@ -4741,6 +4745,19 @@
         return;
       }
 
+      if (event.target.closest("[data-toggle-staff-work-items]")) {
+        event.preventDefault();
+        state.staffDetailWorkExpanded = !state.staffDetailWorkExpanded;
+        if ($("drawer")?.dataset.drawerType === "staff") {
+          const staff = state.staff.find(item => String(getRowId(item)) === String($("drawer").dataset.drawerId));
+          const activeTab = $("drawer").querySelector("[data-drawer-tab].active")?.dataset.drawerTab || "info";
+          if (staff) await renderStaffDetail(staff, activeTab);
+        } else if ($("staffPanelRoot")) {
+          renderStaffResultsOnly();
+        }
+        return;
+      }
+
       if (event.target.closest("[data-focus-staff-department]")) {
         event.preventDefault();
         document.querySelector("[data-staff-department-option]")?.focus();
@@ -4876,6 +4893,7 @@
       const staffDetail = event.target.closest("[data-staff-detail]");
       if (staffDetail) {
         const staff = state.staff.find(item => getRowId(item) === staffDetail.dataset.staffDetail);
+        state.staffDetailWorkExpanded = false;
         if (staff) renderStaffDetail(staff);
         return;
       }
@@ -4883,6 +4901,7 @@
       const selectStaff = event.target.closest("[data-select-staff]");
       if (selectStaff) {
         state.selectedStaff = selectStaff.dataset.selectStaff;
+        state.staffDetailWorkExpanded = false;
         renderStaff();
         return;
       }
