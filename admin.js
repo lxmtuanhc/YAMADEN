@@ -591,7 +591,23 @@
     closeWithoutSave: "\u4fdd\u5b58\u305b\u305a\u306b\u9589\u3058\u308b",
     savedChanges: "\u5909\u66f4\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002",
     saveChangesFailed: "\u5909\u66f4\u3092\u4fdd\u5b58\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002\u3082\u3046\u4e00\u5ea6\u304a\u8a66\u3057\u304f\u3060\u3055\u3044\u3002",
-    noMediaDetail: "\u30e1\u30c7\u30a3\u30a2\u306f\u3042\u308a\u307e\u305b\u3093\u3002"
+    noMediaDetail: "\u30e1\u30c7\u30a3\u30a2\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
+    staffBasicInfo: "\u57fa\u672c\u60c5\u5831",
+    staffDepartmentRole: "\u90e8\u9580\u30fb\u5f79\u5272",
+    staffSkillsWork: "\u30b9\u30ad\u30eb\u30fb\u5bfe\u5fdc\u53ef\u80fd\u696d\u52d9",
+    staffCurrentWorkload: "\u73fe\u5728\u306e\u62c5\u5f53\u72b6\u6cc1",
+    staffAutoAssign: "\u81ea\u52d5\u5272\u308a\u5f53\u3066",
+    staffRecentHistory: "\u6700\u8fd1\u306e\u5bfe\u5fdc\u5c65\u6b74",
+    staffOperations: "\u30b9\u30bf\u30c3\u30d5\u64cd\u4f5c",
+    editStaffProfile: "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u7de8\u96c6",
+    pauseStaff: "\u4f11\u6b62",
+    reactivateStaff: "\u7a3c\u50cd\u518d\u958b",
+    noAssignedRequests: "\u73fe\u5728\u62c5\u5f53\u4e2d\u306e\u4f9d\u983c\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
+    noStaffHistory: "\u5bfe\u5fdc\u5c65\u6b74\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
+    autoAssignPlanned: "\u5f8c\u3067\u9023\u643a\u4e88\u5b9a\u3002",
+    currentAssignments: "\u4f9d\u983c\u5bfe\u5fdc\u4e2d",
+    overdueAssigned: "\u671f\u9650\u8d85\u904e",
+    staffId: "\u30b9\u30bf\u30c3\u30d5ID"
   });
 
   Object.assign(i18n.vi, {
@@ -688,7 +704,23 @@
     closeWithoutSave: "\u0110\u00f3ng kh\u00f4ng l\u01b0u",
     savedChanges: "\u0110\u00e3 l\u01b0u thay \u0111\u1ed5i.",
     saveChangesFailed: "Kh\u00f4ng th\u1ec3 l\u01b0u thay \u0111\u1ed5i. Vui l\u00f2ng th\u1eed l\u1ea1i.",
-    noMediaDetail: "Kh\u00f4ng c\u00f3 media."
+    noMediaDetail: "Kh\u00f4ng c\u00f3 media.",
+    staffBasicInfo: "Th\u00f4ng tin c\u01a1 b\u1ea3n",
+    staffDepartmentRole: "B\u1ed9 ph\u1eadn & vai tr\u00f2",
+    staffSkillsWork: "K\u1ef9 n\u0103ng / c\u00f4ng vi\u1ec7c c\u00f3 th\u1ec3 nh\u1eadn",
+    staffCurrentWorkload: "T\u1ea3i c\u00f4ng vi\u1ec7c hi\u1ec7n t\u1ea1i",
+    staffAutoAssign: "T\u1ef1 \u0111\u1ed9ng ph\u00e2n c\u00f4ng",
+    staffRecentHistory: "L\u1ecbch s\u1eed x\u1eed l\u00fd g\u1ea7n \u0111\u00e2y",
+    staffOperations: "Thao t\u00e1c nh\u00e2n vi\u00ean",
+    editStaffProfile: "Ch\u1ec9nh s\u1eeda h\u1ed3 s\u01a1",
+    pauseStaff: "T\u1ea1m ngh\u1ec9",
+    reactivateStaff: "K\u00edch ho\u1ea1t l\u1ea1i",
+    noAssignedRequests: "Ch\u01b0a c\u00f3 y\u00eau c\u1ea7u \u0111ang ph\u1ee5 tr\u00e1ch.",
+    noStaffHistory: "Ch\u01b0a c\u00f3 d\u1eef li\u1ec7u x\u1eed l\u00fd.",
+    autoAssignPlanned: "S\u1ebd li\u00ean k\u1ebft sau.",
+    currentAssignments: "\u0110ang ph\u1ee5 tr\u00e1ch",
+    overdueAssigned: "Qu\u00e1 h\u1ea1n",
+    staffId: "ID nh\u00e2n vi\u00ean"
   });
 
   Object.assign(requestStatusMap, {
@@ -2148,12 +2180,15 @@
     const dept = state.filters.staffDepartment || "all";
     const status = state.filters.staffStatus || "all";
     const sort = state.filters.staffSort || "name";
+    const assignedFilter = state.filters.staffAssigned || "all";
     return [...state.staff].filter(staff => {
       const deptText = staffDepartment(staff);
       const statusText = staff.status || "active";
       if (statusText === "deleted" || staff.deletedAt) return false;
       const text = [staff.name, staff.email, staff.phone, deptText, staffRole(staff), staff.workContent, staff.skills, toList(staff.workTags).join(" ")].join(" ").toLowerCase();
-      return (dept === "all" || deptText === dept) && (status === "all" || statusText === status) && text.includes(search.toLowerCase());
+      const assigned = activeAssignmentCount(staff);
+      const assignedOk = assignedFilter === "all" || (assignedFilter === "has" ? assigned > 0 : assigned === 0);
+      return (dept === "all" || deptText === dept) && (status === "all" || statusText === status) && assignedOk && text.includes(search.toLowerCase());
     }).sort((a, b) => {
       if (sort === "status") return compactText(a.status).localeCompare(compactText(b.status));
       if (sort === "created") return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
@@ -2504,6 +2539,16 @@
     $("drawer").dataset.drawerId = id;
   }
 
+  function staffAssignedRequests(staff, activeOnly = true) {
+    const id = getRowId(staff);
+    return state.requests.filter(request => {
+      const assigned = String(request.assigneeId || request.assignedStaffId || "") === id || getAssigneeName(request) === staff.name;
+      if (!assigned) return false;
+      if (!activeOnly) return true;
+      return !["completed", "lost"].includes(normalizeRequestStatus(request.status));
+    });
+  }
+
   function renderStaff() {
     if (state.loading.staff) {
       $("viewRoot").innerHTML = `<div class="loading-state">${escapeHtml(t("loading"))}</div>`;
@@ -2515,16 +2560,19 @@
     }
     const rows = filterStaff();
     const departments = [...new Set(state.staff.map(staffDepartment).filter(value => value && value !== "-"))];
-    const allTags = state.staff.flatMap(staff => toList(staff.workTags));
-    const selected = rows.find(staff => getRowId(staff) === state.selectedStaff) || rows[0] || null;
-    if (selected) state.selectedStaff = getRowId(selected);
+    const allTags = state.staff.flatMap(staff => staffTags(staff));
+    const selected = state.selectedStaff ? rows.find(staff => getRowId(staff) === state.selectedStaff) : null;
+    if (state.selectedStaff && !selected) state.selectedStaff = "";
+    const visibleStaff = state.staff.filter(staff => String(staff.status || "active") !== "deleted" && !staff.deletedAt);
+    const activeStaff = visibleStaff.filter(staff => !["off", "inactive"].includes(String(staff.status || "active")));
+    const assignedStaffCount = activeStaff.filter(staff => activeAssignmentCount(staff) > 0).length;
     $("viewRoot").innerHTML = `
       <div class="page-intro"><p>${escapeHtml(t("staffSubtitle"))}</p></div>
       <div class="toolbar demo-actions"><button class="btn btn-soft" disabled>CSV ${escapeHtml(t("export"))}</button><button class="primary-button" type="button" data-staff-new>+ ${escapeHtml(t("addStaff"))}</button></div>
       <div class="kpi-grid kpi-grid-small">
-        ${statCard(t("staffCount"), state.staff.length, t("realData"), "info")}
-        ${statCard(t("active"), state.staff.filter(staff => (staff.status || "active") === "active").length, t("realData"), "success")}
-        ${statCard(staffStatusMap.busy, state.staff.filter(staff => staff.status === "busy").length, t("realData"), "warning")}
+        ${statCard(t("staffCount"), visibleStaff.length, t("realData"), "info")}
+        ${statCard(t("active"), activeStaff.length, t("realData"), "success")}
+        ${statCard(t("currentAssignments"), assignedStaffCount, t("realData"), "warning")}
         ${statCard(t("off"), state.staff.filter(staff => ["off", "inactive"].includes(staff.status)).length, t("realData"), "danger")}
         ${statCard(t("departments"), departments.length, t("realData"), "total")}
         ${statCard(t("totalTags"), new Set(allTags).size, t("realData"), "info")}
@@ -2533,20 +2581,21 @@
         <input class="filter-input" data-staff-filter="search" value="${escapeHtml(state.filters.staffSearch || "")}" placeholder="${escapeHtml(t("search"))}" />
         <select class="filter-input" data-staff-filter="department"><option value="all">${escapeHtml(t("allDepartments"))}</option>${departments.map(item => `<option value="${escapeHtml(item)}" ${state.filters.staffDepartment === item ? "selected" : ""}>${escapeHtml(item)}</option>`).join("")}</select>
         <select class="filter-input" data-staff-filter="status"><option value="all">${escapeHtml(t("statusFilter"))}</option>${["active", "busy", "off", "inactive"].map(status => `<option value="${status}" ${state.filters.staffStatus === status ? "selected" : ""}>${escapeHtml(staffStatusMap[status] || status)}</option>`).join("")}</select>
+        <select class="filter-input" data-staff-filter="assigned"><option value="all">${escapeHtml(t("currentAssignments"))}</option><option value="has" ${state.filters.staffAssigned === "has" ? "selected" : ""}>${escapeHtml(t("currentAssignments"))}</option><option value="none" ${state.filters.staffAssigned === "none" ? "selected" : ""}>${escapeHtml(t("noData"))}</option></select>
         <select class="filter-input" data-staff-filter="sort">
           <option value="name" ${(state.filters.staffSort || "name") === "name" ? "selected" : ""}>${escapeHtml(t("sortName"))}</option>
           <option value="created" ${state.filters.staffSort === "created" ? "selected" : ""}>${escapeHtml(t("sortCreated"))}</option>
           <option value="status" ${state.filters.staffSort === "status" ? "selected" : ""}>${escapeHtml(t("sortStatus"))}</option>
         </select>
       </div>
-      <div class="split-layout staff-workforce-layout">
-        <section class="section-card split-main">
+      <div class="staff-layout ${selected ? "has-detail" : ""}">
+        <section class="section-card staff-list-panel">
           <div class="panel-head"><h2>${escapeHtml(t("staff"))}</h2><span class="note">${rows.length} / ${state.staff.length}</span></div>
           <div class="panel-body crm-table-body">
             ${rows.length ? `<div class="table-wrap crm-table-wrap"><table class="data-table staff-table"><thead><tr><th>${t("staff")}</th><th>${t("role")} / ${t("department")}</th><th>Skills</th><th>${t("assignedCount")}</th><th>${t("workload")}</th><th>${t("status")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(staff => renderStaffRow(staff, selected)).join("")}</tbody></table></div>` : showEmptyState()}
           </div>
         </section>
-        ${renderStaffPanel(selected)}
+        ${selected ? renderStaffPanel(selected) : ""}
       </div>
     `;
   }
@@ -2557,7 +2606,7 @@
     const assigned = state.requests.filter(request => String(request.assigneeId || request.assignedStaffId || "") === String(id) || getAssigneeName(request) === staff.name).length;
     const workload = assigned ? Math.min(95, 30 + assigned * 8) : 0;
     const isSelected = selected && getRowId(selected) === id;
-    return `<tr class="${isSelected ? "selected-row" : ""}" data-select-staff="${escapeHtml(id)}">
+    return `<tr class="${isSelected ? "selected-row" : ""}">
       <td><div class="identity-cell">${avatarHtml(staff)}<div><strong>${escapeHtml(staff.name || "-")}</strong><span>${escapeHtml(staff.email || staff.phone || "-")}</span></div></div></td>
       <td>${escapeHtml(staffRole(staff))}<div class="subtext">${escapeHtml(staffDepartment(staff))}</div></td>
       <td>${tagChips(staff.workTags || staff.skills || staff.areas, 4)}<div class="subtext text-clamp-1">${escapeHtml(staff.workContent || "")}</div></td>
@@ -2565,9 +2614,7 @@
       <td><div class="progress-cell"><span style="width:${workload}%"></span></div><small>${workload}%</small></td>
       <td><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span></td>
       <td><div class="actions crm-actions">
-        <button class="btn btn-soft" data-select-staff="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
-        <button class="btn btn-soft" data-staff-edit="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button>
-        <button class="btn btn-danger" data-staff-delete="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>
+        <button class="btn btn-soft" type="button" data-staff-action="detail" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
       </div></td>
     </tr>`;
   }
@@ -2576,24 +2623,42 @@
     if (!staff) return `<aside class="detail-panel">${showEmptyState()}</aside>`;
     const id = getRowId(staff);
     const status = staff.status || "active";
-    const assigned = state.requests.filter(request => String(request.assigneeId || request.assignedStaffId || "") === String(id) || getAssigneeName(request) === staff.name).slice(0, 5);
+    const assignedAll = staffAssignedRequests(staff, false).sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+    const assignedActive = staffAssignedRequests(staff, true);
+    const assigned = assignedAll.slice(0, 5);
+    const workload = assignedActive.length ? Math.min(95, 30 + assignedActive.length * 8) : 0;
+    const overdue = assignedActive.filter(isOverdue).length;
+    const isPaused = ["off", "inactive"].includes(status);
+    const isDeleted = status === "deleted" || staff.deletedAt;
+    const actionButtons = isDeleted
+      ? `<button class="btn btn-soft" type="button" data-staff-action="restore" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("restore"))}</button><button class="btn btn-danger" type="button" data-staff-action="permanent-delete" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("permanentDelete"))}</button>`
+      : `<button class="btn btn-soft" type="button" data-staff-action="edit" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("editStaffProfile"))}</button><button class="btn btn-soft" type="button" data-staff-action="${isPaused ? "activate" : "pause"}" data-staff-id="${escapeHtml(id)}">${escapeHtml(isPaused ? t("reactivateStaff") : t("pauseStaff"))}</button><button class="btn btn-danger" type="button" data-staff-action="delete" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>`;
     return `<aside class="detail-panel staff-detail-panel">
       <div class="detail-panel-head">
         ${avatarHtml(staff, "avatar-large")}
-        <div><h2>${escapeHtml(staff.name || "-")}</h2><p>ID: ${escapeHtml(id || "-")}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span></div>
-        <button class="close-button" type="button" data-staff-detail="${escapeHtml(id)}">×</button>
+        <div><h2>${escapeHtml(staff.name || "-")}</h2><p>${escapeHtml(staff.email || "")}</p><p>ID: ${escapeHtml(id || "-")}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span></div>
+        <button class="close-button" type="button" data-staff-action="close-detail" aria-label="${escapeHtml(t("close"))}">&times;</button>
       </div>
-      <div class="contact-grid">
-        ${infoItem(t("phone"), staff.phone)}
+      <section><h3>${escapeHtml(t("staffBasicInfo"))}</h3><div class="contact-grid">
+        ${infoItem(t("staffId"), id)}
+        ${infoItem(t("name"), staff.name)}
         ${infoItem(t("email"), staff.email)}
+        ${infoItem(t("phone"), staff.phone)}
+        ${infoItem(t("status"), staffStatusMap[status] || status)}
+        ${infoItem(t("createdAt"), formatDate(staff.createdAt))}
+        ${staff.updatedAt ? infoItem(t("updatedAt"), formatDate(staff.updatedAt)) : ""}
+      </div></section>
+      <section><h3>${escapeHtml(t("staffDepartmentRole"))}</h3><div class="contact-grid">
         ${infoItem(t("department"), staffDepartment(staff))}
         ${infoItem(t("role"), staffRole(staff))}
-      </div>
-      <section><h3>${escapeHtml(t("strengths"))}</h3>${tagChips(staff.workTags || staff.skills || staff.areas)}</section>
-      <section><h3>${escapeHtml(t("recentRequests"))} (${assigned.length})</h3><div class="priority-list">${assigned.length ? assigned.map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState(t("planned"))}</div></section>
-      <section><h3>${escapeHtml(t("performance"))}</h3><div class="mini-kpi-row">${miniMetric(t("assignedCount"), assigned.length)}${miniMetric(t("workload"), assigned.length ? Math.min(95, 30 + assigned.length * 8) + "%" : "0%")}</div></section>
-      <section><h3>${escapeHtml(t("aiSuitability"))}</h3><div class="score-list">${["緊急対応", "現場管理", "提案対応"].map(label => `<div><span>${label}</span><b>${escapeHtml(t("preparing"))}</b><i style="width:0%"></i></div>`).join("")}</div></section>
-      <div class="modal-actions"><button class="btn btn-soft" data-staff-edit="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button><button class="btn btn-primary" data-staff-detail="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button></div>
+        ${infoItem(t("province"), staff.areas)}
+        ${infoItem(t("workContent"), staff.workContent)}
+      </div></section>
+      <section><h3>${escapeHtml(t("staffSkillsWork"))}</h3>${tagChips(staffTags(staff))}</section>
+      <section><h3>${escapeHtml(t("staffCurrentWorkload"))}</h3><div class="mini-kpi-row">${miniMetric(t("currentAssignments"), assignedActive.length)}${miniMetric(t("workload"), workload + "%")}${miniMetric(t("overdueAssigned"), overdue)}</div><div class="priority-list">${assignedActive.length ? assignedActive.slice(0, 4).map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState(t("noAssignedRequests"))}</div></section>
+      <section><h3>${escapeHtml(t("staffAutoAssign"))}</h3><div class="contact-grid">${infoItem(t("status"), isPaused || isDeleted ? t("off") : t("active"))}${infoItem(t("workTags"), staffTags(staff).join(", "))}${infoItem(t("department"), staffDepartment(staff))}${infoItem(t("workload"), workload + "%")}</div><p class="note">${escapeHtml(t("autoAssignPlanned"))}</p></section>
+      <section><h3>${escapeHtml(t("staffRecentHistory"))}</h3><div class="priority-list">${assigned.length ? assigned.map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState(t("noStaffHistory"))}</div></section>
+      <section><h3>${escapeHtml(t("staffOperations"))}</h3><div class="modal-actions">${actionButtons}</div></section>
     </aside>`;
   }
 
@@ -3215,6 +3280,65 @@
     return false;
   }
 
+  async function handleStaffAction(action, id) {
+    if (action === "close-detail") {
+      state.selectedStaff = "";
+      renderStaff();
+      return;
+    }
+    if (!id) return;
+    const staff = state.staff.find(item => getRowId(item) === id);
+    if (!staff && !["permanent-delete"].includes(action)) return;
+    if (action === "detail") {
+      state.selectedStaff = id;
+      renderStaff();
+      return;
+    }
+    if (action === "edit") {
+      renderStaffForm(staff);
+      return;
+    }
+    try {
+      let response;
+      if (action === "pause") {
+        if (!await confirmAction({ title: t("pauseStaff"), confirmLabel: t("pauseStaff"), variant: "warning" })) return;
+        response = await AdminAPI.updateStaff(id, { status: "off" });
+      }
+      if (action === "activate") {
+        if (!await confirmAction({ title: t("reactivateStaff"), confirmLabel: t("reactivateStaff") })) return;
+        response = await AdminAPI.updateStaff(id, { status: "active" });
+      }
+      if (action === "delete") {
+        if (!await confirmAction({ title: t("confirmDelete"), confirmLabel: t("delete"), danger: true })) return;
+        response = await AdminAPI.deleteStaff(id, false);
+      }
+      if (action === "restore") {
+        if (!await confirmAction({ title: t("restoreTrashTitle"), message: t("restoreTrashText"), confirmLabel: t("restore") })) return;
+        response = await AdminAPI.restoreStaff(id);
+      }
+      if (action === "permanent-delete") {
+        if (!await confirmAction({ title: t("permanentDeleteTrashTitle"), message: t("permanentDeleteTrashText"), confirmLabel: t("permanentDelete"), danger: true })) return;
+        await AdminAPI.deleteStaff(id, true);
+        state.staff = state.staff.filter(item => getRowId(item) !== id);
+        state.selectedStaff = "";
+        renderStaff();
+        toast(t("permanentDeletedSuccess"));
+        return;
+      }
+      const updated = response?.data || response;
+      if (updated && getRowId(updated)) {
+        const index = state.staff.findIndex(item => getRowId(item) === getRowId(updated));
+        if (index >= 0) state.staff[index] = Object.assign({}, state.staff[index], updated);
+      }
+      if (action === "delete") state.selectedStaff = "";
+      renderStaff();
+      toast(action === "restore" ? t("restoredSuccess") : t("saved"));
+    } catch (error) {
+      console.error(error);
+      toast(t("failed"));
+    }
+  }
+
   function bindEvents() {
     console.log("[admin-v2] binding events");
     const savedSidebarState = localStorage.getItem("adminV2SidebarCollapsed");
@@ -3448,6 +3572,12 @@
           console.error(error);
           toast(t("failed"));
         }
+        return;
+      }
+
+      const staffAction = event.target.closest("[data-staff-action]");
+      if (staffAction) {
+        await handleStaffAction(staffAction.dataset.staffAction, staffAction.dataset.staffId || state.selectedStaff);
         return;
       }
 
