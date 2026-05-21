@@ -847,7 +847,7 @@
     outsideCurrentDepartment: "現在の部門外",
     createContentFromSelectedWork: "選択業務から担当内容を作成",
     manageWorkMaster: "業務マスタを管理",
-    noSelectedWorkTypes: "業務が選択されていません。",
+    noSelectedWorkTypes: "業務がありません",
     viewAllWorkTypes: "すべて表示",
     overwriteWorkContentTitle: "担当内容を上書きしますか？",
     overwriteWorkContentText: "現在の担当内容は選択業務の一覧で置き換えられます。",
@@ -912,7 +912,7 @@
     outsideCurrentDepartment: "Ngoài bộ phận hiện tại",
     createContentFromSelectedWork: "Tạo nội dung phụ trách từ công việc đã chọn",
     manageWorkMaster: "Quản lý danh mục công việc",
-    noSelectedWorkTypes: "Chưa chọn công việc nào.",
+    noSelectedWorkTypes: "Chưa có công việc nào",
     viewAllWorkTypes: "Xem tất cả",
     overwriteWorkContentTitle: "Ghi đè nội dung phụ trách?",
     overwriteWorkContentText: "Nội dung phụ trách hiện tại sẽ được thay bằng danh sách công việc đã chọn.",
@@ -2323,10 +2323,65 @@
     const raw = []
       .concat(toList(staff?.workTags))
       .concat(toList(staff?.skills))
-      .concat(toList(staff?.workContent))
-      .concat(toList(staff?.areas))
-      .concat(toList(staff?.department));
-    return [...new Set(raw.map(item => String(item || "").trim()).filter(Boolean))];
+      .concat(toList(staff?.workContent));
+    return cleanStaffWorkTags(Object.assign({}, staff, { workTags: raw }));
+  }
+
+  function departmentTokenSet() {
+    const values = [];
+    (state.workMaster?.departments || []).forEach(dept => {
+      values.push(dept.id, dept._id, dept.code, dept.departmentCode, dept.nameVi, dept.nameJa);
+    });
+    return new Set(values.map(normalizeTag).filter(Boolean));
+  }
+
+  function cleanStaffWorkTags(staff) {
+    const departmentTokens = departmentTokenSet();
+    [staff?.departmentCode, staff?.department, staff?.areas].forEach(value => {
+      const dept = findDepartmentByCodeOrLabel(value);
+      [value, dept?.code, dept?.nameVi, dept?.nameJa].forEach(token => {
+        const normalized = normalizeTag(token);
+        if (normalized) departmentTokens.add(normalized);
+      });
+    });
+    const raw = toList(staff?.workTags).concat(toList(staff?.skills));
+    if (!raw.length) raw.push(...toList(staff?.workContent));
+    const seen = new Set();
+    return raw.map(item => String(item || "").trim()).filter(item => {
+      const normalized = normalizeTag(item);
+      if (!normalized || departmentTokens.has(normalized) || seen.has(normalized)) return false;
+      seen.add(normalized);
+      return true;
+    });
+  }
+
+  function findWorkTypeByIdOrCode(value) {
+    const normalized = normalizeTag(value);
+    if (!normalized) return null;
+    return (state.workMaster?.workTypes || []).find(item => [item.id, item._id, item.code].some(candidate => normalizeTag(candidate) === normalized)) || null;
+  }
+
+  function getStaffWorkItems(staff) {
+    const ids = toList(staff?.workTypeIds);
+    const seen = new Set();
+    const items = [];
+    const addWorkType = (workType, fallback) => {
+      const key = normalizeTag(workType?.id || workType?._id || workType?.code || fallback);
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      items.push({
+        id: workType?.id || workType?._id || fallback,
+        code: workType?.code || fallback,
+        name: workType ? workMasterLabel(workType) : fallback
+      });
+    };
+    ids.forEach(id => addWorkType(findWorkTypeByIdOrCode(id), String(id || "").trim()));
+    if (items.length) return items;
+    cleanStaffWorkTags(staff).forEach(tag => {
+      const found = findWorkTypeByValue(tag);
+      addWorkType(found, tag);
+    });
+    return items;
   }
 
   function activeAssignmentCount(staff) {
@@ -2341,9 +2396,11 @@
   function recommendAssignee(request) {
     const reqTags = requestTags(request);
     const requestWorkTypeIds = toList(request?.workTypeIds);
+    const requestDepartmentCode = compactText(request?.departmentCode, "");
     const normalizedReqTags = reqTags.map(normalizeTag).filter(Boolean);
     let best = null;
     state.staff.filter(staff => !["off", "inactive", "deleted"].includes(String(staff.status || "active")) && staff.autoAssignEnabled !== false && !staff.deletedAt).forEach(staff => {
+      if (requestDepartmentCode && compactText(staff.departmentCode, "") && compactText(staff.departmentCode, "") !== requestDepartmentCode) return;
       const staffWorkTypeIds = toList(staff.workTypeIds);
       const idMatches = requestWorkTypeIds.filter(id => staffWorkTypeIds.includes(id));
       const tags = staffTags(staff);
@@ -2445,7 +2502,7 @@
       const deptText = staffDepartment(staff);
       const statusText = staff.status || "active";
       if (statusText === "deleted" || staff.deletedAt) return false;
-      const text = [staff.name, staff.email, staff.phone, deptText, staffRole(staff), staff.workContent, staffTags(staff).join(" ")].join(" ").toLowerCase();
+      const text = [staff.name, staff.email, staff.phone, deptText, staffRole(staff), staff.workContent, getStaffWorkItems(staff).map(item => item.name).join(" ")].join(" ").toLowerCase();
       const assigned = activeAssignmentCount(staff);
       const assignedOk = assignedFilter === "all" || (assignedFilter === "has" ? assigned > 0 : assigned === 0);
       return (dept === "all" || deptText === dept) && (status === "all" || statusText === status) && assignedOk && text.includes(search.toLowerCase());
@@ -2875,7 +2932,7 @@
     return `<tr class="${isSelected ? "selected-row" : ""}">
       <td><div class="identity-cell">${avatarHtml(staff)}<div><strong>${escapeHtml(staff.name || "-")}</strong><span>${escapeHtml(staff.email || staff.phone || "-")}</span></div></div></td>
       <td>${escapeHtml(staffRole(staff))}<div class="subtext">${escapeHtml(staffDepartment(staff))}</div></td>
-      <td>${tagChips(staffTags(staff), 3)}<div class="subtext text-clamp-1">${escapeHtml(staff.workContent || "")}</div></td>
+      <td>${tagChips(getStaffWorkItems(staff).map(item => item.name), 3)}<div class="subtext text-clamp-1">${escapeHtml(staff.workContent || "")}</div></td>
       <td>${assigned}</td>
       <td><div class="progress-cell"><span style="width:${workload}%"></span></div><small>${workload}%</small></td>
       <td><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span></td>
@@ -2916,6 +2973,8 @@
     const overdue = assignedActive.filter(isOverdue).length;
     const isPaused = ["off", "inactive"].includes(status);
     const isDeleted = status === "deleted" || staff.deletedAt;
+    const workItems = getStaffWorkItems(staff);
+    const staffDescription = staff.staffDescription || staff.introduction || "";
     const actionButtons = isDeleted
       ? `<button class="btn btn-soft" type="button" data-staff-action="restore" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("restore"))}</button><button class="btn btn-danger" type="button" data-staff-action="permanent-delete" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("permanentDelete"))}</button>`
       : `<button class="btn btn-soft" type="button" data-staff-action="edit" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("editStaffProfile"))}</button><button class="btn btn-soft" type="button" data-staff-action="${isPaused ? "activate" : "pause"}" data-staff-id="${escapeHtml(id)}">${escapeHtml(isPaused ? t("reactivateStaff") : t("pauseStaff"))}</button><button class="btn btn-danger" type="button" data-staff-action="delete" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>`;
@@ -2934,15 +2993,17 @@
         ${infoItem(t("createdAt"), formatDate(staff.createdAt))}
         ${staff.updatedAt ? infoItem(t("updatedAt"), formatDate(staff.updatedAt)) : ""}
       </div></section>
-      <section><h3>${escapeHtml(t("staffDepartmentRole"))}</h3><div class="contact-grid">
-        ${infoItem(t("department"), staffDepartment(staff))}
-        ${infoItem(t("role"), staffRole(staff))}
-        ${infoItem(t("province"), staff.areas)}
-        ${infoItem(t("workContent"), staff.workContent)}
-      </div></section>
-      <section><h3>${escapeHtml(t("staffSkillsWork"))}</h3>${tagChips(staffTags(staff))}</section>
+      <section><h3>${escapeHtml(t("staffAssignment"))}</h3>
+        <div class="contact-grid">
+          ${infoItem(t("primaryDepartment"), staffDepartment(staff))}
+          ${infoItem(t("staffAutoAssign"), staffAutoAssignText(staff))}
+          ${infoItem(t("workContent"), staff.workContent)}
+          ${infoItem(t("staffDescriptionSection"), staffDescription)}
+        </div>
+        <h3>${escapeHtml(t("staffAssignableWork"))}</h3>
+        ${workItems.length ? tagChips(workItems.map(item => item.name)) : showEmptyState(t("noSelectedWorkTypes"))}
+      </section>
       <section><h3>${escapeHtml(t("staffCurrentWorkload"))}</h3><div class="mini-kpi-row">${miniMetric(t("currentAssignments"), assignedActive.length)}${miniMetric(t("workload"), workload + "%")}${miniMetric(t("overdueAssigned"), overdue)}</div><div class="priority-list">${assignedActive.length ? assignedActive.slice(0, 4).map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState(t("noAssignedRequests"))}</div></section>
-      <section><h3>${escapeHtml(t("staffAutoAssign"))}</h3><div class="contact-grid">${infoItem(t("staffAutoAssign"), staffAutoAssignText(staff))}${infoItem(t("status"), isPaused || isDeleted ? t("off") : t("active"))}${infoItem(t("workTags"), staffTags(staff).join(", "))}${infoItem(t("department"), staffDepartment(staff))}</div></section>
       <section><h3>${escapeHtml(t("staffRecentHistory"))}</h3><div class="priority-list">${assigned.length ? assigned.map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState(t("noStaffHistory"))}</div></section>
       <section><h3>${escapeHtml(t("staffOperations"))}</h3><div class="modal-actions">${actionButtons}</div></section>
     </aside>`;
@@ -2963,15 +3024,17 @@
       }
     }
     const status = staff.status || "active";
+    const workItems = getStaffWorkItems(staff);
+    const staffDescription = staff.staffDescription || staff.introduction || "";
     const infoFields = [
       [t("name"), staff.name],
       [t("phone"), staff.phone],
       [t("email"), staff.email],
-      [t("department"), staff.department],
+      [t("primaryDepartment"), staffDepartment(staff)],
       [t("staffAutoAssign"), staffAutoAssignText(staff)],
       [t("status"), staffStatusMap[status] || status],
       [t("note"), staff.note],
-      [t("staffDescription"), staff.introduction],
+      [t("staffDescriptionSection"), staffDescription],
       [t("createdAt"), formatDate(staff.createdAt)]
     ];
     openDrawer(`
@@ -2983,7 +3046,18 @@
         ${drawerTabs(activeTab, [["info", t("info")], ["work", t("work")], ["history", t("history")]])}
         <div class="drawer-body">
           ${activeTab === "info" ? `<div class="info-grid">${infoFields.map(([label, value]) => infoItem(label, value)).join("")}</div>` : ""}
-          ${activeTab === "work" ? `<section class="work-detail"><h3>${escapeHtml(t("workContent"))}</h3><p>${escapeHtml(staff.workContent || "-")}</p><h3>${escapeHtml(t("workTags"))}</h3>${tagChips(staff.workTags)}<h3>Skills</h3>${tagChips(staff.skills)}<h3>Areas</h3>${tagChips(staff.areas)}</section>` : ""}
+          ${activeTab === "work" ? `<section class="work-detail">
+            <h3>${escapeHtml(t("staffAssignment"))}</h3>
+            <div class="info-grid">
+              ${infoItem(t("primaryDepartment"), staffDepartment(staff))}
+              ${infoItem(t("staffAutoAssign"), staffAutoAssignText(staff))}
+              ${infoItem(t("workContent"), staff.workContent)}
+              ${infoItem(t("staffDescriptionSection"), staffDescription)}
+              ${infoItem(t("internalMemo"), staff.note)}
+            </div>
+            <h3>${escapeHtml(t("staffAssignableWork"))}</h3>
+            ${workItems.length ? tagChips(workItems.map(item => item.name)) : showEmptyState(t("noSelectedWorkTypes"))}
+          </section>` : ""}
           ${activeTab === "history" ? `<section><div class="priority-list">${history.length ? history.map(item => `<div class="priority-item"><strong>${escapeHtml(item.requestCode || item.id || "-")}</strong><span>${escapeHtml(item.title || getRequestContent(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span><small>${escapeHtml(item.createdAt || "")}</small></div>`).join("") : showEmptyState(t("staffHistoryPlaceholder"))}</div></section>` : ""}
         </div>
       </article>
@@ -3153,11 +3227,11 @@
   function allStaffWorkTags(selected) {
     const masterTags = activeMasterItems("workTypes").map(workMasterLabel);
     if (masterTags.length) {
-      const existing = state.staff.flatMap(staff => toList(staff.workTags).concat(toList(staff.skills)));
+      const existing = state.staff.flatMap(staff => cleanStaffWorkTags(staff));
       return optionPool(masterTags.concat(existing), selected);
     }
     const groups = staffWorkTagGroups();
-    const existing = state.staff.flatMap(staff => toList(staff.workTags).concat(toList(staff.skills)));
+    const existing = state.staff.flatMap(staff => cleanStaffWorkTags(staff));
     return optionPool(Object.values(groups).flat().concat(existing), selected);
   }
 
@@ -3208,15 +3282,17 @@
       seen.add(normalized);
       entries.push(entry);
     };
-    toList(staff?.workTypeIds).forEach(value => {
+    const ids = toList(staff?.workTypeIds);
+    ids.forEach(value => {
       const found = findWorkTypeByValue(value);
       if (found) addEntry({ id: workTypeKey(found), code: found.code, label: workMasterLabel(found), departmentCode: found.departmentCode, legacy: false });
       else addEntry({ id: value, code: value, label: value, departmentCode: "", legacy: true });
     });
-    toList(staff?.workTags).concat(toList(staff?.skills)).forEach(value => {
+    if (ids.length) return entries;
+    cleanStaffWorkTags(staff).forEach(value => {
       const found = findWorkTypeByValue(value);
       if (found) addEntry({ id: workTypeKey(found), code: found.code, label: workMasterLabel(found), departmentCode: found.departmentCode, legacy: false });
-      else addEntry({ id: value, code: value, label: value, departmentCode: staffTagDepartmentKey(value), legacy: true });
+      else addEntry({ id: value, code: value, label: value, departmentCode: "", legacy: true });
     });
     return entries;
   }
@@ -4269,8 +4345,16 @@
     payload.set("departmentCode", departmentCode);
     payload.set("department", currentStaffDepartmentLabel() === "-" ? "" : currentStaffDepartmentLabel());
     payload.set("autoAssignEnabled", raw.get("autoAssignEnabled") === "on" ? "true" : "false");
+    payload.set("staffDescription", raw.get("introduction") || "");
     const selectedWork = readSelectedWorkEntries();
-    const workTags = selectedWork.map(item => String(item.label || item.code || item.id || "").trim()).filter(Boolean);
+    const departmentTokens = departmentTokenSet();
+    [departmentCode, currentStaffDepartmentLabel()].forEach(value => {
+      const normalized = normalizeTag(value);
+      if (normalized) departmentTokens.add(normalized);
+    });
+    const workTags = selectedWork
+      .map(item => String(item.label || item.code || item.id || "").trim())
+      .filter(value => value && !departmentTokens.has(normalizeTag(value)));
     if (workTags.length) workTags.forEach(tag => payload.append("workTags", tag));
     else payload.set("workTags", "");
     const workTypeIds = selectedWork.filter(item => !item.legacy).map(item => item.id || item.code).filter(Boolean);
@@ -4284,7 +4368,14 @@
   }
 
   function selectedStaffWorkTags() {
-    return readSelectedWorkEntries().map(item => item.label || item.code || item.id).filter(Boolean);
+    const departmentTokens = departmentTokenSet();
+    [currentStaffDepartmentCode(), currentStaffDepartmentLabel()].forEach(value => {
+      const normalized = normalizeTag(value);
+      if (normalized) departmentTokens.add(normalized);
+    });
+    return readSelectedWorkEntries()
+      .map(item => String(item.label || item.code || item.id || "").trim())
+      .filter(value => value && !departmentTokens.has(normalizeTag(value)));
   }
 
   function renderSelectedStaffTags() {

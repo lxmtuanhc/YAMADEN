@@ -305,6 +305,7 @@ const StaffSchema = new mongoose.Schema({
   workTypeIds: [String],
   departmentCode: String,
   autoAssignEnabled: { type: Boolean, default: true },
+  staffDescription: String,
   note: String,
   introduction: String,
   status: { type: String, default: "active" },
@@ -748,8 +749,9 @@ function publicStaffProfile(staff) {
     position: staff.position || "",
     title: staff.title || "",
     workContent: staff.workContent || "",
+    staffDescription: staff.staffDescription || staff.introduction || "",
     skills: staff.skills || "",
-    workTags: Array.isArray(staff.workTags) ? staff.workTags : [],
+    workTags: staffTags(staff),
     workTypeIds: Array.isArray(staff.workTypeIds) ? staff.workTypeIds : [],
     departmentCode: staff.departmentCode || "",
     autoAssignEnabled: staff.autoAssignEnabled !== false,
@@ -1064,11 +1066,12 @@ function parseRequestTags(value) {
 
 function staffTags(staff) {
   const fromArray = Array.isArray(staff.workTags) ? staff.workTags : [];
-  const fromText = [staff.skills, staff.workContent, staff.areas, staff.department]
+  const departmentTokens = normalizeTagList([staff.department, staff.departmentCode, staff.areas]);
+  const fromText = [staff.skills, staff.workContent]
     .join(",")
     .split(/[,;、；\n\r]+/);
 
-  return normalizeTagList(fromArray.concat(fromText));
+  return normalizeTagList(fromArray.concat(fromText)).filter(tag => !departmentTokens.includes(normalizeAssignmentTag(tag)));
 }
 
 function uniqueStaffWorkOptions(staffList) {
@@ -1119,7 +1122,13 @@ async function findBestAssignee(issueTags) {
   return best;
 }
 
-async function findBestAssigneeForRequest({ issueTags, workTypeIds }) {
+function staffDepartmentMatchesRequest(staff, departmentCode) {
+  const requested = String(departmentCode || "").trim();
+  if (!requested) return true;
+  return String(staff.departmentCode || "").trim() === requested;
+}
+
+async function findBestAssigneeForRequest({ issueTags, workTypeIds, departmentCode }) {
   const ids = normalizeTagList(workTypeIds);
   if (ids.length) {
     const staffList = await Staff.find({
@@ -1129,7 +1138,7 @@ async function findBestAssigneeForRequest({ issueTags, workTypeIds }) {
     });
     const best = staffList.find(staff => {
       const staffIds = normalizeTagList(staff.workTypeIds);
-      return ids.some(id => staffIds.includes(id));
+      return staffDepartmentMatchesRequest(staff, departmentCode) && ids.some(id => staffIds.includes(id));
     });
     if (best) return best;
   }
@@ -1852,6 +1861,8 @@ app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res)
     const workTypeIds = Array.isArray(req.body.workTypeIds)
       ? req.body.workTypeIds.map(item => String(item || "").trim()).filter(Boolean)
       : parseRequestTags(req.body.workTypeIds);
+    const departmentTokens = normalizeTagList([req.body.department, req.body.departmentCode, req.body.areas]);
+    const cleanWorkTags = workTags.filter(tag => !departmentTokens.includes(normalizeAssignmentTag(tag)));
 
     let avatar = req.body.avatar || "";
 
@@ -1866,16 +1877,17 @@ app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res)
       phone: req.body.phone || "",
       email: req.body.email || "",
       areas: req.body.areas || req.body.department || "",
-      skills: req.body.skills || req.body.workContent || workTags.join(", "),
+      skills: req.body.skills || req.body.workContent || cleanWorkTags.join(", "),
       department: req.body.department || req.body.areas || "",
       departmentCode: req.body.departmentCode || "",
       autoAssignEnabled: req.body.autoAssignEnabled === undefined ? true : req.body.autoAssignEnabled === true || req.body.autoAssignEnabled === "true",
       role: req.body.role || req.body.position || req.body.title || "",
       position: req.body.position || "",
       title: req.body.title || "",
-      workContent: req.body.workContent || req.body.skills || workTags.join(", "),
-      workTags,
+      workContent: req.body.workContent || req.body.skills || cleanWorkTags.join(", "),
+      workTags: cleanWorkTags,
       workTypeIds,
+      staffDescription: req.body.staffDescription || req.body.introduction || "",
       note: req.body.note || req.body.introduction || "",
       introduction: req.body.introduction || "",
       status: req.body.status || "active",
@@ -1898,16 +1910,18 @@ app.put("/admin/staff/:id", requireAdmin, upload.single("avatar"), async (req, r
     const staff = await Staff.findById(req.params.id);
     if (!staff) return res.status(404).json({ message: "Staff not found" });
 
-    ["name", "phone", "email", "areas", "skills", "department", "role", "position", "title", "workContent", "note", "introduction", "status"].forEach(field => {
+    ["name", "phone", "email", "areas", "skills", "department", "role", "position", "title", "workContent", "staffDescription", "note", "introduction", "status"].forEach(field => {
       if (req.body[field] !== undefined) staff[field] = req.body[field];
     });
     if (req.body.departmentCode !== undefined) staff.departmentCode = req.body.departmentCode;
     if (req.body.autoAssignEnabled !== undefined) staff.autoAssignEnabled = req.body.autoAssignEnabled === true || req.body.autoAssignEnabled === "true";
 
     if (req.body.workTags !== undefined) {
+      const departmentTokens = normalizeTagList([req.body.department ?? staff.department, req.body.departmentCode ?? staff.departmentCode, req.body.areas ?? staff.areas]);
       staff.workTags = Array.isArray(req.body.workTags)
         ? req.body.workTags.map(item => String(item || "").trim()).filter(Boolean)
         : parseRequestTags(req.body.workTags);
+      staff.workTags = staff.workTags.filter(tag => !departmentTokens.includes(normalizeAssignmentTag(tag)));
     }
     if (req.body.workTypeIds !== undefined) {
       staff.workTypeIds = Array.isArray(req.body.workTypeIds)
@@ -2297,7 +2311,7 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
     const issueTags = parseRequestTags(req.body.issueTags);
     const workTypeIds = parseRequestTags(req.body.workTypeIds);
     const departmentCode = cleanText(req.body.departmentCode);
-    const bestAssignee = await findBestAssigneeForRequest({ issueTags, workTypeIds });
+    const bestAssignee = await findBestAssigneeForRequest({ issueTags, workTypeIds, departmentCode });
     const timeline = normalizeTimelineEvents([{
       id: "tl-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
       type: "submitted",
