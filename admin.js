@@ -1124,6 +1124,7 @@
     settingsSystemData: "\u30b7\u30b9\u30c6\u30e0\u30c7\u30fc\u30bf",
     settingsSystemDataSub: "\u30c7\u30fc\u30bf\u51fa\u529b\u3001\u30ed\u30b0",
     linkLater: "\u5f8c\u3067\u9023\u643a\u4e88\u5b9a",
+    linked: "\u9023\u643a\u6e08\u307f",
     inUse: "\u4f7f\u7528\u4e2d",
     configured: "\u8a2d\u5b9a\u6e08\u307f",
     notConfigured: "\u672a\u8a2d\u5b9a",
@@ -1219,6 +1220,7 @@
     settingsSystemData: "D\u1eef li\u1ec7u h\u1ec7 th\u1ed1ng",
     settingsSystemDataSub: "Xu\u1ea5t d\u1eef li\u1ec7u, nh\u1eadt k\u00fd",
     linkLater: "S\u1ebd li\u00ean k\u1ebft sau",
+    linked: "\u0110\u00e3 li\u00ean k\u1ebft",
     inUse: "\u0110ang d\u00f9ng",
     configured: "\u0110\u00e3 c\u1ea5u h\u00ecnh",
     notConfigured: "Ch\u01b0a c\u1ea5u h\u00ecnh",
@@ -4344,10 +4346,20 @@
 
   function renderSettingsOverview() {
     const langLabel = state.lang === "vi" ? "Ti\u1ebfng Vi\u1ec7t" : "\u65e5\u672c\u8a9e";
-    const hasWorkMaster = (state.workMaster.departments || []).length || (state.workMaster.workGroups || []).length || (state.workMaster.workTypes || []).length;
+    const visibleStaff = state.staff.filter(staff => String(staff.status || "active") !== "deleted" && !staff.deletedAt);
+    const departments = activeMasterItems("departments");
+    const workTypes = activeMasterItems("workTypes");
+    const visibleUsers = state.users.filter(user => !isSoftDeleted(user));
+    const pendingUsers = visibleUsers.filter(user => normalizeUserStatusValue(user.status) === "pendingApproval" || normalizeUserStatusValue(user.status) === "pending").length;
+    const activeUsers = visibleUsers.filter(user => normalizeUserStatusValue(user.status) === "active").length;
+    const visibleRequests = state.requests.filter(request => !isSoftDeleted(request));
+    const processingRequests = visibleRequests.filter(request => ["processing", "contacted", "site_done", "quoted", "ordered"].includes(normalizeRequestStatus(request.status))).length;
+    const completedRequests = visibleRequests.filter(request => normalizeRequestStatus(request.status) === "completed").length;
     return [
       settingCard("palette", t("languageRegion"), [t("currentLanguage") + ": " + langLabel, t("timezone") + ": Asia/Tokyo", t("dateTimeFormat") + ": YYYY/MM/DD HH:mm"], t("inUse"), "is-live"),
-      settingCard("users", t("workMaster"), [t("department"), t("workGroups"), t("workTypes")], hasWorkMaster ? t("workMasterLinked") : t("linkLater"), hasWorkMaster ? "is-live" : "is-planned"),
+      settingCard("users", t("settingsStaffWork"), [t("staffCount") + ": " + visibleStaff.length, t("departments") + ": " + departments.length, t("workTypes") + ": " + workTypes.length], t("linked"), "is-live"),
+      settingCard("userCheck", t("settingsCustomers"), [t("customersCount") + ": " + visibleUsers.length, customerStatusLabel("pendingApproval") + ": " + pendingUsers, customerStatusLabel("active") + ": " + activeUsers], t("inUse"), "is-live"),
+      settingCard("clipboard", t("settingsRequestStatus"), [t("totalRequests") + ": " + visibleRequests.length, t("processing") + ": " + processingRequests, formatStatus("completed") + ": " + completedRequests], t("inUse"), "is-live"),
       settingCard("receipt", t("quoteTax"), [t("defaultTax"), t("currency") + ": JPY", t("quoteTemplate")], t("linkLater"), "is-planned"),
       settingCard("bell", t("settingsNotifications"), ["Slack", "Email", "LINE WORKS"], t("linkLater"), "is-planned"),
       settingCard("database", t("systemData"), [t("csvExport"), t("adminLogs"), t("backup")], t("linkLater"), "is-planned")
@@ -4356,7 +4368,6 @@
 
   function renderSettingsStaffWork() {
     const departments = activeMasterItems("departments");
-    const groups = activeMasterItems("workGroups");
     const types = activeMasterItems("workTypes");
     const fallbackDepartments = state.lang === "vi"
       ? ["Gi\u00e1m \u0111\u1ed1c", "Koumu", "FS", "Kinh doanh", "Thi c\u00f4ng", "Thi\u1ebft k\u1ebf", "D\u1ef1 to\u00e1n"]
@@ -4364,9 +4375,8 @@
     const preview = (departments.length ? departments.map(workMasterLabel) : fallbackDepartments).slice(0, 8);
     return [
       settingCard("users", t("department"), t("departmentsCardDesc"), t("inUse"), "is-live", `<div class="settings-metrics"><span><b>${departments.length || preview.length}</b>${escapeHtml(t("totalDepartments"))}</span><span><b>${departments.length}</b>${escapeHtml(t("currentlyUsed"))}</span></div><div class="settings-chip-list">${preview.map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("manageLater"))}</button>`),
-      settingCard("clipboard", t("workGroups"), t("workGroupsDesc"), groups.length ? t("inUse") : t("linkLater"), groups.length ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${groups.length}</b>${escapeHtml(t("workGroups"))}</span></div><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("manageLater"))}</button>`),
-      settingCard("clipboard", t("workTypes"), t("workTypesDesc"), types.length ? t("inUse") : t("linkLater"), types.length ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${types.length}</b>${escapeHtml(t("workTypes"))}</span></div><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("manageLater"))}</button>`),
-      settingCard("shield", t("autoAssign"), t("autoAssignDesc"), t("linkLater"), "is-planned")
+      settingCard("clipboard", t("workTypes"), t("workTypesDesc"), types.length ? t("inUse") : t("linkLater"), types.length ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${types.length}</b>${escapeHtml(t("workTypes"))}</span><span><b>${escapeHtml(t("staff"))}</b>${escapeHtml(t("workMasterLinked"))}</span></div><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("manageLater"))}</button>`),
+      settingCard("shield", t("autoAssign"), [t("autoAssignDesc"), t("department"), t("workTypes"), t("status")], t("inUse"), "is-live")
     ].join("");
   }
 
