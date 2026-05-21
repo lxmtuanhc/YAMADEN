@@ -1987,7 +1987,7 @@ app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res)
       role: req.body.role || req.body.position || req.body.title || "",
       position: req.body.position || "",
       title: req.body.title || "",
-      workContent: req.body.workContent || "",
+      workContent: "",
       workTags: cleanWorkTags,
       workTypeIds,
       staffDescription: req.body.staffDescription || req.body.introduction || "",
@@ -2013,7 +2013,7 @@ app.put("/admin/staff/:id", requireAdmin, upload.single("avatar"), async (req, r
     const staff = await Staff.findById(req.params.id);
     if (!staff) return res.status(404).json({ message: "Staff not found" });
 
-    ["name", "phone", "email", "areas", "skills", "department", "role", "position", "title", "workContent", "staffDescription", "note", "introduction", "status"].forEach(field => {
+    ["name", "phone", "email", "areas", "skills", "department", "role", "position", "title", "staffDescription", "note", "introduction", "status"].forEach(field => {
       if (req.body[field] !== undefined) staff[field] = req.body[field];
     });
     if (req.body.departmentCode !== undefined) staff.departmentCode = req.body.departmentCode;
