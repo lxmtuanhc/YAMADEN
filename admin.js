@@ -605,6 +605,20 @@
     staffOrganization: "\u7d44\u7e54",
     staffAssignableWork: "\u5bfe\u5fdc\u53ef\u80fd\u696d\u52d9",
     internalMemo: "\u5185\u90e8\u30e1\u30e2",
+    staffWorkGroup: "\u696d\u52d9\u30b0\u30eb\u30fc\u30d7",
+    selectedTags: "\u9078\u629e\u6e08\u307f",
+    tagSearchPlaceholder: "\u696d\u52d9\u3092\u691c\u7d22...",
+    tagsByDepartment: "\u90e8\u9580\u5225",
+    allTags: "\u3059\u3079\u3066",
+    outsideDepartmentTags: "\u90e8\u9580\u5916\u30bf\u30b0",
+    createContentFromTags: "\u30bf\u30b0\u304b\u3089\u5185\u5bb9\u3092\u4f5c\u6210",
+    autoAssignJoin: "\u81ea\u52d5\u5272\u308a\u5f53\u3066\u306b\u53c2\u52a0",
+    maxActiveRequests: "\u6700\u5927\u62c5\u5f53\u6570",
+    assignPriority: "\u512a\u5148\u5ea6",
+    low: "\u4f4e",
+    normal: "\u901a\u5e38",
+    high: "\u9ad8",
+    assignNote: "\u5272\u308a\u5f53\u3066\u30e1\u30e2",
     avatar: "\u30a2\u30d0\u30bf\u30fc",
     area: "\u5bfe\u5fdc\u30a8\u30ea\u30a2",
     areas: "\u5bfe\u5fdc\u30a8\u30ea\u30a2",
@@ -739,6 +753,20 @@
     staffOrganization: "T\u1ed5 ch\u1ee9c",
     staffAssignableWork: "C\u00f4ng vi\u1ec7c c\u00f3 th\u1ec3 ph\u1ee5 tr\u00e1ch",
     internalMemo: "Ghi ch\u00fa n\u1ed9i b\u1ed9",
+    staffWorkGroup: "Nh\u00f3m c\u00f4ng vi\u1ec7c",
+    selectedTags: "\u0110\u00e3 ch\u1ecdn",
+    tagSearchPlaceholder: "T\u00ecm c\u00f4ng vi\u1ec7c...",
+    tagsByDepartment: "Theo b\u1ed9 ph\u1eadn",
+    allTags: "T\u1ea5t c\u1ea3",
+    outsideDepartmentTags: "Tag ngo\u00e0i b\u1ed9 ph\u1eadn",
+    createContentFromTags: "T\u1ea1o n\u1ed9i dung t\u1eeb tag",
+    autoAssignJoin: "Tham gia t\u1ef1 \u0111\u1ed9ng ph\u00e2n c\u00f4ng",
+    maxActiveRequests: "T\u1ea3i t\u1ed1i \u0111a",
+    assignPriority: "\u01afu ti\u00ean nh\u1eadn vi\u1ec7c",
+    low: "Th\u1ea5p",
+    normal: "Th\u01b0\u1eddng",
+    high: "Cao",
+    assignNote: "Ghi ch\u00fa \u0111i\u1ec1u ph\u1ed1i",
     avatar: "\u1ea2nh \u0111\u1ea1i di\u1ec7n",
     area: "Khu v\u1ef1c",
     areas: "Khu v\u1ef1c",
@@ -2788,18 +2816,96 @@
     return uniqueOptions([].concat(base || []).concat(toList(current)));
   }
 
+  function staffDepartmentPresets() {
+    return state.lang === "vi"
+      ? [
+        { key: "design", label: "B\u1ed9 thi\u1ebft k\u1ebf" },
+        { key: "construction", label: "B\u1ed9 thi c\u00f4ng" },
+        { key: "survey", label: "B\u1ed9 kh\u1ea3o s\u00e1t" },
+        { key: "maintenance", label: "B\u1ed9 b\u1ea3o tr\u00ec" },
+        { key: "sales", label: "B\u1ed9 kinh doanh" },
+        { key: "operation", label: "B\u1ed9 nghi\u1ec7p v\u1ee5" },
+        { key: "executive", label: "Ban gi\u00e1m \u0111\u1ed1c" },
+        { key: "other", label: "B\u1ed9 kh\u00e1c" }
+      ]
+      : [
+        { key: "design", label: "\u8a2d\u8a08\u90e8" },
+        { key: "construction", label: "\u5de5\u4e8b\u90e8" },
+        { key: "survey", label: "\u8abf\u67fb\u90e8" },
+        { key: "maintenance", label: "\u4fdd\u5168\u90e8" },
+        { key: "sales", label: "\u55b6\u696d\u90e8" },
+        { key: "operation", label: "\u696d\u52d9\u90e8" },
+        { key: "executive", label: "\u793e\u9577\u30fb\u4ee3\u8868" },
+        { key: "other", label: "\u305d\u306e\u4ed6" }
+      ];
+  }
+
+  const staffDepartmentAliases = {
+    design: ["design", "thi\u1ebft k\u1ebf", "b\u1ed9 thi\u1ebft k\u1ebf", "\u8a2d\u8a08", "\u8a2d\u8a08\u90e8"],
+    construction: ["construction", "thi c\u00f4ng", "b\u1ed9 thi c\u00f4ng", "c\u00f4ng s\u1ef1", "\u5de5\u4e8b", "\u5de5\u4e8b\u90e8", "\u5de5\u52d9", "\u5de5\u52d9\u90e8"],
+    survey: ["survey", "kh\u1ea3o s\u00e1t", "b\u1ed9 kh\u1ea3o s\u00e1t", "\u8abf\u67fb", "\u8abf\u67fb\u90e8"],
+    maintenance: ["maintenance", "b\u1ea3o tr\u00ec", "b\u1ed9 b\u1ea3o tr\u00ec", "\u4fdd\u5168", "\u4fdd\u5168\u90e8", "\u30e1\u30f3\u30c6\u30ca\u30f3\u30b9"],
+    sales: ["sales", "kinh doanh", "b\u1ed9 kinh doanh", "\u55b6\u696d", "\u55b6\u696d\u90e8"],
+    operation: ["operation", "nghi\u1ec7p v\u1ee5", "b\u1ed9 nghi\u1ec7p v\u1ee5", "\u696d\u52d9", "\u696d\u52d9\u90e8"],
+    executive: ["executive", "gi\u00e1m \u0111\u1ed1c", "ban gi\u00e1m \u0111\u1ed1c", "\u793e\u9577", "\u4ee3\u8868", "\u793e\u9577\u30fb\u4ee3\u8868"]
+  };
+
+  function staffDepartmentKey(value) {
+    const normalized = compactText(value, "").toLowerCase();
+    for (const [key, aliases] of Object.entries(staffDepartmentAliases)) {
+      if (aliases.some(alias => normalized.includes(alias.toLowerCase()))) return key;
+    }
+    return "other";
+  }
+
+  function staffDepartmentLabelByKey(key) {
+    const found = staffDepartmentPresets().find(item => item.key === key);
+    return found ? found.label : staffDepartmentPresets().find(item => item.key === "other")?.label || "";
+  }
+
   function staffDepartmentOptions(current) {
-    const base = state.lang === "vi"
-      ? ["B\u1ed9 thi\u1ebft k\u1ebf", "B\u1ed9 thi c\u00f4ng", "B\u1ed9 kh\u1ea3o s\u00e1t", "B\u1ed9 b\u1ea3o tr\u00ec", "B\u1ed9 kinh doanh", "B\u1ed9 nghi\u1ec7p v\u1ee5", "B\u1ed9 kh\u00e1c"]
-      : ["\u8a2d\u8a08\u90e8", "\u5de5\u52d9\u90e8", "\u55b6\u696d\u90e8", "\u4fdd\u5168\u90e8", "\u696d\u52d9\u90e8", "\u305d\u306e\u4ed6"];
+    const base = staffDepartmentPresets().map(item => item.label);
     return optionPool(base.concat(state.staff.map(staffDepartment)), current);
   }
 
-  function staffTagOptions(current) {
-    const base = state.lang === "vi"
-      ? ["Thi\u1ebft k\u1ebf b\u1ea3n v\u1ebd", "Ch\u1ec9nh s\u1eeda b\u1ea3n v\u1ebd", "Thi\u1ebft k\u1ebf s\u01a1 \u0111\u1ed3 \u0111i\u1ec7n", "V\u1ebd CAD", "Kh\u1ea3o s\u00e1t hi\u1ec7n tr\u01b0\u1eddng", "B\u00e1o gi\u00e1", "Thi c\u00f4ng", "B\u1ea3o tr\u00ec"]
-      : ["\u56f3\u9762\u8a2d\u8a08", "\u56f3\u9762\u4fee\u6b63", "\u96fb\u6c17\u56f3\u9762\u8a2d\u8a08", "CAD\u4f5c\u56f3", "\u73fe\u5730\u8abf\u67fb", "\u898b\u7a4d", "\u65bd\u5de5", "\u4fdd\u5168"];
-    return optionPool(base.concat(state.staff.flatMap(staffTags)), current);
+  function staffWorkTagGroups() {
+    if (state.lang === "ja") {
+      return {
+        design: ["図面設計", "図面修正", "電気図面設計", "CAD作図", "制御盤設計", "盤設計", "設備配置設計", "電気システム設計", "施工図作成", "竣工図作成", "技術図面チェック", "材料計算", "容量計算", "施工計画設計", "技術基準チェック"],
+        construction: ["電気工事", "現場確認", "施工進捗確認", "現場安全確認", "施工品質確認", "竣工検査", "施工後点検", "施工調整", "引き渡し支援", "施工後確認"],
+        survey: ["現地調査", "見積調査", "設備状態確認", "会社状況確認", "適正設備提案"],
+        sales: ["顧客対応", "サービス提案", "依頼受付", "顧客打ち合わせ", "修理見積", "施工見積", "契約支援", "契約内容調整"],
+        maintenance: ["設備保全", "施工後点検", "現場トラブル対応", "重大トラブル対応"],
+        operation: ["社内業務調整", "会社運営管理", "人事管理", "工事売上確認", "施工計画確認", "技術書類承認"],
+        executive: ["工事承認", "見積承認", "契約承認", "大型案件受付", "重要課題対応", "顧客クレーム対応"],
+        other: []
+      };
+    }
+    return {
+      design: ["Thi\u1ebft k\u1ebf b\u1ea3n v\u1ebd", "Ch\u1ec9nh s\u1eeda b\u1ea3n v\u1ebd", "Thi\u1ebft k\u1ebf s\u01a1 \u0111\u1ed3 \u0111i\u1ec7n", "V\u1ebd CAD", "Thi\u1ebft k\u1ebf t\u1ee7 \u0111i\u1ec7n", "\u76e4\u8a2d\u8a08", "Thi\u1ebft k\u1ebf b\u1ed1 tr\u00ed thi\u1ebft b\u1ecb", "Thi\u1ebft k\u1ebf h\u1ec7 th\u1ed1ng \u0111i\u1ec7n", "L\u00e0m b\u1ea3n v\u1ebd thi c\u00f4ng", "L\u00e0m b\u1ea3n v\u1ebd ho\u00e0n c\u00f4ng", "Ki\u1ec3m tra b\u1ea3n v\u1ebd k\u1ef9 thu\u1eadt", "T\u00ednh to\u00e1n v\u1eadt t\u01b0", "T\u00ednh to\u00e1n c\u00f4ng su\u1ea5t", "Thi\u1ebft k\u1ebf ph\u01b0\u01a1ng \u00e1n thi c\u00f4ng", "Ki\u1ec3m tra ti\u00eau chu\u1ea9n k\u1ef9 thu\u1eadt"],
+      construction: ["Thi c\u00f4ng \u0111i\u1ec7n", "Ki\u1ec3m tra c\u00f4ng tr\u00ecnh", "Ki\u1ec3m tra ti\u1ebfn \u0111\u1ed9 thi c\u00f4ng", "Ki\u1ec3m tra an to\u00e0n c\u00f4ng tr\u00ecnh", "Ki\u1ec3m tra ch\u1ea5t l\u01b0\u1ee3ng c\u00f4ng tr\u00ecnh", "Nghi\u1ec7m thu c\u00f4ng tr\u00ecnh", "\u65bd\u5de5\u5f8c\u70b9\u691c", "\u0110i\u1ec1u ph\u1ed1i thi c\u00f4ng", "H\u1ed7 tr\u1ee3 b\u00e0n giao c\u00f4ng tr\u00ecnh", "Ki\u1ec3m tra sau thi c\u00f4ng"],
+      survey: ["Kh\u1ea3o s\u00e1t hi\u1ec7n tr\u01b0\u1eddng", "Kh\u1ea3o s\u00e1t \u0111\u1ec3 b\u00e1o gi\u00e1", "Ki\u1ec3m tra t\u00ecnh tr\u1ea1ng thi\u1ebft b\u1ecb", "Ki\u1ec3m tra t\u00ecnh tr\u1ea1ng c\u00f4ng ty", "T\u01b0 v\u1ea5n thi\u1ebft b\u1ecb ph\u00f9 h\u1ee3p"],
+      sales: ["Ch\u0103m s\u00f3c kh\u00e1ch h\u00e0ng", "T\u01b0 v\u1ea5n d\u1ecbch v\u1ee5", "Ti\u1ebfp nh\u1eadn y\u00eau c\u1ea7u kh\u00e1ch h\u00e0ng", "H\u1ecdp v\u1edbi kh\u00e1ch h\u00e0ng", "B\u00e1o gi\u00e1 s\u1eeda ch\u1eefa", "B\u00e1o gi\u00e1 thi c\u00f4ng", "H\u1ed7 tr\u1ee3 h\u1ee3p \u0111\u1ed3ng", "\u0110i\u1ec1u ch\u1ec9nh n\u1ed9i dung h\u1ee3p \u0111\u1ed3ng"],
+      maintenance: ["B\u1ea3o tr\u00ec thi\u1ebft b\u1ecb", "Ki\u1ec3m tra sau thi c\u00f4ng", "H\u1ed7 tr\u1ee3 x\u1eed l\u00fd v\u1ea5n \u0111\u1ec1 t\u1ea1i c\u00f4ng tr\u00ecnh", "H\u1ed7 tr\u1ee3 x\u1eed l\u00fd s\u1ef1 c\u1ed1 nghi\u00eam tr\u1ecdng"],
+      operation: ["\u0110i\u1ec1u ph\u1ed1i ho\u1ea1t \u0111\u1ed9ng c\u00f4ng ty", "Qu\u1ea3n l\u00fd v\u1eadn h\u00e0nh c\u00f4ng ty", "Qu\u1ea3n l\u00fd nh\u00e2n s\u1ef1", "Ki\u1ec3m tra doanh thu c\u00f4ng tr\u00ecnh", "X\u00e1c nh\u1eadn k\u1ebf ho\u1ea1ch thi c\u00f4ng", "Ph\u00ea duy\u1ec7t h\u1ed3 s\u01a1 k\u1ef9 thu\u1eadt"],
+      executive: ["Ph\u00ea duy\u1ec7t c\u00f4ng tr\u00ecnh", "Ph\u00ea duy\u1ec7t b\u00e1o gi\u00e1", "Ph\u00ea duy\u1ec7t h\u1ee3p \u0111\u1ed3ng", "Ti\u1ebfp nh\u1eadn d\u1ef1 \u00e1n l\u1edbn", "X\u1eed l\u00fd v\u1ea5n \u0111\u1ec1 quan tr\u1ecdng", "Gi\u1ea3i quy\u1ebft khi\u1ebfu n\u1ea1i kh\u00e1ch h\u00e0ng"],
+      other: []
+    };
+  }
+
+  function staffTagDepartmentKey(tag) {
+    const normalized = normalizeTag(tag);
+    const groups = staffWorkTagGroups();
+    for (const [key, tags] of Object.entries(groups)) {
+      if (tags.some(item => normalizeTag(item) === normalized)) return key;
+    }
+    return "outside";
+  }
+
+  function allStaffWorkTags(selected) {
+    const groups = staffWorkTagGroups();
+    const existing = state.staff.flatMap(staff => toList(staff.workTags).concat(toList(staff.skills)));
+    return optionPool(Object.values(groups).flat().concat(existing), selected);
   }
 
   function staffStatusLabel(status) {
@@ -2819,21 +2925,48 @@
     return `<label class="staff-edit-field"><span>${escapeHtml(label)}</span><input name="${escapeHtml(name)}" type="${escapeHtml(type)}" value="${escapeHtml(value || "")}" ${extra}></label>`;
   }
 
-  function staffTextareaField(name, label, value) {
-    return `<label class="staff-edit-field full"><span>${escapeHtml(label)}</span><textarea name="${escapeHtml(name)}">${escapeHtml(value || "")}</textarea></label>`;
+  function staffTextareaField(name, label, value, extra = "") {
+    return `<label class="staff-edit-field full"><span>${escapeHtml(label)}</span><textarea name="${escapeHtml(name)}" ${extra}>${escapeHtml(value || "")}</textarea></label>`;
   }
 
   function staffSelectField(name, label, options, selected) {
     return `<label class="staff-edit-field"><span>${escapeHtml(label)}</span><select name="${escapeHtml(name)}">${renderSelectOptions(options, selected)}</select></label>`;
   }
 
-  function staffTagPickerField(name, label, options, selected) {
-    const selectedSet = new Set(toList(selected).map(item => item.toLowerCase()));
-    const html = optionPool(options, selected).map((tag, index) => {
+  function staffTagPickerField(name, label, selected, department) {
+    const selectedItems = toList(selected);
+    const selectedSet = new Set(selectedItems.map(item => item.toLowerCase()));
+    const departmentKey = staffDepartmentKey(department);
+    const allTags = allStaffWorkTags(selectedItems);
+    const selectedHtml = selectedItems.length
+      ? selectedItems.map(tag => `<button class="staff-selected-tag" type="button" data-staff-tag-remove="${escapeHtml(tag)}">${escapeHtml(tag)} <span aria-hidden="true">\u00d7</span></button>`).join("")
+      : `<span class="muted-dash">-</span>`;
+    const tagsHtml = allTags.map((tag, index) => {
+      const tagDept = staffTagDepartmentKey(tag);
       const id = `${name}-${normalizeTag(tag) || "tag"}-${index}`;
-      return `<label class="staff-tag-option" for="${escapeHtml(id)}"><input id="${escapeHtml(id)}" type="checkbox" name="${escapeHtml(name)}" value="${escapeHtml(tag)}" ${selectedSet.has(tag.toLowerCase()) ? "checked" : ""}><span>${escapeHtml(tag)}</span></label>`;
+      const outside = tagDept !== "outside" && tagDept !== departmentKey ? t("outsideDepartmentTags") : "";
+      return `<label class="staff-tag-option" for="${escapeHtml(id)}" data-staff-tag-item data-tag="${escapeHtml(tag)}" data-tag-dept="${escapeHtml(tagDept)}">
+        <input id="${escapeHtml(id)}" type="checkbox" name="${escapeHtml(name)}" value="${escapeHtml(tag)}" ${selectedSet.has(tag.toLowerCase()) ? "checked" : ""}>
+        <span>${escapeHtml(tag)}</span>${outside ? `<small>${escapeHtml(outside)}</small>` : ""}
+      </label>`;
     }).join("");
-    return `<div class="staff-edit-field full"><span>${escapeHtml(label)}</span><div class="staff-tag-picker">${html || `<span class="muted-dash">-</span>`}</div></div>`;
+    const groupTabs = staffDepartmentPresets().filter(item => item.key !== "other").map(item => `<button class="staff-work-group ${item.key === departmentKey ? "active" : ""}" type="button" data-staff-work-group="${escapeHtml(item.key)}">${escapeHtml(item.label)}</button>`).join("");
+    return `<div class="staff-edit-field full">
+      <span>${escapeHtml(label)}</span>
+      <div class="staff-tag-picker" data-staff-tag-picker data-current-dept="${escapeHtml(departmentKey)}" data-tag-mode="department">
+        <div class="staff-selected-tags"><strong>${escapeHtml(t("selectedTags"))}</strong><div data-staff-selected-tags>${selectedHtml}</div></div>
+        <div class="staff-work-groups"><strong>${escapeHtml(t("staffWorkGroup"))}</strong><div>${groupTabs}</div></div>
+        <div class="staff-tag-toolbar">
+          <input class="filter-input" type="search" data-staff-tag-search placeholder="${escapeHtml(t("tagSearchPlaceholder"))}">
+          <div class="staff-tag-tabs">
+            <button class="staff-tag-tab active" type="button" data-staff-tag-mode="department">${escapeHtml(t("tagsByDepartment"))}</button>
+            <button class="staff-tag-tab" type="button" data-staff-tag-mode="all">${escapeHtml(t("allTags"))}</button>
+            <button class="staff-tag-tab" type="button" data-staff-tag-mode="selected">${escapeHtml(t("selectedTags"))}</button>
+          </div>
+        </div>
+        <div class="staff-tag-list" data-staff-tag-list>${tagsHtml || `<span class="muted-dash">-</span>`}</div>
+      </div>
+    </div>`;
   }
 
   function renderStaffForm(staff) {
@@ -2843,6 +2976,7 @@
     const statusOptions = ["active", "off"];
     const selectedStatus = ["off", "inactive"].includes(String(item.status || "")) ? "off" : "active";
     const mergedTags = uniqueOptions([].concat(toList(item.skills)).concat(toList(item.workTags)));
+    const roleValue = item.role || item.position || item.title || "";
     document.querySelector("[data-staff-edit-overlay]")?.remove();
     const overlay = document.createElement("div");
     overlay.className = "staff-edit-overlay";
@@ -2886,6 +3020,7 @@
                     ${staffTextField("name", t("name"), item.name)}
                     ${staffTextField("email", t("email"), item.email, "email")}
                     ${staffTextField("phone", t("phone"), item.phone, "tel")}
+                    <label class="staff-edit-field"><span>${escapeHtml(t("status"))}</span><select name="status">${statusOptions.map(status => `<option value="${status}" ${selectedStatus === status ? "selected" : ""}>${escapeHtml(staffStatusLabel(status))}</option>`).join("")}</select></label>
                   </div>
                 </section>
 
@@ -2893,8 +3028,20 @@
                   <h3>${escapeHtml(t("staffOrganization"))}</h3>
                   <div class="staff-edit-grid">
                     ${staffSelectField("department", t("department"), staffDepartmentOptions(item.department), item.department)}
-                    <label class="staff-edit-field"><span>${escapeHtml(t("status"))}</span><select name="status">${statusOptions.map(status => `<option value="${status}" ${selectedStatus === status ? "selected" : ""}>${escapeHtml(staffStatusLabel(status))}</option>`).join("")}</select></label>
+                    ${staffTextField("role", t("role"), roleValue)}
+                    ${staffTextField("areas", t("areas"), item.areas)}
                   </div>
+                </section>
+
+                <section class="staff-edit-section">
+                  <h3>${escapeHtml(t("staffAutoAssign"))}</h3>
+                  <div class="staff-edit-grid">
+                    <label class="staff-edit-field staff-switch-field"><span>${escapeHtml(t("autoAssignJoin"))}</span><input type="checkbox" disabled></label>
+                    ${staffTextField("maxActiveRequests", t("maxActiveRequests"), "", "number", "disabled min=\"0\"")}
+                    <label class="staff-edit-field"><span>${escapeHtml(t("assignPriority"))}</span><select disabled><option>${escapeHtml(t("normal"))}</option><option>${escapeHtml(t("low"))}</option><option>${escapeHtml(t("high"))}</option></select></label>
+                    ${staffTextareaField("assignNote", t("assignNote"), t("autoAssignPlanned"), "disabled")}
+                  </div>
+                  <p class="note">${escapeHtml(t("autoAssignPlanned"))}</p>
                 </section>
               </div>
 
@@ -2902,7 +3049,8 @@
                 <section class="staff-edit-section">
                   <h3>${escapeHtml(t("staffAssignableWork"))}</h3>
                   <div class="staff-edit-grid">
-                    ${staffTagPickerField("workTags", t("workTags"), staffTagOptions(mergedTags), mergedTags)}
+                    ${staffTagPickerField("workTags", t("workTags"), mergedTags, item.department)}
+                    <button class="btn btn-soft" type="button" data-staff-tags-to-content>${escapeHtml(t("createContentFromTags"))}</button>
                     ${staffTextareaField("workContent", t("workContent"), item.workContent)}
                   </div>
                 </section>
@@ -2925,6 +3073,7 @@
       </article>
     `;
     document.body.appendChild(overlay);
+    applyStaffTagFilter();
   }
 
   function field(name, label, value, textarea) {
@@ -3580,7 +3729,7 @@
   function staffFormPayload(form) {
     const raw = new FormData(form);
     const payload = new FormData();
-    ["name", "phone", "email", "department", "workContent", "note", "status"].forEach(field => {
+    ["name", "phone", "email", "department", "role", "areas", "workContent", "note", "status"].forEach(field => {
       payload.set(field, raw.get(field) || "");
     });
     const workTags = raw.getAll("workTags").map(item => String(item || "").trim()).filter(Boolean);
@@ -3590,6 +3739,50 @@
     const file = raw.get("avatarFile");
     if (file && file.size > 0) payload.set("avatar", file);
     return payload;
+  }
+
+  function selectedStaffWorkTags() {
+    return Array.from(document.querySelectorAll("[data-staff-tag-item] input:checked")).map(input => input.value).filter(Boolean);
+  }
+
+  function renderSelectedStaffTags() {
+    const target = document.querySelector("[data-staff-selected-tags]");
+    if (!target) return;
+    const tags = selectedStaffWorkTags();
+    target.innerHTML = tags.length
+      ? tags.map(tag => `<button class="staff-selected-tag" type="button" data-staff-tag-remove="${escapeHtml(tag)}">${escapeHtml(tag)} <span aria-hidden="true">\u00d7</span></button>`).join("")
+      : `<span class="muted-dash">-</span>`;
+  }
+
+  function applyStaffTagFilter() {
+    const picker = document.querySelector("[data-staff-tag-picker]");
+    if (!picker) return;
+    const mode = picker.dataset.tagMode || "department";
+    const dept = picker.dataset.currentDept || "other";
+    const search = (picker.querySelector("[data-staff-tag-search]")?.value || "").trim().toLowerCase();
+    picker.querySelectorAll("[data-staff-tag-item]").forEach(item => {
+      const tag = (item.dataset.tag || "").toLowerCase();
+      const tagDept = item.dataset.tagDept || "outside";
+      const checked = item.querySelector("input")?.checked;
+      const modeOk = mode === "all" || (mode === "selected" ? checked : tagDept === dept || checked);
+      const searchOk = !search || tag.includes(search);
+      item.hidden = !(modeOk && searchOk);
+    });
+    picker.querySelectorAll("[data-staff-tag-mode]").forEach(button => {
+      button.classList.toggle("active", button.dataset.staffTagMode === mode);
+    });
+    picker.querySelectorAll("[data-staff-work-group]").forEach(button => {
+      button.classList.toggle("active", button.dataset.staffWorkGroup === dept);
+    });
+    renderSelectedStaffTags();
+  }
+
+  function refreshStaffTagDepartment() {
+    const picker = document.querySelector("[data-staff-tag-picker]");
+    const department = document.querySelector("#staffForm select[name='department']");
+    if (!picker || !department) return;
+    picker.dataset.currentDept = staffDepartmentKey(department.value);
+    applyStaffTagFilter();
   }
 
   function bindEvents() {
@@ -3724,6 +3917,12 @@
           const file = event.target.files && event.target.files[0];
           if (file) previewStaffAvatar(file);
         }
+        if (event.target.matches("select[name='department']")) refreshStaffTagDepartment();
+        if (event.target.closest("[data-staff-tag-item] input")) {
+          const content = document.querySelector("#staffForm textarea[name='workContent']");
+          if (content && !content.value.trim()) content.value = selectedStaffWorkTags().join(", ");
+          applyStaffTagFilter();
+        }
         return;
       }
       if (event.target.closest("[data-request-edit-field]")) {
@@ -3852,6 +4051,50 @@
         return;
       }
 
+      const tagMode = event.target.closest("[data-staff-tag-mode]");
+      if (tagMode) {
+        event.preventDefault();
+        const picker = tagMode.closest("[data-staff-tag-picker]");
+        if (picker) {
+          picker.dataset.tagMode = tagMode.dataset.staffTagMode || "department";
+          applyStaffTagFilter();
+        }
+        return;
+      }
+
+      const workGroup = event.target.closest("[data-staff-work-group]");
+      if (workGroup) {
+        event.preventDefault();
+        const department = document.querySelector("#staffForm select[name='department']");
+        const label = staffDepartmentLabelByKey(workGroup.dataset.staffWorkGroup);
+        if (department && label) department.value = label;
+        refreshStaffTagDepartment();
+        setStaffEditDirty(true);
+        return;
+      }
+
+      const removeTag = event.target.closest("[data-staff-tag-remove]");
+      if (removeTag) {
+        event.preventDefault();
+        const tag = removeTag.dataset.staffTagRemove;
+        document.querySelectorAll("[data-staff-tag-item] input").forEach(input => {
+          if (input.value === tag) input.checked = false;
+        });
+        setStaffEditDirty(true);
+        applyStaffTagFilter();
+        return;
+      }
+
+      if (event.target.closest("[data-staff-tags-to-content]")) {
+        event.preventDefault();
+        const content = document.querySelector("#staffForm textarea[name='workContent']");
+        if (content) {
+          content.value = selectedStaffWorkTags().join(", ");
+          setStaffEditDirty(true);
+        }
+        return;
+      }
+
       if (event.target.closest("[data-staff-avatar-pick]")) {
         event.preventDefault();
         $("staffAvatarInput")?.click();
@@ -3950,6 +4193,9 @@
       }
       if (event.target.closest("#staffForm")) {
         setStaffEditDirty(true);
+      }
+      if (event.target.closest("[data-staff-tag-search]")) {
+        applyStaffTagFilter();
       }
       if (event.target.id === "requestSearch") {
         state.filters.search = event.target.value || "";
