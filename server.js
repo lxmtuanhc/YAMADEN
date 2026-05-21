@@ -496,6 +496,99 @@ const DEFAULT_WORK_TYPES = {
   ]
 };
 
+const LEGACY_DEPARTMENT_CODES = ["survey", "maintenance", "operations", "other"];
+
+const OFFICIAL_DEPARTMENTS = [
+  ["executive", "Giám đốc", "社長・代表"],
+  ["koumu", "Bộ công vụ", "工務部"],
+  ["fs", "Bộ FS", "FS部"],
+  ["sales", "Bộ kinh doanh", "営業部"],
+  ["construction", "Bộ thi công", "工事部"],
+  ["design", "Bộ thiết kế", "設計部"],
+  ["estimate", "Bộ dự toán", "予算書"]
+].map(([code, nameVi, nameJa], index) => ({
+  code,
+  nameVi,
+  nameJa,
+  descriptionVi: "",
+  descriptionJa: "",
+  sortOrder: index + 1,
+  active: true,
+  isSystemDefault: true
+}));
+
+const OFFICIAL_WORK_GROUPS = {
+  executive: [["approval", "Phê duyệt", "承認"], ["important", "Dự án / vấn đề quan trọng", "重要案件"]],
+  koumu: [["coordination", "Điều phối", "調整"], ["inspection", "Kiểm tra", "確認"]],
+  fs: [["field_service", "Khảo sát / xử lý hiện trường", "現地対応"], ["maintenance", "Bảo trì", "保守"]],
+  sales: [["customer", "Khách hàng", "顧客"], ["contract", "Hợp đồng", "契約"]],
+  construction: [["construction", "Thi công", "工事"], ["trouble", "Sửa chữa / xử lý vấn đề", "修理・トラブル対応"]],
+  design: [["drawing", "Bản vẽ", "図面"], ["panel", "Tủ điện", "盤"], ["technical_check", "Kiểm tra kỹ thuật", "技術確認"]],
+  estimate: [["estimate", "Dự toán / báo giá", "予算・見積"], ["calculation", "Tính toán", "計算"]]
+};
+
+const OFFICIAL_WORK_TYPES = {
+  executive: [
+    ["construction_approval", "approval", "Phê duyệt công trình", "工事承認"],
+    ["estimate_approval", "approval", "Phê duyệt báo giá", "見積承認"],
+    ["contract_approval", "approval", "Phê duyệt hợp đồng", "契約承認"],
+    ["large_project_reception", "important", "Tiếp nhận dự án lớn", "大型案件対応"],
+    ["important_issue_handling", "important", "Xử lý vấn đề quan trọng", "重要問題対応"],
+    ["customer_complaint_resolution", "important", "Giải quyết khiếu nại khách hàng", "クレーム対応"]
+  ],
+  koumu: [
+    ["construction_coordination", "coordination", "Điều phối công trình", "工事調整"],
+    ["schedule_management", "coordination", "Quản lý tiến độ", "工程管理"],
+    ["site_check", "inspection", "Kiểm tra công trình", "現場確認"],
+    ["safety_check", "inspection", "Kiểm tra an toàn", "安全確認"],
+    ["quality_check", "inspection", "Kiểm tra chất lượng", "品質確認"],
+    ["completion_inspection", "inspection", "Nghiệm thu công trình", "完了検査"],
+    ["handover_support", "coordination", "Hỗ trợ bàn giao", "引渡し支援"]
+  ],
+  fs: [
+    ["site_survey", "field_service", "Khảo sát hiện trường", "現地調査"],
+    ["equipment_condition_check", "field_service", "Kiểm tra tình trạng thiết bị", "設備状態確認"],
+    ["trouble_response", "field_service", "Xử lý sự cố", "トラブル対応"],
+    ["maintenance_support", "maintenance", "Hỗ trợ bảo trì", "保守支援"],
+    ["post_construction_check_fs", "field_service", "Kiểm tra sau thi công", "施工後点検"]
+  ],
+  sales: [
+    ["customer_support", "customer", "Chăm sóc khách hàng", "顧客対応"],
+    ["service_consultation", "customer", "Tư vấn dịch vụ", "サービス相談"],
+    ["request_reception", "customer", "Tiếp nhận yêu cầu khách hàng", "依頼受付"],
+    ["customer_meeting", "customer", "Họp với khách hàng", "顧客打合せ"],
+    ["contract_support", "contract", "Hỗ trợ hợp đồng", "契約支援"]
+  ],
+  construction: [
+    ["electrical_construction", "construction", "Thi công điện", "電気工事"],
+    ["equipment_installation", "construction", "Lắp đặt thiết bị", "機器取付"],
+    ["post_construction_check", "construction", "Kiểm tra sau thi công", "施工後点検"],
+    ["site_repair", "trouble", "Sửa chữa tại công trình", "現場修理"],
+    ["site_trouble_support", "trouble", "Hỗ trợ xử lý vấn đề tại công trình", "現場トラブル対応"]
+  ],
+  design: [
+    ["drawing_design", "drawing", "Thiết kế bản vẽ", "図面設計"],
+    ["drawing_revision", "drawing", "Chỉnh sửa bản vẽ", "図面修正"],
+    ["electrical_diagram_design", "drawing", "Thiết kế sơ đồ điện", "電気系統設計"],
+    ["cad_drafting", "drawing", "Vẽ CAD", "CAD作図"],
+    ["panel_design", "panel", "Thiết kế tủ điện", "盤設計"],
+    ["equipment_layout_design", "drawing", "Thiết kế bố trí thiết bị", "機器配置設計"],
+    ["electrical_system_design", "drawing", "Thiết kế hệ thống điện", "電気設備設計"],
+    ["construction_drawing", "drawing", "Làm bản vẽ thi công", "施工図作成"],
+    ["as_built_drawing", "drawing", "Làm bản vẽ hoàn công", "竣工図作成"],
+    ["technical_drawing_check", "technical_check", "Kiểm tra bản vẽ kỹ thuật", "技術図面確認"]
+  ],
+  estimate: [
+    ["budget_creation", "estimate", "Lập dự toán", "予算書作成"],
+    ["material_quantity_calculation", "calculation", "Tính toán vật tư", "材料数量計算"],
+    ["power_capacity_calculation", "calculation", "Tính toán công suất", "電力容量計算"],
+    ["repair_estimate", "estimate", "Báo giá sửa chữa", "修理見積"],
+    ["construction_estimate", "estimate", "Báo giá thi công", "工事見積"],
+    ["cost_check", "estimate", "Kiểm tra chi phí", "原価確認"],
+    ["estimate_adjustment", "estimate", "Điều chỉnh báo giá", "見積調整"]
+  ]
+};
+
 function normalizeUserStatus(status) {
   if (status === "pending") return USER_STATUS_PENDING;
   return status || USER_STATUS_PENDING;
@@ -563,34 +656,39 @@ async function seedWorkMasterData() {
   ]);
   const now = new Date();
 
-  if (!departmentCount) {
-    await Department.insertMany(DEFAULT_DEPARTMENTS.map(item => ({
-      ...item,
-      createdAt: now,
-      updatedAt: now
+  await Department.bulkWrite(OFFICIAL_DEPARTMENTS.map(item => ({
+    updateOne: {
+      filter: { code: item.code },
+      update: { $set: { ...item, updatedAt: now }, $setOnInsert: { createdAt: now } },
+      upsert: true
+    }
+  })));
+  await Department.updateMany({ code: { $in: LEGACY_DEPARTMENT_CODES } }, { $set: { active: false, updatedAt: now } });
+
+  const groupRows = Object.entries(OFFICIAL_WORK_GROUPS).flatMap(([departmentCode, items]) =>
+    items.map(([code, nameVi, nameJa], index) => ({
+      departmentCode,
+      code: `${departmentCode}_${code}`,
+      nameVi,
+      nameJa,
+      descriptionVi: "",
+      descriptionJa: "",
+      active: true,
+      sortOrder: (index + 1) * 10
+    }))
+  );
+  if (groupRows.length) {
+    await WorkGroup.bulkWrite(groupRows.map(item => ({
+      updateOne: {
+        filter: { code: item.code },
+        update: { $set: { ...item, updatedAt: now }, $setOnInsert: { createdAt: now } },
+        upsert: true
+      }
     })));
   }
+  await WorkGroup.updateMany({ departmentCode: { $in: LEGACY_DEPARTMENT_CODES } }, { $set: { active: false, updatedAt: now } });
 
-  if (!workGroupCount) {
-    const rows = Object.entries(DEFAULT_WORK_GROUPS).flatMap(([departmentCode, items]) =>
-      items.map(([code, nameVi, nameJa], index) => ({
-        departmentCode,
-        code: `${departmentCode}_${code}`,
-        nameVi,
-        nameJa,
-        descriptionVi: "",
-        descriptionJa: "",
-        active: true,
-        sortOrder: (index + 1) * 10,
-        createdAt: now,
-        updatedAt: now
-      }))
-    );
-    await WorkGroup.insertMany(rows);
-  }
-
-  if (!workTypeCount) {
-    const rows = Object.entries(DEFAULT_WORK_TYPES).flatMap(([departmentCode, items]) =>
+  const typeRows = Object.entries(OFFICIAL_WORK_TYPES).flatMap(([departmentCode, items]) =>
       items.map((item, index) => {
         const [code, maybeGroup, maybeVi, maybeJa] = item;
         const hasGroup = item.length >= 4;
@@ -606,14 +704,20 @@ async function seedWorkMasterData() {
         descriptionVi: "",
         descriptionJa: "",
         active: true,
-        sortOrder: (index + 1) * 10,
-        createdAt: now,
-        updatedAt: now
+        sortOrder: (index + 1) * 10
         };
       })
-    );
-    await WorkType.insertMany(rows);
+  );
+  if (typeRows.length) {
+    await WorkType.bulkWrite(typeRows.map(item => ({
+      updateOne: {
+        filter: { code: item.code },
+        update: { $set: { ...item, updatedAt: now }, $setOnInsert: { createdAt: now } },
+        upsert: true
+      }
+    })));
   }
+  await WorkType.updateMany({ departmentCode: { $in: LEGACY_DEPARTMENT_CODES } }, { $set: { active: false, updatedAt: now } });
 }
 
 async function loadWorkMaster({ activeOnly = false } = {}) {

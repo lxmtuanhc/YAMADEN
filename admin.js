@@ -827,7 +827,7 @@
     staffAssignment: "業務割り当て",
     staffWorkFlowHelp: "部門を選択し、その後スタッフが対応できる業務内容を選択してください。",
     workStepDepartment: "ステップ1：部門を選択",
-    noDepartmentsInMaster: "部門がありません。新しい部門を追加してください。",
+    noDepartmentsInMaster: "部門がありません。設定画面で登録してください。",
     addDepartmentQuick: "+ 部門を追加",
     manageDepartments: "部門を管理",
     autoAssign: "自動割り当て",
@@ -840,7 +840,7 @@
     selectedDepartment: "選択中の部門",
     changeDepartment: "部門を変更",
     workTypeSearchPlaceholder: "業務内容を検索...",
-    noWorkTypesInDepartment: "この部門には業務内容がありません。",
+    noWorkTypesInDepartment: "この部門には業務内容がありません。設定画面で登録してください。",
     openWorkMaster: "業務マスタを開く",
     addWorkTypeQuick: "+ 業務内容を追加",
     manageWorkTypes: "業務内容を管理",
@@ -855,7 +855,12 @@
     itemCountSuffix: "件",
     staffDescription: "スタッフの得意分野・説明",
     staffDescriptionPlaceholder: "例：電気図面設計が得意で、施工図・竣工図にも対応できます。",
-    createDescriptionFromSelectedWork: "選択業務から説明を作成"
+    createDescriptionFromSelectedWork: "選択業務から説明を作成",
+    staffDetailNotes: "説明・メモ",
+    noStaffDescription: "説明はありません。",
+    noInternalMemo: "メモはありません。",
+    showMore: "もっと見る",
+    collapse: "閉じる"
   });
 
   Object.assign(i18n.vi, {
@@ -892,7 +897,7 @@
     staffAssignment: "Phân công công việc",
     staffWorkFlowHelp: "Chọn bộ phận, sau đó chọn các nội dung công việc mà nhân viên có thể phụ trách.",
     workStepDepartment: "Bước 1: Chọn bộ phận",
-    noDepartmentsInMaster: "Chưa có bộ phận. Hãy thêm bộ phận mới.",
+    noDepartmentsInMaster: "Chưa có bộ phận. Vui lòng thiết lập trong Cài đặt.",
     addDepartmentQuick: "+ Thêm bộ phận",
     manageDepartments: "Quản lý bộ phận",
     autoAssign: "Tự động phân công",
@@ -905,7 +910,7 @@
     selectedDepartment: "Bộ phận đang chọn",
     changeDepartment: "Đổi bộ phận",
     workTypeSearchPlaceholder: "Tìm nội dung công việc...",
-    noWorkTypesInDepartment: "Bộ phận này chưa có nội dung công việc.",
+    noWorkTypesInDepartment: "Bộ phận này chưa có nội dung công việc. Vui lòng thiết lập trong Cài đặt.",
     openWorkMaster: "Mở Danh mục công việc",
     addWorkTypeQuick: "+ Thêm nội dung công việc",
     manageWorkTypes: "Quản lý nội dung công việc",
@@ -920,7 +925,12 @@
     itemCountSuffix: "công việc",
     staffDescription: "Mô tả năng lực nhân viên",
     staffDescriptionPlaceholder: "Ví dụ: Chuyên thiết kế bản vẽ điện, có thể xử lý bản vẽ thi công và hoàn công.",
-    createDescriptionFromSelectedWork: "Tạo mô tả từ công việc đã chọn"
+    createDescriptionFromSelectedWork: "Tạo mô tả từ công việc đã chọn",
+    staffDetailNotes: "Mô tả & ghi chú",
+    noStaffDescription: "Chưa có mô tả.",
+    noInternalMemo: "Không có ghi chú.",
+    showMore: "Xem thêm",
+    collapse: "Thu gọn"
   });
 
   Object.assign(requestStatusMap, {
@@ -2303,6 +2313,19 @@
     return `<div class="tag-list">${visible.map(item => `<span class="tag-chip">${escapeHtml(item)}</span>`).join("")}${rest ? `<span class="tag-chip tag-more">+${rest}</span>` : ""}</div>`;
   }
 
+  function staffWorkChipList(items, limit = 12) {
+    const names = toList(items).map(item => typeof item === "string" ? item : item?.name).filter(Boolean);
+    if (!names.length) return showEmptyState(t("noSelectedWorkTypes"));
+    const visible = names.slice(0, limit);
+    const hidden = names.slice(limit);
+    const chipHtml = list => list.map(item => `<span class="tag-chip">${escapeHtml(item)}</span>`).join("");
+    if (!hidden.length) return `<div class="staff-work-chip-list">${chipHtml(visible)}</div>`;
+    return `<details class="staff-work-chip-details">
+      <summary>${escapeHtml(t("showMore"))}</summary>
+      <div class="staff-work-chip-list">${chipHtml(visible.concat(hidden))}</div>
+    </details>`;
+  }
+
   function normalizeTag(value) {
     return String(value || "")
       .toLowerCase()
@@ -2382,6 +2405,17 @@
       addWorkType(found, tag);
     });
     return items;
+  }
+
+  function shouldShowStaffWorkContent(staff, workItems) {
+    const content = compactText(staff?.workContent, "");
+    if (!content) return false;
+    const contentKey = normalizeTag(content);
+    const names = (workItems || []).map(item => item.name).filter(Boolean);
+    if (!names.length) return true;
+    const joinedKey = normalizeTag(names.join(", "));
+    const sortedKey = normalizeTag([...names].sort().join(", "));
+    return contentKey !== joinedKey && contentKey !== sortedKey;
   }
 
   function activeAssignmentCount(staff) {
@@ -2975,37 +3009,42 @@
     const isDeleted = status === "deleted" || staff.deletedAt;
     const workItems = getStaffWorkItems(staff);
     const staffDescription = staff.staffDescription || staff.introduction || "";
+    const showWorkContent = shouldShowStaffWorkContent(staff, workItems);
     const actionButtons = isDeleted
       ? `<button class="btn btn-soft" type="button" data-staff-action="restore" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("restore"))}</button><button class="btn btn-danger" type="button" data-staff-action="permanent-delete" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("permanentDelete"))}</button>`
       : `<button class="btn btn-soft" type="button" data-staff-action="edit" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("editStaffProfile"))}</button><button class="btn btn-soft" type="button" data-staff-action="${isPaused ? "activate" : "pause"}" data-staff-id="${escapeHtml(id)}">${escapeHtml(isPaused ? t("reactivateStaff") : t("pauseStaff"))}</button><button class="btn btn-danger" type="button" data-staff-action="delete" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>`;
     return `<aside class="detail-panel staff-detail-panel">
-      <div class="detail-panel-head">
+      <div class="detail-panel-head staff-detail-head">
         ${avatarHtml(staff, "avatar-large")}
         <div><h2>${escapeHtml(staff.name || "-")}</h2><p>${escapeHtml(staff.email || "")}</p><p>ID: ${escapeHtml(id || "-")}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span></div>
         <button class="close-button" type="button" data-staff-action="close-detail" aria-label="${escapeHtml(t("close"))}">&times;</button>
       </div>
-      <section><h3>${escapeHtml(t("staffBasicInfo"))}</h3><div class="contact-grid">
+      <section class="staff-detail-section"><h3>${escapeHtml(t("staffBasicInfo"))}</h3><div class="staff-detail-grid">
         ${infoItem(t("staffId"), id)}
         ${infoItem(t("name"), staff.name)}
         ${infoItem(t("email"), staff.email)}
         ${infoItem(t("phone"), staff.phone)}
         ${infoItem(t("status"), staffStatusMap[status] || status)}
         ${infoItem(t("createdAt"), formatDate(staff.createdAt))}
-        ${staff.updatedAt ? infoItem(t("updatedAt"), formatDate(staff.updatedAt)) : ""}
       </div></section>
-      <section><h3>${escapeHtml(t("staffAssignment"))}</h3>
-        <div class="contact-grid">
+      <section class="staff-detail-section"><h3>${escapeHtml(t("staffAssignment"))}</h3>
+        <div class="staff-detail-grid">
           ${infoItem(t("primaryDepartment"), staffDepartment(staff))}
           ${infoItem(t("staffAutoAssign"), staffAutoAssignText(staff))}
-          ${infoItem(t("workContent"), staff.workContent)}
-          ${infoItem(t("staffDescriptionSection"), staffDescription)}
         </div>
-        <h3>${escapeHtml(t("staffAssignableWork"))}</h3>
-        ${workItems.length ? tagChips(workItems.map(item => item.name)) : showEmptyState(t("noSelectedWorkTypes"))}
+        <div class="staff-readable-card staff-detail-full">
+          <h4>${escapeHtml(t("staffAssignableWork"))}</h4>
+          ${staffWorkChipList(workItems)}
+        </div>
       </section>
-      <section><h3>${escapeHtml(t("staffCurrentWorkload"))}</h3><div class="mini-kpi-row">${miniMetric(t("currentAssignments"), assignedActive.length)}${miniMetric(t("workload"), workload + "%")}${miniMetric(t("overdueAssigned"), overdue)}</div><div class="priority-list">${assignedActive.length ? assignedActive.slice(0, 4).map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState(t("noAssignedRequests"))}</div></section>
-      <section><h3>${escapeHtml(t("staffRecentHistory"))}</h3><div class="priority-list">${assigned.length ? assigned.map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState(t("noStaffHistory"))}</div></section>
-      <section><h3>${escapeHtml(t("staffOperations"))}</h3><div class="modal-actions">${actionButtons}</div></section>
+      <section class="staff-detail-section"><h3>${escapeHtml(t("staffDetailNotes"))}</h3>
+        <div class="staff-readable-card"><h4>${escapeHtml(t("staffDescriptionSection"))}</h4><p>${escapeHtml(staffDescription || t("noStaffDescription"))}</p></div>
+        ${showWorkContent ? `<div class="staff-readable-card"><h4>${escapeHtml(t("workContent"))}</h4><p>${escapeHtml(staff.workContent)}</p></div>` : ""}
+        <div class="staff-readable-card"><h4>${escapeHtml(t("internalMemo"))}</h4><p>${escapeHtml(staff.note || t("noInternalMemo"))}</p></div>
+      </section>
+      <section class="staff-detail-section"><h3>${escapeHtml(t("staffCurrentWorkload"))}</h3><div class="mini-kpi-row">${miniMetric(t("currentAssignments"), assignedActive.length)}${miniMetric(t("workload"), workload + "%")}${miniMetric(t("overdueAssigned"), overdue)}</div><div class="priority-list">${assignedActive.length ? assignedActive.slice(0, 4).map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState(t("noAssignedRequests"))}</div></section>
+      <section class="staff-detail-section"><h3>${escapeHtml(t("staffRecentHistory"))}</h3><div class="priority-list">${assigned.length ? assigned.map(item => `<button class="compact-request" type="button" data-request-detail="${escapeHtml(getRowId(item))}"><strong>${escapeHtml(getRequestDisplayId(item))}</strong><span>${escapeHtml(getCustomerName(item))}</span><span class="status-badge ${getStatusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span></button>`).join("") : showEmptyState(t("noStaffHistory"))}</div></section>
+      <section class="staff-detail-section"><h3>${escapeHtml(t("staffOperations"))}</h3><div class="modal-actions staff-detail-actions">${actionButtons}</div></section>
     </aside>`;
   }
 
@@ -3113,34 +3152,32 @@
     }
     return state.lang === "vi"
       ? [
-        { key: "design", label: "B\u1ed9 thi\u1ebft k\u1ebf" },
-        { key: "construction", label: "B\u1ed9 thi c\u00f4ng" },
-        { key: "survey", label: "B\u1ed9 kh\u1ea3o s\u00e1t" },
-        { key: "maintenance", label: "B\u1ed9 b\u1ea3o tr\u00ec" },
-        { key: "sales", label: "B\u1ed9 kinh doanh" },
-        { key: "operation", label: "B\u1ed9 nghi\u1ec7p v\u1ee5" },
-        { key: "executive", label: "Ban gi\u00e1m \u0111\u1ed1c" },
-        { key: "other", label: "B\u1ed9 kh\u00e1c" }
+        { key: "executive", label: "Giám đốc" },
+        { key: "koumu", label: "Bộ công vụ" },
+        { key: "fs", label: "Bộ FS" },
+        { key: "sales", label: "Bộ kinh doanh" },
+        { key: "construction", label: "Bộ thi công" },
+        { key: "design", label: "Bộ thiết kế" },
+        { key: "estimate", label: "Bộ dự toán" }
       ]
       : [
-        { key: "design", label: "\u8a2d\u8a08\u90e8" },
-        { key: "construction", label: "\u5de5\u4e8b\u90e8" },
-        { key: "survey", label: "\u8abf\u67fb\u90e8" },
-        { key: "maintenance", label: "\u4fdd\u5168\u90e8" },
-        { key: "sales", label: "\u55b6\u696d\u90e8" },
-        { key: "operation", label: "\u696d\u52d9\u90e8" },
         { key: "executive", label: "\u793e\u9577\u30fb\u4ee3\u8868" },
-        { key: "other", label: "\u305d\u306e\u4ed6" }
+        { key: "koumu", label: "\u5de5\u52d9\u90e8" },
+        { key: "fs", label: "FS\u90e8" },
+        { key: "sales", label: "\u55b6\u696d\u90e8" },
+        { key: "construction", label: "\u5de5\u4e8b\u90e8" },
+        { key: "design", label: "\u8a2d\u8a08\u90e8" },
+        { key: "estimate", label: "\u4e88\u7b97\u66f8" }
       ];
   }
 
   const staffDepartmentAliases = {
     design: ["design", "thi\u1ebft k\u1ebf", "b\u1ed9 thi\u1ebft k\u1ebf", "\u8a2d\u8a08", "\u8a2d\u8a08\u90e8"],
-    construction: ["construction", "thi c\u00f4ng", "b\u1ed9 thi c\u00f4ng", "c\u00f4ng s\u1ef1", "\u5de5\u4e8b", "\u5de5\u4e8b\u90e8", "\u5de5\u52d9", "\u5de5\u52d9\u90e8"],
-    survey: ["survey", "kh\u1ea3o s\u00e1t", "b\u1ed9 kh\u1ea3o s\u00e1t", "\u8abf\u67fb", "\u8abf\u67fb\u90e8"],
-    maintenance: ["maintenance", "b\u1ea3o tr\u00ec", "b\u1ed9 b\u1ea3o tr\u00ec", "\u4fdd\u5168", "\u4fdd\u5168\u90e8", "\u30e1\u30f3\u30c6\u30ca\u30f3\u30b9"],
+    construction: ["construction", "thi c\u00f4ng", "b\u1ed9 thi c\u00f4ng", "\u5de5\u4e8b", "\u5de5\u4e8b\u90e8"],
+    koumu: ["koumu", "c\u00f4ng v\u1ee5", "b\u1ed9 c\u00f4ng v\u1ee5", "\u5de5\u52d9", "\u5de5\u52d9\u90e8"],
+    fs: ["fs", "b\u1ed9 fs", "fs\u90e8", "kh\u1ea3o s\u00e1t", "b\u1ed9 kh\u1ea3o s\u00e1t", "\u8abf\u67fb", "\u8abf\u67fb\u90e8", "\u4fdd\u5168", "\u4fdd\u5168\u90e8", "\u30e1\u30f3\u30c6\u30ca\u30f3\u30b9"],
     sales: ["sales", "kinh doanh", "b\u1ed9 kinh doanh", "\u55b6\u696d", "\u55b6\u696d\u90e8"],
-    operation: ["operation", "nghi\u1ec7p v\u1ee5", "b\u1ed9 nghi\u1ec7p v\u1ee5", "\u696d\u52d9", "\u696d\u52d9\u90e8"],
+    estimate: ["estimate", "d\u1ef1 to\u00e1n", "b\u1ed9 d\u1ef1 to\u00e1n", "\u4e88\u7b97\u66f8", "b\u00e1o gi\u00e1", "\u898b\u7a4d"],
     executive: ["executive", "gi\u00e1m \u0111\u1ed1c", "ban gi\u00e1m \u0111\u1ed1c", "\u793e\u9577", "\u4ee3\u8868", "\u793e\u9577\u30fb\u4ee3\u8868"]
   };
 
@@ -3149,7 +3186,7 @@
     for (const [key, aliases] of Object.entries(staffDepartmentAliases)) {
       if (aliases.some(alias => normalized.includes(alias.toLowerCase()))) return key;
     }
-    return "other";
+    return "";
   }
 
   function staffDepartmentLabelByKey(key) {
@@ -3165,17 +3202,11 @@
   function staffDepartmentSelectField(item) {
     const departments = activeMasterItems("departments");
     const currentCode = item.departmentCode || findDepartmentByCodeOrLabel(item.department)?.code || "";
-    if (!departments.length) {
-      return `<div class="staff-work-empty"><p>${escapeHtml(t("noDepartmentsInMaster"))}</p><button class="btn btn-soft" type="button" data-open-work-master-tab="departments">${escapeHtml(t("addDepartmentQuick"))}</button></div>`;
-    }
+    if (!departments.length) return `<div class="staff-work-empty"><p>${escapeHtml(t("noDepartmentsInMaster"))}</p></div>`;
     return `<div class="staff-department-picker" data-staff-department-picker>
       <input type="hidden" name="department" data-staff-department-value value="${escapeHtml(currentCode)}">
       <div class="staff-department-options">
         ${departments.map(dept => `<button class="staff-department-option ${dept.code === currentCode ? "active" : ""}" type="button" data-staff-department-option="${escapeHtml(dept.code)}" data-label="${escapeHtml(workMasterLabel(dept))}">${escapeHtml(workMasterLabel(dept))}</button>`).join("")}
-      </div>
-      <div class="actions">
-        <button class="btn btn-soft" type="button" data-open-work-master-tab="departments">${escapeHtml(t("addDepartmentQuick"))}</button>
-        <button class="btn btn-soft" type="button" data-open-work-master-tab="departments">${escapeHtml(t("manageDepartments"))}</button>
       </div>
     </div>`;
   }
@@ -3405,18 +3436,14 @@
         <input type="checkbox" data-staff-worktype-item value="${escapeHtml(key)}" data-work-code="${escapeHtml(item.code || key)}" data-work-label="${escapeHtml(workMasterLabel(item))}" data-work-department="${escapeHtml(item.departmentCode || "")}" ${checked ? "checked" : ""}>
         <span><b>${escapeHtml(workMasterLabel(item))}</b>${description ? `<small>${escapeHtml(description)}</small>` : ""}</span>
       </label>`;
-    }).join("") : `<div class="staff-work-empty"><p>${escapeHtml(t("noWorkTypesInDepartment"))}</p><button class="btn btn-soft" type="button" data-open-work-master-tab="workTypes">${escapeHtml(t("addWorkTypeQuick"))}</button></div>`;
+    }).join("") : `<div class="staff-work-empty"><p>${escapeHtml(t("noWorkTypesInDepartment"))}</p></div>`;
     pickerTarget.innerHTML = `
       <div class="staff-work-picker-head">
         <p class="staff-work-summary">${escapeHtml(t("selectedDepartment"))}: <strong>${escapeHtml(departmentLabel)}</strong></p>
         ${selectedCount}
       </div>
       <input class="filter-input" type="search" data-staff-work-search placeholder="${escapeHtml(t("workTypeSearchPlaceholder"))}" value="${escapeHtml(search)}">
-      <div class="staff-work-type-list" data-staff-work-type-list>${workTypeHtml}</div>
-      <div class="actions">
-        <button class="btn btn-soft" type="button" data-open-work-master-tab="workTypes">${escapeHtml(t("addWorkTypeQuick"))}</button>
-        <button class="btn btn-soft" type="button" data-open-work-master-tab="workTypes">${escapeHtml(t("manageWorkTypes"))}</button>
-      </div>`;
+      <div class="staff-work-type-list" data-staff-work-type-list>${workTypeHtml}</div>`;
     if (options.keepSearchFocus) {
       const searchInput = pickerTarget.querySelector("[data-staff-work-search]");
       if (searchInput) {

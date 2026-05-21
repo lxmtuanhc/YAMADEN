@@ -407,6 +407,20 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .customer-detail-panel,
 .staff-list-panel,
 .staff-detail-panel { min-width: 0; }
+.staff-detail-head { position: relative; align-items: flex-start; }
+.staff-detail-head h2 { font-size: 20px; line-height: 1.2; margin: 0 0 4px; }
+.staff-detail-head p { margin: 2px 0; overflow-wrap: anywhere; }
+.staff-detail-section { margin-top: 18px; display: grid; gap: 12px; }
+.staff-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.staff-detail-full { grid-column: 1 / -1; }
+.staff-readable-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; min-width: 0; }
+.staff-readable-card h4 { margin: 0 0 8px; color: #0f172a; font-size: 13px; font-weight: 950; }
+.staff-readable-card p { margin: 0; color: #334155; line-height: 1.55; overflow-wrap: anywhere; white-space: pre-wrap; }
+.staff-work-chip-list { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.staff-work-chip-details { display: grid; gap: 10px; }
+.staff-work-chip-details summary { cursor: pointer; color: #2563eb; font-size: 12px; font-weight: 950; list-style: none; margin-bottom: 10px; }
+.staff-work-chip-details summary::-webkit-details-marker { display: none; }
+.staff-detail-actions { justify-content: flex-end; }
 .crm-grid { display: grid; gap: 10px; }
 .customer-row { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 12px; display: grid; grid-template-columns: 48px minmax(180px, 1.15fr) minmax(140px, .8fr) minmax(170px, 1fr) auto minmax(110px, .6fr) auto; gap: 12px; align-items: center; }
 .customer-main, .customer-meta { display: grid; gap: 4px; min-width: 0; }
