@@ -938,6 +938,10 @@
     changeStaffStatus: "\u30b9\u30c6\u30fc\u30bf\u30b9\u5909\u66f4",
     pauseStaffConfirmTitle: "\u30b9\u30bf\u30c3\u30d5\u3092\u4f11\u6b62\u4e2d\u306b\u3057\u307e\u3059\u304b\uff1f",
     pauseStaffConfirmText: "\u4f11\u6b62\u4e2d\u306e\u30b9\u30bf\u30c3\u30d5\u306f\u81ea\u52d5\u5272\u308a\u5f53\u3066\u306e\u5bfe\u8c61\u5916\u306b\u306a\u308a\u307e\u3059\u3002",
+    pauseStaffConfirmLabel: "\u4f11\u6b62\u3059\u308b",
+    reactivateStaffConfirmTitle: "\u30b9\u30bf\u30c3\u30d5\u3092\u518d\u958b\u3057\u307e\u3059\u304b\uff1f",
+    reactivateStaffConfirmText: "\u518d\u958b\u3059\u308b\u3068\u3001\u3053\u306e\u30b9\u30bf\u30c3\u30d5\u306f\u518d\u3073\u5229\u7528\u3067\u304d\u307e\u3059\u3002\u81ea\u52d5\u5272\u308a\u5f53\u3066\u304c\u6709\u52b9\u306a\u5834\u5408\u3001\u6761\u4ef6\u306b\u4e00\u81f4\u3059\u308b\u3068\u5272\u308a\u5f53\u3066\u5bfe\u8c61\u306b\u306a\u308a\u307e\u3059\u3002",
+    reactivateStaffConfirmLabel: "\u518d\u958b\u3059\u308b",
     noSelectedWorkTypes: "\u696d\u52d9\u304c\u3042\u308a\u307e\u305b\u3093\u3002",
     staffWorkTypes: "\u5bfe\u5fdc\u53ef\u80fd\u696d\u52d9"
   });
@@ -947,6 +951,10 @@
     changeStaffStatus: "\u0110\u1ed5i tr\u1ea1ng th\u00e1i",
     pauseStaffConfirmTitle: "Chuy\u1ec3n nh\u00e2n vi\u00ean sang t\u1ea1m ngh\u1ec9?",
     pauseStaffConfirmText: "Nh\u00e2n vi\u00ean n\u00e0y s\u1ebd kh\u00f4ng \u0111\u01b0\u1ee3c t\u1ef1 \u0111\u1ed9ng ph\u00e2n c\u00f4ng trong th\u1eddi gian t\u1ea1m ngh\u1ec9.",
+    pauseStaffConfirmLabel: "X\u00e1c nh\u1eadn t\u1ea1m ngh\u1ec9",
+    reactivateStaffConfirmTitle: "K\u00edch ho\u1ea1t l\u1ea1i nh\u00e2n vi\u00ean?",
+    reactivateStaffConfirmText: "Nh\u00e2n vi\u00ean n\u00e0y c\u00f3 th\u1ec3 \u0111\u01b0\u1ee3c s\u1eed d\u1ee5ng l\u1ea1i trong h\u1ec7 th\u1ed1ng. N\u1ebfu b\u1eadt t\u1ef1 \u0111\u1ed9ng ph\u00e2n c\u00f4ng, nh\u00e2n vi\u00ean s\u1ebd \u0111\u01b0\u1ee3c x\u00e9t ph\u00e2n c\u00f4ng khi ph\u00f9 h\u1ee3p.",
+    reactivateStaffConfirmLabel: "K\u00edch ho\u1ea1t",
     noSelectedWorkTypes: "Ch\u01b0a c\u00f3 c\u00f4ng vi\u1ec7c n\u00e0o.",
     staffWorkTypes: "C\u00f4ng vi\u1ec7c c\u00f3 th\u1ec3 ph\u1ee5 tr\u00e1ch"
   });
@@ -2983,17 +2991,14 @@
     const handledCount = handledRequestCount(staff);
     const isSelected = selected && String(getRowId(selected)) === String(id);
     const workItems = getStaffWorkItems(staff);
-    return `<tr class="${isSelected ? "selected-row" : ""}">
-      <td><div class="identity-cell">${avatarHtml(staff)}<div><strong>${escapeHtml(staff.name || "-")}</strong><span>${escapeHtml(staff.email || staff.phone || "-")}</span></div></div></td>
-      <td>${escapeHtml(staffRole(staff))}<div class="subtext">${escapeHtml(staffDepartment(staff))}</div></td>
-      <td>${tagChips(workItems.map(getWorkItemLabel), 3)}</td>
-      <td>${handledCount}</td>
-      <td><select class="staff-status-quick-select" data-staff-status-change="${escapeHtml(id)}" aria-label="${escapeHtml(t("changeStaffStatus"))}">
-        <option value="active" ${quickStatus === "active" ? "selected" : ""}>${escapeHtml(staffStatusLabel("active"))}</option>
-        <option value="off" ${quickStatus === "off" ? "selected" : ""}>${escapeHtml(staffStatusLabel("off"))}</option>
-      </select></td>
-      <td><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusLabel(status))}</span></td>
-      <td><div class="actions crm-actions">
+    return `<tr class="staff-row ${isSelected ? "selected-row is-selected" : ""}">
+      <td data-label="${escapeHtml(t("staff"))}"><div class="identity-cell">${avatarHtml(staff)}<div><strong>${escapeHtml(staff.name || "-")}</strong><span>${escapeHtml(staff.email || staff.phone || "-")}</span></div></div></td>
+      <td data-label="${escapeHtml(t("role"))} / ${escapeHtml(t("department"))}">${escapeHtml(staffRole(staff))}<div class="subtext">${escapeHtml(staffDepartment(staff))}</div></td>
+      <td data-label="${escapeHtml(t("skillsWork"))}">${tagChips(workItems.map(getWorkItemLabel), 3)}</td>
+      <td data-label="${escapeHtml(t("assignedCount"))}">${handledCount}</td>
+      <td data-label="${escapeHtml(t("changeStaffStatus"))}"><button class="staff-status-action ${quickStatus === "off" ? "is-activate" : "is-pause"}" type="button" data-staff-status-action="${escapeHtml(id)}" data-next-status="${quickStatus === "off" ? "active" : "off"}">${escapeHtml(quickStatus === "off" ? t("reactivateStaffConfirmLabel") : t("pauseStaff"))}</button></td>
+      <td data-label="${escapeHtml(t("status"))}"><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusLabel(status))}</span></td>
+      <td data-label="${escapeHtml(t("action"))}"><div class="actions crm-actions">
         <button class="btn btn-soft" type="button" data-staff-action="detail" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
       </div></td>
     </tr>`;
@@ -4273,25 +4278,21 @@
     return false;
   }
 
-  async function updateStaffStatusQuick(id, status, select) {
+  async function updateStaffStatusQuick(id, status) {
     const staff = state.staff.find(item => String(getRowId(item)) === String(id));
     if (!staff) return;
     const currentStatus = ["off", "inactive"].includes(String(staff.status || "active")) ? "off" : "active";
     const nextStatus = status === "off" ? "off" : "active";
     if (currentStatus === nextStatus) return;
-    if (nextStatus === "off") {
-      const ok = await confirmAction({
-        title: t("pauseStaffConfirmTitle"),
-        message: t("pauseStaffConfirmText"),
-        confirmLabel: t("confirm"),
-        cancelLabel: t("cancel"),
-        variant: "warning"
-      });
-      if (!ok) {
-        if (select) select.value = currentStatus;
-        return;
-      }
-    }
+    const isPausing = nextStatus === "off";
+    const ok = await confirmAction({
+      title: t(isPausing ? "pauseStaffConfirmTitle" : "reactivateStaffConfirmTitle"),
+      message: t(isPausing ? "pauseStaffConfirmText" : "reactivateStaffConfirmText"),
+      confirmLabel: t(isPausing ? "pauseStaffConfirmLabel" : "reactivateStaffConfirmLabel"),
+      cancelLabel: t("cancel"),
+      variant: isPausing ? "warning" : "default"
+    });
+    if (!ok) return;
     try {
       const response = await AdminAPI.updateStaff(id, { status: nextStatus });
       const updated = response?.staff || response?.data?.staff || response?.data || response || { status: nextStatus };
@@ -4301,7 +4302,6 @@
       toast(t("saved"));
     } catch (error) {
       console.error(error);
-      if (select) select.value = currentStatus;
       toast(t("failed"));
     }
   }
@@ -4331,12 +4331,12 @@
     try {
       let response;
       if (action === "pause") {
-        if (!await confirmAction({ title: t("pauseStaff"), confirmLabel: t("pauseStaff"), variant: "warning" })) return;
-        response = await AdminAPI.updateStaff(id, { status: "off" });
+        await updateStaffStatusQuick(id, "off");
+        return;
       }
       if (action === "activate") {
-        if (!await confirmAction({ title: t("reactivateStaff"), confirmLabel: t("reactivateStaff") })) return;
-        response = await AdminAPI.updateStaff(id, { status: "active" });
+        await updateStaffStatusQuick(id, "active");
+        return;
       }
       if (action === "delete") {
         if (!await confirmAction({ title: t("confirmDelete"), confirmLabel: t("delete"), danger: true })) return;
@@ -4622,11 +4622,6 @@
     });
 
     bind(document, "change", async event => {
-      const staffStatusSelect = event.target.closest("[data-staff-status-change]");
-      if (staffStatusSelect) {
-        await updateStaffStatusQuick(staffStatusSelect.dataset.staffStatusChange, staffStatusSelect.value, staffStatusSelect);
-        return;
-      }
       const staffForm = event.target.closest("#staffForm");
       if (staffForm) {
         setStaffEditDirty(true);
@@ -4925,6 +4920,13 @@
         if (fileInput) fileInput.value = "";
         if (status) status.textContent = t("removeImage");
         setStaffEditDirty(true);
+        return;
+      }
+
+      const statusAction = event.target.closest("[data-staff-status-action]");
+      if (statusAction) {
+        event.preventDefault();
+        await updateStaffStatusQuick(statusAction.dataset.staffStatusAction, statusAction.dataset.nextStatus);
         return;
       }
 
