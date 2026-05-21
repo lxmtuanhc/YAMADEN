@@ -599,11 +599,12 @@
     staffAutoAssign: "\u81ea\u52d5\u5272\u308a\u5f53\u3066",
     staffRecentHistory: "\u6700\u8fd1\u306e\u5bfe\u5fdc\u5c65\u6b74",
     staffOperations: "\u30b9\u30bf\u30c3\u30d5\u64cd\u4f5c",
+    staffEditTitle: "\u30b9\u30bf\u30c3\u30d5\u7de8\u96c6",
     editStaffProfile: "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u7de8\u96c6",
     staffProfileBasic: "\u57fa\u672c\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb",
     staffOrganizationRole: "\u7d44\u7e54\u30fb\u5f79\u5272",
-    staffExpertise: "\u5c02\u9580\u6027",
-    staffIntroNotes: "\u7d39\u4ecb\u30fb\u30e1\u30e2",
+    staffExpertise: "\u30b9\u30ad\u30eb\u30fb\u5c02\u9580",
+    staffIntroNotes: "\u30e1\u30e2",
     avatar: "\u30a2\u30d0\u30bf\u30fc",
     area: "\u5bfe\u5fdc\u30a8\u30ea\u30a2",
     areas: "\u5bfe\u5fdc\u30a8\u30ea\u30a2",
@@ -732,11 +733,12 @@
     staffAutoAssign: "T\u1ef1 \u0111\u1ed9ng ph\u00e2n c\u00f4ng",
     staffRecentHistory: "L\u1ecbch s\u1eed x\u1eed l\u00fd g\u1ea7n \u0111\u00e2y",
     staffOperations: "Thao t\u00e1c nh\u00e2n vi\u00ean",
+    staffEditTitle: "Ch\u1ec9nh s\u1eeda staff",
     editStaffProfile: "Ch\u1ec9nh s\u1eeda h\u1ed3 s\u01a1",
     staffProfileBasic: "H\u1ed3 s\u01a1 c\u01a1 b\u1ea3n",
     staffOrganizationRole: "T\u1ed5 ch\u1ee9c & vai tr\u00f2",
     staffExpertise: "Chuy\u00ean m\u00f4n",
-    staffIntroNotes: "Gi\u1edbi thi\u1ec7u & ghi ch\u00fa",
+    staffIntroNotes: "Ghi ch\u00fa",
     avatar: "\u1ea2nh \u0111\u1ea1i di\u1ec7n",
     area: "Khu v\u1ef1c",
     areas: "Khu v\u1ef1c",
@@ -1378,7 +1380,6 @@
   function closeDrawer() {
     const drawer = $("drawer");
     drawer.classList.remove("open");
-    drawer.classList.remove("staff-edit-open");
     drawer.setAttribute("aria-hidden", "true");
     drawer.innerHTML = "";
   }
@@ -2866,82 +2867,97 @@
     const id = getRowId(item);
     const avatar = item.avatar || "";
     const statusOptions = ["active", "busy", "off", "inactive"];
-    openDrawer(`
-      <article class="drawer-panel staff-edit-panel">
+    document.querySelector("[data-staff-edit-overlay]")?.remove();
+    const overlay = document.createElement("div");
+    overlay.className = "staff-edit-overlay";
+    overlay.id = "staffEditOverlay";
+    overlay.dataset.staffEditOverlay = "";
+    overlay.innerHTML = `
+      <article class="staff-edit-modal" role="dialog" aria-modal="true" aria-labelledby="staffEditTitle">
         <form id="staffForm" data-staff-id="${escapeHtml(id)}" data-staff-edit-dirty="false">
           <header class="staff-edit-header">
             <div>
-              <p>${escapeHtml(t("staffForm"))}</p>
-              <h2>${escapeHtml(item.name || t("addStaff"))}</h2>
+              <p class="staff-edit-eyebrow">${escapeHtml(t("staffEditTitle"))}</p>
+              <h2 class="staff-edit-title" id="staffEditTitle">${escapeHtml(item.name || t("addStaff"))}</h2>
+              <span>${escapeHtml(item.email || id || "-")}</span>
             </div>
             <div class="staff-edit-header-actions">
               <button class="btn btn-soft" type="button" data-staff-edit-close>${escapeHtml(t("close"))}</button>
-              <button class="primary-button" type="submit">${escapeHtml(t("saveChanges"))}</button>
+              <button class="primary-button" type="submit" data-staff-edit-save disabled>${escapeHtml(t("saveChanges"))}</button>
             </div>
           </header>
           <div class="staff-edit-body">
-            <section class="staff-edit-section">
-              <h3>${escapeHtml(t("staffProfileBasic"))}</h3>
-              <div class="staff-avatar-editor">
-                <div class="staff-avatar-preview" data-avatar-preview>
-                  ${avatar ? `<img src="${escapeHtml(avatar)}" alt="${escapeHtml(t("preview"))}">` : `<span>${escapeHtml(t("noAvatarPreview"))}</span>`}
-                </div>
-                <div class="staff-avatar-controls">
-                  <strong>${escapeHtml(t("avatar"))}</strong>
-                  <input type="hidden" name="avatar" value="${escapeHtml(avatar)}" data-avatar-url>
-                  <input class="sr-only" id="staffAvatarInput" name="avatarFile" type="file" accept="image/*" data-avatar-file>
-                  <div class="actions">
-                    <label class="btn btn-soft" for="staffAvatarInput">${escapeHtml(t("chooseImage"))}</label>
-                    <button class="btn btn-soft" type="button" data-staff-avatar-pick>${escapeHtml(t("uploadImage"))}</button>
-                    <button class="btn btn-soft" type="button" data-staff-avatar-remove>${escapeHtml(t("removeImage"))}</button>
+            <div class="staff-edit-columns">
+              <div class="staff-edit-column">
+                <section class="staff-edit-section">
+                  <h3>${escapeHtml(t("staffProfileBasic"))}</h3>
+                  <div class="staff-avatar-editor">
+                    <div class="staff-avatar-preview" data-avatar-preview>
+                      ${avatar ? `<img src="${escapeHtml(avatar)}" alt="${escapeHtml(t("preview"))}">` : `<span>${escapeHtml(t("noAvatarPreview"))}</span>`}
+                    </div>
+                    <div class="staff-avatar-controls">
+                      <strong>${escapeHtml(t("avatar"))}</strong>
+                      <input type="hidden" name="avatar" value="${escapeHtml(avatar)}" data-avatar-url>
+                      <input class="sr-only" id="staffAvatarInput" name="avatarFile" type="file" accept="image/*" data-avatar-file>
+                      <div class="actions">
+                        <label class="btn btn-soft" for="staffAvatarInput">${escapeHtml(t("chooseImage"))}</label>
+                        <button class="btn btn-soft" type="button" data-staff-avatar-pick>${escapeHtml(t("uploadImage"))}</button>
+                        <button class="btn btn-soft" type="button" data-staff-avatar-remove>${escapeHtml(t("removeImage"))}</button>
+                      </div>
+                      <small data-avatar-status>${escapeHtml(t("preview"))}</small>
+                    </div>
                   </div>
-                  <small data-avatar-status>${escapeHtml(t("preview"))}</small>
-                </div>
-              </div>
-              <div class="staff-edit-grid">
-                ${staffTextField("name", t("name"), item.name)}
-                ${staffTextField("email", t("email"), item.email, "email")}
-                ${staffTextField("phone", t("phone"), item.phone, "tel")}
-              </div>
-            </section>
+                  <div class="staff-edit-grid">
+                    ${staffTextField("name", t("name"), item.name)}
+                    ${staffTextField("email", t("email"), item.email, "email")}
+                    ${staffTextField("phone", t("phone"), item.phone, "tel")}
+                  </div>
+                </section>
 
-            <section class="staff-edit-section">
-              <h3>${escapeHtml(t("staffOrganizationRole"))}</h3>
-              <div class="staff-edit-grid">
-                ${staffMultiSelectField("areas", t("areas"), staffAreaOptions(item.areas), item.areas)}
-                ${staffSelectField("department", t("department"), staffDepartmentOptions(item.department), item.department)}
-                ${staffSelectField("role", t("role"), staffRoleOptions(item.role), item.role)}
-                ${staffTextField("position", t("position"), item.position, "text", `list="staffPositionOptions"`)}
-                ${staffTextField("title", t("title"), item.title, "text", `list="staffTitleOptions"`)}
-                <label class="staff-edit-field"><span>${escapeHtml(t("status"))}</span><select name="status">${statusOptions.map(status => `<option value="${status}" ${String(item.status || "active") === status ? "selected" : ""}>${escapeHtml(staffStatusLabel(status))}</option>`).join("")}</select></label>
+                <section class="staff-edit-section">
+                  <h3>${escapeHtml(t("staffOrganizationRole"))}</h3>
+                  <div class="staff-edit-grid">
+                    ${staffMultiSelectField("areas", t("areas"), staffAreaOptions(item.areas), item.areas)}
+                    ${staffSelectField("department", t("department"), staffDepartmentOptions(item.department), item.department)}
+                    ${staffSelectField("role", t("role"), staffRoleOptions(item.role), item.role)}
+                    ${staffTextField("position", t("position"), item.position, "text", `list="staffPositionOptions"`)}
+                    ${staffTextField("title", t("title"), item.title, "text", `list="staffTitleOptions"`)}
+                    <label class="staff-edit-field"><span>${escapeHtml(t("status"))}</span><select name="status">${statusOptions.map(status => `<option value="${status}" ${String(item.status || "active") === status ? "selected" : ""}>${escapeHtml(staffStatusLabel(status))}</option>`).join("")}</select></label>
+                  </div>
+                  <datalist id="staffPositionOptions">${staffPositionOptions(item.position).map(value => `<option value="${escapeHtml(value)}"></option>`).join("")}</datalist>
+                  <datalist id="staffTitleOptions">${staffTitleOptions(item.title).map(value => `<option value="${escapeHtml(value)}"></option>`).join("")}</datalist>
+                </section>
               </div>
-              <datalist id="staffPositionOptions">${staffPositionOptions(item.position).map(value => `<option value="${escapeHtml(value)}"></option>`).join("")}</datalist>
-              <datalist id="staffTitleOptions">${staffTitleOptions(item.title).map(value => `<option value="${escapeHtml(value)}"></option>`).join("")}</datalist>
-            </section>
 
-            <section class="staff-edit-section">
-              <h3>${escapeHtml(t("staffExpertise"))}</h3>
-              <div class="staff-edit-grid">
-                ${staffMultiSelectField("skills", t("skills"), staffTagOptions(item.skills), item.skills)}
-                ${staffMultiSelectField("workTags", t("workTags"), staffTagOptions(item.workTags), item.workTags)}
-                ${staffTextareaField("workContent", t("workContent"), item.workContent)}
-              </div>
-            </section>
+              <div class="staff-edit-column">
+                <section class="staff-edit-section">
+                  <h3>${escapeHtml(t("staffExpertise"))}</h3>
+                  <div class="staff-edit-grid">
+                    ${staffMultiSelectField("skills", t("skills"), staffTagOptions(item.skills), item.skills)}
+                    ${staffMultiSelectField("workTags", t("workTags"), staffTagOptions(item.workTags), item.workTags)}
+                    ${staffTextareaField("workContent", t("workContent"), item.workContent)}
+                  </div>
+                </section>
 
-            <section class="staff-edit-section">
-              <h3>${escapeHtml(t("staffIntroNotes"))}</h3>
-              <div class="staff-edit-grid">
-                ${staffTextareaField("introduction", t("introduction"), item.introduction)}
-                ${staffTextareaField("note", t("note"), item.note)}
+                <section class="staff-edit-section">
+                  <h3>${escapeHtml(t("staffIntroNotes"))}</h3>
+                  <div class="staff-edit-grid">
+                    ${staffTextareaField("note", t("note"), item.note)}
+                    ${staffTextareaField("introduction", t("introduction"), item.introduction)}
+                  </div>
+                </section>
               </div>
-            </section>
+            </div>
           </div>
+          <footer class="staff-edit-footer">
+            <span class="request-unsaved-note" data-staff-edit-unsaved hidden>${escapeHtml(t("unsavedChanges"))}</span>
+            <button class="ghost-button" type="button" data-staff-edit-close>${escapeHtml(t("close"))}</button>
+            <button class="primary-button" type="submit" data-staff-edit-save disabled>${escapeHtml(t("saveChanges"))}</button>
+          </footer>
         </form>
       </article>
-    `);
-    $("drawer").dataset.drawerType = "staff-edit";
-    $("drawer").dataset.drawerId = id;
-    $("drawer").classList.add("staff-edit-open");
+    `;
+    document.body.appendChild(overlay);
   }
 
   function field(name, label, value, textarea) {
@@ -3561,7 +3577,13 @@
 
   function setStaffEditDirty(dirty = true) {
     const form = $("staffForm");
-    if (form) form.dataset.staffEditDirty = dirty ? "true" : "false";
+    if (!form) return;
+    form.dataset.staffEditDirty = dirty ? "true" : "false";
+    document.querySelectorAll("[data-staff-edit-save]").forEach(button => {
+      button.disabled = !dirty;
+    });
+    const note = document.querySelector("[data-staff-edit-unsaved]");
+    if (note) note.hidden = !dirty;
   }
 
   async function closeStaffEditForm(force = false) {
@@ -3576,7 +3598,7 @@
       });
       if (!ok) return;
     }
-    closeDrawer();
+    document.querySelector("[data-staff-edit-overlay]")?.remove();
   }
 
   function previewStaffAvatar(file) {
@@ -3859,6 +3881,12 @@
         return;
       }
 
+      if (event.target.closest("[data-staff-edit-close]") || event.target.id === "staffEditOverlay") {
+        event.preventDefault();
+        void closeStaffEditForm();
+        return;
+      }
+
       if (event.target.closest("[data-staff-avatar-pick]")) {
         event.preventDefault();
         $("staffAvatarInput")?.click();
@@ -3937,7 +3965,7 @@
         if (form.dataset.staffId) await AdminAPI.updateStaff(form.dataset.staffId, payload);
         else await AdminAPI.createStaff(payload);
         setStaffEditDirty(false);
-        closeDrawer();
+        await closeStaffEditForm(true);
         await refreshData();
         toast(t("staffSaved"));
       } catch {
