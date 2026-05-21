@@ -2185,12 +2185,13 @@
       const deptText = staffDepartment(staff);
       const statusText = staff.status || "active";
       if (statusText === "deleted" || staff.deletedAt) return false;
-      const text = [staff.name, staff.email, staff.phone, deptText, staffRole(staff), staff.workContent, staff.skills, toList(staff.workTags).join(" ")].join(" ").toLowerCase();
+      const text = [staff.name, staff.email, staff.phone, deptText, staffRole(staff), staff.workContent, staffTags(staff).join(" ")].join(" ").toLowerCase();
       const assigned = activeAssignmentCount(staff);
       const assignedOk = assignedFilter === "all" || (assignedFilter === "has" ? assigned > 0 : assigned === 0);
       return (dept === "all" || deptText === dept) && (status === "all" || statusText === status) && assignedOk && text.includes(search.toLowerCase());
     }).sort((a, b) => {
       if (sort === "status") return compactText(a.status).localeCompare(compactText(b.status));
+      if (sort === "workload") return activeAssignmentCount(b) - activeAssignmentCount(a);
       if (sort === "created") return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       return compactText(a.name).localeCompare(compactText(b.name));
     });
@@ -2561,14 +2562,14 @@
     const rows = filterStaff();
     const departments = [...new Set(state.staff.map(staffDepartment).filter(value => value && value !== "-"))];
     const allTags = state.staff.flatMap(staff => staffTags(staff));
-    const selected = state.selectedStaff ? rows.find(staff => getRowId(staff) === state.selectedStaff) : null;
+    const selected = state.selectedStaff ? rows.find(staff => String(getRowId(staff)) === String(state.selectedStaff)) : null;
     if (state.selectedStaff && !selected) state.selectedStaff = "";
     const visibleStaff = state.staff.filter(staff => String(staff.status || "active") !== "deleted" && !staff.deletedAt);
     const activeStaff = visibleStaff.filter(staff => !["off", "inactive"].includes(String(staff.status || "active")));
     const assignedStaffCount = activeStaff.filter(staff => activeAssignmentCount(staff) > 0).length;
     $("viewRoot").innerHTML = `
       <div class="page-intro"><p>${escapeHtml(t("staffSubtitle"))}</p></div>
-      <div class="toolbar demo-actions"><button class="btn btn-soft" disabled>CSV ${escapeHtml(t("export"))}</button><button class="primary-button" type="button" data-staff-new>+ ${escapeHtml(t("addStaff"))}</button></div>
+      <div class="toolbar demo-actions"><button class="btn btn-soft" disabled>CSV ${escapeHtml(t("export"))}</button><button class="primary-button" type="button" data-staff-action="add">+ ${escapeHtml(t("addStaff"))}</button></div>
       <div class="kpi-grid kpi-grid-small">
         ${statCard(t("staffCount"), visibleStaff.length, t("realData"), "info")}
         ${statCard(t("active"), activeStaff.length, t("realData"), "success")}
@@ -2577,25 +2578,26 @@
         ${statCard(t("departments"), departments.length, t("realData"), "total")}
         ${statCard(t("totalTags"), new Set(allTags).size, t("realData"), "info")}
       </div>
-      <div class="crm-filter-bar">
-        <input class="filter-input" data-staff-filter="search" value="${escapeHtml(state.filters.staffSearch || "")}" placeholder="${escapeHtml(t("search"))}" />
+      <div class="crm-filter-bar staff-filter-bar">
+        <input class="filter-input" data-staff-search data-staff-filter="search" value="${escapeHtml(state.filters.staffSearch || "")}" placeholder="${escapeHtml(t("search"))}" />
         <select class="filter-input" data-staff-filter="department"><option value="all">${escapeHtml(t("allDepartments"))}</option>${departments.map(item => `<option value="${escapeHtml(item)}" ${state.filters.staffDepartment === item ? "selected" : ""}>${escapeHtml(item)}</option>`).join("")}</select>
         <select class="filter-input" data-staff-filter="status"><option value="all">${escapeHtml(t("statusFilter"))}</option>${["active", "busy", "off", "inactive"].map(status => `<option value="${status}" ${state.filters.staffStatus === status ? "selected" : ""}>${escapeHtml(staffStatusMap[status] || status)}</option>`).join("")}</select>
         <select class="filter-input" data-staff-filter="assigned"><option value="all">${escapeHtml(t("currentAssignments"))}</option><option value="has" ${state.filters.staffAssigned === "has" ? "selected" : ""}>${escapeHtml(t("currentAssignments"))}</option><option value="none" ${state.filters.staffAssigned === "none" ? "selected" : ""}>${escapeHtml(t("noData"))}</option></select>
         <select class="filter-input" data-staff-filter="sort">
           <option value="name" ${(state.filters.staffSort || "name") === "name" ? "selected" : ""}>${escapeHtml(t("sortName"))}</option>
+          <option value="workload" ${state.filters.staffSort === "workload" ? "selected" : ""}>${escapeHtml(t("workload"))}</option>
           <option value="created" ${state.filters.staffSort === "created" ? "selected" : ""}>${escapeHtml(t("sortCreated"))}</option>
           <option value="status" ${state.filters.staffSort === "status" ? "selected" : ""}>${escapeHtml(t("sortStatus"))}</option>
         </select>
       </div>
-      <div class="staff-layout ${selected ? "has-detail" : ""}">
+      <div class="staff-layout ${selected ? "has-detail" : ""}" id="staffLayoutRoot">
         <section class="section-card staff-list-panel">
-          <div class="panel-head"><h2>${escapeHtml(t("staff"))}</h2><span class="note">${rows.length} / ${state.staff.length}</span></div>
-          <div class="panel-body crm-table-body">
-            ${rows.length ? `<div class="table-wrap crm-table-wrap"><table class="data-table staff-table"><thead><tr><th>${t("staff")}</th><th>${t("role")} / ${t("department")}</th><th>Skills</th><th>${t("assignedCount")}</th><th>${t("workload")}</th><th>${t("status")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(staff => renderStaffRow(staff, selected)).join("")}</tbody></table></div>` : showEmptyState()}
+          <div class="panel-head"><h2>${escapeHtml(t("staff"))}</h2><span class="note" id="staffCountNote">${rows.length} / ${visibleStaff.length}</span></div>
+          <div class="panel-body crm-table-body" id="staffTableRoot">
+            ${renderStaffTableHtml(rows, selected)}
           </div>
         </section>
-        ${selected ? renderStaffPanel(selected) : ""}
+        <div id="staffPanelRoot">${selected ? renderStaffPanel(selected) : ""}</div>
       </div>
     `;
   }
@@ -2605,11 +2607,11 @@
     const status = staff.status || "active";
     const assigned = state.requests.filter(request => String(request.assigneeId || request.assignedStaffId || "") === String(id) || getAssigneeName(request) === staff.name).length;
     const workload = assigned ? Math.min(95, 30 + assigned * 8) : 0;
-    const isSelected = selected && getRowId(selected) === id;
+    const isSelected = selected && String(getRowId(selected)) === String(id);
     return `<tr class="${isSelected ? "selected-row" : ""}">
       <td><div class="identity-cell">${avatarHtml(staff)}<div><strong>${escapeHtml(staff.name || "-")}</strong><span>${escapeHtml(staff.email || staff.phone || "-")}</span></div></div></td>
       <td>${escapeHtml(staffRole(staff))}<div class="subtext">${escapeHtml(staffDepartment(staff))}</div></td>
-      <td>${tagChips(staff.workTags || staff.skills || staff.areas, 4)}<div class="subtext text-clamp-1">${escapeHtml(staff.workContent || "")}</div></td>
+      <td>${tagChips(staffTags(staff), 3)}<div class="subtext text-clamp-1">${escapeHtml(staff.workContent || "")}</div></td>
       <td>${assigned}</td>
       <td><div class="progress-cell"><span style="width:${workload}%"></span></div><small>${workload}%</small></td>
       <td><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span></td>
@@ -2617,6 +2619,26 @@
         <button class="btn btn-soft" type="button" data-staff-action="detail" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
       </div></td>
     </tr>`;
+  }
+
+  function renderStaffTableHtml(rows, selected) {
+    return rows.length ? `<div class="table-wrap crm-table-wrap"><table class="data-table staff-table"><thead><tr><th>${t("staff")}</th><th>${t("role")} / ${t("department")}</th><th>${t("skillsWork")}</th><th>${t("assignedCount")}</th><th>${t("workload")}</th><th>${t("status")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(staff => renderStaffRow(staff, selected)).join("")}</tbody></table></div>` : showEmptyState();
+  }
+
+  function renderStaffResultsOnly() {
+    if (!$("staffTableRoot")) {
+      renderStaff();
+      return;
+    }
+    const rows = filterStaff();
+    const selected = state.selectedStaff ? rows.find(staff => String(getRowId(staff)) === String(state.selectedStaff)) : null;
+    const visibleStaff = state.staff.filter(staff => String(staff.status || "active") !== "deleted" && !staff.deletedAt);
+    if (state.selectedStaff && !selected) state.selectedStaff = "";
+    const layout = $("staffLayoutRoot");
+    if (layout) layout.classList.toggle("has-detail", Boolean(selected));
+    $("staffTableRoot").innerHTML = renderStaffTableHtml(rows, selected);
+    if ($("staffPanelRoot")) $("staffPanelRoot").innerHTML = selected ? renderStaffPanel(selected) : "";
+    if ($("staffCountNote")) $("staffCountNote").textContent = `${rows.length} / ${visibleStaff.length}`;
   }
 
   function renderStaffPanel(staff) {
@@ -3283,7 +3305,11 @@
   async function handleStaffAction(action, id) {
     if (action === "close-detail") {
       state.selectedStaff = "";
-      renderStaff();
+      renderStaffResultsOnly();
+      return;
+    }
+    if (action === "add") {
+      renderStaffForm(null);
       return;
     }
     if (!id) return;
@@ -3291,7 +3317,7 @@
     if (!staff && !["permanent-delete"].includes(action)) return;
     if (action === "detail") {
       state.selectedStaff = id;
-      renderStaff();
+      renderStaffResultsOnly();
       return;
     }
     if (action === "edit") {
@@ -3337,6 +3363,16 @@
       console.error(error);
       toast(t("failed"));
     }
+  }
+
+  async function handleStaffDelegatedClick(event) {
+    const staffBtn = event.target.closest("[data-staff-action]");
+    if (!staffBtn) return false;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    await handleStaffAction(staffBtn.dataset.staffAction, staffBtn.dataset.staffId || state.selectedStaff);
+    return true;
   }
 
   function bindEvents() {
@@ -3412,6 +3448,9 @@
     });
     document.addEventListener("click", event => {
       void handleTrashDelegatedClick(event);
+    }, true);
+    document.addEventListener("click", event => {
+      void handleStaffDelegatedClick(event);
     }, true);
     document.addEventListener("click", event => {
       void handleCustomerDelegatedClick(event);
@@ -3655,7 +3694,7 @@
       const staffFilter = event.target.closest("[data-staff-filter]");
       if (staffFilter) {
         state.filters["staff" + staffFilter.dataset.staffFilter.charAt(0).toUpperCase() + staffFilter.dataset.staffFilter.slice(1)] = staffFilter.value || "";
-        renderStaff();
+        renderStaffResultsOnly();
       }
       const trashSearch = event.target.closest("[data-trash-search]");
       if (trashSearch) {
@@ -3674,7 +3713,7 @@
       const staffFilter = event.target.closest("[data-staff-filter]");
       if (staffFilter) {
         state.filters["staff" + staffFilter.dataset.staffFilter.charAt(0).toUpperCase() + staffFilter.dataset.staffFilter.slice(1)] = staffFilter.value || "";
-        renderStaff();
+        renderStaffResultsOnly();
       }
     });
   }

@@ -315,6 +315,7 @@ h1 { margin-bottom: 0; font-size: 28px; }
 
 .kpi-grid-small { grid-template-columns: repeat(6, minmax(120px, 1fr)); margin-bottom: 14px; }
 .crm-filter-bar { display: grid; grid-template-columns: minmax(220px, 1.4fr) minmax(140px, .7fr) minmax(140px, .7fr); gap: 10px; margin-bottom: 14px; }
+.staff-filter-bar { grid-template-columns: minmax(220px, 1.2fr) repeat(4, minmax(150px, .8fr)); }
 .customer-layout { display: grid; grid-template-columns: 1fr; gap: 18px; align-items: start; }
 .customer-layout.has-detail { grid-template-columns: minmax(0, 1fr) 420px; }
 .staff-layout { display: grid; grid-template-columns: 1fr; gap: 18px; align-items: start; }
@@ -2779,8 +2780,13 @@ body {
 }
 
 .staff-table .tag-list {
-  flex-wrap: nowrap;
-  overflow: hidden;
+  max-width: 100%;
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.staff-table .tag-chip {
+  max-width: 150px;
 }
 
 .progress-cell {
