@@ -933,6 +933,24 @@
     collapse: "Thu gọn"
   });
 
+  Object.assign(i18n.ja, {
+    assignedCount: "\u5bfe\u5fdc\u6e08\u307f\u4ef6\u6570",
+    changeStaffStatus: "\u30b9\u30c6\u30fc\u30bf\u30b9\u5909\u66f4",
+    pauseStaffConfirmTitle: "\u30b9\u30bf\u30c3\u30d5\u3092\u4f11\u6b62\u4e2d\u306b\u3057\u307e\u3059\u304b\uff1f",
+    pauseStaffConfirmText: "\u4f11\u6b62\u4e2d\u306e\u30b9\u30bf\u30c3\u30d5\u306f\u81ea\u52d5\u5272\u308a\u5f53\u3066\u306e\u5bfe\u8c61\u5916\u306b\u306a\u308a\u307e\u3059\u3002",
+    noSelectedWorkTypes: "\u696d\u52d9\u304c\u3042\u308a\u307e\u305b\u3093\u3002",
+    staffWorkTypes: "\u5bfe\u5fdc\u53ef\u80fd\u696d\u52d9"
+  });
+
+  Object.assign(i18n.vi, {
+    assignedCount: "S\u1ed1 y\u00eau c\u1ea7u \u0111\u00e3 ph\u1ee5 tr\u00e1ch",
+    changeStaffStatus: "\u0110\u1ed5i tr\u1ea1ng th\u00e1i",
+    pauseStaffConfirmTitle: "Chuy\u1ec3n nh\u00e2n vi\u00ean sang t\u1ea1m ngh\u1ec9?",
+    pauseStaffConfirmText: "Nh\u00e2n vi\u00ean n\u00e0y s\u1ebd kh\u00f4ng \u0111\u01b0\u1ee3c t\u1ef1 \u0111\u1ed9ng ph\u00e2n c\u00f4ng trong th\u1eddi gian t\u1ea1m ngh\u1ec9.",
+    noSelectedWorkTypes: "Ch\u01b0a c\u00f3 c\u00f4ng vi\u1ec7c n\u00e0o.",
+    staffWorkTypes: "C\u00f4ng vi\u1ec7c c\u00f3 th\u1ec3 ph\u1ee5 tr\u00e1ch"
+  });
+
   Object.assign(requestStatusMap, {
     untreated: "\u672a\u5bfe\u5fdc",
     contacted: "\u9023\u7d61\u6e08",
@@ -1084,7 +1102,6 @@
     selectedRequest: null,
     selectedUser: null,
     selectedStaff: null,
-    staffDetailWorkExpanded: false,
     errors: {},
     loading: {
       requests: false,
@@ -2314,14 +2331,19 @@
     return `<div class="tag-list">${visible.map(item => `<span class="tag-chip">${escapeHtml(item)}</span>`).join("")}${rest ? `<span class="tag-chip tag-more">+${rest}</span>` : ""}</div>`;
   }
 
-  function staffWorkChipList(items, limit = 12) {
-    const names = toList(items).map(item => typeof item === "string" ? item : item?.name).filter(Boolean);
+  function getWorkItemLabel(item) {
+    if (!item) return "-";
+    if (typeof item === "string") return item;
+    if (state.lang === "ja") {
+      return item.nameJa || item.ja || item.labelJa || item.nameVi || item.vi || item.labelVi || item.name || item.label || item.code || "-";
+    }
+    return item.nameVi || item.vi || item.labelVi || item.nameJa || item.ja || item.labelJa || item.name || item.label || item.code || "-";
+  }
+
+  function staffWorkChipList(items) {
+    const names = (Array.isArray(items) ? items : toList(items)).map(getWorkItemLabel).filter(name => name && name !== "-");
     if (!names.length) return showEmptyState(t("noSelectedWorkTypes"));
-    const expanded = state.staffDetailWorkExpanded === true;
-    const visible = expanded ? names : names.slice(0, limit);
-    const chipHtml = list => list.map(item => `<span class="tag-chip">${escapeHtml(item)}</span>`).join("");
-    return `<div class="staff-work-chip-list">${chipHtml(visible)}</div>
-      ${names.length > limit && visible.length ? `<button class="mini-button staff-work-chip-toggle" type="button" data-toggle-staff-work-items>${escapeHtml(expanded ? t("collapse") : t("showMore"))}</button>` : ""}`;
+    return `<div class="staff-work-chip-list ${names.length > 12 ? "is-long" : ""}">${names.map(item => `<span class="tag-chip">${escapeHtml(item)}</span>`).join("")}</div>`;
   }
 
   function normalizeTag(value) {
@@ -2391,7 +2413,9 @@
       items.push({
         id: workType?.id || workType?._id || fallback,
         code: workType?.code || fallback,
-        name: workType ? workMasterLabel(workType) : fallback
+        nameVi: workType?.nameVi || fallback,
+        nameJa: workType?.nameJa || fallback,
+        name: getWorkItemLabel(workType || fallback)
       });
     };
     ids.forEach(id => {
@@ -2413,8 +2437,13 @@
     return state.requests.filter(request => {
       const status = normalizeRequestStatus(request.status);
       return !["completed", "lost"].includes(status)
-        && (String(request.assigneeId || "") === id || getAssigneeName(request) === staff.name);
+        && (String(request.assigneeId || request.assignedStaffId || "") === id || getAssigneeName(request) === staff.name);
     }).length;
+  }
+
+  function handledRequestCount(staff) {
+    const id = getRowId(staff);
+    return state.requests.filter(request => String(request.assigneeId || request.assignedStaffId || "") === id || getAssigneeName(request) === staff.name).length;
   }
 
   function recommendAssignee(request) {
@@ -2525,11 +2554,12 @@
     return [...state.staff].filter(staff => {
       const deptText = staffDepartment(staff);
       const statusText = staff.status || "active";
+      const normalizedStaffStatus = ["off", "inactive"].includes(String(statusText)) ? "off" : statusText;
       if (statusText === "deleted" || staff.deletedAt) return false;
-      const text = [staff.name, staff.email, staff.phone, deptText, staffRole(staff), getStaffWorkItems(staff).map(item => item.name).join(" ")].join(" ").toLowerCase();
+      const text = [staff.name, staff.email, staff.phone, deptText, staffRole(staff), getStaffWorkItems(staff).map(getWorkItemLabel).join(" ")].join(" ").toLowerCase();
       const assigned = activeAssignmentCount(staff);
       const assignedOk = assignedFilter === "all" || (assignedFilter === "has" ? assigned > 0 : assigned === 0);
-      return (dept === "all" || deptText === dept) && (status === "all" || statusText === status) && assignedOk && text.includes(search.toLowerCase());
+      return (dept === "all" || deptText === dept) && (status === "all" || normalizedStaffStatus === status) && assignedOk && text.includes(search.toLowerCase());
     }).sort((a, b) => {
       if (sort === "status") return compactText(a.status).localeCompare(compactText(b.status));
       if (sort === "workload") return activeAssignmentCount(b) - activeAssignmentCount(a);
@@ -2926,11 +2956,10 @@
       <div class="crm-filter-bar staff-filter-bar">
         <input class="filter-input" data-staff-search data-staff-filter="search" value="${escapeHtml(state.filters.staffSearch || "")}" placeholder="${escapeHtml(t("search"))}" />
         <select class="filter-input" data-staff-filter="department"><option value="all">${escapeHtml(t("allDepartments"))}</option>${departments.map(item => `<option value="${escapeHtml(item)}" ${state.filters.staffDepartment === item ? "selected" : ""}>${escapeHtml(item)}</option>`).join("")}</select>
-        <select class="filter-input" data-staff-filter="status"><option value="all">${escapeHtml(t("statusFilter"))}</option>${["active", "busy", "off", "inactive"].map(status => `<option value="${status}" ${state.filters.staffStatus === status ? "selected" : ""}>${escapeHtml(staffStatusMap[status] || status)}</option>`).join("")}</select>
+        <select class="filter-input" data-staff-filter="status"><option value="all">${escapeHtml(t("statusFilter"))}</option>${["active", "off"].map(status => `<option value="${status}" ${state.filters.staffStatus === status ? "selected" : ""}>${escapeHtml(staffStatusLabel(status))}</option>`).join("")}</select>
         <select class="filter-input" data-staff-filter="assigned"><option value="all">${escapeHtml(t("currentAssignments"))}</option><option value="has" ${state.filters.staffAssigned === "has" ? "selected" : ""}>${escapeHtml(t("currentAssignments"))}</option><option value="none" ${state.filters.staffAssigned === "none" ? "selected" : ""}>${escapeHtml(t("noData"))}</option></select>
         <select class="filter-input" data-staff-filter="sort">
           <option value="name" ${(state.filters.staffSort || "name") === "name" ? "selected" : ""}>${escapeHtml(t("sortName"))}</option>
-          <option value="workload" ${state.filters.staffSort === "workload" ? "selected" : ""}>${escapeHtml(t("workload"))}</option>
           <option value="created" ${state.filters.staffSort === "created" ? "selected" : ""}>${escapeHtml(t("sortCreated"))}</option>
           <option value="status" ${state.filters.staffSort === "status" ? "selected" : ""}>${escapeHtml(t("sortStatus"))}</option>
         </select>
@@ -2950,17 +2979,20 @@
   function renderStaffRow(staff, selected) {
     const id = getRowId(staff);
     const status = staff.status || "active";
-    const assigned = state.requests.filter(request => String(request.assigneeId || request.assignedStaffId || "") === String(id) || getAssigneeName(request) === staff.name).length;
-    const workload = assigned ? Math.min(95, 30 + assigned * 8) : 0;
+    const quickStatus = ["off", "inactive"].includes(String(status)) ? "off" : "active";
+    const handledCount = handledRequestCount(staff);
     const isSelected = selected && String(getRowId(selected)) === String(id);
     const workItems = getStaffWorkItems(staff);
     return `<tr class="${isSelected ? "selected-row" : ""}">
       <td><div class="identity-cell">${avatarHtml(staff)}<div><strong>${escapeHtml(staff.name || "-")}</strong><span>${escapeHtml(staff.email || staff.phone || "-")}</span></div></div></td>
       <td>${escapeHtml(staffRole(staff))}<div class="subtext">${escapeHtml(staffDepartment(staff))}</div></td>
-      <td>${tagChips(workItems.map(item => item.name), 3)}</td>
-      <td>${assigned}</td>
-      <td><div class="progress-cell"><span style="width:${workload}%"></span></div><small>${workload}%</small></td>
-      <td><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span></td>
+      <td>${tagChips(workItems.map(getWorkItemLabel), 3)}</td>
+      <td>${handledCount}</td>
+      <td><select class="staff-status-quick-select" data-staff-status-change="${escapeHtml(id)}" aria-label="${escapeHtml(t("changeStaffStatus"))}">
+        <option value="active" ${quickStatus === "active" ? "selected" : ""}>${escapeHtml(staffStatusLabel("active"))}</option>
+        <option value="off" ${quickStatus === "off" ? "selected" : ""}>${escapeHtml(staffStatusLabel("off"))}</option>
+      </select></td>
+      <td><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusLabel(status))}</span></td>
       <td><div class="actions crm-actions">
         <button class="btn btn-soft" type="button" data-staff-action="detail" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
       </div></td>
@@ -2968,7 +3000,7 @@
   }
 
   function renderStaffTableHtml(rows, selected) {
-    return rows.length ? `<div class="table-wrap crm-table-wrap"><table class="data-table staff-table"><thead><tr><th>${t("staff")}</th><th>${t("role")} / ${t("department")}</th><th>${t("skillsWork")}</th><th>${t("assignedCount")}</th><th>${t("workload")}</th><th>${t("status")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(staff => renderStaffRow(staff, selected)).join("")}</tbody></table></div>` : showEmptyState();
+    return rows.length ? `<div class="table-wrap crm-table-wrap"><table class="data-table staff-table"><thead><tr><th>${t("staff")}</th><th>${t("role")} / ${t("department")}</th><th>${t("skillsWork")}</th><th>${t("assignedCount")}</th><th>${t("changeStaffStatus")}</th><th>${t("status")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(staff => renderStaffRow(staff, selected)).join("")}</tbody></table></div>` : showEmptyState();
   }
 
   function renderStaffResultsOnly() {
@@ -3006,7 +3038,7 @@
     return `<aside class="detail-panel staff-detail-panel">
       <div class="detail-panel-head staff-detail-head">
         ${avatarHtml(staff, "avatar-large")}
-        <div><h2>${escapeHtml(staff.name || "-")}</h2><p>${escapeHtml(staff.email || "")}</p><p>ID: ${escapeHtml(id || "-")}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusMap[status] || status)}</span></div>
+        <div><h2>${escapeHtml(staff.name || "-")}</h2><p>${escapeHtml(staff.email || "")}</p><p>ID: ${escapeHtml(id || "-")}</p><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusLabel(status))}</span></div>
         <button class="close-button" type="button" data-staff-action="close-detail" aria-label="${escapeHtml(t("close"))}">&times;</button>
       </div>
       <section class="staff-detail-section"><h3>${escapeHtml(t("staffBasicInfo"))}</h3><div class="staff-detail-grid">
@@ -3014,7 +3046,7 @@
         ${infoItem(t("name"), staff.name)}
         ${infoItem(t("email"), staff.email)}
         ${infoItem(t("phone"), staff.phone)}
-        ${infoItem(t("status"), staffStatusMap[status] || status)}
+        ${infoItem(t("status"), staffStatusLabel(status))}
         ${infoItem(t("createdAt"), formatDate(staff.createdAt))}
       </div></section>
       <section class="staff-detail-section"><h3>${escapeHtml(t("staffAssignment"))}</h3>
@@ -3256,8 +3288,8 @@
 
   function staffStatusLabel(status) {
     const labels = state.lang === "vi"
-      ? { active: "\u0110ang ho\u1ea1t \u0111\u1ed9ng", off: "Ngh\u1ec9 / off", deleted: "\u0110\u00e3 x\u00f3a" }
-      : { active: "\u7a3c\u50cd\u4e2d", off: "\u4f11\u6b62\u4e2d", deleted: "\u524a\u9664\u6e08\u307f" };
+      ? { active: "\u0110ang ho\u1ea1t \u0111\u1ed9ng", off: "T\u1ea1m ngh\u1ec9", inactive: "T\u1ea1m ngh\u1ec9", deleted: "\u0110\u00e3 x\u00f3a" }
+      : { active: "\u7a3c\u50cd\u4e2d", off: "\u4f11\u6b62\u4e2d", inactive: "\u4f11\u6b62\u4e2d", deleted: "\u524a\u9664\u6e08\u307f" };
     return labels[status] || staffStatusMap[status] || status || "-";
   }
 
@@ -4241,6 +4273,39 @@
     return false;
   }
 
+  async function updateStaffStatusQuick(id, status, select) {
+    const staff = state.staff.find(item => String(getRowId(item)) === String(id));
+    if (!staff) return;
+    const currentStatus = ["off", "inactive"].includes(String(staff.status || "active")) ? "off" : "active";
+    const nextStatus = status === "off" ? "off" : "active";
+    if (currentStatus === nextStatus) return;
+    if (nextStatus === "off") {
+      const ok = await confirmAction({
+        title: t("pauseStaffConfirmTitle"),
+        message: t("pauseStaffConfirmText"),
+        confirmLabel: t("confirm"),
+        cancelLabel: t("cancel"),
+        variant: "warning"
+      });
+      if (!ok) {
+        if (select) select.value = currentStatus;
+        return;
+      }
+    }
+    try {
+      const response = await AdminAPI.updateStaff(id, { status: nextStatus });
+      const updated = response?.staff || response?.data?.staff || response?.data || response || { status: nextStatus };
+      const index = state.staff.findIndex(item => String(getRowId(item)) === String(id));
+      if (index >= 0) state.staff[index] = Object.assign({}, state.staff[index], updated, { status: updated.status || nextStatus });
+      renderStaffResultsOnly();
+      toast(t("saved"));
+    } catch (error) {
+      console.error(error);
+      if (select) select.value = currentStatus;
+      toast(t("failed"));
+    }
+  }
+
   async function handleStaffAction(action, id) {
     if (action === "close-detail") {
       state.selectedStaff = "";
@@ -4256,7 +4321,6 @@
     if (!staff && !["permanent-delete"].includes(action)) return;
     if (action === "detail") {
       state.selectedStaff = id;
-      state.staffDetailWorkExpanded = false;
       renderStaffResultsOnly();
       return;
     }
@@ -4558,6 +4622,11 @@
     });
 
     bind(document, "change", async event => {
+      const staffStatusSelect = event.target.closest("[data-staff-status-change]");
+      if (staffStatusSelect) {
+        await updateStaffStatusQuick(staffStatusSelect.dataset.staffStatusChange, staffStatusSelect.value, staffStatusSelect);
+        return;
+      }
       const staffForm = event.target.closest("#staffForm");
       if (staffForm) {
         setStaffEditDirty(true);
@@ -4745,19 +4814,6 @@
         return;
       }
 
-      if (event.target.closest("[data-toggle-staff-work-items]")) {
-        event.preventDefault();
-        state.staffDetailWorkExpanded = !state.staffDetailWorkExpanded;
-        if ($("drawer")?.dataset.drawerType === "staff") {
-          const staff = state.staff.find(item => String(getRowId(item)) === String($("drawer").dataset.drawerId));
-          const activeTab = $("drawer").querySelector("[data-drawer-tab].active")?.dataset.drawerTab || "info";
-          if (staff) await renderStaffDetail(staff, activeTab);
-        } else if ($("staffPanelRoot")) {
-          renderStaffResultsOnly();
-        }
-        return;
-      }
-
       if (event.target.closest("[data-focus-staff-department]")) {
         event.preventDefault();
         document.querySelector("[data-staff-department-option]")?.focus();
@@ -4893,7 +4949,6 @@
       const staffDetail = event.target.closest("[data-staff-detail]");
       if (staffDetail) {
         const staff = state.staff.find(item => getRowId(item) === staffDetail.dataset.staffDetail);
-        state.staffDetailWorkExpanded = false;
         if (staff) renderStaffDetail(staff);
         return;
       }
@@ -4901,7 +4956,6 @@
       const selectStaff = event.target.closest("[data-select-staff]");
       if (selectStaff) {
         state.selectedStaff = selectStaff.dataset.selectStaff;
-        state.staffDetailWorkExpanded = false;
         renderStaff();
         return;
       }

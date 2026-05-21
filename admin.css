@@ -416,8 +416,9 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .staff-readable-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; min-width: 0; }
 .staff-readable-card h4 { margin: 0 0 8px; color: #0f172a; font-size: 13px; font-weight: 950; }
 .staff-readable-card p { margin: 0; color: #334155; line-height: 1.55; overflow-wrap: anywhere; white-space: pre-wrap; }
-.staff-work-chip-list { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
-.staff-work-chip-toggle { justify-self: start; margin-top: 10px; }
+.staff-work-chip-list { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; max-width: 100%; }
+.staff-work-chip-list.is-long { max-height: 220px; overflow-y: auto; padding-right: 4px; }
+.staff-status-quick-select { min-height: 34px; border: 1px solid var(--border); border-radius: 10px; background: #fff; padding: 0 10px; color: #0f172a; font-weight: 850; max-width: 100%; }
 .staff-detail-actions { justify-content: flex-end; }
 .crm-grid { display: grid; gap: 10px; }
 .customer-row { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 12px; display: grid; grid-template-columns: 48px minmax(180px, 1.15fr) minmax(140px, .8fr) minmax(170px, 1fr) auto minmax(110px, .6fr) auto; gap: 12px; align-items: center; }
