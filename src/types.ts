@@ -101,6 +101,8 @@ export interface AssigneeRequestHistoryItem {
   updatedAt?: string;
   latestNote?: string;
   issueTags?: string[];
+  workTypeIds?: string[];
+  departmentCode?: string;
 }
 
 export interface StaffProfile {
@@ -154,6 +156,8 @@ export interface Request {
   phone?: string;
   contact?: string;
   issueTags?: string[];
+  workTypeIds?: string[];
+  departmentCode?: string;
   adminReply?: string;
   assigneeId?: string;
   assigneeName?: string;

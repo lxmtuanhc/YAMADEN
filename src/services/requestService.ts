@@ -18,6 +18,44 @@ export interface CreateRequestInput {
   phone?: string;
   contact?: string;
   issueTags?: string[];
+  workTypeIds?: string[];
+  departmentCode?: string;
+}
+
+export interface WorkMasterDepartment {
+  id: string;
+  code: string;
+  nameVi?: string;
+  nameJa?: string;
+  active?: boolean;
+  sortOrder?: number;
+}
+
+export interface WorkMasterGroup {
+  id: string;
+  departmentCode: string;
+  code: string;
+  nameVi?: string;
+  nameJa?: string;
+  active?: boolean;
+  sortOrder?: number;
+}
+
+export interface WorkMasterType {
+  id: string;
+  departmentCode: string;
+  workGroupCode?: string;
+  code: string;
+  nameVi?: string;
+  nameJa?: string;
+  active?: boolean;
+  sortOrder?: number;
+}
+
+export interface WorkMaster {
+  departments: WorkMasterDepartment[];
+  workGroups: WorkMasterGroup[];
+  workTypes: WorkMasterType[];
 }
 
 class BackendRequestError extends Error {
@@ -273,6 +311,8 @@ function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): 
     phone: item.phone || input?.phone || "",
     contact: item.contact || input?.contact || "",
     issueTags: Array.isArray(item.issueTags) ? item.issueTags : input?.issueTags || [],
+    workTypeIds: Array.isArray(item.workTypeIds) ? item.workTypeIds : input?.workTypeIds || [],
+    departmentCode: item.departmentCode || input?.departmentCode || "",
     adminReply: item.adminReply || item.adminResponse || item.response || item.feedback || item.note || latestTimelineNote(item.timeline) || "",
     assigneeId: item.assigneeId || "",
     assigneeName: item.assigneeName || "",
@@ -499,6 +539,8 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
     address: input.address,
     content: input.description,
     issueTags: input.issueTags || [],
+    workTypeIds: input.workTypeIds || [],
+    departmentCode: input.departmentCode || "",
     quoteRequested: false
   });
 
@@ -519,8 +561,10 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
     body.append("title", input.title);
     body.append("address", input.address);
     body.append("content", input.description);
+    body.append("departmentCode", input.departmentCode || "");
     body.append("quoteRequested", "false");
     (input.issueTags || []).forEach(tag => body.append("issueTags", tag));
+    (input.workTypeIds || []).forEach(id => body.append("workTypeIds", id));
     uploadFiles.forEach(file => body.append("image", file));
     const debugEntries = Array.from(body.entries()).map(([field, value]) => (
       value instanceof File
@@ -672,15 +716,23 @@ export const requestService = {
   },
 
   async getIssueOptions(): Promise<string[]> {
-    const token = getUserToken();
-    const response = await fetch("/api/work-options", {
-      cache: "no-store",
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    });
-    if (!response.ok) return [];
+    const master = await this.getWorkMaster();
+    const locale = localStorage.getItem("language") === "vi" ? "vi" : "ja";
+    return master.workTypes
+      .map(item => locale === "vi" ? item.nameVi || item.nameJa || item.code : item.nameJa || item.nameVi || item.code)
+      .map(item => String(item || "").trim())
+      .filter(Boolean);
+  },
+
+  async getWorkMaster(): Promise<WorkMaster> {
+    const response = await fetch("/api/work-master", { cache: "no-store" });
+    if (!response.ok) return { departments: [], workGroups: [], workTypes: [] };
     const payload = await response.json();
-    const options = Array.isArray(payload.data) ? payload.data : [];
-    return options.map((item: unknown) => String(item || "").trim()).filter(Boolean);
+    return {
+      departments: Array.isArray(payload.departments) ? payload.departments : [],
+      workGroups: Array.isArray(payload.workGroups) ? payload.workGroups : [],
+      workTypes: Array.isArray(payload.workTypes) ? payload.workTypes : []
+    };
   },
 
   async updateRequest(id: string, input: UpdateRequestInput): Promise<SupportRequest> {

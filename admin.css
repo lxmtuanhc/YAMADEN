@@ -3823,3 +3823,25 @@ textarea {
 .support-button {
   display: none !important;
 }
+
+.work-master-panel { display: grid; gap: 16px; }
+.work-master-panel .panel-head { align-items: end; }
+.work-master-search { max-width: 320px; }
+.work-master-tabs { margin: 2px 0 4px; }
+.work-master-form { border: 1px solid var(--border); border-radius: 16px; background: #fff; padding: 16px; display: grid; gap: 14px; }
+.work-master-form h3 { margin: 0; font-size: 18px; color: var(--text); }
+.work-master-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.work-master-form label { display: grid; gap: 7px; min-width: 0; }
+.work-master-form label span { font-size: 12px; font-weight: 900; color: var(--muted); }
+.work-master-form input,
+.work-master-form select { width: 100%; min-height: 42px; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; font-weight: 800; color: var(--text); background: #fff; }
+.work-master-form .work-master-check input { width: 20px; min-height: 20px; accent-color: #2563eb; }
+.work-master-table-wrap { max-height: calc(100dvh - 430px); }
+.work-master-table td,
+.work-master-table th { vertical-align: middle; }
+
+@media (max-width: 720px) {
+  .work-master-panel .panel-head { display: grid; gap: 12px; }
+  .work-master-search { max-width: none; width: 100%; }
+  .work-master-table-wrap { max-height: none; }
+}

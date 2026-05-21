@@ -70,6 +70,7 @@ const ADMIN_URL = process.env.ADMIN_URL || "https://yamaden.onrender.com/admin.h
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("MongoDB connected");
+    seedWorkMasterData().catch(error => console.log("Work master seed error:", error.message));
     cleanupExpiredDeletedItems();
     setInterval(cleanupExpiredDeletedItems, 6 * 60 * 60 * 1000).unref?.();
   })
@@ -230,6 +231,8 @@ const RequestSchema = new mongoose.Schema({
   staff: mongoose.Schema.Types.Mixed,
   responsiblePerson: mongoose.Schema.Types.Mixed,
   issueTags: [String],
+  workTypeIds: [String],
+  departmentCode: String,
   quoteRequested: Boolean,
   timeline: [TimelineEventSchema],
   isDeleted: { type: Boolean, default: false },
@@ -299,6 +302,8 @@ const StaffSchema = new mongoose.Schema({
   title: String,
   workContent: String,
   workTags: [String],
+  workTypeIds: [String],
+  departmentCode: String,
   note: String,
   introduction: String,
   status: { type: String, default: "active" },
@@ -306,14 +311,188 @@ const StaffSchema = new mongoose.Schema({
   deletedAt: Date
 });
 
+const DepartmentSchema = new mongoose.Schema({
+  code: { type: String, unique: true, index: true },
+  nameVi: String,
+  nameJa: String,
+  descriptionVi: String,
+  descriptionJa: String,
+  sortOrder: { type: Number, default: 0 },
+  active: { type: Boolean, default: true },
+  isSystemDefault: { type: Boolean, default: false },
+  createdAt: Date,
+  updatedAt: Date
+});
+
+const WorkGroupSchema = new mongoose.Schema({
+  departmentCode: { type: String, index: true },
+  code: { type: String, unique: true, index: true },
+  nameVi: String,
+  nameJa: String,
+  descriptionVi: String,
+  descriptionJa: String,
+  active: { type: Boolean, default: true },
+  sortOrder: { type: Number, default: 0 },
+  createdAt: Date,
+  updatedAt: Date
+});
+
+const WorkTypeSchema = new mongoose.Schema({
+  departmentCode: { type: String, index: true },
+  workGroupCode: String,
+  code: { type: String, unique: true, index: true },
+  nameVi: String,
+  nameJa: String,
+  descriptionVi: String,
+  descriptionJa: String,
+  active: { type: Boolean, default: true },
+  sortOrder: { type: Number, default: 0 },
+  createdAt: Date,
+  updatedAt: Date
+});
+
 const Request = mongoose.model("Request", RequestSchema);
 const Quote = mongoose.model("Quote", QuoteSchema);
 const User = mongoose.model("User", UserSchema);
 const Staff = mongoose.model("Staff", StaffSchema);
+const Department = mongoose.model("Department", DepartmentSchema);
+const WorkGroup = mongoose.model("WorkGroup", WorkGroupSchema);
+const WorkType = mongoose.model("WorkType", WorkTypeSchema);
 
 const USER_STATUS_PENDING = "pendingApproval";
 const SOFT_DELETE_RETENTION_DAYS = 30;
 const SOFT_DELETE_RETENTION_MS = SOFT_DELETE_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+
+const DEFAULT_DEPARTMENTS = [
+  ["design", "Bộ thiết kế", "設計部"],
+  ["construction", "Bộ thi công", "工務部"],
+  ["survey", "Bộ khảo sát", "調査部"],
+  ["maintenance", "Bộ bảo trì", "保全部"],
+  ["sales", "Bộ kinh doanh", "営業部"],
+  ["operations", "Bộ nghiệp vụ", "業務部"],
+  ["executive", "Ban giám đốc", "社長・代表"],
+  ["other", "Bộ khác", "その他"]
+].map(([code, nameVi, nameJa], index) => ({
+  code,
+  nameVi,
+  nameJa,
+  descriptionVi: "",
+  descriptionJa: "",
+  sortOrder: (index + 1) * 10,
+  active: true,
+  isSystemDefault: true
+}));
+
+const DEFAULT_WORK_GROUPS = {
+  design: [
+    ["drawing", "Bản vẽ", "図面"],
+    ["panel", "Tủ điện", "盤"],
+    ["calculation", "Tính toán", "計算"],
+    ["technical_check", "Kiểm tra kỹ thuật", "技術確認"]
+  ],
+  construction: [
+    ["construction", "Thi công", "工事"],
+    ["inspection", "Kiểm tra", "確認"],
+    ["acceptance", "Nghiệm thu", "検査"],
+    ["handover", "Bàn giao", "引渡し"]
+  ],
+  survey: [
+    ["survey", "Khảo sát", "調査"],
+    ["proposal", "Tư vấn", "提案"]
+  ],
+  maintenance: [
+    ["maintenance", "Bảo trì", "保守"],
+    ["trouble", "Xử lý sự cố", "トラブル対応"]
+  ],
+  sales: [
+    ["customer", "Khách hàng", "顧客"],
+    ["estimate", "Báo giá", "見積"],
+    ["contract", "Hợp đồng", "契約"]
+  ],
+  operations: [
+    ["management", "Quản lý", "管理"],
+    ["approval", "Xác nhận / phê duyệt", "確認・承認"]
+  ],
+  executive: [
+    ["approval", "Phê duyệt", "承認"],
+    ["important", "Vấn đề quan trọng", "重要案件"]
+  ],
+  other: [
+    ["general", "Chung", "共通"]
+  ]
+};
+
+const DEFAULT_WORK_TYPES = {
+  design: [
+    ["drawing_design", "drawing", "Thiết kế bản vẽ", "図面設計"],
+    ["drawing_revision", "drawing", "Chỉnh sửa bản vẽ", "図面修正"],
+    ["electrical_diagram_design", "drawing", "Thiết kế sơ đồ điện", "電気系統設計"],
+    ["cad_drafting", "drawing", "Vẽ CAD", "CAD作図"],
+    ["panel_design", "panel", "Thiết kế tủ điện", "盤設計"],
+    ["equipment_layout_design", "panel", "Thiết kế bố trí thiết bị", "機器配置設計"],
+    ["electrical_system_design", "drawing", "Thiết kế hệ thống điện", "電気設備設計"],
+    ["construction_drawing", "drawing", "Làm bản vẽ thi công", "施工図作成"],
+    ["as_built_drawing", "drawing", "Làm bản vẽ hoàn công", "竣工図作成"],
+    ["technical_drawing_check", "technical_check", "Kiểm tra bản vẽ kỹ thuật", "技術図面確認"],
+    ["material_quantity_calculation", "calculation", "Tính toán vật tư", "材料数量計算"],
+    ["power_capacity_calculation", "calculation", "Tính toán công suất", "電力容量計算"],
+    ["construction_plan_design", "drawing", "Thiết kế phương án thi công", "施工計画設計"],
+    ["technical_standard_check", "technical_check", "Kiểm tra tiêu chuẩn kỹ thuật", "技術基準確認"]
+  ],
+  construction: [
+    ["electrical_construction", "construction", "Thi công điện", "電気工事"],
+    ["site_check", "inspection", "Kiểm tra công trình", "現場確認"],
+    ["construction_progress_check", "inspection", "Kiểm tra tiến độ thi công", "工事進捗確認"],
+    ["site_safety_check", "inspection", "Kiểm tra an toàn công trình", "安全確認"],
+    ["construction_quality_check", "inspection", "Kiểm tra chất lượng công trình", "品質確認"],
+    ["completion_inspection", "acceptance", "Nghiệm thu công trình", "完了検査"],
+    ["post_construction_check", "inspection", "Kiểm tra sau thi công", "施工後点検"],
+    ["construction_coordination", "construction", "Điều phối thi công", "工事調整"],
+    ["handover_support", "handover", "Hỗ trợ bàn giao công trình", "引渡し支援"]
+  ],
+  survey: [
+    ["site_survey", "Khảo sát hiện trường", "現地調査"],
+    ["estimate_survey", "Khảo sát để báo giá", "見積調査"],
+    ["equipment_condition_check", "Kiểm tra tình trạng thiết bị", "設備状態確認"],
+    ["equipment_consultation", "Tư vấn thiết bị phù hợp", "適正機器提案"]
+  ],
+  maintenance: [
+    ["equipment_maintenance", "Bảo trì thiết bị", "設備保守"],
+    ["post_construction_check_maintenance", "Kiểm tra sau thi công", "施工後点検"],
+    ["site_trouble_support", "Hỗ trợ xử lý vấn đề tại công trình", "現場トラブル対応"],
+    ["major_trouble_support", "Hỗ trợ xử lý sự cố nghiêm trọng", "重大トラブル対応"]
+  ],
+  sales: [
+    ["customer_support", "Chăm sóc khách hàng", "顧客対応"],
+    ["service_consultation", "Tư vấn dịch vụ", "サービス相談"],
+    ["request_reception", "Tiếp nhận yêu cầu khách hàng", "依頼受付"],
+    ["customer_meeting", "Họp với khách hàng", "顧客打合せ"],
+    ["repair_estimate", "Báo giá sửa chữa", "修理見積"],
+    ["construction_estimate", "Báo giá thi công", "工事見積"],
+    ["contract_support", "Hỗ trợ hợp đồng", "契約支援"],
+    ["contract_adjustment", "Điều chỉnh nội dung hợp đồng", "契約内容調整"]
+  ],
+  operations: [
+    ["business_coordination", "Điều phối hoạt động công ty", "業務調整"],
+    ["operations_management", "Quản lý vận hành công ty", "運営管理"],
+    ["hr_management", "Quản lý nhân sự", "人事管理"],
+    ["sales_check", "Kiểm tra doanh thu công trình", "売上確認"],
+    ["construction_plan_confirmation", "Xác nhận kế hoạch thi công", "工事計画確認"],
+    ["technical_document_approval", "Phê duyệt hồ sơ kỹ thuật", "技術資料承認"]
+  ],
+  executive: [
+    ["construction_approval", "Phê duyệt công trình", "工事承認"],
+    ["estimate_approval", "Phê duyệt báo giá", "見積承認"],
+    ["contract_approval", "Phê duyệt hợp đồng", "契約承認"],
+    ["large_project_reception", "Tiếp nhận dự án lớn", "大型案件対応"],
+    ["important_issue_handling", "Xử lý vấn đề quan trọng", "重要問題対応"],
+    ["customer_complaint_resolution", "Giải quyết khiếu nại khách hàng", "クレーム対応"]
+  ],
+  other: [
+    ["other", "Khác", "その他"],
+    ["general_support", "Hỗ trợ chung", "共通支援"]
+  ]
+};
 
 function normalizeUserStatus(status) {
   if (status === "pending") return USER_STATUS_PENDING;
@@ -328,6 +507,135 @@ function publicUser(user) {
   if (item.deletedAt) item.daysUntilPermanentDelete = daysLeftBeforePermanentDelete(item.deletedAt);
   delete item.pinHash;
   return item;
+}
+
+function publicDepartment(item) {
+  const data = item && item.toObject ? item.toObject() : { ...(item || {}) };
+  data.id = String(data._id || data.id || "");
+  delete data._id;
+  delete data.__v;
+  return data;
+}
+
+function publicWorkType(item) {
+  const data = item && item.toObject ? item.toObject() : { ...(item || {}) };
+  data.id = String(data._id || data.id || "");
+  delete data._id;
+  delete data.__v;
+  return data;
+}
+
+function publicWorkGroup(item) {
+  const data = item && item.toObject ? item.toObject() : { ...(item || {}) };
+  data.id = String(data._id || data.id || "");
+  delete data._id;
+  delete data.__v;
+  return data;
+}
+
+function slugifyCode(value, fallback = "item") {
+  const normalized = String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return normalized || fallback;
+}
+
+function cleanMasterPayload(body, fields) {
+  const payload = {};
+  fields.forEach(field => {
+    if (body[field] !== undefined) payload[field] = cleanText(body[field]);
+  });
+  if (body.sortOrder !== undefined) payload.sortOrder = Number(body.sortOrder) || 0;
+  if (body.active !== undefined) payload.active = body.active === true || body.active === "true";
+  return payload;
+}
+
+async function seedWorkMasterData() {
+  const [departmentCount, workGroupCount, workTypeCount] = await Promise.all([
+    Department.countDocuments(),
+    WorkGroup.countDocuments(),
+    WorkType.countDocuments()
+  ]);
+  const now = new Date();
+
+  if (!departmentCount) {
+    await Department.insertMany(DEFAULT_DEPARTMENTS.map(item => ({
+      ...item,
+      createdAt: now,
+      updatedAt: now
+    })));
+  }
+
+  if (!workGroupCount) {
+    const rows = Object.entries(DEFAULT_WORK_GROUPS).flatMap(([departmentCode, items]) =>
+      items.map(([code, nameVi, nameJa], index) => ({
+        departmentCode,
+        code: `${departmentCode}_${code}`,
+        nameVi,
+        nameJa,
+        descriptionVi: "",
+        descriptionJa: "",
+        active: true,
+        sortOrder: (index + 1) * 10,
+        createdAt: now,
+        updatedAt: now
+      }))
+    );
+    await WorkGroup.insertMany(rows);
+  }
+
+  if (!workTypeCount) {
+    const rows = Object.entries(DEFAULT_WORK_TYPES).flatMap(([departmentCode, items]) =>
+      items.map((item, index) => {
+        const [code, maybeGroup, maybeVi, maybeJa] = item;
+        const hasGroup = item.length >= 4;
+        const workGroupCode = hasGroup ? `${departmentCode}_${maybeGroup}` : "";
+        const nameVi = hasGroup ? maybeVi : maybeGroup;
+        const nameJa = hasGroup ? maybeJa : maybeVi;
+        return {
+        departmentCode,
+        workGroupCode,
+        code,
+        nameVi,
+        nameJa,
+        descriptionVi: "",
+        descriptionJa: "",
+        active: true,
+        sortOrder: (index + 1) * 10,
+        createdAt: now,
+        updatedAt: now
+        };
+      })
+    );
+    await WorkType.insertMany(rows);
+  }
+}
+
+async function loadWorkMaster({ activeOnly = false } = {}) {
+  await seedWorkMasterData();
+  const departmentQuery = activeOnly ? { active: true } : {};
+  const activeDepartments = await Department.find(departmentQuery).sort({ sortOrder: 1, createdAt: 1 });
+  const departmentCodes = activeDepartments.map(item => item.code);
+  const workGroupQuery = activeOnly
+    ? { active: true, departmentCode: { $in: departmentCodes } }
+    : {};
+  const workTypeQuery = activeOnly
+    ? { active: true, departmentCode: { $in: departmentCodes } }
+    : {};
+  const workGroups = await WorkGroup.find(workGroupQuery).sort({ departmentCode: 1, sortOrder: 1, createdAt: 1 });
+  const activeGroupCodes = workGroups.map(item => item.code);
+  const workTypes = await WorkType.find(workTypeQuery).sort({ departmentCode: 1, sortOrder: 1, createdAt: 1 });
+  const visibleWorkTypes = activeOnly
+    ? workTypes.filter(item => !item.workGroupCode || activeGroupCodes.includes(item.workGroupCode))
+    : workTypes;
+  return {
+    departments: activeDepartments.map(publicDepartment),
+    workGroups: workGroups.map(publicWorkGroup),
+    workTypes: visibleWorkTypes.map(publicWorkType)
+  };
 }
 
 function daysLeftBeforePermanentDelete(deletedAt) {
@@ -801,6 +1109,19 @@ async function findBestAssignee(issueTags) {
 
   if (!best || bestScore <= 0) return null;
   return best;
+}
+
+async function findBestAssigneeForRequest({ issueTags, workTypeIds }) {
+  const ids = normalizeTagList(workTypeIds);
+  if (ids.length) {
+    const staffList = await Staff.find({ status: { $nin: ["off", "inactive", "deleted"] } });
+    const best = staffList.find(staff => {
+      const staffIds = normalizeTagList(staff.workTypeIds);
+      return ids.some(id => staffIds.includes(id));
+    });
+    if (best) return best;
+  }
+  return findBestAssignee(issueTags);
 }
 
 app.get("/", (req, res) => {
@@ -1516,6 +1837,9 @@ app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res)
     const workTags = Array.isArray(req.body.workTags)
       ? req.body.workTags.map(item => String(item || "").trim()).filter(Boolean)
       : parseRequestTags(req.body.workTags);
+    const workTypeIds = Array.isArray(req.body.workTypeIds)
+      ? req.body.workTypeIds.map(item => String(item || "").trim()).filter(Boolean)
+      : parseRequestTags(req.body.workTypeIds);
 
     let avatar = req.body.avatar || "";
 
@@ -1532,11 +1856,13 @@ app.post("/admin/staff", requireAdmin, upload.single("avatar"), async (req, res)
       areas: req.body.areas || req.body.department || "",
       skills: req.body.skills || req.body.workContent || workTags.join(", "),
       department: req.body.department || req.body.areas || "",
+      departmentCode: req.body.departmentCode || "",
       role: req.body.role || req.body.position || req.body.title || "",
       position: req.body.position || "",
       title: req.body.title || "",
       workContent: req.body.workContent || req.body.skills || workTags.join(", "),
       workTags,
+      workTypeIds,
       note: req.body.note || req.body.introduction || "",
       introduction: req.body.introduction || "",
       status: req.body.status || "active",
@@ -1562,11 +1888,17 @@ app.put("/admin/staff/:id", requireAdmin, upload.single("avatar"), async (req, r
     ["name", "phone", "email", "areas", "skills", "department", "role", "position", "title", "workContent", "note", "introduction", "status"].forEach(field => {
       if (req.body[field] !== undefined) staff[field] = req.body[field];
     });
+    if (req.body.departmentCode !== undefined) staff.departmentCode = req.body.departmentCode;
 
     if (req.body.workTags !== undefined) {
       staff.workTags = Array.isArray(req.body.workTags)
         ? req.body.workTags.map(item => String(item || "").trim()).filter(Boolean)
         : parseRequestTags(req.body.workTags);
+    }
+    if (req.body.workTypeIds !== undefined) {
+      staff.workTypeIds = Array.isArray(req.body.workTypeIds)
+        ? req.body.workTypeIds.map(item => String(item || "").trim()).filter(Boolean)
+        : parseRequestTags(req.body.workTypeIds);
     }
 
     if (req.body.avatar !== undefined) staff.avatar = req.body.avatar || "";
@@ -1631,11 +1963,217 @@ app.patch("/admin/staff/:id/restore", requireAdmin, async (req, res) => {
   }
 });
 
+app.get("/api/work-master", async (req, res) => {
+  try {
+    res.set("Cache-Control", "no-store");
+    res.json(await loadWorkMaster({ activeOnly: true }));
+  } catch (error) {
+    res.status(500).json({ message: "Work master load failed", error: error.message });
+  }
+});
+
+app.get("/admin/work-master", requireAdmin, async (req, res) => {
+  try {
+    res.set("Cache-Control", "no-store");
+    res.json(await loadWorkMaster({ activeOnly: false }));
+  } catch (error) {
+    res.status(500).json({ message: "Work master load failed", error: error.message });
+  }
+});
+
+app.post("/admin/departments", requireAdmin, async (req, res) => {
+  try {
+    const now = new Date();
+    const payload = cleanMasterPayload(req.body || {}, ["code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
+    payload.code = slugifyCode(payload.code || payload.nameVi || payload.nameJa, "department");
+    payload.createdAt = now;
+    payload.updatedAt = now;
+    const item = await Department.create(payload);
+    res.json({ message: "Department saved", data: publicDepartment(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Department save failed", error: error.message });
+  }
+});
+
+app.put("/admin/departments/:id", requireAdmin, async (req, res) => {
+  try {
+    const item = await Department.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Department not found" });
+    const payload = cleanMasterPayload(req.body || {}, ["code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
+    if (payload.code) payload.code = slugifyCode(payload.code, item.code);
+    Object.assign(item, payload, { updatedAt: new Date() });
+    await item.save();
+    res.json({ message: "Department saved", data: publicDepartment(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Department save failed", error: error.message });
+  }
+});
+
+app.put("/admin/departments/:id/status", requireAdmin, async (req, res) => {
+  try {
+    const item = await Department.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Department not found" });
+    item.active = req.body.active === true || req.body.active === "true";
+    item.updatedAt = new Date();
+    await item.save();
+    res.json({ message: "Department status saved", data: publicDepartment(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Department status failed", error: error.message });
+  }
+});
+
+app.delete("/admin/departments/:id", requireAdmin, async (req, res) => {
+  try {
+    const item = await Department.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Department not found" });
+    const related = await Promise.all([
+      Staff.countDocuments({ $or: [{ departmentCode: item.code }, { department: new RegExp(item.nameVi || item.nameJa || item.code, "i") }] }),
+      Request.countDocuments({ departmentCode: item.code }),
+      WorkType.countDocuments({ departmentCode: item.code }),
+      WorkGroup.countDocuments({ departmentCode: item.code })
+    ]);
+    item.active = false;
+    item.updatedAt = new Date();
+    await item.save();
+    res.json({
+      message: related.some(Boolean) ? "Department has related data and was hidden" : "Department hidden",
+      data: publicDepartment(item),
+      relatedCount: related.reduce((sum, count) => sum + count, 0)
+    });
+  } catch (error) {
+    res.status(400).json({ message: "Department delete failed", error: error.message });
+  }
+});
+
+app.post("/admin/work-groups", requireAdmin, async (req, res) => {
+  try {
+    const now = new Date();
+    const payload = cleanMasterPayload(req.body || {}, ["departmentCode", "code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
+    payload.departmentCode = slugifyCode(payload.departmentCode, "other");
+    payload.code = payload.code ? slugifyCode(payload.code, "group") : `${payload.departmentCode}_${slugifyCode(payload.nameVi || payload.nameJa, "group")}`;
+    payload.createdAt = now;
+    payload.updatedAt = now;
+    const item = await WorkGroup.create(payload);
+    res.json({ message: "Work group saved", data: publicWorkGroup(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Work group save failed", error: error.message });
+  }
+});
+
+app.put("/admin/work-groups/:id", requireAdmin, async (req, res) => {
+  try {
+    const item = await WorkGroup.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Work group not found" });
+    const payload = cleanMasterPayload(req.body || {}, ["departmentCode", "code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
+    if (payload.departmentCode) payload.departmentCode = slugifyCode(payload.departmentCode, item.departmentCode);
+    if (payload.code) payload.code = slugifyCode(payload.code, item.code);
+    Object.assign(item, payload, { updatedAt: new Date() });
+    await item.save();
+    res.json({ message: "Work group saved", data: publicWorkGroup(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Work group save failed", error: error.message });
+  }
+});
+
+app.put("/admin/work-groups/:id/status", requireAdmin, async (req, res) => {
+  try {
+    const item = await WorkGroup.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Work group not found" });
+    item.active = req.body.active === true || req.body.active === "true";
+    item.updatedAt = new Date();
+    await item.save();
+    res.json({ message: "Work group status saved", data: publicWorkGroup(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Work group status failed", error: error.message });
+  }
+});
+
+app.delete("/admin/work-groups/:id", requireAdmin, async (req, res) => {
+  try {
+    const item = await WorkGroup.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Work group not found" });
+    const relatedCount = await WorkType.countDocuments({ workGroupCode: item.code });
+    item.active = false;
+    item.updatedAt = new Date();
+    await item.save();
+    res.json({ message: relatedCount ? "Work group has related data and was hidden" : "Work group hidden", data: publicWorkGroup(item), relatedCount });
+  } catch (error) {
+    res.status(400).json({ message: "Work group delete failed", error: error.message });
+  }
+});
+
+app.post("/admin/work-types", requireAdmin, async (req, res) => {
+  try {
+    const now = new Date();
+    const payload = cleanMasterPayload(req.body || {}, ["departmentCode", "workGroupCode", "code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
+    payload.departmentCode = slugifyCode(payload.departmentCode, "other");
+    payload.workGroupCode = payload.workGroupCode ? slugifyCode(payload.workGroupCode, "") : "";
+    payload.code = slugifyCode(payload.code || payload.nameVi || payload.nameJa, "work_type");
+    payload.createdAt = now;
+    payload.updatedAt = now;
+    const item = await WorkType.create(payload);
+    res.json({ message: "Work type saved", data: publicWorkType(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Work type save failed", error: error.message });
+  }
+});
+
+app.put("/admin/work-types/:id", requireAdmin, async (req, res) => {
+  try {
+    const item = await WorkType.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Work type not found" });
+    const payload = cleanMasterPayload(req.body || {}, ["departmentCode", "workGroupCode", "code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
+    if (payload.departmentCode) payload.departmentCode = slugifyCode(payload.departmentCode, item.departmentCode);
+    if (payload.workGroupCode) payload.workGroupCode = slugifyCode(payload.workGroupCode, "");
+    if (payload.code) payload.code = slugifyCode(payload.code, item.code);
+    Object.assign(item, payload, { updatedAt: new Date() });
+    await item.save();
+    res.json({ message: "Work type saved", data: publicWorkType(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Work type save failed", error: error.message });
+  }
+});
+
+app.put("/admin/work-types/:id/status", requireAdmin, async (req, res) => {
+  try {
+    const item = await WorkType.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Work type not found" });
+    item.active = req.body.active === true || req.body.active === "true";
+    item.updatedAt = new Date();
+    await item.save();
+    res.json({ message: "Work type status saved", data: publicWorkType(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Work type status failed", error: error.message });
+  }
+});
+
+app.delete("/admin/work-types/:id", requireAdmin, async (req, res) => {
+  try {
+    const item = await WorkType.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Work type not found" });
+    const related = await Promise.all([
+      Staff.countDocuments({ $or: [{ workTypeIds: String(item._id) }, { workTypeIds: item.code }, { workTags: { $in: [item.code, item.nameVi, item.nameJa] } }] }),
+      Request.countDocuments({ $or: [{ workTypeIds: String(item._id) }, { workTypeIds: item.code }, { issueTags: { $in: [item.code, item.nameVi, item.nameJa] } }] })
+    ]);
+    item.active = false;
+    item.updatedAt = new Date();
+    await item.save();
+    res.json({ message: related.some(Boolean) ? "Work type has related data and was hidden" : "Work type hidden", data: publicWorkType(item), relatedCount: related.reduce((sum, count) => sum + count, 0) });
+  } catch (error) {
+    res.status(400).json({ message: "Work type delete failed", error: error.message });
+  }
+});
+
 app.get("/api/work-options", requireUser, async (req, res) => {
   try {
-    const staff = await Staff.find({ status: { $nin: ["off", "deleted"] } }).sort({ createdAt: -1 });
+    const master = await loadWorkMaster({ activeOnly: true });
+    const options = master.workTypes.map(item => item.nameJa || item.nameVi || item.code).filter(Boolean);
+    if (!options.length) {
+      const staff = await Staff.find({ status: { $nin: ["off", "deleted"] } }).sort({ createdAt: -1 });
+      options.push(...uniqueStaffWorkOptions(staff));
+    }
     res.set("Cache-Control", "no-store");
-    res.json({ data: uniqueStaffWorkOptions(staff) });
+    res.json({ data: options });
   } catch (error) {
     res.status(500).json({
       message: "Work options load failed",
@@ -1743,7 +2281,9 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
 
     const firstMedia = mediaFiles[0] || { url: "", type: "" };
     const issueTags = parseRequestTags(req.body.issueTags);
-    const bestAssignee = await findBestAssignee(issueTags);
+    const workTypeIds = parseRequestTags(req.body.workTypeIds);
+    const departmentCode = cleanText(req.body.departmentCode);
+    const bestAssignee = await findBestAssigneeForRequest({ issueTags, workTypeIds });
     const timeline = normalizeTimelineEvents([{
       id: "tl-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
       type: "submitted",
@@ -1770,6 +2310,8 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
       mediaType: firstMedia.type,
       mediaFiles,
       issueTags,
+      workTypeIds,
+      departmentCode,
       quoteRequested: req.body.quoteRequested === "true" || req.body.quoteRequested === true,
       assigneeId: bestAssignee ? String(bestAssignee._id) : "",
       assigneeName: bestAssignee ? bestAssignee.name : "",

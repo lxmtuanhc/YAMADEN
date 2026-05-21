@@ -793,6 +793,68 @@
     staffId: "ID nh\u00e2n vi\u00ean"
   });
 
+  Object.assign(i18n.ja, {
+    workMaster: "業務マスタ",
+    department: "部門",
+    workGroup: "業務グループ",
+    workGroups: "業務グループ",
+    workType: "業務内容",
+    workTypes: "業務内容",
+    addDepartment: "部門を追加",
+    addWorkGroup: "業務グループを追加",
+    addWorkType: "業務内容を追加",
+    nameVi: "ベトナム語名",
+    nameJa: "日本語名",
+    code: "コード",
+    descriptionVi: "ベトナム語説明",
+    descriptionJa: "日本語説明",
+    activeStatus: "ステータス",
+    active: "使用中",
+    hidden: "非表示",
+    sortOrder: "並び替え",
+    show: "表示",
+    hide: "非表示",
+    workMasterUpdated: "業務リストを更新しました。",
+    workTypeAdded: "業務内容を追加しました。",
+    relatedDataWarning: "この部門には関連データがあります。完全削除ではなく非表示にできます。",
+    selectDepartment: "部門を選択",
+    selectWorkGroup: "業務グループを選択",
+    noWorkGroup: "グループなし",
+    searchWorkMaster: "検索",
+    description: "説明"
+  });
+
+  Object.assign(i18n.vi, {
+    workMaster: "Danh mục công việc",
+    department: "Bộ phận",
+    workGroup: "Nhóm công việc",
+    workGroups: "Nhóm công việc",
+    workType: "Nội dung công việc",
+    workTypes: "Nội dung công việc",
+    addDepartment: "Thêm bộ phận",
+    addWorkGroup: "Thêm nhóm công việc",
+    addWorkType: "Thêm nội dung công việc",
+    nameVi: "Tên tiếng Việt",
+    nameJa: "Tên tiếng Nhật",
+    code: "Mã",
+    descriptionVi: "Mô tả tiếng Việt",
+    descriptionJa: "Mô tả tiếng Nhật",
+    activeStatus: "Trạng thái",
+    active: "Đang sử dụng",
+    hidden: "Đã ẩn",
+    sortOrder: "Sắp xếp",
+    show: "Hiện",
+    hide: "Ẩn",
+    workMasterUpdated: "Danh sách công việc đã được cập nhật.",
+    workTypeAdded: "Nội dung công việc đã được thêm.",
+    relatedDataWarning: "Bộ phận này đang có dữ liệu liên quan. Bạn chỉ có thể ẩn thay vì xóa vĩnh viễn.",
+    selectDepartment: "Chọn bộ phận",
+    selectWorkGroup: "Chọn nhóm công việc",
+    noWorkGroup: "Không có nhóm",
+    searchWorkMaster: "Tìm kiếm",
+    description: "Mô tả"
+  });
+
   Object.assign(requestStatusMap, {
     untreated: "\u672a\u5bfe\u5fdc",
     contacted: "\u9023\u7d61\u6e08",
@@ -940,6 +1002,7 @@
     users: [],
     staff: [],
     quotes: [],
+    workMaster: { departments: [], workGroups: [], workTypes: [] },
     selectedRequest: null,
     selectedUser: null,
     selectedStaff: null,
@@ -948,7 +1011,8 @@
       requests: false,
       users: false,
       staff: false,
-      quotes: false
+      quotes: false,
+      workMaster: false
     },
     filters: {
       requestStatus: "all",
@@ -1066,6 +1130,45 @@
     },
     getStaff() {
       return requestJson("/admin/staff");
+    },
+    getWorkMaster() {
+      return requestJson("/admin/work-master");
+    },
+    createDepartment(payload) {
+      return requestJson("/admin/departments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
+    },
+    updateDepartment(id, payload) {
+      return requestJson("/admin/departments/" + encodeURIComponent(id), { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
+    },
+    setDepartmentStatus(id, active) {
+      return requestJson("/admin/departments/" + encodeURIComponent(id) + "/status", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active }) });
+    },
+    deleteDepartment(id) {
+      return requestJson("/admin/departments/" + encodeURIComponent(id), { method: "DELETE" });
+    },
+    createWorkGroup(payload) {
+      return requestJson("/admin/work-groups", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
+    },
+    updateWorkGroup(id, payload) {
+      return requestJson("/admin/work-groups/" + encodeURIComponent(id), { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
+    },
+    setWorkGroupStatus(id, active) {
+      return requestJson("/admin/work-groups/" + encodeURIComponent(id) + "/status", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active }) });
+    },
+    deleteWorkGroup(id) {
+      return requestJson("/admin/work-groups/" + encodeURIComponent(id), { method: "DELETE" });
+    },
+    createWorkType(payload) {
+      return requestJson("/admin/work-types", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
+    },
+    updateWorkType(id, payload) {
+      return requestJson("/admin/work-types/" + encodeURIComponent(id), { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
+    },
+    setWorkTypeStatus(id, active) {
+      return requestJson("/admin/work-types/" + encodeURIComponent(id) + "/status", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active }) });
+    },
+    deleteWorkType(id) {
+      return requestJson("/admin/work-types/" + encodeURIComponent(id), { method: "DELETE" });
     },
     getStaffHistory(id) {
       return requestJson("/api/requests/staff/" + encodeURIComponent(id) + "/history");
@@ -1545,20 +1648,23 @@
     state.loading.staff = true;
     state.errors = {};
     state.loading.quotes = true;
-    const [requests, users, staff, quotes] = await Promise.allSettled([
+    const [requests, users, staff, quotes, workMaster] = await Promise.allSettled([
       AdminAPI.getRequests(),
       AdminAPI.getUsers(),
       AdminAPI.getStaff(),
-      AdminAPI.getQuotes()
+      AdminAPI.getQuotes(),
+      AdminAPI.getWorkMaster()
     ]);
     state.requests = requests.status === "fulfilled" ? normalizeList(requests.value) : [];
     state.users = users.status === "fulfilled" ? normalizeList(users.value) : [];
     state.staff = staff.status === "fulfilled" ? normalizeList(staff.value) : [];
     state.quotes = quotes.status === "fulfilled" ? normalizeList(quotes.value) : [];
+    state.workMaster = workMaster.status === "fulfilled" ? normalizeWorkMaster(workMaster.value) : { departments: [], workGroups: [], workTypes: [] };
     state.errors.requests = requests.status === "rejected" ? requests.reason?.message || "failed" : "";
     state.errors.users = users.status === "rejected" ? users.reason?.message || "failed" : "";
     state.errors.staff = staff.status === "rejected" ? staff.reason?.message || "failed" : "";
     state.errors.quotes = quotes.status === "rejected" ? quotes.reason?.message || "failed" : "";
+    state.errors.workMaster = workMaster.status === "rejected" ? workMaster.reason?.message || "failed" : "";
     state.loading.requests = false;
     state.loading.users = false;
     state.loading.staff = false;
@@ -1573,6 +1679,15 @@
     if (Array.isArray(payload?.staff)) return payload.staff;
     if (Array.isArray(payload?.quotes)) return payload.quotes;
     return [];
+  }
+
+  function normalizeWorkMaster(payload) {
+    const data = payload?.data || payload || {};
+    return {
+      departments: Array.isArray(data.departments) ? data.departments : [],
+      workGroups: Array.isArray(data.workGroups) ? data.workGroups : [],
+      workTypes: Array.isArray(data.workTypes) ? data.workTypes : []
+    };
   }
 
   function isSoftDeleted(item) {
@@ -2157,9 +2272,12 @@
 
   function recommendAssignee(request) {
     const reqTags = requestTags(request);
+    const requestWorkTypeIds = toList(request?.workTypeIds);
     const normalizedReqTags = reqTags.map(normalizeTag).filter(Boolean);
     let best = null;
     state.staff.filter(staff => !["off", "inactive", "deleted"].includes(String(staff.status || "active"))).forEach(staff => {
+      const staffWorkTypeIds = toList(staff.workTypeIds);
+      const idMatches = requestWorkTypeIds.filter(id => staffWorkTypeIds.includes(id));
       const tags = staffTags(staff);
       const normalizedStaffTags = tags.map(normalizeTag);
       const matched = reqTags.filter((tag, index) => {
@@ -2167,8 +2285,8 @@
         return normalized && normalizedStaffTags.some(staffTag => staffTag === normalized || staffTag.includes(normalized) || normalized.includes(staffTag));
       });
       const workload = activeAssignmentCount(staff);
-      const score = matched.length * 100 - workload;
-      const candidate = { staff, matched: [...new Set(matched)], workload, score };
+      const score = idMatches.length * 200 + matched.length * 100 - workload;
+      const candidate = { staff, matched: [...new Set(idMatches.concat(matched))], workload, score };
       if (!best || candidate.score > best.score) best = candidate;
     });
     return best && best.matched.length ? best : null;
@@ -2240,7 +2358,9 @@
   }
 
   function staffDepartment(staff) {
-    return compactText(staff?.department || staff?.areas);
+    const code = staff?.departmentCode || staff?.department;
+    const department = findDepartmentByCodeOrLabel(code);
+    return department ? workMasterLabel(department) : compactText(staff?.department || staff?.areas);
   }
 
   function staffRole(staff) {
@@ -2816,7 +2936,36 @@
     return uniqueOptions([].concat(base || []).concat(toList(current)));
   }
 
+  function workMasterLabel(item) {
+    if (!item) return "";
+    return state.lang === "vi"
+      ? (item.nameVi || item.nameJa || item.code || "")
+      : (item.nameJa || item.nameVi || item.code || "");
+  }
+
+  function activeMasterItems(type) {
+    return (state.workMaster?.[type] || []).filter(item => item.active !== false);
+  }
+
+  function findDepartmentByCodeOrLabel(value) {
+    const normalized = normalizeTag(value);
+    if (!normalized) return null;
+    return (state.workMaster?.departments || []).find(item => {
+      return [item.code, item.nameVi, item.nameJa].some(candidate => normalizeTag(candidate) === normalized);
+    }) || null;
+  }
+
+  function staffDepartmentCode(value) {
+    const found = findDepartmentByCodeOrLabel(value);
+    if (found) return found.code;
+    return staffDepartmentKey(value);
+  }
+
   function staffDepartmentPresets() {
+    const masterDepartments = activeMasterItems("departments");
+    if (masterDepartments.length) {
+      return masterDepartments.map(item => ({ key: item.code, label: workMasterLabel(item) }));
+    }
     return state.lang === "vi"
       ? [
         { key: "design", label: "B\u1ed9 thi\u1ebft k\u1ebf" },
@@ -2868,7 +3017,24 @@
     return optionPool(base.concat(state.staff.map(staffDepartment)), current);
   }
 
+  function staffDepartmentSelectField(item) {
+    const departments = activeMasterItems("departments");
+    if (!departments.length) return staffSelectField("department", t("department"), staffDepartmentOptions(item.department), item.department);
+    const currentCode = item.departmentCode || findDepartmentByCodeOrLabel(item.department)?.code || departments[0]?.code || "";
+    return `<label class="staff-edit-field"><span>${escapeHtml(t("department"))}</span><select name="department" data-staff-department-select>
+      ${departments.map(dept => `<option value="${escapeHtml(dept.code)}" data-label="${escapeHtml(workMasterLabel(dept))}" ${dept.code === currentCode ? "selected" : ""}>${escapeHtml(workMasterLabel(dept))}</option>`).join("")}
+    </select></label>`;
+  }
+
   function staffWorkTagGroups() {
+    const workTypes = activeMasterItems("workTypes");
+    if (workTypes.length) {
+      const groups = {};
+      activeMasterItems("departments").forEach(dept => {
+        groups[dept.code] = workTypes.filter(item => item.departmentCode === dept.code).map(workMasterLabel);
+      });
+      return groups;
+    }
     if (state.lang === "ja") {
       return {
         design: ["図面設計", "図面修正", "電気図面設計", "CAD作図", "制御盤設計", "盤設計", "設備配置設計", "電気システム設計", "施工図作成", "竣工図作成", "技術図面チェック", "材料計算", "容量計算", "施工計画設計", "技術基準チェック"],
@@ -2894,6 +3060,8 @@
   }
 
   function staffTagDepartmentKey(tag) {
+    const masterType = activeMasterItems("workTypes").find(item => [item.code, item.nameVi, item.nameJa].some(candidate => normalizeTag(candidate) === normalizeTag(tag)));
+    if (masterType) return masterType.departmentCode || "other";
     const normalized = normalizeTag(tag);
     const groups = staffWorkTagGroups();
     for (const [key, tags] of Object.entries(groups)) {
@@ -2903,6 +3071,11 @@
   }
 
   function allStaffWorkTags(selected) {
+    const masterTags = activeMasterItems("workTypes").map(workMasterLabel);
+    if (masterTags.length) {
+      const existing = state.staff.flatMap(staff => toList(staff.workTags).concat(toList(staff.skills)));
+      return optionPool(masterTags.concat(existing), selected);
+    }
     const groups = staffWorkTagGroups();
     const existing = state.staff.flatMap(staff => toList(staff.workTags).concat(toList(staff.skills)));
     return optionPool(Object.values(groups).flat().concat(existing), selected);
@@ -2936,7 +3109,7 @@
   function staffTagPickerField(name, label, selected, department) {
     const selectedItems = toList(selected);
     const selectedSet = new Set(selectedItems.map(item => item.toLowerCase()));
-    const departmentKey = staffDepartmentKey(department);
+    const departmentKey = staffDepartmentCode(department);
     const allTags = allStaffWorkTags(selectedItems);
     const selectedHtml = selectedItems.length
       ? selectedItems.map(tag => `<button class="staff-selected-tag" type="button" data-staff-tag-remove="${escapeHtml(tag)}">${escapeHtml(tag)} <span aria-hidden="true">\u00d7</span></button>`).join("")
@@ -2975,7 +3148,10 @@
     const avatar = item.avatar || "";
     const statusOptions = ["active", "off"];
     const selectedStatus = ["off", "inactive"].includes(String(item.status || "")) ? "off" : "active";
-    const mergedTags = uniqueOptions([].concat(toList(item.skills)).concat(toList(item.workTags)));
+    const masterTagsById = activeMasterItems("workTypes")
+      .filter(type => toList(item.workTypeIds).includes(type.id) || toList(item.workTypeIds).includes(type.code))
+      .map(workMasterLabel);
+    const mergedTags = uniqueOptions([].concat(toList(item.skills)).concat(toList(item.workTags)).concat(masterTagsById));
     const roleValue = item.role || item.position || item.title || "";
     document.querySelector("[data-staff-edit-overlay]")?.remove();
     const overlay = document.createElement("div");
@@ -3027,7 +3203,7 @@
                 <section class="staff-edit-section">
                   <h3>${escapeHtml(t("staffOrganization"))}</h3>
                   <div class="staff-edit-grid">
-                    ${staffSelectField("department", t("department"), staffDepartmentOptions(item.department), item.department)}
+                    ${staffDepartmentSelectField(item)}
                     ${staffTextField("role", t("role"), roleValue)}
                     ${staffTextField("areas", t("areas"), item.areas)}
                   </div>
@@ -3384,9 +3560,154 @@
     return `<button class="notification-card" type="button" data-dashboard-filter="${escapeHtml(filter || "notification")}"><strong>${escapeHtml(label)}</strong><span class="stat-value">${escapeHtml(count)}</span><p class="note">${escapeHtml(count ? t("realData") : t("planned"))}</p></button>`;
   }
 
+  function masterFormValue(item, field) {
+    return escapeHtml(item?.[field] || "");
+  }
+
+  function renderMasterStatus(item) {
+    return `<span class="status-badge ${item.active === false ? "status-off" : "status-completed"}">${escapeHtml(item.active === false ? t("hidden") : t("active"))}</span>`;
+  }
+
+  function masterSelectOptions(items, selected, placeholder) {
+    return `${placeholder ? `<option value="">${escapeHtml(placeholder)}</option>` : ""}${items.map(item => `<option value="${escapeHtml(item.code)}" ${item.code === selected ? "selected" : ""}>${escapeHtml(workMasterLabel(item))}</option>`).join("")}`;
+  }
+
+  function renderWorkMasterForm(type, item) {
+    const departments = state.workMaster.departments || [];
+    const groups = state.workMaster.workGroups || [];
+    const titleKey = item?.id ? "edit" : type === "departments" ? "addDepartment" : type === "workGroups" ? "addWorkGroup" : "addWorkType";
+    const departmentSelect = type !== "departments"
+      ? `<label><span>${escapeHtml(t("department"))}</span><select name="departmentCode" data-master-department-select>${masterSelectOptions(departments, item?.departmentCode || departments[0]?.code || "", t("selectDepartment"))}</select></label>`
+      : "";
+    const groupSelect = type === "workTypes"
+      ? `<label><span>${escapeHtml(t("workGroup"))}</span><select name="workGroupCode">${masterSelectOptions(groups.filter(group => !item?.departmentCode || group.departmentCode === item.departmentCode), item?.workGroupCode || "", t("noWorkGroup"))}</select></label>`
+      : "";
+    return `<form class="work-master-form" data-work-master-form="${escapeHtml(type)}" data-master-id="${escapeHtml(item?.id || "")}">
+      <h3>${escapeHtml(t(titleKey))}</h3>
+      <div class="work-master-form-grid">
+        ${departmentSelect}
+        ${groupSelect}
+        <label><span>${escapeHtml(t("code"))}</span><input name="code" value="${masterFormValue(item, "code")}"></label>
+        <label><span>${escapeHtml(t("nameVi"))}</span><input name="nameVi" value="${masterFormValue(item, "nameVi")}"></label>
+        <label><span>${escapeHtml(t("nameJa"))}</span><input name="nameJa" value="${masterFormValue(item, "nameJa")}"></label>
+        <label><span>${escapeHtml(t("descriptionVi"))}</span><input name="descriptionVi" value="${masterFormValue(item, "descriptionVi")}"></label>
+        <label><span>${escapeHtml(t("descriptionJa"))}</span><input name="descriptionJa" value="${masterFormValue(item, "descriptionJa")}"></label>
+        <label><span>${escapeHtml(t("sortOrder"))}</span><input name="sortOrder" type="number" value="${escapeHtml(item?.sortOrder ?? 0)}"></label>
+        <label class="work-master-check"><span>${escapeHtml(t("activeStatus"))}</span><input name="active" type="checkbox" ${item?.active === false ? "" : "checked"}></label>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">${escapeHtml(t("save"))}</button>
+        <button class="btn btn-soft" type="button" data-master-cancel>${escapeHtml(t("cancel"))}</button>
+      </div>
+    </form>`;
+  }
+
+  function renderWorkMasterTable(type) {
+    const search = (state.filters.workMasterSearch || "").toLowerCase();
+    const rows = (state.workMaster[type] || []).filter(item => {
+      const text = [item.code, item.nameVi, item.nameJa, item.descriptionVi, item.descriptionJa, item.departmentCode, item.workGroupCode].join(" ").toLowerCase();
+      return !search || text.includes(search);
+    });
+    const departmentByCode = Object.fromEntries((state.workMaster.departments || []).map(item => [item.code, workMasterLabel(item)]));
+    const groupByCode = Object.fromEntries((state.workMaster.workGroups || []).map(item => [item.code, workMasterLabel(item)]));
+    return `<div class="table-wrap work-master-table-wrap"><table class="data-table work-master-table">
+      <thead><tr><th>${escapeHtml(t("code"))}</th><th>${escapeHtml(t("nameVi"))}</th><th>${escapeHtml(t("nameJa"))}</th><th>${escapeHtml(t("department"))}</th><th>${escapeHtml(t("workGroup"))}</th><th>${escapeHtml(t("sortOrder"))}</th><th>${escapeHtml(t("status"))}</th><th>${escapeHtml(t("action"))}</th></tr></thead>
+      <tbody>${rows.length ? rows.map(item => `<tr>
+        <td>${escapeHtml(item.code || "-")}</td>
+        <td>${escapeHtml(item.nameVi || "-")}</td>
+        <td>${escapeHtml(item.nameJa || "-")}</td>
+        <td>${escapeHtml(departmentByCode[item.departmentCode] || item.departmentCode || "-")}</td>
+        <td>${escapeHtml(groupByCode[item.workGroupCode] || item.workGroupCode || "-")}</td>
+        <td>${escapeHtml(item.sortOrder ?? 0)}</td>
+        <td>${renderMasterStatus(item)}</td>
+        <td><div class="actions">
+          <button class="btn btn-soft" type="button" data-master-edit="${escapeHtml(type)}" data-master-id="${escapeHtml(item.id)}">${escapeHtml(t("edit"))}</button>
+          <button class="btn btn-soft" type="button" data-master-status="${escapeHtml(type)}" data-master-id="${escapeHtml(item.id)}" data-master-active="${item.active === false ? "true" : "false"}">${escapeHtml(item.active === false ? t("show") : t("hide"))}</button>
+          <button class="btn btn-soft" type="button" data-master-delete="${escapeHtml(type)}" data-master-id="${escapeHtml(item.id)}">${escapeHtml(t("delete"))}</button>
+        </div></td>
+      </tr>`).join("") : `<tr><td colspan="8">${showEmptyState()}</td></tr>`}</tbody>
+    </table></div>`;
+  }
+
+  function renderWorkMaster() {
+    const tab = state.filters.workMasterTab || "departments";
+    const editItem = state.filters.workMasterEditId
+      ? (state.workMaster[tab] || []).find(item => item.id === state.filters.workMasterEditId)
+      : null;
+    $("viewRoot").innerHTML = `<section class="section-card work-master-panel">
+      <div class="panel-head">
+        <div><h2>${escapeHtml(t("workMaster"))}</h2><p class="note">${escapeHtml(t("workMasterUpdated"))}</p></div>
+        <input class="filter-input work-master-search" data-work-master-search value="${escapeHtml(state.filters.workMasterSearch || "")}" placeholder="${escapeHtml(t("searchWorkMaster"))}">
+      </div>
+      <div class="staff-tag-tabs work-master-tabs">
+        ${[["departments", t("department")], ["workGroups", t("workGroups")], ["workTypes", t("workTypes")]].map(([key, label]) => `<button class="staff-tag-tab ${tab === key ? "active" : ""}" type="button" data-work-master-tab="${escapeHtml(key)}">${escapeHtml(label)}</button>`).join("")}
+      </div>
+      ${renderWorkMasterForm(tab, editItem)}
+      ${renderWorkMasterTable(tab)}
+    </section>`;
+  }
+
   function renderSettings() {
-    const items = ["automationGoal", "settingsSla", "settingsAssign", "settingsUrgency", "settingsNotice", "roles", "companyInfo", "dataApi", "settingsColor"];
-    $("viewRoot").innerHTML = `<div class="settings-grid settings-demo-grid">${items.map(key => `<section class="settings-card"><div class="settings-card-head"><h2>${escapeHtml(t(key))}</h2><span class="status-badge status-quoted">${escapeHtml(t("preparing"))}</span></div><div class="settings-placeholder"><label>${escapeHtml(t("status"))}</label><div class="placeholder-input">${escapeHtml(t("planned"))}</div><label>${escapeHtml(t("settingsSystem"))}</label><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("planned"))}</button></div><p class="note">${escapeHtml(t("kpiPlanned"))}</p></section>`).join("")}</div>`;
+    renderWorkMaster();
+  }
+
+  async function reloadWorkMaster() {
+    state.workMaster = normalizeWorkMaster(await AdminAPI.getWorkMaster());
+  }
+
+  function masterPayloadFromForm(form) {
+    const raw = new FormData(form);
+    return {
+      departmentCode: String(raw.get("departmentCode") || ""),
+      workGroupCode: String(raw.get("workGroupCode") || ""),
+      code: String(raw.get("code") || "").trim(),
+      nameVi: String(raw.get("nameVi") || "").trim(),
+      nameJa: String(raw.get("nameJa") || "").trim(),
+      descriptionVi: String(raw.get("descriptionVi") || "").trim(),
+      descriptionJa: String(raw.get("descriptionJa") || "").trim(),
+      sortOrder: Number(raw.get("sortOrder") || 0),
+      active: raw.get("active") === "on"
+    };
+  }
+
+  async function saveWorkMasterForm(form) {
+    const type = form.dataset.workMasterForm;
+    const id = form.dataset.masterId;
+    const payload = masterPayloadFromForm(form);
+    if (type === "departments") {
+      if (id) await AdminAPI.updateDepartment(id, payload);
+      else await AdminAPI.createDepartment(payload);
+    }
+    if (type === "workGroups") {
+      if (id) await AdminAPI.updateWorkGroup(id, payload);
+      else await AdminAPI.createWorkGroup(payload);
+    }
+    if (type === "workTypes") {
+      if (id) await AdminAPI.updateWorkType(id, payload);
+      else await AdminAPI.createWorkType(payload);
+    }
+    state.filters.workMasterEditId = "";
+    await reloadWorkMaster();
+    renderWorkMaster();
+    toast(type === "workTypes" && !id ? t("workTypeAdded") : t("workMasterUpdated"));
+  }
+
+  async function setWorkMasterStatus(type, id, active) {
+    if (type === "departments") await AdminAPI.setDepartmentStatus(id, active);
+    if (type === "workGroups") await AdminAPI.setWorkGroupStatus(id, active);
+    if (type === "workTypes") await AdminAPI.setWorkTypeStatus(id, active);
+    await reloadWorkMaster();
+    renderWorkMaster();
+    toast(t("workMasterUpdated"));
+  }
+
+  async function deleteWorkMasterItem(type, id) {
+    if (type === "departments") await AdminAPI.deleteDepartment(id);
+    if (type === "workGroups") await AdminAPI.deleteWorkGroup(id);
+    if (type === "workTypes") await AdminAPI.deleteWorkType(id);
+    await reloadWorkMaster();
+    renderWorkMaster();
+    toast(type === "departments" ? t("relatedDataWarning") : t("workMasterUpdated"));
   }
 
   function setRequestDetailDirty(dirty) {
@@ -3732,9 +4053,21 @@
     ["name", "phone", "email", "department", "role", "areas", "workContent", "note", "status"].forEach(field => {
       payload.set(field, raw.get(field) || "");
     });
+    const departmentSelect = form.querySelector("[data-staff-department-select]");
+    if (departmentSelect) {
+      const selectedOption = departmentSelect.selectedOptions && departmentSelect.selectedOptions[0];
+      payload.set("departmentCode", departmentSelect.value || "");
+      payload.set("department", selectedOption?.dataset.label || selectedOption?.textContent || departmentSelect.value || "");
+    }
     const workTags = raw.getAll("workTags").map(item => String(item || "").trim()).filter(Boolean);
     if (workTags.length) workTags.forEach(tag => payload.append("workTags", tag));
     else payload.set("workTags", "");
+    const workTypeIds = activeMasterItems("workTypes")
+      .filter(item => workTags.some(tag => [item.code, item.nameVi, item.nameJa].some(candidate => normalizeTag(candidate) === normalizeTag(tag))))
+      .map(item => item.id || item.code)
+      .filter(Boolean);
+    if (workTypeIds.length) workTypeIds.forEach(id => payload.append("workTypeIds", id));
+    else payload.set("workTypeIds", "");
     payload.set("avatar", raw.get("avatar") || "");
     const file = raw.get("avatarFile");
     if (file && file.size > 0) payload.set("avatar", file);
@@ -3781,7 +4114,7 @@
     const picker = document.querySelector("[data-staff-tag-picker]");
     const department = document.querySelector("#staffForm select[name='department']");
     if (!picker || !department) return;
-    picker.dataset.currentDept = staffDepartmentKey(department.value);
+    picker.dataset.currentDept = staffDepartmentCode(department.value);
     applyStaffTagFilter();
   }
 
@@ -3997,6 +4330,42 @@
         return;
       }
 
+      const masterTab = event.target.closest("[data-work-master-tab]");
+      if (masterTab) {
+        state.filters.workMasterTab = masterTab.dataset.workMasterTab || "departments";
+        state.filters.workMasterEditId = "";
+        renderWorkMaster();
+        return;
+      }
+
+      const masterEdit = event.target.closest("[data-master-edit]");
+      if (masterEdit) {
+        state.filters.workMasterTab = masterEdit.dataset.masterEdit || "departments";
+        state.filters.workMasterEditId = masterEdit.dataset.masterId || "";
+        renderWorkMaster();
+        return;
+      }
+
+      const masterStatus = event.target.closest("[data-master-status]");
+      if (masterStatus) {
+        await setWorkMasterStatus(masterStatus.dataset.masterStatus, masterStatus.dataset.masterId, masterStatus.dataset.masterActive === "true");
+        return;
+      }
+
+      const masterDelete = event.target.closest("[data-master-delete]");
+      if (masterDelete) {
+        if (await confirmAction(t("confirmDelete"))) {
+          await deleteWorkMasterItem(masterDelete.dataset.masterDelete, masterDelete.dataset.masterId);
+        }
+        return;
+      }
+
+      if (event.target.closest("[data-master-cancel]")) {
+        state.filters.workMasterEditId = "";
+        renderWorkMaster();
+        return;
+      }
+
       const requestButton = event.target.closest("[data-request-detail]");
       if (requestButton) {
         const id = requestButton.dataset.requestDetail;
@@ -4067,7 +4436,10 @@
         event.preventDefault();
         const department = document.querySelector("#staffForm select[name='department']");
         const label = staffDepartmentLabelByKey(workGroup.dataset.staffWorkGroup);
-        if (department && label) department.value = label;
+        if (department && label) {
+          const hasCodeOption = Array.from(department.options || []).some(option => option.value === workGroup.dataset.staffWorkGroup);
+          department.value = hasCodeOption ? workGroup.dataset.staffWorkGroup : label;
+        }
         refreshStaffTagDepartment();
         setStaffEditDirty(true);
         return;
@@ -4160,6 +4532,17 @@
     });
 
     bind(document, "submit", async event => {
+      const masterForm = event.target.closest("[data-work-master-form]");
+      if (masterForm) {
+        event.preventDefault();
+        try {
+          await saveWorkMasterForm(masterForm);
+        } catch (error) {
+          console.error(error);
+          toast(t("failed"));
+        }
+        return;
+      }
       if (event.target.id !== "staffForm") return;
       event.preventDefault();
       const form = event.target;
@@ -4196,6 +4579,10 @@
       }
       if (event.target.closest("[data-staff-tag-search]")) {
         applyStaffTagFilter();
+      }
+      if (event.target.closest("[data-work-master-search]")) {
+        state.filters.workMasterSearch = event.target.value || "";
+        renderWorkMaster();
       }
       if (event.target.id === "requestSearch") {
         state.filters.search = event.target.value || "";

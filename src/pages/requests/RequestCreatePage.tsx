@@ -5,6 +5,7 @@ import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { useTranslation } from "../../hooks/useTranslation";
 import { requestService } from "../../services/requestService";
+import type { WorkMaster } from "../../services/requestService";
 import { useAppStore } from "../../stores/appStore";
 import { categoryOptions } from "./requestHelpers";
 
@@ -27,6 +28,7 @@ export function RequestCreatePage() {
   const [isIssueDropdownOpen, setIsIssueDropdownOpen] = useState(false);
   const [selectedIssues, setSelectedIssues] = useState<string[]>([]);
   const [issueOptions, setIssueOptions] = useState<string[]>([]);
+  const [workMaster, setWorkMaster] = useState<WorkMaster>({ departments: [], workGroups: [], workTypes: [] });
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState(user?.address || "");
   const [datetime, setDatetime] = useState("");
@@ -47,9 +49,14 @@ export function RequestCreatePage() {
 
   useEffect(() => {
     let mounted = true;
-    requestService.getIssueOptions()
-      .then(options => {
+    requestService.getWorkMaster()
+      .then(master => {
         if (!mounted) return;
+        setWorkMaster(master);
+        const locale = localStorage.getItem("language") === "vi" ? "vi" : "ja";
+        const options = master.workTypes.map(item => (
+          locale === "vi" ? item.nameVi || item.nameJa || item.code : item.nameJa || item.nameVi || item.code
+        ));
         setIssueOptions(Array.from(new Set(options.map(option => option.trim()).filter(Boolean))));
       })
       .catch(() => {
@@ -114,6 +121,9 @@ export function RequestCreatePage() {
     submitInFlightRef.current = true;
     setIsSubmitting(true);
     try {
+      const selectedWorkTypes = workMaster.workTypes.filter(item => selectedIssues.some(issue => (
+        [item.code, item.nameVi, item.nameJa].some(value => String(value || "").trim().toLowerCase() === issue.trim().toLowerCase())
+      )));
       console.log("[request:create] submit media state", {
         selectedMediaFilesLength: selectedMediaFiles.length,
         files: selectedMediaFiles.map(file => ({
@@ -132,7 +142,9 @@ export function RequestCreatePage() {
         name: name.trim(),
         phone: phone.trim(),
         contact: contact.trim(),
-        issueTags: selectedIssues
+        issueTags: selectedIssues,
+        workTypeIds: selectedWorkTypes.map(item => item.id || item.code).filter(Boolean),
+        departmentCode: selectedWorkTypes[0]?.departmentCode || ""
       });
       navigate(`/requests/${request.id}`);
     } catch (submitError) {
