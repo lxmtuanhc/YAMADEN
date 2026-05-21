@@ -600,6 +600,26 @@
     staffRecentHistory: "\u6700\u8fd1\u306e\u5bfe\u5fdc\u5c65\u6b74",
     staffOperations: "\u30b9\u30bf\u30c3\u30d5\u64cd\u4f5c",
     editStaffProfile: "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u7de8\u96c6",
+    staffProfileBasic: "\u57fa\u672c\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb",
+    staffOrganizationRole: "\u7d44\u7e54\u30fb\u5f79\u5272",
+    staffExpertise: "\u5c02\u9580\u6027",
+    staffIntroNotes: "\u7d39\u4ecb\u30fb\u30e1\u30e2",
+    avatar: "\u30a2\u30d0\u30bf\u30fc",
+    area: "\u5bfe\u5fdc\u30a8\u30ea\u30a2",
+    areas: "\u5bfe\u5fdc\u30a8\u30ea\u30a2",
+    position: "\u5f79\u8077",
+    title: "\u80a9\u66f8\u304d",
+    skills: "\u30b9\u30ad\u30eb",
+    introduction: "\u7d39\u4ecb",
+    chooseImage: "\u753b\u50cf\u3092\u9078\u629e",
+    uploadImage: "\u753b\u50cf\u3092\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9",
+    removeImage: "\u753b\u50cf\u3092\u524a\u9664",
+    preview: "\u30d7\u30ec\u30d3\u30e5\u30fc",
+    staffSaved: "\u30b9\u30bf\u30c3\u30d5\u60c5\u5831\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002",
+    staffSaveFailed: "\u30b9\u30bf\u30c3\u30d5\u60c5\u5831\u306e\u4fdd\u5b58\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002",
+    staffUnsavedCloseTitle: "\u672a\u4fdd\u5b58\u306e\u5909\u66f4\u304c\u3042\u308a\u307e\u3059\u3002\u9589\u3058\u3066\u3082\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f",
+    continueEditing: "\u7de8\u96c6\u3092\u7d9a\u3051\u308b",
+    noAvatarPreview: "\u30d7\u30ec\u30d3\u30e5\u30fc",
     pauseStaff: "\u4f11\u6b62",
     reactivateStaff: "\u7a3c\u50cd\u518d\u958b",
     noAssignedRequests: "\u73fe\u5728\u62c5\u5f53\u4e2d\u306e\u4f9d\u983c\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
@@ -713,6 +733,26 @@
     staffRecentHistory: "L\u1ecbch s\u1eed x\u1eed l\u00fd g\u1ea7n \u0111\u00e2y",
     staffOperations: "Thao t\u00e1c nh\u00e2n vi\u00ean",
     editStaffProfile: "Ch\u1ec9nh s\u1eeda h\u1ed3 s\u01a1",
+    staffProfileBasic: "H\u1ed3 s\u01a1 c\u01a1 b\u1ea3n",
+    staffOrganizationRole: "T\u1ed5 ch\u1ee9c & vai tr\u00f2",
+    staffExpertise: "Chuy\u00ean m\u00f4n",
+    staffIntroNotes: "Gi\u1edbi thi\u1ec7u & ghi ch\u00fa",
+    avatar: "\u1ea2nh \u0111\u1ea1i di\u1ec7n",
+    area: "Khu v\u1ef1c",
+    areas: "Khu v\u1ef1c",
+    position: "Ch\u1ee9c v\u1ee5",
+    title: "Danh x\u01b0ng",
+    skills: "K\u1ef9 n\u0103ng",
+    introduction: "Gi\u1edbi thi\u1ec7u",
+    chooseImage: "Ch\u1ecdn \u1ea3nh",
+    uploadImage: "T\u1ea3i \u1ea3nh",
+    removeImage: "X\u00f3a \u1ea3nh",
+    preview: "Xem tr\u01b0\u1edbc",
+    staffSaved: "\u0110\u00e3 l\u01b0u th\u00f4ng tin staff.",
+    staffSaveFailed: "L\u01b0u staff th\u1ea5t b\u1ea1i.",
+    staffUnsavedCloseTitle: "B\u1ea1n c\u00f3 thay \u0111\u1ed5i ch\u01b0a l\u01b0u. V\u1eabn \u0111\u00f3ng?",
+    continueEditing: "Ti\u1ebfp t\u1ee5c ch\u1ec9nh s\u1eeda",
+    noAvatarPreview: "Xem tr\u01b0\u1edbc",
     pauseStaff: "T\u1ea1m ngh\u1ec9",
     reactivateStaff: "K\u00edch ho\u1ea1t l\u1ea1i",
     noAssignedRequests: "Ch\u01b0a c\u00f3 y\u00eau c\u1ea7u \u0111ang ph\u1ee5 tr\u00e1ch.",
@@ -1001,17 +1041,19 @@
       return requestJson("/api/requests/staff/" + encodeURIComponent(id) + "/history");
     },
     createStaff(payload) {
+      const isFormData = payload instanceof FormData;
       return requestJson("/admin/staff", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload || {})
+        headers: isFormData ? {} : { "Content-Type": "application/json" },
+        body: isFormData ? payload : JSON.stringify(payload || {})
       });
     },
     updateStaff(id, payload) {
+      const isFormData = payload instanceof FormData;
       return requestJson("/admin/staff/" + encodeURIComponent(id), {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload || {})
+        headers: isFormData ? {} : { "Content-Type": "application/json" },
+        body: isFormData ? payload : JSON.stringify(payload || {})
       });
     },
     deleteStaff(id, permanent) {
@@ -1336,6 +1378,7 @@
   function closeDrawer() {
     const drawer = $("drawer");
     drawer.classList.remove("open");
+    drawer.classList.remove("staff-edit-open");
     drawer.setAttribute("aria-hidden", "true");
     drawer.innerHTML = "";
   }
@@ -2730,34 +2773,175 @@
     $("drawer").dataset.drawerId = id;
   }
 
+  function uniqueOptions(values) {
+    const seen = new Set();
+    return values.map(value => compactText(value, "")).filter(value => {
+      const key = value.toLowerCase();
+      if (!value || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function optionPool(base, current) {
+    return uniqueOptions([].concat(base || []).concat(toList(current)));
+  }
+
+  function staffDepartmentOptions(current) {
+    const base = state.lang === "vi"
+      ? ["Bộ thiết kế", "Bộ thi công", "Bộ khảo sát", "Bộ bảo trì", "Bộ kinh doanh", "Bộ nghiệp vụ", "Bộ khác"]
+      : ["設計部", "工務部", "営業部", "保全部", "業務部", "その他"];
+    return optionPool(base.concat(state.staff.map(staffDepartment)), current);
+  }
+
+  function staffAreaOptions(current) {
+    const base = state.lang === "vi"
+      ? ["Tokyo", "Osaka", "Kanagawa", "Saitama", "Chiba", "Toàn khu vực"]
+      : ["東京都", "大阪府", "神奈川県", "埼玉県", "千葉県", "全エリア"];
+    return optionPool(base.concat(state.staff.flatMap(staff => toList(staff.areas))), current);
+  }
+
+  function staffRoleOptions(current) {
+    const base = state.lang === "vi"
+      ? ["Nhân viên", "Trưởng nhóm", "Quản lý", "Đại diện"]
+      : ["一般", "リーダー", "マネージャー", "代表"];
+    return optionPool(base.concat(state.staff.map(staffRole)), current);
+  }
+
+  function staffPositionOptions(current) {
+    const base = state.lang === "vi"
+      ? ["Kỹ sư", "Nhân viên khảo sát", "Thiết kế viên", "Nhân viên hiện trường", "Nhân viên kinh doanh"]
+      : ["技術者", "設計担当", "現場担当", "営業担当", "保全担当"];
+    return optionPool(base.concat(state.staff.map(staff => staff.position)), current);
+  }
+
+  function staffTitleOptions(current) {
+    const base = state.lang === "vi"
+      ? ["Kỹ sư", "Nhân viên khảo sát", "Thiết kế viên", "Trưởng nhóm"]
+      : ["技術者", "設計担当", "現場担当", "リーダー"];
+    return optionPool(base.concat(state.staff.map(staff => staff.title)), current);
+  }
+
+  function staffTagOptions(current) {
+    return optionPool(state.staff.flatMap(staffTags), current);
+  }
+
+  function staffStatusLabel(status) {
+    const labels = state.lang === "vi"
+      ? { active: "Đang hoạt động", busy: "Đang phụ trách", off: "Nghỉ / off", inactive: "Tạm khóa", deleted: "Đã xóa" }
+      : { active: "稼働中", busy: "対応中", off: "休止中", inactive: "停止中", deleted: "削除済み" };
+    return labels[status] || staffStatusMap[status] || status || "-";
+  }
+
+  function renderSelectOptions(options, selected, placeholder) {
+    const selectedValue = compactText(selected, "");
+    const normalized = optionPool(options, selectedValue);
+    return `${placeholder ? `<option value="">${escapeHtml(placeholder)}</option>` : ""}${normalized.map(value => `<option value="${escapeHtml(value)}" ${String(value) === String(selectedValue) ? "selected" : ""}>${escapeHtml(value)}</option>`).join("")}`;
+  }
+
+  function renderMultiOptions(options, selected) {
+    const selectedItems = toList(selected);
+    const selectedSet = new Set(selectedItems.map(item => item.toLowerCase()));
+    return optionPool(options, selectedItems).map(value => `<option value="${escapeHtml(value)}" ${selectedSet.has(value.toLowerCase()) ? "selected" : ""}>${escapeHtml(value)}</option>`).join("");
+  }
+
+  function staffTextField(name, label, value, type = "text", extra = "") {
+    return `<label class="staff-edit-field"><span>${escapeHtml(label)}</span><input name="${escapeHtml(name)}" type="${escapeHtml(type)}" value="${escapeHtml(value || "")}" ${extra}></label>`;
+  }
+
+  function staffTextareaField(name, label, value) {
+    return `<label class="staff-edit-field full"><span>${escapeHtml(label)}</span><textarea name="${escapeHtml(name)}">${escapeHtml(value || "")}</textarea></label>`;
+  }
+
+  function staffSelectField(name, label, options, selected) {
+    return `<label class="staff-edit-field"><span>${escapeHtml(label)}</span><select name="${escapeHtml(name)}">${renderSelectOptions(options, selected)}</select></label>`;
+  }
+
+  function staffMultiSelectField(name, label, options, selected) {
+    return `<label class="staff-edit-field full"><span>${escapeHtml(label)}</span><select name="${escapeHtml(name)}" multiple size="6">${renderMultiOptions(options, selected)}</select><small>${escapeHtml(state.lang === "vi" ? "Có thể chọn nhiều mục." : "複数選択できます。")}</small></label>`;
+  }
+
   function renderStaffForm(staff) {
     const item = staff || {};
     const id = getRowId(item);
+    const avatar = item.avatar || "";
+    const statusOptions = ["active", "busy", "off", "inactive"];
     openDrawer(`
-      <article class="drawer-panel">
-        <header class="drawer-head"><h2>${escapeHtml(t("staffForm"))}</h2><button class="close-button" type="button" data-close-drawer>×</button></header>
-        <form class="drawer-body" id="staffForm" data-staff-id="${escapeHtml(id)}">
-          <div class="form-grid">
-            ${field("name", t("name"), item.name)}
-            ${field("avatar", "Avatar URL", item.avatar)}
-            ${field("phone", t("phone"), item.phone)}
-            ${field("email", t("email"), item.email)}
-            ${field("areas", "Areas", toList(item.areas).join(", "))}
-            ${field("skills", "Skills", toList(item.skills).join(", "))}
-            ${field("department", t("department"), item.department)}
-            ${field("role", "Role", item.role)}
-            ${field("position", "Position", item.position)}
-            ${field("title", "Title", item.title)}
-            ${field("workContent", t("workContent"), item.workContent, true)}
-            ${field("workTags", t("workTags"), toList(item.workTags).join(", "))}
-            ${field("note", "Note", item.note, true)}
-            ${field("introduction", "Introduction", item.introduction, true)}
-            <label class="field"><span>${escapeHtml(t("status"))}</span><select name="status">${["active", "busy", "off", "inactive"].map(status => `<option value="${status}" ${item.status === status ? "selected" : ""}>${escapeHtml(staffStatusMap[status])}</option>`).join("")}</select></label>
+      <article class="drawer-panel staff-edit-panel">
+        <form id="staffForm" data-staff-id="${escapeHtml(id)}" data-staff-edit-dirty="false">
+          <header class="staff-edit-header">
+            <div>
+              <p>${escapeHtml(t("staffForm"))}</p>
+              <h2>${escapeHtml(item.name || t("addStaff"))}</h2>
+            </div>
+            <div class="staff-edit-header-actions">
+              <button class="btn btn-soft" type="button" data-staff-edit-close>${escapeHtml(t("close"))}</button>
+              <button class="primary-button" type="submit">${escapeHtml(t("saveChanges"))}</button>
+            </div>
+          </header>
+          <div class="staff-edit-body">
+            <section class="staff-edit-section">
+              <h3>${escapeHtml(t("staffProfileBasic"))}</h3>
+              <div class="staff-avatar-editor">
+                <div class="staff-avatar-preview" data-avatar-preview>
+                  ${avatar ? `<img src="${escapeHtml(avatar)}" alt="${escapeHtml(t("preview"))}">` : `<span>${escapeHtml(t("noAvatarPreview"))}</span>`}
+                </div>
+                <div class="staff-avatar-controls">
+                  <strong>${escapeHtml(t("avatar"))}</strong>
+                  <input type="hidden" name="avatar" value="${escapeHtml(avatar)}" data-avatar-url>
+                  <input class="sr-only" id="staffAvatarInput" name="avatarFile" type="file" accept="image/*" data-avatar-file>
+                  <div class="actions">
+                    <label class="btn btn-soft" for="staffAvatarInput">${escapeHtml(t("chooseImage"))}</label>
+                    <button class="btn btn-soft" type="button" data-staff-avatar-pick>${escapeHtml(t("uploadImage"))}</button>
+                    <button class="btn btn-soft" type="button" data-staff-avatar-remove>${escapeHtml(t("removeImage"))}</button>
+                  </div>
+                  <small data-avatar-status>${escapeHtml(t("preview"))}</small>
+                </div>
+              </div>
+              <div class="staff-edit-grid">
+                ${staffTextField("name", t("name"), item.name)}
+                ${staffTextField("email", t("email"), item.email, "email")}
+                ${staffTextField("phone", t("phone"), item.phone, "tel")}
+              </div>
+            </section>
+
+            <section class="staff-edit-section">
+              <h3>${escapeHtml(t("staffOrganizationRole"))}</h3>
+              <div class="staff-edit-grid">
+                ${staffMultiSelectField("areas", t("areas"), staffAreaOptions(item.areas), item.areas)}
+                ${staffSelectField("department", t("department"), staffDepartmentOptions(item.department), item.department)}
+                ${staffSelectField("role", t("role"), staffRoleOptions(item.role), item.role)}
+                ${staffTextField("position", t("position"), item.position, "text", `list="staffPositionOptions"`)}
+                ${staffTextField("title", t("title"), item.title, "text", `list="staffTitleOptions"`)}
+                <label class="staff-edit-field"><span>${escapeHtml(t("status"))}</span><select name="status">${statusOptions.map(status => `<option value="${status}" ${String(item.status || "active") === status ? "selected" : ""}>${escapeHtml(staffStatusLabel(status))}</option>`).join("")}</select></label>
+              </div>
+              <datalist id="staffPositionOptions">${staffPositionOptions(item.position).map(value => `<option value="${escapeHtml(value)}"></option>`).join("")}</datalist>
+              <datalist id="staffTitleOptions">${staffTitleOptions(item.title).map(value => `<option value="${escapeHtml(value)}"></option>`).join("")}</datalist>
+            </section>
+
+            <section class="staff-edit-section">
+              <h3>${escapeHtml(t("staffExpertise"))}</h3>
+              <div class="staff-edit-grid">
+                ${staffMultiSelectField("skills", t("skills"), staffTagOptions(item.skills), item.skills)}
+                ${staffMultiSelectField("workTags", t("workTags"), staffTagOptions(item.workTags), item.workTags)}
+                ${staffTextareaField("workContent", t("workContent"), item.workContent)}
+              </div>
+            </section>
+
+            <section class="staff-edit-section">
+              <h3>${escapeHtml(t("staffIntroNotes"))}</h3>
+              <div class="staff-edit-grid">
+                ${staffTextareaField("introduction", t("introduction"), item.introduction)}
+                ${staffTextareaField("note", t("note"), item.note)}
+              </div>
+            </section>
           </div>
-          <div class="actions"><button class="primary-button" type="submit">${escapeHtml(t("save"))}</button></div>
         </form>
       </article>
     `);
+    $("drawer").dataset.drawerType = "staff-edit";
+    $("drawer").dataset.drawerId = id;
+    $("drawer").classList.add("staff-edit-open");
   }
 
   function field(name, label, value, textarea) {
@@ -3375,6 +3559,52 @@
     return true;
   }
 
+  function setStaffEditDirty(dirty = true) {
+    const form = $("staffForm");
+    if (form) form.dataset.staffEditDirty = dirty ? "true" : "false";
+  }
+
+  async function closeStaffEditForm(force = false) {
+    const form = $("staffForm");
+    if (!force && form?.dataset.staffEditDirty === "true") {
+      const ok = await confirmAction({
+        title: t("staffUnsavedCloseTitle"),
+        message: t("unsavedChangesText"),
+        cancelLabel: t("continueEditing"),
+        confirmLabel: t("closeWithoutSave"),
+        variant: "warning"
+      });
+      if (!ok) return;
+    }
+    closeDrawer();
+  }
+
+  function previewStaffAvatar(file) {
+    const preview = document.querySelector("[data-avatar-preview]");
+    const status = document.querySelector("[data-avatar-status]");
+    if (!preview || !file) return;
+    const url = URL.createObjectURL(file);
+    preview.innerHTML = `<img src="${escapeHtml(url)}" alt="${escapeHtml(t("preview"))}">`;
+    if (status) status.textContent = file.name || t("preview");
+  }
+
+  function staffFormPayload(form) {
+    const raw = new FormData(form);
+    const payload = new FormData();
+    ["name", "phone", "email", "department", "role", "position", "title", "workContent", "note", "introduction", "status"].forEach(field => {
+      payload.set(field, raw.get(field) || "");
+    });
+    payload.set("areas", raw.getAll("areas").map(item => String(item || "").trim()).filter(Boolean).join(", "));
+    payload.set("skills", raw.getAll("skills").map(item => String(item || "").trim()).filter(Boolean).join(", "));
+    const workTags = raw.getAll("workTags").map(item => String(item || "").trim()).filter(Boolean);
+    if (workTags.length) workTags.forEach(tag => payload.append("workTags", tag));
+    else payload.set("workTags", "");
+    payload.set("avatar", raw.get("avatar") || "");
+    const file = raw.get("avatarFile");
+    if (file && file.size > 0) payload.set("avatar", file);
+    return payload;
+  }
+
   function bindEvents() {
     console.log("[admin-v2] binding events");
     const savedSidebarState = localStorage.getItem("adminV2SidebarCollapsed");
@@ -3490,10 +3720,25 @@
         }
         return;
       }
-      if (event.target.id === "drawer" || event.target.closest("[data-close-drawer]")) closeDrawer();
+      if (event.target.id === "drawer" || event.target.closest("[data-close-drawer]") || event.target.closest("[data-staff-edit-close]")) {
+        if ($("drawer").dataset.drawerType === "staff-edit") {
+          void closeStaffEditForm();
+          return;
+        }
+        closeDrawer();
+      }
     });
 
     bind(document, "change", async event => {
+      const staffForm = event.target.closest("#staffForm");
+      if (staffForm) {
+        setStaffEditDirty(true);
+        if (event.target.closest("[data-avatar-file]")) {
+          const file = event.target.files && event.target.files[0];
+          if (file) previewStaffAvatar(file);
+        }
+        return;
+      }
       if (event.target.closest("[data-request-edit-field]")) {
         setRequestDetailDirty(true);
         return;
@@ -3614,6 +3859,26 @@
         return;
       }
 
+      if (event.target.closest("[data-staff-avatar-pick]")) {
+        event.preventDefault();
+        $("staffAvatarInput")?.click();
+        return;
+      }
+
+      if (event.target.closest("[data-staff-avatar-remove]")) {
+        event.preventDefault();
+        const preview = document.querySelector("[data-avatar-preview]");
+        const avatarUrl = document.querySelector("[data-avatar-url]");
+        const fileInput = document.querySelector("[data-avatar-file]");
+        const status = document.querySelector("[data-avatar-status]");
+        if (preview) preview.innerHTML = `<span>${escapeHtml(t("noAvatarPreview"))}</span>`;
+        if (avatarUrl) avatarUrl.value = "";
+        if (fileInput) fileInput.value = "";
+        if (status) status.textContent = t("removeImage");
+        setStaffEditDirty(true);
+        return;
+      }
+
       const staffAction = event.target.closest("[data-staff-action]");
       if (staffAction) {
         await handleStaffAction(staffAction.dataset.staffAction, staffAction.dataset.staffId || state.selectedStaff);
@@ -3662,26 +3927,35 @@
       if (event.target.id !== "staffForm") return;
       event.preventDefault();
       const form = event.target;
-      const payload = Object.fromEntries(new FormData(form).entries());
-      const areas = toList(payload.areas);
-      const skills = toList(payload.skills);
-      payload.areas = areas.join(", ");
-      payload.skills = skills.join(", ");
-      payload.workTags = toList(payload.workTags);
+      const payload = staffFormPayload(form);
+      const submit = form.querySelector("button[type='submit']");
+      if (submit) {
+        submit.disabled = true;
+        submit.setAttribute("aria-busy", "true");
+      }
       try {
         if (form.dataset.staffId) await AdminAPI.updateStaff(form.dataset.staffId, payload);
         else await AdminAPI.createStaff(payload);
+        setStaffEditDirty(false);
         closeDrawer();
         await refreshData();
-        toast(t("saved"));
+        toast(t("staffSaved"));
       } catch {
-        toast(t("failed"));
+        toast(t("staffSaveFailed"));
+      } finally {
+        if (submit) {
+          submit.disabled = false;
+          submit.removeAttribute("aria-busy");
+        }
       }
     });
 
     bind(document, "input", event => {
       if (event.target.closest("[data-request-edit-field]")) {
         setRequestDetailDirty(true);
+      }
+      if (event.target.closest("#staffForm")) {
+        setStaffEditDirty(true);
       }
       if (event.target.id === "requestSearch") {
         state.filters.search = event.target.value || "";
