@@ -1112,6 +1112,7 @@
     selectedRequest: null,
     selectedUser: null,
     selectedStaff: null,
+    staffStatusUpdating: new Set(),
     errors: {},
     loading: {
       requests: false,
@@ -1822,7 +1823,7 @@
     const quoted = activeRequests.filter(item => normalizeRequestStatus(item.status) === "quoted");
     const ordered = activeRequests.filter(item => normalizeRequestStatus(item.status) === "ordered");
     const pendingUsers = state.users.filter(user => user.status === "pendingApproval" || user.status === "pending");
-    const activeStaff = state.staff.filter(item => !["off", "inactive", "deleted"].includes(String(item.status || "active")));
+    const activeStaff = state.staff.filter(item => !["off", "deleted"].includes(normalizeStaffStatus(item.status || "active")));
     const priority = sortRequests(activeRequests
       .filter(item => !["completed", "lost"].includes(normalizeRequestStatus(item.status)))
       .filter(item => ["untreated", "contacted", "site_done", "quoted"].includes(normalizeRequestStatus(item.status)) || getPriorityScore(item) > 0))
@@ -2462,7 +2463,7 @@
     const requestDepartmentCode = compactText(request?.departmentCode, "");
     const normalizedReqTags = reqTags.map(normalizeTag).filter(Boolean);
     let best = null;
-    state.staff.filter(staff => !["off", "inactive", "deleted"].includes(String(staff.status || "active")) && staff.autoAssignEnabled !== false && !staff.deletedAt).forEach(staff => {
+    state.staff.filter(staff => !["off", "deleted"].includes(normalizeStaffStatus(staff.status || "active")) && staff.autoAssignEnabled !== false && !staff.deletedAt).forEach(staff => {
       if (requestDepartmentCode && compactText(staff.departmentCode, "") && compactText(staff.departmentCode, "") !== requestDepartmentCode) return;
       const staffWorkTypeIds = toList(staff.workTypeIds);
       const idMatches = requestWorkTypeIds.filter(id => staffWorkTypeIds.includes(id));
@@ -2564,7 +2565,7 @@
     return [...state.staff].filter(staff => {
       const deptText = staffDepartment(staff);
       const statusText = staff.status || "active";
-      const normalizedStaffStatus = ["off", "inactive"].includes(String(statusText)) ? "off" : statusText;
+      const normalizedStaffStatus = normalizeStaffStatus(statusText);
       if (statusText === "deleted" || staff.deletedAt) return false;
       const text = [staff.name, staff.email, staff.phone, deptText, staffRole(staff), getStaffWorkItems(staff).map(getWorkItemLabel).join(" ")].join(" ").toLowerCase();
       const assigned = activeAssignmentCount(staff);
@@ -2950,7 +2951,7 @@
     const selected = state.selectedStaff ? rows.find(staff => String(getRowId(staff)) === String(state.selectedStaff)) : null;
     if (state.selectedStaff && !selected) state.selectedStaff = "";
     const visibleStaff = state.staff.filter(staff => String(staff.status || "active") !== "deleted" && !staff.deletedAt);
-    const activeStaff = visibleStaff.filter(staff => !["off", "inactive"].includes(String(staff.status || "active")));
+    const activeStaff = visibleStaff.filter(staff => normalizeStaffStatus(staff.status || "active") !== "off");
     const assignedStaffCount = activeStaff.filter(staff => activeAssignmentCount(staff) > 0).length;
     $("viewRoot").innerHTML = `
       <div class="page-intro"><p>${escapeHtml(t("staffSubtitle"))}</p></div>
@@ -2959,7 +2960,7 @@
         ${statCard(t("staffCount"), visibleStaff.length, t("realData"), "info")}
         ${statCard(t("active"), activeStaff.length, t("realData"), "success")}
         ${statCard(t("currentAssignments"), assignedStaffCount, t("realData"), "warning")}
-        ${statCard(t("off"), state.staff.filter(staff => ["off", "inactive"].includes(staff.status)).length, t("realData"), "danger")}
+        ${statCard(t("off"), state.staff.filter(staff => normalizeStaffStatus(staff.status) === "off").length, t("realData"), "danger")}
         ${statCard(t("departments"), departments.length, t("realData"), "total")}
         ${statCard(t("totalTags"), new Set(allTags).size, t("realData"), "info")}
       </div>
@@ -2989,7 +2990,8 @@
   function renderStaffRow(staff, selected) {
     const id = getRowId(staff);
     const status = staff.status || "active";
-    const quickStatus = ["off", "inactive"].includes(String(status)) ? "off" : "active";
+    const quickStatus = normalizeStaffStatus(status) === "off" ? "off" : "active";
+    const isUpdatingStatus = state.staffStatusUpdating?.has(id);
     const handledCount = handledRequestCount(staff);
     const isSelected = selected && String(getRowId(selected)) === String(id);
     const workItems = getStaffWorkItems(staff);
@@ -2998,7 +3000,7 @@
       <td data-label="${escapeHtml(t("role"))} / ${escapeHtml(t("department"))}">${escapeHtml(staffRole(staff))}<div class="subtext">${escapeHtml(staffDepartment(staff))}</div></td>
       <td data-label="${escapeHtml(t("skillsWork"))}">${tagChips(workItems.map(getWorkItemLabel), 3)}</td>
       <td data-label="${escapeHtml(t("assignedCount"))}">${handledCount}</td>
-      <td data-label="${escapeHtml(t("staffStatusAction"))}"><div class="staff-status-stack"><span class="status-badge status-${escapeHtml(status)}">${escapeHtml(staffStatusLabel(status))}</span><button class="staff-status-action ${quickStatus === "off" ? "is-activate" : "is-pause"}" type="button" data-staff-status-action="${escapeHtml(id)}" data-next-status="${quickStatus === "off" ? "active" : "off"}">${escapeHtml(quickStatus === "off" ? t("reactivateStaffConfirmLabel") : t("pauseStaff"))}</button></div></td>
+      <td data-label="${escapeHtml(t("staffStatusAction"))}"><div class="staff-status-stack"><span class="status-badge status-${escapeHtml(quickStatus)}">${escapeHtml(staffStatusLabel(quickStatus))}</span><button class="staff-status-switch ${quickStatus === "active" ? "is-on" : "is-off"} ${isUpdatingStatus ? "is-loading" : ""}" type="button" role="switch" aria-checked="${quickStatus === "active" ? "true" : "false"}" aria-label="${escapeHtml(t("staffStatusAction"))}" data-action="toggle-staff-status" data-staff-status-action="${escapeHtml(id)}" data-staff-id="${escapeHtml(id)}" data-current-status="${escapeHtml(quickStatus)}" data-next-status="${quickStatus === "off" ? "active" : "off"}" ${isUpdatingStatus ? "disabled aria-disabled=\"true\"" : ""}><span class="staff-status-switch-track"><span class="staff-status-switch-thumb"></span></span><span class="sr-only">${escapeHtml(quickStatus === "off" ? t("reactivateStaffConfirmLabel") : t("pauseStaff"))}</span></button></div></td>
       <td data-label="${escapeHtml(t("action"))}"><div class="actions crm-actions">
         <button class="btn btn-soft" type="button" data-staff-action="detail" data-staff-id="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
       </div></td>
@@ -3034,8 +3036,8 @@
     const assigned = assignedAll.slice(0, 5);
     const workload = assignedActive.length ? Math.min(95, 30 + assignedActive.length * 8) : 0;
     const overdue = assignedActive.filter(isOverdue).length;
-    const isPaused = ["off", "inactive"].includes(status);
-    const isDeleted = status === "deleted" || staff.deletedAt;
+    const isPaused = normalizeStaffStatus(status) === "off";
+    const isDeleted = normalizeStaffStatus(status) === "deleted" || staff.deletedAt;
     const workItems = getStaffWorkItems(staff);
     const staffDescription = staff.staffDescription || staff.introduction || "";
     const actionButtons = isDeleted
@@ -3293,10 +3295,22 @@
   }
 
   function staffStatusLabel(status) {
+    const normalized = normalizeStaffStatus(status);
     const labels = state.lang === "vi"
       ? { active: "\u0110ang ho\u1ea1t \u0111\u1ed9ng", off: "T\u1ea1m ngh\u1ec9", inactive: "T\u1ea1m ngh\u1ec9", deleted: "\u0110\u00e3 x\u00f3a" }
       : { active: "\u7a3c\u50cd\u4e2d", off: "\u4f11\u6b62\u4e2d", inactive: "\u4f11\u6b62\u4e2d", deleted: "\u524a\u9664\u6e08\u307f" };
-    return labels[status] || staffStatusMap[status] || status || "-";
+    return labels[normalized] || staffStatusMap[status] || status || "-";
+  }
+
+  function normalizeStaffStatus(status) {
+    const normalized = String(status || "active")
+      .toLowerCase()
+      .replace(/[、，,;/\s]+/g, "")
+      .trim();
+    if (["deleted"].includes(normalized)) return "deleted";
+    if (["off", "inactive", "paused", "pause", "rest", "休止中", "休止", "tạmnghỉ", "nghỉoff"].includes(normalized)) return "off";
+    if (["active", "working", "available", "稼働中", "đanghoạtđộng"].includes(normalized)) return "active";
+    return normalized || "active";
   }
 
   function renderSelectOptions(options, selected, placeholder) {
@@ -3520,7 +3534,7 @@
     const id = getRowId(item);
     const avatar = item.avatar || "";
     const statusOptions = ["active", "off"];
-    const selectedStatus = ["off", "inactive"].includes(String(item.status || "")) ? "off" : "active";
+    const selectedStatus = normalizeStaffStatus(item.status || "") === "off" ? "off" : "active";
     document.querySelector("[data-staff-edit-overlay]")?.remove();
     const overlay = document.createElement("div");
     overlay.className = "staff-edit-overlay";
@@ -4279,12 +4293,19 @@
     return false;
   }
 
-  async function updateStaffStatusQuick(id, status) {
+  async function updateStaffStatusQuick(id, status, trigger) {
     const staff = state.staff.find(item => String(getRowId(item)) === String(id));
     if (!staff) return;
-    const currentStatus = ["off", "inactive"].includes(String(staff.status || "active")) ? "off" : "active";
+    if (state.staffStatusUpdating?.has(id)) return;
+    const currentStatus = normalizeStaffStatus(staff.status || "active") === "off" ? "off" : "active";
     const nextStatus = status === "off" ? "off" : "active";
     if (currentStatus === nextStatus) return;
+    state.staffStatusUpdating.add(id);
+    if (trigger) {
+      trigger.disabled = true;
+      trigger.classList.add("is-loading");
+      trigger.setAttribute("aria-disabled", "true");
+    }
     const isPausing = nextStatus === "off";
     const ok = await confirmAction({
       title: t(isPausing ? "pauseStaffConfirmTitle" : "reactivateStaffConfirmTitle"),
@@ -4293,16 +4314,31 @@
       cancelLabel: t("cancel"),
       variant: isPausing ? "warning" : "default"
     });
-    if (!ok) return;
+    if (!ok) {
+      state.staffStatusUpdating.delete(id);
+      if (trigger) {
+        trigger.disabled = false;
+        trigger.classList.remove("is-loading");
+        trigger.removeAttribute("aria-disabled");
+      }
+      return;
+    }
     try {
       const response = await AdminAPI.updateStaff(id, { status: nextStatus });
       const updated = response?.staff || response?.data?.staff || response?.data || response || { status: nextStatus };
       const index = state.staff.findIndex(item => String(getRowId(item)) === String(id));
       if (index >= 0) state.staff[index] = Object.assign({}, state.staff[index], updated, { status: updated.status || nextStatus });
+      state.staffStatusUpdating.delete(id);
       renderStaffResultsOnly();
       toast(t("saved"));
     } catch (error) {
       console.error(error);
+      state.staffStatusUpdating.delete(id);
+      if (trigger) {
+        trigger.disabled = false;
+        trigger.classList.remove("is-loading");
+        trigger.removeAttribute("aria-disabled");
+      }
       toast(t("failed"));
     }
   }
@@ -4927,7 +4963,8 @@
       const statusAction = event.target.closest("[data-staff-status-action]");
       if (statusAction) {
         event.preventDefault();
-        await updateStaffStatusQuick(statusAction.dataset.staffStatusAction, statusAction.dataset.nextStatus);
+        event.stopPropagation();
+        await updateStaffStatusQuick(statusAction.dataset.staffStatusAction, statusAction.dataset.nextStatus, statusAction);
         return;
       }
 
