@@ -517,6 +517,21 @@ const OFFICIAL_DEPARTMENTS = [
   isSystemDefault: true
 }));
 
+const OFFICIAL_DEPARTMENT_LABELS = {
+  executive: { nameVi: "Gi\u00e1m \u0111\u1ed1c", nameJa: "\u793e\u9577\u30fb\u4ee3\u8868" },
+  koumu: { nameVi: "B\u1ed9 c\u00f4ng v\u1ee5", nameJa: "\u5de5\u52d9\u90e8" },
+  fs: { nameVi: "B\u1ed9 FS", nameJa: "FS\u90e8" },
+  sales: { nameVi: "B\u1ed9 kinh doanh", nameJa: "\u55b6\u696d\u90e8" },
+  construction: { nameVi: "B\u1ed9 thi c\u00f4ng", nameJa: "\u5de5\u4e8b\u90e8" },
+  design: { nameVi: "B\u1ed9 thi\u1ebft k\u1ebf", nameJa: "\u8a2d\u8a08\u90e8" },
+  estimate: { nameVi: "B\u1ed9 d\u1ef1 to\u00e1n", nameJa: "\u4e88\u7b97\u66f8" }
+};
+
+OFFICIAL_DEPARTMENTS.forEach(item => {
+  const labels = OFFICIAL_DEPARTMENT_LABELS[item.code];
+  if (labels) Object.assign(item, labels);
+});
+
 const OFFICIAL_WORK_GROUPS = {
   executive: [["approval", "Phê duyệt", "承認"], ["important", "Dự án / vấn đề quan trọng", "重要案件"]],
   koumu: [["coordination", "Điều phối", "調整"], ["inspection", "Kiểm tra", "確認"]],

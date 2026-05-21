@@ -2552,7 +2552,7 @@
   }
 
   function staffDepartment(staff) {
-    const code = staff?.departmentCode || staff?.department;
+    const code = staffDepartmentCodeForStaff(staff);
     const department = findDepartmentByCodeOrLabel(code);
     return department ? workMasterLabel(department) : compactText(staff?.department || staff?.areas);
   }
@@ -2563,19 +2563,20 @@
 
   function filterStaff() {
     const search = state.filters.staffSearch || "";
-    const dept = state.filters.staffDepartment || "all";
+    const dept = normalizeStaffDepartmentFilterValue(state.filters.staffDepartment || "all");
     const status = state.filters.staffStatus || "all";
     const sort = state.filters.staffSort || "name";
     const assignedFilter = state.filters.staffAssigned || "all";
     return [...state.staff].filter(staff => {
       const deptText = staffDepartment(staff);
+      const deptCode = staffDepartmentCodeForStaff(staff);
       const statusText = staff.status || "active";
       const normalizedStaffStatus = normalizeStaffStatus(statusText);
       if (statusText === "deleted" || staff.deletedAt) return false;
-      const text = [staff.name, staff.email, staff.phone, deptText, staffRole(staff), getStaffWorkItems(staff).map(getWorkItemLabel).join(" ")].join(" ").toLowerCase();
+      const text = [staff.name, staff.email, staff.phone, deptText, deptCode, staffRole(staff), getStaffWorkItems(staff).map(getWorkItemLabel).join(" ")].join(" ").toLowerCase();
       const assigned = activeAssignmentCount(staff);
       const assignedOk = assignedFilter === "all" || (assignedFilter === "has" ? assigned > 0 : assigned === 0);
-      return (dept === "all" || deptText === dept) && (status === "all" || normalizedStaffStatus === status) && assignedOk && text.includes(search.toLowerCase());
+      return (dept === "all" || deptCode === dept) && (status === "all" || normalizedStaffStatus === status) && assignedOk && text.includes(search.toLowerCase());
     }).sort((a, b) => {
       if (sort === "status") return compactText(a.status).localeCompare(compactText(b.status));
       if (sort === "workload") return activeAssignmentCount(b) - activeAssignmentCount(a);
@@ -2950,8 +2951,10 @@
       $("viewRoot").innerHTML = showErrorState(state.lang === "vi" ? "Không thể tải staff" : "スタッフ一覧を読み込めません");
       return;
     }
+    const selectedDepartmentFilter = normalizeStaffDepartmentFilterValue(state.filters.staffDepartment || "all");
+    state.filters.staffDepartment = selectedDepartmentFilter;
     const rows = filterStaff();
-    const departments = [...new Set(state.staff.map(staffDepartment).filter(value => value && value !== "-"))];
+    const departments = staffDepartmentFilterOptions();
     const allTags = state.staff.flatMap(staff => staffTags(staff));
     const selected = state.selectedStaff ? rows.find(staff => String(getRowId(staff)) === String(state.selectedStaff)) : null;
     if (state.selectedStaff && !selected) state.selectedStaff = "";
@@ -2971,7 +2974,7 @@
       </div>
       <div class="crm-filter-bar staff-filter-bar">
         <input class="filter-input" data-staff-search data-staff-filter="search" value="${escapeHtml(state.filters.staffSearch || "")}" placeholder="${escapeHtml(t("search"))}" />
-        <select class="filter-input" data-staff-filter="department"><option value="all">${escapeHtml(t("allDepartments"))}</option>${departments.map(item => `<option value="${escapeHtml(item)}" ${state.filters.staffDepartment === item ? "selected" : ""}>${escapeHtml(item)}</option>`).join("")}</select>
+        <select class="filter-input" data-staff-filter="department"><option value="all">${escapeHtml(t("allDepartments"))}</option>${departments.map(item => `<option value="${escapeHtml(item.code)}" ${state.filters.staffDepartment === item.code ? "selected" : ""}>${escapeHtml(item.label)}</option>`).join("")}</select>
         <select class="filter-input" data-staff-filter="status"><option value="all">${escapeHtml(t("statusFilter"))}</option>${["active", "off"].map(status => `<option value="${status}" ${state.filters.staffStatus === status ? "selected" : ""}>${escapeHtml(staffStatusLabel(status))}</option>`).join("")}</select>
         <select class="filter-input" data-staff-filter="assigned"><option value="all">${escapeHtml(t("currentAssignments"))}</option><option value="has" ${state.filters.staffAssigned === "has" ? "selected" : ""}>${escapeHtml(t("currentAssignments"))}</option><option value="none" ${state.filters.staffAssigned === "none" ? "selected" : ""}>${escapeHtml(t("noData"))}</option></select>
         <select class="filter-input" data-staff-filter="sort">
@@ -3163,26 +3166,64 @@
     return (state.workMaster?.[type] || []).filter(item => item.active !== false);
   }
 
+  function departmentMasterKey(item) {
+    return compactText(item?.code || item?.departmentCode || item?.id || item?._id, "");
+  }
+
   function findDepartmentByCodeOrLabel(value) {
     const normalized = normalizeTag(value);
     if (!normalized) return null;
     return (state.workMaster?.departments || []).find(item => {
-      return [item.code, item.nameVi, item.nameJa].some(candidate => normalizeTag(candidate) === normalized);
+      return [item.code, item.departmentCode, item.id, item._id, item.nameVi, item.nameJa].some(candidate => normalizeTag(candidate) === normalized);
     }) || null;
   }
 
   function staffDepartmentCode(value) {
     if (!compactText(value, "")) return "";
     const found = findDepartmentByCodeOrLabel(value);
-    if (found) return found.code;
+    if (found) return departmentMasterKey(found);
     return staffDepartmentKey(value);
+  }
+
+  function staffDepartmentCodeForStaff(staff) {
+    return staffDepartmentCode(staff?.departmentCode || staff?.department || staff?.areas || "");
+  }
+
+  function normalizeStaffDepartmentFilterValue(value) {
+    const raw = compactText(value || "all", "all");
+    if (raw === "all") return "all";
+    const found = findDepartmentByCodeOrLabel(raw);
+    return found ? departmentMasterKey(found) : staffDepartmentCode(raw);
+  }
+
+  function staffDepartmentFilterOptions() {
+    const departments = activeMasterItems("departments")
+      .map(item => ({
+        code: departmentMasterKey(item),
+        label: workMasterLabel(item),
+        sortOrder: Number(item.sortOrder || 0)
+      }))
+      .filter(item => item.code && item.label)
+      .sort((a, b) => (a.sortOrder || 9999) - (b.sortOrder || 9999) || a.label.localeCompare(b.label));
+    if (departments.length) return departments;
+    return staffDepartmentPresets().map(item => ({ code: item.key, label: item.label, sortOrder: 0 }));
   }
 
   function staffDepartmentPresets() {
     const masterDepartments = activeMasterItems("departments");
     if (masterDepartments.length) {
-      return masterDepartments.map(item => ({ key: item.code, label: workMasterLabel(item) }));
+      return masterDepartments.map(item => ({ key: departmentMasterKey(item), label: workMasterLabel(item) })).filter(item => item.key);
     }
+    const fallbackDepartments = [
+      { key: "executive", nameVi: "Gi\u00e1m \u0111\u1ed1c", nameJa: "\u793e\u9577\u30fb\u4ee3\u8868" },
+      { key: "koumu", nameVi: "B\u1ed9 c\u00f4ng v\u1ee5", nameJa: "\u5de5\u52d9\u90e8" },
+      { key: "fs", nameVi: "B\u1ed9 FS", nameJa: "FS\u90e8" },
+      { key: "sales", nameVi: "B\u1ed9 kinh doanh", nameJa: "\u55b6\u696d\u90e8" },
+      { key: "construction", nameVi: "B\u1ed9 thi c\u00f4ng", nameJa: "\u5de5\u4e8b\u90e8" },
+      { key: "design", nameVi: "B\u1ed9 thi\u1ebft k\u1ebf", nameJa: "\u8a2d\u8a08\u90e8" },
+      { key: "estimate", nameVi: "B\u1ed9 d\u1ef1 to\u00e1n", nameJa: "\u4e88\u7b97\u66f8" }
+    ];
+    return fallbackDepartments.map(item => ({ key: item.key, label: state.lang === "vi" ? item.nameVi : item.nameJa }));
     return state.lang === "vi"
       ? [
         { key: "executive", label: "Giám đốc" },
@@ -3234,12 +3275,15 @@
 
   function staffDepartmentSelectField(item) {
     const departments = activeMasterItems("departments");
-    const currentCode = item.departmentCode || findDepartmentByCodeOrLabel(item.department)?.code || "";
+    const currentCode = staffDepartmentCodeForStaff(item);
     if (!departments.length) return `<div class="staff-work-empty"><p>${escapeHtml(t("noDepartmentsInMaster"))}</p></div>`;
     return `<div class="staff-department-picker" data-staff-department-picker>
       <input type="hidden" name="department" data-staff-department-value value="${escapeHtml(currentCode)}">
       <div class="staff-department-options">
-        ${departments.map(dept => `<button class="staff-department-option ${dept.code === currentCode ? "active" : ""}" type="button" data-staff-department-option="${escapeHtml(dept.code)}" data-label="${escapeHtml(workMasterLabel(dept))}">${escapeHtml(workMasterLabel(dept))}</button>`).join("")}
+        ${departments.map(dept => {
+          const key = departmentMasterKey(dept);
+          return `<button class="staff-department-option ${key === currentCode ? "active" : ""}" type="button" data-staff-department-option="${escapeHtml(key)}" data-label="${escapeHtml(workMasterLabel(dept))}">${escapeHtml(workMasterLabel(dept))}</button>`;
+        }).join("")}
       </div>
     </div>`;
   }
