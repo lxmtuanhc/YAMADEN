@@ -306,6 +306,8 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .kpi-card::after { content: ""; position: absolute; inset: auto -24px -36px auto; width: 92px; height: 92px; border-radius: 50%; opacity: .13; background: currentColor; }
 .kpi-card small { color: var(--muted); font-weight: 800; }
 .kpi-icon { width: 34px; height: 34px; border-radius: 10px; background: currentColor; opacity: .15; }
+.kpi-grid-small .kpi-icon { display: flex; align-items: center; justify-content: center; opacity: 1; color: currentColor; background: color-mix(in srgb, currentColor 13%, white); }
+.kpi-grid-small .kpi-icon svg { width: 20px; height: 20px; color: currentColor; }
 .kpi-total { color: var(--primary); }
 .kpi-danger { color: var(--danger); }
 .kpi-warning { color: var(--warning); }

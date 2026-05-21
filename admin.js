@@ -1911,6 +1911,11 @@
       alert: `<svg ${common}><path d="M10.3 4.4 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.4a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg>`,
       building: `<svg ${common}><path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h7v18"></path><path d="M14 8h3a2 2 0 0 1 2 2v11"></path><path d="M8 7h2M8 11h2M8 15h2"></path></svg>`,
       users: `<svg ${common}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.9"></path><path d="M16 3.1a4 4 0 0 1 0 7.8"></path></svg>`,
+      userCheck: `<svg ${common}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m16 11 2 2 4-4"></path></svg>`,
+      briefcase: `<svg ${common}><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M3 13h18"></path><path d="M12 12v2"></path></svg>`,
+      pauseCircle: `<svg ${common}><circle cx="12" cy="12" r="9"></circle><path d="M10 9v6M14 9v6"></path></svg>`,
+      layers: `<svg ${common}><path d="m12 2 9 5-9 5-9-5 9-5Z"></path><path d="m3 12 9 5 9-5"></path><path d="m3 17 9 5 9-5"></path></svg>`,
+      tags: `<svg ${common}><path d="M12.5 3H4a1 1 0 0 0-1 1v8.5a2 2 0 0 0 .6 1.4l6.5 6.5a2 2 0 0 0 2.8 0l7.5-7.5a2 2 0 0 0 0-2.8L13.9 3.6A2 2 0 0 0 12.5 3Z"></path><path d="M7.5 7.5h.01"></path><path d="M16 5l3 3"></path></svg>`,
       receipt: `<svg ${common}><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M8 8h8M8 12h8M8 16h5"></path></svg>`,
       trend: `<svg ${common}><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg>`,
       timer: `<svg ${common}><path d="M10 2h4"></path><path d="M12 14v-4"></path><circle cx="12" cy="14" r="8"></circle><path d="m17 7 1.5-1.5"></path></svg>`
@@ -2957,12 +2962,12 @@
       <div class="page-intro"><p>${escapeHtml(t("staffSubtitle"))}</p></div>
       <div class="toolbar demo-actions"><button class="btn btn-soft" disabled>CSV ${escapeHtml(t("export"))}</button><button class="primary-button" type="button" data-staff-action="add">+ ${escapeHtml(t("addStaff"))}</button></div>
       <div class="kpi-grid kpi-grid-small">
-        ${statCard(t("staffCount"), visibleStaff.length, t("realData"), "info")}
-        ${statCard(t("active"), activeStaff.length, t("realData"), "success")}
-        ${statCard(t("currentAssignments"), assignedStaffCount, t("realData"), "warning")}
-        ${statCard(t("off"), state.staff.filter(staff => normalizeStaffStatus(staff.status) === "off").length, t("realData"), "danger")}
-        ${statCard(t("departments"), departments.length, t("realData"), "total")}
-        ${statCard(t("totalTags"), new Set(allTags).size, t("realData"), "info")}
+        ${statCard(t("staffCount"), visibleStaff.length, t("realData"), "info", "users")}
+        ${statCard(t("active"), activeStaff.length, t("realData"), "success", "userCheck")}
+        ${statCard(t("currentAssignments"), assignedStaffCount, t("realData"), "warning", "briefcase")}
+        ${statCard(t("off"), state.staff.filter(staff => normalizeStaffStatus(staff.status) === "off").length, t("realData"), "danger", "pauseCircle")}
+        ${statCard(t("departments"), departments.length, t("realData"), "total", "layers")}
+        ${statCard(t("totalTags"), new Set(allTags).size, t("realData"), "info", "tags")}
       </div>
       <div class="crm-filter-bar staff-filter-bar">
         <input class="filter-input" data-staff-search data-staff-filter="search" value="${escapeHtml(state.filters.staffSearch || "")}" placeholder="${escapeHtml(t("search"))}" />
@@ -4320,30 +4325,13 @@
       trigger.classList.add("is-loading");
       trigger.setAttribute("aria-disabled", "true");
     }
-    const isPausing = nextStatus === "off";
-    const ok = await confirmAction({
-      title: t(isPausing ? "pauseStaffConfirmTitle" : "reactivateStaffConfirmTitle"),
-      message: t(isPausing ? "pauseStaffConfirmText" : "reactivateStaffConfirmText"),
-      confirmLabel: t(isPausing ? "pauseStaffConfirmLabel" : "reactivateStaffConfirmLabel"),
-      cancelLabel: t("cancel"),
-      variant: isPausing ? "warning" : "default"
-    });
-    if (!ok) {
-      state.staffStatusUpdating.delete(id);
-      if (trigger) {
-        trigger.disabled = false;
-        trigger.classList.remove("is-loading");
-        trigger.removeAttribute("aria-disabled");
-      }
-      return;
-    }
     try {
       const response = await AdminAPI.updateStaff(id, { status: nextStatus });
       const updated = response?.staff || response?.data?.staff || response?.data || response || { status: nextStatus };
       const index = state.staff.findIndex(item => String(getRowId(item)) === String(id));
       if (index >= 0) state.staff[index] = Object.assign({}, state.staff[index], updated, { status: updated.status || nextStatus });
       state.staffStatusUpdating.delete(id);
-      renderStaffResultsOnly();
+      renderStaff();
       toast(t("saved"));
     } catch (error) {
       console.error(error);
