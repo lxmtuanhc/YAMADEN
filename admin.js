@@ -821,7 +821,25 @@
     selectWorkGroup: "業務グループを選択",
     noWorkGroup: "グループなし",
     searchWorkMaster: "検索",
-    description: "説明"
+    description: "説明",
+    staffClassification: "スタッフ分類",
+    primaryDepartment: "主部門",
+    staffWorkFlowHelp: "先に部門を選択し、その部門で対応できる業務内容を選択してください。",
+    workStepDepartment: "ステップ1：主部門",
+    workStepPick: "ステップ2：対応可能業務を選択",
+    workStepSelected: "ステップ3：選択済み業務",
+    selectedDepartment: "選択中の部門",
+    changeDepartment: "部門を変更",
+    workTypeSearchPlaceholder: "業務を検索...",
+    noWorkTypesInDepartment: "この部門には業務内容がありません。業務マスタで追加してください。",
+    openWorkMaster: "業務マスタを開く",
+    outsideCurrentDepartment: "現在の部門外",
+    createContentFromSelectedWork: "選択業務から担当内容を作成",
+    manageWorkMaster: "業務マスタを管理",
+    noSelectedWorkTypes: "業務が選択されていません。",
+    viewAllWorkTypes: "すべて表示",
+    overwriteWorkContentTitle: "担当内容を上書きしますか？",
+    overwriteWorkContentText: "現在の担当内容は選択業務の一覧で置き換えられます。"
   });
 
   Object.assign(i18n.vi, {
@@ -852,7 +870,25 @@
     selectWorkGroup: "Chọn nhóm công việc",
     noWorkGroup: "Không có nhóm",
     searchWorkMaster: "Tìm kiếm",
-    description: "Mô tả"
+    description: "Mô tả",
+    staffClassification: "Phân loại nhân viên",
+    primaryDepartment: "Bộ phận chính",
+    staffWorkFlowHelp: "Chọn bộ phận trước, sau đó chọn các nội dung công việc mà nhân viên có thể phụ trách.",
+    workStepDepartment: "Bước 1: Bộ phận chính",
+    workStepPick: "Bước 2: Chọn nội dung công việc",
+    workStepSelected: "Bước 3: Công việc đã chọn",
+    selectedDepartment: "Bộ phận đang chọn",
+    changeDepartment: "Đổi bộ phận",
+    workTypeSearchPlaceholder: "Tìm nội dung công việc...",
+    noWorkTypesInDepartment: "Chưa có nội dung công việc trong bộ phận này. Hãy thêm trong Danh mục công việc.",
+    openWorkMaster: "Mở Danh mục công việc",
+    outsideCurrentDepartment: "Ngoài bộ phận hiện tại",
+    createContentFromSelectedWork: "Tạo nội dung phụ trách từ công việc đã chọn",
+    manageWorkMaster: "Quản lý danh mục công việc",
+    noSelectedWorkTypes: "Chưa chọn công việc nào.",
+    viewAllWorkTypes: "Xem tất cả",
+    overwriteWorkContentTitle: "Ghi đè nội dung phụ trách?",
+    overwriteWorkContentText: "Nội dung phụ trách hiện tại sẽ được thay bằng danh sách công việc đã chọn."
   });
 
   Object.assign(requestStatusMap, {
@@ -3019,9 +3055,9 @@
 
   function staffDepartmentSelectField(item) {
     const departments = activeMasterItems("departments");
-    if (!departments.length) return staffSelectField("department", t("department"), staffDepartmentOptions(item.department), item.department);
+    if (!departments.length) return staffSelectField("department", t("primaryDepartment"), staffDepartmentOptions(item.department), item.department);
     const currentCode = item.departmentCode || findDepartmentByCodeOrLabel(item.department)?.code || departments[0]?.code || "";
-    return `<label class="staff-edit-field"><span>${escapeHtml(t("department"))}</span><select name="department" data-staff-department-select>
+    return `<label class="staff-edit-field"><span>${escapeHtml(t("primaryDepartment"))}</span><select name="department" data-staff-department-select>
       ${departments.map(dept => `<option value="${escapeHtml(dept.code)}" data-label="${escapeHtml(workMasterLabel(dept))}" ${dept.code === currentCode ? "selected" : ""}>${escapeHtml(workMasterLabel(dept))}</option>`).join("")}
     </select></label>`;
   }
@@ -3106,6 +3142,136 @@
     return `<label class="staff-edit-field"><span>${escapeHtml(label)}</span><select name="${escapeHtml(name)}">${renderSelectOptions(options, selected)}</select></label>`;
   }
 
+  function workTypeKey(item) {
+    return String(item?.id || item?.code || "").trim();
+  }
+
+  function findWorkTypeByValue(value) {
+    const normalized = normalizeTag(value);
+    if (!normalized) return null;
+    return (state.workMaster?.workTypes || []).find(item => {
+      return [item.id, item.code, item.nameVi, item.nameJa].some(candidate => normalizeTag(candidate) === normalized);
+    }) || null;
+  }
+
+  function selectedWorkEntriesFromStaff(staff) {
+    const seen = new Set();
+    const entries = [];
+    const addEntry = (entry) => {
+      const key = String(entry.id || entry.code || entry.label || "").trim();
+      const normalized = normalizeTag(key || entry.label);
+      if (!normalized || seen.has(normalized)) return;
+      seen.add(normalized);
+      entries.push(entry);
+    };
+    toList(staff?.workTypeIds).forEach(value => {
+      const found = findWorkTypeByValue(value);
+      if (found) addEntry({ id: workTypeKey(found), code: found.code, label: workMasterLabel(found), departmentCode: found.departmentCode, legacy: false });
+      else addEntry({ id: value, code: value, label: value, departmentCode: "", legacy: true });
+    });
+    toList(staff?.workTags).concat(toList(staff?.skills)).forEach(value => {
+      const found = findWorkTypeByValue(value);
+      if (found) addEntry({ id: workTypeKey(found), code: found.code, label: workMasterLabel(found), departmentCode: found.departmentCode, legacy: false });
+      else addEntry({ id: value, code: value, label: value, departmentCode: staffTagDepartmentKey(value), legacy: true });
+    });
+    return entries;
+  }
+
+  function currentStaffDepartmentCode() {
+    const department = document.querySelector("#staffForm select[name='department']");
+    return staffDepartmentCode(department?.value || "");
+  }
+
+  function currentStaffDepartmentLabel() {
+    const department = document.querySelector("#staffForm select[name='department']");
+    if (!department) return "-";
+    const selectedOption = department.selectedOptions && department.selectedOptions[0];
+    return selectedOption?.dataset.label || selectedOption?.textContent || staffDepartmentLabelByKey(department.value) || department.value || "-";
+  }
+
+  function readSelectedWorkEntries() {
+    return Array.from(document.querySelectorAll("[data-selected-work-entry]")).map(input => ({
+      id: input.value,
+      code: input.dataset.workCode || input.value,
+      label: findWorkTypeByValue(input.value) ? workMasterLabel(findWorkTypeByValue(input.value)) : input.dataset.workLabel || input.value,
+      departmentCode: findWorkTypeByValue(input.value)?.departmentCode || input.dataset.workDepartment || "",
+      legacy: input.dataset.workLegacy === "true" && !findWorkTypeByValue(input.value)
+    })).filter(item => item.id || item.label);
+  }
+
+  function writeSelectedWorkEntries(entries) {
+    const holder = document.querySelector("[data-selected-work-holder]");
+    if (!holder) return;
+    const seen = new Set();
+    holder.innerHTML = entries.filter(item => {
+      const key = normalizeTag(item.id || item.label);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).map(item => `<input type="hidden" data-selected-work-entry value="${escapeHtml(item.id || item.code || item.label)}" data-work-code="${escapeHtml(item.code || item.id || item.label)}" data-work-label="${escapeHtml(item.label || item.code || item.id)}" data-work-department="${escapeHtml(item.departmentCode || "")}" data-work-legacy="${item.legacy ? "true" : "false"}">`).join("");
+  }
+
+  function renderStaffWorkAssignmentField(staff) {
+    const entries = selectedWorkEntriesFromStaff(staff);
+    return `<div class="staff-work-assignment" data-staff-work-assignment>
+      <p class="note">${escapeHtml(t("staffWorkFlowHelp"))}</p>
+      <div data-selected-work-holder>${entries.map(item => `<input type="hidden" data-selected-work-entry value="${escapeHtml(item.id || item.code || item.label)}" data-work-code="${escapeHtml(item.code || item.id || item.label)}" data-work-label="${escapeHtml(item.label || item.code || item.id)}" data-work-department="${escapeHtml(item.departmentCode || "")}" data-work-legacy="${item.legacy ? "true" : "false"}">`).join("")}</div>
+      <section class="staff-work-step">
+        <div class="staff-work-step-head"><b>${escapeHtml(t("workStepDepartment"))}</b><button class="mini-button" type="button" data-focus-staff-department>${escapeHtml(t("changeDepartment"))}</button></div>
+        <p class="staff-work-summary">${escapeHtml(t("selectedDepartment"))}: <strong data-staff-work-department-label>-</strong></p>
+      </section>
+      <section class="staff-work-step">
+        <div class="staff-work-step-head"><b>${escapeHtml(t("workStepPick"))}</b><label class="staff-work-view-all"><input type="checkbox" data-staff-work-view-all> ${escapeHtml(t("viewAllWorkTypes"))}</label></div>
+        <input class="filter-input" type="search" data-staff-work-search placeholder="${escapeHtml(t("workTypeSearchPlaceholder"))}">
+        <div class="staff-work-type-list" data-staff-work-type-list></div>
+      </section>
+      <section class="staff-work-step">
+        <div class="staff-work-step-head"><b>${escapeHtml(t("workStepSelected"))}</b><button class="mini-button" type="button" data-open-work-master>${escapeHtml(t("manageWorkMaster"))}</button></div>
+        <div class="staff-selected-work-list" data-staff-selected-work-list></div>
+      </section>
+    </div>`;
+  }
+
+  function renderStaffWorkAssignment() {
+    const root = document.querySelector("[data-staff-work-assignment]");
+    if (!root) return;
+    const departmentCode = currentStaffDepartmentCode();
+    const departmentLabel = currentStaffDepartmentLabel();
+    const selected = readSelectedWorkEntries();
+    const selectedIds = new Set(selected.map(item => normalizeTag(item.id || item.code || item.label)));
+    const search = (root.querySelector("[data-staff-work-search]")?.value || "").trim().toLowerCase();
+    const viewAll = root.querySelector("[data-staff-work-view-all]")?.checked;
+    const listTarget = root.querySelector("[data-staff-work-type-list]");
+    const selectedTarget = root.querySelector("[data-staff-selected-work-list]");
+    const labelTarget = root.querySelector("[data-staff-work-department-label]");
+    if (labelTarget) labelTarget.textContent = departmentLabel;
+    const workTypes = activeMasterItems("workTypes")
+      .filter(item => viewAll || item.departmentCode === departmentCode)
+      .filter(item => {
+        const haystack = [item.code, item.nameVi, item.nameJa, item.descriptionVi, item.descriptionJa].join(" ").toLowerCase();
+        return !search || haystack.includes(search);
+      });
+    if (listTarget) {
+      listTarget.innerHTML = workTypes.length ? workTypes.map(item => {
+        const key = workTypeKey(item);
+        const checked = selectedIds.has(normalizeTag(key)) || selectedIds.has(normalizeTag(item.code));
+        const description = state.lang === "vi" ? item.descriptionVi || item.descriptionJa || "" : item.descriptionJa || item.descriptionVi || "";
+        return `<label class="staff-work-type-option ${checked ? "selected" : ""}">
+          <input type="checkbox" data-staff-worktype-item value="${escapeHtml(key)}" data-work-code="${escapeHtml(item.code || key)}" data-work-label="${escapeHtml(workMasterLabel(item))}" data-work-department="${escapeHtml(item.departmentCode || "")}" ${checked ? "checked" : ""}>
+          <span><b>${escapeHtml(workMasterLabel(item))}</b>${description ? `<small>${escapeHtml(description)}</small>` : ""}</span>
+        </label>`;
+      }).join("") : `<div class="staff-work-empty"><p>${escapeHtml(t("noWorkTypesInDepartment"))}</p><button class="btn btn-soft" type="button" data-open-work-master>${escapeHtml(t("openWorkMaster"))}</button></div>`;
+    }
+    if (selectedTarget) {
+      const inDepartment = selected.filter(item => item.departmentCode === departmentCode || !item.departmentCode);
+      const outside = selected.filter(item => item.departmentCode && item.departmentCode !== departmentCode);
+      const chips = items => items.map(item => `<button class="staff-selected-work-chip" type="button" data-staff-work-remove="${escapeHtml(item.id || item.code || item.label)}">${escapeHtml(item.label || item.code || item.id)} <span aria-hidden="true">\u00d7</span></button>`).join("");
+      selectedTarget.innerHTML = selected.length
+        ? `${inDepartment.length ? `<div class="staff-selected-work-group">${chips(inDepartment)}</div>` : ""}${outside.length ? `<div class="staff-selected-work-outside"><strong>${escapeHtml(t("outsideCurrentDepartment"))}</strong><div class="staff-selected-work-group">${chips(outside)}</div></div>` : ""}`
+        : `<span class="muted-dash">${escapeHtml(t("noSelectedWorkTypes"))}</span>`;
+    }
+  }
+
   function staffTagPickerField(name, label, selected, department) {
     const selectedItems = toList(selected);
     const selectedSet = new Set(selectedItems.map(item => item.toLowerCase()));
@@ -3148,10 +3314,6 @@
     const avatar = item.avatar || "";
     const statusOptions = ["active", "off"];
     const selectedStatus = ["off", "inactive"].includes(String(item.status || "")) ? "off" : "active";
-    const masterTagsById = activeMasterItems("workTypes")
-      .filter(type => toList(item.workTypeIds).includes(type.id) || toList(item.workTypeIds).includes(type.code))
-      .map(workMasterLabel);
-    const mergedTags = uniqueOptions([].concat(toList(item.skills)).concat(toList(item.workTags)).concat(masterTagsById));
     const roleValue = item.role || item.position || item.title || "";
     document.querySelector("[data-staff-edit-overlay]")?.remove();
     const overlay = document.createElement("div");
@@ -3201,32 +3363,27 @@
                 </section>
 
                 <section class="staff-edit-section">
-                  <h3>${escapeHtml(t("staffOrganization"))}</h3>
+                  <h3>${escapeHtml(t("staffClassification"))}</h3>
                   <div class="staff-edit-grid">
                     ${staffDepartmentSelectField(item)}
                     ${staffTextField("role", t("role"), roleValue)}
                     ${staffTextField("areas", t("areas"), item.areas)}
-                  </div>
-                </section>
-
-                <section class="staff-edit-section">
-                  <h3>${escapeHtml(t("staffAutoAssign"))}</h3>
-                  <div class="staff-edit-grid">
                     <label class="staff-edit-field staff-switch-field"><span>${escapeHtml(t("autoAssignJoin"))}</span><input type="checkbox" disabled></label>
                     ${staffTextField("maxActiveRequests", t("maxActiveRequests"), "", "number", "disabled min=\"0\"")}
-                    <label class="staff-edit-field"><span>${escapeHtml(t("assignPriority"))}</span><select disabled><option>${escapeHtml(t("normal"))}</option><option>${escapeHtml(t("low"))}</option><option>${escapeHtml(t("high"))}</option></select></label>
-                    ${staffTextareaField("assignNote", t("assignNote"), t("autoAssignPlanned"), "disabled")}
                   </div>
-                  <p class="note">${escapeHtml(t("autoAssignPlanned"))}</p>
                 </section>
               </div>
 
               <div class="staff-edit-column">
                 <section class="staff-edit-section">
                   <h3>${escapeHtml(t("staffAssignableWork"))}</h3>
+                  ${renderStaffWorkAssignmentField(item)}
+                </section>
+
+                <section class="staff-edit-section">
+                  <h3>${escapeHtml(t("workContent"))}</h3>
                   <div class="staff-edit-grid">
-                    ${staffTagPickerField("workTags", t("workTags"), mergedTags, item.department)}
-                    <button class="btn btn-soft" type="button" data-staff-tags-to-content>${escapeHtml(t("createContentFromTags"))}</button>
+                    <button class="btn btn-soft" type="button" data-staff-selected-work-to-content>${escapeHtml(t("createContentFromSelectedWork"))}</button>
                     ${staffTextareaField("workContent", t("workContent"), item.workContent)}
                   </div>
                 </section>
@@ -3249,7 +3406,7 @@
       </article>
     `;
     document.body.appendChild(overlay);
-    applyStaffTagFilter();
+    renderStaffWorkAssignment();
   }
 
   function field(name, label, value, textarea) {
@@ -4059,13 +4216,11 @@
       payload.set("departmentCode", departmentSelect.value || "");
       payload.set("department", selectedOption?.dataset.label || selectedOption?.textContent || departmentSelect.value || "");
     }
-    const workTags = raw.getAll("workTags").map(item => String(item || "").trim()).filter(Boolean);
+    const selectedWork = readSelectedWorkEntries();
+    const workTags = selectedWork.map(item => String(item.label || item.code || item.id || "").trim()).filter(Boolean);
     if (workTags.length) workTags.forEach(tag => payload.append("workTags", tag));
     else payload.set("workTags", "");
-    const workTypeIds = activeMasterItems("workTypes")
-      .filter(item => workTags.some(tag => [item.code, item.nameVi, item.nameJa].some(candidate => normalizeTag(candidate) === normalizeTag(tag))))
-      .map(item => item.id || item.code)
-      .filter(Boolean);
+    const workTypeIds = selectedWork.filter(item => !item.legacy).map(item => item.id || item.code).filter(Boolean);
     if (workTypeIds.length) workTypeIds.forEach(id => payload.append("workTypeIds", id));
     else payload.set("workTypeIds", "");
     payload.set("avatar", raw.get("avatar") || "");
@@ -4075,7 +4230,7 @@
   }
 
   function selectedStaffWorkTags() {
-    return Array.from(document.querySelectorAll("[data-staff-tag-item] input:checked")).map(input => input.value).filter(Boolean);
+    return readSelectedWorkEntries().map(item => item.label || item.code || item.id).filter(Boolean);
   }
 
   function renderSelectedStaffTags() {
@@ -4250,11 +4405,24 @@
           const file = event.target.files && event.target.files[0];
           if (file) previewStaffAvatar(file);
         }
-        if (event.target.matches("select[name='department']")) refreshStaffTagDepartment();
-        if (event.target.closest("[data-staff-tag-item] input")) {
-          const content = document.querySelector("#staffForm textarea[name='workContent']");
-          if (content && !content.value.trim()) content.value = selectedStaffWorkTags().join(", ");
-          applyStaffTagFilter();
+        if (event.target.matches("select[name='department']")) renderStaffWorkAssignment();
+        const workTypeInput = event.target.closest("[data-staff-worktype-item]");
+        if (workTypeInput) {
+          const selected = readSelectedWorkEntries().filter(item => normalizeTag(item.id || item.code || item.label) !== normalizeTag(workTypeInput.value));
+          if (workTypeInput.checked) {
+            selected.push({
+              id: workTypeInput.value,
+              code: workTypeInput.dataset.workCode || workTypeInput.value,
+              label: workTypeInput.dataset.workLabel || workTypeInput.value,
+              departmentCode: workTypeInput.dataset.workDepartment || "",
+              legacy: false
+            });
+          }
+          writeSelectedWorkEntries(selected);
+          renderStaffWorkAssignment();
+        }
+        if (event.target.closest("[data-staff-work-view-all]")) {
+          renderStaffWorkAssignment();
         }
         return;
       }
@@ -4420,6 +4588,50 @@
         return;
       }
 
+      if (event.target.closest("[data-focus-staff-department]")) {
+        event.preventDefault();
+        document.querySelector("#staffForm select[name='department']")?.focus();
+        return;
+      }
+
+      const removeWork = event.target.closest("[data-staff-work-remove]");
+      if (removeWork) {
+        event.preventDefault();
+        const value = removeWork.dataset.staffWorkRemove;
+        writeSelectedWorkEntries(readSelectedWorkEntries().filter(item => normalizeTag(item.id || item.code || item.label) !== normalizeTag(value)));
+        setStaffEditDirty(true);
+        renderStaffWorkAssignment();
+        return;
+      }
+
+      if (event.target.closest("[data-open-work-master]")) {
+        event.preventDefault();
+        await closeStaffEditForm(true);
+        state.currentView = "settings";
+        state.filters.workMasterTab = "workTypes";
+        state.filters.workMasterEditId = "";
+        renderCurrentView();
+        return;
+      }
+
+      if (event.target.closest("[data-staff-selected-work-to-content]")) {
+        event.preventDefault();
+        const content = document.querySelector("#staffForm textarea[name='workContent']");
+        if (!content) return;
+        if (content.value.trim()) {
+          const ok = await confirmAction({
+            title: t("overwriteWorkContentTitle"),
+            message: t("overwriteWorkContentText"),
+            confirmLabel: t("save"),
+            cancelLabel: t("cancel")
+          });
+          if (!ok) return;
+        }
+        content.value = selectedStaffWorkTags().join(", ");
+        setStaffEditDirty(true);
+        return;
+      }
+
       const tagMode = event.target.closest("[data-staff-tag-mode]");
       if (tagMode) {
         event.preventDefault();
@@ -4573,6 +4785,10 @@
     bind(document, "input", event => {
       if (event.target.closest("[data-request-edit-field]")) {
         setRequestDetailDirty(true);
+      }
+      if (event.target.closest("[data-staff-work-search]")) {
+        renderStaffWorkAssignment();
+        return;
       }
       if (event.target.closest("#staffForm")) {
         setStaffEditDirty(true);
