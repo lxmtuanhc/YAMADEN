@@ -2472,7 +2472,8 @@ body {
 .quote-workspace-head {
   align-items: center;
   flex: 0 0 auto;
-  padding: 14px 60px 14px 18px;
+  min-height: 112px;
+  padding: 22px 88px 22px 24px;
 }
 
 .quote-head-main {
@@ -2507,32 +2508,40 @@ body {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
-  padding-right: 4px;
+  margin-right: 56px;
 }
 
-.quote-modal-close {
+.quote-detail-close {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 36px;
-  height: 36px;
-  display: grid;
+  top: 18px;
+  right: 18px;
+  z-index: 50;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
   place-items: center;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  background: transparent;
-  color: #64748b;
-  font-size: 24px;
+  justify-content: center;
+  border: 1px solid #d7e0ee;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #0f172a;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, .08);
+  cursor: pointer;
+  font-size: 22px;
   font-weight: 800;
   line-height: 1;
   transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease;
 }
 
-.quote-modal-close:hover {
-  border-color: #dbe3ef;
-  background: #f1f5f9;
-  color: #0f172a;
-  transform: translateY(-1px);
+.quote-detail-close:hover {
+  border-color: #93c5fd;
+  background: #eef2ff;
+  color: #2563eb;
+}
+
+.quote-detail-close:active {
+  transform: scale(.96);
 }
 
 .quote-detail-form,
@@ -2545,10 +2554,18 @@ body {
 .quote-detail-form {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  height: auto;
+  max-height: none;
+  overflow: visible;
   padding-top: 14px;
   scroll-behavior: smooth;
+}
+
+.quote-detail-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .quote-detail-layout {
@@ -2556,6 +2573,9 @@ body {
   grid-template-columns: minmax(0, 1fr) 300px;
   gap: 16px;
   align-items: start;
+  height: auto;
+  max-height: none;
+  overflow: visible;
 }
 
 .quote-stepper {
@@ -2605,6 +2625,8 @@ body {
   grid-template-columns: minmax(0, 1fr) 340px;
   gap: 20px;
   align-items: start;
+  height: auto;
+  max-height: none;
   overflow: visible;
 }
 
@@ -2613,6 +2635,8 @@ body {
   display: grid;
   gap: 14px;
   min-width: 0;
+  height: auto;
+  max-height: none;
   overflow: visible;
 }
 
@@ -2898,6 +2922,7 @@ body {
   top: 16px;
   align-self: start;
   min-width: 0;
+  height: auto;
   max-height: none;
   overflow: visible;
 }
@@ -2905,9 +2930,18 @@ body {
 .quote-summary-panel {
   display: grid;
   gap: 12px;
+  height: auto;
   max-height: none;
   overflow: visible;
   box-shadow: 0 10px 26px rgba(15, 23, 42, .04);
+}
+
+.quote-summary-block,
+.quote-upload-box,
+.quote-summary-actions {
+  height: auto;
+  max-height: none;
+  overflow: visible;
 }
 
 .quote-summary-block {
