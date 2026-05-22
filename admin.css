@@ -2231,8 +2231,63 @@ body {
 }
 
 .quote-kpi-grid .kpi-card {
-  min-height: 104px;
-  padding: 12px;
+  min-height: 88px;
+  padding: 10px 12px;
+}
+
+.quote-kpi-grid .kpi-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.quote-kpi-grid .stat-value {
+  font-size: 20px;
+}
+
+.quote-today-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, .05);
+}
+
+.quote-today-card .eyebrow {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.quote-today-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.quote-today-item {
+  min-height: 48px;
+  display: grid;
+  gap: 3px;
+  padding: 8px 10px;
+  border-radius: 11px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.quote-today-item span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.quote-today-item strong {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 950;
 }
 
 .quote-filter-bar {
@@ -2264,6 +2319,14 @@ body {
 
 .quote-pipeline-head {
   gap: 12px;
+}
+
+.quote-kanban-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
 }
 
 .quote-scroll-hint {
@@ -3626,6 +3689,16 @@ body {
 
   .quote-page-head {
     grid-template-columns: 1fr;
+  }
+
+  .quote-today-card,
+  .quote-today-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-kanban-controls {
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 }
 

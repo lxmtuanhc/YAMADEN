@@ -1296,6 +1296,8 @@
 
   Object.assign(i18n.ja, {
     quoteModuleSubtitle: "\u898b\u7a4d\u30fb\u63d0\u6848\u3068\u53d7\u6ce8\u72b6\u6cc1\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002",
+    quoteRegister: "\u898b\u7a4d\u4f5c\u6210",
+    quoteCsvExport: "CSV\u51fa\u529b",
     totalQuoteValue: "\u898b\u7a4d\u91d1\u984d\u5408\u8a08",
     orderRate: "\u53d7\u6ce8\u7387",
     orderedValue: "\u53d7\u6ce8\u91d1\u984d",
@@ -1345,16 +1347,23 @@
     kanban: "Kanban",
     listView: "\u4e00\u89a7",
     noCustomerSelected: "\u9867\u5ba2\u672a\u8a2d\u5b9a",
-    noValidUntil: "\u6709\u52b9\u671f\u9650\u672a\u8a2d\u5b9a",
-    noAssignee: "\u62c5\u5f53\u8005\u672a\u8a2d\u5b9a",
+    noValidUntil: "\u672a\u8a2d\u5b9a",
+    noAssignee: "\u672a\u8a2d\u5b9a",
     missingCustomer: "\u9867\u5ba2\u672a\u8a2d\u5b9a",
     quotePipeline: "\u898b\u7a4d\u30d1\u30a4\u30d7\u30e9\u30a4\u30f3",
     quoteLayoutData: "\u30ec\u30a4\u30a2\u30a6\u30c8\u30c7\u30fc\u30bf",
-    quoteKanbanHint: "\u6a2a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3057\u3066\u4ed6\u306e\u30b9\u30c6\u30fc\u30bf\u30b9\u3092\u8868\u793a"
+    quoteKanbanHint: "\u6a2a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3057\u3066\u4ed6\u306e\u30b9\u30c6\u30fc\u30bf\u30b9\u3092\u8868\u793a",
+    quoteTodayNeedsAction: "\u672c\u65e5\u306e\u5bfe\u5fdc",
+    quotePendingApprovalShort: "\u627f\u8a8d\u5f85\u3061",
+    quoteExpiringSoonShort: "\u671f\u9650\u9593\u8fd1",
+    quoteMissingCustomerShort: "\u9867\u5ba2\u672a\u8a2d\u5b9a",
+    quoteChangeRequestedShort: "\u4fee\u6b63\u4f9d\u983c"
   });
 
   Object.assign(i18n.vi, {
     quoteModuleSubtitle: "Qu\u1ea3n l\u00fd b\u00e1o gi\u00e1, \u0111\u1ec1 xu\u1ea5t v\u00e0 tr\u1ea1ng th\u00e1i nh\u1eadn \u0111\u01a1n.",
+    quoteRegister: "T\u1ea1o b\u00e1o gi\u00e1",
+    quoteCsvExport: "Xu\u1ea5t CSV",
     totalQuoteValue: "T\u1ed5ng gi\u00e1 tr\u1ecb b\u00e1o gi\u00e1",
     orderRate: "T\u1ec9 l\u1ec7 nh\u1eadn \u0111\u01a1n",
     orderedValue: "Gi\u00e1 tr\u1ecb \u0111\u00e3 nh\u1eadn \u0111\u01a1n",
@@ -1404,12 +1413,17 @@
     kanban: "Kanban",
     listView: "Danh s\u00e1ch",
     noCustomerSelected: "Ch\u01b0a c\u00f3 kh\u00e1ch h\u00e0ng",
-    noValidUntil: "Ch\u01b0a \u0111\u1eb7t hi\u1ec7u l\u1ef1c",
-    noAssignee: "Ch\u01b0a c\u00f3 ph\u1ee5 tr\u00e1ch",
+    noValidUntil: "Ch\u01b0a \u0111\u1eb7t",
+    noAssignee: "Ch\u01b0a c\u00f3",
     missingCustomer: "Thi\u1ebfu kh\u00e1ch h\u00e0ng",
     quotePipeline: "Pipeline b\u00e1o gi\u00e1",
     quoteLayoutData: "D\u1eef li\u1ec7u layout",
-    quoteKanbanHint: "K\u00e9o ngang \u0111\u1ec3 xem th\u00eam tr\u1ea1ng th\u00e1i"
+    quoteKanbanHint: "K\u00e9o ngang \u0111\u1ec3 xem th\u00eam tr\u1ea1ng th\u00e1i",
+    quoteTodayNeedsAction: "C\u1ea7n x\u1eed l\u00fd h\u00f4m nay",
+    quotePendingApprovalShort: "B\u00e1o gi\u00e1 ch\u1edd duy\u1ec7t",
+    quoteExpiringSoonShort: "B\u00e1o gi\u00e1 s\u1eafp h\u1ebft h\u1ea1n",
+    quoteMissingCustomerShort: "B\u00e1o gi\u00e1 thi\u1ebfu kh\u00e1ch h\u00e0ng",
+    quoteChangeRequestedShort: "B\u00e1o gi\u00e1 y\u00eau c\u1ea7u ch\u1ec9nh s\u1eeda"
   });
 
   const state = {
@@ -4184,6 +4198,32 @@
     });
   }
 
+  function quoteNeedsCustomer(quote) {
+    return quoteAdminStatus(quote?.status) === "sent_to_customer" && !quote?.customerId && !quote?.customerName;
+  }
+
+  function quoteExpiresSoon(quote) {
+    if (!quote?.validUntil) return false;
+    const due = new Date(quote.validUntil);
+    if (Number.isNaN(due.getTime())) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const limit = new Date(today);
+    limit.setDate(limit.getDate() + 7);
+    due.setHours(0, 0, 0, 0);
+    return due >= today && due <= limit && !["accepted", "rejected", "expired"].includes(quoteAdminStatus(quote.status));
+  }
+
+  function renderQuoteTodaySummary(rows) {
+    const items = [
+      [t("quotePendingApprovalShort"), rows.filter(quote => quoteAdminStatus(quote.status) === "pending_approval").length],
+      [t("quoteExpiringSoonShort"), rows.filter(quoteExpiresSoon).length],
+      [t("quoteMissingCustomerShort"), rows.filter(quoteNeedsCustomer).length],
+      [t("quoteChangeRequestedShort"), rows.filter(quote => quoteAdminStatus(quote.status) === "change_requested").length]
+    ];
+    return `<section class="quote-today-card"><p class="eyebrow">${escapeHtml(t("quoteTodayNeedsAction"))}</p><div class="quote-today-grid">${items.map(([label, value]) => `<div class="quote-today-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(String(value))}</strong></div>`).join("")}</div></section>`;
+  }
+
   function renderQuotes() {
     const rows = filterQuotes(quoteRows());
     const acceptedRows = rows.filter(item => quoteAdminStatus(item.status) === "accepted");
@@ -4194,7 +4234,7 @@
       <div class="quote-page-head">
         <div class="page-intro"><p>${escapeHtml(t("quoteModuleSubtitle"))}</p><span class="quote-dev-note">${escapeHtml(t("quoteMockNote"))}</span></div>
         <div class="request-command-bar demo-actions quote-toolbar">
-          <button class="btn btn-soft" disabled>CSV ${escapeHtml(t("export"))}</button>
+          <button class="btn btn-soft" disabled>${escapeHtml(t("quoteCsvExport"))}</button>
           <button class="btn btn-primary" type="button" data-quote-action="new">+ ${escapeHtml(t("quoteRegister"))}</button>
         </div>
       </div>
@@ -4204,6 +4244,7 @@
         ${statCard(t("orderRate"), rows.length ? Math.round(acceptedRows.length / rows.length * 100) + "%" : "-", t("quoteLayoutData"), "success", "trend")}
         ${statCard(t("orderedValue"), quoteCurrency(orderedValue), t("quoteLayoutData"), "total", "userCheck")}
       </div>
+      ${renderQuoteTodaySummary(rows)}
       <div class="crm-filter-bar quote-filter-bar">
         <input class="filter-input" data-quote-filter="search" value="${escapeHtml(state.filters.quoteSearch || "")}" placeholder="${escapeHtml(t("quoteSearchPlaceholder"))}">
         <select class="filter-input" data-quote-filter="status"><option value="all">${escapeHtml(t("statusFilter"))}</option>${QUOTE_STATUSES.map(status => `<option value="${escapeHtml(status)}" ${state.filters.quoteStatus === status ? "selected" : ""}>${escapeHtml(quoteStatusLabel(status))}</option>`).join("")}</select>
@@ -4215,7 +4256,7 @@
         ${[["kanban", t("kanban")], ["list", t("listView")]].map(([key, label]) => `<button class="staff-tag-tab ${viewMode === key ? "active" : ""}" type="button" data-quote-view="${escapeHtml(key)}">${escapeHtml(label)}</button>`).join("")}
       </div>
       <section class="section-card">
-        <div class="panel-head quote-pipeline-head"><div><h2>${escapeHtml(t("quotePipeline"))}</h2><p class="note">${escapeHtml(String(rows.length))}</p></div>${viewMode === "kanban" ? `<span class="quote-scroll-hint">${escapeHtml(t("quoteKanbanHint"))}</span>` : ""}</div>
+        <div class="panel-head quote-pipeline-head"><div><h2>${escapeHtml(t("quotePipeline"))}</h2><p class="note">${escapeHtml(String(rows.length))}</p></div>${viewMode === "kanban" ? `<div class="quote-kanban-controls"><span class="quote-scroll-hint">${escapeHtml(t("quoteKanbanHint"))}</span><button class="icon-btn" type="button" data-quote-scroll="-1" aria-label="Scroll left">&larr;</button><button class="icon-btn" type="button" data-quote-scroll="1" aria-label="Scroll right">&rarr;</button></div>` : ""}</div>
         <div class="panel-body quote-board-body">${viewMode === "list" ? renderQuoteList(rows) : renderQuoteKanban(rows)}</div>
       </section>
     `;
@@ -4234,7 +4275,7 @@
     const projectName = quote.projectName || quote.title || "";
     const validUntil = quote.validUntil ? formatDate(quote.validUntil) : t("noValidUntil");
     const assigneeName = quote.assigneeName || t("noAssignee");
-    const needsCustomer = quoteAdminStatus(quote.status) === "sent_to_customer" && !quote.customerId && !quote.customerName;
+    const needsCustomer = quoteNeedsCustomer(quote);
     return `<button class="quote-card" type="button" data-quote-action="detail" data-quote-id="${escapeHtml(quote.id)}">
       <span class="quote-card-top"><strong>${escapeHtml(quote.quoteNo)}</strong><span class="status-badge status-${escapeHtml(quoteAdminStatus(quote.status))}">${escapeHtml(quoteStatusLabel(quoteAdminStatus(quote.status)))}</span></span>
       ${needsCustomer ? `<span class="quote-warning-badge">${escapeHtml(t("missingCustomer"))}</span>` : ""}
@@ -5609,6 +5650,13 @@
       if (quoteView) {
         state.filters.quoteView = quoteView.dataset.quoteView || "kanban";
         renderQuotes();
+        return;
+      }
+
+      const quoteScroll = event.target.closest("[data-quote-scroll]");
+      if (quoteScroll) {
+        const board = document.querySelector(".quote-kanban-board");
+        if (board) board.scrollBy({ left: Number(quoteScroll.dataset.quoteScroll || 1) * 320, behavior: "smooth" });
         return;
       }
 

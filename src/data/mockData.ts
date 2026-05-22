@@ -74,7 +74,7 @@ export const initialQuotes: Quote[] = [
   {
     id: "Q-2024-0385",
     requestId: "RQ-2024-0415",
-    projectName: "Lap them 6 o cam va day dien",
+    projectName: "Lắp thêm 6 ổ cắm và dây điện",
     validUntil: "25/05/2024",
     status: "pending",
     items: [
