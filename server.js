@@ -244,6 +244,7 @@ const RequestSchema = new mongoose.Schema({
 });
 
 const QuoteItemSchema = new mongoose.Schema({
+  id: String,
   name: String,
   title: String,
   description: String,
@@ -262,7 +263,9 @@ const QuoteSchema = new mongoose.Schema({
   id: String,
   quoteCode: String,
   quoteNo: String,
+  quoteNumber: String,
   code: String,
+  number: String,
   requestId: String,
   userId: String,
   customerId: String,
@@ -306,6 +309,7 @@ const QuoteSchema = new mongoose.Schema({
   customerNote: String,
   internalNote: String,
   createdAt: { type: Date, default: Date.now },
+  updatedAt: Date,
   isDeleted: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },
   deletedBy: String,
@@ -1888,9 +1892,108 @@ app.get("/admin/quotes", requireAdmin, async (req, res) => {
 });
 
 function adminQuoteQuery(id) {
-  const clauses = [{ id }, { quoteCode: id }, { quoteNo: id }, { code: id }];
+  const clauses = [{ id }, { quoteCode: id }, { quoteNo: id }, { quoteNumber: id }, { code: id }, { number: id }];
   if (mongoose.Types.ObjectId.isValid(id)) clauses.unshift({ _id: id });
   return { $or: clauses };
+}
+
+async function findQuoteByAnyId(id) {
+  let quote = null;
+  if (mongoose.Types.ObjectId.isValid(id)) quote = await Quote.findById(id).lean();
+  if (!quote) quote = await Quote.findOne(adminQuoteQuery(id)).lean();
+  return quote;
+}
+
+async function findQuoteDocumentByAnyId(id) {
+  let quote = null;
+  if (id && mongoose.Types.ObjectId.isValid(id)) quote = await Quote.findById(id);
+  if (!quote && id) quote = await Quote.findOne(adminQuoteQuery(id));
+  return quote;
+}
+
+function newServerQuoteNo() {
+  return "Q-" + new Date().getFullYear() + "-" + String(Date.now()).slice(-5);
+}
+
+function normalizeQuotePayloadForDb(body = {}) {
+  const quoteNo = body.quoteNo || body.quoteCode || body.quoteNumber || body.code || body.number || newServerQuoteNo();
+  const rawItems = Array.isArray(body.quoteItems) && body.quoteItems.length ? body.quoteItems : Array.isArray(body.items) ? body.items : [];
+  const items = rawItems.map(item => ({
+    id: item.id || "",
+    name: item.name || item.title || "",
+    title: item.title || item.name || "",
+    description: item.description || item.spec || "",
+    spec: item.spec || item.description || "",
+    unit: item.unit || "\u5f0f",
+    quantity: Number(item.quantity || item.qty || 1),
+    qty: Number(item.qty || item.quantity || 1),
+    unitPrice: Number(item.unitPrice || item.price || 0),
+    price: Number(item.price || item.unitPrice || 0),
+    discount: Number(item.discount || 0),
+    discountRate: Number(item.discountRate || 0),
+    amount: Number(item.amount ?? Math.max(0, Number(item.quantity || item.qty || 1) * Number(item.unitPrice || item.price || 0) - Number(item.discount || 0)))
+  }));
+  const subtotal = Number(body.subtotal ?? items.reduce((sum, item) => sum + Number(item.amount || 0), 0));
+  const discount = Number(body.discount || 0);
+  const taxable = Math.max(0, subtotal - discount);
+  const rawTaxRate = body.vatRate ?? body.taxRate ?? 0.1;
+  const taxRate = Number(rawTaxRate) <= 1 ? Number(rawTaxRate || 0.1) : Number(rawTaxRate || 10) / 100;
+  const taxAmount = Number(body.taxAmount ?? body.tax ?? body.vatAmount ?? Math.round(taxable * taxRate));
+  const rounding = Number(body.rounding || 0);
+  const total = Math.max(0, Number(body.total ?? taxable + taxAmount + rounding));
+  return {
+    id: body.id || "",
+    quoteCode: quoteNo,
+    quoteNo,
+    quoteNumber: body.quoteNumber || quoteNo,
+    code: body.code || quoteNo,
+    number: body.number || quoteNo,
+    requestId: body.requestId || body.linkedRequestId || "",
+    userId: body.userId || "",
+    customerId: body.customerId || "",
+    customerName: body.customerName || body.name || "",
+    customerCompany: body.customerCompany || body.company || "",
+    customerPerson: body.customerPerson || body.contactPerson || "",
+    customerPhone: body.customerPhone || body.phone || "",
+    customerEmail: body.customerEmail || body.email || "",
+    customerAddress: body.customerAddress || body.projectAddress || body.address || "",
+    phone: body.phone || body.customerPhone || "",
+    email: body.email || body.customerEmail || "",
+    address: body.address || body.projectAddress || body.customerAddress || "",
+    company: body.company || body.customerCompany || "",
+    name: body.name || body.customerName || "",
+    projectName: body.projectName || body.title || "",
+    title: body.title || body.projectName || "",
+    content: body.content || body.projectName || body.title || "",
+    description: body.description || body.customerNote || "",
+    assigneeName: body.assigneeName || body.staffName || "",
+    staffName: body.staffName || body.assigneeName || "",
+    departmentName: body.departmentName || body.department || "",
+    department: body.department || body.departmentName || "",
+    validUntil: body.validUntil || body.expireDate || body.validDate || "",
+    expireDate: body.expireDate || body.validUntil || "",
+    validDate: body.validDate || body.validUntil || "",
+    status: body.status || "draft",
+    items,
+    quoteItems: items,
+    subtotal,
+    discount,
+    tax: taxAmount,
+    taxAmount,
+    vatAmount: taxAmount,
+    taxRate,
+    vatRate: Number(body.vatRate ?? taxRate),
+    rounding,
+    total,
+    currency: body.currency || "JPY",
+    paymentTerms: body.paymentTerms || "",
+    note: body.note || body.customerNote || "",
+    customerNote: body.customerNote || body.note || "",
+    internalNote: body.internalNote || "",
+    isDeleted: body.isDeleted === true,
+    deletedAt: body.deletedAt || null,
+    updatedAt: new Date()
+  };
 }
 
 function safeFileName(value) {
@@ -2265,10 +2368,44 @@ function drawQuotePdf(doc, q) {
   doc.fontSize(7).text("YAMADEN Electrical Solutions", left, pageH - 18, { width: right - left, align: "center" });
 }
 
+app.post("/admin/quotes", requireAdmin, async (req, res) => {
+  try {
+    const body = req.body || {};
+    const lookupIds = [
+      body._id,
+      body.quoteNo,
+      body.quoteCode,
+      body.quoteNumber,
+      body.code,
+      body.id,
+      body.number
+    ].filter(Boolean);
+    let quote = null;
+    for (const id of lookupIds) {
+      quote = await findQuoteDocumentByAnyId(String(id));
+      if (quote) break;
+    }
+    const payload = normalizeQuotePayloadForDb(body);
+    if (!quote) {
+      quote = new Quote({ ...payload, createdAt: body.createdAt || new Date() });
+    } else {
+      Object.assign(quote, payload);
+      if (!quote.createdAt) quote.createdAt = body.createdAt || new Date();
+    }
+    await quote.save();
+    res.json({ ok: true, quote: quote.toObject() });
+  } catch (error) {
+    console.error("Quote save failed:", error);
+    res.status(500).json({ ok: false, message: "Quote save failed", error: error.message });
+  }
+});
+
 app.get("/admin/quotes/:id/pdf", requireAdmin, async (req, res) => {
   try {
-    const quote = await Quote.findOne(adminQuoteQuery(req.params.id)).lean();
-    if (!quote) return res.status(404).json({ ok: false, message: "Quote not found" });
+    console.log("PDF quote lookup id:", req.params.id);
+    const quote = await findQuoteByAnyId(req.params.id);
+    console.log("PDF quote found:", !!quote);
+    if (!quote) return res.status(404).json({ ok: false, message: "Quote not found", id: req.params.id });
     const normalized = normalizeQuoteForPdf(quote);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="YAMADEN_Quote_${safeFileName(normalized.quoteNo)}.pdf"`);

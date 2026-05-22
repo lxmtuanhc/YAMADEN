@@ -1624,6 +1624,13 @@
     getQuotes() {
       return requestJson("/admin/quotes");
     },
+    saveQuote(payload) {
+      return requestJson("/admin/quotes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload || {})
+      });
+    },
     deleteQuote(id, permanent) {
       return requestJson("/admin/quotes/" + encodeURIComponent(id) + (permanent ? "?permanent=true" : ""), { method: "DELETE" });
     },
@@ -4297,8 +4304,11 @@
       : quoteAdminStatus(quote?.status || "draft");
     const base = {
       _id: quote?._id || "",
-      id: quote?.id || newQuoteId(),
-      quoteNo: quote?.quoteNo || quote?.quoteCode || newQuoteNo(),
+      id: quote?.id || quote?._id || newQuoteId(),
+      quoteNo: quote?.quoteNo || quote?.quoteCode || quote?.quoteNumber || quote?.code || quote?.number || newQuoteNo(),
+      quoteNumber: quote?.quoteNumber || "",
+      code: quote?.code || "",
+      number: quote?.number || "",
       requestId: quote?.requestId || "",
       customerId,
       customerName,
@@ -4388,14 +4398,14 @@
   function quoteRows() {
     const byId = new Map();
     loadQuoteLayoutState();
-    state.quotes.map(normalizeQuote).forEach(item => byId.set(String(item.id || item.quoteNo), item));
+    state.quotes.map(normalizeQuote).forEach(item => byId.set(String(item._id || item.id || item.quoteNo), item));
     return [...byId.values()].filter(item => !item.isDeleted && !item.deletedAt);
   }
 
   function persistMockQuote(quote) {
     const normalized = normalizeQuote(quote);
     const quotes = quoteRows();
-    const next = [normalized, ...quotes.filter(item => String(item.id) !== String(normalized.id) && String(item.quoteNo) !== String(normalized.quoteNo))];
+    const next = [normalized, ...quotes.filter(item => String(item._id || "") !== String(normalized._id || "___new_quote") && String(item.id) !== String(normalized.id) && String(item.quoteNo) !== String(normalized.quoteNo))];
     state.quotes = next;
     writeCustomerAppQuotes(next.map(item => ({
       ...item,
@@ -4407,12 +4417,12 @@
   }
 
   function openQuoteDetail(quoteId) {
-    const quote = quoteRows().find(item => String(item.id) === String(quoteId) || String(item.quoteNo) === String(quoteId));
+    const quote = quoteRows().find(item => [item._id, item.id, item.quoteNo, item.quoteCode, item.quoteNumber, item.code, item.number].some(value => value && String(value) === String(quoteId)));
     if (!quote) {
       toast(t("quoteNotFound"));
       return;
     }
-    state.selectedQuoteId = quote.id;
+    state.selectedQuoteId = quote._id || quote.id;
     state.quoteWizardStep = 1;
     try {
       renderQuoteDetail(quote);
@@ -4805,7 +4815,7 @@
         </header>
         ${renderQuoteWizardSteps()}
         <form class="drawer-body quote-detail-form quote-wizard-form" data-quote-form>
-          <input type="hidden" name="id" value="${escapeHtml(quote.id)}"><input type="hidden" name="quoteNo" value="${escapeHtml(quote.quoteNo)}">
+          <input type="hidden" name="_id" value="${escapeHtml(quote._id || "")}"><input type="hidden" name="id" value="${escapeHtml(quote.id)}"><input type="hidden" name="quoteNo" value="${escapeHtml(quote.quoteNo)}">
           <div class="quote-wizard-content">
             <section class="quote-wizard-panel ${currentStep === 1 ? "is-active" : ""}" data-quote-step-panel="1">
               <h3>${escapeHtml(t("quoteWizardStep1"))}</h3>
@@ -4855,7 +4865,7 @@
       unitPrice: row.querySelector("[name='itemUnitPrice']")?.value || 0,
       discount: row.querySelector("[name='itemDiscount']")?.value || 0
     }, index));
-    return ensureQuoteDefaults(normalizeQuote({ ...(existing || {}), id: raw.get("id"), quoteNo: raw.get("quoteNo"), requestId: raw.get("requestId"), customerId: raw.get("customerId"), customerName: raw.get("customerName"), customerPhone: raw.get("customerPhone"), customerEmail: raw.get("customerEmail"), projectName: raw.get("projectName"), projectAddress: raw.get("projectAddress"), title: raw.get("projectName"), assigneeId: raw.get("assigneeId"), assigneeName: raw.get("assigneeName"), items: rows, discount: raw.get("discount"), taxRate: Number(raw.get("taxRate") || 10) / 100, rounding: raw.get("rounding"), paymentTerms: raw.get("paymentTerms"), validUntil: raw.get("validUntil"), customerNote: raw.get("customerNote"), internalNote: raw.get("internalNote") }));
+    return ensureQuoteDefaults(normalizeQuote({ ...(existing || {}), _id: raw.get("_id"), id: raw.get("id"), quoteNo: raw.get("quoteNo"), requestId: raw.get("requestId"), customerId: raw.get("customerId"), customerName: raw.get("customerName"), customerPhone: raw.get("customerPhone"), customerEmail: raw.get("customerEmail"), projectName: raw.get("projectName"), projectAddress: raw.get("projectAddress"), title: raw.get("projectName"), assigneeId: raw.get("assigneeId"), assigneeName: raw.get("assigneeName"), items: rows, discount: raw.get("discount"), taxRate: Number(raw.get("taxRate") || 10) / 100, rounding: raw.get("rounding"), paymentTerms: raw.get("paymentTerms"), validUntil: raw.get("validUntil"), customerNote: raw.get("customerNote"), internalNote: raw.get("internalNote") }));
   }
 
   function updateQuoteDetailTotals() {
@@ -4977,19 +4987,67 @@
     scrollQuoteWizardToTop();
   }
 
+  async function saveCurrentQuoteBeforeExport(quote) {
+    const savedPayload = await AdminAPI.saveQuote({
+      ...quote,
+      quoteCode: quote.quoteNo || quote.quoteCode,
+      code: quote.code || quote.quoteNo || quote.quoteCode,
+      items: quote.items.map(item => ({ ...item, amount: quoteItemAmount(item) }))
+    });
+    const savedQuote = normalizeQuote(savedPayload?.quote || savedPayload?.data || savedPayload);
+    if (!savedQuote?._id) return null;
+    window.currentQuoteDetail = savedQuote;
+    state.selectedQuoteId = savedQuote._id;
+    persistMockQuote(savedQuote);
+    const form = document.querySelector("[data-quote-form]");
+    if (form) {
+      const idInput = form.querySelector("[name='_id']");
+      if (idInput) idInput.value = savedQuote._id;
+      const localIdInput = form.querySelector("[name='id']");
+      if (localIdInput) localIdInput.value = savedQuote.id || savedQuote._id;
+      const quoteNoInput = form.querySelector("[name='quoteNo']");
+      if (quoteNoInput) quoteNoInput.value = savedQuote.quoteNo || savedQuote.quoteCode || "";
+    }
+    return savedQuote;
+  }
+
   async function exportCurrentQuotePdf() {
     const form = document.querySelector("[data-quote-form]");
     const formData = form ? new FormData(form) : null;
+    const formMongoId = formData?.get("_id") || "";
     const formId = formData?.get("id") || "";
     const formQuoteNo = formData?.get("quoteNo") || "";
-    const quote = quoteRows().find(item => [item._id, item.id, item.quoteNo, item.quoteCode, item.code].some(value => value && String(value) === String(formId || formQuoteNo)));
-    const id = quote?._id || formQuoteNo || quote?.quoteNo || quote?.quoteCode || quote?.code || quote?.id || formId;
+    const existing = quoteRows().find(item => [item._id, item.id, item.quoteNo, item.quoteCode, item.quoteNumber, item.code, item.number].some(value => value && [formMongoId, formId, formQuoteNo].some(target => target && String(value) === String(target))));
+    const quote = form ? quoteFromForm(form, existing || {}) : existing || window.currentQuoteDetail || null;
+    console.log("Current quote for PDF:", quote);
+    console.log("Quote _id:", quote && quote._id);
+    console.log("Quote quoteNo:", quote && quote.quoteNo);
+    if (!quote) {
+      toast(state.lang === "vi" ? "Kh\u00f4ng t\u00ecm th\u1ea5y d\u1eef li\u1ec7u b\u00e1o gi\u00e1 \u0111ang m\u1edf." : "\u958b\u3044\u3066\u3044\u308b\u898b\u7a4d\u30c7\u30fc\u30bf\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3002");
+      return;
+    }
+    let exportQuote = quote;
+    if (!exportQuote._id) {
+      try {
+        exportQuote = await saveCurrentQuoteBeforeExport(exportQuote);
+      } catch (error) {
+        console.error(error);
+        exportQuote = null;
+      }
+      if (!exportQuote?._id) {
+        toast(state.lang === "vi" ? "Kh\u00f4ng th\u1ec3 l\u01b0u b\u00e1o gi\u00e1 tr\u01b0\u1edbc khi xu\u1ea5t PDF." : "PDF\u51fa\u529b\u524d\u306b\u898b\u7a4d\u3092\u4fdd\u5b58\u3067\u304d\u307e\u305b\u3093\u3002");
+        return;
+      }
+    }
+    const id = exportQuote._id;
     if (!id) {
       toast(state.lang === "vi" ? "Kh\u00f4ng t\u00ecm th\u1ea5y ID b\u00e1o gi\u00e1." : "\u898b\u7a4dID\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3002");
       return;
     }
     try {
-      const response = await fetch(`/admin/quotes/${encodeURIComponent(id)}/pdf`, {
+      const pdfUrl = `/admin/quotes/${encodeURIComponent(id)}/pdf`;
+      console.log("Export PDF:", pdfUrl);
+      const response = await fetch(pdfUrl, {
         cache: "no-store",
         headers: authHeaders()
       });
