@@ -1325,6 +1325,28 @@
     quoteNotFound: "\u898b\u7a4d\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3002",
     featureLater: "\u3053\u306e\u6a5f\u80fd\u306f\u6b21\u306e\u30b9\u30c6\u30c3\u30d7\u3067\u5b9f\u88c5\u3057\u307e\u3059\u3002",
     quoteDetailPlaceholderText: "\u898b\u7a4d\u8a73\u7d30\u753b\u9762\u306f\u6b21\u306e\u30b9\u30c6\u30c3\u30d7\u3067\u5b9f\u88c5\u3057\u307e\u3059\u3002",
+    quoteQuickCreate: "\u898b\u7a4d\u4f5c\u6210",
+    quoteCreateSubtitle: "\u898b\u7a4d\u3092\u4f5c\u6210\u3057\u3066\u9867\u5ba2\u30a2\u30d7\u30ea\u3078\u9001\u4fe1\u3057\u307e\u3059",
+    quoteStepRequest: "\u4f9d\u983c\u53d7\u4ed8",
+    quoteStepQuote: "\u898b\u7a4d",
+    quoteStepReview: "\u78ba\u8a8d",
+    quoteStepSend: "\u9001\u4fe1",
+    quoteRequestInput: "\u4f9d\u983cID\u5165\u529b",
+    quoteRequestPlaceholder: "\u4f9d\u983cID\u30fb\u9867\u5ba2\u540d\u30fb\u96fb\u8a71\u756a\u53f7\u3092\u5165\u529b",
+    searchAction: "\u691c\u7d22",
+    changeRequest: "\u4f9d\u983c\u3092\u5909\u66f4",
+    requestNotLinked: "\u4f9d\u983c\u672a\u9023\u643a",
+    quoteCustomerProjectInfo: "\u9867\u5ba2\u30fb\u5de5\u4e8b\u60c5\u5831",
+    quotePaymentSummary: "\u652f\u6255\u5408\u8a08",
+    quoteAfterDiscount: "\u5024\u5f15\u5f8c\u91d1\u984d",
+    quoteTaxSection: "\u6d88\u8cbb\u7a0e",
+    quoteGrandTotalVat: "\u7a0e\u8fbc\u5408\u8a08",
+    quoteUploadHint: "\u30d5\u30a1\u30a4\u30eb\u3092\u30c9\u30e9\u30c3\u30b0\u307e\u305f\u306f\u9078\u629e",
+    quoteUploadMeta: "PDF, JPG, PNG / 10MB\u307e\u3067",
+    quoteTermsDefault: "\u30fb\u672c\u898b\u7a4d\u306f\u4e0a\u8a18\u4f5c\u696d\u7bc4\u56f2\u306b\u9069\u7528\u3055\u308c\u307e\u3059\u3002\n\u30fb\u7bc4\u56f2\u5916\u306e\u8ffd\u52a0\u4f5c\u696d\u304c\u767a\u751f\u3057\u305f\u5834\u5408\u306f\u5225\u9014\u898b\u7a4d\u3068\u306a\u308a\u307e\u3059\u3002",
+    quoteItemCount: "{count}\u9805\u76ee",
+    pdfPreviewLater: "PDF\u30d7\u30ec\u30d3\u30e5\u30fc\u306f\u5f8c\u3067\u5b9f\u88c5\u3057\u307e\u3059\u3002",
+    deleteRow: "\u884c\u524a\u9664",
     quoteSearchPlaceholder: "\u898b\u7a4d\u756a\u53f7\u30fb\u9867\u5ba2\u30fb\u5de5\u4e8b\u540d\u3092\u691c\u7d22",
     quoteNo: "\u898b\u7a4d\u756a\u53f7",
     projectContent: "\u5de5\u4e8b / \u5185\u5bb9",
@@ -1404,6 +1426,28 @@
     quoteNotFound: "Kh\u00f4ng t\u00ecm th\u1ea5y b\u00e1o gi\u00e1.",
     featureLater: "Ch\u1ee9c n\u0103ng n\u00e0y s\u1ebd \u0111\u01b0\u1ee3c ho\u00e0n thi\u1ec7n \u1edf b\u01b0\u1edbc sau.",
     quoteDetailPlaceholderText: "M\u00e0n chi ti\u1ebft b\u00e1o gi\u00e1 s\u1ebd \u0111\u01b0\u1ee3c ho\u00e0n thi\u1ec7n \u1edf b\u01b0\u1edbc sau.",
+    quoteQuickCreate: "B\u00e1o gi\u00e1 nhanh",
+    quoteCreateSubtitle: "T\u1ea1o b\u00e1o gi\u00e1 nhanh v\u00e0 g\u1eedi l\u00ean app kh\u00e1ch h\u00e0ng",
+    quoteStepRequest: "Ti\u1ebfp nh\u1eadn y\u00eau c\u1ea7u",
+    quoteStepQuote: "B\u00e1o gi\u00e1",
+    quoteStepReview: "Xem l\u1ea1i",
+    quoteStepSend: "G\u1eedi b\u00e1o gi\u00e1",
+    quoteRequestInput: "Nh\u1eadp ID y\u00eau c\u1ea7u",
+    quoteRequestPlaceholder: "Nh\u1eadp ID y\u00eau c\u1ea7u / t\u00ean kh\u00e1ch / s\u1ed1 \u0111i\u1ec7n tho\u1ea1i",
+    searchAction: "T\u00ecm ki\u1ebfm",
+    changeRequest: "\u0110\u1ed5i y\u00eau c\u1ea7u",
+    requestNotLinked: "Ch\u01b0a li\u00ean k\u1ebft y\u00eau c\u1ea7u",
+    quoteCustomerProjectInfo: "Th\u00f4ng tin kh\u00e1ch h\u00e0ng - c\u00f4ng tr\u00ecnh",
+    quotePaymentSummary: "T\u1ed5ng h\u1ee3p thanh to\u00e1n",
+    quoteAfterDiscount: "Th\u00e0nh ti\u1ec1n sau chi\u1ebft kh\u1ea5u",
+    quoteTaxSection: "Thu\u1ebf VAT",
+    quoteGrandTotalVat: "T\u1ed5ng c\u1ed9ng \u0111\u00e3 g\u1ed3m VAT",
+    quoteUploadHint: "K\u00e9o & th\u1ea3 file v\u00e0o \u0111\u00e2y ho\u1eb7c ch\u1ecdn file",
+    quoteUploadMeta: "PDF, JPG, PNG / t\u1ed1i \u0111a 10MB",
+    quoteTermsDefault: "- B\u00e1o gi\u00e1 n\u00e0y \u0111\u01b0\u1ee3c \u00e1p d\u1ee5ng cho ph\u1ea1m vi c\u00f4ng vi\u1ec7c n\u00eau tr\u00ean.\n- N\u1ebfu c\u00f3 ph\u00e1t sinh ngo\u00e0i ph\u1ea1m vi tr\u00ean, s\u1ebd b\u00e1o gi\u00e1 ri\u00eang.",
+    quoteItemCount: "T\u1ed5ng s\u1ed1 {count} h\u1ea1ng m\u1ee5c",
+    pdfPreviewLater: "Ch\u1ee9c n\u0103ng xem tr\u01b0\u1edbc PDF s\u1ebd \u0111\u01b0\u1ee3c ho\u00e0n thi\u1ec7n sau.",
+    deleteRow: "X\u00f3a d\u00f2ng",
     quoteSearchPlaceholder: "T\u00ecm ki\u1ebfm m\u00e3 b\u00e1o gi\u00e1 / kh\u00e1ch h\u00e0ng / c\u00f4ng tr\u00ecnh",
     quoteNo: "M\u00e3 b\u00e1o gi\u00e1",
     projectContent: "C\u00f4ng tr\u00ecnh / n\u1ed9i dung",
@@ -4492,7 +4536,7 @@
       assigneeId: getRowId(staff),
       assigneeName: staff.name || "",
       validUntil: valid,
-      paymentTerms: state.lang === "vi" ? "Thanh to\u00e1n sau khi nghi\u1ec7m thu." : "\u691c\u53ce\u5f8c\u306b\u304a\u652f\u6255\u3044\u304f\u3060\u3055\u3044\u3002",
+      paymentTerms: t("quoteTermsDefault"),
       items: [{ name: "", description: "", unit: "\u5f0f", quantity: 1, unitPrice: 0, discount: 0 }]
     });
   }
@@ -4500,32 +4544,72 @@
   function renderQuoteDetail(quote) {
     const totals = calculateQuoteTotals(quote);
     const readonly = ["accepted", "rejected", "expired"].includes(quoteAdminStatus(quote.status));
+    const requestLinked = Boolean(quote.requestId);
+    const itemCountText = t("quoteItemCount").replace("{count}", String(quote.items.length));
     openDrawer(`
       <article class="drawer-panel quote-detail-drawer">
-        <header class="drawer-head drawer-header">
-          <div><p class="eyebrow">${escapeHtml(t("quickQuote"))}</p><h2>${escapeHtml(quote.quoteNo || t("quoteNew"))}</h2><span class="status-badge status-${escapeHtml(quoteAdminStatus(quote.status))}">${escapeHtml(quoteStatusLabel(quoteAdminStatus(quote.status)))}</span></div>
-          <div class="quote-detail-actions"><button class="btn btn-soft" type="button" data-close-drawer>${escapeHtml(t("close"))}</button><button class="btn btn-soft" disabled>${escapeHtml(t("pdfPreview"))}</button><button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button><button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button></div>
+        <header class="drawer-head drawer-header quote-workspace-head">
+          <div class="quote-head-main">
+            <p class="eyebrow">${escapeHtml(t("quoteQuickCreate"))}</p>
+            <h2>${escapeHtml(quote.quoteNo || t("quoteNew"))}</h2>
+            <p class="note">${escapeHtml(t("quoteCreateSubtitle"))}</p>
+            <span class="status-badge status-${escapeHtml(quoteAdminStatus(quote.status))}">${escapeHtml(quoteStatusLabel(quoteAdminStatus(quote.status)))}</span>
+          </div>
+          <div class="quote-detail-actions"><button class="btn btn-soft" type="button" data-close-drawer>${escapeHtml(t("close"))}</button><button class="btn btn-soft" type="button" data-quote-pdf-preview>${escapeHtml(t("pdfPreview"))}</button><button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button><button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button></div>
         </header>
         <form class="drawer-body quote-detail-form" data-quote-form>
           <input type="hidden" name="id" value="${escapeHtml(quote.id)}"><input type="hidden" name="quoteNo" value="${escapeHtml(quote.quoteNo)}">
-          <div class="quote-dev-note">${escapeHtml(t("quoteMockNote"))}</div>
-          <div class="quote-detail-layout">
-            <div class="quote-detail-main">
-              <section class="quote-form-section"><h3>${escapeHtml(t("linkedRequest"))}</h3><input name="requestId" value="${escapeHtml(quote.requestId)}" placeholder="${escapeHtml(t("id"))} / ${escapeHtml(t("customer"))} / ${escapeHtml(t("phone"))}"></section>
-              <section class="quote-form-section"><h3>${escapeHtml(t("customerInfo"))}</h3><div class="quote-form-grid"><label>${escapeHtml(t("customer"))}<input name="customerName" value="${escapeHtml(quote.customerName)}"></label><label>${escapeHtml(t("phone"))}<input name="customerPhone" value="${escapeHtml(quote.customerPhone)}"></label><label>${escapeHtml(t("email"))}<input name="customerEmail" value="${escapeHtml(quote.customerEmail)}"></label><label>ID<input name="customerId" value="${escapeHtml(quote.customerId)}"></label></div></section>
-              <section class="quote-form-section"><h3>${escapeHtml(t("projectInfo"))}</h3><div class="quote-form-grid"><label>${escapeHtml(t("projectContent"))}<input name="projectName" value="${escapeHtml(quote.projectName)}"></label><label>${escapeHtml(t("address"))}<input name="projectAddress" value="${escapeHtml(quote.projectAddress)}"></label><label>${escapeHtml(t("paymentTerms"))}<input name="paymentTerms" value="${escapeHtml(quote.paymentTerms)}"></label><label>${escapeHtml(t("validUntil"))}<input name="validUntil" type="date" value="${escapeHtml(String(quote.validUntil || "").slice(0, 10))}"></label><label>${escapeHtml(t("assignee"))}<input name="assigneeName" value="${escapeHtml(quote.assigneeName)}"></label><input type="hidden" name="assigneeId" value="${escapeHtml(quote.assigneeId)}"></div></section>
-              <section class="quote-form-section"><div class="quote-section-head"><h3>${escapeHtml(t("quoteItems"))}</h3><button class="btn btn-soft" type="button" data-quote-add-item ${readonly ? "disabled" : ""}>${escapeHtml(t("addQuoteItem"))}</button></div><div class="quote-item-table" data-quote-items>${quote.items.map(renderQuoteItemRow).join("")}</div></section>
-              <section class="quote-form-section"><h3>${escapeHtml(t("quoteNotes"))}</h3><div class="quote-form-grid"><label>${escapeHtml(t("customerNote"))}<textarea name="customerNote">${escapeHtml(quote.customerNote)}</textarea></label><label>${escapeHtml(t("internalNote"))}<textarea name="internalNote">${escapeHtml(quote.internalNote)}</textarea></label></div></section>
+          <div class="quote-stepper">
+            ${[[t("quoteStepRequest"), requestLinked], [t("quoteStepQuote"), true], [t("quoteStepReview"), false], [t("quoteStepSend"), quote.visibleToCustomer]].map(([label, done], index) => `<span class="quote-step ${index === 1 ? "active" : ""} ${done ? "done" : ""}"><b>${done ? "\u2713" : index + 1}</b>${escapeHtml(label)}</span>`).join("")}
+          </div>
+          <div class="quote-workspace-layout">
+            <div class="quote-workspace-main">
+              <section class="quote-work-card quote-request-link">
+                <div class="quote-section-head"><h3>${escapeHtml(t("quoteRequestInput"))}</h3><button class="btn btn-soft" type="button" data-quote-placeholder-action>${escapeHtml(requestLinked ? t("changeRequest") : t("searchAction"))}</button></div>
+                <div class="quote-request-grid">
+                  <label class="quote-field-wide"><span>${escapeHtml(t("linkedRequest"))}</span><input name="requestId" value="${escapeHtml(quote.requestId)}" placeholder="${escapeHtml(t("quoteRequestPlaceholder"))}"></label>
+                  <div class="quote-linked-summary">
+                    ${requestLinked ? `<strong>${escapeHtml(quote.requestId)}</strong><span>${escapeHtml(quote.customerName || "-")}</span><small>${escapeHtml(quote.projectName || quote.title || "-")}</small>` : `<span>${escapeHtml(t("requestNotLinked"))}</span>`}
+                  </div>
+                </div>
+              </section>
+              <section class="quote-work-card">
+                <h3>${escapeHtml(t("quoteCustomerProjectInfo"))}</h3>
+                <div class="quote-info-grid">
+                  <label><span>${escapeHtml(t("customer"))}</span><input name="customerName" value="${escapeHtml(quote.customerName)}"></label>
+                  <label><span>${escapeHtml(t("phone"))}</span><input name="customerPhone" value="${escapeHtml(quote.customerPhone)}"></label>
+                  <label><span>${escapeHtml(t("email"))}</span><input name="customerEmail" value="${escapeHtml(quote.customerEmail)}"></label>
+                  <label><span>ID</span><input name="customerId" value="${escapeHtml(quote.customerId)}"></label>
+                  <label><span>${escapeHtml(t("projectContent"))}</span><input name="projectName" value="${escapeHtml(quote.projectName)}"></label>
+                  <label><span>${escapeHtml(t("address"))}</span><input name="projectAddress" value="${escapeHtml(quote.projectAddress)}"></label>
+                  <label><span>${escapeHtml(t("validUntil"))}</span><input name="validUntil" type="date" value="${escapeHtml(String(quote.validUntil || "").slice(0, 10))}"></label>
+                  <label><span>${escapeHtml(t("assignee"))}</span><input name="assigneeName" value="${escapeHtml(quote.assigneeName)}"></label><input type="hidden" name="assigneeId" value="${escapeHtml(quote.assigneeId)}">
+                  <label class="quote-note-cell"><span>${escapeHtml(t("customerNote"))}</span><textarea data-quote-note-preview>${escapeHtml(quote.customerNote)}</textarea></label>
+                </div>
+              </section>
+              <section class="quote-work-card quote-items-card">
+                <div class="quote-section-head"><div><h3>${escapeHtml(t("quoteItems"))}</h3><p class="note">${escapeHtml(itemCountText)}</p></div><div class="quote-table-actions"><button class="btn btn-soft" type="button" data-quote-placeholder-action>${escapeHtml(t("deleteRow"))}</button><button class="btn btn-primary" type="button" data-quote-add-item ${readonly ? "disabled" : ""}>+ ${escapeHtml(t("addQuoteItem"))}</button></div></div>
+                <div class="quote-item-table-shell">
+                  <div class="quote-item-table quote-item-table-pro" data-quote-items>
+                    <div class="quote-item-row quote-item-header"><span>No.</span><span>${escapeHtml(t("itemName"))}</span><span>${escapeHtml(t("itemDescription"))}</span><span>${escapeHtml(t("unit"))}</span><span>${escapeHtml(t("quantity"))}</span><span>${escapeHtml(t("unitPrice"))}</span><span>${escapeHtml(t("discount"))}</span><span>${escapeHtml(t("lineAmount"))}</span><span>${escapeHtml(t("action"))}</span></div>
+                    ${quote.items.length ? quote.items.map(renderQuoteItemRow).join("") : `<div class="quote-empty-line">${escapeHtml(t("noQuotes"))}</div>`}
+                  </div>
+                </div>
+                <footer class="quote-table-footer">${escapeHtml(itemCountText)}</footer>
+              </section>
+              <section class="quote-notes-grid">
+                <div class="quote-work-card"><h3>${escapeHtml(t("quoteNotes"))}</h3><p class="note">${escapeHtml(t("customerNote"))}</p><textarea name="customerNote" data-quote-note-mirror>${escapeHtml(quote.customerNote)}</textarea></div>
+                <div class="quote-work-card"><h3>${escapeHtml(t("paymentTerms"))}</h3><textarea name="paymentTerms">${escapeHtml(quote.paymentTerms || t("quoteTermsDefault"))}</textarea></div>
+                <div class="quote-work-card"><h3>${escapeHtml(t("internalNote"))}</h3><textarea name="internalNote">${escapeHtml(quote.internalNote)}</textarea></div>
+              </section>
             </div>
             <aside class="quote-summary-panel">
-              <h3>${escapeHtml(t("quoteSummary"))}</h3>
-              <div class="summary-row"><span>${escapeHtml(t("subtotal"))}</span><strong data-quote-summary="subtotal">${escapeHtml(quoteCurrency(totals.subtotal))}</strong></div>
-              <label>${escapeHtml(t("discount"))}<input name="discount" type="number" value="${escapeHtml(quote.discount || 0)}"></label>
-              <label>${escapeHtml(t("taxRate"))}<input name="taxRate" type="number" value="${escapeHtml(Math.round((quote.taxRate || 0.1) * 100))}"></label>
-              <div class="summary-row"><span>${escapeHtml(t("taxAmount"))}</span><strong data-quote-summary="taxAmount">${escapeHtml(quoteCurrency(totals.taxAmount))}</strong></div>
-              <label>${escapeHtml(t("rounding"))}<input name="rounding" type="number" value="${escapeHtml(quote.rounding || 0)}"></label>
-              <div class="summary-row total"><span>${escapeHtml(t("grandTotal"))}</span><strong data-quote-summary="total">${escapeHtml(quoteCurrency(totals.total))}</strong></div>
-              <div class="settings-card-note">${escapeHtml(t("attachments"))}: ${escapeHtml(t("linkLater"))}</div>
+              <h3>${escapeHtml(t("quotePaymentSummary"))}</h3>
+              <div class="quote-summary-block"><h4>${escapeHtml(t("grandTotal"))}</h4><div class="summary-row"><span>${escapeHtml(t("subtotal"))}</span><strong data-quote-summary="subtotal">${escapeHtml(quoteCurrency(totals.subtotal))}</strong></div><label class="summary-input-row"><span>${escapeHtml(t("discount"))}</span><input name="discount" type="number" value="${escapeHtml(quote.discount || 0)}"></label><div class="summary-row"><span>${escapeHtml(t("quoteAfterDiscount"))}</span><strong data-quote-summary="afterDiscount">${escapeHtml(quoteCurrency(totals.taxableAmount))}</strong></div></div>
+              <div class="quote-summary-block"><h4>${escapeHtml(t("quoteTaxSection"))}</h4><label class="summary-input-row"><span>${escapeHtml(t("taxRate"))}</span><input name="taxRate" type="number" value="${escapeHtml(Math.round((quote.taxRate || 0.1) * 100))}"></label><div class="summary-row"><span>${escapeHtml(t("taxAmount"))}</span><strong data-quote-summary="taxAmount">${escapeHtml(quoteCurrency(totals.taxAmount))}</strong></div><label class="summary-input-row"><span>${escapeHtml(t("rounding"))}</span><input name="rounding" type="number" value="${escapeHtml(quote.rounding || 0)}"></label></div>
+              <div class="quote-grand-total"><span>${escapeHtml(t("quoteGrandTotalVat"))}</span><strong data-quote-summary="total">${escapeHtml(quoteCurrency(totals.total))}</strong></div>
+              <div class="quote-upload-box"><strong>${escapeHtml(t("attachments"))}</strong><span>${escapeHtml(t("quoteUploadHint"))}</span><small>${escapeHtml(t("quoteUploadMeta"))}</small></div>
+              <div class="quote-summary-actions"><button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button><button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button></div>
             </aside>
           </div>
         </form>
@@ -4534,7 +4618,7 @@
   }
 
   function renderQuoteItemRow(item, index) {
-    return `<div class="quote-item-row" data-quote-item-row data-item-id="${escapeHtml(item.id || "")}"><span class="quote-item-index">${index + 1}</span><input name="itemName" value="${escapeHtml(item.name)}" placeholder="${escapeHtml(t("itemName"))}"><input name="itemDescription" value="${escapeHtml(item.description)}" placeholder="${escapeHtml(t("itemDescription"))}"><input name="itemUnit" value="${escapeHtml(item.unit)}" placeholder="${escapeHtml(t("unit"))}"><input name="itemQuantity" type="number" value="${escapeHtml(item.quantity)}" placeholder="${escapeHtml(t("quantity"))}"><input name="itemUnitPrice" type="number" value="${escapeHtml(item.unitPrice)}" placeholder="${escapeHtml(t("unitPrice"))}"><input name="itemDiscount" type="number" value="${escapeHtml(item.discount)}" placeholder="${escapeHtml(t("discount"))}"><strong data-quote-line-amount>${escapeHtml(quoteCurrency(quoteItemAmount(item)))}</strong><button class="icon-btn" type="button" data-quote-copy-item>+</button><button class="icon-btn" type="button" data-quote-remove-item>&times;</button></div>`;
+    return `<div class="quote-item-row" data-quote-item-row data-item-id="${escapeHtml(item.id || "")}"><span class="quote-item-index">${index + 1}</span><input name="itemName" value="${escapeHtml(item.name)}" placeholder="${escapeHtml(t("itemName"))}"><input name="itemDescription" value="${escapeHtml(item.description)}" placeholder="${escapeHtml(t("itemDescription"))}"><input name="itemUnit" value="${escapeHtml(item.unit)}" placeholder="${escapeHtml(t("unit"))}"><input name="itemQuantity" type="number" value="${escapeHtml(item.quantity)}" placeholder="${escapeHtml(t("quantity"))}"><input name="itemUnitPrice" type="number" value="${escapeHtml(item.unitPrice)}" placeholder="${escapeHtml(t("unitPrice"))}"><input name="itemDiscount" type="number" value="${escapeHtml(item.discount)}" placeholder="${escapeHtml(t("discount"))}"><strong data-quote-line-amount>${escapeHtml(quoteCurrency(quoteItemAmount(item)))}</strong><span class="quote-row-actions"><button class="icon-btn" type="button" data-quote-copy-item title="Copy">\u2398</button><button class="icon-btn danger" type="button" data-quote-remove-item title="${escapeHtml(t("deleteRow"))}">&times;</button></span></div>`;
   }
 
   function quoteFromForm(form, existing) {
@@ -4557,6 +4641,7 @@
     const quote = quoteFromForm(form, {});
     const totals = calculateQuoteTotals(quote);
     form.querySelector("[data-quote-summary='subtotal']") && (form.querySelector("[data-quote-summary='subtotal']").textContent = quoteCurrency(totals.subtotal));
+    form.querySelector("[data-quote-summary='afterDiscount']") && (form.querySelector("[data-quote-summary='afterDiscount']").textContent = quoteCurrency(totals.taxableAmount));
     form.querySelector("[data-quote-summary='taxAmount']") && (form.querySelector("[data-quote-summary='taxAmount']").textContent = quoteCurrency(totals.taxAmount));
     form.querySelector("[data-quote-summary='total']") && (form.querySelector("[data-quote-summary='total']").textContent = quoteCurrency(totals.total));
     form.querySelectorAll("[data-quote-item-row]").forEach(row => {
@@ -5774,7 +5859,17 @@
       if (handleRequestViewInput(event)) event.stopPropagation();
     });
     bind(document, "input", event => {
-      if (event.target.closest("[data-quote-form]")) updateQuoteDetailTotals();
+      if (event.target.closest("[data-quote-form]")) {
+        if (event.target.matches("[data-quote-note-preview]")) {
+          const mirror = document.querySelector("[data-quote-note-mirror]");
+          if (mirror) mirror.value = event.target.value;
+        }
+        if (event.target.matches("[data-quote-note-mirror]")) {
+          const preview = document.querySelector("[data-quote-note-preview]");
+          if (preview) preview.value = event.target.value;
+        }
+        updateQuoteDetailTotals();
+      }
     });
     bind($("viewRoot"), "keydown", event => {
       if (event.target.id === "requestSearch" && event.key === "Enter") {
@@ -5911,6 +6006,10 @@
         toast(t("featureLater"));
         return;
       }
+      if (event.target.closest("[data-quote-pdf-preview]")) {
+        toast(t("pdfPreviewLater"));
+        return;
+      }
       if (event.target.closest("select,input,textarea,option")) return;
 
       const navButton = event.target.closest("[data-view]");
@@ -5997,7 +6096,10 @@
 
       if (event.target.closest("[data-quote-add-item]")) {
         const target = document.querySelector("[data-quote-items]");
-        if (target) target.insertAdjacentHTML("beforeend", renderQuoteItemRow(normalizeQuoteItem({}, target.querySelectorAll("[data-quote-item-row]").length), target.querySelectorAll("[data-quote-item-row]").length));
+        if (target) {
+          target.querySelector(".quote-empty-line")?.remove();
+          target.insertAdjacentHTML("beforeend", renderQuoteItemRow(normalizeQuoteItem({}, target.querySelectorAll("[data-quote-item-row]").length), target.querySelectorAll("[data-quote-item-row]").length));
+        }
         updateQuoteDetailTotals();
         return;
       }
