@@ -61,14 +61,15 @@ export function QuoteDetailPage() {
 
   if (!id) return <Navigate to="/quotes" replace />;
 
-  async function updateStatus(status: "approved" | "revision_requested") {
+  async function updateStatus(status: "accepted" | "change_requested" | "rejected") {
     if (!quote) return;
     setActionLoading(status);
     setError("");
     try {
-      const updated =
-        status === "approved"
-          ? await quoteService.approveQuote(quote.id)
+      const updated = status === "accepted"
+        ? await quoteService.approveQuote(quote.id)
+        : status === "rejected"
+          ? await quoteService.rejectQuote(quote.id)
           : await quoteService.requestRevision(quote.id);
       setQuote(updated);
     } catch {
@@ -153,11 +154,14 @@ export function QuoteDetailPage() {
       </Card>
       {error ? <ErrorState message={error} /> : null}
       <div className="two-actions">
-        <Button variant="outline" disabled={!!actionLoading} onClick={() => updateStatus("revision_requested")}>
-          {actionLoading === "revision_requested" ? t("common.loading") : t("quote.revision")}
+        <Button variant="outline" disabled={!!actionLoading} onClick={() => updateStatus("change_requested")}>
+          {actionLoading === "change_requested" ? t("common.loading") : t("quote.revision")}
         </Button>
-        <Button disabled={!!actionLoading} onClick={() => updateStatus("approved")}>
-          {actionLoading === "approved" ? t("common.loading") : t("quote.approve")}
+        <Button variant="outline" disabled={!!actionLoading} onClick={() => updateStatus("rejected")}>
+          {actionLoading === "rejected" ? t("common.loading") : t("quote.reject")}
+        </Button>
+        <Button disabled={!!actionLoading} onClick={() => updateStatus("accepted")}>
+          {actionLoading === "accepted" ? t("common.loading") : t("quote.approve")}
         </Button>
       </div>
       <Button variant="danger" icon={<Trash2 size={18} />} onClick={() => setIsDeleteConfirmOpen(true)}>

@@ -5,7 +5,7 @@ import type { Quote, QuoteStatus } from "../types";
 import { APP_STORAGE_KEY } from "../constants/storageKeys";
 import { getUserToken } from "./authService";
 
-export type UpdateQuoteInput = Partial<Pick<Quote, "status" | "validUntil" | "items" | "projectName">>;
+export type UpdateQuoteInput = Partial<Pick<Quote, "status" | "validUntil" | "items" | "projectName" | "visibleToCustomer" | "viewedByCustomerAt" | "acceptedAt" | "rejectedAt" | "changeRequestedAt" | "changeRequestMessage">>;
 
 const quoteSeedById = new Map(initialQuotes.map(quote => [quote.id, quote]));
 
@@ -19,11 +19,22 @@ function normalizeQuote(quote: Quote): Quote {
     ...quote,
     id: String(quote.id || quote.quoteCode || ""),
     quoteCode: quote.quoteCode || quote.id,
+    quoteNo: quote.quoteNo || quote.quoteCode || quote.id,
     requestId: quote.requestId || seed?.requestId || "",
     items: quote.items || seed?.items || [],
     projectName: quote.projectName || seed?.projectName || "",
     validUntil: quote.validUntil || seed?.validUntil || "",
     title: quote.title || quote.projectName || seed?.projectName || "",
+    visibleToCustomer: quote.visibleToCustomer === true,
+    customerId: quote.customerId || "",
+    customerName: quote.customerName || "",
+    customerPhone: quote.customerPhone || "",
+    customerEmail: quote.customerEmail || "",
+    sentToCustomerAt: quote.sentToCustomerAt || "",
+    acceptedAt: quote.acceptedAt || "",
+    rejectedAt: quote.rejectedAt || "",
+    changeRequestedAt: quote.changeRequestedAt || "",
+    changeRequestMessage: quote.changeRequestMessage || "",
     isDeleted: Boolean(quote.isDeleted),
     deletedAt: quote.deletedAt || null,
     deletedBy: quote.deletedBy || "",
@@ -32,16 +43,33 @@ function normalizeQuote(quote: Quote): Quote {
   };
 }
 
+function visibleToCurrentUser(quote: Quote): boolean {
+  const user = useAppStore.getState().user;
+  if (!quote.visibleToCustomer) return false;
+  if (!user) return true;
+  return Boolean(
+    !quote.customerId && !quote.customerPhone && !quote.customerEmail ||
+    quote.customerId === user.id ||
+    quote.customerPhone === user.phone ||
+    quote.customerEmail === user.email
+  );
+}
+
 function readQuotes(): Quote[] {
   const storeQuotes = useAppStore.getState().quotes;
-  if (storeQuotes.length) return storeQuotes.map(normalizeQuote);
-
+  let savedQuotes: Quote[] = [];
   try {
     const raw = JSON.parse(localStorage.getItem(APP_STORAGE_KEY) || "null");
     const saved = raw?.state?.quotes;
-    if (Array.isArray(saved)) return saved.map(normalizeQuote);
+    if (Array.isArray(saved)) savedQuotes = saved.map(normalizeQuote);
   } catch (error) {
     console.warn("Unable to read quote cache", error);
+  }
+  if (storeQuotes.length || savedQuotes.length) {
+    const byId = new Map<string, Quote>();
+    storeQuotes.map(normalizeQuote).forEach(quote => byId.set(quote.id || quote.quoteCode || "", quote));
+    savedQuotes.forEach(quote => byId.set(quote.id || quote.quoteCode || "", quote));
+    return [...byId.values()];
   }
 
   return initialQuotes.map(normalizeQuote);
@@ -138,19 +166,24 @@ export const quoteService = {
     }
     const quotes = readQuotes();
     commitQuotes(quotes);
-    return quotes.filter(quote => !quote.isDeleted);
+    return quotes.filter(quote => !quote.isDeleted && visibleToCurrentUser(quote));
   },
 
   async getQuoteById(id: string): Promise<Quote | null> {
     await delay();
-    return readQuotes().find(quote => !quote.isDeleted && (quote.id === id || quote.quoteCode === id)) || null;
+    const quote = readQuotes().find(item => !item.isDeleted && (item.id === id || item.quoteCode === id));
+    if (!quote || !visibleToCurrentUser(quote)) return null;
+    if (!quote.viewedByCustomerAt && quote.status === "sent_to_customer") {
+      return quoteService.updateQuote(quote.id, { status: "viewed_by_customer", viewedByCustomerAt: new Date().toISOString() });
+    }
+    return quote;
   },
 
   async getQuotesByRequestId(requestId: string): Promise<Quote[]> {
     await delay();
     const allQuotes = readQuotes();
     commitQuotes(allQuotes);
-    return allQuotes.filter(quote => !quote.isDeleted && quote.requestId === requestId);
+    return allQuotes.filter(quote => !quote.isDeleted && quote.requestId === requestId && visibleToCurrentUser(quote));
   },
 
   async updateQuote(id: string, input: UpdateQuoteInput): Promise<Quote> {
@@ -159,7 +192,7 @@ export const quoteService = {
     const existing = quotes.find(quote => quote.id === id);
     if (!existing) throw new Error("Quote not found");
 
-    const updated = { ...existing, ...input };
+    const updated = { ...existing, ...input, updatedAt: new Date().toISOString() };
     commitQuotes(quotes.map(quote => (quote.id === id ? updated : quote)));
     return updated;
   },
@@ -167,14 +200,14 @@ export const quoteService = {
   async updateQuoteStatus(id: string, status: QuoteStatus): Promise<Quote> {
     const quote = await quoteService.updateQuote(id, { status });
 
-    if (status === "approved") {
+    if (status === "approved" || status === "accepted") {
       await requestService.addTimelineEvent(quote.requestId, {
         type: "scheduled",
         message: "request.timelineQuoteApproved"
       });
     }
 
-    if (status === "revision_requested") {
+    if (status === "revision_requested" || status === "change_requested") {
       await requestService.addTimelineEvent(quote.requestId, {
         type: "waiting_customer",
         message: "request.timelineQuoteRevision"
@@ -263,10 +296,14 @@ export const quoteService = {
   },
 
   async approveQuote(id: string): Promise<Quote> {
-    return quoteService.updateQuoteStatus(id, "approved");
+    return quoteService.updateQuote(id, { status: "accepted", acceptedAt: new Date().toISOString() });
   },
 
   async requestRevision(id: string): Promise<Quote> {
-    return quoteService.updateQuoteStatus(id, "revision_requested");
+    return quoteService.updateQuote(id, { status: "change_requested", changeRequestedAt: new Date().toISOString() });
+  },
+
+  async rejectQuote(id: string): Promise<Quote> {
+    return quoteService.updateQuote(id, { status: "rejected", rejectedAt: new Date().toISOString() });
   }
 };

@@ -21,9 +21,16 @@ const requestStatusKeys: Record<RequestStatus, TranslationKey> = {
 };
 
 const quoteStatusKeys: Record<QuoteStatus, TranslationKey> = {
+  draft: "quote.draft",
   pending: "quote.pending",
+  pending_approval: "quote.pendingApproval",
+  sent_to_customer: "quote.sentToCustomer",
+  viewed_by_customer: "quote.viewedByCustomer",
   approved: "quote.approved",
+  accepted: "quote.approved",
   revision_requested: "quote.revision_requested",
+  change_requested: "quote.revision_requested",
+  rejected: "quote.rejected",
   expired: "quote.expired"
 };
 

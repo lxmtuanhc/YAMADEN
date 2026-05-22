@@ -22,7 +22,18 @@ export type RequestStatus =
   | "lost"
   | "cancelled";
 
-export type QuoteStatus = "pending" | "approved" | "revision_requested" | "expired";
+export type QuoteStatus =
+  | "draft"
+  | "pending"
+  | "pending_approval"
+  | "sent_to_customer"
+  | "viewed_by_customer"
+  | "approved"
+  | "accepted"
+  | "revision_requested"
+  | "change_requested"
+  | "rejected"
+  | "expired";
 
 export type ScheduleStatus = "upcoming" | "in_progress" | "completed" | "cancelled";
 
@@ -176,9 +187,14 @@ export interface Request {
 export type SupportRequest = Request;
 
 export interface QuoteItem {
+  id?: string;
   name: string;
+  description?: string;
+  unit?: string;
   quantity: number;
   unitPrice: number;
+  discount?: number;
+  amount?: number;
 }
 
 export interface Quote {
@@ -190,6 +206,31 @@ export interface Quote {
   status: QuoteStatus;
   items: QuoteItem[];
   title?: string;
+  quoteNo?: string;
+  customerId?: string;
+  customerName?: string;
+  customerPhone?: string;
+  customerEmail?: string;
+  projectAddress?: string;
+  subtotal?: number;
+  discount?: number;
+  taxRate?: number;
+  taxAmount?: number;
+  rounding?: number;
+  total?: number;
+  paymentTerms?: string;
+  customerNote?: string;
+  internalNote?: string;
+  attachments?: string[];
+  visibleToCustomer?: boolean;
+  sentToCustomerAt?: string;
+  viewedByCustomerAt?: string;
+  acceptedAt?: string;
+  rejectedAt?: string;
+  changeRequestedAt?: string;
+  changeRequestMessage?: string;
+  createdAt?: string;
+  updatedAt?: string;
   isDeleted?: boolean;
   deletedAt?: string | null;
   deletedBy?: string;

@@ -2187,6 +2187,172 @@ body {
   gap: 6px;
 }
 
+.quote-dev-note {
+  padding: 12px 14px;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.5;
+}
+
+.quote-kanban-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(230px, 1fr));
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.quote-column {
+  min-width: 230px;
+}
+
+.quote-card {
+  width: 100%;
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+  text-align: left;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
+}
+
+.quote-card:hover {
+  border-color: #bfdbfe;
+  background: #f8fbff;
+}
+
+.quote-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.quote-card small,
+.quote-card-meta {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.quote-detail-drawer {
+  width: min(1180px, 100%);
+}
+
+.quote-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.quote-detail-form,
+.quote-detail-main,
+.quote-form-section {
+  display: grid;
+  gap: 14px;
+}
+
+.quote-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 16px;
+  align-items: start;
+}
+
+.quote-form-section,
+.quote-summary-panel {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.quote-form-section h3,
+.quote-summary-panel h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.quote-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.quote-form-grid label,
+.quote-summary-panel label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.quote-form-grid input,
+.quote-form-grid textarea,
+.quote-form-section > input,
+.quote-summary-panel input,
+.quote-item-row input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 10px;
+  color: var(--text);
+  background: #fff;
+  font-weight: 800;
+}
+
+.quote-form-grid textarea {
+  min-height: 96px;
+  padding: 10px;
+}
+
+.quote-section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.quote-item-table {
+  display: grid;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.quote-item-row {
+  min-width: 880px;
+  display: grid;
+  grid-template-columns: 34px 1.25fr 1.45fr 80px 96px 110px 110px 120px 34px;
+  gap: 8px;
+  align-items: center;
+}
+
+.quote-item-index {
+  display: grid;
+  place-items: center;
+  min-height: 34px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: var(--primary);
+  font-weight: 950;
+}
+
+.quote-summary-panel {
+  position: sticky;
+  top: 96px;
+}
+
 .placeholder-input {
   min-height: 32px;
   font-size: 12px;
@@ -3322,6 +3488,18 @@ body {
 
   .settings-demo-grid {
     grid-template-columns: repeat(2, minmax(240px, 1fr));
+  }
+
+  .quote-kanban-board {
+    grid-template-columns: repeat(2, minmax(230px, 1fr));
+  }
+
+  .quote-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-summary-panel {
+    position: static;
   }
 }
 

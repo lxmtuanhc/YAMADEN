@@ -64,7 +64,7 @@ export function QuotesPage() {
         {isLoading ? <LoadingState /> : null}
         {!isLoading && error ? <ErrorState message={error} /> : null}
         {!isLoading && !error && quotes.length ? quotes.map(quote => <QuoteCard key={quote.id} quote={quote} onDelete={setDeleteTarget} />) : null}
-        {!isLoading && !error && !quotes.length ? <EmptyState /> : null}
+        {!isLoading && !error && !quotes.length ? <EmptyState message={t("quote.empty")} /> : null}
       </div>
       <ActionConfirmModal
         open={Boolean(deleteTarget)}
