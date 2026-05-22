@@ -998,6 +998,10 @@ h1 {
   align-items: stretch;
 }
 
+.drawer.open.quote-detail-open {
+  justify-content: center;
+}
+
 .drawer-panel {
   width: min(640px, 100%);
   min-height: calc(100dvh - 48px);
@@ -2448,7 +2452,10 @@ body {
 }
 
 .quote-detail-drawer {
-  width: min(1180px, 100%);
+  width: min(1380px, 100%);
+  min-height: calc(100dvh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
 }
 
 .quote-detail-actions {
@@ -2535,9 +2542,9 @@ body {
 }
 
 .quote-item-row {
-  min-width: 880px;
+  min-width: 930px;
   display: grid;
-  grid-template-columns: 34px 1.25fr 1.45fr 80px 96px 110px 110px 120px 34px;
+  grid-template-columns: 34px 1.25fr 1.45fr 80px 96px 110px 110px 120px 34px 34px;
   gap: 8px;
   align-items: center;
 }
@@ -2576,6 +2583,10 @@ body {
 .drawer-panel {
   width: min(620px, 100%);
   border-radius: 18px;
+}
+
+.drawer-panel.quote-detail-drawer {
+  width: min(1380px, calc(100vw - 48px));
 }
 
 .drawer-head,

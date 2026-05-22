@@ -24,7 +24,7 @@ export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote
         <h3>{quote.projectName}</h3>
         <p>
           <span>{t("quote.amount")}</span>
-          <span>{formatCurrency(calculateQuoteTotal(quote.items))}</span>
+          <span>{formatCurrency(quote.total ?? calculateQuoteTotal(quote.items))}</span>
         </p>
         <p>
           <span>{t("quote.validUntil")}</span>

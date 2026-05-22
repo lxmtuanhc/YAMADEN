@@ -15,15 +15,15 @@ export const QUOTE_STATUS_LABEL_KEYS: Record<QuoteStatus, TranslationKey> = {
   expired: "quote.expired"
 };
 
-export function calculateQuoteSubtotal(items: Array<{ quantity: number; unitPrice: number }>): number {
-  return items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+export function calculateQuoteSubtotal(items: Array<{ quantity: number; unitPrice: number; discount?: number; amount?: number }>): number {
+  return items.reduce((sum, item) => sum + (item.amount ?? item.quantity * item.unitPrice - (item.discount || 0)), 0);
 }
 
 export function calculateQuoteVat(subtotal: number): number {
   return Math.round(subtotal * 0.1);
 }
 
-export function calculateQuoteTotal(items: Array<{ quantity: number; unitPrice: number }>): number {
+export function calculateQuoteTotal(items: Array<{ quantity: number; unitPrice: number; discount?: number; amount?: number }>): number {
   const subtotal = calculateQuoteSubtotal(items);
   return subtotal + calculateQuoteVat(subtotal);
 }

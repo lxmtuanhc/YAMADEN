@@ -1315,9 +1315,13 @@
     quoteDetailTitle: "\u898b\u7a4d\u8a73\u7d30",
     noQuotes: "\u898b\u7a4d\u306f\u307e\u3060\u3042\u308a\u307e\u305b\u3093",
     quoteMockNote: "\u30ec\u30a4\u30a2\u30a6\u30c8\u8a66\u9a13\u4e2d\uff1aMongoDB\u4fdd\u5b58\u30fbPDF\u4f5c\u6210\u306f\u672a\u63a5\u7d9a\u3067\u3059\u3002",
-    quoteSentMock: "\u898b\u7a4d\u306f\u30c6\u30b9\u30c8\u8868\u793a\u3068\u3057\u3066\u9867\u5ba2\u30a2\u30d7\u30ea\u306b\u8868\u793a\u3055\u308c\u307e\u3057\u305f\u3002",
-    quoteSavedMock: "\u898b\u7a4d\u306e\u4e0b\u66f8\u304d\u3092\u30c6\u30b9\u30c8\u30c7\u30fc\u30bf\u3068\u3057\u3066\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002",
+    quoteSentMock: "\u898b\u7a4d\u3092\u9867\u5ba2\u30a2\u30d7\u30ea\u3078\u9001\u4fe1\u3057\u307e\u3057\u305f\u3002",
+    quoteSavedMock: "\u898b\u7a4d\u306e\u4e0b\u66f8\u304d\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002",
     quoteMissingCustomerSend: "\u9867\u5ba2\u3092\u9078\u629e\u3057\u3066\u304b\u3089\u9867\u5ba2\u30a2\u30d7\u30ea\u3078\u9001\u4fe1\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+    quoteMissingItemsSend: "\u898b\u7a4d\u9805\u76ee\u30921\u3064\u4ee5\u4e0a\u8ffd\u52a0\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+    quoteDraftRequired: "\u5de5\u4e8b\u540d\u307e\u305f\u306f\u898b\u7a4d\u9805\u76ee\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+    quoteLayoutRefreshed: "\u30ec\u30a4\u30a2\u30a6\u30c8\u30c7\u30fc\u30bf\u3092\u66f4\u65b0\u3057\u307e\u3057\u305f\u3002",
+    quoteCsvUnavailable: "CSV\u51fa\u529b\u306f\u307e\u3060\u63a5\u7d9a\u3055\u308c\u3066\u3044\u307e\u305b\u3093\u3002",
     quoteSearchPlaceholder: "\u898b\u7a4d\u756a\u53f7\u30fb\u9867\u5ba2\u30fb\u5de5\u4e8b\u540d\u3092\u691c\u7d22",
     quoteNo: "\u898b\u7a4d\u756a\u53f7",
     projectContent: "\u5de5\u4e8b / \u5185\u5bb9",
@@ -1387,9 +1391,13 @@
     quoteDetailTitle: "Chi ti\u1ebft b\u00e1o gi\u00e1",
     noQuotes: "Ch\u01b0a c\u00f3 b\u00e1o gi\u00e1 n\u00e0o",
     quoteMockNote: "Ch\u1ebf \u0111\u1ed9 layout th\u1eed nghi\u1ec7m: ch\u01b0a l\u01b0u MongoDB, ch\u01b0a t\u1ea1o PDF.",
-    quoteSentMock: "B\u00e1o gi\u00e1 \u0111\u00e3 \u0111\u01b0\u1ee3c hi\u1ec3n th\u1ecb trong app kh\u00e1ch h\u00e0ng \u1edf ch\u1ebf \u0111\u1ed9 th\u1eed nghi\u1ec7m.",
-    quoteSavedMock: "\u0110\u00e3 l\u01b0u nh\u00e1p b\u00e1o gi\u00e1 v\u00e0o d\u1eef li\u1ec7u th\u1eed nghi\u1ec7m.",
+    quoteSentMock: "B\u00e1o gi\u00e1 \u0111\u00e3 \u0111\u01b0\u1ee3c g\u1eedi l\u00ean app kh\u00e1ch h\u00e0ng.",
+    quoteSavedMock: "\u0110\u00e3 l\u01b0u nh\u00e1p b\u00e1o gi\u00e1.",
     quoteMissingCustomerSend: "Vui l\u00f2ng ch\u1ecdn kh\u00e1ch h\u00e0ng tr\u01b0\u1edbc khi g\u1eedi b\u00e1o gi\u00e1 l\u00ean app.",
+    quoteMissingItemsSend: "Vui l\u00f2ng th\u00eam \u00edt nh\u1ea5t m\u1ed9t h\u1ea1ng m\u1ee5c b\u00e1o gi\u00e1.",
+    quoteDraftRequired: "Vui l\u00f2ng nh\u1eadp t\u00ean c\u00f4ng tr\u00ecnh ho\u1eb7c h\u1ea1ng m\u1ee5c b\u00e1o gi\u00e1.",
+    quoteLayoutRefreshed: "\u0110\u00e3 l\u00e0m m\u1edbi d\u1eef li\u1ec7u layout.",
+    quoteCsvUnavailable: "Xu\u1ea5t CSV ch\u01b0a \u0111\u01b0\u1ee3c k\u1ebft n\u1ed1i trong layout n\u00e0y.",
     quoteSearchPlaceholder: "T\u00ecm ki\u1ebfm m\u00e3 b\u00e1o gi\u00e1 / kh\u00e1ch h\u00e0ng / c\u00f4ng tr\u00ecnh",
     quoteNo: "M\u00e3 b\u00e1o gi\u00e1",
     projectContent: "C\u00f4ng tr\u00ecnh / n\u1ed9i dung",
@@ -1955,6 +1963,7 @@
   function closeDrawer() {
     const drawer = $("drawer");
     drawer.classList.remove("open");
+    drawer.classList.remove("quote-detail-open");
     drawer.setAttribute("aria-hidden", "true");
     drawer.innerHTML = "";
   }
@@ -1963,6 +1972,7 @@
     const drawer = $("drawer");
     drawer.innerHTML = html;
     drawer.classList.add("open");
+    drawer.classList.toggle("quote-detail-open", html.includes("quote-detail-drawer"));
     drawer.setAttribute("aria-hidden", "false");
   }
 
@@ -4059,6 +4069,7 @@
   }
 
   const QUOTE_MOCK_STORAGE_KEY = "yamaden-mobile-spa";
+  const QUOTE_LAYOUT_STORAGE_KEY = "yamaden-quotes-layout-v1";
   const QUOTE_STATUSES = ["draft", "pending_approval", "sent_to_customer", "viewed_by_customer", "change_requested", "accepted", "rejected", "expired"];
 
   function quoteStatusLabel(status) {
@@ -4079,8 +4090,6 @@
   }
 
   function quoteCustomerAppStatus(status) {
-    if (status === "accepted") return "approved";
-    if (status === "change_requested") return "revision_requested";
     if (status === "expired") return "expired";
     return status || "draft";
   }
@@ -4124,6 +4133,14 @@
     };
   }
 
+  function newQuoteId() {
+    return "quote-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+  }
+
+  function newQuoteNo() {
+    return "Q-" + new Date().getFullYear() + "-" + String(Date.now()).slice(-5);
+  }
+
   function normalizeQuoteDemoTitle(value) {
     const text = String(value || "");
     if (text === "Lap them 6 o cam va day dien" || text.includes("6 o cam") || (text.includes("6") && (text.includes("\u862f") || text.includes("\u76fb")))) {
@@ -4143,8 +4160,8 @@
       ? "draft"
       : quoteAdminStatus(quote?.status || "draft");
     const base = {
-      id: quote?.id || "quote-" + Date.now(),
-      quoteNo: quote?.quoteNo || quote?.quoteCode || "Q-" + new Date().getFullYear() + "-" + String(Date.now()).slice(-5),
+      id: quote?.id || newQuoteId(),
+      quoteNo: quote?.quoteNo || quote?.quoteCode || newQuoteNo(),
       requestId: quote?.requestId || "",
       customerId,
       customerName,
@@ -4193,12 +4210,33 @@
     const parsed = JSON.parse(localStorage.getItem(QUOTE_MOCK_STORAGE_KEY) || "{}");
     const stateValue = parsed.state || {};
     localStorage.setItem(QUOTE_MOCK_STORAGE_KEY, JSON.stringify({ ...parsed, state: { ...stateValue, quotes } }));
+    localStorage.setItem(QUOTE_LAYOUT_STORAGE_KEY, JSON.stringify({ quotes }));
+  }
+
+  function loadQuoteLayoutState() {
+    let storageQuotes = [];
+    try {
+      const layout = JSON.parse(localStorage.getItem(QUOTE_LAYOUT_STORAGE_KEY) || "null");
+      if (Array.isArray(layout?.quotes)) storageQuotes = layout.quotes;
+    } catch (error) {
+      console.warn("Unable to read quote layout cache", error);
+    }
+    if (!storageQuotes.length) storageQuotes = readCustomerAppQuotes();
+    if (storageQuotes.length) state.quotes = storageQuotes.map(normalizeQuote);
+    else state.quotes = state.quotes.map(normalizeQuote);
+    return state.quotes;
+  }
+
+  function refreshQuoteLayoutData() {
+    loadQuoteLayoutState();
+    renderQuotes();
+    toast(t("quoteLayoutRefreshed"));
   }
 
   function quoteRows() {
     const byId = new Map();
+    loadQuoteLayoutState();
     state.quotes.map(normalizeQuote).forEach(item => byId.set(String(item.id || item.quoteNo), item));
-    readCustomerAppQuotes().forEach(item => byId.set(String(item.id || item.quoteNo), item));
     return [...byId.values()].filter(item => !item.isDeleted && !item.deletedAt);
   }
 
@@ -4219,11 +4257,15 @@
   function filterQuotes(rows) {
     const search = String(state.filters.quoteSearch || "").toLowerCase();
     const status = state.filters.quoteStatus || "all";
+    const assignee = state.filters.quoteAssignee || "all";
+    const customer = state.filters.quoteCustomer || "all";
     const validity = state.filters.quoteValidity || "all";
     return rows.filter(item => {
-      const text = [item.quoteNo, item.customerName, item.projectName, item.title, item.assigneeName].join(" ").toLowerCase();
+      const text = [item.quoteNo, item.customerName, item.projectName, item.title].join(" ").toLowerCase();
       const matchesValidity = validity === "all" || quoteValidityStatus(item) === validity;
-      return (!search || text.includes(search)) && (status === "all" || quoteAdminStatus(item.status) === status) && matchesValidity;
+      const matchesAssignee = assignee === "all" || [item.assigneeId, item.assigneeName].some(value => String(value || "") === assignee);
+      const matchesCustomer = customer === "all" || [item.customerId, item.customerName].some(value => String(value || "") === customer);
+      return (!search || text.includes(search)) && (status === "all" || quoteAdminStatus(item.status) === status) && matchesAssignee && matchesCustomer && matchesValidity;
     });
   }
 
@@ -4298,7 +4340,8 @@
   }
 
   function renderQuotes() {
-    const rows = filterQuotes(quoteRows());
+    const allRows = quoteRows();
+    const rows = filterQuotes(allRows);
     const acceptedRows = rows.filter(item => quoteAdminStatus(item.status) === "accepted");
     const totalValue = rows.reduce((sum, item) => sum + calculateQuoteTotals(item).total, 0);
     const orderedValue = acceptedRows.reduce((sum, item) => sum + calculateQuoteTotals(item).total, 0);
@@ -4310,11 +4353,18 @@
       ["expired", t("quoteExpired")],
       ["unset", t("quoteNoValidUntil")]
     ];
+    const assigneeOptions = [...new Map(allRows
+      .filter(item => item.assigneeId || item.assigneeName)
+      .map(item => [String(item.assigneeId || item.assigneeName), item.assigneeName || item.assigneeId])).entries()];
+    const customerOptions = [...new Map(allRows
+      .filter(item => item.customerId || item.customerName)
+      .map(item => [String(item.customerId || item.customerName), item.customerName || item.customerId])).entries()];
     $("viewRoot").innerHTML = `
       <div class="quote-page-head">
         <div class="page-intro"><p>${escapeHtml(t("quoteModuleSubtitle"))}</p><span class="quote-dev-note">${escapeHtml(t("quoteMockNote"))}</span></div>
         <div class="request-command-bar demo-actions quote-toolbar">
-          <button class="btn btn-soft" disabled>${escapeHtml(t("quoteCsvExport"))}</button>
+          <button class="btn btn-soft" type="button" data-quote-csv>${escapeHtml(t("quoteCsvExport"))}</button>
+          <button class="btn btn-soft" type="button" data-quote-refresh>${escapeHtml(t("refresh"))}</button>
           <button class="btn btn-primary" type="button" data-quote-action="new">+ ${escapeHtml(t("quoteRegister"))}</button>
         </div>
       </div>
@@ -4328,8 +4378,8 @@
       <div class="crm-filter-bar quote-filter-bar">
         <input class="filter-input" data-quote-filter="search" value="${escapeHtml(state.filters.quoteSearch || "")}" placeholder="${escapeHtml(t("quoteSearchPlaceholder"))}">
         <select class="filter-input" data-quote-filter="status"><option value="all">${escapeHtml(t("statusFilter"))}</option>${QUOTE_STATUSES.map(status => `<option value="${escapeHtml(status)}" ${state.filters.quoteStatus === status ? "selected" : ""}>${escapeHtml(quoteStatusLabel(status))}</option>`).join("")}</select>
-        <select class="filter-input" disabled><option>${escapeHtml(t("assignee"))}</option></select>
-        <select class="filter-input" disabled><option>${escapeHtml(t("customer"))}</option></select>
+        <select class="filter-input" data-quote-filter="assignee"><option value="all">${escapeHtml(t("assignee"))}: ${escapeHtml(t("all"))}</option>${assigneeOptions.map(([key, label]) => `<option value="${escapeHtml(key)}" ${state.filters.quoteAssignee === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
+        <select class="filter-input" data-quote-filter="customer"><option value="all">${escapeHtml(t("customer"))}: ${escapeHtml(t("all"))}</option>${customerOptions.map(([key, label]) => `<option value="${escapeHtml(key)}" ${state.filters.quoteCustomer === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
         <select class="filter-input" data-quote-filter="validity"><option value="all">${escapeHtml(t("validUntil"))}: ${escapeHtml(t("quoteAllValidity"))}</option>${validityOptions.slice(1).map(([key, label]) => `<option value="${escapeHtml(key)}" ${state.filters.quoteValidity === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
       </div>
       <div class="staff-tag-tabs quote-view-tabs">
@@ -4369,23 +4419,22 @@
   }
 
   function renderQuoteList(rows) {
-    return rows.length ? `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table quote-table-admin"><thead><tr><th>${t("quoteNo")}</th><th>${t("customer")}</th><th>${t("projectContent")}</th><th>${t("grandTotal")}</th><th>${t("status")}</th><th>${t("assignee")}</th><th>${t("createdAt")}</th><th>${t("validUntil")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(quote => {
+    return rows.length ? `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table quote-table-admin"><thead><tr><th>${t("quoteNo")}</th><th>${t("customer")}</th><th>${t("projectContent")}</th><th>${t("grandTotal")}</th><th>${t("status")}</th><th>${t("assignee")}</th><th>${t("validUntil")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(quote => {
       const totals = calculateQuoteTotals(quote);
-      return `<tr><td>${escapeHtml(quote.quoteNo)}</td><td>${escapeHtml(quote.customerName || "-")}</td><td>${escapeHtml(quote.projectName || "-")}</td><td>${escapeHtml(quoteCurrency(totals.total))}</td><td><span class="status-badge status-${escapeHtml(quoteAdminStatus(quote.status))}">${escapeHtml(quoteStatusLabel(quoteAdminStatus(quote.status)))}</span></td><td>${escapeHtml(quote.assigneeName || "-")}</td><td>${escapeHtml(formatDate(quote.createdAt))}</td><td>${escapeHtml(quoteDateLabel(quote.validUntil))}</td><td><button class="btn btn-soft" type="button" data-quote-action="detail" data-quote-id="${escapeHtml(quote.id)}">${escapeHtml(t("detail"))}</button></td></tr>`;
+      return `<tr><td>${escapeHtml(quote.quoteNo)}</td><td>${escapeHtml(quote.customerName || "-")}</td><td>${escapeHtml(quote.projectName || quote.title || "-")}</td><td>${escapeHtml(quoteCurrency(totals.total))}</td><td><span class="status-badge status-${escapeHtml(quoteAdminStatus(quote.status))}">${escapeHtml(quoteStatusLabel(quoteAdminStatus(quote.status)))}</span></td><td>${escapeHtml(quote.assigneeName || "-")}</td><td>${escapeHtml(quoteDateLabel(quote.validUntil))}</td><td><button class="btn btn-soft" type="button" data-quote-action="detail" data-quote-id="${escapeHtml(quote.id)}">${escapeHtml(t("detail"))}</button></td></tr>`;
     }).join("")}</tbody></table></div>` : showEmptyState(t("noQuotes"));
   }
 
   function emptyQuote() {
-    const customer = state.users.find(user => normalizeUserStatusValue(user.status) === "active") || state.users[0] || {};
     const staff = state.staff.find(item => normalizeStaffStatus(item.status || "active") !== "off") || {};
     const valid = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     return normalizeQuote({
-      customerId: getRowId(customer) || customer.id || "user-demo",
-      customerName: customer.name || customer.companyName || "",
-      customerPhone: customer.phone || "",
-      customerEmail: customer.email || "",
-      projectName: customer.projectName || "",
-      projectAddress: customer.address || customer.companyAddress || "",
+      customerId: "",
+      customerName: "",
+      customerPhone: "",
+      customerEmail: "",
+      projectName: "",
+      projectAddress: "",
       assigneeId: getRowId(staff),
       assigneeName: staff.name || "",
       validUntil: valid,
@@ -4396,11 +4445,12 @@
 
   function renderQuoteDetail(quote) {
     const totals = calculateQuoteTotals(quote);
+    const readonly = ["accepted", "rejected", "expired"].includes(quoteAdminStatus(quote.status));
     openDrawer(`
       <article class="drawer-panel quote-detail-drawer">
         <header class="drawer-head drawer-header">
           <div><p class="eyebrow">${escapeHtml(t("quickQuote"))}</p><h2>${escapeHtml(quote.quoteNo || t("quoteNew"))}</h2><span class="status-badge status-${escapeHtml(quoteAdminStatus(quote.status))}">${escapeHtml(quoteStatusLabel(quoteAdminStatus(quote.status)))}</span></div>
-          <div class="quote-detail-actions"><button class="btn btn-soft" type="button" data-close-drawer>${escapeHtml(t("close"))}</button><button class="btn btn-soft" disabled>${escapeHtml(t("pdfPreview"))}</button><button class="btn btn-soft" type="button" data-quote-save>${escapeHtml(t("saveDraft"))}</button><button class="btn btn-primary" type="button" data-quote-send>${escapeHtml(t("sendToCustomerApp"))}</button></div>
+          <div class="quote-detail-actions"><button class="btn btn-soft" type="button" data-close-drawer>${escapeHtml(t("close"))}</button><button class="btn btn-soft" disabled>${escapeHtml(t("pdfPreview"))}</button><button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button><button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button></div>
         </header>
         <form class="drawer-body quote-detail-form" data-quote-form>
           <input type="hidden" name="id" value="${escapeHtml(quote.id)}"><input type="hidden" name="quoteNo" value="${escapeHtml(quote.quoteNo)}">
@@ -4410,17 +4460,17 @@
               <section class="quote-form-section"><h3>${escapeHtml(t("linkedRequest"))}</h3><input name="requestId" value="${escapeHtml(quote.requestId)}" placeholder="${escapeHtml(t("id"))} / ${escapeHtml(t("customer"))} / ${escapeHtml(t("phone"))}"></section>
               <section class="quote-form-section"><h3>${escapeHtml(t("customerInfo"))}</h3><div class="quote-form-grid"><label>${escapeHtml(t("customer"))}<input name="customerName" value="${escapeHtml(quote.customerName)}"></label><label>${escapeHtml(t("phone"))}<input name="customerPhone" value="${escapeHtml(quote.customerPhone)}"></label><label>${escapeHtml(t("email"))}<input name="customerEmail" value="${escapeHtml(quote.customerEmail)}"></label><label>ID<input name="customerId" value="${escapeHtml(quote.customerId)}"></label></div></section>
               <section class="quote-form-section"><h3>${escapeHtml(t("projectInfo"))}</h3><div class="quote-form-grid"><label>${escapeHtml(t("projectContent"))}<input name="projectName" value="${escapeHtml(quote.projectName)}"></label><label>${escapeHtml(t("address"))}<input name="projectAddress" value="${escapeHtml(quote.projectAddress)}"></label><label>${escapeHtml(t("paymentTerms"))}<input name="paymentTerms" value="${escapeHtml(quote.paymentTerms)}"></label><label>${escapeHtml(t("validUntil"))}<input name="validUntil" type="date" value="${escapeHtml(String(quote.validUntil || "").slice(0, 10))}"></label><label>${escapeHtml(t("assignee"))}<input name="assigneeName" value="${escapeHtml(quote.assigneeName)}"></label><input type="hidden" name="assigneeId" value="${escapeHtml(quote.assigneeId)}"></div></section>
-              <section class="quote-form-section"><div class="quote-section-head"><h3>${escapeHtml(t("quoteItems"))}</h3><button class="btn btn-soft" type="button" data-quote-add-item>${escapeHtml(t("addQuoteItem"))}</button></div><div class="quote-item-table" data-quote-items>${quote.items.map(renderQuoteItemRow).join("")}</div></section>
+              <section class="quote-form-section"><div class="quote-section-head"><h3>${escapeHtml(t("quoteItems"))}</h3><button class="btn btn-soft" type="button" data-quote-add-item ${readonly ? "disabled" : ""}>${escapeHtml(t("addQuoteItem"))}</button></div><div class="quote-item-table" data-quote-items>${quote.items.map(renderQuoteItemRow).join("")}</div></section>
               <section class="quote-form-section"><h3>${escapeHtml(t("quoteNotes"))}</h3><div class="quote-form-grid"><label>${escapeHtml(t("customerNote"))}<textarea name="customerNote">${escapeHtml(quote.customerNote)}</textarea></label><label>${escapeHtml(t("internalNote"))}<textarea name="internalNote">${escapeHtml(quote.internalNote)}</textarea></label></div></section>
             </div>
             <aside class="quote-summary-panel">
               <h3>${escapeHtml(t("quoteSummary"))}</h3>
-              <div class="summary-row"><span>${escapeHtml(t("subtotal"))}</span><strong>${escapeHtml(quoteCurrency(totals.subtotal))}</strong></div>
+              <div class="summary-row"><span>${escapeHtml(t("subtotal"))}</span><strong data-quote-summary="subtotal">${escapeHtml(quoteCurrency(totals.subtotal))}</strong></div>
               <label>${escapeHtml(t("discount"))}<input name="discount" type="number" value="${escapeHtml(quote.discount || 0)}"></label>
               <label>${escapeHtml(t("taxRate"))}<input name="taxRate" type="number" value="${escapeHtml(Math.round((quote.taxRate || 0.1) * 100))}"></label>
-              <div class="summary-row"><span>${escapeHtml(t("taxAmount"))}</span><strong>${escapeHtml(quoteCurrency(totals.taxAmount))}</strong></div>
+              <div class="summary-row"><span>${escapeHtml(t("taxAmount"))}</span><strong data-quote-summary="taxAmount">${escapeHtml(quoteCurrency(totals.taxAmount))}</strong></div>
               <label>${escapeHtml(t("rounding"))}<input name="rounding" type="number" value="${escapeHtml(quote.rounding || 0)}"></label>
-              <div class="summary-row total"><span>${escapeHtml(t("grandTotal"))}</span><strong>${escapeHtml(quoteCurrency(totals.total))}</strong></div>
+              <div class="summary-row total"><span>${escapeHtml(t("grandTotal"))}</span><strong data-quote-summary="total">${escapeHtml(quoteCurrency(totals.total))}</strong></div>
               <div class="settings-card-note">${escapeHtml(t("attachments"))}: ${escapeHtml(t("linkLater"))}</div>
             </aside>
           </div>
@@ -4430,7 +4480,7 @@
   }
 
   function renderQuoteItemRow(item, index) {
-    return `<div class="quote-item-row" data-quote-item-row data-item-id="${escapeHtml(item.id || "")}"><span class="quote-item-index">${index + 1}</span><input name="itemName" value="${escapeHtml(item.name)}" placeholder="${escapeHtml(t("itemName"))}"><input name="itemDescription" value="${escapeHtml(item.description)}" placeholder="${escapeHtml(t("itemDescription"))}"><input name="itemUnit" value="${escapeHtml(item.unit)}" placeholder="${escapeHtml(t("unit"))}"><input name="itemQuantity" type="number" value="${escapeHtml(item.quantity)}" placeholder="${escapeHtml(t("quantity"))}"><input name="itemUnitPrice" type="number" value="${escapeHtml(item.unitPrice)}" placeholder="${escapeHtml(t("unitPrice"))}"><input name="itemDiscount" type="number" value="${escapeHtml(item.discount)}" placeholder="${escapeHtml(t("discount"))}"><strong>${escapeHtml(quoteCurrency(quoteItemAmount(item)))}</strong><button class="icon-btn" type="button" data-quote-remove-item>&times;</button></div>`;
+    return `<div class="quote-item-row" data-quote-item-row data-item-id="${escapeHtml(item.id || "")}"><span class="quote-item-index">${index + 1}</span><input name="itemName" value="${escapeHtml(item.name)}" placeholder="${escapeHtml(t("itemName"))}"><input name="itemDescription" value="${escapeHtml(item.description)}" placeholder="${escapeHtml(t("itemDescription"))}"><input name="itemUnit" value="${escapeHtml(item.unit)}" placeholder="${escapeHtml(t("unit"))}"><input name="itemQuantity" type="number" value="${escapeHtml(item.quantity)}" placeholder="${escapeHtml(t("quantity"))}"><input name="itemUnitPrice" type="number" value="${escapeHtml(item.unitPrice)}" placeholder="${escapeHtml(t("unitPrice"))}"><input name="itemDiscount" type="number" value="${escapeHtml(item.discount)}" placeholder="${escapeHtml(t("discount"))}"><strong data-quote-line-amount>${escapeHtml(quoteCurrency(quoteItemAmount(item)))}</strong><button class="icon-btn" type="button" data-quote-copy-item>+</button><button class="icon-btn" type="button" data-quote-remove-item>&times;</button></div>`;
   }
 
   function quoteFromForm(form, existing) {
@@ -4445,6 +4495,37 @@
       discount: row.querySelector("[name='itemDiscount']")?.value || 0
     }, index)).filter(item => item.name || item.description || item.unitPrice);
     return normalizeQuote({ ...(existing || {}), id: raw.get("id"), quoteNo: raw.get("quoteNo"), requestId: raw.get("requestId"), customerId: raw.get("customerId"), customerName: raw.get("customerName"), customerPhone: raw.get("customerPhone"), customerEmail: raw.get("customerEmail"), projectName: raw.get("projectName"), projectAddress: raw.get("projectAddress"), title: raw.get("projectName"), assigneeId: raw.get("assigneeId"), assigneeName: raw.get("assigneeName"), items: rows, discount: raw.get("discount"), taxRate: Number(raw.get("taxRate") || 10) / 100, rounding: raw.get("rounding"), paymentTerms: raw.get("paymentTerms"), validUntil: raw.get("validUntil"), customerNote: raw.get("customerNote"), internalNote: raw.get("internalNote") });
+  }
+
+  function updateQuoteDetailTotals() {
+    const form = document.querySelector("[data-quote-form]");
+    if (!form) return;
+    const quote = quoteFromForm(form, {});
+    const totals = calculateQuoteTotals(quote);
+    form.querySelector("[data-quote-summary='subtotal']") && (form.querySelector("[data-quote-summary='subtotal']").textContent = quoteCurrency(totals.subtotal));
+    form.querySelector("[data-quote-summary='taxAmount']") && (form.querySelector("[data-quote-summary='taxAmount']").textContent = quoteCurrency(totals.taxAmount));
+    form.querySelector("[data-quote-summary='total']") && (form.querySelector("[data-quote-summary='total']").textContent = quoteCurrency(totals.total));
+    form.querySelectorAll("[data-quote-item-row]").forEach(row => {
+      const item = normalizeQuoteItem({
+        quantity: row.querySelector("[name='itemQuantity']")?.value || 0,
+        unitPrice: row.querySelector("[name='itemUnitPrice']")?.value || 0,
+        discount: row.querySelector("[name='itemDiscount']")?.value || 0
+      }, 0);
+      const amount = row.querySelector("[data-quote-line-amount]");
+      if (amount) amount.textContent = quoteCurrency(quoteItemAmount(item));
+    });
+  }
+
+  function validateQuoteDraft(quote) {
+    if (quote.projectName || quote.title || quote.items.some(item => item.name)) return "";
+    return t("quoteDraftRequired");
+  }
+
+  function validateQuoteSend(quote) {
+    if (quoteNeedsCustomer(quote)) return t("quoteMissingCustomerSend");
+    if (!quote.items.length) return t("quoteMissingItemsSend");
+    if (!quote.quoteNo) return t("failed");
+    return "";
   }
 
   function trashCategories() {
@@ -5093,6 +5174,10 @@
   }
 
   async function refreshData() {
+    if (state.currentView === "quotes") {
+      refreshQuoteLayoutData();
+      return;
+    }
     await loadAll();
     renderCurrentView();
   }
@@ -5560,6 +5645,9 @@
     bind($("viewRoot"), "input", event => {
       if (handleRequestViewInput(event)) event.stopPropagation();
     });
+    bind(document, "input", event => {
+      if (event.target.closest("[data-quote-form]")) updateQuoteDetailTotals();
+    });
     bind($("viewRoot"), "keydown", event => {
       if (event.target.id === "requestSearch" && event.key === "Enter") {
         event.preventDefault();
@@ -5723,6 +5811,16 @@
         return;
       }
 
+      if (event.target.closest("[data-quote-refresh]")) {
+        refreshQuoteLayoutData();
+        return;
+      }
+
+      if (event.target.closest("[data-quote-csv]")) {
+        toast(t("quoteCsvUnavailable"));
+        return;
+      }
+
       const settingsTab = event.target.closest("[data-settings-tab]");
       if (settingsTab) {
         state.settingsTab = settingsTab.dataset.settingsTab || "overview";
@@ -5767,12 +5865,33 @@
       if (event.target.closest("[data-quote-add-item]")) {
         const target = document.querySelector("[data-quote-items]");
         if (target) target.insertAdjacentHTML("beforeend", renderQuoteItemRow(normalizeQuoteItem({}, target.querySelectorAll("[data-quote-item-row]").length), target.querySelectorAll("[data-quote-item-row]").length));
+        updateQuoteDetailTotals();
+        return;
+      }
+
+      const copyQuoteItem = event.target.closest("[data-quote-copy-item]");
+      if (copyQuoteItem) {
+        const row = copyQuoteItem.closest("[data-quote-item-row]");
+        const target = document.querySelector("[data-quote-items]");
+        if (row && target) {
+          const item = normalizeQuoteItem({
+            name: row.querySelector("[name='itemName']")?.value || "",
+            description: row.querySelector("[name='itemDescription']")?.value || "",
+            unit: row.querySelector("[name='itemUnit']")?.value || "",
+            quantity: row.querySelector("[name='itemQuantity']")?.value || 0,
+            unitPrice: row.querySelector("[name='itemUnitPrice']")?.value || 0,
+            discount: row.querySelector("[name='itemDiscount']")?.value || 0
+          }, target.querySelectorAll("[data-quote-item-row]").length);
+          row.insertAdjacentHTML("afterend", renderQuoteItemRow(item, target.querySelectorAll("[data-quote-item-row]").length));
+          updateQuoteDetailTotals();
+        }
         return;
       }
 
       const removeQuoteItem = event.target.closest("[data-quote-remove-item]");
       if (removeQuoteItem) {
         removeQuoteItem.closest("[data-quote-item-row]")?.remove();
+        updateQuoteDetailTotals();
         return;
       }
 
@@ -5784,15 +5903,27 @@
           const existing = quoteRows().find(item => String(item.id) === String(new FormData(form).get("id")));
           const quote = quoteFromForm(form, existing);
           if (quoteSave.matches("[data-quote-send]")) {
-            if (quoteNeedsCustomer(quote)) {
-              toast(t("quoteMissingCustomerSend"));
+            const message = validateQuoteSend(quote);
+            if (message) {
+              toast(message);
               return;
             }
             quote.status = "sent_to_customer";
             quote.visibleToCustomer = true;
             quote.sentToCustomerAt = new Date().toISOString();
+          } else {
+            const message = validateQuoteDraft(quote);
+            if (message) {
+              toast(message);
+              return;
+            }
+            quote.status = "draft";
           }
-          persistMockQuote(quote);
+          const saved = persistMockQuote(quote);
+          if (!saved) {
+            toast(t("failed"));
+            return;
+          }
           closeDrawer();
           renderQuotes();
           toast(quoteSave.matches("[data-quote-send]") ? t("quoteSentMock") : t("quoteSavedMock"));

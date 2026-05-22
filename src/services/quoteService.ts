@@ -7,6 +7,7 @@ import { getUserToken } from "./authService";
 
 export type UpdateQuoteInput = Partial<Pick<Quote, "status" | "validUntil" | "items" | "projectName" | "visibleToCustomer" | "viewedByCustomerAt" | "acceptedAt" | "rejectedAt" | "changeRequestedAt" | "changeRequestMessage">>;
 
+const QUOTE_LAYOUT_STORAGE_KEY = "yamaden-quotes-layout-v1";
 const quoteSeedById = new Map(initialQuotes.map(quote => [quote.id, quote]));
 
 function delay() {
@@ -59,6 +60,7 @@ function visibleToCurrentUser(quote: Quote): boolean {
 function readQuotes(): Quote[] {
   const storeQuotes = useAppStore.getState().quotes;
   let savedQuotes: Quote[] = [];
+  let layoutQuotes: Quote[] = [];
   try {
     const raw = JSON.parse(localStorage.getItem(APP_STORAGE_KEY) || "null");
     const saved = raw?.state?.quotes;
@@ -66,9 +68,16 @@ function readQuotes(): Quote[] {
   } catch (error) {
     console.warn("Unable to read quote cache", error);
   }
-  if (storeQuotes.length || savedQuotes.length) {
+  try {
+    const raw = JSON.parse(localStorage.getItem(QUOTE_LAYOUT_STORAGE_KEY) || "null");
+    if (Array.isArray(raw?.quotes)) layoutQuotes = raw.quotes.map(normalizeQuote);
+  } catch (error) {
+    console.warn("Unable to read quote layout cache", error);
+  }
+  if (storeQuotes.length || savedQuotes.length || layoutQuotes.length) {
     const byId = new Map<string, Quote>();
     storeQuotes.map(normalizeQuote).forEach(quote => byId.set(quote.id || quote.quoteCode || "", quote));
+    layoutQuotes.forEach(quote => byId.set(quote.id || quote.quoteCode || "", quote));
     savedQuotes.forEach(quote => byId.set(quote.id || quote.quoteCode || "", quote));
     return [...byId.values()];
   }
@@ -78,6 +87,11 @@ function readQuotes(): Quote[] {
 
 function commitQuotes(quotes: Quote[]) {
   useAppStore.setState({ quotes });
+  try {
+    localStorage.setItem(QUOTE_LAYOUT_STORAGE_KEY, JSON.stringify({ quotes }));
+  } catch (error) {
+    console.warn("Unable to persist quote layout cache", error);
+  }
 }
 
 function sameQuote(left: Quote, right: Quote) {
