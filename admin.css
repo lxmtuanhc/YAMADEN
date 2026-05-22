@@ -2455,7 +2455,9 @@ body {
   width: min(1380px, 100%);
   min-height: calc(100dvh - 32px);
   max-height: calc(100dvh - 32px);
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .quote-workspace-head {
@@ -2484,6 +2486,13 @@ body {
 .quote-form-section {
   display: grid;
   gap: 14px;
+}
+
+.quote-detail-form {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-top: 14px;
 }
 
 .quote-detail-layout {
@@ -2537,8 +2546,8 @@ body {
 
 .quote-workspace-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 340px);
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 20px;
   align-items: start;
 }
 
@@ -2555,11 +2564,12 @@ body {
 
 .quote-work-card {
   display: grid;
-  gap: 14px;
-  padding: 16px;
+  gap: 12px;
+  padding: 14px;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   background: #fff;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, .04);
 }
 
 .quote-work-card h3 {
@@ -2569,7 +2579,7 @@ body {
 
 .quote-request-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, .42fr);
+  grid-template-columns: minmax(0, 1fr) 220px;
   gap: 12px;
   align-items: stretch;
 }
@@ -2594,8 +2604,8 @@ body {
 
 .quote-info-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .quote-field-wide,
@@ -2624,6 +2634,7 @@ body {
   color: var(--text);
   background: #fff;
   font-weight: 800;
+  min-width: 0;
 }
 
 .quote-info-grid textarea,
@@ -2636,6 +2647,7 @@ body {
 
 .quote-note-cell {
   grid-column: span 2;
+  grid-row: span 2;
 }
 
 .quote-table-actions {
@@ -2647,22 +2659,38 @@ body {
 
 .quote-item-table-shell {
   overflow-x: auto;
+  overflow-y: visible;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   background: #fff;
+  scrollbar-width: thin;
 }
 
 .quote-item-table-pro {
-  min-width: 980px;
+  width: 100%;
+  min-width: 900px;
   gap: 0;
+  overflow: visible;
 }
 
 .quote-item-table-pro .quote-item-row {
   min-width: 0;
   margin: 0;
-  padding: 8px;
+  padding: 7px;
   border-bottom: 1px solid #e2e8f0;
-  grid-template-columns: 42px minmax(150px, 1.15fr) minmax(190px, 1.35fr) 76px 90px 112px 108px 120px 78px;
+  grid-template-columns: 38px minmax(132px, 1.05fr) minmax(160px, 1.25fr) 64px 74px 96px 92px 108px 68px;
+  gap: 6px;
+}
+
+.quote-item-table-pro .quote-item-row input {
+  min-height: 34px;
+  padding-inline: 8px;
+  font-size: 12px;
+}
+
+.quote-item-table-pro [data-quote-line-amount] {
+  white-space: nowrap;
+  font-size: 12px;
 }
 
 .quote-item-table-pro .quote-item-row:last-child {
@@ -2709,9 +2737,9 @@ body {
 
 .quote-form-section,
 .quote-summary-panel {
-  padding: 16px;
+  padding: 14px;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   background: #fff;
 }
 
@@ -2765,8 +2793,8 @@ body {
 
 .quote-item-table {
   display: grid;
-  gap: 8px;
-  overflow-x: auto;
+  gap: 0;
+  overflow: visible;
 }
 
 .quote-item-row {
@@ -2789,10 +2817,13 @@ body {
 
 .quote-summary-panel {
   position: sticky;
-  top: 96px;
+  top: 16px;
   display: grid;
-  gap: 14px;
+  gap: 12px;
   align-self: start;
+  max-height: calc(100dvh - 168px);
+  overflow: auto;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, .04);
 }
 
 .quote-summary-block {
@@ -2841,7 +2872,7 @@ body {
 }
 
 .quote-upload-box {
-  min-height: 112px;
+  min-height: 92px;
   display: grid;
   place-items: center;
   gap: 4px;
@@ -4046,11 +4077,18 @@ body {
 
   .quote-stepper,
   .quote-info-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .quote-note-cell {
-    grid-column: auto;
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .quote-stepper,
+  .quote-info-grid {
+    grid-template-columns: 1fr;
   }
 }
 
