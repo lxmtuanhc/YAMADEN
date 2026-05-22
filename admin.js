@@ -4296,6 +4296,7 @@
       ? "draft"
       : quoteAdminStatus(quote?.status || "draft");
     const base = {
+      _id: quote?._id || "",
       id: quote?.id || newQuoteId(),
       quoteNo: quote?.quoteNo || quote?.quoteCode || newQuoteNo(),
       requestId: quote?.requestId || "",
@@ -4700,7 +4701,7 @@
       .map(item => [String(item.customerId || item.customerName), item.customerName || item.customerId])).entries()];
     $("viewRoot").innerHTML = `
       <div class="quote-page-head">
-        <div class="page-intro"><p>${escapeHtml(t("quoteModuleSubtitle"))}</p><span class="quote-dev-note">${escapeHtml(t("quoteMockNote"))}</span></div>
+        <div class="page-intro"><p>${escapeHtml(t("quoteModuleSubtitle"))}</p></div>
         <div class="request-command-bar demo-actions quote-toolbar">
           <button class="btn btn-soft" type="button" data-quote-csv>${escapeHtml(t("quoteCsvExport"))}</button>
           <button class="btn btn-soft" type="button" data-quote-refresh>${escapeHtml(t("refresh"))}</button>
@@ -4721,8 +4722,10 @@
         <select class="filter-input" data-quote-filter="customer"><option value="all">${escapeHtml(t("customer"))}: ${escapeHtml(t("all"))}</option>${customerOptions.map(([key, label]) => `<option value="${escapeHtml(key)}" ${state.filters.quoteCustomer === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
         <select class="filter-input" data-quote-filter="validity"><option value="all">${escapeHtml(t("validUntil"))}: ${escapeHtml(t("quoteAllValidity"))}</option>${validityOptions.slice(1).map(([key, label]) => `<option value="${escapeHtml(key)}" ${state.filters.quoteValidity === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
       </div>
-      <div class="staff-tag-tabs quote-view-tabs">
-        ${[["kanban", t("kanban")], ["list", t("listView")]].map(([key, label]) => `<button class="staff-tag-tab ${viewMode === key ? "active" : ""}" type="button" data-quote-view="${escapeHtml(key)}">${escapeHtml(label)}</button>`).join("")}
+      <div class="quote-view-switch-wrap">
+        <div class="quote-view-switch" role="tablist" aria-label="${escapeHtml(t("quotes"))}">
+          ${[["kanban", t("kanban")], ["list", t("listView")]].map(([key, label]) => `<button class="quote-view-tab ${viewMode === key ? "active is-active" : ""}" type="button" role="tab" aria-selected="${viewMode === key ? "true" : "false"}" data-quote-view="${escapeHtml(key)}">${escapeHtml(label)}</button>`).join("")}
+        </div>
       </div>
       <section class="section-card">
         <div class="panel-head quote-pipeline-head"><div><h2>${escapeHtml(t("quotePipeline"))}</h2><p class="note">${escapeHtml(quotePipelineSummary(rows.length))}</p></div>${viewMode === "kanban" ? `<div class="quote-kanban-controls"><span class="quote-scroll-hint">${escapeHtml(t("quoteKanbanHint"))}</span><button class="icon-btn quote-scroll-button" type="button" data-quote-scroll="-1" aria-label="Scroll left">&larr;</button><button class="icon-btn quote-scroll-button" type="button" data-quote-scroll="1" aria-label="Scroll right">&rarr;</button></div>` : ""}</div>
@@ -4972,6 +4975,49 @@
   function prevQuoteStep() {
     setQuoteWizardStep(Number(state.quoteWizardStep || 1) - 1);
     scrollQuoteWizardToTop();
+  }
+
+  async function exportCurrentQuotePdf() {
+    const form = document.querySelector("[data-quote-form]");
+    const formData = form ? new FormData(form) : null;
+    const formId = formData?.get("id") || "";
+    const formQuoteNo = formData?.get("quoteNo") || "";
+    const quote = quoteRows().find(item => [item._id, item.id, item.quoteNo, item.quoteCode, item.code].some(value => value && String(value) === String(formId || formQuoteNo)));
+    const id = quote?._id || formQuoteNo || quote?.quoteNo || quote?.quoteCode || quote?.code || quote?.id || formId;
+    if (!id) {
+      toast(state.lang === "vi" ? "Kh\u00f4ng t\u00ecm th\u1ea5y ID b\u00e1o gi\u00e1." : "\u898b\u7a4dID\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3002");
+      return;
+    }
+    try {
+      const response = await fetch(`/admin/quotes/${encodeURIComponent(id)}/pdf`, {
+        cache: "no-store",
+        headers: authHeaders()
+      });
+      if (response.status === 401 || response.status === 403) {
+        handleAuthFailure();
+        return;
+      }
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.message || body.error || "PDF export failed");
+      }
+      const blob = await response.blob();
+      const disposition = response.headers.get("Content-Disposition") || "";
+      const match = disposition.match(/filename="?([^"]+)"?/i);
+      const filename = match?.[1] || `YAMADEN_Quote_${String(id).replace(/[\\/:*?"<>|]/g, "_")}.pdf`;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1200);
+      toast(state.lang === "vi" ? "\u0110ang t\u1ea3i PDF b\u00e1o gi\u00e1." : "\u898b\u7a4dPDF\u3092\u30c0\u30a6\u30f3\u30ed\u30fc\u30c9\u3057\u3066\u3044\u307e\u3059\u3002");
+    } catch (error) {
+      console.error(error);
+      toast(state.lang === "vi" ? "Xu\u1ea5t PDF th\u1ea5t b\u1ea1i." : "PDF\u51fa\u529b\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002");
+    }
   }
 
   function validateQuoteDraft(quote) {
@@ -6334,7 +6380,7 @@
         return;
       }
       if (event.target.closest("[data-quote-pdf-preview]")) {
-        toast(t("pdfPreviewLater"));
+        exportCurrentQuotePdf();
         return;
       }
       if (event.target.closest("[data-quote-excel-preview]")) {

@@ -3,12 +3,14 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
 const https = require("https");
 const mongoose = require("mongoose");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const PDFDocument = require("pdfkit");
 
 const app = express();
 const distPath = path.join(__dirname, "dist");
@@ -243,20 +245,66 @@ const RequestSchema = new mongoose.Schema({
 
 const QuoteItemSchema = new mongoose.Schema({
   name: String,
+  title: String,
+  description: String,
+  spec: String,
+  unit: String,
   quantity: Number,
-  unitPrice: Number
+  qty: Number,
+  unitPrice: Number,
+  price: Number,
+  discount: Number,
+  discountRate: Number,
+  amount: Number
 }, { _id: false });
 
 const QuoteSchema = new mongoose.Schema({
   id: String,
   quoteCode: String,
+  quoteNo: String,
+  code: String,
   requestId: String,
   userId: String,
+  customerId: String,
+  customerName: String,
+  customerCompany: String,
+  customerPerson: String,
+  customerPhone: String,
+  customerEmail: String,
+  customerAddress: String,
+  phone: String,
+  email: String,
+  address: String,
+  company: String,
+  name: String,
   projectName: String,
   title: String,
+  content: String,
+  description: String,
+  assigneeName: String,
+  staffName: String,
+  departmentName: String,
+  department: String,
   validUntil: String,
+  expireDate: String,
+  validDate: String,
   status: String,
+  quoteItems: [QuoteItemSchema],
   items: [QuoteItemSchema],
+  subtotal: Number,
+  discount: Number,
+  tax: Number,
+  taxAmount: Number,
+  vatAmount: Number,
+  vatRate: Number,
+  taxRate: Number,
+  rounding: Number,
+  total: Number,
+  currency: String,
+  paymentTerms: String,
+  note: String,
+  customerNote: String,
+  internalNote: String,
   createdAt: { type: Date, default: Date.now },
   isDeleted: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },
@@ -1840,10 +1888,401 @@ app.get("/admin/quotes", requireAdmin, async (req, res) => {
 });
 
 function adminQuoteQuery(id) {
-  const clauses = [{ id }, { quoteCode: id }];
+  const clauses = [{ id }, { quoteCode: id }, { quoteNo: id }, { code: id }];
   if (mongoose.Types.ObjectId.isValid(id)) clauses.unshift({ _id: id });
   return { $or: clauses };
 }
+
+function safeFileName(value) {
+  return String(value || "quote").replace(/[\\/:*?"<>|]/g, "_");
+}
+
+function formatYen(value) {
+  const num = Number(value || 0);
+  return "\u00a5" + num.toLocaleString("ja-JP");
+}
+
+function formatPdfDate(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" });
+}
+
+function getPdfLogoPath() {
+  const candidates = [
+    path.join(__dirname, "icon-512.png"),
+    path.join(__dirname, "assets", "icon-512.png"),
+    path.join(__dirname, "icon-192.png"),
+    path.join(__dirname, "assets", "icon-192.png")
+  ];
+  return candidates.find(filePath => fs.existsSync(filePath)) || null;
+}
+
+function pdfFontPaths() {
+  return {
+    regular: path.join(__dirname, "fonts", "NotoSansJP-Regular.ttf"),
+    bold: path.join(__dirname, "fonts", "NotoSansJP-Bold.ttf")
+  };
+}
+
+function hasPdfAppFont() {
+  const fonts = pdfFontPaths();
+  return fs.existsSync(fonts.regular);
+}
+
+function setupPdfFonts(doc) {
+  const fonts = pdfFontPaths();
+  if (fs.existsSync(fonts.regular)) doc.registerFont("AppRegular", fonts.regular);
+  if (fs.existsSync(fonts.bold)) doc.registerFont("AppBold", fonts.bold);
+}
+
+function setPdfFont(doc, bold = false) {
+  const fonts = pdfFontPaths();
+  if (bold && fs.existsSync(fonts.bold)) doc.font("AppBold");
+  else if (fs.existsSync(fonts.regular)) doc.font("AppRegular");
+  else doc.font(bold ? "Helvetica-Bold" : "Helvetica");
+}
+
+function safePdfText(value) {
+  if (value === null || value === undefined || value === "") return "-";
+  const text = String(value);
+  if (hasPdfAppFont()) return text;
+  return text.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^\x20-\x7E\u00A0-\u00FF]/g, "?");
+}
+
+function normalizeQuoteForPdf(quote) {
+  const quoteNo = quote.quoteNo || quote.quoteCode || quote.code || quote.id || String(quote._id || "");
+  const itemsRaw = Array.isArray(quote.quoteItems) && quote.quoteItems.length
+    ? quote.quoteItems
+    : Array.isArray(quote.items) && quote.items.length
+      ? quote.items
+      : [];
+  let items = itemsRaw.map((item, index) => {
+    const quantity = Number(item.quantity || item.qty || 1);
+    const unitPrice = Number(item.unitPrice || item.price || 0);
+    const itemDiscount = Number(item.discount || 0);
+    const discountRate = Number(item.discountRate || 0);
+    const beforeDiscount = quantity * unitPrice;
+    const amount = Number(item.amount ?? Math.max(0, beforeDiscount - itemDiscount - Math.round(beforeDiscount * discountRate / 100)));
+    return {
+      no: index + 1,
+      name: item.name || item.title || "-",
+      spec: item.spec || item.description || "",
+      unit: item.unit || "\u5f0f",
+      quantity,
+      unitPrice,
+      discountRate: discountRate || (beforeDiscount ? Math.round(itemDiscount / beforeDiscount * 100) : 0),
+      amount
+    };
+  });
+  if (!items.length) {
+    const temporaryAmount = Number(quote.total || quote.subtotal || 0);
+    items = [{
+      no: 1,
+      name: quote.projectName || quote.content || quote.description || "Electrical work",
+      spec: quote.description || quote.content || "",
+      unit: "\u5f0f",
+      quantity: 1,
+      unitPrice: temporaryAmount,
+      discountRate: 0,
+      amount: temporaryAmount
+    }];
+  }
+  const calculatedSubtotal = items.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const subtotal = Number(quote.subtotal || calculatedSubtotal);
+  const discount = Number(quote.discount || 0);
+  const taxable = Math.max(subtotal - discount, 0);
+  const rawTaxRate = quote.vatRate ?? quote.taxRate ?? 0.1;
+  const taxRatePercent = Number(rawTaxRate) <= 1 ? Number(rawTaxRate || 0.1) * 100 : Number(rawTaxRate || 10);
+  const tax = Number(quote.tax ?? quote.taxAmount ?? quote.vatAmount ?? Math.round(taxable * taxRatePercent / 100));
+  const rounding = Number(quote.rounding || 0);
+  const total = Math.max(0, Number(quote.total ?? taxable + tax + rounding));
+  return {
+    quoteNo,
+    customerName: quote.customerName || quote.name || "-",
+    customerCompany: quote.customerCompany || quote.company || "",
+    customerPerson: quote.customerPerson || quote.contactPerson || "",
+    customerPhone: quote.customerPhone || quote.phone || "-",
+    customerEmail: quote.customerEmail || quote.email || "-",
+    customerAddress: quote.customerAddress || quote.address || "-",
+    projectName: quote.projectName || quote.content || quote.description || "-",
+    content: quote.content || quote.description || "",
+    assigneeName: quote.assigneeName || quote.staffName || "-",
+    departmentName: quote.departmentName || quote.department || "-",
+    createdAt: quote.createdAt || new Date(),
+    validUntil: quote.validUntil || quote.expireDate || quote.validDate || "",
+    currency: quote.currency || "JPY",
+    paymentTerms: quote.paymentTerms || "\u691c\u53ce\u5f8c30\u65e5\u4ee5\u5185",
+    status: quote.status || "-",
+    note: quote.note || quote.customerNote || "",
+    items,
+    subtotal,
+    discount,
+    tax,
+    taxRatePercent,
+    total
+  };
+}
+
+function drawPdfInfoBox(doc, opt) {
+  const { x, y, w, h, title, lines, black, gray, light, line, text } = opt;
+  doc.roundedRect(x, y, w, h, 8).fillAndStroke(light, line);
+  doc.fillColor(black);
+  setPdfFont(doc, true);
+  doc.fontSize(7).text(safePdfText(title), x + 12, y + 10);
+  let yy = y + 28;
+  lines.filter(Boolean).forEach((lineText, index) => {
+    doc.fillColor(index === 0 ? text : gray);
+    setPdfFont(doc, index === 0);
+    doc.fontSize(index === 0 ? 9 : 7).text(safePdfText(lineText), x + 12, yy, { width: w - 24, lineGap: 2 });
+    yy += index === 0 ? 18 : 14;
+  });
+}
+
+function drawPdfSummaryItem(doc, x, y, w, label, value, valueColor, gray) {
+  doc.fillColor(gray);
+  setPdfFont(doc, true);
+  doc.fontSize(7).text(safePdfText(label), x, y, { width: w, align: "center" });
+  doc.fillColor(valueColor);
+  setPdfFont(doc, true);
+  doc.fontSize(10).text(safePdfText(value), x, y + 18, { width: w, align: "center" });
+  doc.moveTo(x, y - 4).lineTo(x, y + 40).strokeColor("#e2e8f0").stroke();
+}
+
+function drawPdfItemsTable(doc, items, opt) {
+  const { x, y, w, black, line, text } = opt;
+  const cols = [
+    { key: "no", label: "No.", width: 30, align: "center" },
+    { key: "name", label: "Item", width: 116, align: "left" },
+    { key: "spec", label: "Spec / Description", width: 184, align: "left" },
+    { key: "unit", label: "Unit", width: 36, align: "center" },
+    { key: "quantity", label: "Qty", width: 45, align: "right" },
+    { key: "unitPrice", label: "Unit price", width: 62, align: "right" },
+    { key: "discountRate", label: "Disc.", width: 45, align: "center" },
+    { key: "amount", label: "Amount", width: 62, align: "right" }
+  ];
+  let yy = y;
+  let xx = x;
+  doc.rect(x, yy, w, 24).fillColor(black).fill();
+  doc.fillColor("#ffffff");
+  setPdfFont(doc, true);
+  doc.fontSize(7);
+  cols.forEach(col => {
+    doc.text(safePdfText(col.label), xx + 4, yy + 8, { width: col.width - 8, align: col.align });
+    xx += col.width;
+  });
+  yy += 24;
+  items.forEach((item, rowIndex) => {
+    const rowH = 26;
+    if (yy + rowH > 660) {
+      doc.addPage();
+      yy = 44;
+      doc.rect(x, yy, w, 24).fillColor(black).fill();
+      doc.fillColor("#ffffff");
+      setPdfFont(doc, true);
+      xx = x;
+      cols.forEach(col => {
+        doc.fontSize(7).text(safePdfText(col.label), xx + 4, yy + 8, { width: col.width - 8, align: col.align });
+        xx += col.width;
+      });
+      yy += 24;
+    }
+    if (rowIndex % 2 === 0) doc.rect(x, yy, w, rowH).fillColor("#fbfdff").fill();
+    doc.rect(x, yy, w, rowH).strokeColor(line).stroke();
+    xx = x;
+    cols.forEach(col => {
+      let value = item[col.key];
+      if (col.key === "unitPrice" || col.key === "amount") value = Number(value || 0).toLocaleString("ja-JP");
+      if (col.key === "discountRate") value = `${Number(value || 0)}%`;
+      doc.fillColor(text);
+      setPdfFont(doc, false);
+      doc.fontSize(7).text(safePdfText(value), xx + 4, yy + 8, { width: col.width - 8, align: col.align, ellipsis: true });
+      xx += col.width;
+    });
+    yy += rowH;
+  });
+  return yy;
+}
+
+function drawPdfTotalLine(doc, x, y, w, label, value, color) {
+  doc.fillColor("#111827");
+  setPdfFont(doc, true);
+  doc.fontSize(8).text(safePdfText(label), x + 12, y);
+  doc.fillColor(color);
+  setPdfFont(doc, true);
+  doc.fontSize(10).text(safePdfText(value), x + 12, y, { width: w - 24, align: "right" });
+}
+
+function drawPdfRemarksBox(doc, opt) {
+  const { x, y, w, h, q, black, gray, line, text } = opt;
+  doc.roundedRect(x, y, w, h, 8).strokeColor(line).stroke();
+  doc.fillColor(black);
+  setPdfFont(doc, true);
+  doc.fontSize(8).text(safePdfText("Remarks"), x + 12, y + 12);
+  const remarks = q.note || "This quotation is based on the listed scope. Additional work outside the scope will be quoted separately.";
+  doc.fillColor(text);
+  setPdfFont(doc, false);
+  doc.fontSize(7).text(safePdfText(remarks), x + 12, y + 30, { width: w - 24, lineGap: 3 });
+  doc.moveTo(x, y + 92).lineTo(x + w, y + 92).strokeColor(line).stroke();
+  doc.fillColor(black);
+  setPdfFont(doc, true);
+  doc.fontSize(8).text(safePdfText("Payment terms"), x + 12, y + 104);
+  doc.fillColor(gray);
+  setPdfFont(doc, false);
+  doc.fontSize(7).text(safePdfText(q.paymentTerms), x + 12, y + 121, { width: w - 24 });
+}
+
+function drawPdfTotalBox(doc, opt) {
+  const { x, y, w, h, q, black, red, line, text } = opt;
+  doc.roundedRect(x, y, w, h, 8).strokeColor(black).stroke();
+  let yy = y + 14;
+  drawPdfTotalLine(doc, x, yy, w, "Subtotal", formatYen(q.subtotal), text);
+  yy += 20;
+  drawPdfTotalLine(doc, x, yy, w, "Discount", "- " + formatYen(q.discount), q.discount > 0 ? red : text);
+  yy += 20;
+  doc.moveTo(x + 12, yy).lineTo(x + w - 12, yy).strokeColor(line).stroke();
+  yy += 12;
+  drawPdfTotalLine(doc, x, yy, w, "Taxable amount", formatYen(q.subtotal - q.discount), text);
+  yy += 20;
+  drawPdfTotalLine(doc, x, yy, w, `VAT (${q.taxRatePercent}%)`, formatYen(q.tax), text);
+  yy += 22;
+  doc.moveTo(x + 12, yy).lineTo(x + w - 12, yy).dash(3, { space: 3 }).strokeColor(line).stroke();
+  doc.undash();
+  yy += 14;
+  doc.fillColor(black);
+  setPdfFont(doc, true);
+  doc.fontSize(10).text(safePdfText("Total incl. VAT"), x + 12, yy);
+  doc.fillColor(black);
+  setPdfFont(doc, true);
+  doc.fontSize(19).text(safePdfText(formatYen(q.total)), x + 12, yy - 4, { width: w - 24, align: "right" });
+}
+
+function drawPdfSignatureBoxes(doc, opt) {
+  const { x, y, w, h, line, gray } = opt;
+  const colW = w / 4;
+  ["Prepared", "Checked", "Approved", "Client"].forEach((label, index) => {
+    const xx = x + colW * index;
+    doc.rect(xx, y, colW, h).strokeColor(line).stroke();
+    doc.fillColor(gray);
+    setPdfFont(doc, true);
+    doc.fontSize(6).text(safePdfText(label), xx + 4, y + 7, { width: colW - 8, align: "center" });
+    if (index === 3) {
+      doc.fillColor("#cbd5e1");
+      setPdfFont(doc, false);
+      doc.fontSize(8).text("SIGN", xx + 4, y + 30, { width: colW - 8, align: "center" });
+    }
+  });
+}
+
+function drawQuotePdf(doc, q) {
+  const pageW = doc.page.width;
+  const pageH = doc.page.height;
+  const left = 36;
+  const right = pageW - 36;
+  const black = "#111827";
+  const dark = "#1f2937";
+  const gray = "#64748b";
+  const light = "#f8fafc";
+  const line = "#d8dee8";
+  const text = "#111827";
+  const red = "#dc2626";
+  let y = 38;
+  const logoPath = getPdfLogoPath();
+  if (logoPath) {
+    doc.image(logoPath, left, y, { width: 34, height: 34 });
+  } else {
+    doc.roundedRect(left, y, 34, 34, 6).fill(black);
+    doc.fillColor("#ffffff");
+    setPdfFont(doc, true);
+    doc.fontSize(18).text("Y", left + 10, y + 8);
+  }
+  doc.fillColor(text);
+  setPdfFont(doc, true);
+  doc.fontSize(16).text(safePdfText("YAMADEN CO.,LTD"), left + 46, y + 1);
+  doc.fillColor(gray);
+  setPdfFont(doc, true);
+  doc.fontSize(8).text(safePdfText("YAMADEN ELECTRICAL SOLUTIONS"), left + 46, y + 23);
+  doc.moveTo(pageW - 230, y + 4).lineTo(pageW - 230, y + 36).strokeColor(line).stroke();
+  doc.fillColor(text);
+  setPdfFont(doc, true);
+  doc.fontSize(20).text(safePdfText("QUOTATION"), pageW - 220, y + 8, { width: 184, align: "right" });
+  y += 58;
+  const boxTop = y;
+  const colGap = 14;
+  const colW = (right - left - colGap * 2) / 3;
+  drawPdfInfoBox(doc, {
+    x: left, y: boxTop, w: colW, h: 112, title: "CLIENT",
+    lines: [q.customerCompany || q.customerName, q.customerPerson ? `${q.customerPerson}` : "", `Address: ${q.customerAddress}`, `TEL: ${q.customerPhone}`, `Email: ${q.customerEmail}`],
+    black, gray, light, line, text
+  });
+  drawPdfInfoBox(doc, {
+    x: left + colW + colGap, y: boxTop, w: colW, h: 112, title: "PROJECT",
+    lines: [q.projectName, `Assignee: ${q.assigneeName}`, `Department: ${q.departmentName}`, `Valid until: ${formatPdfDate(q.validUntil)}`],
+    black, gray, light, line, text
+  });
+  drawPdfInfoBox(doc, {
+    x: left + (colW + colGap) * 2, y: boxTop, w: colW, h: 112, title: "QUOTE INFO",
+    lines: [`Quote No: ${q.quoteNo}`, `Date: ${formatPdfDate(q.createdAt)}`, `Currency: ${q.currency}`, `Payment: ${q.paymentTerms}`],
+    black, gray, light, line, text
+  });
+  y = boxTop + 130;
+  doc.roundedRect(left, y, right - left, 62, 8).strokeColor(line).stroke();
+  doc.roundedRect(left, y, 170, 62, 8).fillColor(black).fill();
+  doc.fillColor("#ffffff");
+  setPdfFont(doc, true);
+  doc.fontSize(8).text("TOTAL INCL. VAT", left + 16, y + 13);
+  doc.fontSize(24).text(safePdfText(formatYen(q.total)), left + 16, y + 30);
+  const summaryX = left + 188;
+  const summaryW = right - summaryX;
+  const itemW = summaryW / 4;
+  drawPdfSummaryItem(doc, summaryX, y + 16, itemW, "Subtotal", formatYen(q.subtotal), text, gray);
+  drawPdfSummaryItem(doc, summaryX + itemW, y + 16, itemW, "Discount", "- " + formatYen(q.discount), q.discount > 0 ? red : text, gray);
+  drawPdfSummaryItem(doc, summaryX + itemW * 2, y + 16, itemW, "VAT", formatYen(q.tax), text, gray);
+  drawPdfSummaryItem(doc, summaryX + itemW * 3, y + 16, itemW, "Total", formatYen(q.total), black, gray);
+  y += 82;
+  y = drawPdfItemsTable(doc, q.items, { x: left, y, w: right - left, black: dark, line, text, gray });
+  y += 16;
+  const bottomTop = y;
+  const leftBoxW = 300;
+  const rightBoxW = right - left - leftBoxW - 22;
+  drawPdfRemarksBox(doc, { x: left, y: bottomTop, w: leftBoxW, h: 142, q, black, gray, line, text });
+  drawPdfTotalBox(doc, { x: left + leftBoxW + 22, y: bottomTop, w: rightBoxW, h: 142, q, black, red, line, text });
+  y = bottomTop + 164;
+  doc.moveTo(left, y).lineTo(right, y).strokeColor(line).stroke();
+  y += 14;
+  if (logoPath) doc.image(logoPath, left, y, { width: 28, height: 28 });
+  doc.fillColor(text);
+  setPdfFont(doc, true);
+  doc.fontSize(11).text(safePdfText("YAMADEN CO.,LTD"), left + 38, y);
+  doc.fillColor(gray);
+  setPdfFont(doc, false);
+  doc.fontSize(7).text(safePdfText("Tokyo, Japan"), left + 38, y + 16).text(safePdfText("Email: info@yamaden.co.jp"), left + 38, y + 28);
+  drawPdfSignatureBoxes(doc, { x: right - 300, y: y - 2, w: 300, h: 56, line, text, gray });
+  doc.rect(0, pageH - 28, pageW, 28).fillColor(black).fill();
+  doc.fillColor("#ffffff");
+  setPdfFont(doc, false);
+  doc.fontSize(7).text("YAMADEN Electrical Solutions", left, pageH - 18, { width: right - left, align: "center" });
+}
+
+app.get("/admin/quotes/:id/pdf", requireAdmin, async (req, res) => {
+  try {
+    const quote = await Quote.findOne(adminQuoteQuery(req.params.id)).lean();
+    if (!quote) return res.status(404).json({ ok: false, message: "Quote not found" });
+    const normalized = normalizeQuoteForPdf(quote);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="YAMADEN_Quote_${safeFileName(normalized.quoteNo)}.pdf"`);
+    const doc = new PDFDocument({ size: "A4", margin: 36, bufferPages: true });
+    setupPdfFonts(doc);
+    doc.pipe(res);
+    drawQuotePdf(doc, normalized);
+    doc.end();
+  } catch (error) {
+    console.error("PDF export error:", error);
+    if (!res.headersSent) res.status(500).json({ ok: false, message: "PDF export failed" });
+    else res.end();
+  }
+});
 
 app.delete("/admin/quotes/:id", requireAdmin, async (req, res) => {
   try {
