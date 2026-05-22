@@ -3178,6 +3178,427 @@ body {
   font-weight: 850;
 }
 
+.quote-wizard-modal .quote-workspace-head {
+  min-height: auto;
+  padding: 18px 76px 16px 22px;
+}
+
+.quote-detail-close,
+.quote-close-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #dc2626;
+  font-size: 26px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(220, 38, 38, .12);
+}
+
+.quote-detail-close:hover,
+.quote-close-btn:hover {
+  background: #fff1f2;
+  border-color: #fb7185;
+  color: #b91c1c;
+}
+
+.quote-wizard-steps {
+  gap: 12px;
+  padding: 14px 22px;
+  background: #f1f5f9;
+}
+
+.quote-wizard-step {
+  min-height: 48px;
+  border-radius: 16px;
+  background: #fff;
+  color: #64748b;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, .04);
+}
+
+.quote-wizard-step.active {
+  border-color: #60a5fa;
+  background: #dbeafe;
+  color: #1d4ed8;
+  box-shadow: 0 12px 26px rgba(37, 99, 235, .14);
+}
+
+.quote-wizard-step.done {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.quote-wizard-step.done b {
+  background: #16a34a;
+}
+
+.quote-wizard-step:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+}
+
+.quote-wizard-content {
+  padding: 18px 22px 20px;
+}
+
+.quote-wizard-panel {
+  gap: 16px;
+  max-width: 1320px;
+  width: 100%;
+}
+
+.quote-wizard-panel > h3 {
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.quote-step-grid {
+  display: grid;
+  gap: 20px;
+  align-items: start;
+  min-width: 0;
+}
+
+.quote-step1-grid {
+  grid-template-columns: minmax(360px, .85fr) minmax(560px, 1.15fr);
+}
+
+.quote-step2-grid {
+  grid-template-columns: minmax(0, 1.35fr) 380px;
+}
+
+.quote-step3-grid {
+  grid-template-columns: minmax(0, 1.1fr) 420px;
+}
+
+.quote-step-left,
+.quote-step-right,
+.quote-side-stack,
+.quote-customer-note-column {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.quote-work-card {
+  border-radius: 20px;
+  padding: 18px;
+  border-color: #e2e8f0;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, .06);
+}
+
+.quote-primary-work-card {
+  border-color: #bfdbfe;
+  background: linear-gradient(180deg, #fff 0%, #f8fbff 100%);
+  box-shadow: 0 18px 44px rgba(37, 99, 235, .10);
+}
+
+.quote-card-header,
+.quote-section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.quote-card-header h3,
+.quote-section-head h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.quote-card-subtitle {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.quote-field-grid.quote-info-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.quote-field-wide,
+.quote-info-grid label,
+.quote-work-card label,
+.quote-money-input {
+  gap: 7px;
+}
+
+.quote-info-grid input,
+.quote-request-grid input,
+.quote-work-card textarea,
+.summary-input-row input,
+.quote-item-table-pro .quote-item-row input,
+.quote-money-row input {
+  border-color: #dbe3ef;
+  border-radius: 12px;
+  transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+}
+
+.quote-info-grid input,
+.quote-request-grid input,
+.quote-money-row input {
+  min-height: 44px;
+}
+
+.quote-info-grid input:focus,
+.quote-request-grid input:focus,
+.quote-work-card textarea:focus,
+.quote-item-table-pro .quote-item-row input:focus,
+.quote-money-row input:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, .12);
+  background: #fff;
+}
+
+.quote-linked-summary {
+  border-radius: 16px;
+  min-height: 82px;
+}
+
+.quote-items-card {
+  min-height: min(560px, calc(100vh - 330px));
+  align-content: start;
+}
+
+.quote-items-header {
+  align-items: center;
+}
+
+.quote-table-wrap.quote-item-table-shell {
+  max-height: calc(100vh - 430px);
+  min-height: 260px;
+  overflow: auto;
+  border-radius: 16px;
+  border-color: #dbeafe;
+}
+
+.quote-item-table-pro {
+  min-width: 1040px;
+}
+
+.quote-item-table-pro .quote-item-row {
+  grid-template-columns: 44px minmax(180px, 1.2fr) minmax(220px, 1.4fr) 74px 86px 112px 108px 124px 82px;
+  padding: 8px 10px;
+  gap: 8px;
+}
+
+.quote-item-table-pro .quote-item-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #eef6ff;
+  color: #1e3a8a;
+  box-shadow: 0 1px 0 #bfdbfe;
+}
+
+.quote-item-table-pro .quote-item-row input {
+  min-height: 38px;
+  background: #fff;
+}
+
+.quote-item-index {
+  border-radius: 12px;
+}
+
+.quote-row-actions {
+  justify-content: center;
+}
+
+.quote-row-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.quote-note-card textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.quote-note-card-main textarea {
+  min-height: 190px;
+}
+
+.quote-upload-card {
+  width: 100%;
+  min-height: 150px;
+  border-radius: 20px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.quote-upload-card strong {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 24px;
+}
+
+.quote-upload-card:hover {
+  border-color: #60a5fa;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.quote-check-list {
+  display: grid;
+  gap: 10px;
+}
+
+.quote-check-list > div,
+.quote-money-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.quote-check-list span,
+.quote-money-row span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.quote-check-list strong,
+.quote-money-row strong {
+  min-width: 0;
+  color: #0f172a;
+  text-align: right;
+  font-weight: 950;
+}
+
+.quote-money-list {
+  display: grid;
+  gap: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.quote-money-row {
+  min-height: 58px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.quote-money-row:nth-child(3),
+.quote-money-row:nth-child(5) {
+  background: #f8fafc;
+}
+
+.quote-money-row:last-child {
+  border-bottom: 0;
+}
+
+.quote-money-row input {
+  width: 150px;
+  text-align: right;
+  font-weight: 950;
+}
+
+.quote-money-row-total {
+  background: #f0fdf4;
+}
+
+.quote-money-row-total span,
+.quote-money-row-total strong {
+  color: #047857;
+}
+
+.quote-money-row-total strong {
+  font-size: 22px;
+}
+
+.quote-total-highlight {
+  display: grid;
+  gap: 10px;
+  padding: 22px;
+  border: 1px solid #bbf7d0;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #ecfdf5, #dbeafe);
+  box-shadow: 0 18px 40px rgba(5, 150, 105, .14);
+}
+
+.quote-total-highlight span {
+  color: #047857;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.quote-total-highlight strong {
+  color: #065f46;
+  font-size: 38px;
+  line-height: 1;
+  font-weight: 1000;
+}
+
+.quote-warning-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.quote-warning-list p {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff1f2;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.quote-warning-list p::before {
+  content: "!";
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  border-radius: 999px;
+  background: #fecdd3;
+  color: #991b1b;
+  font-size: 12px;
+  font-weight: 1000;
+}
+
+.quote-warning-list.is-ok p {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.quote-warning-list.is-ok p::before {
+  content: "\2713";
+  background: #bbf7d0;
+  color: #047857;
+}
+
+.quote-wizard-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  padding: 14px 22px;
+  border-top-color: #e2e8f0;
+  box-shadow: 0 -12px 30px rgba(15, 23, 42, .05);
+}
+
 .quote-summary-actions {
   display: grid;
   gap: 8px;
@@ -4335,7 +4756,10 @@ body {
 
   .quote-workspace-layout,
   .quote-request-grid,
-  .quote-notes-grid {
+  .quote-notes-grid,
+  .quote-step1-grid,
+  .quote-step2-grid,
+  .quote-step3-grid {
     grid-template-columns: 1fr;
   }
 
@@ -4367,6 +4791,26 @@ body {
   .quote-payment-grid,
   .quote-wizard-steps {
     grid-template-columns: 1fr;
+  }
+
+  .quote-wizard-content {
+    padding: 14px;
+  }
+
+  .quote-wizard-modal .quote-workspace-head {
+    padding: 16px 72px 14px 16px;
+  }
+
+  .quote-field-grid.quote-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-table-wrap.quote-item-table-shell {
+    max-height: none;
+  }
+
+  .quote-total-highlight strong {
+    font-size: 30px;
   }
 
   .quote-wizard-footer {

@@ -4538,6 +4538,136 @@
     return rows.map((item, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(item.name || "-")}</td><td>${escapeHtml(item.description || "-")}</td><td>${escapeHtml(item.unit || "-")}</td><td>${escapeHtml(item.quantity)}</td><td>${escapeHtml(quoteCurrency(item.unitPrice))}</td><td>${escapeHtml(quoteCurrency(item.discount))}</td><td>${escapeHtml(quoteCurrency(quoteItemAmount(item)))}</td></tr>`).join("");
   }
 
+  function quoteStepSubtitle(key) {
+    const vi = {
+      customerNote: "N\u1ed9i dung n\u00e0y s\u1ebd hi\u1ec3n th\u1ecb cho kh\u00e1ch h\u00e0ng.",
+      paymentTerms: "\u0110i\u1ec1u kho\u1ea3n \u00e1p d\u1ee5ng khi g\u1eedi b\u00e1o gi\u00e1.",
+      internalNote: "Ch\u1ec9 admin nh\u00ecn th\u1ea5y.",
+      ready: "C\u00f3 th\u1ec3 chuy\u1ec3n sang b\u01b0\u1edbc xem l\u1ea1i."
+    };
+    const ja = {
+      customerNote: "\u3053\u306e\u5185\u5bb9\u306f\u9867\u5ba2\u306b\u8868\u793a\u3055\u308c\u307e\u3059\u3002",
+      paymentTerms: "\u898b\u7a4d\u9001\u4ed8\u6642\u306b\u9069\u7528\u3055\u308c\u308b\u652f\u6255\u6761\u4ef6\u3002",
+      internalNote: "\u7ba1\u7406\u8005\u306e\u307f\u8868\u793a\u3002",
+      ready: "\u78ba\u8a8d\u30b9\u30c6\u30c3\u30d7\u3078\u9032\u3081\u307e\u3059\u3002"
+    };
+    return (state.lang === "ja" ? ja : vi)[key] || "";
+  }
+
+  function renderQuoteStep1(quote, readonly, requestLinked, itemCountText) {
+    return `<div class="quote-step-grid quote-step1-grid">
+      <div class="quote-step-left">
+        <section class="quote-work-card quote-request-link">
+          <div class="quote-card-header"><div><h3>${escapeHtml(t("quoteRequestInput"))}</h3><p class="quote-card-subtitle">${escapeHtml(t("linkedRequest"))}</p></div><button class="btn btn-soft" type="button" data-quote-request-search>${escapeHtml(requestLinked ? t("changeRequest") : t("searchAction"))}</button></div>
+          <label class="quote-field-wide"><span>${escapeHtml(t("linkedRequest"))}</span><input name="requestId" value="${escapeHtml(quote.requestId)}" placeholder="${escapeHtml(t("quoteRequestPlaceholder"))}"></label>
+          <div class="quote-linked-summary">${requestLinked ? `<strong>${escapeHtml(quote.requestId)}</strong><span>${escapeHtml(quote.projectName || quote.title || "-")}</span><small>${escapeHtml(quote.customerName || "-")}</small>` : `<span>${escapeHtml(t("requestNotLinked"))}</span>`}</div>
+        </section>
+        <section class="quote-work-card">
+          <div class="quote-card-header"><div><h3>${escapeHtml(t("quoteCustomerProjectInfo"))}</h3><p class="quote-card-subtitle">${escapeHtml(t("quoteWizardStep1"))}</p></div></div>
+          <div class="quote-field-grid quote-info-grid">
+            <label><span>${escapeHtml(t("customer"))}</span><input name="customerName" value="${escapeHtml(quote.customerName)}"></label>
+            <label><span>${escapeHtml(t("phone"))}</span><input name="customerPhone" value="${escapeHtml(quote.customerPhone)}"></label>
+            <label><span>${escapeHtml(t("email"))}</span><input name="customerEmail" value="${escapeHtml(quote.customerEmail)}"></label>
+            <label><span>ID</span><input name="customerId" value="${escapeHtml(quote.customerId)}"></label>
+            <label><span>${escapeHtml(t("projectContent"))}</span><input name="projectName" value="${escapeHtml(quote.projectName)}"></label>
+            <label><span>${escapeHtml(t("address"))}</span><input name="projectAddress" value="${escapeHtml(quote.projectAddress)}"></label>
+            <label><span>${escapeHtml(t("validUntil"))}</span><input name="validUntil" type="date" value="${escapeHtml(String(quote.validUntil || "").slice(0, 10))}"></label>
+            <label><span>${escapeHtml(t("assignee"))}</span><input name="assigneeName" value="${escapeHtml(quote.assigneeName)}"></label><input type="hidden" name="assigneeId" value="${escapeHtml(quote.assigneeId)}">
+          </div>
+        </section>
+      </div>
+      <div class="quote-step-right">
+        <section class="quote-work-card quote-items-card quote-primary-work-card">
+          <div class="quote-card-header quote-items-header"><div><h3>${escapeHtml(t("quoteItems"))}</h3><p class="quote-card-subtitle" data-quote-item-count>${escapeHtml(itemCountText)}</p></div><button class="btn btn-primary" type="button" data-quote-add-item ${readonly ? "disabled" : ""}>${escapeHtml(quoteAddItemLabel())}</button></div>
+          <div class="quote-table-wrap quote-item-table-shell"><div class="quote-item-table quote-item-table-pro" data-quote-items><div class="quote-item-row quote-item-header"><span>No.</span><span>${escapeHtml(t("itemName"))}</span><span>${escapeHtml(t("itemDescription"))}</span><span>${escapeHtml(t("unit"))}</span><span>${escapeHtml(t("quantity"))}</span><span>${escapeHtml(t("unitPrice"))}</span><span>${escapeHtml(t("discount"))}</span><span>${escapeHtml(t("lineAmount"))}</span><span>${escapeHtml(t("action"))}</span></div>${quote.items.length ? quote.items.map(renderQuoteItemRow).join("") : `<div class="quote-empty-line">${escapeHtml(t("noQuotes"))}</div>`}</div></div>
+        </section>
+      </div>
+    </div>`;
+  }
+
+  function renderQuoteStep2(quote, totals) {
+    return `<div class="quote-step-grid quote-step2-grid">
+      <div class="quote-step-left quote-customer-note-column">
+        <section class="quote-work-card quote-note-card quote-note-card-main"><div class="quote-card-header"><div><h3>${escapeHtml(t("quoteNotes"))}</h3><p class="quote-card-subtitle">${escapeHtml(quoteStepSubtitle("customerNote"))}</p></div></div><textarea name="customerNote" data-quote-note-mirror>${escapeHtml(quote.customerNote)}</textarea></section>
+        <section class="quote-work-card quote-note-card quote-note-card-main"><div class="quote-card-header"><div><h3>${escapeHtml(t("paymentTerms"))}</h3><p class="quote-card-subtitle">${escapeHtml(quoteStepSubtitle("paymentTerms"))}</p></div></div><textarea name="paymentTerms">${escapeHtml(quote.paymentTerms || t("quoteTermsDefault"))}</textarea></section>
+      </div>
+      <div class="quote-step-right quote-side-stack">
+        <section class="quote-work-card quote-note-card"><div class="quote-card-header"><div><h3>${escapeHtml(t("internalNote"))}</h3><p class="quote-card-subtitle">${escapeHtml(quoteStepSubtitle("internalNote"))}</p></div></div><textarea name="internalNote">${escapeHtml(quote.internalNote)}</textarea></section>
+        <button class="quote-upload-box quote-upload-card" type="button" data-quote-upload-placeholder><strong aria-hidden="true">\u21e7</strong><span>${escapeHtml(t("quoteUploadHint"))}</span><small>${escapeHtml(t("quoteUploadMeta"))}</small></button>
+        <section class="quote-work-card quote-quick-summary"><div class="quote-card-header"><div><h3>${escapeHtml(state.lang === "ja" ? "\u30af\u30a4\u30c3\u30af\u30b5\u30de\u30ea\u30fc" : "T\u00f3m t\u1eaft nhanh")}</h3></div></div>
+          <div class="quote-check-list">
+            <div><span>${escapeHtml(t("quoteNo"))}</span><strong>${escapeHtml(quote.quoteNo || "-")}</strong></div>
+            <div><span>${escapeHtml(t("linkedRequest"))}</span><strong>${escapeHtml(quote.requestId || "-")}</strong></div>
+            <div><span>${escapeHtml(t("quoteItems"))}</span><strong data-quote-item-count>${escapeHtml(t("quoteItemCount").replace("{count}", String(quote.items.length)))}</strong></div>
+            <div><span>${escapeHtml(t("subtotal"))}</span><strong data-quote-summary="subtotal">${escapeHtml(quoteCurrency(totals.subtotal))}</strong></div>
+            <div><span>${escapeHtml(t("validUntil"))}</span><strong data-quote-validity-label>${escapeHtml(quoteDateLabel(quote.validUntil))}</strong></div>
+          </div>
+        </section>
+      </div>
+    </div>`;
+  }
+
+  function quoteDataWarnings(quote, totals) {
+    const warnings = [];
+    if (quoteNeedsCustomer(quote)) warnings.push(state.lang === "ja" ? "\u9867\u5ba2\u304c\u672a\u8a2d\u5b9a\u3067\u3059" : "Thi\u1ebfu kh\u00e1ch h\u00e0ng");
+    if (!quote.validUntil) warnings.push(state.lang === "ja" ? "\u6709\u52b9\u671f\u9650\u304c\u672a\u8a2d\u5b9a\u3067\u3059" : "Ch\u01b0a \u0111\u1eb7t hi\u1ec7u l\u1ef1c");
+    if (!quote.items.length) warnings.push(state.lang === "ja" ? "\u898b\u7a4d\u9805\u76ee\u304c\u3042\u308a\u307e\u305b\u3093" : "Ch\u01b0a c\u00f3 h\u1ea1ng m\u1ee5c");
+    if (totals.total <= 0) warnings.push(state.lang === "ja" ? "\u5408\u8a08\u91d1\u984d\u304c\u00a50\u3067\u3059" : "T\u1ed5ng ti\u1ec1n b\u1eb1ng \u00a50");
+    return warnings;
+  }
+
+  function renderQuoteWarningList(quote, totals) {
+    const warnings = quoteDataWarnings(quote, totals);
+    if (!warnings.length) return `<div class="quote-warning-list is-ok" data-quote-warning-list><p>${escapeHtml(quoteStepSubtitle("ready"))}</p></div>`;
+    return `<div class="quote-warning-list" data-quote-warning-list>${warnings.map(item => `<p>${escapeHtml(item)}</p>`).join("")}</div>`;
+  }
+
+  function updateQuoteWarningList(target, quote, totals) {
+    const warnings = quoteDataWarnings(quote, totals);
+    if (!target) return;
+    target.classList.toggle("is-ok", warnings.length === 0);
+    if (!warnings.length) {
+      target.innerHTML = `<p>${escapeHtml(quoteStepSubtitle("ready"))}</p>`;
+      return;
+    }
+    target.innerHTML = warnings.map(item => `<p>${escapeHtml(item)}</p>`).join("");
+  }
+
+  function renderQuoteStep3(quote, totals) {
+    const customerOk = !quoteNeedsCustomer(quote);
+    const itemsOk = quote.items.length > 0;
+    const validityOk = Boolean(quote.validUntil);
+    return `<div class="quote-step-grid quote-step3-grid">
+      <div class="quote-step-left">
+        <section class="quote-work-card quote-payment-card quote-payment-detail-card">
+          <div class="quote-card-header"><div><h3>${escapeHtml(t("quotePaymentSummary"))}</h3><p class="quote-card-subtitle">${escapeHtml(t("quoteWizardStep3"))}</p></div></div>
+          <div class="quote-money-list">
+            <div class="quote-money-row"><span>${escapeHtml(t("subtotal"))}</span><strong data-quote-summary="subtotal">${escapeHtml(quoteCurrency(totals.subtotal))}</strong></div>
+            <label class="quote-money-row quote-money-input"><span>${escapeHtml(t("discount"))}</span><input name="discount" type="number" value="${escapeHtml(quote.discount || 0)}"></label>
+            <div class="quote-money-row"><span>${escapeHtml(t("quoteAfterDiscount"))}</span><strong data-quote-summary="afterDiscount">${escapeHtml(quoteCurrency(totals.taxableAmount))}</strong></div>
+            <label class="quote-money-row quote-money-input"><span>${escapeHtml(t("taxRate"))}</span><input name="taxRate" type="number" value="${escapeHtml(Math.round((quote.taxRate || 0.1) * 100))}"></label>
+            <div class="quote-money-row"><span>${escapeHtml(t("taxAmount"))}</span><strong data-quote-summary="taxAmount">${escapeHtml(quoteCurrency(totals.taxAmount))}</strong></div>
+            <label class="quote-money-row quote-money-input"><span>${escapeHtml(t("rounding"))}</span><input name="rounding" type="number" value="${escapeHtml(quote.rounding || 0)}"></label>
+            <div class="quote-money-row quote-money-row-total"><span>${escapeHtml(t("quoteGrandTotalVat"))}</span><strong data-quote-summary="total">${escapeHtml(quoteCurrency(totals.total))}</strong></div>
+          </div>
+        </section>
+      </div>
+      <div class="quote-step-right quote-side-stack">
+        <section class="quote-total-highlight"><span>${escapeHtml(t("quoteGrandTotalVat"))}</span><strong data-quote-summary="total">${escapeHtml(quoteCurrency(totals.total))}</strong></section>
+        <section class="quote-work-card quote-quick-check"><div class="quote-card-header"><div><h3>${escapeHtml(state.lang === "ja" ? "\u30af\u30a4\u30c3\u30af\u78ba\u8a8d" : "Ki\u1ec3m tra nhanh")}</h3></div></div>
+          <div class="quote-check-list">
+            <div><span>${escapeHtml(t("quoteItems"))}</span><strong data-quote-item-count>${escapeHtml(t("quoteItemCount").replace("{count}", String(quote.items.length)))}</strong></div>
+            <div><span>${escapeHtml(t("validUntil"))}</span><strong data-quote-validity-label>${escapeHtml(quoteDateLabel(quote.validUntil))}</strong></div>
+            <div><span>${escapeHtml(t("customer"))}</span><strong data-quote-customer-label>${escapeHtml(quote.customerName || "-")}</strong></div>
+            <div><span>${escapeHtml(t("linkedRequest"))}</span><strong data-quote-request-label>${escapeHtml(quote.requestId || "-")}</strong></div>
+            <div><span>${escapeHtml(t("status"))}</span><strong data-quote-status-label>${escapeHtml([customerOk ? (state.lang === "ja" ? "\u9867\u5ba2\u8a2d\u5b9a\u6e08\u307f" : "\u0110\u00e3 c\u00f3 kh\u00e1ch h\u00e0ng") : (state.lang === "ja" ? "\u9867\u5ba2\u672a\u8a2d\u5b9a" : "Thi\u1ebfu kh\u00e1ch h\u00e0ng"), itemsOk ? (state.lang === "ja" ? "\u660e\u7d30\u3042\u308a" : "\u0110\u00e3 c\u00f3 h\u1ea1ng m\u1ee5c") : (state.lang === "ja" ? "\u660e\u7d30\u306a\u3057" : "Ch\u01b0a c\u00f3 h\u1ea1ng m\u1ee5c"), validityOk ? (state.lang === "ja" ? "\u6709\u52b9\u671f\u9650\u8a2d\u5b9a\u6e08\u307f" : "\u0110\u00e3 \u0111\u1eb7t hi\u1ec7u l\u1ef1c") : (state.lang === "ja" ? "\u6709\u52b9\u671f\u9650\u672a\u8a2d\u5b9a" : "Ch\u01b0a \u0111\u1eb7t hi\u1ec7u l\u1ef1c")].join(" / "))}</strong></div>
+          </div>
+        </section>
+        <section class="quote-work-card quote-warning-card"><div class="quote-card-header"><div><h3>${escapeHtml(state.lang === "ja" ? "\u8b66\u544a" : "C\u1ea3nh b\u00e1o")}</h3></div></div>${renderQuoteWarningList(quote, totals)}</section>
+      </div>
+    </div>`;
+  }
+
   function renderQuoteTodaySummary(rows) {
     const items = [
       [t("quotePendingApprovalShort"), rows.filter(quote => quoteAdminStatus(quote.status) === "pending_approval").length],
@@ -4676,43 +4806,15 @@
           <div class="quote-wizard-content">
             <section class="quote-wizard-panel ${currentStep === 1 ? "is-active" : ""}" data-quote-step-panel="1">
               <h3>${escapeHtml(t("quoteWizardStep1"))}</h3>
-              <section class="quote-work-card quote-request-link">
-                <div class="quote-section-head"><h3>${escapeHtml(t("quoteRequestInput"))}</h3><button class="btn btn-soft" type="button" data-quote-request-search>${escapeHtml(requestLinked ? t("changeRequest") : t("searchAction"))}</button></div>
-                <div class="quote-request-grid">
-                  <label class="quote-field-wide"><span>${escapeHtml(t("linkedRequest"))}</span><input name="requestId" value="${escapeHtml(quote.requestId)}" placeholder="${escapeHtml(t("quoteRequestPlaceholder"))}"></label>
-                  <div class="quote-linked-summary">${requestLinked ? `<strong>${escapeHtml(quote.requestId)}</strong><span>${escapeHtml(quote.customerName || "-")}</span><small>${escapeHtml(quote.projectName || quote.title || "-")}</small>` : `<span>${escapeHtml(t("requestNotLinked"))}</span>`}</div>
-                </div>
-              </section>
-              <section class="quote-work-card">
-                <h3>${escapeHtml(t("quoteCustomerProjectInfo"))}</h3>
-                <div class="quote-info-grid">
-                  <label><span>${escapeHtml(t("customer"))}</span><input name="customerName" value="${escapeHtml(quote.customerName)}"></label>
-                  <label><span>${escapeHtml(t("phone"))}</span><input name="customerPhone" value="${escapeHtml(quote.customerPhone)}"></label>
-                  <label><span>${escapeHtml(t("email"))}</span><input name="customerEmail" value="${escapeHtml(quote.customerEmail)}"></label>
-                  <label><span>ID</span><input name="customerId" value="${escapeHtml(quote.customerId)}"></label>
-                  <label><span>${escapeHtml(t("projectContent"))}</span><input name="projectName" value="${escapeHtml(quote.projectName)}"></label>
-                  <label><span>${escapeHtml(t("address"))}</span><input name="projectAddress" value="${escapeHtml(quote.projectAddress)}"></label>
-                  <label><span>${escapeHtml(t("validUntil"))}</span><input name="validUntil" type="date" value="${escapeHtml(String(quote.validUntil || "").slice(0, 10))}"></label>
-                  <label><span>${escapeHtml(t("assignee"))}</span><input name="assigneeName" value="${escapeHtml(quote.assigneeName)}"></label><input type="hidden" name="assigneeId" value="${escapeHtml(quote.assigneeId)}">
-                </div>
-              </section>
-              <section class="quote-work-card quote-items-card">
-                <div class="quote-section-head"><div><h3>${escapeHtml(t("quoteItems"))}</h3><p class="note" data-quote-item-count>${escapeHtml(itemCountText)}</p></div><div class="quote-table-actions"><button class="btn btn-primary" type="button" data-quote-add-item ${readonly ? "disabled" : ""}>${escapeHtml(quoteAddItemLabel())}</button></div></div>
-                <div class="quote-item-table-shell"><div class="quote-item-table quote-item-table-pro" data-quote-items><div class="quote-item-row quote-item-header"><span>No.</span><span>${escapeHtml(t("itemName"))}</span><span>${escapeHtml(t("itemDescription"))}</span><span>${escapeHtml(t("unit"))}</span><span>${escapeHtml(t("quantity"))}</span><span>${escapeHtml(t("unitPrice"))}</span><span>${escapeHtml(t("discount"))}</span><span>${escapeHtml(t("lineAmount"))}</span><span>${escapeHtml(t("action"))}</span></div>${quote.items.length ? quote.items.map(renderQuoteItemRow).join("") : `<div class="quote-empty-line">${escapeHtml(t("noQuotes"))}</div>`}</div></div>
-              </section>
+              ${renderQuoteStep1(quote, readonly, requestLinked, itemCountText)}
             </section>
             <section class="quote-wizard-panel ${currentStep === 2 ? "is-active" : ""}" data-quote-step-panel="2">
               <h3>${escapeHtml(t("quoteWizardStep2"))}</h3>
-              <div class="quote-notes-grid">
-                <div class="quote-work-card"><h3>${escapeHtml(t("quoteNotes"))}</h3><p class="note">${escapeHtml(t("customerNote"))}</p><textarea name="customerNote" data-quote-note-mirror>${escapeHtml(quote.customerNote)}</textarea></div>
-                <div class="quote-work-card"><h3>${escapeHtml(t("paymentTerms"))}</h3><textarea name="paymentTerms">${escapeHtml(quote.paymentTerms || t("quoteTermsDefault"))}</textarea></div>
-                <div class="quote-work-card"><h3>${escapeHtml(t("internalNote"))}</h3><textarea name="internalNote">${escapeHtml(quote.internalNote)}</textarea></div>
-              </div>
-              <div class="quote-upload-box quote-upload-large"><strong>${escapeHtml(t("attachments"))}</strong><span>${escapeHtml(t("quoteUploadHint"))}</span><small>${escapeHtml(t("quoteUploadMeta"))}</small></div>
+              ${renderQuoteStep2(quote, totals)}
             </section>
             <section class="quote-wizard-panel ${currentStep === 3 ? "is-active" : ""}" data-quote-step-panel="3">
               <h3>${escapeHtml(t("quoteWizardStep3"))}</h3>
-              ${renderQuoteSummaryCard(quote, totals, true)}
+              ${renderQuoteStep3(quote, totals)}
             </section>
             <section class="quote-wizard-panel ${currentStep === 4 ? "is-active" : ""}" data-quote-step-panel="4">
               <h3>${escapeHtml(t("quoteWizardStep4"))}</h3>
@@ -4726,7 +4828,7 @@
             <div>${currentStep > 1 ? `<button class="btn btn-soft" type="button" data-quote-prev data-quote-prev-step>${escapeHtml(t("previousStep"))}</button>` : ""}</div>
             <div class="quote-wizard-footer-actions">
               ${currentStep === 4 ? `<button class="btn btn-soft" type="button" data-quote-pdf-preview>${escapeHtml(t("exportPdf"))}</button><button class="btn btn-soft" type="button" data-quote-excel-preview>${escapeHtml(t("exportExcel"))}</button>` : ""}
-              <button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button>
+              ${currentStep === 4 ? `<button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button>` : ""}
               ${currentStep < 4 ? `<button class="btn btn-primary" type="button" data-quote-next data-quote-next-step>${escapeHtml(t("nextStep"))}</button>` : `<button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button>`}
             </div>
           </footer>
@@ -4759,6 +4861,7 @@
     const quote = quoteFromForm(form, {});
     const totals = calculateQuoteTotals(quote);
     const itemRows = [...form.querySelectorAll("[data-quote-item-row]")];
+    const warningQuote = { ...quote, items: itemRows.length ? quote.items : [] };
     const itemTable = form.querySelector("[data-quote-items]");
     if (itemTable) {
       itemTable.querySelector(".quote-empty-line")?.remove();
@@ -4790,6 +4893,28 @@
     form.querySelectorAll("[data-quote-review-terms]").forEach(node => {
       node.textContent = quote.paymentTerms || "-";
     });
+    form.querySelectorAll("[data-quote-validity-label]").forEach(node => {
+      node.textContent = quoteDateLabel(quote.validUntil);
+    });
+    form.querySelectorAll("[data-quote-customer-label]").forEach(node => {
+      node.textContent = quote.customerName || "-";
+    });
+    form.querySelectorAll("[data-quote-request-label]").forEach(node => {
+      node.textContent = quote.requestId || "-";
+    });
+    form.querySelectorAll("[data-quote-status-label]").forEach(node => {
+      const customerOk = !quoteNeedsCustomer(quote);
+      const itemsOk = itemRows.length > 0;
+      const validityOk = Boolean(quote.validUntil);
+      node.textContent = [
+        customerOk ? (state.lang === "ja" ? "\u9867\u5ba2\u8a2d\u5b9a\u6e08\u307f" : "\u0110\u00e3 c\u00f3 kh\u00e1ch h\u00e0ng") : (state.lang === "ja" ? "\u9867\u5ba2\u672a\u8a2d\u5b9a" : "Thi\u1ebfu kh\u00e1ch h\u00e0ng"),
+        itemsOk ? (state.lang === "ja" ? "\u660e\u7d30\u3042\u308a" : "\u0110\u00e3 c\u00f3 h\u1ea1ng m\u1ee5c") : (state.lang === "ja" ? "\u660e\u7d30\u306a\u3057" : "Ch\u01b0a c\u00f3 h\u1ea1ng m\u1ee5c"),
+        validityOk ? (state.lang === "ja" ? "\u6709\u52b9\u671f\u9650\u8a2d\u5b9a\u6e08\u307f" : "\u0110\u00e3 \u0111\u1eb7t hi\u1ec7u l\u1ef1c") : (state.lang === "ja" ? "\u6709\u52b9\u671f\u9650\u672a\u8a2d\u5b9a" : "Ch\u01b0a \u0111\u1eb7t hi\u1ec7u l\u1ef1c")
+      ].join(" / ");
+    });
+    form.querySelectorAll("[data-quote-warning-list]").forEach(node => {
+      updateQuoteWarningList(node, warningQuote, totals);
+    });
     itemRows.forEach((row, index) => {
       const itemIndex = row.querySelector(".quote-item-index");
       if (itemIndex) itemIndex.textContent = String(index + 1);
@@ -4819,8 +4944,7 @@
   function validateQuoteStep1() {
     const form = document.querySelector("[data-quote-form]");
     if (!form) return false;
-    const quote = quoteFromForm(form, {});
-    if (!Array.isArray(quote.items) || !quote.items.length) {
+    if (!form.querySelectorAll("[data-quote-item-row]").length) {
       toast(t("quoteMissingItemsSend"));
       return false;
     }
@@ -6202,6 +6326,10 @@
         return;
       }
       if (event.target.closest("[data-quote-placeholder-action]")) {
+        toast(t("featureLater"));
+        return;
+      }
+      if (event.target.closest("[data-quote-upload-placeholder]")) {
         toast(t("featureLater"));
         return;
       }
