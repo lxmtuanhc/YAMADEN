@@ -2544,6 +2544,139 @@ body {
   transform: scale(.96);
 }
 
+.quote-wizard-modal {
+  background: #fff;
+}
+
+.quote-wizard-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.quote-wizard-steps {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--line);
+  background: #f8fafc;
+}
+
+.quote-wizard-step {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  color: #64748b;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: left;
+}
+
+.quote-wizard-step b {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+  flex: 0 0 auto;
+}
+
+.quote-wizard-step.active {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.quote-wizard-step.done b,
+.quote-wizard-step.active b {
+  background: var(--primary);
+  color: #fff;
+}
+
+.quote-wizard-step:disabled {
+  cursor: default;
+  opacity: .66;
+}
+
+.quote-wizard-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  background: #f8fafc;
+}
+
+.quote-wizard-panel {
+  display: none;
+  gap: 14px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.quote-wizard-panel.is-active {
+  display: grid;
+}
+
+.quote-wizard-panel > h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.quote-wizard-footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+
+.quote-wizard-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.quote-payment-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.quote-payment-lines {
+  display: grid;
+  gap: 10px;
+}
+
+.quote-mini-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.quote-upload-large {
+  min-height: 140px;
+}
+
 .quote-detail-form,
 .quote-detail-main,
 .quote-form-section {
@@ -2573,6 +2706,14 @@ body {
   align-items: stretch;
   flex: 1 1 auto;
   min-height: 0;
+  overflow: hidden;
+}
+
+.quote-detail-form.quote-wizard-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
   overflow: hidden;
 }
 
@@ -4221,6 +4362,21 @@ body {
 
   .quote-detail-summary-fixed {
     position: static;
+  }
+
+  .quote-payment-grid,
+  .quote-wizard-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-wizard-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .quote-wizard-footer-actions,
+  .quote-wizard-footer-actions .btn {
+    width: 100%;
   }
 }
 
