@@ -1322,6 +1322,9 @@
     quoteDraftRequired: "\u5de5\u4e8b\u540d\u307e\u305f\u306f\u898b\u7a4d\u9805\u76ee\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
     quoteLayoutRefreshed: "\u30ec\u30a4\u30a2\u30a6\u30c8\u30c7\u30fc\u30bf\u3092\u66f4\u65b0\u3057\u307e\u3057\u305f\u3002",
     quoteCsvUnavailable: "CSV\u51fa\u529b\u306f\u307e\u3060\u63a5\u7d9a\u3055\u308c\u3066\u3044\u307e\u305b\u3093\u3002",
+    quoteNotFound: "\u898b\u7a4d\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3002",
+    featureLater: "\u3053\u306e\u6a5f\u80fd\u306f\u6b21\u306e\u30b9\u30c6\u30c3\u30d7\u3067\u5b9f\u88c5\u3057\u307e\u3059\u3002",
+    quoteDetailPlaceholderText: "\u898b\u7a4d\u8a73\u7d30\u753b\u9762\u306f\u6b21\u306e\u30b9\u30c6\u30c3\u30d7\u3067\u5b9f\u88c5\u3057\u307e\u3059\u3002",
     quoteSearchPlaceholder: "\u898b\u7a4d\u756a\u53f7\u30fb\u9867\u5ba2\u30fb\u5de5\u4e8b\u540d\u3092\u691c\u7d22",
     quoteNo: "\u898b\u7a4d\u756a\u53f7",
     projectContent: "\u5de5\u4e8b / \u5185\u5bb9",
@@ -1349,7 +1352,7 @@
     rounding: "\u4e38\u3081",
     grandTotal: "\u5408\u8a08",
     attachments: "\u6dfb\u4ed8\u8cc7\u6599",
-    kanban: "Kanban",
+    kanban: "\u30ab\u30f3\u30d0\u30f3",
     listView: "\u4e00\u89a7",
     noCustomerSelected: "\u9867\u5ba2\u672a\u8a2d\u5b9a",
     noValidUntil: "\u672a\u8a2d\u5b9a",
@@ -1398,6 +1401,9 @@
     quoteDraftRequired: "Vui l\u00f2ng nh\u1eadp t\u00ean c\u00f4ng tr\u00ecnh ho\u1eb7c h\u1ea1ng m\u1ee5c b\u00e1o gi\u00e1.",
     quoteLayoutRefreshed: "\u0110\u00e3 l\u00e0m m\u1edbi d\u1eef li\u1ec7u layout.",
     quoteCsvUnavailable: "Xu\u1ea5t CSV ch\u01b0a \u0111\u01b0\u1ee3c k\u1ebft n\u1ed1i trong layout n\u00e0y.",
+    quoteNotFound: "Kh\u00f4ng t\u00ecm th\u1ea5y b\u00e1o gi\u00e1.",
+    featureLater: "Ch\u1ee9c n\u0103ng n\u00e0y s\u1ebd \u0111\u01b0\u1ee3c ho\u00e0n thi\u1ec7n \u1edf b\u01b0\u1edbc sau.",
+    quoteDetailPlaceholderText: "M\u00e0n chi ti\u1ebft b\u00e1o gi\u00e1 s\u1ebd \u0111\u01b0\u1ee3c ho\u00e0n thi\u1ec7n \u1edf b\u01b0\u1edbc sau.",
     quoteSearchPlaceholder: "T\u00ecm ki\u1ebfm m\u00e3 b\u00e1o gi\u00e1 / kh\u00e1ch h\u00e0ng / c\u00f4ng tr\u00ecnh",
     quoteNo: "M\u00e3 b\u00e1o gi\u00e1",
     projectContent: "C\u00f4ng tr\u00ecnh / n\u1ed9i dung",
@@ -1456,6 +1462,7 @@
     selectedRequest: null,
     selectedUser: null,
     selectedStaff: null,
+    selectedQuoteId: null,
     staffStatusUpdating: new Set(),
     errors: {},
     loading: {
@@ -4068,6 +4075,33 @@
     `);
   }
 
+  function renderQuoteDetailPlaceholder(quote) {
+    const totals = calculateQuoteTotals(quote);
+    openDrawer(`
+      <article class="drawer-panel quote-detail-drawer">
+        <header class="drawer-head drawer-header">
+          <div><p class="eyebrow">${escapeHtml(t("quickQuote"))}</p><h2>${escapeHtml(t("quoteDetailTitle"))}</h2></div>
+          <div class="quote-detail-actions"><button class="btn btn-soft" type="button" data-close-drawer>${escapeHtml(t("close"))}</button><button class="btn btn-soft" type="button" data-quote-placeholder-action>${escapeHtml(t("saveDraft"))}</button><button class="btn btn-primary" type="button" data-quote-placeholder-action>${escapeHtml(t("sendToCustomerApp"))}</button></div>
+        </header>
+        <div class="drawer-body quote-detail-form">
+          <div class="quote-dev-note">${escapeHtml(t("quoteDetailPlaceholderText"))}</div>
+          <section class="quote-form-section">
+            <h3>${escapeHtml(quote.quoteNo || t("quoteNew"))}</h3>
+            <div class="info-grid">
+              ${infoItem(t("quoteNo"), quote.quoteNo)}
+              ${infoItem(t("customer"), quote.customerName || t("noCustomerSelected"))}
+              ${infoItem(t("projectContent"), quote.projectName || quote.title || "-")}
+              ${infoItem(t("grandTotal"), quoteCurrency(totals.total))}
+              ${infoItem(t("status"), quoteStatusLabel(quoteAdminStatus(quote.status)))}
+              ${infoItem(t("validUntil"), quoteDateLabel(quote.validUntil))}
+              ${infoItem(t("assignee"), quote.assigneeName || t("noAssignee"))}
+            </div>
+          </section>
+        </div>
+      </article>
+    `);
+  }
+
   const QUOTE_MOCK_STORAGE_KEY = "yamaden-mobile-spa";
   const QUOTE_LAYOUT_STORAGE_KEY = "yamaden-quotes-layout-v1";
   const QUOTE_STATUSES = ["draft", "pending_approval", "sent_to_customer", "viewed_by_customer", "change_requested", "accepted", "rejected", "expired"];
@@ -4254,6 +4288,26 @@
     return normalized;
   }
 
+  function openQuoteDetail(quoteId) {
+    const quote = quoteRows().find(item => String(item.id) === String(quoteId) || String(item.quoteNo) === String(quoteId));
+    if (!quote) {
+      toast(t("quoteNotFound"));
+      return;
+    }
+    state.selectedQuoteId = quote.id;
+    try {
+      renderQuoteDetail(quote);
+    } catch (error) {
+      console.error(error);
+      renderQuoteDetailPlaceholder(quote);
+    }
+  }
+
+  function closeQuoteDetail() {
+    state.selectedQuoteId = null;
+    closeDrawer();
+  }
+
   function filterQuotes(rows) {
     const search = String(state.filters.quoteSearch || "").toLowerCase();
     const status = state.filters.quoteStatus || "all";
@@ -4407,7 +4461,7 @@
     const validUntil = quoteDateLabel(quote.validUntil);
     const assigneeName = quote.assigneeName || t("noAssignee");
     const needsCustomer = quoteNeedsCustomer(quote);
-    return `<button class="quote-card" type="button" data-quote-action="detail" data-quote-id="${escapeHtml(quote.id)}">
+    return `<button class="quote-card" type="button" data-quote-card-id="${escapeHtml(quote.id)}" data-quote-action="detail" data-quote-id="${escapeHtml(quote.id)}">
       <span class="quote-card-top"><strong>${escapeHtml(quote.quoteNo)}</strong><span class="status-badge status-${escapeHtml(quoteAdminStatus(quote.status))}">${escapeHtml(quoteStatusLabel(quoteAdminStatus(quote.status)))}</span></span>
       ${needsCustomer ? `<span class="quote-warning-badge">${escapeHtml(t("missingCustomer"))}</span>` : ""}
       <span class="quote-card-customer">${escapeHtml(customerName)}</span>
@@ -5207,6 +5261,77 @@
     tooltip.setAttribute("aria-hidden", "true");
   }
 
+  function handleQuoteDashboardClick(event) {
+    if (state.currentView !== "quotes") return false;
+
+    const quoteView = event.target.closest("[data-quote-view]");
+    if (quoteView) {
+      event.preventDefault();
+      event.stopPropagation();
+      state.filters.quoteView = quoteView.dataset.quoteView === "list" ? "list" : "kanban";
+      renderQuotes();
+      return true;
+    }
+
+    const quoteCard = event.target.closest("[data-quote-card-id]");
+    if (quoteCard && !event.target.closest("[data-quote-card-skip]")) {
+      event.preventDefault();
+      event.stopPropagation();
+      openQuoteDetail(quoteCard.dataset.quoteCardId);
+      return true;
+    }
+
+    const quoteAction = event.target.closest("[data-quote-action]");
+    if (quoteAction) {
+      event.preventDefault();
+      event.stopPropagation();
+      const action = quoteAction.dataset.quoteAction;
+      if (action === "new") {
+        renderQuoteDetail(emptyQuote());
+        return true;
+      }
+      if (action === "detail") {
+        openQuoteDetail(quoteAction.dataset.quoteId);
+        return true;
+      }
+    }
+
+    const quoteScroll = event.target.closest("[data-quote-scroll]");
+    if (quoteScroll) {
+      event.preventDefault();
+      event.stopPropagation();
+      const board = document.querySelector(".quote-kanban-board");
+      if (!board) {
+        toast(t("featureLater"));
+        return true;
+      }
+      const column = board.querySelector(".quote-column");
+      const gap = Number.parseFloat(getComputedStyle(board).columnGap || getComputedStyle(board).gap || "14") || 14;
+      const step = (column?.getBoundingClientRect().width || 320) + gap;
+      board.scrollBy({ left: Number(quoteScroll.dataset.quoteScroll || 1) * step, behavior: "smooth" });
+      setTimeout(updateQuoteScrollButtons, 260);
+      return true;
+    }
+
+    const quoteRefresh = event.target.closest("[data-quote-refresh]");
+    if (quoteRefresh) {
+      event.preventDefault();
+      event.stopPropagation();
+      refreshQuoteLayoutData();
+      return true;
+    }
+
+    const quoteCsv = event.target.closest("[data-quote-csv]");
+    if (quoteCsv) {
+      event.preventDefault();
+      event.stopPropagation();
+      toast(t("quoteCsvUnavailable"));
+      return true;
+    }
+
+    return false;
+  }
+
   async function handleRequestViewClick(event) {
     const filter = event.target.closest("[data-request-filter]");
     if (filter) {
@@ -5640,7 +5765,10 @@
       localStorage.setItem("language", state.lang);
       renderCurrentView();
     });
-    bind($("viewRoot"), "click", handleRequestViewClick);
+    bind($("viewRoot"), "click", event => {
+      if (handleQuoteDashboardClick(event)) return;
+      void handleRequestViewClick(event);
+    });
     bind($("viewRoot"), "change", handleRequestViewChange);
     bind($("viewRoot"), "input", event => {
       if (handleRequestViewInput(event)) event.stopPropagation();
@@ -5710,7 +5838,8 @@
           void closeStaffEditForm();
           return;
         }
-        closeDrawer();
+        if (state.selectedQuoteId) closeQuoteDetail();
+        else closeDrawer();
       }
     });
 
@@ -5776,6 +5905,10 @@
       }
       if (event.target.closest("[data-close-request-detail]") || event.target.id === "requestDetailOverlay") {
         await closeRequestDetail();
+        return;
+      }
+      if (event.target.closest("[data-quote-placeholder-action]")) {
+        toast(t("featureLater"));
         return;
       }
       if (event.target.closest("select,input,textarea,option")) return;
