@@ -4707,11 +4707,11 @@
             </section>
           </div>
           <footer class="quote-wizard-footer">
-            <div>${currentStep > 1 ? `<button class="btn btn-soft" type="button" data-quote-prev-step>${escapeHtml(t("previousStep"))}</button>` : ""}</div>
+            <div>${currentStep > 1 ? `<button class="btn btn-soft" type="button" data-quote-prev data-quote-prev-step>${escapeHtml(t("previousStep"))}</button>` : ""}</div>
             <div class="quote-wizard-footer-actions">
               ${currentStep === 4 ? `<button class="btn btn-soft" type="button" data-quote-pdf-preview>${escapeHtml(t("exportPdf"))}</button><button class="btn btn-soft" type="button" data-quote-excel-preview>${escapeHtml(t("exportExcel"))}</button>` : ""}
               <button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button>
-              ${currentStep < 4 ? `<button class="btn btn-primary" type="button" data-quote-next-step>${escapeHtml(t("nextStep"))}</button>` : `<button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button>`}
+              ${currentStep < 4 ? `<button class="btn btn-primary" type="button" data-quote-next data-quote-next-step>${escapeHtml(t("nextStep"))}</button>` : `<button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button>`}
             </div>
           </footer>
         </form>
@@ -4805,10 +4805,6 @@
     if (!form) return false;
     const quote = quoteFromForm(form, {});
     if (Number(state.quoteWizardStep || 1) === 1) {
-      if (quoteNeedsCustomer(quote)) {
-        toast(t("quoteCustomerInfoRequired"));
-        return false;
-      }
       if (!quote.items.length) {
         toast(t("quoteMissingItemsSend"));
         return false;
@@ -6180,11 +6176,11 @@
         toast(t("fileExportLater"));
         return;
       }
-      if (event.target.closest("[data-quote-prev-step]")) {
+      if (event.target.closest("[data-quote-prev], [data-quote-prev-step]")) {
         setQuoteWizardStep(Number(state.quoteWizardStep || 1) - 1);
         return;
       }
-      if (event.target.closest("[data-quote-next-step]")) {
+      if (event.target.closest("[data-quote-next], [data-quote-next-step]")) {
         if (!validateQuoteWizardStep()) return;
         setQuoteWizardStep(Number(state.quoteWizardStep || 1) + 1);
         return;
