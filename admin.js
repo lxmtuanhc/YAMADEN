@@ -1344,7 +1344,13 @@
     attachments: "\u6dfb\u4ed8\u8cc7\u6599",
     kanban: "Kanban",
     listView: "\u4e00\u89a7",
-    noCustomerSelected: "\u9867\u5ba2\u672a\u8a2d\u5b9a"
+    noCustomerSelected: "\u9867\u5ba2\u672a\u8a2d\u5b9a",
+    noValidUntil: "\u6709\u52b9\u671f\u9650\u672a\u8a2d\u5b9a",
+    noAssignee: "\u62c5\u5f53\u8005\u672a\u8a2d\u5b9a",
+    missingCustomer: "\u9867\u5ba2\u672a\u8a2d\u5b9a",
+    quotePipeline: "\u898b\u7a4d\u30d1\u30a4\u30d7\u30e9\u30a4\u30f3",
+    quoteLayoutData: "\u30ec\u30a4\u30a2\u30a6\u30c8\u30c7\u30fc\u30bf",
+    quoteKanbanHint: "\u6a2a\u306b\u30b9\u30af\u30ed\u30fc\u30eb\u3057\u3066\u4ed6\u306e\u30b9\u30c6\u30fc\u30bf\u30b9\u3092\u8868\u793a"
   });
 
   Object.assign(i18n.vi, {
@@ -1397,7 +1403,13 @@
     attachments: "T\u00e0i li\u1ec7u \u0111\u00ednh k\u00e8m",
     kanban: "Kanban",
     listView: "Danh s\u00e1ch",
-    noCustomerSelected: "Ch\u01b0a c\u00f3 kh\u00e1ch h\u00e0ng"
+    noCustomerSelected: "Ch\u01b0a c\u00f3 kh\u00e1ch h\u00e0ng",
+    noValidUntil: "Ch\u01b0a \u0111\u1eb7t hi\u1ec7u l\u1ef1c",
+    noAssignee: "Ch\u01b0a c\u00f3 ph\u1ee5 tr\u00e1ch",
+    missingCustomer: "Thi\u1ebfu kh\u00e1ch h\u00e0ng",
+    quotePipeline: "Pipeline b\u00e1o gi\u00e1",
+    quoteLayoutData: "D\u1eef li\u1ec7u layout",
+    quoteKanbanHint: "K\u00e9o ngang \u0111\u1ec3 xem th\u00eam tr\u1ea1ng th\u00e1i"
   });
 
   const state = {
@@ -4179,17 +4191,18 @@
     const orderedValue = acceptedRows.reduce((sum, item) => sum + calculateQuoteTotals(item).total, 0);
     const viewMode = state.filters.quoteView || "kanban";
     $("viewRoot").innerHTML = `
-      <div class="page-intro"><p>${escapeHtml(t("quoteModuleSubtitle"))}</p></div>
-      <div class="quote-dev-note">${escapeHtml(t("quoteMockNote"))}</div>
-      <div class="kpi-grid kpi-grid-small quote-kpi-grid">
-        ${statCard(t("quoteTotal"), rows.length, t("realData"), "info", "receipt")}
-        ${statCard(t("totalQuoteValue"), quoteCurrency(totalValue), t("realData"), "warning", "clipboard")}
-        ${statCard(t("orderRate"), rows.length ? Math.round(acceptedRows.length / rows.length * 100) + "%" : "-", t("realData"), "success", "trend")}
-        ${statCard(t("orderedValue"), quoteCurrency(orderedValue), t("realData"), "total", "userCheck")}
+      <div class="quote-page-head">
+        <div class="page-intro"><p>${escapeHtml(t("quoteModuleSubtitle"))}</p><span class="quote-dev-note">${escapeHtml(t("quoteMockNote"))}</span></div>
+        <div class="request-command-bar demo-actions quote-toolbar">
+          <button class="btn btn-soft" disabled>CSV ${escapeHtml(t("export"))}</button>
+          <button class="btn btn-primary" type="button" data-quote-action="new">+ ${escapeHtml(t("quoteRegister"))}</button>
+        </div>
       </div>
-      <div class="request-command-bar demo-actions quote-toolbar">
-        <button class="btn btn-soft" disabled>CSV ${escapeHtml(t("export"))}</button>
-        <button class="btn btn-primary" type="button" data-quote-action="new">+ ${escapeHtml(t("quoteRegister"))}</button>
+      <div class="kpi-grid kpi-grid-small quote-kpi-grid">
+        ${statCard(t("quoteTotal"), rows.length, t("quoteLayoutData"), "info", "receipt")}
+        ${statCard(t("totalQuoteValue"), quoteCurrency(totalValue), t("quoteLayoutData"), "warning", "clipboard")}
+        ${statCard(t("orderRate"), rows.length ? Math.round(acceptedRows.length / rows.length * 100) + "%" : "-", t("quoteLayoutData"), "success", "trend")}
+        ${statCard(t("orderedValue"), quoteCurrency(orderedValue), t("quoteLayoutData"), "total", "userCheck")}
       </div>
       <div class="crm-filter-bar quote-filter-bar">
         <input class="filter-input" data-quote-filter="search" value="${escapeHtml(state.filters.quoteSearch || "")}" placeholder="${escapeHtml(t("quoteSearchPlaceholder"))}">
@@ -4202,7 +4215,7 @@
         ${[["kanban", t("kanban")], ["list", t("listView")]].map(([key, label]) => `<button class="staff-tag-tab ${viewMode === key ? "active" : ""}" type="button" data-quote-view="${escapeHtml(key)}">${escapeHtml(label)}</button>`).join("")}
       </div>
       <section class="section-card">
-        <div class="panel-head"><div><h2>${escapeHtml(t("quotes"))}</h2><p class="note">${escapeHtml(String(rows.length))}</p></div></div>
+        <div class="panel-head quote-pipeline-head"><div><h2>${escapeHtml(t("quotePipeline"))}</h2><p class="note">${escapeHtml(String(rows.length))}</p></div>${viewMode === "kanban" ? `<span class="quote-scroll-hint">${escapeHtml(t("quoteKanbanHint"))}</span>` : ""}</div>
         <div class="panel-body quote-board-body">${viewMode === "list" ? renderQuoteList(rows) : renderQuoteKanban(rows)}</div>
       </section>
     `;
@@ -4219,14 +4232,17 @@
     const totals = calculateQuoteTotals(quote);
     const customerName = quote.customerName || t("noCustomerSelected");
     const projectName = quote.projectName || quote.title || "";
-    const validUntil = quote.validUntil ? formatDate(quote.validUntil) : "-";
+    const validUntil = quote.validUntil ? formatDate(quote.validUntil) : t("noValidUntil");
+    const assigneeName = quote.assigneeName || t("noAssignee");
+    const needsCustomer = quoteAdminStatus(quote.status) === "sent_to_customer" && !quote.customerId && !quote.customerName;
     return `<button class="quote-card" type="button" data-quote-action="detail" data-quote-id="${escapeHtml(quote.id)}">
       <span class="quote-card-top"><strong>${escapeHtml(quote.quoteNo)}</strong><span class="status-badge status-${escapeHtml(quoteAdminStatus(quote.status))}">${escapeHtml(quoteStatusLabel(quoteAdminStatus(quote.status)))}</span></span>
+      ${needsCustomer ? `<span class="quote-warning-badge">${escapeHtml(t("missingCustomer"))}</span>` : ""}
       <span class="quote-card-customer">${escapeHtml(customerName)}</span>
       ${projectName ? `<small class="quote-card-project">${escapeHtml(projectName)}</small>` : ""}
       <strong class="quote-card-total">${escapeHtml(quoteCurrency(totals.total))}</strong>
       <span class="quote-card-meta">${escapeHtml(t("validUntil"))}: ${escapeHtml(validUntil)}</span>
-      <span class="quote-card-meta">${escapeHtml(t("assignee"))}: ${escapeHtml(quote.assigneeName || "-")}</span>
+      <span class="quote-card-meta">${escapeHtml(t("assignee"))}: ${escapeHtml(assigneeName)}</span>
     </button>`;
   }
 

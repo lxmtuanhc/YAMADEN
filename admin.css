@@ -2195,6 +2195,21 @@ body {
   gap: 6px;
 }
 
+.quote-page-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.quote-page-head .page-intro {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  margin-bottom: 0;
+}
+
 .quote-dev-note {
   display: inline-flex;
   align-items: center;
@@ -2216,8 +2231,8 @@ body {
 }
 
 .quote-kpi-grid .kpi-card {
-  min-height: 120px;
-  padding: 14px;
+  min-height: 104px;
+  padding: 12px;
 }
 
 .quote-filter-bar {
@@ -2235,17 +2250,38 @@ body {
   overflow-y: hidden;
   padding: 2px 2px 10px;
   overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+
+.quote-kanban-board::-webkit-scrollbar {
+  height: 10px;
+}
+
+.quote-kanban-board::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #cbd5e1;
+}
+
+.quote-pipeline-head {
+  gap: 12px;
+}
+
+.quote-scroll-hint {
+  align-self: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
 }
 
 .pipeline-column.quote-column {
   min-width: 280px;
-  min-height: 0;
-  max-height: calc(100vh - 360px);
+  min-height: 260px;
+  max-height: min(560px, calc(100vh - 360px));
   overflow-y: auto;
 }
 
 .quote-empty-column {
-  min-height: 58px;
+  min-height: 68px;
   display: grid;
   place-items: center;
   margin-top: 10px;
@@ -2302,6 +2338,19 @@ body {
 
 .quote-card-total {
   font-size: 18px;
+  font-weight: 950;
+}
+
+.quote-warning-badge {
+  width: fit-content;
+  min-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #fff7ed;
+  color: #c2410c;
+  font-size: 11px;
   font-weight: 950;
 }
 
@@ -3572,6 +3621,10 @@ body {
   }
 
   .quote-filter-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-page-head {
     grid-template-columns: 1fr;
   }
 }
