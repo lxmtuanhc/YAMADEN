@@ -2605,6 +2605,7 @@ body {
   grid-template-columns: minmax(0, 1fr) 340px;
   gap: 20px;
   align-items: start;
+  overflow: visible;
 }
 
 .quote-workspace-main,
@@ -2612,6 +2613,7 @@ body {
   display: grid;
   gap: 14px;
   min-width: 0;
+  overflow: visible;
 }
 
 .quote-notes-grid {
@@ -2891,12 +2893,18 @@ body {
   font-weight: 950;
 }
 
-.quote-summary-panel {
+.quote-detail-side {
   position: sticky;
   top: 16px;
+  align-self: start;
+  min-width: 0;
+  max-height: none;
+  overflow: visible;
+}
+
+.quote-summary-panel {
   display: grid;
   gap: 12px;
-  align-self: start;
   max-height: none;
   overflow: visible;
   box-shadow: 0 10px 26px rgba(15, 23, 42, .04);
@@ -4134,7 +4142,14 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .quote-detail-side,
   .quote-summary-panel {
+    position: static;
+  }
+}
+
+@media (max-height: 760px) and (min-width: 1281px) {
+  .quote-detail-side {
     position: static;
   }
 }

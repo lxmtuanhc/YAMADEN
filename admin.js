@@ -4580,13 +4580,13 @@
           <div class="quote-detail-actions"><button class="btn btn-soft" type="button" data-quote-pdf-preview>${escapeHtml(t("pdfPreview"))}</button><button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button><button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button></div>
           <button class="quote-modal-close" type="button" data-close-drawer aria-label="${escapeHtml(t("close"))}">&times;</button>
         </header>
-        <form class="drawer-body quote-detail-form" data-quote-form>
+        <form class="drawer-body quote-detail-form quote-detail-content" data-quote-form>
           <input type="hidden" name="id" value="${escapeHtml(quote.id)}"><input type="hidden" name="quoteNo" value="${escapeHtml(quote.quoteNo)}">
           <div class="quote-stepper">
             ${[[t("quoteStepRequest"), requestLinked], [t("quoteStepQuote"), true], [t("quoteStepReview"), false], [t("quoteStepSend"), quote.visibleToCustomer]].map(([label, done], index) => `<span class="quote-step ${index === 1 ? "active" : ""} ${done ? "done" : ""}"><b>${done ? "\u2713" : index + 1}</b>${escapeHtml(label)}</span>`).join("")}
           </div>
-          <div class="quote-workspace-layout">
-            <div class="quote-workspace-main">
+          <div class="quote-workspace-layout quote-detail-body-grid">
+            <div class="quote-workspace-main quote-detail-main">
               <section class="quote-work-card quote-request-link">
                 <div class="quote-section-head"><h3>${escapeHtml(t("quoteRequestInput"))}</h3><button class="btn btn-soft" type="button" data-quote-request-search>${escapeHtml(requestLinked ? t("changeRequest") : t("searchAction"))}</button></div>
                 <div class="quote-request-grid">
@@ -4625,13 +4625,15 @@
                 <div class="quote-work-card"><h3>${escapeHtml(t("internalNote"))}</h3><textarea name="internalNote">${escapeHtml(quote.internalNote)}</textarea></div>
               </section>
             </div>
-            <aside class="quote-summary-panel">
-              <h3>${escapeHtml(t("quotePaymentSummary"))}</h3>
-              <div class="quote-summary-block"><h4>${escapeHtml(t("grandTotal"))}</h4><div class="summary-row"><span>${escapeHtml(t("subtotal"))}</span><strong data-quote-summary="subtotal">${escapeHtml(quoteCurrency(totals.subtotal))}</strong></div><label class="summary-input-row"><span>${escapeHtml(t("discount"))}</span><input name="discount" type="number" value="${escapeHtml(quote.discount || 0)}"></label><div class="summary-row"><span>${escapeHtml(t("quoteAfterDiscount"))}</span><strong data-quote-summary="afterDiscount">${escapeHtml(quoteCurrency(totals.taxableAmount))}</strong></div></div>
-              <div class="quote-summary-block"><h4>${escapeHtml(t("quoteTaxSection"))}</h4><label class="summary-input-row"><span>${escapeHtml(t("taxRate"))}</span><input name="taxRate" type="number" value="${escapeHtml(Math.round((quote.taxRate || 0.1) * 100))}"></label><div class="summary-row"><span>${escapeHtml(t("taxAmount"))}</span><strong data-quote-summary="taxAmount">${escapeHtml(quoteCurrency(totals.taxAmount))}</strong></div><label class="summary-input-row"><span>${escapeHtml(t("rounding"))}</span><input name="rounding" type="number" value="${escapeHtml(quote.rounding || 0)}"></label></div>
-              <div class="quote-grand-total"><span>${escapeHtml(t("quoteGrandTotalVat"))}</span><strong data-quote-summary="total">${escapeHtml(quoteCurrency(totals.total))}</strong></div>
-              <div class="quote-upload-box"><strong>${escapeHtml(t("attachments"))}</strong><span>${escapeHtml(t("quoteUploadHint"))}</span><small>${escapeHtml(t("quoteUploadMeta"))}</small></div>
-              <div class="quote-summary-actions"><button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button><button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button></div>
+            <aside class="quote-detail-side">
+              <section class="quote-summary-panel">
+                <h3>${escapeHtml(t("quotePaymentSummary"))}</h3>
+                <div class="quote-summary-block"><h4>${escapeHtml(t("grandTotal"))}</h4><div class="summary-row"><span>${escapeHtml(t("subtotal"))}</span><strong data-quote-summary="subtotal">${escapeHtml(quoteCurrency(totals.subtotal))}</strong></div><label class="summary-input-row"><span>${escapeHtml(t("discount"))}</span><input name="discount" type="number" value="${escapeHtml(quote.discount || 0)}"></label><div class="summary-row"><span>${escapeHtml(t("quoteAfterDiscount"))}</span><strong data-quote-summary="afterDiscount">${escapeHtml(quoteCurrency(totals.taxableAmount))}</strong></div></div>
+                <div class="quote-summary-block"><h4>${escapeHtml(t("quoteTaxSection"))}</h4><label class="summary-input-row"><span>${escapeHtml(t("taxRate"))}</span><input name="taxRate" type="number" value="${escapeHtml(Math.round((quote.taxRate || 0.1) * 100))}"></label><div class="summary-row"><span>${escapeHtml(t("taxAmount"))}</span><strong data-quote-summary="taxAmount">${escapeHtml(quoteCurrency(totals.taxAmount))}</strong></div><label class="summary-input-row"><span>${escapeHtml(t("rounding"))}</span><input name="rounding" type="number" value="${escapeHtml(quote.rounding || 0)}"></label></div>
+                <div class="quote-grand-total"><span>${escapeHtml(t("quoteGrandTotalVat"))}</span><strong data-quote-summary="total">${escapeHtml(quoteCurrency(totals.total))}</strong></div>
+                <div class="quote-upload-box"><strong>${escapeHtml(t("attachments"))}</strong><span>${escapeHtml(t("quoteUploadHint"))}</span><small>${escapeHtml(t("quoteUploadMeta"))}</small></div>
+                <div class="quote-summary-actions"><button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button><button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button></div>
+              </section>
             </aside>
           </div>
         </form>
