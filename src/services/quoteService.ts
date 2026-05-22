@@ -46,6 +46,7 @@ function normalizeQuote(quote: Quote): Quote {
 function visibleToCurrentUser(quote: Quote): boolean {
   const user = useAppStore.getState().user;
   if (!quote.visibleToCustomer) return false;
+  if (!quote.customerId && !quote.customerName) return false;
   if (!user) return true;
   return Boolean(
     !quote.customerId && !quote.customerPhone && !quote.customerEmail ||

@@ -1317,6 +1317,7 @@
     quoteMockNote: "\u30ec\u30a4\u30a2\u30a6\u30c8\u8a66\u9a13\u4e2d\uff1aMongoDB\u4fdd\u5b58\u30fbPDF\u4f5c\u6210\u306f\u672a\u63a5\u7d9a\u3067\u3059\u3002",
     quoteSentMock: "\u898b\u7a4d\u306f\u30c6\u30b9\u30c8\u8868\u793a\u3068\u3057\u3066\u9867\u5ba2\u30a2\u30d7\u30ea\u306b\u8868\u793a\u3055\u308c\u307e\u3057\u305f\u3002",
     quoteSavedMock: "\u898b\u7a4d\u306e\u4e0b\u66f8\u304d\u3092\u30c6\u30b9\u30c8\u30c7\u30fc\u30bf\u3068\u3057\u3066\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002",
+    quoteMissingCustomerSend: "\u9867\u5ba2\u3092\u9078\u629e\u3057\u3066\u304b\u3089\u9867\u5ba2\u30a2\u30d7\u30ea\u3078\u9001\u4fe1\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
     quoteSearchPlaceholder: "\u898b\u7a4d\u756a\u53f7\u30fb\u9867\u5ba2\u30fb\u5de5\u4e8b\u540d\u3092\u691c\u7d22",
     quoteNo: "\u898b\u7a4d\u756a\u53f7",
     projectContent: "\u5de5\u4e8b / \u5185\u5bb9",
@@ -1388,6 +1389,7 @@
     quoteMockNote: "Ch\u1ebf \u0111\u1ed9 layout th\u1eed nghi\u1ec7m: ch\u01b0a l\u01b0u MongoDB, ch\u01b0a t\u1ea1o PDF.",
     quoteSentMock: "B\u00e1o gi\u00e1 \u0111\u00e3 \u0111\u01b0\u1ee3c hi\u1ec3n th\u1ecb trong app kh\u00e1ch h\u00e0ng \u1edf ch\u1ebf \u0111\u1ed9 th\u1eed nghi\u1ec7m.",
     quoteSavedMock: "\u0110\u00e3 l\u01b0u nh\u00e1p b\u00e1o gi\u00e1 v\u00e0o d\u1eef li\u1ec7u th\u1eed nghi\u1ec7m.",
+    quoteMissingCustomerSend: "Vui l\u00f2ng ch\u1ecdn kh\u00e1ch h\u00e0ng tr\u01b0\u1edbc khi g\u1eedi b\u00e1o gi\u00e1 l\u00ean app.",
     quoteSearchPlaceholder: "T\u00ecm ki\u1ebfm m\u00e3 b\u00e1o gi\u00e1 / kh\u00e1ch h\u00e0ng / c\u00f4ng tr\u00ecnh",
     quoteNo: "M\u00e3 b\u00e1o gi\u00e1",
     projectContent: "C\u00f4ng tr\u00ecnh / n\u1ed9i dung",
@@ -4122,21 +4124,36 @@
     };
   }
 
+  function normalizeQuoteDemoTitle(value) {
+    const text = String(value || "");
+    if (text === "Lap them 6 o cam va day dien" || text.includes("6 o cam") || (text.includes("6") && (text.includes("\u862f") || text.includes("\u76fb")))) {
+      return "L\u1eafp th\u00eam 6 \u1ed5 c\u1eafm v\u00e0 d\u00e2y \u0111i\u1ec7n";
+    }
+    return text;
+  }
+
   function normalizeQuote(quote) {
     const now = new Date().toISOString();
     const items = toList(quote?.items).length ? toList(quote.items).map(normalizeQuoteItem) : [normalizeQuoteItem({}, 0)];
+    const customerId = quote?.customerId || "";
+    const customerName = quote?.customerName || quote?.name || "";
+    const projectName = normalizeQuoteDemoTitle(quote?.projectName || quote?.title || "");
+    const title = normalizeQuoteDemoTitle(quote?.title || quote?.projectName || "");
+    const status = !customerId && !customerName && quoteAdminStatus(quote?.status || "draft") === "sent_to_customer"
+      ? "draft"
+      : quoteAdminStatus(quote?.status || "draft");
     const base = {
       id: quote?.id || "quote-" + Date.now(),
       quoteNo: quote?.quoteNo || quote?.quoteCode || "Q-" + new Date().getFullYear() + "-" + String(Date.now()).slice(-5),
       requestId: quote?.requestId || "",
-      customerId: quote?.customerId || "",
-      customerName: quote?.customerName || quote?.name || "",
+      customerId,
+      customerName,
       customerPhone: quote?.customerPhone || quote?.phone || "",
       customerEmail: quote?.customerEmail || quote?.email || "",
-      projectName: quote?.projectName || quote?.title || "",
+      projectName,
       projectAddress: quote?.projectAddress || quote?.address || "",
-      title: quote?.title || quote?.projectName || "",
-      status: quoteAdminStatus(quote?.status || "draft"),
+      title,
+      status,
       assigneeId: quote?.assigneeId || "",
       assigneeName: quote?.assigneeName || "",
       items,
@@ -4211,7 +4228,7 @@
   }
 
   function quoteNeedsCustomer(quote) {
-    return quoteAdminStatus(quote?.status) === "sent_to_customer" && !quote?.customerId && !quote?.customerName;
+    return !quote?.customerId && !quote?.customerName;
   }
 
   function parseQuoteDate(value) {
@@ -5767,6 +5784,10 @@
           const existing = quoteRows().find(item => String(item.id) === String(new FormData(form).get("id")));
           const quote = quoteFromForm(form, existing);
           if (quoteSave.matches("[data-quote-send]")) {
+            if (quoteNeedsCustomer(quote)) {
+              toast(t("quoteMissingCustomerSend"));
+              return;
+            }
             quote.status = "sent_to_customer";
             quote.visibleToCustomer = true;
             quote.sentToCustomerAt = new Date().toISOString();
