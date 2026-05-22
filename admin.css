@@ -28,6 +28,7 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; width: 100%; font-family: Inter, "Noto Sans JP", "Segoe UI", Arial, sans-serif; color: var(--text); background: var(--bg); overflow-x: hidden; }
+body.quote-modal-open { overflow: hidden; }
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
 
@@ -1000,6 +1001,12 @@ h1 {
 
 .drawer.open.quote-detail-open {
   justify-content: center;
+  align-items: stretch;
+  z-index: 9999;
+  padding: 16px 24px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, .45);
+  backdrop-filter: blur(6px);
 }
 
 .drawer-panel {
@@ -2453,15 +2460,19 @@ body {
 
 .quote-detail-drawer {
   width: min(1380px, 100%);
+  height: calc(100dvh - 32px);
   min-height: calc(100dvh - 32px);
   max-height: calc(100dvh - 32px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  align-self: stretch;
 }
 
 .quote-workspace-head {
   align-items: center;
+  flex: 0 0 auto;
+  padding: 14px 18px;
 }
 
 .quote-head-main {
@@ -2469,9 +2480,26 @@ body {
   gap: 4px;
 }
 
+.quote-head-main .eyebrow {
+  margin: 0;
+  letter-spacing: .08em;
+}
+
 .quote-head-main h2,
 .quote-head-main .note {
   margin: 0;
+}
+
+.quote-head-main h2 {
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.quote-head-main .status-badge {
+  justify-self: start;
+  width: fit-content;
+  min-height: 24px;
+  padding: 4px 9px;
 }
 
 .quote-detail-actions {
@@ -2491,8 +2519,10 @@ body {
 .quote-detail-form {
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding-top: 14px;
+  scroll-behavior: smooth;
 }
 
 .quote-detail-layout {
@@ -2691,6 +2721,8 @@ body {
 .quote-item-table-pro [data-quote-line-amount] {
   white-space: nowrap;
   font-size: 12px;
+  text-align: right;
+  justify-self: end;
 }
 
 .quote-item-table-pro .quote-item-row:last-child {
@@ -2846,6 +2878,17 @@ body {
   gap: 12px;
 }
 
+.quote-summary-panel .summary-row span,
+.quote-summary-panel .summary-input-row span {
+  min-width: 0;
+}
+
+.quote-summary-panel .summary-row strong {
+  flex: 0 0 auto;
+  text-align: right;
+  white-space: nowrap;
+}
+
 .summary-input-row input {
   width: 120px;
   min-height: 34px;
@@ -2889,6 +2932,11 @@ body {
 .quote-summary-actions {
   display: grid;
   gap: 8px;
+}
+
+.quote-summary-actions .btn {
+  width: 100%;
+  justify-content: center;
 }
 
 .placeholder-input {
@@ -4086,6 +4134,21 @@ body {
 }
 
 @media (max-width: 720px) {
+  .drawer.open.quote-detail-open {
+    padding: 10px;
+  }
+
+  .drawer-panel.quote-detail-drawer {
+    width: calc(100vw - 20px);
+    height: calc(100dvh - 20px);
+    min-height: calc(100dvh - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+
+  .quote-workspace-head {
+    align-items: flex-start;
+  }
+
   .quote-stepper,
   .quote-info-grid {
     grid-template-columns: 1fr;

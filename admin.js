@@ -1333,6 +1333,7 @@
     quoteStepSend: "\u9001\u4fe1",
     quoteRequestInput: "\u4f9d\u983cID\u5165\u529b",
     quoteRequestPlaceholder: "\u4f9d\u983cID\u30fb\u9867\u5ba2\u540d\u30fb\u96fb\u8a71\u756a\u53f7\u3092\u5165\u529b",
+    quoteRequestSearchLater: "\u4f9d\u983c\u691c\u7d22\u306f\u5f8c\u3067\u63a5\u7d9a\u3057\u307e\u3059\u3002",
     searchAction: "\u691c\u7d22",
     changeRequest: "\u4f9d\u983c\u3092\u5909\u66f4",
     requestNotLinked: "\u4f9d\u983c\u672a\u9023\u643a",
@@ -1347,6 +1348,7 @@
     quoteItemCount: "{count}\u9805\u76ee",
     pdfPreviewLater: "PDF\u30d7\u30ec\u30d3\u30e5\u30fc\u306f\u5f8c\u3067\u5b9f\u88c5\u3057\u307e\u3059\u3002",
     deleteRow: "\u884c\u524a\u9664",
+    noQuoteItemToDelete: "\u524a\u9664\u3059\u308b\u898b\u7a4d\u9805\u76ee\u304c\u3042\u308a\u307e\u305b\u3093\u3002",
     quoteSearchPlaceholder: "\u898b\u7a4d\u756a\u53f7\u30fb\u9867\u5ba2\u30fb\u5de5\u4e8b\u540d\u3092\u691c\u7d22",
     quoteNo: "\u898b\u7a4d\u756a\u53f7",
     projectContent: "\u5de5\u4e8b / \u5185\u5bb9",
@@ -1434,6 +1436,7 @@
     quoteStepSend: "G\u1eedi b\u00e1o gi\u00e1",
     quoteRequestInput: "Nh\u1eadp ID y\u00eau c\u1ea7u",
     quoteRequestPlaceholder: "Nh\u1eadp ID y\u00eau c\u1ea7u / t\u00ean kh\u00e1ch / s\u1ed1 \u0111i\u1ec7n tho\u1ea1i",
+    quoteRequestSearchLater: "Ch\u1ee9c n\u0103ng t\u00ecm y\u00eau c\u1ea7u s\u1ebd \u0111\u01b0\u1ee3c k\u1ebft n\u1ed1i sau.",
     searchAction: "T\u00ecm ki\u1ebfm",
     changeRequest: "\u0110\u1ed5i y\u00eau c\u1ea7u",
     requestNotLinked: "Ch\u01b0a li\u00ean k\u1ebft y\u00eau c\u1ea7u",
@@ -1448,6 +1451,7 @@
     quoteItemCount: "T\u1ed5ng s\u1ed1 {count} h\u1ea1ng m\u1ee5c",
     pdfPreviewLater: "Ch\u1ee9c n\u0103ng xem tr\u01b0\u1edbc PDF s\u1ebd \u0111\u01b0\u1ee3c ho\u00e0n thi\u1ec7n sau.",
     deleteRow: "X\u00f3a d\u00f2ng",
+    noQuoteItemToDelete: "Kh\u00f4ng c\u00f3 d\u00f2ng h\u1ea1ng m\u1ee5c \u0111\u1ec3 x\u00f3a.",
     quoteSearchPlaceholder: "T\u00ecm ki\u1ebfm m\u00e3 b\u00e1o gi\u00e1 / kh\u00e1ch h\u00e0ng / c\u00f4ng tr\u00ecnh",
     quoteNo: "M\u00e3 b\u00e1o gi\u00e1",
     projectContent: "C\u00f4ng tr\u00ecnh / n\u1ed9i dung",
@@ -2017,14 +2021,23 @@
     drawer.classList.remove("quote-detail-open");
     drawer.setAttribute("aria-hidden", "true");
     drawer.innerHTML = "";
+    document.body.classList.remove("quote-modal-open");
   }
 
   function openDrawer(html) {
     const drawer = $("drawer");
+    const isQuoteDetail = html.includes("quote-detail-drawer");
     drawer.innerHTML = html;
     drawer.classList.add("open");
-    drawer.classList.toggle("quote-detail-open", html.includes("quote-detail-drawer"));
+    drawer.classList.toggle("quote-detail-open", isQuoteDetail);
     drawer.setAttribute("aria-hidden", "false");
+    document.body.classList.toggle("quote-modal-open", isQuoteDetail);
+    if (isQuoteDetail) {
+      requestAnimationFrame(() => {
+        const content = document.querySelector(".quote-detail-form");
+        if (content) content.scrollTop = 0;
+      });
+    }
   }
 
   function closeConfirm(resolve, value) {
@@ -4183,6 +4196,10 @@
     return "\u00a5" + Math.round(Number(value || 0)).toLocaleString("ja-JP");
   }
 
+  function quoteAddItemLabel() {
+    return "+ " + String(t("addQuoteItem")).replace(/^\+\s*/, "");
+  }
+
   function quoteItemAmount(item) {
     return Math.max(0, Number(item?.quantity || 0) * Number(item?.unitPrice || 0) - Number(item?.discount || 0));
   }
@@ -4565,7 +4582,7 @@
           <div class="quote-workspace-layout">
             <div class="quote-workspace-main">
               <section class="quote-work-card quote-request-link">
-                <div class="quote-section-head"><h3>${escapeHtml(t("quoteRequestInput"))}</h3><button class="btn btn-soft" type="button" data-quote-placeholder-action>${escapeHtml(requestLinked ? t("changeRequest") : t("searchAction"))}</button></div>
+                <div class="quote-section-head"><h3>${escapeHtml(t("quoteRequestInput"))}</h3><button class="btn btn-soft" type="button" data-quote-request-search>${escapeHtml(requestLinked ? t("changeRequest") : t("searchAction"))}</button></div>
                 <div class="quote-request-grid">
                   <label class="quote-field-wide"><span>${escapeHtml(t("linkedRequest"))}</span><input name="requestId" value="${escapeHtml(quote.requestId)}" placeholder="${escapeHtml(t("quoteRequestPlaceholder"))}"></label>
                   <div class="quote-linked-summary">
@@ -4588,14 +4605,14 @@
                 </div>
               </section>
               <section class="quote-work-card quote-items-card">
-                <div class="quote-section-head"><div><h3>${escapeHtml(t("quoteItems"))}</h3><p class="note">${escapeHtml(itemCountText)}</p></div><div class="quote-table-actions"><button class="btn btn-soft" type="button" data-quote-placeholder-action>${escapeHtml(t("deleteRow"))}</button><button class="btn btn-primary" type="button" data-quote-add-item ${readonly ? "disabled" : ""}>+ ${escapeHtml(t("addQuoteItem"))}</button></div></div>
+                <div class="quote-section-head"><div><h3>${escapeHtml(t("quoteItems"))}</h3><p class="note" data-quote-item-count>${escapeHtml(itemCountText)}</p></div><div class="quote-table-actions"><button class="btn btn-soft" type="button" data-quote-remove-last ${readonly ? "disabled" : ""}>${escapeHtml(t("deleteRow"))}</button><button class="btn btn-primary" type="button" data-quote-add-item ${readonly ? "disabled" : ""}>${escapeHtml(quoteAddItemLabel())}</button></div></div>
                 <div class="quote-item-table-shell">
                   <div class="quote-item-table quote-item-table-pro" data-quote-items>
                     <div class="quote-item-row quote-item-header"><span>No.</span><span>${escapeHtml(t("itemName"))}</span><span>${escapeHtml(t("itemDescription"))}</span><span>${escapeHtml(t("unit"))}</span><span>${escapeHtml(t("quantity"))}</span><span>${escapeHtml(t("unitPrice"))}</span><span>${escapeHtml(t("discount"))}</span><span>${escapeHtml(t("lineAmount"))}</span><span>${escapeHtml(t("action"))}</span></div>
                     ${quote.items.length ? quote.items.map(renderQuoteItemRow).join("") : `<div class="quote-empty-line">${escapeHtml(t("noQuotes"))}</div>`}
                   </div>
                 </div>
-                <footer class="quote-table-footer">${escapeHtml(itemCountText)}</footer>
+                <footer class="quote-table-footer" data-quote-item-count>${escapeHtml(itemCountText)}</footer>
               </section>
               <section class="quote-notes-grid">
                 <div class="quote-work-card"><h3>${escapeHtml(t("quoteNotes"))}</h3><p class="note">${escapeHtml(t("customerNote"))}</p><textarea name="customerNote" data-quote-note-mirror>${escapeHtml(quote.customerNote)}</textarea></div>
@@ -4640,11 +4657,23 @@
     if (!form) return;
     const quote = quoteFromForm(form, {});
     const totals = calculateQuoteTotals(quote);
+    const itemRows = [...form.querySelectorAll("[data-quote-item-row]")];
+    const itemTable = form.querySelector("[data-quote-items]");
+    if (itemTable) {
+      itemTable.querySelector(".quote-empty-line")?.remove();
+      if (!itemRows.length) itemTable.insertAdjacentHTML("beforeend", `<div class="quote-empty-line">${escapeHtml(t("noQuotes"))}</div>`);
+    }
+    const itemCountText = t("quoteItemCount").replace("{count}", String(itemRows.length));
+    form.querySelectorAll("[data-quote-item-count]").forEach(node => {
+      node.textContent = itemCountText;
+    });
     form.querySelector("[data-quote-summary='subtotal']") && (form.querySelector("[data-quote-summary='subtotal']").textContent = quoteCurrency(totals.subtotal));
     form.querySelector("[data-quote-summary='afterDiscount']") && (form.querySelector("[data-quote-summary='afterDiscount']").textContent = quoteCurrency(totals.taxableAmount));
     form.querySelector("[data-quote-summary='taxAmount']") && (form.querySelector("[data-quote-summary='taxAmount']").textContent = quoteCurrency(totals.taxAmount));
     form.querySelector("[data-quote-summary='total']") && (form.querySelector("[data-quote-summary='total']").textContent = quoteCurrency(totals.total));
-    form.querySelectorAll("[data-quote-item-row]").forEach(row => {
+    itemRows.forEach((row, index) => {
+      const itemIndex = row.querySelector(".quote-item-index");
+      if (itemIndex) itemIndex.textContent = String(index + 1);
       const item = normalizeQuoteItem({
         quantity: row.querySelector("[name='itemQuantity']")?.value || 0,
         unitPrice: row.querySelector("[name='itemUnitPrice']")?.value || 0,
@@ -6002,6 +6031,10 @@
         await closeRequestDetail();
         return;
       }
+      if (event.target.closest("[data-quote-request-search]")) {
+        toast(t("quoteRequestSearchLater"));
+        return;
+      }
       if (event.target.closest("[data-quote-placeholder-action]")) {
         toast(t("featureLater"));
         return;
@@ -6100,6 +6133,18 @@
           target.querySelector(".quote-empty-line")?.remove();
           target.insertAdjacentHTML("beforeend", renderQuoteItemRow(normalizeQuoteItem({}, target.querySelectorAll("[data-quote-item-row]").length), target.querySelectorAll("[data-quote-item-row]").length));
         }
+        updateQuoteDetailTotals();
+        return;
+      }
+
+      const removeLastQuoteItem = event.target.closest("[data-quote-remove-last]");
+      if (removeLastQuoteItem) {
+        const rows = document.querySelectorAll("[data-quote-item-row]");
+        if (!rows.length) {
+          toast(t("noQuoteItemToDelete"));
+          return;
+        }
+        rows[rows.length - 1].remove();
         updateQuoteDetailTotals();
         return;
       }
