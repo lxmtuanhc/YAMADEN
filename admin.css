@@ -2698,7 +2698,7 @@ body {
 
 .quote-item-table-pro {
   width: 100%;
-  min-width: 900px;
+  min-width: 940px;
   gap: 0;
   overflow: visible;
 }
@@ -2706,14 +2706,14 @@ body {
 .quote-item-table-pro .quote-item-row {
   min-width: 0;
   margin: 0;
-  padding: 7px;
+  padding: 6px 7px;
   border-bottom: 1px solid #e2e8f0;
-  grid-template-columns: 38px minmax(132px, 1.05fr) minmax(160px, 1.25fr) 64px 74px 96px 92px 108px 68px;
+  grid-template-columns: 34px minmax(170px, 1.25fr) minmax(210px, 1.45fr) 60px 72px 96px 92px 112px 72px;
   gap: 6px;
 }
 
 .quote-item-table-pro .quote-item-row input {
-  min-height: 34px;
+  min-height: 36px;
   padding-inline: 8px;
   font-size: 12px;
 }
@@ -2730,7 +2730,7 @@ body {
 }
 
 .quote-item-header {
-  min-height: 42px;
+  min-height: 38px;
   background: #f8fafc;
   color: #475569;
   font-size: 11px;
@@ -2744,21 +2744,39 @@ body {
   justify-content: flex-end;
 }
 
-.quote-row-actions .icon-btn {
+.quote-row-icon {
   width: 30px;
   height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dbe3ef;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #334155;
   box-shadow: none;
+  font-size: 14px;
+  font-weight: 950;
+  line-height: 1;
+  transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease;
 }
 
-.quote-row-actions .icon-btn.danger {
+.quote-row-icon:hover {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.quote-row-icon.danger {
   color: #b91c1c;
   background: #fff1f2;
+  border-color: #fecdd3;
 }
 
-.quote-table-footer {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
+.quote-row-icon.danger:hover {
+  border-color: #fda4af;
+  background: #ffe4e6;
+  color: #991b1b;
 }
 
 .quote-empty-line {
@@ -2853,8 +2871,8 @@ body {
   display: grid;
   gap: 12px;
   align-self: start;
-  max-height: calc(100dvh - 168px);
-  overflow: auto;
+  max-height: none;
+  overflow: visible;
   box-shadow: 0 10px 26px rgba(15, 23, 42, .04);
 }
 
@@ -4092,6 +4110,15 @@ body {
 
   .quote-summary-panel {
     position: static;
+  }
+}
+
+@media (max-height: 760px) and (min-width: 1281px) {
+  .quote-summary-panel {
+    max-height: calc(100dvh - 96px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 14px;
   }
 }
 

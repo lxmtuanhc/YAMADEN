@@ -1348,6 +1348,8 @@
     quoteItemCount: "{count}\u9805\u76ee",
     pdfPreviewLater: "PDF\u30d7\u30ec\u30d3\u30e5\u30fc\u306f\u5f8c\u3067\u5b9f\u88c5\u3057\u307e\u3059\u3002",
     deleteRow: "\u884c\u524a\u9664",
+    copyQuoteRow: "\u30b3\u30d4\u30fc",
+    deleteQuoteRow: "\u524a\u9664",
     noQuoteItemToDelete: "\u524a\u9664\u3059\u308b\u898b\u7a4d\u9805\u76ee\u304c\u3042\u308a\u307e\u305b\u3093\u3002",
     quoteSearchPlaceholder: "\u898b\u7a4d\u756a\u53f7\u30fb\u9867\u5ba2\u30fb\u5de5\u4e8b\u540d\u3092\u691c\u7d22",
     quoteNo: "\u898b\u7a4d\u756a\u53f7",
@@ -1451,6 +1453,8 @@
     quoteItemCount: "T\u1ed5ng s\u1ed1 {count} h\u1ea1ng m\u1ee5c",
     pdfPreviewLater: "Ch\u1ee9c n\u0103ng xem tr\u01b0\u1edbc PDF s\u1ebd \u0111\u01b0\u1ee3c ho\u00e0n thi\u1ec7n sau.",
     deleteRow: "X\u00f3a d\u00f2ng",
+    copyQuoteRow: "Sao ch\u00e9p",
+    deleteQuoteRow: "X\u00f3a",
     noQuoteItemToDelete: "Kh\u00f4ng c\u00f3 d\u00f2ng h\u1ea1ng m\u1ee5c \u0111\u1ec3 x\u00f3a.",
     quoteSearchPlaceholder: "T\u00ecm ki\u1ebfm m\u00e3 b\u00e1o gi\u00e1 / kh\u00e1ch h\u00e0ng / c\u00f4ng tr\u00ecnh",
     quoteNo: "M\u00e3 b\u00e1o gi\u00e1",
@@ -4605,14 +4609,13 @@
                 </div>
               </section>
               <section class="quote-work-card quote-items-card">
-                <div class="quote-section-head"><div><h3>${escapeHtml(t("quoteItems"))}</h3><p class="note" data-quote-item-count>${escapeHtml(itemCountText)}</p></div><div class="quote-table-actions"><button class="btn btn-soft" type="button" data-quote-remove-last ${readonly ? "disabled" : ""}>${escapeHtml(t("deleteRow"))}</button><button class="btn btn-primary" type="button" data-quote-add-item ${readonly ? "disabled" : ""}>${escapeHtml(quoteAddItemLabel())}</button></div></div>
+                <div class="quote-section-head"><div><h3>${escapeHtml(t("quoteItems"))}</h3><p class="note" data-quote-item-count>${escapeHtml(itemCountText)}</p></div><div class="quote-table-actions"><button class="btn btn-primary" type="button" data-quote-add-item ${readonly ? "disabled" : ""}>${escapeHtml(quoteAddItemLabel())}</button></div></div>
                 <div class="quote-item-table-shell">
                   <div class="quote-item-table quote-item-table-pro" data-quote-items>
                     <div class="quote-item-row quote-item-header"><span>No.</span><span>${escapeHtml(t("itemName"))}</span><span>${escapeHtml(t("itemDescription"))}</span><span>${escapeHtml(t("unit"))}</span><span>${escapeHtml(t("quantity"))}</span><span>${escapeHtml(t("unitPrice"))}</span><span>${escapeHtml(t("discount"))}</span><span>${escapeHtml(t("lineAmount"))}</span><span>${escapeHtml(t("action"))}</span></div>
                     ${quote.items.length ? quote.items.map(renderQuoteItemRow).join("") : `<div class="quote-empty-line">${escapeHtml(t("noQuotes"))}</div>`}
                   </div>
                 </div>
-                <footer class="quote-table-footer" data-quote-item-count>${escapeHtml(itemCountText)}</footer>
               </section>
               <section class="quote-notes-grid">
                 <div class="quote-work-card"><h3>${escapeHtml(t("quoteNotes"))}</h3><p class="note">${escapeHtml(t("customerNote"))}</p><textarea name="customerNote" data-quote-note-mirror>${escapeHtml(quote.customerNote)}</textarea></div>
@@ -4635,7 +4638,7 @@
   }
 
   function renderQuoteItemRow(item, index) {
-    return `<div class="quote-item-row" data-quote-item-row data-item-id="${escapeHtml(item.id || "")}"><span class="quote-item-index">${index + 1}</span><input name="itemName" value="${escapeHtml(item.name)}" placeholder="${escapeHtml(t("itemName"))}"><input name="itemDescription" value="${escapeHtml(item.description)}" placeholder="${escapeHtml(t("itemDescription"))}"><input name="itemUnit" value="${escapeHtml(item.unit)}" placeholder="${escapeHtml(t("unit"))}"><input name="itemQuantity" type="number" value="${escapeHtml(item.quantity)}" placeholder="${escapeHtml(t("quantity"))}"><input name="itemUnitPrice" type="number" value="${escapeHtml(item.unitPrice)}" placeholder="${escapeHtml(t("unitPrice"))}"><input name="itemDiscount" type="number" value="${escapeHtml(item.discount)}" placeholder="${escapeHtml(t("discount"))}"><strong data-quote-line-amount>${escapeHtml(quoteCurrency(quoteItemAmount(item)))}</strong><span class="quote-row-actions"><button class="icon-btn" type="button" data-quote-copy-item title="Copy">\u2398</button><button class="icon-btn danger" type="button" data-quote-remove-item title="${escapeHtml(t("deleteRow"))}">&times;</button></span></div>`;
+    return `<div class="quote-item-row" data-quote-item-row data-item-id="${escapeHtml(item.id || "")}"><span class="quote-item-index">${index + 1}</span><input name="itemName" value="${escapeHtml(item.name)}" placeholder="${escapeHtml(t("itemName"))}"><input name="itemDescription" value="${escapeHtml(item.description)}" placeholder="${escapeHtml(t("itemDescription"))}"><input name="itemUnit" value="${escapeHtml(item.unit)}" placeholder="${escapeHtml(t("unit"))}"><input name="itemQuantity" type="number" value="${escapeHtml(item.quantity)}" placeholder="${escapeHtml(t("quantity"))}"><input name="itemUnitPrice" type="number" value="${escapeHtml(item.unitPrice)}" placeholder="${escapeHtml(t("unitPrice"))}"><input name="itemDiscount" type="number" value="${escapeHtml(item.discount)}" placeholder="${escapeHtml(t("discount"))}"><strong data-quote-line-amount>${escapeHtml(quoteCurrency(quoteItemAmount(item)))}</strong><span class="quote-row-actions"><button class="quote-row-icon" type="button" data-quote-copy-item title="${escapeHtml(t("copyQuoteRow"))}" aria-label="${escapeHtml(t("copyQuoteRow"))}">\u29c9</button><button class="quote-row-icon danger" type="button" data-quote-remove-item title="${escapeHtml(t("deleteQuoteRow"))}" aria-label="${escapeHtml(t("deleteQuoteRow"))}">\u00d7</button></span></div>`;
   }
 
   function quoteFromForm(form, existing) {
@@ -6133,18 +6136,6 @@
           target.querySelector(".quote-empty-line")?.remove();
           target.insertAdjacentHTML("beforeend", renderQuoteItemRow(normalizeQuoteItem({}, target.querySelectorAll("[data-quote-item-row]").length), target.querySelectorAll("[data-quote-item-row]").length));
         }
-        updateQuoteDetailTotals();
-        return;
-      }
-
-      const removeLastQuoteItem = event.target.closest("[data-quote-remove-last]");
-      if (removeLastQuoteItem) {
-        const rows = document.querySelectorAll("[data-quote-item-row]");
-        if (!rows.length) {
-          toast(t("noQuoteItemToDelete"));
-          return;
-        }
-        rows[rows.length - 1].remove();
         updateQuoteDetailTotals();
         return;
       }
