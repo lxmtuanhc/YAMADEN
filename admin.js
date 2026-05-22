@@ -4142,7 +4142,8 @@
       <article class="drawer-panel quote-detail-drawer">
         <header class="drawer-head drawer-header">
           <div><p class="eyebrow">${escapeHtml(t("quickQuote"))}</p><h2>${escapeHtml(t("quoteDetailTitle"))}</h2></div>
-          <div class="quote-detail-actions"><button class="btn btn-soft" type="button" data-close-drawer>${escapeHtml(t("close"))}</button><button class="btn btn-soft" type="button" data-quote-placeholder-action>${escapeHtml(t("saveDraft"))}</button><button class="btn btn-primary" type="button" data-quote-placeholder-action>${escapeHtml(t("sendToCustomerApp"))}</button></div>
+          <div class="quote-detail-actions"><button class="btn btn-soft" type="button" data-quote-placeholder-action>${escapeHtml(t("saveDraft"))}</button><button class="btn btn-primary" type="button" data-quote-placeholder-action>${escapeHtml(t("sendToCustomerApp"))}</button></div>
+          <button class="quote-modal-close" type="button" data-close-drawer aria-label="${escapeHtml(t("close"))}">&times;</button>
         </header>
         <div class="drawer-body quote-detail-form">
           <div class="quote-dev-note">${escapeHtml(t("quoteDetailPlaceholderText"))}</div>
@@ -4576,7 +4577,8 @@
             <p class="note">${escapeHtml(t("quoteCreateSubtitle"))}</p>
             <span class="status-badge status-${escapeHtml(quoteAdminStatus(quote.status))}">${escapeHtml(quoteStatusLabel(quoteAdminStatus(quote.status)))}</span>
           </div>
-          <div class="quote-detail-actions"><button class="btn btn-soft" type="button" data-close-drawer>${escapeHtml(t("close"))}</button><button class="btn btn-soft" type="button" data-quote-pdf-preview>${escapeHtml(t("pdfPreview"))}</button><button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button><button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button></div>
+          <div class="quote-detail-actions"><button class="btn btn-soft" type="button" data-quote-pdf-preview>${escapeHtml(t("pdfPreview"))}</button><button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button><button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button></div>
+          <button class="quote-modal-close" type="button" data-close-drawer aria-label="${escapeHtml(t("close"))}">&times;</button>
         </header>
         <form class="drawer-body quote-detail-form" data-quote-form>
           <input type="hidden" name="id" value="${escapeHtml(quote.id)}"><input type="hidden" name="quoteNo" value="${escapeHtml(quote.quoteNo)}">

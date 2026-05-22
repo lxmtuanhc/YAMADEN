@@ -2472,7 +2472,7 @@ body {
 .quote-workspace-head {
   align-items: center;
   flex: 0 0 auto;
-  padding: 14px 18px;
+  padding: 14px 60px 14px 18px;
 }
 
 .quote-head-main {
@@ -2507,6 +2507,32 @@ body {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
+  padding-right: 4px;
+}
+
+.quote-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #64748b;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease;
+}
+
+.quote-modal-close:hover {
+  border-color: #dbe3ef;
+  background: #f1f5f9;
+  color: #0f172a;
+  transform: translateY(-1px);
 }
 
 .quote-detail-form,
@@ -4113,15 +4139,6 @@ body {
   }
 }
 
-@media (max-height: 760px) and (min-width: 1281px) {
-  .quote-summary-panel {
-    max-height: calc(100dvh - 96px);
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-top: 14px;
-  }
-}
-
 @media (max-width: 900px) {
   .settings-layout,
   .settings-content-grid {
@@ -4174,6 +4191,7 @@ body {
 
   .quote-workspace-head {
     align-items: flex-start;
+    padding-right: 56px;
   }
 
   .quote-stepper,
