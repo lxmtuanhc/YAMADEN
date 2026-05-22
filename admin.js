@@ -1320,7 +1320,7 @@
     quoteSearchPlaceholder: "\u898b\u7a4d\u756a\u53f7\u30fb\u9867\u5ba2\u30fb\u5de5\u4e8b\u540d\u3092\u691c\u7d22",
     quoteNo: "\u898b\u7a4d\u756a\u53f7",
     projectContent: "\u5de5\u4e8b / \u5185\u5bb9",
-    validUntil: "\u6709\u52b9\u671f\u9650",
+    validUntil: "\u6709\u52b9",
     quoteNew: "\u65b0\u898f\u898b\u7a4d",
     quickQuote: "\u898b\u7a4d\u4f5c\u6210",
     linkedRequest: "\u4f9d\u983c\u9023\u643a",
@@ -1357,7 +1357,12 @@
     quotePendingApprovalShort: "\u627f\u8a8d\u5f85\u3061",
     quoteExpiringSoonShort: "\u671f\u9650\u9593\u8fd1",
     quoteMissingCustomerShort: "\u9867\u5ba2\u672a\u8a2d\u5b9a",
-    quoteChangeRequestedShort: "\u4fee\u6b63\u4f9d\u983c"
+    quoteChangeRequestedShort: "\u4fee\u6b63\u4f9d\u983c",
+    quoteAllValidity: "\u3059\u3079\u3066",
+    quoteStillValid: "\u6709\u52b9",
+    quoteExpired: "\u671f\u9650\u5207\u308c",
+    quoteNoValidUntil: "\u6709\u52b9\u671f\u9650\u672a\u8a2d\u5b9a",
+    quotePipelineTracking: "\u4ef6\u306e\u898b\u7a4d\u3092\u30b9\u30c6\u30fc\u30bf\u30b9\u5225\u306b\u8868\u793a"
   });
 
   Object.assign(i18n.vi, {
@@ -1386,7 +1391,7 @@
     quoteSearchPlaceholder: "T\u00ecm ki\u1ebfm m\u00e3 b\u00e1o gi\u00e1 / kh\u00e1ch h\u00e0ng / c\u00f4ng tr\u00ecnh",
     quoteNo: "M\u00e3 b\u00e1o gi\u00e1",
     projectContent: "C\u00f4ng tr\u00ecnh / n\u1ed9i dung",
-    validUntil: "Hi\u1ec7u l\u1ef1c \u0111\u1ebfn",
+    validUntil: "Hi\u1ec7u l\u1ef1c",
     quoteNew: "B\u00e1o gi\u00e1 m\u1edbi",
     quickQuote: "B\u00e1o gi\u00e1 nhanh",
     linkedRequest: "Li\u00ean k\u1ebft y\u00eau c\u1ea7u",
@@ -1423,7 +1428,12 @@
     quotePendingApprovalShort: "B\u00e1o gi\u00e1 ch\u1edd duy\u1ec7t",
     quoteExpiringSoonShort: "B\u00e1o gi\u00e1 s\u1eafp h\u1ebft h\u1ea1n",
     quoteMissingCustomerShort: "B\u00e1o gi\u00e1 thi\u1ebfu kh\u00e1ch h\u00e0ng",
-    quoteChangeRequestedShort: "B\u00e1o gi\u00e1 y\u00eau c\u1ea7u ch\u1ec9nh s\u1eeda"
+    quoteChangeRequestedShort: "B\u00e1o gi\u00e1 y\u00eau c\u1ea7u ch\u1ec9nh s\u1eeda",
+    quoteAllValidity: "T\u1ea5t c\u1ea3",
+    quoteStillValid: "C\u00f2n hi\u1ec7u l\u1ef1c",
+    quoteExpired: "\u0110\u00e3 h\u1ebft h\u1ea1n",
+    quoteNoValidUntil: "Ch\u01b0a \u0111\u1eb7t hi\u1ec7u l\u1ef1c",
+    quotePipelineTracking: "Theo d\u00f5i {count} b\u00e1o gi\u00e1 theo tr\u1ea1ng th\u00e1i x\u1eed l\u00fd"
   });
 
   const state = {
@@ -4192,9 +4202,11 @@
   function filterQuotes(rows) {
     const search = String(state.filters.quoteSearch || "").toLowerCase();
     const status = state.filters.quoteStatus || "all";
+    const validity = state.filters.quoteValidity || "all";
     return rows.filter(item => {
       const text = [item.quoteNo, item.customerName, item.projectName, item.title, item.assigneeName].join(" ").toLowerCase();
-      return (!search || text.includes(search)) && (status === "all" || quoteAdminStatus(item.status) === status);
+      const matchesValidity = validity === "all" || quoteValidityStatus(item) === validity;
+      return (!search || text.includes(search)) && (status === "all" || quoteAdminStatus(item.status) === status) && matchesValidity;
     });
   }
 
@@ -4202,9 +4214,16 @@
     return quoteAdminStatus(quote?.status) === "sent_to_customer" && !quote?.customerId && !quote?.customerName;
   }
 
+  function parseQuoteDate(value) {
+    const text = String(value || "").trim();
+    const slash = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (slash) return new Date(Number(slash[3]), Number(slash[2]) - 1, Number(slash[1]));
+    return new Date(text);
+  }
+
   function quoteExpiresSoon(quote) {
     if (!quote?.validUntil) return false;
-    const due = new Date(quote.validUntil);
+    const due = parseQuoteDate(quote.validUntil);
     if (Number.isNaN(due.getTime())) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -4212,6 +4231,43 @@
     limit.setDate(limit.getDate() + 7);
     due.setHours(0, 0, 0, 0);
     return due >= today && due <= limit && !["accepted", "rejected", "expired"].includes(quoteAdminStatus(quote.status));
+  }
+
+  function quoteValidityStatus(quote) {
+    if (!quote?.validUntil) return "unset";
+    if (quoteAdminStatus(quote.status) === "expired") return "expired";
+    const due = parseQuoteDate(quote.validUntil);
+    if (Number.isNaN(due.getTime())) return "unset";
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+    if (due < today) return "expired";
+    if (quoteExpiresSoon(quote)) return "expiring";
+    return "valid";
+  }
+
+  function quoteDateLabel(value) {
+    if (!value) return t("noValidUntil");
+    const parsed = parseQuoteDate(value);
+    if (Number.isNaN(parsed.getTime())) return t("noValidUntil");
+    return parsed.toLocaleDateString(state.lang === "ja" ? "ja-JP" : "vi-VN");
+  }
+
+  function quotePipelineSummary(count) {
+    return state.lang === "vi"
+      ? t("quotePipelineTracking").replace("{count}", String(count))
+      : `${count}${t("quotePipelineTracking")}`;
+  }
+
+  function updateQuoteScrollButtons() {
+    const board = document.querySelector(".quote-kanban-board");
+    if (!board) return;
+    const left = document.querySelector("[data-quote-scroll='-1']");
+    const right = document.querySelector("[data-quote-scroll='1']");
+    const atStart = board.scrollLeft <= 4;
+    const atEnd = board.scrollLeft + board.clientWidth >= board.scrollWidth - 4;
+    if (left) left.disabled = atStart;
+    if (right) right.disabled = atEnd;
   }
 
   function renderQuoteTodaySummary(rows) {
@@ -4230,6 +4286,13 @@
     const totalValue = rows.reduce((sum, item) => sum + calculateQuoteTotals(item).total, 0);
     const orderedValue = acceptedRows.reduce((sum, item) => sum + calculateQuoteTotals(item).total, 0);
     const viewMode = state.filters.quoteView || "kanban";
+    const validityOptions = [
+      ["all", t("quoteAllValidity")],
+      ["valid", t("quoteStillValid")],
+      ["expiring", t("quoteExpiringSoonShort")],
+      ["expired", t("quoteExpired")],
+      ["unset", t("quoteNoValidUntil")]
+    ];
     $("viewRoot").innerHTML = `
       <div class="quote-page-head">
         <div class="page-intro"><p>${escapeHtml(t("quoteModuleSubtitle"))}</p><span class="quote-dev-note">${escapeHtml(t("quoteMockNote"))}</span></div>
@@ -4250,16 +4313,17 @@
         <select class="filter-input" data-quote-filter="status"><option value="all">${escapeHtml(t("statusFilter"))}</option>${QUOTE_STATUSES.map(status => `<option value="${escapeHtml(status)}" ${state.filters.quoteStatus === status ? "selected" : ""}>${escapeHtml(quoteStatusLabel(status))}</option>`).join("")}</select>
         <select class="filter-input" disabled><option>${escapeHtml(t("assignee"))}</option></select>
         <select class="filter-input" disabled><option>${escapeHtml(t("customer"))}</option></select>
-        <select class="filter-input" disabled><option>${escapeHtml(t("validUntil"))}</option></select>
+        <select class="filter-input" data-quote-filter="validity"><option value="all">${escapeHtml(t("validUntil"))}: ${escapeHtml(t("quoteAllValidity"))}</option>${validityOptions.slice(1).map(([key, label]) => `<option value="${escapeHtml(key)}" ${state.filters.quoteValidity === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
       </div>
       <div class="staff-tag-tabs quote-view-tabs">
         ${[["kanban", t("kanban")], ["list", t("listView")]].map(([key, label]) => `<button class="staff-tag-tab ${viewMode === key ? "active" : ""}" type="button" data-quote-view="${escapeHtml(key)}">${escapeHtml(label)}</button>`).join("")}
       </div>
       <section class="section-card">
-        <div class="panel-head quote-pipeline-head"><div><h2>${escapeHtml(t("quotePipeline"))}</h2><p class="note">${escapeHtml(String(rows.length))}</p></div>${viewMode === "kanban" ? `<div class="quote-kanban-controls"><span class="quote-scroll-hint">${escapeHtml(t("quoteKanbanHint"))}</span><button class="icon-btn" type="button" data-quote-scroll="-1" aria-label="Scroll left">&larr;</button><button class="icon-btn" type="button" data-quote-scroll="1" aria-label="Scroll right">&rarr;</button></div>` : ""}</div>
+        <div class="panel-head quote-pipeline-head"><div><h2>${escapeHtml(t("quotePipeline"))}</h2><p class="note">${escapeHtml(quotePipelineSummary(rows.length))}</p></div>${viewMode === "kanban" ? `<div class="quote-kanban-controls"><span class="quote-scroll-hint">${escapeHtml(t("quoteKanbanHint"))}</span><button class="icon-btn quote-scroll-button" type="button" data-quote-scroll="-1" aria-label="Scroll left">&larr;</button><button class="icon-btn quote-scroll-button" type="button" data-quote-scroll="1" aria-label="Scroll right">&rarr;</button></div>` : ""}</div>
         <div class="panel-body quote-board-body">${viewMode === "list" ? renderQuoteList(rows) : renderQuoteKanban(rows)}</div>
       </section>
     `;
+    requestAnimationFrame(updateQuoteScrollButtons);
   }
 
   function renderQuoteKanban(rows) {
@@ -4273,7 +4337,7 @@
     const totals = calculateQuoteTotals(quote);
     const customerName = quote.customerName || t("noCustomerSelected");
     const projectName = quote.projectName || quote.title || "";
-    const validUntil = quote.validUntil ? formatDate(quote.validUntil) : t("noValidUntil");
+    const validUntil = quoteDateLabel(quote.validUntil);
     const assigneeName = quote.assigneeName || t("noAssignee");
     const needsCustomer = quoteNeedsCustomer(quote);
     return `<button class="quote-card" type="button" data-quote-action="detail" data-quote-id="${escapeHtml(quote.id)}">
@@ -4290,7 +4354,7 @@
   function renderQuoteList(rows) {
     return rows.length ? `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table quote-table-admin"><thead><tr><th>${t("quoteNo")}</th><th>${t("customer")}</th><th>${t("projectContent")}</th><th>${t("grandTotal")}</th><th>${t("status")}</th><th>${t("assignee")}</th><th>${t("createdAt")}</th><th>${t("validUntil")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(quote => {
       const totals = calculateQuoteTotals(quote);
-      return `<tr><td>${escapeHtml(quote.quoteNo)}</td><td>${escapeHtml(quote.customerName || "-")}</td><td>${escapeHtml(quote.projectName || "-")}</td><td>${escapeHtml(quoteCurrency(totals.total))}</td><td><span class="status-badge status-${escapeHtml(quoteAdminStatus(quote.status))}">${escapeHtml(quoteStatusLabel(quoteAdminStatus(quote.status)))}</span></td><td>${escapeHtml(quote.assigneeName || "-")}</td><td>${escapeHtml(formatDate(quote.createdAt))}</td><td>${escapeHtml(quote.validUntil || "-")}</td><td><button class="btn btn-soft" type="button" data-quote-action="detail" data-quote-id="${escapeHtml(quote.id)}">${escapeHtml(t("detail"))}</button></td></tr>`;
+      return `<tr><td>${escapeHtml(quote.quoteNo)}</td><td>${escapeHtml(quote.customerName || "-")}</td><td>${escapeHtml(quote.projectName || "-")}</td><td>${escapeHtml(quoteCurrency(totals.total))}</td><td><span class="status-badge status-${escapeHtml(quoteAdminStatus(quote.status))}">${escapeHtml(quoteStatusLabel(quoteAdminStatus(quote.status)))}</span></td><td>${escapeHtml(quote.assigneeName || "-")}</td><td>${escapeHtml(formatDate(quote.createdAt))}</td><td>${escapeHtml(quoteDateLabel(quote.validUntil))}</td><td><button class="btn btn-soft" type="button" data-quote-action="detail" data-quote-id="${escapeHtml(quote.id)}">${escapeHtml(t("detail"))}</button></td></tr>`;
     }).join("")}</tbody></table></div>` : showEmptyState(t("noQuotes"));
   }
 
@@ -5498,6 +5562,9 @@
     document.addEventListener("click", event => {
       void handleCustomerDelegatedClick(event);
     }, true);
+    document.addEventListener("scroll", event => {
+      if (event.target?.classList?.contains("quote-kanban-board")) updateQuoteScrollButtons();
+    }, true);
     bind(document, "keydown", event => {
       if (event.key === "Escape" && $("mediaPreviewOverlay")) {
         $("mediaPreviewOverlay").remove();
@@ -5656,7 +5723,13 @@
       const quoteScroll = event.target.closest("[data-quote-scroll]");
       if (quoteScroll) {
         const board = document.querySelector(".quote-kanban-board");
-        if (board) board.scrollBy({ left: Number(quoteScroll.dataset.quoteScroll || 1) * 320, behavior: "smooth" });
+        if (board) {
+          const column = board.querySelector(".quote-column");
+          const gap = Number.parseFloat(getComputedStyle(board).columnGap || getComputedStyle(board).gap || "14") || 14;
+          const step = (column?.getBoundingClientRect().width || 320) + gap;
+          board.scrollBy({ left: Number(quoteScroll.dataset.quoteScroll || 1) * step, behavior: "smooth" });
+          setTimeout(updateQuoteScrollButtons, 260);
+        }
         return;
       }
 
