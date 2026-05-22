@@ -4332,6 +4332,21 @@
     return { ...base, subtotal: totals.subtotal, taxAmount: totals.taxAmount, total: totals.total, quoteCode: base.quoteNo };
   }
 
+  function ensureQuoteDefaults(quote) {
+    const target = quote && typeof quote === "object" ? quote : {};
+    target.items = Array.isArray(target.items) ? target.items : [];
+    if (!target.items.length) target.items.push(normalizeQuoteItem({}, 0));
+    else target.items = target.items.map(normalizeQuoteItem);
+    if (target.vatRate == null && target.taxRate == null) {
+      target.vatRate = 10;
+      target.taxRate = 0.1;
+    }
+    if (target.discount == null) target.discount = 0;
+    if (target.rounding == null) target.rounding = 0;
+    calculateQuoteTotals(target);
+    return target;
+  }
+
   function readCustomerAppQuotes() {
     try {
       const parsed = JSON.parse(localStorage.getItem(QUOTE_MOCK_STORAGE_KEY) || "null");
@@ -4638,6 +4653,7 @@
   }
 
   function renderQuoteDetail(quote) {
+    quote = ensureQuoteDefaults(normalizeQuote(quote));
     const totals = calculateQuoteTotals(quote);
     const readonly = ["accepted", "rejected", "expired"].includes(quoteAdminStatus(quote.status));
     const requestLinked = Boolean(quote.requestId);
@@ -4733,8 +4749,8 @@
       quantity: row.querySelector("[name='itemQuantity']")?.value || 0,
       unitPrice: row.querySelector("[name='itemUnitPrice']")?.value || 0,
       discount: row.querySelector("[name='itemDiscount']")?.value || 0
-    }, index)).filter(item => item.name || item.description || item.unitPrice);
-    return normalizeQuote({ ...(existing || {}), id: raw.get("id"), quoteNo: raw.get("quoteNo"), requestId: raw.get("requestId"), customerId: raw.get("customerId"), customerName: raw.get("customerName"), customerPhone: raw.get("customerPhone"), customerEmail: raw.get("customerEmail"), projectName: raw.get("projectName"), projectAddress: raw.get("projectAddress"), title: raw.get("projectName"), assigneeId: raw.get("assigneeId"), assigneeName: raw.get("assigneeName"), items: rows, discount: raw.get("discount"), taxRate: Number(raw.get("taxRate") || 10) / 100, rounding: raw.get("rounding"), paymentTerms: raw.get("paymentTerms"), validUntil: raw.get("validUntil"), customerNote: raw.get("customerNote"), internalNote: raw.get("internalNote") });
+    }, index));
+    return ensureQuoteDefaults(normalizeQuote({ ...(existing || {}), id: raw.get("id"), quoteNo: raw.get("quoteNo"), requestId: raw.get("requestId"), customerId: raw.get("customerId"), customerName: raw.get("customerName"), customerPhone: raw.get("customerPhone"), customerEmail: raw.get("customerEmail"), projectName: raw.get("projectName"), projectAddress: raw.get("projectAddress"), title: raw.get("projectName"), assigneeId: raw.get("assigneeId"), assigneeName: raw.get("assigneeName"), items: rows, discount: raw.get("discount"), taxRate: Number(raw.get("taxRate") || 10) / 100, rounding: raw.get("rounding"), paymentTerms: raw.get("paymentTerms"), validUntil: raw.get("validUntil"), customerNote: raw.get("customerNote"), internalNote: raw.get("internalNote") }));
   }
 
   function updateQuoteDetailTotals() {
@@ -4800,17 +4816,38 @@
     if (content) content.scrollTop = 0;
   }
 
-  function validateQuoteWizardStep() {
+  function validateQuoteStep1() {
     const form = document.querySelector("[data-quote-form]");
     if (!form) return false;
     const quote = quoteFromForm(form, {});
-    if (Number(state.quoteWizardStep || 1) === 1) {
-      if (!quote.items.length) {
-        toast(t("quoteMissingItemsSend"));
-        return false;
-      }
+    if (!Array.isArray(quote.items) || !quote.items.length) {
+      toast(t("quoteMissingItemsSend"));
+      return false;
     }
     return true;
+  }
+
+  function validateCurrentQuoteStep() {
+    if (Number(state.quoteWizardStep || 1) === 1) return validateQuoteStep1();
+    return true;
+  }
+
+  function scrollQuoteWizardToTop() {
+    requestAnimationFrame(() => {
+      const content = document.querySelector(".quote-wizard-content");
+      if (content) content.scrollTop = 0;
+    });
+  }
+
+  function nextQuoteStep() {
+    if (!validateCurrentQuoteStep()) return;
+    setQuoteWizardStep(Number(state.quoteWizardStep || 1) + 1);
+    scrollQuoteWizardToTop();
+  }
+
+  function prevQuoteStep() {
+    setQuoteWizardStep(Number(state.quoteWizardStep || 1) - 1);
+    scrollQuoteWizardToTop();
   }
 
   function validateQuoteDraft(quote) {
@@ -6177,12 +6214,11 @@
         return;
       }
       if (event.target.closest("[data-quote-prev], [data-quote-prev-step]")) {
-        setQuoteWizardStep(Number(state.quoteWizardStep || 1) - 1);
+        prevQuoteStep();
         return;
       }
       if (event.target.closest("[data-quote-next], [data-quote-next-step]")) {
-        if (!validateQuoteWizardStep()) return;
-        setQuoteWizardStep(Number(state.quoteWizardStep || 1) + 1);
+        nextQuoteStep();
         return;
       }
       const wizardStep = event.target.closest("[data-quote-wizard-step]");
