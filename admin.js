@@ -4197,8 +4197,13 @@
     return status || "draft";
   }
 
+  function toNumber(value) {
+    const number = Number(String(value ?? "0").replace(/[^\d.-]/g, ""));
+    return Number.isFinite(number) ? number : 0;
+  }
+
   function quoteCurrency(value) {
-    return "\u00a5" + Math.round(Number(value || 0)).toLocaleString("ja-JP");
+    return "\u00a5" + Math.round(toNumber(value)).toLocaleString("ja-JP");
   }
 
   function quoteAddItemLabel() {
@@ -4206,18 +4211,27 @@
   }
 
   function quoteItemAmount(item) {
-    return Math.max(0, Number(item?.quantity || 0) * Number(item?.unitPrice || 0) - Number(item?.discount || 0));
+    return Math.max(0, toNumber(item?.quantity) * toNumber(item?.unitPrice) - toNumber(item?.discount));
   }
 
   function calculateQuoteTotals(quote) {
     const items = toList(quote?.items);
     const subtotal = items.reduce((sum, item) => sum + quoteItemAmount(item), 0);
-    const discount = Number(quote?.discount || 0);
+    const discount = toNumber(quote?.discount);
     const taxableAmount = Math.max(0, subtotal - discount);
-    const taxRate = Number(quote?.taxRate ?? 0.1);
-    const taxAmount = Math.round(taxableAmount * taxRate);
-    const rounding = Number(quote?.rounding || 0);
-    const total = taxableAmount + taxAmount + rounding;
+    const rawTaxRate = quote?.vatRate ?? quote?.taxRate ?? 0.1;
+    const taxRatePercent = toNumber(rawTaxRate) <= 1 ? toNumber(rawTaxRate) * 100 : toNumber(rawTaxRate);
+    const taxRate = taxRatePercent / 100;
+    const taxAmount = Math.round(taxableAmount * taxRatePercent / 100);
+    const rounding = toNumber(quote?.rounding);
+    const total = Math.max(0, taxableAmount + taxAmount + rounding);
+    if (quote && typeof quote === "object") {
+      quote.subtotal = subtotal;
+      quote.subtotalAfterDiscount = taxableAmount;
+      quote.taxAmount = taxAmount;
+      quote.vatAmount = taxAmount;
+      quote.total = total;
+    }
     return { subtotal, discount, taxableAmount, taxRate, taxAmount, rounding, total };
   }
 
@@ -4227,9 +4241,10 @@
       name: item?.name || "",
       description: item?.description || "",
       unit: item?.unit || "\u5f0f",
-      quantity: Number(item?.quantity || 1),
-      unitPrice: Number(item?.unitPrice || 0),
-      discount: Number(item?.discount || 0)
+      quantity: toNumber(item?.quantity || 1),
+      unitPrice: toNumber(item?.unitPrice),
+      discount: toNumber(item?.discount),
+      amount: quoteItemAmount(item)
     };
   }
 
