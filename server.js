@@ -200,6 +200,7 @@ const RequestSchema = new mongoose.Schema({
   userId: String,
   name: String,
   phone: String,
+  email: String,
   contact: String,
   address: String,
   title: String,
@@ -235,7 +236,12 @@ const RequestSchema = new mongoose.Schema({
   issueTags: [String],
   workTypeIds: [String],
   departmentCode: String,
-  quoteRequested: Boolean,
+  quoteId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Quote",
+    default: null
+  },
+  quoteRequested: { type: Boolean, default: false },
   timeline: [TimelineEventSchema],
   isDeleted: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },
@@ -308,6 +314,17 @@ const QuoteSchema = new mongoose.Schema({
   note: String,
   customerNote: String,
   internalNote: String,
+  pdfUrl: String,
+  pdfPublicId: String,
+  sentToCustomer: { type: Boolean, default: false },
+  sentAt: Date,
+  customerResponse: {
+    type: String,
+    enum: ["pending", "accepted", "revision_requested", "rejected"],
+    default: "pending"
+  },
+  customerResponseNote: String,
+  customerRespondedAt: Date,
   createdAt: { type: Date, default: Date.now },
   updatedAt: Date,
   isDeleted: { type: Boolean, default: false },
@@ -1915,6 +1932,30 @@ function newServerQuoteNo() {
   return "Q-" + new Date().getFullYear() + "-" + String(Date.now()).slice(-5);
 }
 
+async function generateQuoteNo() {
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const quoteNo = "Q-" + new Date().getFullYear() + "-" + Math.floor(10000 + Math.random() * 90000);
+    const exists = await Quote.exists({ $or: [{ quoteNo }, { quoteCode: quoteNo }, { code: quoteNo }, { number: quoteNo }] });
+    if (!exists) return quoteNo;
+  }
+  return newServerQuoteNo();
+}
+
+async function findRequestByAnyId(id) {
+  let request = null;
+  if (mongoose.Types.ObjectId.isValid(id)) request = await Request.findById(id);
+  if (!request) {
+    request = await Request.findOne({
+      $or: [
+        { id },
+        { requestCode: id },
+        { requestId: id }
+      ]
+    });
+  }
+  return request;
+}
+
 function normalizeQuotePayloadForDb(body = {}) {
   const quoteNo = body.quoteNo || body.quoteCode || body.quoteNumber || body.code || body.number || newServerQuoteNo();
   const rawItems = Array.isArray(body.quoteItems) && body.quoteItems.length ? body.quoteItems : Array.isArray(body.items) ? body.items : [];
@@ -1990,6 +2031,13 @@ function normalizeQuotePayloadForDb(body = {}) {
     note: body.note || body.customerNote || "",
     customerNote: body.customerNote || body.note || "",
     internalNote: body.internalNote || "",
+    pdfUrl: body.pdfUrl || "",
+    pdfPublicId: body.pdfPublicId || "",
+    sentToCustomer: body.sentToCustomer === true || body.visibleToCustomer === true,
+    sentAt: body.sentAt || body.sentToCustomerAt || null,
+    customerResponse: ["pending", "accepted", "revision_requested", "rejected"].includes(body.customerResponse) ? body.customerResponse : "pending",
+    customerResponseNote: body.customerResponseNote || "",
+    customerRespondedAt: body.customerRespondedAt || null,
     isDeleted: body.isDeleted === true,
     deletedAt: body.deletedAt || null,
     updatedAt: new Date()
@@ -2397,6 +2445,93 @@ app.post("/admin/quotes", requireAdmin, async (req, res) => {
   } catch (error) {
     console.error("Quote save failed:", error);
     res.status(500).json({ ok: false, message: "Quote save failed", error: error.message });
+  }
+});
+
+app.post("/admin/requests/:requestId/create-quote", requireAdmin, async (req, res) => {
+  try {
+    const request = await findRequestByAnyId(req.params.requestId);
+    if (!request) return res.status(404).json({ ok: false, message: "Request not found" });
+
+    if (request.quoteId) {
+      const existingQuote = await Quote.findById(request.quoteId).lean();
+      if (existingQuote) return res.json({ ok: true, quote: existingQuote, request: request.toObject(), reused: true });
+    }
+
+    const quoteNo = await generateQuoteNo();
+    const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const spec = Array.isArray(request.issueTags) && request.issueTags.length
+      ? request.issueTags.join(", ")
+      : (request.issueTags || request.content || "");
+    const item = {
+      name: request.content || request.title || "\u5de5\u4e8b\u4e00\u5f0f",
+      title: request.content || request.title || "\u5de5\u4e8b\u4e00\u5f0f",
+      description: spec,
+      spec,
+      unit: "\u5f0f",
+      quantity: 1,
+      qty: 1,
+      unitPrice: 0,
+      price: 0,
+      discount: 0,
+      discountRate: 0,
+      amount: 0
+    };
+    const payload = {
+      id: quoteNo,
+      quoteCode: quoteNo,
+      quoteNo,
+      quoteNumber: quoteNo,
+      code: quoteNo,
+      number: quoteNo,
+      requestId: String(request._id),
+      userId: request.userId ? String(request.userId) : "",
+      customerName: request.name || "",
+      name: request.name || "",
+      customerPhone: request.phone || "",
+      phone: request.phone || "",
+      customerEmail: request.email || request.contact || "",
+      email: request.email || request.contact || "",
+      customerAddress: request.address || "",
+      address: request.address || "",
+      projectName: request.projectName || request.title || request.content || "\u5de5\u4e8b\u4e00\u5f0f",
+      title: request.projectName || request.title || request.content || "\u5de5\u4e8b\u4e00\u5f0f",
+      content: request.content || "",
+      description: request.content || "",
+      assigneeName: request.assigneeName || "",
+      validUntil,
+      expireDate: validUntil,
+      validDate: validUntil,
+      status: "draft",
+      quoteItems: [item],
+      items: [item],
+      subtotal: 0,
+      discount: 0,
+      tax: 0,
+      taxAmount: 0,
+      vatAmount: 0,
+      total: 0,
+      currency: "JPY",
+      paymentTerms: "\u691c\u53ce\u5f8c30\u65e5\u4ee5\u5185",
+      note: "",
+      customerNote: "",
+      sentToCustomer: false,
+      customerResponse: "pending",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const quote = await Quote.create(payload);
+
+    request.quoteId = quote._id;
+    request.quoteRequested = true;
+    request.quotedAt = new Date();
+    if (typeof request.status === "string") request.status = "quoted";
+    await request.save();
+
+    res.json({ ok: true, quote: quote.toObject(), request: request.toObject(), reused: false });
+  } catch (error) {
+    console.error("Create quote from request error:", error);
+    res.status(500).json({ ok: false, message: "Create quote from request failed", error: error.message });
   }
 });
 
@@ -3022,6 +3157,7 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
       userId: String(user._id),
       name: req.body.name || user.name || "",
       phone: req.body.phone || user.phone || "",
+      email: req.body.email || user.email || "",
       contact: req.body.contact || user.contact || "",
       address: req.body.address || user.address || "",
       title: req.body.title || "",

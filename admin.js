@@ -1631,6 +1631,12 @@
         body: JSON.stringify(payload || {})
       });
     },
+    createQuoteFromRequest(id) {
+      return requestJson("/admin/requests/" + encodeURIComponent(id) + "/create-quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+    },
     deleteQuote(id, permanent) {
       return requestJson("/admin/quotes/" + encodeURIComponent(id) + (permanent ? "?permanent=true" : ""), { method: "DELETE" });
     },
@@ -2569,6 +2575,10 @@
     const media = normalizeRequestMedia(request);
     const timeline = Array.isArray(request.timeline) ? request.timeline : [];
     const suggestion = recommendAssignee(request);
+    const quoteLinked = Boolean(request.quoteId || request.quoteNo || request.quoteCode);
+    const quoteButtonLabel = quoteLinked
+      ? (state.lang === "vi" ? "M\u1edf b\u00e1o gi\u00e1" : "\u898b\u7a4d\u3092\u958b\u304f")
+      : t("createQuote");
     const existing = $("requestDetailOverlay");
     if (existing) existing.remove();
     const overlay = document.createElement("div");
@@ -2637,6 +2647,7 @@
         </div>
         <footer class="request-detail-footer">
           <span class="request-unsaved-note" data-unsaved-note hidden>${escapeHtml(t("unsavedChanges"))}</span>
+          <button class="btn btn-soft" type="button" data-create-quote-from-request="${escapeHtml(id)}">${escapeHtml(quoteButtonLabel)}</button>
           <button class="ghost-button" type="button" data-close-request-detail>${escapeHtml(t("close"))}</button>
           <button class="primary-button" type="button" data-save-request="${escapeHtml(id)}" disabled>${escapeHtml(t("saveChanges"))}</button>
         </footer>
@@ -4294,7 +4305,8 @@
 
   function normalizeQuote(quote) {
     const now = new Date().toISOString();
-    const items = toList(quote?.items).length ? toList(quote.items).map(normalizeQuoteItem) : [normalizeQuoteItem({}, 0)];
+    const sourceItems = toList(quote?.items).length ? toList(quote.items) : toList(quote?.quoteItems);
+    const items = sourceItems.length ? sourceItems.map(normalizeQuoteItem) : [normalizeQuoteItem({}, 0)];
     const customerId = quote?.customerId || "";
     const customerName = quote?.customerName || quote?.name || "";
     const projectName = normalizeQuoteDemoTitle(quote?.projectName || quote?.title || "");
@@ -4376,21 +4388,17 @@
   }
 
   function loadQuoteLayoutState() {
-    let storageQuotes = [];
-    try {
-      const layout = JSON.parse(localStorage.getItem(QUOTE_LAYOUT_STORAGE_KEY) || "null");
-      if (Array.isArray(layout?.quotes)) storageQuotes = layout.quotes;
-    } catch (error) {
-      console.warn("Unable to read quote layout cache", error);
-    }
-    if (!storageQuotes.length) storageQuotes = readCustomerAppQuotes();
-    if (storageQuotes.length) state.quotes = storageQuotes.map(normalizeQuote);
-    else state.quotes = state.quotes.map(normalizeQuote);
+    state.quotes = Array.isArray(state.quotes) ? state.quotes.map(normalizeQuote) : [];
     return state.quotes;
   }
 
-  function refreshQuoteLayoutData() {
-    loadQuoteLayoutState();
+  async function refreshQuoteLayoutData() {
+    try {
+      state.quotes = normalizeList(await AdminAPI.getQuotes());
+    } catch (error) {
+      console.error(error);
+      loadQuoteLayoutState();
+    }
     renderQuotes();
     toast(t("quoteLayoutRefreshed"));
   }
@@ -5735,9 +5743,42 @@
     toast(t("savedChanges"));
   }
 
+  async function createQuoteFromRequest(requestId) {
+    if (!requestId) {
+      toast(state.lang === "vi" ? "Kh\u00f4ng t\u00ecm th\u1ea5y ID y\u00eau c\u1ea7u." : "\u4f9d\u983cID\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3002");
+      return;
+    }
+    try {
+      const data = await AdminAPI.createQuoteFromRequest(requestId);
+      if (!data?.ok || !data.quote) throw new Error(data?.message || "Create quote failed");
+      const savedQuote = normalizeQuote(data.quote);
+      const requestIdText = getRowId(data.request) || data.request?.requestCode || requestId;
+      const requestIndex = state.requests.findIndex(item => [getRowId(item), getRequestDisplayId(item)].some(value => value && String(value) === String(requestIdText)));
+      if (requestIndex >= 0 && data.request) state.requests[requestIndex] = data.request;
+      state.quotes = [savedQuote, ...state.quotes.filter(item => String(item._id || item.id || item.quoteNo) !== String(savedQuote._id || savedQuote.id || savedQuote.quoteNo))];
+      writeCustomerAppQuotes(state.quotes.map(item => ({
+        ...item,
+        status: quoteCustomerAppStatus(item.status),
+        quoteCode: item.quoteNo,
+        items: item.items.map(row => ({ ...row, amount: quoteItemAmount(row) }))
+      })));
+      toast(data.reused
+        ? (state.lang === "vi" ? "Y\u00eau c\u1ea7u n\u00e0y \u0111\u00e3 c\u00f3 b\u00e1o gi\u00e1." : "\u3053\u306e\u4f9d\u983c\u306b\u306f\u65e2\u306b\u898b\u7a4d\u304c\u3042\u308a\u307e\u3059\u3002")
+        : (state.lang === "vi" ? "\u0110\u00e3 t\u1ea1o b\u00e1o gi\u00e1 t\u1eeb y\u00eau c\u1ea7u." : "\u4f9d\u983c\u304b\u3089\u898b\u7a4d\u3092\u4f5c\u6210\u3057\u307e\u3057\u305f\u3002"));
+      await closeRequestDetail(true);
+      state.currentView = "quotes";
+      renderCurrentView();
+      state.quoteWizardStep = 1;
+      openQuoteDetail(savedQuote._id || savedQuote.id || savedQuote.quoteNo);
+    } catch (error) {
+      console.error(error);
+      toast(error.message || t("failed"));
+    }
+  }
+
   async function refreshData() {
     if (state.currentView === "quotes") {
-      refreshQuoteLayoutData();
+      await refreshQuoteLayoutData();
       return;
     }
     await loadAll();
@@ -6425,6 +6466,11 @@
         await closeRequestDetail();
         return;
       }
+      const createQuoteButton = event.target.closest("[data-create-quote-from-request]");
+      if (createQuoteButton) {
+        await createQuoteFromRequest(createQuoteButton.dataset.createQuoteFromRequest);
+        return;
+      }
       if (event.target.closest("[data-quote-request-search]")) {
         toast(t("quoteRequestSearchLater"));
         return;
@@ -6537,11 +6583,8 @@
           return;
         }
         if (action === "detail") {
-          const quote = quoteRows().find(item => String(item.id) === String(quoteAction.dataset.quoteId));
-          if (quote) {
-            state.quoteWizardStep = 1;
-            renderQuoteDetail(quote);
-          }
+          state.quoteWizardStep = 1;
+          openQuoteDetail(quoteAction.dataset.quoteId);
           return;
         }
       }
