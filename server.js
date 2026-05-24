@@ -2048,6 +2048,34 @@ function safeFileName(value) {
   return String(value || "quote").replace(/[\\/:*?"<>|]/g, "_");
 }
 
+function safePdfFilePart(value, fallback = "quote") {
+  const cleaned = String(value || fallback)
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\\/:*?"<>|]/g, "")
+    .replace(/[^A-Za-z0-9\s._-]/g, "")
+    .trim()
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_");
+  return cleaned || fallback;
+}
+
+function formatPdfFileDate(value) {
+  const date = value ? new Date(value) : new Date();
+  const validDate = Number.isNaN(date.getTime()) ? new Date() : date;
+  const year = validDate.getFullYear();
+  const month = String(validDate.getMonth() + 1).padStart(2, "0");
+  const day = String(validDate.getDate()).padStart(2, "0");
+  return `${year}${month}${day}`;
+}
+
+function quotePdfFileName(q) {
+  const requestOrQuoteId = safePdfFilePart(q.requestId || q.quoteNo, "quote");
+  const customerName = safePdfFilePart(q.customerName || q.customerCompany, "customer");
+  const quotationDate = formatPdfFileDate(q.createdAt);
+  return `${requestOrQuoteId}_${customerName}_${quotationDate}.pdf`;
+}
+
 function formatYen(value) {
   const num = Number(value || 0);
   return "\u00a5" + num.toLocaleString("ja-JP");
@@ -2062,15 +2090,39 @@ function formatPdfDate(value) {
 
 function getPdfLogoPath() {
   const candidates = [
-    path.join(__dirname, "icon-512.png"),
+    path.join(__dirname, "assets", "icon-admin-512.png"),
+    path.join(__dirname, "assets", "icon-admin-192.png"),
+    path.join(__dirname, "icon-admin-512.png"),
+    path.join(__dirname, "icon-admin-192.png"),
     path.join(__dirname, "assets", "icon-512.png"),
+    path.join(__dirname, "assets", "icon-192.png"),
+    path.join(__dirname, "icon-512.png"),
     path.join(__dirname, "icon-192.png"),
-    path.join(__dirname, "assets", "icon-192.png")
   ];
   return candidates.find(filePath => fs.existsSync(filePath)) || null;
 }
 
 function pdfFontPaths() {
+  const candidates = [
+    {
+      regular: path.join(__dirname, "fonts", "NotoSansJP-Regular.ttf"),
+      bold: path.join(__dirname, "fonts", "NotoSansJP-Bold.ttf")
+    },
+    {
+      regular: "C:\\Windows\\Fonts\\NotoSansJP-VF.ttf",
+      bold: "C:\\Windows\\Fonts\\NotoSansJP-VF.ttf"
+    },
+    {
+      regular: "C:\\Windows\\Fonts\\meiryo.ttc",
+      bold: "C:\\Windows\\Fonts\\meiryob.ttc"
+    },
+    {
+      regular: "C:\\Windows\\Fonts\\YuGothR.ttc",
+      bold: "C:\\Windows\\Fonts\\YuGothB.ttc"
+    }
+  ];
+  const found = candidates.find(fonts => fs.existsSync(fonts.regular));
+  if (found) return found;
   return {
     regular: path.join(__dirname, "fonts", "NotoSansJP-Regular.ttf"),
     bold: path.join(__dirname, "fonts", "NotoSansJP-Bold.ttf")
@@ -2115,7 +2167,9 @@ function normalizeQuoteForPdf(quote) {
     const itemDiscount = Number(item.discount || 0);
     const discountRate = Number(item.discountRate || 0);
     const beforeDiscount = quantity * unitPrice;
-    const amount = Number(item.amount ?? Math.max(0, beforeDiscount - itemDiscount - Math.round(beforeDiscount * discountRate / 100)));
+    const computedAmount = Math.max(0, beforeDiscount - itemDiscount - Math.round(beforeDiscount * discountRate / 100));
+    const storedAmount = Number(item.amount);
+    const amount = Number.isFinite(storedAmount) && storedAmount > 0 ? storedAmount : computedAmount;
     return {
       no: index + 1,
       name: item.name || item.title || "-",
@@ -2146,11 +2200,14 @@ function normalizeQuoteForPdf(quote) {
   const taxable = Math.max(subtotal - discount, 0);
   const rawTaxRate = quote.vatRate ?? quote.taxRate ?? 0.1;
   const taxRatePercent = Number(rawTaxRate) <= 1 ? Number(rawTaxRate || 0.1) * 100 : Number(rawTaxRate || 10);
-  const tax = Number(quote.tax ?? quote.taxAmount ?? quote.vatAmount ?? Math.round(taxable * taxRatePercent / 100));
+  const storedTax = Number(quote.tax ?? quote.taxAmount ?? quote.vatAmount);
+  const tax = Number.isFinite(storedTax) && storedTax > 0 ? storedTax : Math.round(taxable * taxRatePercent / 100);
   const rounding = Number(quote.rounding || 0);
-  const total = Math.max(0, Number(quote.total ?? taxable + tax + rounding));
+  const storedTotal = Number(quote.total);
+  const total = Math.max(0, Number.isFinite(storedTotal) && storedTotal > 0 ? storedTotal : taxable + tax + rounding);
   return {
     quoteNo,
+    requestId: quote.requestId || quote.requestCode || quote.requestNo || quoteNo,
     customerName: quote.customerName || quote.name || "-",
     customerCompany: quote.customerCompany || quote.company || "",
     customerPerson: quote.customerPerson || quote.contactPerson || "",
@@ -2204,14 +2261,14 @@ function drawPdfSummaryItem(doc, x, y, w, label, value, valueColor, gray) {
 function drawPdfItemsTable(doc, items, opt) {
   const { x, y, w, black, line, text } = opt;
   const cols = [
-    { key: "no", label: "No.", width: 30, align: "center" },
-    { key: "name", label: "Item", width: 116, align: "left" },
-    { key: "spec", label: "Spec / Description", width: 184, align: "left" },
-    { key: "unit", label: "Unit", width: 36, align: "center" },
-    { key: "quantity", label: "Qty", width: 45, align: "right" },
-    { key: "unitPrice", label: "Unit price", width: 62, align: "right" },
-    { key: "discountRate", label: "Disc.", width: 45, align: "center" },
-    { key: "amount", label: "Amount", width: 62, align: "right" }
+    { key: "no", label: "No.", width: 28, align: "center" },
+    { key: "name", label: "Item", width: 96, align: "left" },
+    { key: "spec", label: "Spec / Description", width: 150, align: "left" },
+    { key: "unit", label: "Unit", width: 34, align: "center" },
+    { key: "quantity", label: "Qty", width: 38, align: "center" },
+    { key: "unitPrice", label: "Unit price", width: 64, align: "right" },
+    { key: "discountRate", label: "Disc.", width: 40, align: "center" },
+    { key: "amount", label: "Amount", width: 73, align: "right" }
   ];
   let yy = y;
   let xx = x;
@@ -2225,7 +2282,11 @@ function drawPdfItemsTable(doc, items, opt) {
   });
   yy += 24;
   items.forEach((item, rowIndex) => {
-    const rowH = 26;
+    setPdfFont(doc, false);
+    doc.fontSize(7);
+    const nameH = doc.heightOfString(safePdfText(item.name), { width: cols[1].width - 8, lineGap: 1 });
+    const specH = doc.heightOfString(safePdfText(item.spec || "-"), { width: cols[2].width - 8, lineGap: 1 });
+    const rowH = Math.max(28, Math.ceil(Math.max(nameH, specH)) + 16);
     if (yy + rowH > 660) {
       doc.addPage();
       yy = 44;
@@ -2248,7 +2309,7 @@ function drawPdfItemsTable(doc, items, opt) {
       if (col.key === "discountRate") value = `${Number(value || 0)}%`;
       doc.fillColor(text);
       setPdfFont(doc, false);
-      doc.fontSize(7).text(safePdfText(value), xx + 4, yy + 8, { width: col.width - 8, align: col.align, ellipsis: true });
+      doc.fontSize(7).text(safePdfText(value), xx + 4, yy + 8, { width: col.width - 8, align: col.align, lineGap: 1 });
       xx += col.width;
     });
     yy += rowH;
@@ -2350,14 +2411,17 @@ function drawQuotePdf(doc, q) {
   }
   doc.fillColor(text);
   setPdfFont(doc, true);
-  doc.fontSize(16).text(safePdfText("YAMADEN CO.,LTD"), left + 46, y + 1);
+  doc.fontSize(13).text(safePdfText("株式会社 山電"), left + 46, y);
+  doc.fontSize(10).text(safePdfText("YAMADEN CO.,LTD"), left + 46, y + 18);
   doc.fillColor(gray);
   setPdfFont(doc, true);
-  doc.fontSize(8).text(safePdfText("YAMADEN ELECTRICAL SOLUTIONS"), left + 46, y + 23);
+  doc.fontSize(7).text(safePdfText("YAMADEN ELECTRICAL SOLUTIONS"), left + 46, y + 32);
   doc.moveTo(pageW - 230, y + 4).lineTo(pageW - 230, y + 36).strokeColor(line).stroke();
   doc.fillColor(text);
   setPdfFont(doc, true);
-  doc.fontSize(20).text(safePdfText("QUOTATION"), pageW - 220, y + 8, { width: 184, align: "right" });
+  doc.fontSize(18).text(safePdfText("御見積書"), pageW - 220, y + 2, { width: 184, align: "right" });
+  doc.fillColor(gray);
+  doc.fontSize(9).text(safePdfText("QUOTATION"), pageW - 220, y + 26, { width: 184, align: "right" });
   y += 58;
   const boxTop = y;
   const colGap = 14;
@@ -2394,6 +2458,10 @@ function drawQuotePdf(doc, q) {
   y += 82;
   y = drawPdfItemsTable(doc, q.items, { x: left, y, w: right - left, black: dark, line, text, gray });
   y += 16;
+  if (y + 330 > pageH) {
+    doc.addPage();
+    y = 44;
+  }
   const bottomTop = y;
   const leftBoxW = 300;
   const rightBoxW = right - left - leftBoxW - 22;
@@ -2543,7 +2611,7 @@ app.get("/admin/quotes/:id/pdf", requireAdmin, async (req, res) => {
     if (!quote) return res.status(404).json({ ok: false, message: "Quote not found", id: req.params.id });
     const normalized = normalizeQuoteForPdf(quote);
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="YAMADEN_Quote_${safeFileName(normalized.quoteNo)}.pdf"`);
+    res.setHeader("Content-Disposition", `attachment; filename="${safeFileName(quotePdfFileName(normalized))}"`);
     const doc = new PDFDocument({ size: "A4", margin: 36, bufferPages: true });
     setupPdfFonts(doc);
     doc.pipe(res);
