@@ -5053,7 +5053,7 @@
       return;
     }
     try {
-      const pdfUrl = `/admin/quotes/${encodeURIComponent(id)}/pdf`;
+      const pdfUrl = `/admin/quotes/${encodeURIComponent(id)}/pdf?lang=${encodeURIComponent(state.lang === "vi" ? "vi" : "ja")}`;
       console.log("Export PDF:", pdfUrl);
       const response = await fetch(pdfUrl, {
         cache: "no-store",
