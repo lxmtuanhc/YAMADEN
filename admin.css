@@ -3475,6 +3475,38 @@ body {
   justify-content: center;
 }
 
+.quote-file-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.quote-file-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.quote-file-row > div:first-child {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.quote-file-row strong,
+.quote-file-row small {
+  overflow-wrap: anywhere;
+}
+
+.quote-file-row small {
+  color: var(--muted);
+}
+
 .quote-row-icon {
   width: 34px;
   height: 34px;

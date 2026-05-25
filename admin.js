@@ -1639,6 +1639,23 @@
         headers: { "Content-Type": "application/json" }
       });
     },
+    getQuoteFiles(requestId) {
+      return requestJson("/admin/requests/" + encodeURIComponent(requestId) + "/quote-files");
+    },
+    uploadQuoteFiles(requestId, files) {
+      const formData = new FormData();
+      Array.from(files || []).forEach(file => formData.append("files", file));
+      return requestJson("/admin/requests/" + encodeURIComponent(requestId) + "/quote-files", {
+        method: "POST",
+        body: formData
+      });
+    },
+    deleteQuoteFile(fileId) {
+      return requestJson("/admin/quote-files/" + encodeURIComponent(fileId), { method: "DELETE" });
+    },
+    sendQuoteFiles(requestId) {
+      return requestJson("/admin/requests/" + encodeURIComponent(requestId) + "/quote-files/send", { method: "POST" });
+    },
     deleteQuote(id, permanent) {
       return requestJson("/admin/quotes/" + encodeURIComponent(id) + (permanent ? "?permanent=true" : ""), { method: "DELETE" });
     },
@@ -1824,14 +1841,18 @@
   }
 
   function getRequestDisplayId(request) {
-    return String(
-      request?.requestId ||
-      request?.requestCode ||
-      request?.requestNo ||
-      request?.code ||
-      request?._id ||
-      ""
-    );
+    return safeDisplayId(request?.requestNo || request?.code || request?.requestCode || request?.requestId || request?.displayId, "");
+  }
+
+  function isMongoObjectId(value) {
+    return /^[a-f\d]{24}$/i.test(String(value || "").trim());
+  }
+
+  function safeDisplayId(value, fallback = "") {
+    const text = String(value || "").trim();
+    if (!text) return fallback;
+    if (isMongoObjectId(text)) return fallback;
+    return text;
   }
 
   function getCustomerName(request) {
@@ -4554,7 +4575,10 @@
   }
 
   function quoteWizardLabels() {
-    return [t("quoteWizardStep1"), t("quoteWizardStep2"), t("quoteWizardStep3"), t("quoteWizardStep4"), t("quoteWizardStep5")];
+    return [
+      state.lang === "vi" ? "Chi ti\u1ebft y\u00eau c\u1ea7u" : "\u4f9d\u983c\u8a73\u7d30",
+      state.lang === "vi" ? "G\u1eedi b\u00e1o gi\u00e1" : "\u898b\u7a4d\u9001\u4fe1"
+    ];
   }
 
   function renderQuoteWizardSteps() {
@@ -4564,6 +4588,69 @@
       const done = step < current;
       return `<button class="quote-wizard-step ${step === current ? "active" : ""} ${done ? "done" : ""}" type="button" data-quote-wizard-step="${step}" ${step > current ? "disabled" : ""}><b>${done ? "\u2713" : step}</b><span>${escapeHtml(label)}</span></button>`;
     }).join("")}</nav>`;
+  }
+
+  function quoteFileStatusLabel(status, response) {
+    const value = response && response !== "pending" ? response : status;
+    const vi = {
+      draft: "Ch\u01b0a g\u1eedi",
+      sent: "\u0110\u00e3 g\u1eedi",
+      viewed: "Kh\u00e1ch \u0111\u00e3 xem",
+      accepted: "\u0110\u00e3 ch\u1ea5p nh\u1eadn",
+      revision_requested: "Y\u00eau c\u1ea7u s\u1eeda",
+      rejected: "T\u1eeb ch\u1ed1i",
+      pending: "Ch\u1edd ph\u1ea3n h\u1ed3i"
+    };
+    const ja = {
+      draft: "\u672a\u9001\u4fe1",
+      sent: "\u9001\u4fe1\u6e08\u307f",
+      viewed: "\u95b2\u89a7\u6e08\u307f",
+      accepted: "\u627f\u8a8d",
+      revision_requested: "\u4fee\u6b63\u4f9d\u983c",
+      rejected: "\u5374\u4e0b",
+      pending: "\u56de\u7b54\u5f85\u3061"
+    };
+    return (state.lang === "vi" ? vi : ja)[value] || value || "-";
+  }
+
+  function quoteFileSizeLabel(size) {
+    const value = Number(size || 0);
+    if (!value) return "-";
+    if (value >= 1024 * 1024) return (value / 1024 / 1024).toFixed(1) + " MB";
+    return Math.ceil(value / 1024) + " KB";
+  }
+
+  function quoteFileId(file) {
+    return String(file?._id || file?.id || "");
+  }
+
+  function renderQuoteFileRows(files) {
+    const rows = toList(files);
+    if (!rows.length) {
+      return `<div class="quote-empty-line">${escapeHtml(state.lang === "vi" ? "Ch\u01b0a c\u00f3 file b\u00e1o gi\u00e1." : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u306f\u307e\u3060\u3042\u308a\u307e\u305b\u3093\u3002")}</div>`;
+    }
+    return rows.map(file => {
+      const id = quoteFileId(file);
+      const sent = file.status && file.status !== "draft";
+      return `<div class="quote-file-row" data-quote-file-row="${escapeHtml(id)}">
+        <div><strong>${escapeHtml(file.originalName || file.fileName || "-")}</strong><small>${escapeHtml(quoteFileSizeLabel(file.fileSize))} / ${escapeHtml(quoteFileStatusLabel(file.status, file.customerResponse))}</small>${file.customerResponseNote ? `<small>${escapeHtml(file.customerResponseNote)}</small>` : ""}</div>
+        <div class="actions">
+          ${file.fileUrl ? `<a class="btn btn-soft" href="${escapeHtml(file.fileUrl)}" target="_blank" rel="noopener">${escapeHtml(state.lang === "vi" ? "Xem file" : "\u8868\u793a")}</a>` : ""}
+          ${!sent ? `<button class="btn btn-danger" type="button" data-quote-file-delete="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>` : ""}
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  function renderQuoteStepFiles(quote, readonly) {
+    const files = toList(quote.files);
+    const totalSize = files.reduce((sum, file) => sum + Number(file.fileSize || 0), 0);
+    return `<section class="quote-work-card quote-files-card">
+      <div class="quote-card-header"><div><h3>${escapeHtml(state.lang === "vi" ? "File b\u00e1o gi\u00e1" : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb")}</h3><p class="quote-card-subtitle">PDF, Excel, Word, image, ZIP. Max 20MB/file, 100MB/request.</p></div></div>
+      <label class="quote-field-wide"><span>${escapeHtml(state.lang === "vi" ? "Upload file" : "\u30d5\u30a1\u30a4\u30eb\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9")}</span><input type="file" multiple data-quote-file-input accept=".pdf,.xls,.xlsx,.doc,.docx,.jpg,.jpeg,.png,.webp,.zip" ${readonly ? "disabled" : ""}></label>
+      <div class="quote-mini-summary"><span>${escapeHtml(files.length + " file")}</span><span>${escapeHtml(quoteFileSizeLabel(totalSize))} / 100 MB</span></div>
+      <div class="quote-file-list" data-quote-file-list>${renderQuoteFileRows(files)}</div>
+    </section>`;
   }
 
   function renderQuoteSummaryCard(quote, totals, editable) {
@@ -4606,6 +4693,28 @@
   }
 
   function renderQuoteStep1(quote, readonly, requestLinked) {
+    const displayRequestId = safeDisplayId(quote.requestNo || quote.requestCode || quote.code || quote.requestId, "");
+    const requestTitle = state.lang === "vi" ? "Y\u00eau c\u1ea7u li\u00ean k\u1ebft" : "\u9023\u643a\u4f9d\u983c";
+    const requestSub = state.lang === "vi" ? "T\u1ef1 l\u1ea5y t\u1eeb chi ti\u1ebft y\u00eau c\u1ea7u, kh\u00f4ng nh\u1eadp ID th\u1ee7 c\u00f4ng." : "\u4f9d\u983c\u8a73\u7d30\u304b\u3089\u81ea\u52d5\u9023\u643a\u3057\u307e\u3059\u3002";
+    if (quote.useFileFlow) return `<div class="quote-step-grid quote-step-request-only">
+      <section class="quote-work-card quote-request-link">
+        <div class="quote-card-header"><div><h3>${escapeHtml(requestTitle)}</h3><p class="quote-card-subtitle">${escapeHtml(requestSub)}</p></div></div>
+        <div class="quote-linked-summary">${requestLinked ? `<strong>${escapeHtml(displayRequestId)}</strong><span>${escapeHtml(quote.projectName || quote.title || "-")}</span><small>${escapeHtml(quote.customerName || "-")}</small>` : `<span>${escapeHtml(t("requestNotLinked"))}</span>`}</div>
+        <input type="hidden" name="requestId" value="${escapeHtml(quote.requestMongoId || "")}">
+      </section>
+      <section class="quote-work-card">
+        <div class="quote-card-header"><div><h3>${escapeHtml(t("quoteCustomerProjectInfo"))}</h3><p class="quote-card-subtitle">${escapeHtml(quoteWizardLabels()[0])}</p></div></div>
+        <div class="info-grid">
+          ${infoItem(t("id"), displayRequestId || "-")}
+          ${infoItem(t("customer"), quote.customerName || "-")}
+          ${infoItem(t("phone"), quote.customerPhone || "-")}
+          ${infoItem(t("email"), quote.customerEmail || "-")}
+          ${infoItem(t("address"), quote.projectAddress || "-")}
+          ${infoItem(t("projectContent"), quote.projectName || quote.content || "-")}
+          ${infoItem(t("assignee"), quote.assigneeName || "-")}
+        </div>
+      </section>
+    </div>`;
     return `<div class="quote-step-grid quote-step-request-only">
       <section class="quote-work-card quote-request-link">
         <div class="quote-card-header"><div><h3>${escapeHtml(t("quoteRequestInput"))}</h3><p class="quote-card-subtitle">${escapeHtml(t("linkedRequest"))}</p></div><button class="btn btn-soft" type="button" data-quote-request-search>${escapeHtml(requestLinked ? t("changeRequest") : t("searchAction"))}</button></div>
@@ -4811,6 +4920,48 @@
   }
 
   function renderQuoteDetail(quote) {
+    if (quote?.useFileFlow) {
+      const currentStep = Math.min(2, Math.max(1, Number(state.quoteWizardStep || 1)));
+      state.quoteWizardStep = currentStep;
+      const hasDraftFiles = toList(quote.files).some(file => !file.status || file.status === "draft");
+      const requestLinked = Boolean(quote.requestMongoId || quote.requestId || quote.requestNo || quote.requestCode);
+      const displayRequestId = safeDisplayId(quote.requestNo || quote.requestCode || quote.code || quote.requestId, "");
+      openDrawer(`
+        <article class="drawer-panel quote-detail-drawer quote-wizard-modal" data-quote-file-flow>
+          <header class="drawer-head drawer-header quote-workspace-head">
+            <div class="quote-head-main">
+              <p class="eyebrow">${escapeHtml(t("quoteQuickCreate"))}</p>
+              <h2>${escapeHtml(displayRequestId || t("quoteNew"))}</h2>
+              <p class="note">${escapeHtml(state.lang === "vi" ? "Upload file b\u00e1o gi\u00e1 \u0111\u00e3 t\u1ea1o b\u00ean ngo\u00e0i v\u00e0 g\u1eedi cho kh\u00e1ch." : "\u5916\u90e8\u3067\u4f5c\u6210\u3057\u305f\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u9001\u4fe1\u3057\u307e\u3059\u3002")}</p>
+            </div>
+            <button class="quote-detail-close" type="button" data-close-drawer aria-label="${escapeHtml(t("close"))}">&times;</button>
+          </header>
+          ${renderQuoteWizardSteps()}
+          <form class="drawer-body quote-detail-form quote-wizard-form" data-quote-form data-quote-file-request="${escapeHtml(quote.requestMongoId || quote._requestId || "")}">
+            <input type="hidden" name="id" value="${escapeHtml(quote.id || "")}">
+            <input type="hidden" name="requestId" value="${escapeHtml(quote.requestMongoId || quote._requestId || "")}">
+            <div class="quote-wizard-content">
+              <section class="quote-wizard-panel ${currentStep === 1 ? "is-active" : ""}" data-quote-step-panel="1">
+                <h3>${escapeHtml(quoteWizardLabels()[0])}</h3>
+                ${renderQuoteStep1(quote, false, requestLinked)}
+              </section>
+              <section class="quote-wizard-panel ${currentStep === 2 ? "is-active" : ""}" data-quote-step-panel="2">
+                <h3>${escapeHtml(quoteWizardLabels()[1])}</h3>
+                ${renderQuoteStepFiles(quote, false)}
+              </section>
+            </div>
+            <footer class="quote-wizard-footer">
+              <div>${currentStep > 1 ? `<button class="btn btn-soft" type="button" data-quote-prev data-quote-prev-step>${escapeHtml(t("previousStep"))}</button>` : ""}</div>
+              <div class="quote-wizard-footer-actions">
+                ${currentStep < 2 ? `<button class="btn btn-primary" type="button" data-quote-next data-quote-next-step>${escapeHtml(t("nextStep"))}</button>` : `<button class="btn btn-primary" type="button" data-quote-files-send ${hasDraftFiles ? "" : "disabled"}>${escapeHtml(t("sendToCustomerApp"))}</button>`}
+              </div>
+            </footer>
+          </form>
+        </article>
+      `);
+      window.currentQuoteDetail = quote;
+      return;
+    }
     quote = ensureQuoteDefaults(normalizeQuote(quote));
     const totals = calculateQuoteTotals(quote);
     const readonly = ["accepted", "rejected", "expired"].includes(quoteAdminStatus(quote.status));
@@ -4963,9 +5114,14 @@
   }
 
   function setQuoteWizardStep(step) {
-    const next = Math.min(5, Math.max(1, Number(step || 1)));
+    const isFileFlow = Boolean(document.querySelector("[data-quote-file-flow]") || window.currentQuoteDetail?.useFileFlow);
+    const next = Math.min(isFileFlow ? 2 : 5, Math.max(1, Number(step || 1)));
     const form = document.querySelector("[data-quote-form]");
     state.quoteWizardStep = next;
+    if (isFileFlow && window.currentQuoteDetail?.useFileFlow) {
+      renderQuoteDetail(window.currentQuoteDetail);
+      return;
+    }
     if (form) {
       const existing = quoteRows().find(item => String(item.id) === String(new FormData(form).get("id")));
       renderQuoteDetail(quoteFromForm(form, existing));
@@ -4980,6 +5136,7 @@
   }
 
   function validateQuoteStep2() {
+    if (window.currentQuoteDetail?.useFileFlow) return true;
     const form = document.querySelector("[data-quote-form]");
     if (!form) return false;
     if (!form.querySelectorAll("[data-quote-item-row]").length) {
@@ -5769,27 +5926,109 @@
     try {
       const sourceRequest = state.requests.find(item => [getRowId(item), getRequestDisplayId(item)].some(value => value && String(value) === String(requestId)));
       const data = await AdminAPI.createQuoteFromRequest(requestId);
-      if (!data?.ok || !data.quote) throw new Error(data?.message || "Create quote failed");
-      const requestDisplayId = getRequestDisplayId(data.request) || getRequestDisplayId(sourceRequest) || requestId;
-      const savedQuote = normalizeQuote({ ...data.quote, requestId: requestDisplayId });
-      const requestIdText = requestDisplayId;
-      const requestIndex = state.requests.findIndex(item => [getRowId(item), getRequestDisplayId(item)].some(value => value && String(value) === String(requestIdText)));
+      if (!data?.ok || !data.request) throw new Error(data?.message || "Open quote flow failed");
+      const request = data.request || sourceRequest || {};
+      const requestDisplayId = getRequestDisplayId(request) || getRequestDisplayId(sourceRequest) || "";
+      const requestMongoId = getRowId(request) || getRowId(sourceRequest) || requestId;
+      const requestIndex = state.requests.findIndex(item => [getRowId(item), getRequestDisplayId(item)].some(value => value && String(value) === String(requestMongoId) || String(value) === String(requestDisplayId)));
       if (requestIndex >= 0 && data.request) state.requests[requestIndex] = data.request;
-      state.quotes = [savedQuote, ...state.quotes.filter(item => String(item._id || item.id || item.quoteNo) !== String(savedQuote._id || savedQuote.id || savedQuote.quoteNo))];
-      writeCustomerAppQuotes(state.quotes.map(item => ({
-        ...item,
-        status: quoteCustomerAppStatus(item.status),
-        quoteCode: item.quoteNo,
-        items: item.items.map(row => ({ ...row, amount: quoteItemAmount(row) }))
-      })));
-      toast(data.reused
-        ? (state.lang === "vi" ? "Y\u00eau c\u1ea7u n\u00e0y \u0111\u00e3 c\u00f3 b\u00e1o gi\u00e1." : "\u3053\u306e\u4f9d\u983c\u306b\u306f\u65e2\u306b\u898b\u7a4d\u304c\u3042\u308a\u307e\u3059\u3002")
-        : (state.lang === "vi" ? "\u0110\u00e3 t\u1ea1o b\u00e1o gi\u00e1 t\u1eeb y\u00eau c\u1ea7u." : "\u4f9d\u983c\u304b\u3089\u898b\u7a4d\u3092\u4f5c\u6210\u3057\u307e\u3057\u305f\u3002"));
       await closeRequestDetail(true);
-      state.currentView = "quotes";
-      renderCurrentView();
       state.quoteWizardStep = 1;
-      openQuoteDetail(savedQuote._id || savedQuote.id || savedQuote.quoteNo);
+      renderQuoteDetail({
+        useFileFlow: true,
+        id: requestMongoId,
+        requestMongoId,
+        requestId: requestDisplayId,
+        requestNo: request.requestNo || request.code || request.requestCode || requestDisplayId,
+        requestCode: request.requestCode || request.requestNo || request.code || requestDisplayId,
+        customerName: getCustomerName(request),
+        customerPhone: getRequestPhone(request),
+        customerEmail: request.email || request.contact || "",
+        projectAddress: getRequestAddress(request),
+        projectName: request.projectName || request.title || getRequestContent(request),
+        content: getRequestContent(request),
+        assigneeName: getAssigneeName(request),
+        files: normalizeList(data.files || data.data)
+      });
+    } catch (error) {
+      console.error(error);
+      toast(error.message || t("failed"));
+    }
+  }
+
+  function validateQuoteFiles(files, existingFiles) {
+    const allowed = [".pdf", ".xls", ".xlsx", ".doc", ".docx", ".jpg", ".jpeg", ".png", ".webp", ".zip"];
+    const blocked = [".exe", ".bat", ".cmd", ".js", ".sh", ".php", ".msi", ".com", ".scr", ".ps1", ".vbs", ".jar"];
+    const list = Array.from(files || []);
+    const max = 20 * 1024 * 1024;
+    for (const file of list) {
+      const ext = "." + String(file.name || "").split(".").pop().toLowerCase();
+      if (!allowed.includes(ext) || blocked.includes(ext)) return state.lang === "vi" ? "Lo\u1ea1i file kh\u00f4ng \u0111\u01b0\u1ee3c ph\u00e9p." : "\u8a31\u53ef\u3055\u308c\u3066\u3044\u306a\u3044\u30d5\u30a1\u30a4\u30eb\u5f62\u5f0f\u3067\u3059\u3002";
+      if (file.size > max) return state.lang === "vi" ? "M\u1ed7i file t\u1ed1i \u0111a 20MB." : "1\u30d5\u30a1\u30a4\u30eb\u306f20MB\u4ee5\u4e0b\u3067\u3059\u3002";
+    }
+    const existingSize = toList(existingFiles).reduce((sum, file) => sum + Number(file.fileSize || 0), 0);
+    const incomingSize = list.reduce((sum, file) => sum + Number(file.size || 0), 0);
+    if (existingSize + incomingSize > 100 * 1024 * 1024) return state.lang === "vi" ? "T\u1ed5ng file trong 1 request t\u1ed1i \u0111a 100MB." : "1\u4f9d\u983c\u306e\u5408\u8a08\u306f100MB\u4ee5\u4e0b\u3067\u3059\u3002";
+    return "";
+  }
+
+  async function uploadQuoteFilesFromInput(input) {
+    const quote = window.currentQuoteDetail;
+    if (!quote?.useFileFlow || !quote.requestMongoId) return;
+    const files = input.files || [];
+    const message = validateQuoteFiles(files, quote.files);
+    if (message) {
+      toast(message);
+      input.value = "";
+      return;
+    }
+    try {
+      const response = await AdminAPI.uploadQuoteFiles(quote.requestMongoId, files);
+      quote.files = normalizeList(response.data);
+      window.currentQuoteDetail = quote;
+      renderQuoteDetail(quote);
+      toast(state.lang === "vi" ? "Upload file th\u00e0nh c\u00f4ng." : "\u30d5\u30a1\u30a4\u30eb\u3092\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u3057\u307e\u3057\u305f\u3002");
+    } catch (error) {
+      console.error(error);
+      toast(error.message || t("failed"));
+    } finally {
+      input.value = "";
+    }
+  }
+
+  async function deleteQuoteFile(fileId) {
+    const quote = window.currentQuoteDetail;
+    if (!quote?.useFileFlow || !fileId) return;
+    try {
+      await AdminAPI.deleteQuoteFile(fileId);
+      quote.files = toList(quote.files).filter(file => quoteFileId(file) !== String(fileId));
+      window.currentQuoteDetail = quote;
+      renderQuoteDetail(quote);
+      toast(state.lang === "vi" ? "\u0110\u00e3 x\u00f3a file." : "\u30d5\u30a1\u30a4\u30eb\u3092\u524a\u9664\u3057\u307e\u3057\u305f\u3002");
+    } catch (error) {
+      console.error(error);
+      toast(error.message || t("failed"));
+    }
+  }
+
+  async function sendCurrentQuoteFiles() {
+    const quote = window.currentQuoteDetail;
+    if (!quote?.useFileFlow || !quote.requestMongoId) return;
+    if (!toList(quote.files).length) {
+      toast(state.lang === "vi" ? "Vui l\u00f2ng upload file b\u00e1o gi\u00e1 tr\u01b0\u1edbc khi g\u1eedi." : "\u9001\u4fe1\u524d\u306b\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u3057\u3066\u304f\u3060\u3055\u3044\u3002");
+      return;
+    }
+    try {
+      const response = await AdminAPI.sendQuoteFiles(quote.requestMongoId);
+      quote.files = normalizeList(response.data);
+      window.currentQuoteDetail = quote;
+      if (response.request) {
+        const id = getRowId(response.request);
+        const index = state.requests.findIndex(item => getRowId(item) === id);
+        if (index >= 0) state.requests[index] = response.request;
+      }
+      renderQuoteDetail(quote);
+      toast(t("quoteSentMock"));
     } catch (error) {
       console.error(error);
       toast(error.message || t("failed"));
@@ -6423,6 +6662,11 @@
     });
 
     bind(document, "change", async event => {
+      const quoteFileInput = event.target.closest("[data-quote-file-input]");
+      if (quoteFileInput) {
+        await uploadQuoteFilesFromInput(quoteFileInput);
+        return;
+      }
       const staffForm = event.target.closest("#staffForm");
       if (staffForm) {
         setStaffEditDirty(true);
@@ -6509,6 +6753,15 @@
       }
       if (event.target.closest("[data-quote-excel-preview]")) {
         toast(t("fileExportLater"));
+        return;
+      }
+      const quoteFileDelete = event.target.closest("[data-quote-file-delete]");
+      if (quoteFileDelete) {
+        await deleteQuoteFile(quoteFileDelete.dataset.quoteFileDelete);
+        return;
+      }
+      if (event.target.closest("[data-quote-files-send]")) {
+        await sendCurrentQuoteFiles();
         return;
       }
       if (event.target.closest("[data-quote-prev], [data-quote-prev-step]")) {

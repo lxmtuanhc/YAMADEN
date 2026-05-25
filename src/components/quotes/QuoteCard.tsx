@@ -10,6 +10,8 @@ import { StatusBadge } from "../ui/StatusBadge";
 export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote: Quote) => void }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const requestNo = quote.requestNo || quote.requestCode || quote.quoteCode || quote.requestId || quote.id;
+  const isFileQuote = Boolean(quote.fileUrl);
 
   return (
     <Card className="request-card quote-list-card" onClick={() => navigate(`/quotes/${quote.id}`)}>
@@ -18,18 +20,24 @@ export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote
       </div>
       <div className="list-body">
         <div className="list-row">
-          <span className="list-id">{quote.id}</span>
+          <span className="list-id">{requestNo}</span>
           <StatusBadge status={quote.status} />
         </div>
         <h3>{quote.projectName}</h3>
-        <p>
-          <span>{t("quote.amount")}</span>
-          <span>{formatCurrency(quote.total ?? calculateQuoteTotal(quote.items))}</span>
-        </p>
-        <p>
-          <span>{t("quote.validUntil")}</span>
-          <span>{quote.validUntil}</span>
-        </p>
+        {isFileQuote ? (
+          <p><span>{t("quote.id")}</span><span>{quote.originalName || quote.fileName}</span></p>
+        ) : (
+          <>
+            <p>
+              <span>{t("quote.amount")}</span>
+              <span>{formatCurrency(quote.total ?? calculateQuoteTotal(quote.items))}</span>
+            </p>
+            <p>
+              <span>{t("quote.validUntil")}</span>
+              <span>{quote.validUntil}</span>
+            </p>
+          </>
+        )}
         {onDelete ? (
           <button
             className="inline-danger-action"

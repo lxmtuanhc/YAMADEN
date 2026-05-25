@@ -25,7 +25,7 @@ function item(index, extra = "") {
 
 function baseQuote(items) {
   return {
-    quoteNo: "Q-2026-15755",
+    quoteNo: "LEGACY-QUOTE-15755",
     requestId: "YMD-85962",
     customerName: "Le Xuân Minh Tuấn",
     customerPhone: "03-1234-5678",

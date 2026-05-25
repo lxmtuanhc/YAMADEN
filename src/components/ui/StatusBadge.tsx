@@ -24,6 +24,8 @@ const quoteStatusKeys: Record<QuoteStatus, TranslationKey> = {
   draft: "quote.draft",
   pending: "quote.pending",
   pending_approval: "quote.pendingApproval",
+  sent: "quote.sentToCustomer",
+  viewed: "quote.viewedByCustomer",
   sent_to_customer: "quote.sentToCustomer",
   viewed_by_customer: "quote.viewedByCustomer",
   approved: "quote.approved",
