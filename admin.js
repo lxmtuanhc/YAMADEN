@@ -2,6 +2,7 @@
   "use strict";
 
   console.log("[admin-v2] script loaded");
+  console.log("QUOTE FILE FLOW LOADED");
 
   const ADMIN_TOKEN_KEY = "adminToken";
   const LOGIN_TIME_KEY = "loginTime";
@@ -1388,9 +1389,6 @@
     quoteLayoutData: "\u30ec\u30a4\u30a2\u30a6\u30c8\u30c7\u30fc\u30bf",
     quoteWizardStep1: "依頼詳細",
     quoteWizardStep2: "見積明細",
-    quoteWizardStep3: "備考・支払条件",
-    quoteWizardStep4: "支払合計",
-    quoteWizardStep5: "確認・送信",
     nextStep: "次へ",
     previousStep: "戻る",
     exportPdf: "PDF出力",
@@ -1428,7 +1426,7 @@
     sendToCustomerApp: "G\u1eedi l\u00ean app kh\u00e1ch h\u00e0ng",
     saveDraft: "L\u01b0u nh\u00e1p",
     pdfPreview: "Xem tr\u01b0\u1edbc PDF",
-    quoteDetailTitle: "Chi ti\u1ebft b\u00e1o gi\u00e1",
+    quoteDetailTitle: "B\u00e1o gi\u00e1",
     noQuotes: "Ch\u01b0a c\u00f3 b\u00e1o gi\u00e1 n\u00e0o",
     quoteMockNote: "Ch\u1ebf \u0111\u1ed9 layout th\u1eed nghi\u1ec7m: ch\u01b0a l\u01b0u MongoDB, ch\u01b0a t\u1ea1o PDF.",
     quoteSentMock: "B\u00e1o gi\u00e1 \u0111\u00e3 \u0111\u01b0\u1ee3c g\u1eedi l\u00ean app kh\u00e1ch h\u00e0ng.",
@@ -1476,7 +1474,7 @@
     linkedRequest: "Li\u00ean k\u1ebft y\u00eau c\u1ea7u",
     customerInfo: "Th\u00f4ng tin kh\u00e1ch h\u00e0ng",
     projectInfo: "Th\u00f4ng tin c\u00f4ng tr\u00ecnh",
-    quoteItems: "Chi ti\u1ebft b\u00e1o gi\u00e1",
+    quoteItems: "File b\u00e1o gi\u00e1",
     itemName: "H\u1ea1ng m\u1ee5c c\u00f4ng vi\u1ec7c",
     itemDescription: "M\u00f4 t\u1ea3 / Quy c\u00e1ch",
     unit: "\u0110VT",
@@ -1503,10 +1501,7 @@
     quotePipeline: "Pipeline b\u00e1o gi\u00e1",
     quoteLayoutData: "D\u1eef li\u1ec7u layout",
     quoteWizardStep1: "Chi tiết yêu cầu",
-    quoteWizardStep2: "Chi tiết báo giá",
-    quoteWizardStep3: "Ghi chú & điều khoản",
-    quoteWizardStep4: "Tổng hợp thanh toán",
-    quoteWizardStep5: "Xem lại & gửi",
+    quoteWizardStep2: "Gửi báo giá",
     nextStep: "Tiếp tục",
     previousStep: "Quay lại",
     exportPdf: "Xuất PDF",
@@ -4184,7 +4179,7 @@
     `;
   }
 
-  function renderQuoteDetail(quote) {
+  function showLegacyQuoteSummary(quote) {
     openDrawer(`
       <article class="drawer-panel profile-drawer">
         <header class="drawer-head drawer-header">
@@ -4205,7 +4200,7 @@
     `);
   }
 
-  function renderQuoteDetailPlaceholder(quote) {
+  function showLegacyQuoteSummaryPlaceholder(quote) {
     const totals = calculateQuoteTotals(quote);
     openDrawer(`
       <article class="drawer-panel quote-detail-drawer">
@@ -4344,10 +4339,6 @@
     return "quote-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
   }
 
-  function newQuoteNo() {
-    return "Q-" + new Date().getFullYear() + "-" + String(Date.now()).slice(-5);
-  }
-
   function normalizeQuoteDemoTitle(value) {
     const text = String(value || "");
     if (text === "Lap them 6 o cam va day dien" || text.includes("6 o cam") || (text.includes("6") && (text.includes("\u862f") || text.includes("\u76fb")))) {
@@ -4370,7 +4361,7 @@
     const base = {
       _id: quote?._id || "",
       id: quote?.id || quote?._id || newQuoteId(),
-      quoteNo: quote?.quoteNo || quote?.quoteCode || quote?.quoteNumber || quote?.code || quote?.number || newQuoteNo(),
+      quoteNo: quote?.quoteNo || quote?.quoteCode || quote?.quoteNumber || quote?.code || quote?.number || "",
       quoteNumber: quote?.quoteNumber || "",
       code: quote?.code || "",
       number: quote?.number || "",
@@ -4478,7 +4469,7 @@
     return normalized;
   }
 
-  function openQuoteDetail(quoteId) {
+  function openQuoteFileModalById(quoteId) {
     const quote = quoteRows().find(item => [item._id, item.id, item.quoteNo, item.quoteCode, item.quoteNumber, item.code, item.number].some(value => value && String(value) === String(quoteId)));
     if (!quote) {
       toast(t("quoteNotFound"));
@@ -4487,10 +4478,10 @@
     state.selectedQuoteId = quote._id || quote.id;
     state.quoteWizardStep = 1;
     try {
-      renderQuoteDetail(quote);
+      openQuoteFileModal(quote);
     } catch (error) {
       console.error(error);
-      renderQuoteDetailPlaceholder(quote);
+      showLegacyQuoteSummaryPlaceholder(quote);
     }
   }
 
@@ -4789,7 +4780,7 @@
   function renderQuoteStep4(quote, totals) {
     return `<div class="quote-step-grid quote-step-payment-only">
       <section class="quote-work-card quote-payment-card quote-payment-detail-card">
-        <div class="quote-card-header"><div><h3>${escapeHtml(t("quotePaymentSummary"))}</h3><p class="quote-card-subtitle">${escapeHtml(t("quoteWizardStep4"))}</p></div></div>
+        <div class="quote-card-header"><div><h3>${escapeHtml(t("quotePaymentSummary"))}</h3><p class="quote-card-subtitle">${escapeHtml(t("quotePaymentSummary"))}</p></div></div>
         <div class="quote-money-list">
           <div class="quote-money-row"><span>${escapeHtml(t("subtotal"))}</span><strong data-quote-summary="subtotal">${escapeHtml(quoteCurrency(totals.subtotal))}</strong></div>
           <div class="quote-money-row"><span>${escapeHtml(t("discount"))}</span><strong data-quote-summary="discount">${escapeHtml(quoteCurrency(totals.discountTotal || totals.discount || 0))}</strong></div>
@@ -4839,7 +4830,7 @@
         <div class="request-command-bar demo-actions quote-toolbar">
           <button class="btn btn-soft" type="button" data-quote-csv>${escapeHtml(t("quoteCsvExport"))}</button>
           <button class="btn btn-soft" type="button" data-quote-refresh>${escapeHtml(t("refresh"))}</button>
-          <button class="btn btn-primary" type="button" data-quote-action="new">+ ${escapeHtml(t("quoteRegister"))}</button>
+          <button class="btn btn-primary" type="button" disabled title="${escapeHtml(state.lang === "vi" ? "M\u1edf t\u1eeb chi ti\u1ebft y\u00eau c\u1ea7u" : "\u4f9d\u983c\u8a73\u7d30\u304b\u3089\u958b\u3044\u3066\u304f\u3060\u3055\u3044")}">+ ${escapeHtml(t("quoteRegister"))}</button>
         </div>
       </div>
       <div class="kpi-grid kpi-grid-small quote-kpi-grid">
@@ -4919,8 +4910,47 @@
     });
   }
 
-  function renderQuoteDetail(quote) {
-    if (quote?.useFileFlow) {
+  function requestForQuoteFileModal(source) {
+    if (!source) return null;
+    if (source.useFileFlow) return source;
+    if (getRequestDisplayId(source) && !source.quoteNo && !source.quoteCode && !source.quoteNumber) return source;
+    const sourceRequestId = safeDisplayId(source.requestNo || source.requestCode || source.code || source.requestId, "");
+    return state.requests.find(request => {
+      const display = getRequestDisplayId(request);
+      return [getRowId(request), display].some(value => value && String(value) === String(source)) ||
+        (sourceRequestId && display === sourceRequestId);
+    }) || null;
+  }
+
+  function quoteFileModalState(source) {
+    const request = requestForQuoteFileModal(source) || {};
+    const displayRequestId = getRequestDisplayId(request) || safeDisplayId(source?.requestNo || source?.requestCode || source?.code || source?.requestId, "");
+    const requestMongoId = source?.requestMongoId || source?._requestId || (request ? getRowId(request) : "");
+    return {
+      useFileFlow: true,
+      id: requestMongoId || displayRequestId,
+      requestMongoId,
+      requestId: displayRequestId,
+      requestNo: request.requestNo || request.code || request.requestCode || displayRequestId,
+      requestCode: request.requestCode || request.requestNo || request.code || displayRequestId,
+      customerName: getCustomerName(request),
+      customerPhone: getRequestPhone(request),
+      customerEmail: request.email || request.contact || source?.customerEmail || "",
+      projectAddress: getRequestAddress(request),
+      projectName: request.projectName || request.title || getRequestContent(request) || source?.projectName || source?.title || "",
+      content: getRequestContent(request) || source?.content || "",
+      assigneeName: getAssigneeName(request),
+      files: toList(source?.files)
+    };
+  }
+
+  function openQuoteFileModal(source) {
+    const quote = quoteFileModalState(source);
+    if (!quote.requestMongoId) {
+      toast(state.lang === "vi" ? "Vui l\u00f2ng m\u1edf b\u00e1o gi\u00e1 t\u1eeb chi ti\u1ebft y\u00eau c\u1ea7u." : "\u4f9d\u983c\u8a73\u7d30\u304b\u3089\u898b\u7a4d\u3092\u958b\u3044\u3066\u304f\u3060\u3055\u3044\u3002");
+      return;
+    }
+    {
       const currentStep = Math.min(2, Math.max(1, Number(state.quoteWizardStep || 1)));
       state.quoteWizardStep = currentStep;
       const hasDraftFiles = toList(quote.files).some(file => !file.status || file.status === "draft");
@@ -4930,8 +4960,8 @@
         <article class="drawer-panel quote-detail-drawer quote-wizard-modal" data-quote-file-flow>
           <header class="drawer-head drawer-header quote-workspace-head">
             <div class="quote-head-main">
-              <p class="eyebrow">${escapeHtml(t("quoteQuickCreate"))}</p>
-              <h2>${escapeHtml(displayRequestId || t("quoteNew"))}</h2>
+              <p class="eyebrow">${escapeHtml(state.lang === "vi" ? "B\u00e1o gi\u00e1" : "\u898b\u7a4d")}</p>
+              <h2>${escapeHtml((state.lang === "vi" ? "M\u00e3 y\u00eau c\u1ea7u: " : "\u4f9d\u983c\u756a\u53f7: ") + (displayRequestId || "-"))}</h2>
               <p class="note">${escapeHtml(state.lang === "vi" ? "Upload file b\u00e1o gi\u00e1 \u0111\u00e3 t\u1ea1o b\u00ean ngo\u00e0i v\u00e0 g\u1eedi cho kh\u00e1ch." : "\u5916\u90e8\u3067\u4f5c\u6210\u3057\u305f\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u9001\u4fe1\u3057\u307e\u3059\u3002")}</p>
             </div>
             <button class="quote-detail-close" type="button" data-close-drawer aria-label="${escapeHtml(t("close"))}">&times;</button>
@@ -4962,63 +4992,8 @@
       window.currentQuoteDetail = quote;
       return;
     }
-    quote = ensureQuoteDefaults(normalizeQuote(quote));
-    const totals = calculateQuoteTotals(quote);
-    const readonly = ["accepted", "rejected", "expired"].includes(quoteAdminStatus(quote.status));
-    const requestLinked = Boolean(quote.requestId);
-    const itemCountText = t("quoteItemCount").replace("{count}", String(quote.items.length));
-    const currentStep = Number(state.quoteWizardStep || 1);
-    openDrawer(`
-      <article class="drawer-panel quote-detail-drawer quote-wizard-modal">
-        <header class="drawer-head drawer-header quote-workspace-head">
-          <div class="quote-head-main">
-            <p class="eyebrow">${escapeHtml(t("quoteQuickCreate"))}</p>
-            <h2>${escapeHtml(quote.quoteNo || t("quoteNew"))}</h2>
-            <p class="note">${escapeHtml(t("quoteCreateSubtitle"))}</p>
-            <span class="status-badge status-${escapeHtml(quoteAdminStatus(quote.status))}">${escapeHtml(quoteStatusLabel(quoteAdminStatus(quote.status)))}</span>
-          </div>
-          <button class="quote-detail-close" type="button" data-close-drawer aria-label="${escapeHtml(t("close"))}">&times;</button>
-        </header>
-        ${renderQuoteWizardSteps()}
-        <form class="drawer-body quote-detail-form quote-wizard-form" data-quote-form>
-          <input type="hidden" name="_id" value="${escapeHtml(quote._id || "")}"><input type="hidden" name="id" value="${escapeHtml(quote.id)}"><input type="hidden" name="quoteNo" value="${escapeHtml(quote.quoteNo)}">
-          <div class="quote-wizard-content">
-            <section class="quote-wizard-panel ${currentStep === 1 ? "is-active" : ""}" data-quote-step-panel="1">
-              <h3>${escapeHtml(t("quoteWizardStep1"))}</h3>
-              ${renderQuoteStep1(quote, readonly, requestLinked)}
-            </section>
-            <section class="quote-wizard-panel ${currentStep === 2 ? "is-active" : ""}" data-quote-step-panel="2">
-              <h3>${escapeHtml(t("quoteWizardStep2"))}</h3>
-              ${renderQuoteStep2(quote, readonly, itemCountText)}
-            </section>
-            <section class="quote-wizard-panel ${currentStep === 3 ? "is-active" : ""}" data-quote-step-panel="3">
-              <h3>${escapeHtml(t("quoteWizardStep3"))}</h3>
-              ${renderQuoteStep3(quote, readonly)}
-            </section>
-            <section class="quote-wizard-panel ${currentStep === 4 ? "is-active" : ""}" data-quote-step-panel="4">
-              <h3>${escapeHtml(t("quoteWizardStep4"))}</h3>
-              ${renderQuoteStep4(quote, totals)}
-            </section>
-            <section class="quote-wizard-panel ${currentStep === 5 ? "is-active" : ""}" data-quote-step-panel="5">
-              <h3>${escapeHtml(t("quoteWizardStep5"))}</h3>
-              <section class="quote-work-card"><h3>${escapeHtml(t("quoteDetailTitle"))}</h3><div class="info-grid">${infoItem(t("quoteNo"), quote.quoteNo)}${infoItem(t("status"), quoteStatusLabel(quoteAdminStatus(quote.status)))}${infoItem(t("linkedRequest"), quote.requestId || "-")}${infoItem(t("customer"), quote.customerName || "-")}${infoItem(t("projectContent"), quote.projectName || quote.title || "-")}${infoItem(t("validUntil"), quoteDateLabel(quote.validUntil))}${infoItem(t("assignee"), quote.assigneeName || "-")}</div></section>
-              <section class="quote-work-card"><h3>${escapeHtml(t("quoteItems"))}</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>No.</th><th>${escapeHtml(t("itemName"))}</th><th>${escapeHtml(t("itemDescription"))}</th><th>${escapeHtml(t("unit"))}</th><th>${escapeHtml(t("quantity"))}</th><th>${escapeHtml(t("unitPrice"))}</th><th>${escapeHtml(t("discount"))}</th><th>${escapeHtml(t("lineAmount"))}</th></tr></thead><tbody data-quote-review-items>${renderQuoteReviewRows(quote)}</tbody></table></div></section>
-              <section class="quote-work-card"><h3>${escapeHtml(t("quoteNotes"))}</h3><p data-quote-review-note>${escapeHtml(quote.customerNote || "-")}</p><h3>${escapeHtml(t("paymentTerms"))}</h3><p data-quote-review-terms>${escapeHtml(quote.paymentTerms || "-")}</p></section>
-              ${renderQuoteSummaryCard(quote, totals, false)}
-            </section>
-          </div>
-          <footer class="quote-wizard-footer">
-            <div>${currentStep > 1 ? `<button class="btn btn-soft" type="button" data-quote-prev data-quote-prev-step>${escapeHtml(t("previousStep"))}</button>` : ""}</div>
-            <div class="quote-wizard-footer-actions">
-              ${currentStep === 5 ? `<button class="btn btn-soft" type="button" data-quote-pdf-preview>${escapeHtml(t("exportPdf"))}</button><button class="btn btn-soft" type="button" data-quote-excel-preview>${escapeHtml(t("exportExcel"))}</button>` : ""}
-              ${currentStep === 5 ? `<button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button>` : ""}
-              ${currentStep < 5 ? `<button class="btn btn-primary" type="button" data-quote-next data-quote-next-step>${escapeHtml(t("nextStep"))}</button>` : `<button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button>`}
-            </div>
-          </footer>
-        </form>
-      </article>
-    `);
   }
+
 
   function renderQuoteItemRow(item, index) {
     return `<div class="quote-item-row" data-quote-item-row data-item-id="${escapeHtml(item.id || "")}"><span class="quote-item-index">${index + 1}</span><input name="itemName" value="${escapeHtml(item.name)}" placeholder="${escapeHtml(t("itemName"))}"><input name="itemDescription" value="${escapeHtml(item.description)}" placeholder="${escapeHtml(t("itemDescription"))}"><input name="itemUnit" value="${escapeHtml(item.unit)}" placeholder="${escapeHtml(t("unit"))}"><input name="itemQuantity" type="number" min="0" step="1" value="${escapeHtml(item.quantity)}" placeholder="${escapeHtml(t("quantity"))}"><input name="itemUnitPrice" type="number" min="0" step="1" value="${escapeHtml(item.unitPrice)}" placeholder="${escapeHtml(t("unitPrice"))}"><input name="itemDiscount" type="number" min="0" max="100" step="1" value="${escapeHtml(item.discount)}" placeholder="${escapeHtml(t("discount"))} %"><strong data-quote-line-amount>${escapeHtml(quoteCurrency(quoteItemAmount(item)))}</strong><span class="quote-row-actions"><button class="quote-row-icon" type="button" data-quote-copy-item title="${escapeHtml(t("copyQuoteRow"))}" aria-label="${escapeHtml(t("copyQuoteRow"))}">\u29c9</button><button class="quote-row-icon danger" type="button" data-quote-remove-item title="${escapeHtml(t("deleteQuoteRow"))}" aria-label="${escapeHtml(t("deleteQuoteRow"))}">\u00d7</button></span></div>`;
@@ -5119,12 +5094,12 @@
     const form = document.querySelector("[data-quote-form]");
     state.quoteWizardStep = next;
     if (isFileFlow && window.currentQuoteDetail?.useFileFlow) {
-      renderQuoteDetail(window.currentQuoteDetail);
+      openQuoteFileModal(window.currentQuoteDetail);
       return;
     }
     if (form) {
       const existing = quoteRows().find(item => String(item.id) === String(new FormData(form).get("id")));
-      renderQuoteDetail(quoteFromForm(form, existing));
+      openQuoteFileModal(quoteFromForm(form, existing));
       return;
     }
     const content = document.querySelector(".quote-wizard-content");
@@ -5934,7 +5909,7 @@
       if (requestIndex >= 0 && data.request) state.requests[requestIndex] = data.request;
       await closeRequestDetail(true);
       state.quoteWizardStep = 1;
-      renderQuoteDetail({
+      openQuoteFileModal({
         useFileFlow: true,
         id: requestMongoId,
         requestMongoId,
@@ -5986,7 +5961,7 @@
       const response = await AdminAPI.uploadQuoteFiles(quote.requestMongoId, files);
       quote.files = normalizeList(response.data);
       window.currentQuoteDetail = quote;
-      renderQuoteDetail(quote);
+      openQuoteFileModal(quote);
       toast(state.lang === "vi" ? "Upload file th\u00e0nh c\u00f4ng." : "\u30d5\u30a1\u30a4\u30eb\u3092\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u3057\u307e\u3057\u305f\u3002");
     } catch (error) {
       console.error(error);
@@ -6003,7 +5978,7 @@
       await AdminAPI.deleteQuoteFile(fileId);
       quote.files = toList(quote.files).filter(file => quoteFileId(file) !== String(fileId));
       window.currentQuoteDetail = quote;
-      renderQuoteDetail(quote);
+      openQuoteFileModal(quote);
       toast(state.lang === "vi" ? "\u0110\u00e3 x\u00f3a file." : "\u30d5\u30a1\u30a4\u30eb\u3092\u524a\u9664\u3057\u307e\u3057\u305f\u3002");
     } catch (error) {
       console.error(error);
@@ -6027,7 +6002,7 @@
         const index = state.requests.findIndex(item => getRowId(item) === id);
         if (index >= 0) state.requests[index] = response.request;
       }
-      renderQuoteDetail(quote);
+      openQuoteFileModal(quote);
       toast(t("quoteSentMock"));
     } catch (error) {
       console.error(error);
@@ -6085,7 +6060,7 @@
     if (quoteCard && !event.target.closest("[data-quote-card-skip]")) {
       event.preventDefault();
       event.stopPropagation();
-      openQuoteDetail(quoteCard.dataset.quoteCardId);
+      openQuoteFileModalById(quoteCard.dataset.quoteCardId);
       return true;
     }
 
@@ -6095,11 +6070,11 @@
       event.stopPropagation();
       const action = quoteAction.dataset.quoteAction;
       if (action === "new") {
-        renderQuoteDetail(emptyQuote());
+        openQuoteFileModal(emptyQuote());
         return true;
       }
       if (action === "detail") {
-        openQuoteDetail(quoteAction.dataset.quoteId);
+        openQuoteFileModalById(quoteAction.dataset.quoteId);
         return true;
       }
     }
@@ -6852,12 +6827,12 @@
         const action = quoteAction.dataset.quoteAction;
         if (action === "new") {
           state.quoteWizardStep = 1;
-          renderQuoteDetail(emptyQuote());
+          openQuoteFileModal(emptyQuote());
           return;
         }
         if (action === "detail") {
           state.quoteWizardStep = 1;
-          openQuoteDetail(quoteAction.dataset.quoteId);
+          openQuoteFileModalById(quoteAction.dataset.quoteId);
           return;
         }
       }

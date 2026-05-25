@@ -177,7 +177,7 @@ export const vi = {
   "quote.related": "Báo giá liên quan",
   "quote.search": "Tìm kiếm theo mã báo giá, công trình...",
   "quote.list": "Danh sách báo giá",
-  "quote.detail": "Chi tiết báo giá",
+  "quote.detail": "Báo giá",
   "quote.empty": "Chưa có báo giá nào.",
   "quote.company": "Thông tin công ty YAMADEN",
   "quote.id": "Mã báo giá",

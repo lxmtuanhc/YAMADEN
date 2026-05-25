@@ -1420,6 +1420,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/admin.html", (req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.sendFile(path.join(__dirname, "admin.html"));
 });
 
@@ -1432,10 +1433,12 @@ app.get("/admin-reference.html", (req, res) => {
 });
 
 app.get("/admin.css", (req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.sendFile(path.join(__dirname, "admin.css"));
 });
 
 app.get("/admin.js", (req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.sendFile(path.join(__dirname, "admin.js"));
 });
 
