@@ -302,6 +302,7 @@ const QuoteSchema = new mongoose.Schema({
   items: [QuoteItemSchema],
   subtotal: Number,
   discount: Number,
+  discountTotal: Number,
   tax: Number,
   taxAmount: Number,
   vatAmount: Number,
@@ -1959,23 +1960,30 @@ async function findRequestByAnyId(id) {
 function normalizeQuotePayloadForDb(body = {}) {
   const quoteNo = body.quoteNo || body.quoteCode || body.quoteNumber || body.code || body.number || newServerQuoteNo();
   const rawItems = Array.isArray(body.quoteItems) && body.quoteItems.length ? body.quoteItems : Array.isArray(body.items) ? body.items : [];
-  const items = rawItems.map(item => ({
-    id: item.id || "",
-    name: item.name || item.title || "",
-    title: item.title || item.name || "",
-    description: item.description || item.spec || "",
-    spec: item.spec || item.description || "",
-    unit: item.unit || "\u5f0f",
-    quantity: Number(item.quantity || item.qty || 1),
-    qty: Number(item.qty || item.quantity || 1),
-    unitPrice: Number(item.unitPrice || item.price || 0),
-    price: Number(item.price || item.unitPrice || 0),
-    discount: Number(item.discount || 0),
-    discountRate: Number(item.discountRate || 0),
-    amount: Number(item.amount ?? Math.max(0, Number(item.quantity || item.qty || 1) * Number(item.unitPrice || item.price || 0) - Number(item.discount || 0)))
-  }));
+  const items = rawItems.map(item => {
+    const quantity = Number(item.quantity || item.qty || 1);
+    const unitPrice = Number(item.unitPrice || item.price || 0);
+    const discountRate = Number(item.discountPercent ?? item.discountRate ?? item.discount ?? 0);
+    const lineSubtotal = quantity * unitPrice;
+    const amount = Number(item.amount ?? Math.max(0, lineSubtotal - Math.round(lineSubtotal * discountRate / 100)));
+    return {
+      id: item.id || "",
+      name: item.name || item.title || "",
+      title: item.title || item.name || "",
+      description: item.description || item.spec || "",
+      spec: item.spec || item.description || "",
+      unit: item.unit || "\u5f0f",
+      quantity,
+      qty: Number(item.qty || item.quantity || 1),
+      unitPrice,
+      price: Number(item.price || item.unitPrice || 0),
+      discount: discountRate,
+      discountRate,
+      amount
+    };
+  });
   const subtotal = Number(body.subtotal ?? items.reduce((sum, item) => sum + Number(item.amount || 0), 0));
-  const discount = Number(body.discount || 0);
+  const discount = Number(body.discountTotal ?? body.discount ?? 0);
   const taxable = Math.max(0, subtotal - discount);
   const rawTaxRate = body.vatRate ?? body.taxRate ?? 0.1;
   const taxRate = Number(rawTaxRate) <= 1 ? Number(rawTaxRate || 0.1) : Number(rawTaxRate || 10) / 100;
@@ -2019,6 +2027,7 @@ function normalizeQuotePayloadForDb(body = {}) {
     quoteItems: items,
     subtotal,
     discount,
+    discountTotal: discount,
     tax: taxAmount,
     taxAmount,
     vatAmount: taxAmount,

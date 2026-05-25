@@ -2606,7 +2606,7 @@ body {
 .quote-wizard-steps {
   flex: 0 0 auto;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
   padding: 14px 20px;
   border-bottom: 1px solid var(--line);
@@ -2670,6 +2670,7 @@ body {
   gap: 14px;
   max-width: 1180px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .quote-wizard-panel.is-active {
@@ -3417,6 +3418,17 @@ body {
   align-content: start;
 }
 
+.quote-step-request-only,
+.quote-step-items-only,
+.quote-step-notes-only,
+.quote-step-payment-only {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.quote-step-items-only .quote-items-card {
+  width: 100%;
+}
+
 .quote-items-header {
   align-items: center;
 }
@@ -3424,19 +3436,21 @@ body {
 .quote-table-wrap.quote-item-table-shell {
   max-height: calc(100vh - 430px);
   min-height: 260px;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   border-radius: 16px;
   border-color: #dbeafe;
 }
 
 .quote-item-table-pro {
-  min-width: 1040px;
+  min-width: 0;
+  width: 100%;
 }
 
 .quote-item-table-pro .quote-item-row {
-  grid-template-columns: 44px minmax(180px, 1.2fr) minmax(220px, 1.4fr) 74px 86px 112px 108px 124px 82px;
+  grid-template-columns: 36px minmax(130px, 1.2fr) minmax(170px, 1.4fr) 58px 72px 96px 84px 104px 68px;
   padding: 8px 10px;
-  gap: 8px;
+  gap: 6px;
 }
 
 .quote-item-table-pro .quote-item-header {
@@ -5796,4 +5810,32 @@ textarea {
   .work-master-panel .panel-head { display: grid; gap: 12px; }
   .work-master-search { max-width: none; width: 100%; }
   .work-master-table-wrap { max-height: none; }
+}
+
+@media (max-width: 980px) {
+  .quote-wizard-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quote-item-table-pro .quote-item-header {
+    display: none;
+  }
+
+  .quote-item-table-pro .quote-item-row {
+    grid-template-columns: 36px minmax(0, 1fr) minmax(0, 1fr);
+    border: 1px solid #dbeafe;
+    border-radius: 16px;
+    background: #fff;
+    margin-bottom: 10px;
+  }
+
+  .quote-item-table-pro .quote-item-row input[name="itemName"],
+  .quote-item-table-pro .quote-item-row input[name="itemDescription"] {
+    grid-column: span 2;
+  }
+
+  .quote-item-table-pro .quote-item-row [data-quote-line-amount],
+  .quote-item-table-pro .quote-item-row .quote-row-actions {
+    grid-column: span 3;
+  }
 }
