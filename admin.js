@@ -1824,7 +1824,14 @@
   }
 
   function getRequestDisplayId(request) {
-    return String(request?.requestCode || request?.requestId || request?.id || request?._id || "-");
+    return String(
+      request?.requestId ||
+      request?.requestCode ||
+      request?.requestNo ||
+      request?.code ||
+      request?._id ||
+      ""
+    );
   }
 
   function getCustomerName(request) {
@@ -4346,7 +4353,7 @@
       quoteNumber: quote?.quoteNumber || "",
       code: quote?.code || "",
       number: quote?.number || "",
-      requestId: quote?.requestId || "",
+      requestId: quote?.requestId || quote?.requestCode || quote?.requestNo || "",
       customerId,
       customerName,
       customerPhone: quote?.customerPhone || quote?.phone || "",
@@ -5760,10 +5767,12 @@
       return;
     }
     try {
+      const sourceRequest = state.requests.find(item => [getRowId(item), getRequestDisplayId(item)].some(value => value && String(value) === String(requestId)));
       const data = await AdminAPI.createQuoteFromRequest(requestId);
       if (!data?.ok || !data.quote) throw new Error(data?.message || "Create quote failed");
-      const savedQuote = normalizeQuote(data.quote);
-      const requestIdText = getRowId(data.request) || data.request?.requestCode || requestId;
+      const requestDisplayId = getRequestDisplayId(data.request) || getRequestDisplayId(sourceRequest) || requestId;
+      const savedQuote = normalizeQuote({ ...data.quote, requestId: requestDisplayId });
+      const requestIdText = requestDisplayId;
       const requestIndex = state.requests.findIndex(item => [getRowId(item), getRequestDisplayId(item)].some(value => value && String(value) === String(requestIdText)));
       if (requestIndex >= 0 && data.request) state.requests[requestIndex] = data.request;
       state.quotes = [savedQuote, ...state.quotes.filter(item => String(item._id || item.id || item.quoteNo) !== String(savedQuote._id || savedQuote.id || savedQuote.quoteNo))];

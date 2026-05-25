@@ -1950,11 +1950,24 @@ async function findRequestByAnyId(id) {
       $or: [
         { id },
         { requestCode: id },
-        { requestId: id }
+        { requestId: id },
+        { requestNo: id },
+        { code: id }
       ]
     });
   }
   return request;
+}
+
+function getRequestDisplayId(request) {
+  return (
+    request?.requestId ||
+    request?.requestCode ||
+    request?.requestNo ||
+    request?.code ||
+    request?._id ||
+    ""
+  );
 }
 
 function normalizeQuotePayloadForDb(body = {}) {
@@ -2089,10 +2102,17 @@ app.post("/admin/requests/:requestId/create-quote", requireAdmin, async (req, re
   try {
     const request = await findRequestByAnyId(req.params.requestId);
     if (!request) return res.status(404).json({ ok: false, message: "Request not found" });
+    const requestDisplayId = String(getRequestDisplayId(request) || req.params.requestId);
 
     if (request.quoteId) {
-      const existingQuote = await Quote.findById(request.quoteId).lean();
-      if (existingQuote) return res.json({ ok: true, quote: existingQuote, request: request.toObject(), reused: true });
+      const existingQuote = await Quote.findById(request.quoteId);
+      if (existingQuote) {
+        if (requestDisplayId && String(existingQuote.requestId || "") !== requestDisplayId) {
+          existingQuote.requestId = requestDisplayId;
+          await existingQuote.save();
+        }
+        return res.json({ ok: true, quote: existingQuote.toObject(), request: request.toObject(), reused: true });
+      }
     }
 
     const quoteNo = await generateQuoteNo();
@@ -2121,7 +2141,7 @@ app.post("/admin/requests/:requestId/create-quote", requireAdmin, async (req, re
       quoteNumber: quoteNo,
       code: quoteNo,
       number: quoteNo,
-      requestId: String(request._id),
+      requestId: requestDisplayId,
       userId: request.userId ? String(request.userId) : "",
       customerName: request.name || "",
       name: request.name || "",
