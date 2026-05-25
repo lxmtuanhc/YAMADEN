@@ -26,8 +26,6 @@ export type QuoteStatus =
   | "draft"
   | "pending"
   | "pending_approval"
-  | "sent"
-  | "viewed"
   | "sent_to_customer"
   | "viewed_by_customer"
   | "approved"
@@ -149,12 +147,8 @@ export interface RequestMediaFile {
 }
 
 export interface Request {
-  _id?: string;
   id: string;
   requestCode?: string;
-  requestNo?: string;
-  requestId?: string;
-  code?: string;
   title: string;
   category: string;
   description: string;
@@ -204,12 +198,9 @@ export interface QuoteItem {
 }
 
 export interface Quote {
-  _id?: string;
   id: string;
   quoteCode?: string;
   requestId: string;
-  requestCode?: string;
-  requestNo?: string;
   projectName: string;
   validUntil: string;
   status: QuoteStatus;
@@ -231,16 +222,6 @@ export interface Quote {
   customerNote?: string;
   internalNote?: string;
   attachments?: string[];
-  originalName?: string;
-  fileName?: string;
-  fileUrl?: string;
-  filePath?: string;
-  mimeType?: string;
-  fileSize?: number;
-  ext?: string;
-  customerResponse?: "pending" | "accepted" | "revision_requested" | "rejected";
-  customerResponseNote?: string;
-  customerRespondedAt?: string;
   visibleToCustomer?: boolean;
   sentToCustomerAt?: string;
   viewedByCustomerAt?: string;

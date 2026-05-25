@@ -108,8 +108,6 @@ export function QuoteDetailPage() {
     );
   }
 
-  const isFileQuote = Boolean(quote.fileUrl);
-  const requestNo = quote.requestNo || quote.requestCode || quote.quoteCode || quote.requestId || quote.id;
   const subtotal = calculateQuoteSubtotal(quote.items);
   const vat = quote.taxAmount ?? calculateQuoteVat(subtotal);
   const total = quote.total ?? subtotal + vat;
@@ -130,18 +128,11 @@ export function QuoteDetailPage() {
         <div className="info-row"><span>{t("brand.jp")}</span><strong>{t("brand.en")}</strong></div>
       </Card>
       <Card>
-        <div className="info-row"><span>{t("quote.id")}</span><strong>{requestNo}</strong></div>
+        <div className="info-row"><span>{t("quote.id")}</span><strong>{quote.id}</strong></div>
         <div className="info-row"><span>{t("request.project")}</span><strong>{quote.projectName}</strong></div>
-        {isFileQuote ? (
-          <>
-            <div className="info-row"><span>{t("quote.items")}</span><strong>{quote.originalName || quote.fileName || "-"}</strong></div>
-            {quote.fileUrl ? <Button variant="outline" onClick={() => window.open(quote.fileUrl, "_blank", "noopener")}>Xem file</Button> : null}
-          </>
-        ) : (
-          <div className="info-row"><span>{t("quote.validUntil")}</span><strong>{quote.validUntil}</strong></div>
-        )}
+        <div className="info-row"><span>{t("quote.validUntil")}</span><strong>{quote.validUntil}</strong></div>
       </Card>
-      {!isFileQuote ? <Card>
+      <Card>
         <h2 className="section-title">{t("quote.items")}</h2>
         <table className="quote-table">
           <thead>
@@ -166,7 +157,7 @@ export function QuoteDetailPage() {
         <div className="summary-row"><span>{t("quote.subtotal")}</span><strong>{formatCurrency(subtotal)}</strong></div>
         <div className="summary-row"><span>{t("quote.vat")}</span><strong>{formatCurrency(vat)}</strong></div>
         <div className="summary-row total"><span>{t("quote.total")}</span><strong>{formatCurrency(total)}</strong></div>
-      </Card> : null}
+      </Card>
       {error ? <ErrorState message={error} /> : null}
       <div className="two-actions">
         <Button variant="outline" disabled={!!actionLoading} onClick={() => updateStatus("change_requested")}>

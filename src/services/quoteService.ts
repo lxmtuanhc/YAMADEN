@@ -16,21 +16,17 @@ function delay() {
 
 function normalizeQuote(quote: Quote): Quote {
   const seed = quoteSeedById.get(quote.id);
-  const requestDisplay = quote.requestNo || quote.requestCode || quote.quoteCode || seed?.requestId || "";
-  const fileName = quote.originalName || quote.fileName || quote.projectName || seed?.projectName || "";
   return {
     ...quote,
-    id: String(quote.id || quote._id || quote.quoteCode || ""),
-    quoteCode: requestDisplay,
-    quoteNo: quote.quoteNo || "",
-    requestId: quote.requestId || requestDisplay,
-    requestCode: requestDisplay,
-    requestNo: requestDisplay,
+    id: String(quote.id || quote.quoteCode || ""),
+    quoteCode: quote.quoteCode || quote.id,
+    quoteNo: quote.quoteNo || quote.quoteCode || quote.id,
+    requestId: quote.requestId || seed?.requestId || "",
     items: quote.items || seed?.items || [],
-    projectName: fileName,
+    projectName: quote.projectName || seed?.projectName || "",
     validUntil: quote.validUntil || seed?.validUntil || "",
-    title: quote.title || fileName,
-    visibleToCustomer: quote.visibleToCustomer === true || Boolean(quote.fileUrl),
+    title: quote.title || quote.projectName || seed?.projectName || "",
+    visibleToCustomer: quote.visibleToCustomer === true,
     customerId: quote.customerId || "",
     customerName: quote.customerName || "",
     customerPhone: quote.customerPhone || "",
@@ -108,7 +104,7 @@ function sameQuote(left: Quote, right: Quote) {
 async function fetchBackendQuotes(): Promise<Quote[] | null> {
   const token = getUserToken();
   if (!token) return null;
-  const response = await fetch("/api/customer/quote-files", {
+  const response = await fetch("/api/customer/quotes", {
     cache: "no-store",
     headers: { Authorization: `Bearer ${token}` }
   });
@@ -116,33 +112,6 @@ async function fetchBackendQuotes(): Promise<Quote[] | null> {
   const payload = await response.json();
   const items = Array.isArray(payload.data) ? payload.data : Array.isArray(payload) ? payload : [];
   return items.map((item: Quote) => normalizeQuote(item));
-}
-
-async function fetchBackendQuoteFile(id: string): Promise<Quote | null> {
-  const token = getUserToken();
-  if (!token) return null;
-  const response = await fetch(`/api/customer/quote-files/${encodeURIComponent(id)}`, {
-    cache: "no-store",
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error("Quote file load failed");
-  const payload = await response.json();
-  return normalizeQuote(payload.data || payload);
-}
-
-async function respondBackendQuoteFile(id: string, responseValue: "accepted" | "revision_requested" | "rejected"): Promise<Quote | null> {
-  const token = getUserToken();
-  if (!token) return null;
-  const response = await fetch(`/api/customer/quote-files/${encodeURIComponent(id)}/response`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ response: responseValue })
-  });
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error("Quote file response failed");
-  const payload = await response.json();
-  return normalizeQuote(payload.data || payload);
 }
 
 async function fetchDeletedBackendQuotes(): Promise<Quote[] | null> {
@@ -217,12 +186,6 @@ export const quoteService = {
 
   async getQuoteById(id: string): Promise<Quote | null> {
     await delay();
-    try {
-      const backendQuote = await fetchBackendQuoteFile(id);
-      if (backendQuote) return backendQuote;
-    } catch (error) {
-      console.warn("Unable to load quote file from backend", error);
-    }
     const quote = readQuotes().find(item => !item.isDeleted && (item.id === id || item.quoteCode === id));
     if (!quote || !visibleToCurrentUser(quote)) return null;
     if (!quote.viewedByCustomerAt && quote.status === "sent_to_customer") {
@@ -348,20 +311,14 @@ export const quoteService = {
   },
 
   async approveQuote(id: string): Promise<Quote> {
-    const backend = await respondBackendQuoteFile(id, "accepted");
-    if (backend) return backend;
     return quoteService.updateQuote(id, { status: "accepted", acceptedAt: new Date().toISOString() });
   },
 
   async requestRevision(id: string): Promise<Quote> {
-    const backend = await respondBackendQuoteFile(id, "revision_requested");
-    if (backend) return backend;
     return quoteService.updateQuote(id, { status: "change_requested", changeRequestedAt: new Date().toISOString() });
   },
 
   async rejectQuote(id: string): Promise<Quote> {
-    const backend = await respondBackendQuoteFile(id, "rejected");
-    if (backend) return backend;
     return quoteService.updateQuote(id, { status: "rejected", rejectedAt: new Date().toISOString() });
   }
 };

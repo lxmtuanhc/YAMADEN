@@ -106,7 +106,7 @@ function stableRequestCode(value?: string) {
 }
 
 function normalizeRequest(request: SupportRequest): SupportRequest {
-  const requestCode = request.requestNo || request.code || request.requestCode || (/^YMD-\d{6}$/.test(String(request.requestId || "")) ? request.requestId : "") || stableRequestCode(request.id);
+  const requestCode = request.requestCode || stableRequestCode(request.id);
   const fallbackTimeline =
     request.timeline && request.timeline.length
       ? request.timeline
@@ -115,9 +115,6 @@ function normalizeRequest(request: SupportRequest): SupportRequest {
   return {
     ...request,
     requestCode,
-    requestNo: requestCode,
-    code: requestCode,
-    requestId: requestCode,
     images: request.images || [],
     mediaFiles: request.mediaFiles || [],
     timeline: fallbackTimeline,
@@ -293,13 +290,9 @@ function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): 
     .map(file => file.secureUrl || file.url)
     .filter(Boolean);
   const fallbackImages = input?.files?.length ? input.files.map(file => file.name) : input?.imageName ? [input.imageName] : [];
-  const displayRequestCode = item.requestNo || item.code || item.requestCode || (/^YMD-\d{6}$/.test(String(item.requestId || "")) ? item.requestId : "") || stableRequestCode(String(item.id || item._id || ""));
   return normalizeRequest({
-    id: String(item._id || item.id || displayRequestCode || createRequestId()),
-    requestCode: displayRequestCode,
-    requestNo: displayRequestCode,
-    code: displayRequestCode,
-    requestId: displayRequestCode,
+    id: String(item.id || item.requestCode || item.requestId || item._id || createRequestId()),
+    requestCode: item.requestCode || item.requestId || stableRequestCode(String(item.id || item._id || "")),
     title: input?.title || item.title || item.content || item.category || "",
     category: input?.category || item.category || input?.issueTags?.[0] || "",
     description: input?.description || item.description || item.content || "",

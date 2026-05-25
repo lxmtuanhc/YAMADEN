@@ -14,8 +14,6 @@ const { createQuotationPdf, normalizeQuoteForPdf, quotePdfFileName } = require("
 
 const app = express();
 const distPath = path.join(__dirname, "dist");
-const quoteUploadDir = path.join(__dirname, "uploads", "quote-files");
-fs.mkdirSync(quoteUploadDir, { recursive: true });
 
 app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: "10mb" }));
@@ -28,7 +26,6 @@ app.use((req, res, next) => {
 app.use(express.static(distPath));
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 app.use("/css", express.static(path.join(__dirname, "css")));
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.get("/js/service-worker.js", (req, res) => {
   res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.sendFile(path.join(__dirname, "js", "service-worker.js"));
@@ -199,8 +196,6 @@ const TimelineEventSchema = new mongoose.Schema({
 const RequestSchema = new mongoose.Schema({
   id: mongoose.Schema.Types.Mixed,
   requestCode: String,
-  requestNo: String,
-  code: String,
   requestId: String,
   userId: String,
   name: String,
@@ -339,34 +334,6 @@ const QuoteSchema = new mongoose.Schema({
   deletedByRole: String
 });
 
-const QuoteFileSchema = new mongoose.Schema({
-  requestId: { type: mongoose.Schema.Types.ObjectId, ref: "Request", required: true, index: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
-  requestNo: String,
-  originalName: String,
-  fileName: String,
-  fileUrl: String,
-  filePath: String,
-  mimeType: String,
-  fileSize: Number,
-  ext: String,
-  status: {
-    type: String,
-    enum: ["draft", "sent", "viewed", "accepted", "revision_requested", "rejected"],
-    default: "draft"
-  },
-  sentAt: Date,
-  viewedAt: Date,
-  customerResponse: {
-    type: String,
-    enum: ["pending", "accepted", "revision_requested", "rejected"],
-    default: "pending"
-  },
-  customerResponseNote: String,
-  customerRespondedAt: Date,
-  uploadedBy: mongoose.Schema.Types.Mixed
-}, { timestamps: true });
-
 const UserSchema = new mongoose.Schema({
   name: String,
   phone: String,
@@ -458,7 +425,6 @@ const WorkTypeSchema = new mongoose.Schema({
 
 const Request = mongoose.model("Request", RequestSchema);
 const Quote = mongoose.model("Quote", QuoteSchema);
-const QuoteFile = mongoose.model("QuoteFile", QuoteFileSchema);
 const User = mongoose.model("User", UserSchema);
 const Staff = mongoose.model("Staff", StaffSchema);
 const Department = mongoose.model("Department", DepartmentSchema);
@@ -635,44 +601,6 @@ OFFICIAL_DEPARTMENTS.forEach(item => {
   const labels = OFFICIAL_DEPARTMENT_LABELS[item.code];
   if (labels) Object.assign(item, labels);
 });
-
-const QUOTE_FILE_ALLOWED_EXTS = new Set([".pdf", ".xls", ".xlsx", ".doc", ".docx", ".jpg", ".jpeg", ".png", ".webp", ".zip"]);
-const QUOTE_FILE_BLOCKED_EXTS = new Set([".exe", ".bat", ".cmd", ".js", ".sh", ".php", ".msi", ".com", ".scr", ".ps1", ".vbs", ".jar"]);
-const QUOTE_FILE_MAX_SIZE = 20 * 1024 * 1024;
-const QUOTE_FILE_TOTAL_MAX_SIZE = 100 * 1024 * 1024;
-
-function quoteFileExt(name) {
-  return path.extname(String(name || "")).toLowerCase();
-}
-
-function quoteFileUploadMiddleware(req, res, next) {
-  const quoteUpload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: QUOTE_FILE_MAX_SIZE, files: 20 },
-    fileFilter: (uploadReq, file, cb) => {
-      const ext = quoteFileExt(file.originalname);
-      if (!QUOTE_FILE_ALLOWED_EXTS.has(ext) || QUOTE_FILE_BLOCKED_EXTS.has(ext)) {
-        return cb(new Error("Quote file type is not allowed"), false);
-      }
-      return cb(null, true);
-    }
-  }).array("files", 20);
-
-  quoteUpload(req, res, error => {
-    if (error) {
-      const message = error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE"
-        ? "Each quote file must be 20MB or smaller"
-        : error.message || "Quote file upload failed";
-      return res.status(400).json({ ok: false, message });
-    }
-    const files = Array.isArray(req.files) ? req.files : [];
-    const totalSize = files.reduce((sum, file) => sum + Number(file.size || 0), 0);
-    if (totalSize > QUOTE_FILE_TOTAL_MAX_SIZE) {
-      return res.status(400).json({ ok: false, message: "Total quote files must be 100MB or smaller" });
-    }
-    next();
-  });
-}
 
 const OFFICIAL_WORK_GROUPS = {
   executive: [["approval", "Phê duyệt", "承認"], ["important", "Dự án / vấn đề quan trọng", "重要案件"]],
@@ -1047,8 +975,6 @@ async function generateRequestCode() {
     exists = await Request.findOne({
       $or: [
         { requestCode: code },
-        { requestNo: code },
-        { code },
         { requestId: code },
         { id: code }
       ]
@@ -1060,21 +986,13 @@ async function generateRequestCode() {
 
 async function ensureRequestCode(item) {
   if (!item) return "";
-  const existingCode = [item.requestNo, item.code, item.requestCode, item.requestId, item.id]
-    .map(value => String(value || "").trim())
-    .find(value => /^YMD-\d{6}$/.test(value));
-  if (existingCode) {
-    item.requestCode = existingCode;
-    item.requestNo = existingCode;
-    item.code = existingCode;
-    if (!item.requestId || mongoose.Types.ObjectId.isValid(String(item.requestId))) item.requestId = existingCode;
-    return existingCode;
+  if (item.requestCode && /^YMD-\d{6}$/.test(String(item.requestCode))) {
+    if (!item.requestId) item.requestId = item.requestCode;
+    return item.requestCode;
   }
 
   const code = await generateRequestCode();
   item.requestCode = code;
-  item.requestNo = code;
-  item.code = code;
   item.requestId = code;
   return code;
 }
@@ -1886,54 +1804,6 @@ app.delete("/api/customer/quotes/:id/permanent", requireUser, async (req, res) =
   }
 });
 
-async function handleCustomerQuoteFilesList(req, res) {
-  try {
-    const files = await quoteFilesForCustomer(req.user.userId);
-    res.json({ ok: true, data: files.map(publicQuoteFile) });
-  } catch (error) {
-    res.status(500).json({ ok: false, message: "Quote files load failed", error: error.message });
-  }
-}
-
-async function handleCustomerQuoteFileDetail(req, res) {
-  try {
-    const file = await findCustomerQuoteFile(req.params.fileId, req.user.userId);
-    if (!file) return res.status(404).json({ ok: false, message: "Quote file not found" });
-    if (!file.viewedAt) file.viewedAt = new Date();
-    if (file.status === "sent") file.status = "viewed";
-    await file.save();
-    res.json({ ok: true, data: publicQuoteFile(file) });
-  } catch (error) {
-    res.status(500).json({ ok: false, message: "Quote file load failed", error: error.message });
-  }
-}
-
-async function handleCustomerQuoteFileResponse(req, res) {
-  try {
-    const file = await findCustomerQuoteFile(req.params.fileId, req.user.userId);
-    if (!file) return res.status(404).json({ ok: false, message: "Quote file not found" });
-    const response = String(req.body?.response || req.body?.customerResponse || "").trim();
-    if (!["accepted", "revision_requested", "rejected"].includes(response)) {
-      return res.status(400).json({ ok: false, message: "Invalid response" });
-    }
-    file.customerResponse = response;
-    file.customerResponseNote = String(req.body?.note || req.body?.customerResponseNote || "").trim();
-    file.customerRespondedAt = new Date();
-    file.status = response;
-    await file.save();
-    res.json({ ok: true, data: publicQuoteFile(file) });
-  } catch (error) {
-    res.status(500).json({ ok: false, message: "Quote file response failed", error: error.message });
-  }
-}
-
-app.get("/customer/quote-files", requireUser, handleCustomerQuoteFilesList);
-app.get("/api/customer/quote-files", requireUser, handleCustomerQuoteFilesList);
-app.get("/customer/quote-files/:fileId", requireUser, handleCustomerQuoteFileDetail);
-app.get("/api/customer/quote-files/:fileId", requireUser, handleCustomerQuoteFileDetail);
-app.post("/customer/quote-files/:fileId/response", requireUser, handleCustomerQuoteFileResponse);
-app.post("/api/customer/quote-files/:fileId/response", requireUser, handleCustomerQuoteFileResponse);
-
 app.get("/api/admin/users", requireAdmin, async (req, res) => {
   try {
     res.set("Cache-Control", "no-store");
@@ -2059,6 +1929,19 @@ async function findQuoteDocumentByAnyId(id) {
   return quote;
 }
 
+function newServerQuoteNo() {
+  return "Q-" + new Date().getFullYear() + "-" + String(Date.now()).slice(-5);
+}
+
+async function generateQuoteNo() {
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const quoteNo = "Q-" + new Date().getFullYear() + "-" + Math.floor(10000 + Math.random() * 90000);
+    const exists = await Quote.exists({ $or: [{ quoteNo }, { quoteCode: quoteNo }, { code: quoteNo }, { number: quoteNo }] });
+    if (!exists) return quoteNo;
+  }
+  return newServerQuoteNo();
+}
+
 async function findRequestByAnyId(id) {
   let request = null;
   if (mongoose.Types.ObjectId.isValid(id)) request = await Request.findById(id);
@@ -2076,30 +1959,19 @@ async function findRequestByAnyId(id) {
   return request;
 }
 
-function isMongoObjectId(value) {
-  return /^[a-f\d]{24}$/i.test(String(value || "").trim());
-}
-
-function safeDisplayId(value, fallback = "") {
-  const text = String(value || "").trim();
-  if (!text) return fallback;
-  if (isMongoObjectId(text)) return fallback;
-  return text;
-}
-
 function getRequestDisplayId(request) {
-  return safeDisplayId(
+  return (
+    request?.requestId ||
+    request?.requestCode ||
     request?.requestNo ||
     request?.code ||
-    request?.requestCode ||
-    request?.displayId ||
-    request?.requestId,
+    request?._id ||
     ""
   );
 }
 
 function normalizeQuotePayloadForDb(body = {}) {
-  const quoteNo = body.quoteNo || body.quoteCode || body.quoteNumber || body.code || body.number || "";
+  const quoteNo = body.quoteNo || body.quoteCode || body.quoteNumber || body.code || body.number || newServerQuoteNo();
   const rawItems = Array.isArray(body.quoteItems) && body.quoteItems.length ? body.quoteItems : Array.isArray(body.items) ? body.items : [];
   const items = rawItems.map(item => {
     const quantity = Number(item.quantity || item.qty || 1);
@@ -2194,171 +2066,6 @@ function normalizeQuotePayloadForDb(body = {}) {
   };
 }
 
-function publicQuoteFile(file) {
-  const item = typeof file.toObject === "function" ? file.toObject() : file;
-  return {
-    ...item,
-    id: String(item._id || item.id || ""),
-    quoteCode: item.requestNo || "",
-    quoteNo: "",
-    requestCode: item.requestNo || "",
-    projectName: item.originalName || item.fileName || "",
-    title: item.originalName || item.fileName || "",
-    validUntil: "",
-    items: [],
-    total: 0,
-    visibleToCustomer: item.status !== "draft",
-    sentToCustomerAt: item.sentAt || "",
-    viewedByCustomerAt: item.viewedAt || ""
-  };
-}
-
-function writeQuoteFileToLocal(file, requestNo) {
-  const ext = quoteFileExt(file.originalname);
-  const safeBase = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80) || "quote";
-  const fileName = `${requestNo || "YMD"}_${Date.now()}_${Math.floor(Math.random() * 10000)}_${safeBase}${ext}`;
-  const filePath = path.join(quoteUploadDir, fileName);
-  fs.writeFileSync(filePath, file.buffer);
-  return {
-    fileName,
-    filePath,
-    fileUrl: `/uploads/quote-files/${encodeURIComponent(fileName)}`
-  };
-}
-
-function quoteFileRequestQuery(requestId) {
-  if (!mongoose.Types.ObjectId.isValid(requestId)) return null;
-  return { requestId: new mongoose.Types.ObjectId(requestId) };
-}
-
-async function quoteFilesForCustomer(userId) {
-  const requests = await Request.find({ userId: String(userId), isDeleted: { $ne: true } }).select("_id");
-  const requestIds = requests.map(item => item._id);
-  if (!requestIds.length) return [];
-  return QuoteFile.find({
-    requestId: { $in: requestIds },
-    status: { $ne: "draft" }
-  }).sort({ sentAt: -1, createdAt: -1 });
-}
-
-async function findCustomerQuoteFile(fileId, userId) {
-  if (!mongoose.Types.ObjectId.isValid(fileId)) return null;
-  const file = await QuoteFile.findById(fileId);
-  if (!file || file.status === "draft") return null;
-  const request = await Request.findOne({ _id: file.requestId, userId: String(userId), isDeleted: { $ne: true } });
-  return request ? file : null;
-}
-
-app.post("/admin/requests/:requestId/quote-files", requireAdmin, quoteFileUploadMiddleware, async (req, res) => {
-  try {
-    const request = await findRequestByAnyId(req.params.requestId);
-    if (!request) return res.status(404).json({ ok: false, message: "Request not found" });
-    const requestNo = await ensureRequestCode(request);
-    await request.save();
-
-    const existingSize = await QuoteFile.aggregate([
-      { $match: { requestId: request._id } },
-      { $group: { _id: null, total: { $sum: "$fileSize" } } }
-    ]);
-    const currentTotal = existingSize[0]?.total || 0;
-    const incomingTotal = (req.files || []).reduce((sum, file) => sum + Number(file.size || 0), 0);
-    if (currentTotal + incomingTotal > QUOTE_FILE_TOTAL_MAX_SIZE) {
-      return res.status(400).json({ ok: false, message: "Total quote files for this request must be 100MB or smaller" });
-    }
-
-    const files = [];
-    for (const file of req.files || []) {
-      const saved = writeQuoteFileToLocal(file, requestNo);
-      const doc = await QuoteFile.create({
-        requestId: request._id,
-        userId: mongoose.Types.ObjectId.isValid(String(request.userId || "")) ? new mongoose.Types.ObjectId(String(request.userId)) : null,
-        requestNo,
-        originalName: file.originalname,
-        fileName: saved.fileName,
-        fileUrl: saved.fileUrl,
-        filePath: saved.filePath,
-        mimeType: file.mimetype,
-        fileSize: file.size,
-        ext: quoteFileExt(file.originalname),
-        status: "draft",
-        uploadedBy: req.admin?.id || req.admin?.username || "admin"
-      });
-      files.push(doc);
-    }
-
-    request.quoteRequested = true;
-    await request.save();
-    res.json({ ok: true, data: files.map(publicQuoteFile), request: request.toObject() });
-  } catch (error) {
-    console.error("Quote file upload failed:", error);
-    res.status(500).json({ ok: false, message: "Quote file upload failed", error: error.message });
-  }
-});
-
-app.get("/admin/requests/:requestId/quote-files", requireAdmin, async (req, res) => {
-  try {
-    const request = await findRequestByAnyId(req.params.requestId);
-    if (!request) return res.status(404).json({ ok: false, message: "Request not found" });
-    const files = await QuoteFile.find({ requestId: request._id }).sort({ createdAt: -1 });
-    res.json({ ok: true, data: files.map(publicQuoteFile), request: request.toObject() });
-  } catch (error) {
-    res.status(500).json({ ok: false, message: "Quote files load failed", error: error.message });
-  }
-});
-
-app.delete("/admin/quote-files/:fileId", requireAdmin, async (req, res) => {
-  try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.fileId)) return res.status(404).json({ ok: false, message: "Quote file not found" });
-    const file = await QuoteFile.findById(req.params.fileId);
-    if (!file) return res.status(404).json({ ok: false, message: "Quote file not found" });
-    if (file.status !== "draft") return res.status(400).json({ ok: false, message: "Sent quote files cannot be deleted" });
-    if (file.filePath && fs.existsSync(file.filePath)) fs.unlinkSync(file.filePath);
-    await QuoteFile.deleteOne({ _id: file._id });
-    res.json({ ok: true, data: publicQuoteFile(file) });
-  } catch (error) {
-    res.status(500).json({ ok: false, message: "Quote file delete failed", error: error.message });
-  }
-});
-
-async function sendQuoteFiles(query) {
-  const files = await QuoteFile.find(query);
-  const now = new Date();
-  for (const file of files) {
-    if (file.status === "draft") {
-      file.status = "sent";
-      file.sentAt = now;
-      await file.save();
-    }
-  }
-  return QuoteFile.find(query).sort({ createdAt: -1 });
-}
-
-app.post("/admin/quote-files/:fileId/send", requireAdmin, async (req, res) => {
-  try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.fileId)) return res.status(404).json({ ok: false, message: "Quote file not found" });
-    const files = await sendQuoteFiles({ _id: req.params.fileId });
-    if (!files.length) return res.status(404).json({ ok: false, message: "Quote file not found" });
-    res.json({ ok: true, data: publicQuoteFile(files[0]) });
-  } catch (error) {
-    res.status(500).json({ ok: false, message: "Quote file send failed", error: error.message });
-  }
-});
-
-app.post("/admin/requests/:requestId/quote-files/send", requireAdmin, async (req, res) => {
-  try {
-    const request = await findRequestByAnyId(req.params.requestId);
-    if (!request) return res.status(404).json({ ok: false, message: "Request not found" });
-    const files = await sendQuoteFiles({ requestId: request._id });
-    request.quoteRequested = true;
-    request.quotedAt = new Date();
-    if (typeof request.status === "string") request.status = "quoted";
-    await request.save();
-    res.json({ ok: true, data: files.map(publicQuoteFile), request: request.toObject() });
-  } catch (error) {
-    res.status(500).json({ ok: false, message: "Quote files send failed", error: error.message });
-  }
-});
-
 app.post("/admin/quotes", requireAdmin, async (req, res) => {
   try {
     const body = req.body || {};
@@ -2395,14 +2102,93 @@ app.post("/admin/requests/:requestId/create-quote", requireAdmin, async (req, re
   try {
     const request = await findRequestByAnyId(req.params.requestId);
     if (!request) return res.status(404).json({ ok: false, message: "Request not found" });
-    await ensureRequestCode(request);
+    const requestDisplayId = String(getRequestDisplayId(request) || req.params.requestId);
+
+    if (request.quoteId) {
+      const existingQuote = await Quote.findById(request.quoteId);
+      if (existingQuote) {
+        if (requestDisplayId && String(existingQuote.requestId || "") !== requestDisplayId) {
+          existingQuote.requestId = requestDisplayId;
+          await existingQuote.save();
+        }
+        return res.json({ ok: true, quote: existingQuote.toObject(), request: request.toObject(), reused: true });
+      }
+    }
+
+    const quoteNo = await generateQuoteNo();
+    const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const spec = Array.isArray(request.issueTags) && request.issueTags.length
+      ? request.issueTags.join(", ")
+      : (request.issueTags || request.content || "");
+    const item = {
+      name: request.content || request.title || "\u5de5\u4e8b\u4e00\u5f0f",
+      title: request.content || request.title || "\u5de5\u4e8b\u4e00\u5f0f",
+      description: spec,
+      spec,
+      unit: "\u5f0f",
+      quantity: 1,
+      qty: 1,
+      unitPrice: 0,
+      price: 0,
+      discount: 0,
+      discountRate: 0,
+      amount: 0
+    };
+    const payload = {
+      id: quoteNo,
+      quoteCode: quoteNo,
+      quoteNo,
+      quoteNumber: quoteNo,
+      code: quoteNo,
+      number: quoteNo,
+      requestId: requestDisplayId,
+      userId: request.userId ? String(request.userId) : "",
+      customerName: request.name || "",
+      name: request.name || "",
+      customerPhone: request.phone || "",
+      phone: request.phone || "",
+      customerEmail: request.email || request.contact || "",
+      email: request.email || request.contact || "",
+      customerAddress: request.address || "",
+      address: request.address || "",
+      projectName: request.projectName || request.title || request.content || "\u5de5\u4e8b\u4e00\u5f0f",
+      title: request.projectName || request.title || request.content || "\u5de5\u4e8b\u4e00\u5f0f",
+      content: request.content || "",
+      description: request.content || "",
+      assigneeName: request.assigneeName || "",
+      validUntil,
+      expireDate: validUntil,
+      validDate: validUntil,
+      status: "draft",
+      quoteItems: [item],
+      items: [item],
+      subtotal: 0,
+      discount: 0,
+      tax: 0,
+      taxAmount: 0,
+      vatAmount: 0,
+      total: 0,
+      currency: "JPY",
+      paymentTerms: "\u691c\u53ce\u5f8c30\u65e5\u4ee5\u5185",
+      note: "",
+      customerNote: "",
+      sentToCustomer: false,
+      customerResponse: "pending",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const quote = await Quote.create(payload);
+
+    request.quoteId = quote._id;
     request.quoteRequested = true;
+    request.quotedAt = new Date();
+    if (typeof request.status === "string") request.status = "quoted";
     await request.save();
-    const files = await QuoteFile.find({ requestId: request._id }).sort({ createdAt: -1 });
-    res.json({ ok: true, request: request.toObject(), files: files.map(publicQuoteFile), reused: Boolean(files.length) });
+
+    res.json({ ok: true, quote: quote.toObject(), request: request.toObject(), reused: false });
   } catch (error) {
-    console.error("Open quote file flow from request error:", error);
-    res.status(500).json({ ok: false, message: "Open quote file flow failed", error: error.message });
+    console.error("Create quote from request error:", error);
+    res.status(500).json({ ok: false, message: "Create quote from request failed", error: error.message });
   }
 });
 
@@ -3023,8 +2809,6 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
     const requestPayload = {
       id: requestCode,
       requestCode,
-      requestNo: requestCode,
-      code: requestCode,
       requestId: requestCode,
       userId: String(user._id),
       name: req.body.name || user.name || "",
