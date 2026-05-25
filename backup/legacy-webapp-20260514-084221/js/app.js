@@ -1200,12 +1200,12 @@ document.addEventListener("DOMContentLoaded",()=>{
     `;
   }
 
-  function renderQuoteFilePreview(id) {
+  function renderQuoteDetail(id) {
     const item = state.quotes.find(q => q.id === id) || state.quotes[0];
     const subTotal = item.items.reduce((sum, row) => sum + row.qty * row.price, 0);
     const vat = Math.round(subTotal * 0.1);
     return `
-      ${AppHeader("Báo giá", "quotes")}
+      ${AppHeader("Chi tiết báo giá", "", "quotes")}
       <div class="app-card">
         <div class="app-list-meta">株式会社 山電 · YAMADEN.CO.LTD</div>
         <div class="app-card-top" style="margin-top:8px"><div><div class="app-list-title">${esc(item.id)}</div><div class="app-list-sub">${esc(item.project)}</div></div>${statusBadge(item.status)}</div>
@@ -1321,7 +1321,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       "request-new": renderRequestNew,
       "request-detail": () => renderRequestDetail(id),
       quotes: renderQuotes,
-      "quote-detail": () => renderQuoteFilePreview(id),
+      "quote-detail": () => renderQuoteDetail(id),
       schedules: renderSchedules,
       account: renderAccount
     };
