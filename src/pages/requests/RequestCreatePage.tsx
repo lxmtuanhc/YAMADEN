@@ -17,7 +17,7 @@ function fileKey(file: File) {
 }
 
 export function RequestCreatePage() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const navigate = useNavigate();
   const user = useAppStore(state => state.user);
   const [name, setName] = useState(user?.name || "");
@@ -113,7 +113,7 @@ export function RequestCreatePage() {
       setError(t("request.issueRequired"));
       return;
     }
-    if (!name.trim() || !phone.trim() || !title.trim() || !description.trim() || !address.trim()) {
+    if (!name.trim() || !phone.trim() || !title.trim() || !address.trim()) {
       setError(t("common.required"));
       return;
     }
@@ -149,7 +149,7 @@ export function RequestCreatePage() {
       navigate(`/requests/${request.id}`);
     } catch (submitError) {
       console.warn("Request submit failed", submitError);
-      setError(selectedMediaFiles.length ? t("request.uploadFailed") : t("common.required"));
+      setError(t("request.uploadFailed"));
     } finally {
       submitInFlightRef.current = false;
       setIsSubmitting(false);
@@ -292,7 +292,9 @@ export function RequestCreatePage() {
           </label>
 
           <label className="field">
-            <span>{t("request.description")} *</span>
+            <span>
+              {t("request.description")} <small>{language === "vi" ? "Không bắt buộc" : "任意"}</small>
+            </span>
             <textarea value={description} placeholder={t("request.descriptionPlaceholder")} onChange={event => setDescription(event.target.value)} />
           </label>
 
@@ -303,7 +305,9 @@ export function RequestCreatePage() {
 
           <div className="upload-field">
             <Upload size={22} />
-            <span>{t("request.attachments")}</span>
+            <span>
+              {t("request.attachments")} <small>{language === "vi" ? "Không bắt buộc" : "任意"}</small>
+            </span>
             <span>{selectedMediaFiles.length ? t("request.filesSelected").replace("{count}", String(selectedMediaFiles.length)) : t("request.uploadHint")}</span>
             <span className="upload-limit-text">{t("request.fileLimit").replace("{count}", String(maxUploadFiles))}</span>
             <button className="media-picker-button" type="button" onClick={() => mediaInputRef.current?.click()}>

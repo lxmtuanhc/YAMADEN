@@ -194,7 +194,7 @@ export function RequestDetailPage() {
           <InfoRow label={t("request.issue")} value={request.issueTags?.join(", ") || "-"} />
           <InfoRow label={t("request.address")} value={request.address} />
           <InfoRow label={t("request.datetime")} value={request.datetime || "-"} />
-          <InfoRow label={t("request.description")} value={request.description} />
+          <InfoRow label={t("request.description")} value={request.description || (language === "vi" ? "Chưa có mô tả" : "未入力")} />
         </div>
       </Card>
 

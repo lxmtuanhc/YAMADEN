@@ -9,7 +9,7 @@ import { getUserToken } from "./authService";
 export interface CreateRequestInput {
   category: string;
   title: string;
-  description: string;
+  description?: string;
   address: string;
   datetime?: string;
   imageName?: string;
@@ -537,7 +537,7 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
     category: input.category,
     title: input.title,
     address: input.address,
-    content: input.description,
+    content: input.description || "",
     issueTags: input.issueTags || [],
     workTypeIds: input.workTypeIds || [],
     departmentCode: input.departmentCode || "",
@@ -560,7 +560,7 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
     body.append("category", input.category);
     body.append("title", input.title);
     body.append("address", input.address);
-    body.append("content", input.description);
+    body.append("content", input.description || "");
     body.append("departmentCode", input.departmentCode || "");
     body.append("quoteRequested", "false");
     (input.issueTags || []).forEach(tag => body.append("issueTags", tag));
@@ -698,7 +698,7 @@ export const requestService = {
       requestCode: stableRequestCode(`${Date.now()}-${input.title}`),
       title: input.title,
       category: input.category,
-      description: input.description,
+      description: input.description || "",
       address: input.address,
       status: "submitted",
       createdAt,
