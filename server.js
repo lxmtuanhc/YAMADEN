@@ -216,6 +216,15 @@ const RequestSchema = new mongoose.Schema({
   mediaType: String,
   mediaFiles: [MediaFileSchema],
   status: String,
+  quoteStatus: {
+    type: String,
+    enum: ["none", "quoting", "file_uploaded", "sent", "viewed", "accepted", "revision_requested", "rejected"],
+    default: "none"
+  },
+  quoteStartedAt: Date,
+  quoteSentAt: Date,
+  quoteViewedAt: Date,
+  quoteRespondedAt: Date,
   urgency: String,
   priority: String,
   dueAt: Date,
@@ -1126,6 +1135,7 @@ function normalizeRequestStatus(status) {
   if (status === "scheduled") return "ordered";
   if (status === "cancelled") return "lost";
   if (status === "completed") return "completed";
+  if (status === "quoting") return "quoting";
   return status || "untreated";
 }
 
@@ -1133,6 +1143,7 @@ const REQUEST_STATUS_TIMESTAMPS = {
   contacted: ["firstResponseAt", "contactedAt"],
   processing: ["firstResponseAt", "contactedAt"],
   estimating: ["firstResponseAt"],
+  quoting: ["quoteStartedAt"],
   site_done: ["siteVisitedAt"],
   quoted: ["quotedAt"],
   ordered: ["orderedAt"],
@@ -1144,6 +1155,7 @@ const REQUEST_STATUS_TO_CUSTOMER = {
   untreated: "untreated",
   contacted: "received",
   processing: "processing",
+  quoting: "estimating",
   site_done: "processing",
   estimating: "estimating",
   quoted: "quoted",
@@ -1234,6 +1246,37 @@ function applyStatusTimestamps(item, nextStatus) {
   fields.forEach(field => {
     if (!item[field]) item[field] = now;
   });
+}
+
+const REQUEST_QUOTE_STATUSES = ["quoting", "file_uploaded", "sent", "viewed", "accepted", "revision_requested", "rejected"];
+
+function normalizeRequestQuoteStatus(status) {
+  const value = String(status || "").trim();
+  if (!value || value === "none") return "none";
+  if (REQUEST_QUOTE_STATUSES.includes(value)) return value;
+  return "none";
+}
+
+function applyRequestQuoteStatus(request, status) {
+  const quoteStatus = normalizeRequestQuoteStatus(status);
+  const now = new Date();
+  request.quoteStatus = quoteStatus;
+  request.quoteRequested = quoteStatus !== "none";
+  if (quoteStatus === "quoting" && !request.quoteStartedAt) request.quoteStartedAt = now;
+  if (quoteStatus === "file_uploaded" && !request.quoteStartedAt) request.quoteStartedAt = now;
+  if (quoteStatus === "sent") {
+    if (!request.quoteStartedAt) request.quoteStartedAt = now;
+    request.quoteSentAt = now;
+  }
+  if (quoteStatus === "viewed") {
+    if (!request.quoteStartedAt) request.quoteStartedAt = now;
+    if (!request.quoteSentAt) request.quoteSentAt = now;
+    request.quoteViewedAt = now;
+  }
+  if (["accepted", "revision_requested", "rejected"].includes(quoteStatus)) {
+    if (!request.quoteStartedAt) request.quoteStartedAt = now;
+    request.quoteRespondedAt = now;
+  }
 }
 
 const ASSIGNMENT_TAG_MAP = Object.freeze({
@@ -1905,6 +1948,11 @@ async function handleCustomerQuoteFileDetail(req, res) {
     if (!file.viewedAt) file.viewedAt = new Date();
     if (file.status === "sent") file.status = "viewed";
     await file.save();
+    const request = await Request.findById(file.requestId);
+    if (request) {
+      applyRequestQuoteStatus(request, "viewed");
+      await request.save();
+    }
     res.json({ ok: true, data: publicQuoteFile(file) });
   } catch (error) {
     res.status(500).json({ ok: false, message: "Quote file load failed", error: error.message });
@@ -1924,6 +1972,11 @@ async function handleCustomerQuoteFileResponse(req, res) {
     file.customerRespondedAt = new Date();
     file.status = response;
     await file.save();
+    const request = await Request.findById(file.requestId);
+    if (request) {
+      applyRequestQuoteStatus(request, response);
+      await request.save();
+    }
     res.json({ ok: true, data: publicQuoteFile(file) });
   } catch (error) {
     res.status(500).json({ ok: false, message: "Quote file response failed", error: error.message });
@@ -2226,6 +2279,29 @@ function publicQuoteFile(file, request) {
   };
 }
 
+function publicQuoteRequest(request, files = []) {
+  const item = typeof request?.toObject === "function" ? request.toObject() : request;
+  const quoteFiles = files.map(file => publicQuoteFile(file, item));
+  const hasDraft = quoteFiles.some(file => file.status === "draft");
+  const lastFile = quoteFiles[0] || null;
+  let quoteStatus = normalizeRequestQuoteStatus(item?.quoteStatus);
+  if (quoteStatus === "none" && normalizeRequestStatus(item?.status) === "quoting") quoteStatus = "quoting";
+  if (quoteStatus === "quoting" && hasDraft) quoteStatus = "file_uploaded";
+  if (quoteStatus === "none" && quoteFiles.length) quoteStatus = hasDraft ? "file_uploaded" : (lastFile?.status || "sent");
+  return {
+    ...item,
+    id: String(item?._id || item?.id || ""),
+    requestNo: getRequestDisplayId(item),
+    requestCode: getRequestDisplayId(item),
+    quoteStatus,
+    quoteFiles,
+    quoteFileCount: quoteFiles.length,
+    draftQuoteFileCount: quoteFiles.filter(file => file.status === "draft").length,
+    sentQuoteFileCount: quoteFiles.filter(file => file.status && file.status !== "draft").length,
+    latestQuoteFile: lastFile
+  };
+}
+
 function writeQuoteFileToLocal(file, requestNo) {
   const ext = quoteFileExt(file.originalname);
   const safeBase = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80) || "quote";
@@ -2299,7 +2375,7 @@ app.post("/admin/requests/:requestId/quote-files", requireAdmin, quoteFileUpload
       files.push(doc);
     }
 
-    request.quoteRequested = true;
+    applyRequestQuoteStatus(request, "file_uploaded");
     await request.save();
     const allFiles = await QuoteFile.find({ requestId: request._id }).sort({ createdAt: -1 });
     res.json({ ok: true, data: allFiles.map(file => publicQuoteFile(file, request)), request: request.toObject() });
@@ -2354,6 +2430,75 @@ app.get("/admin/quote-files", requireAdmin, async (req, res) => {
   }
 });
 
+app.patch("/admin/requests/:requestId/quote-status", requireAdmin, async (req, res) => {
+  try {
+    const request = await findRequestByAnyId(req.params.requestId);
+    if (!request) return res.status(404).json({ ok: false, message: "Request not found" });
+    await ensureRequestCode(request);
+    const quoteStatus = normalizeRequestQuoteStatus(req.body?.quoteStatus || req.body?.status);
+    if (quoteStatus === "none") return res.status(400).json({ ok: false, message: "Invalid quote status" });
+    applyRequestQuoteStatus(request, quoteStatus);
+    if (quoteStatus === "quoting" && normalizeRequestStatus(request.status) !== "quoting") {
+      request.status = "quoting";
+      mergeStatusTimeline(request, "quoting", req.body?.note || "");
+    }
+    await request.save();
+    res.json({ ok: true, data: request.toObject(), request: request.toObject() });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: "Quote status update failed", error: error.message });
+  }
+});
+
+app.get("/admin/quote-requests", requireAdmin, async (req, res) => {
+  try {
+    const status = String(req.query.status || "all").trim();
+    const customerId = String(req.query.customerId || "all").trim();
+    const search = String(req.query.search || "").trim().toLowerCase();
+    const quoteStatuses = status && status !== "all" ? [status] : REQUEST_QUOTE_STATUSES;
+    const query = { isDeleted: { $ne: true } };
+    query.$or = status && status !== "all"
+      ? [{ quoteStatus: { $in: quoteStatuses } }].concat(status === "quoting" ? [{ status: "quoting" }] : [])
+      : [{ quoteStatus: { $in: quoteStatuses } }, { status: "quoting" }];
+    if (customerId && customerId !== "all") query.userId = customerId;
+
+    const requestDocs = await Request.find(query).sort({ quoteStartedAt: -1, updatedAt: -1, createdAt: -1 });
+    for (const request of requestDocs) {
+      if (!getRequestDisplayId(request)) {
+        await ensureRequestCode(request);
+        await request.save();
+      }
+    }
+    const requests = requestDocs.map(request => request.toObject());
+    const requestIds = requests.map(request => request._id);
+    const files = requestIds.length ? await QuoteFile.find({ requestId: { $in: requestIds } }).sort({ createdAt: -1 }).lean() : [];
+    const filesByRequest = new Map();
+    files.forEach(file => {
+      const key = String(file.requestId || "");
+      if (!filesByRequest.has(key)) filesByRequest.set(key, []);
+      filesByRequest.get(key).push(file);
+    });
+    let data = requests.map(request => publicQuoteRequest(request, filesByRequest.get(String(request._id)) || []));
+
+    if (search) {
+      data = data.filter(request => [
+        request.requestNo,
+        request.requestCode,
+        request.name,
+        request.customerName,
+        request.phone,
+        request.title,
+        request.content,
+        request.assigneeName,
+        ...request.quoteFiles.map(file => file.originalName || file.fileName || "")
+      ].join(" ").toLowerCase().includes(search));
+    }
+
+    res.json({ ok: true, requests: data, data });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: "Quote requests load failed", error: error.message });
+  }
+});
+
 app.delete("/admin/quote-files/:fileId", requireAdmin, async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.fileId)) return res.status(404).json({ ok: false, message: "Quote file not found" });
@@ -2362,6 +2507,12 @@ app.delete("/admin/quote-files/:fileId", requireAdmin, async (req, res) => {
     if (file.status !== "draft") return res.status(400).json({ ok: false, message: "Sent quote files cannot be deleted" });
     if (file.filePath && fs.existsSync(file.filePath)) fs.unlinkSync(file.filePath);
     await QuoteFile.deleteOne({ _id: file._id });
+    const request = await Request.findById(file.requestId);
+    if (request) {
+      const remaining = await QuoteFile.countDocuments({ requestId: request._id });
+      applyRequestQuoteStatus(request, remaining ? "file_uploaded" : "quoting");
+      await request.save();
+    }
     res.json({ ok: true, data: publicQuoteFile(file) });
   } catch (error) {
     res.status(500).json({ ok: false, message: "Quote file delete failed", error: error.message });
@@ -2388,9 +2539,8 @@ app.post("/admin/quote-files/:fileId/send", requireAdmin, async (req, res) => {
     if (!files.length) return res.status(404).json({ ok: false, message: "Quote file not found" });
     const request = files[0] ? await Request.findById(files[0].requestId) : null;
     if (request) {
-      request.quoteRequested = true;
+      applyRequestQuoteStatus(request, "sent");
       request.quotedAt = new Date();
-      if (typeof request.status === "string") request.status = "quoted";
       await request.save();
     }
     res.json({ ok: true, data: publicQuoteFile(files[0], request) });
@@ -2404,9 +2554,8 @@ app.post("/admin/requests/:requestId/quote-files/send", requireAdmin, async (req
     const request = await findRequestByAnyId(req.params.requestId);
     if (!request) return res.status(404).json({ ok: false, message: "Request not found" });
     const files = await sendQuoteFiles({ requestId: request._id });
-    request.quoteRequested = true;
+    applyRequestQuoteStatus(request, "sent");
     request.quotedAt = new Date();
-    if (typeof request.status === "string") request.status = "quoted";
     await request.save();
     res.json({ ok: true, data: files.map(file => publicQuoteFile(file, request)), request: request.toObject() });
   } catch (error) {
@@ -2451,7 +2600,7 @@ app.post("/admin/requests/:requestId/create-quote", requireAdmin, async (req, re
     const request = await findRequestByAnyId(req.params.requestId);
     if (!request) return res.status(404).json({ ok: false, message: "Request not found" });
     await ensureRequestCode(request);
-    request.quoteRequested = true;
+    applyRequestQuoteStatus(request, normalizeRequestQuoteStatus(request.quoteStatus) === "none" ? "quoting" : request.quoteStatus);
     await request.save();
     const files = await QuoteFile.find({ requestId: request._id }).sort({ createdAt: -1 });
     res.json({ ok: true, request: request.toObject(), files: files.map(publicQuoteFile), reused: Boolean(files.length) });
@@ -3258,6 +3407,11 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
       item.status = normalizeRequestStatus(req.body.status);
       applyStatusTimestamps(item, item.status);
       mergeStatusTimeline(item, item.status, req.body.adminReply);
+      if (item.status === "quoting") applyRequestQuoteStatus(item, "quoting");
+    }
+
+    if (req.body.quoteStatus !== undefined) {
+      applyRequestQuoteStatus(item, req.body.quoteStatus);
     }
 
     if (req.body.assigneeId !== undefined) item.assigneeId = req.body.assigneeId;

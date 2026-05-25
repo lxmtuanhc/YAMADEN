@@ -965,6 +965,7 @@
   Object.assign(requestStatusMap, {
     untreated: "\u672a\u5bfe\u5fdc",
     contacted: "\u9023\u7d61\u6e08",
+    quoting: "\u898b\u7a4d\u4e2d",
     site_done: "\u73fe\u5730\u6e08",
     quoted: "\u898b\u7a4d",
     ordered: "\u53d7\u6ce8",
@@ -975,6 +976,7 @@
   Object.assign(requestStatusMapVi, {
     untreated: "Ch\u01b0a x\u1eed l\u00fd",
     contacted: "\u0110\u00e3 li\u00ean h\u1ec7",
+    quoting: "\u0110ang b\u00e1o gi\u00e1",
     site_done: "\u0110\u00e3 kh\u1ea3o s\u00e1t",
     quoted: "B\u00e1o gi\u00e1",
     ordered: "\u0110\u00e3 nh\u1eadn \u0111\u01a1n",
@@ -1644,6 +1646,20 @@
       });
       return requestJson("/admin/quote-files" + (query.toString() ? "?" + query.toString() : ""));
     },
+    getQuoteRequests(params) {
+      const query = new URLSearchParams();
+      Object.entries(params || {}).forEach(([key, value]) => {
+        if (value != null && value !== "" && value !== "all") query.set(key, value);
+      });
+      return requestJson("/admin/quote-requests" + (query.toString() ? "?" + query.toString() : ""));
+    },
+    updateQuoteStatus(requestId, quoteStatus) {
+      return requestJson("/admin/requests/" + encodeURIComponent(requestId) + "/quote-status", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quoteStatus })
+      });
+    },
     uploadQuoteFiles(requestId, files) {
       const formData = new FormData();
       Array.from(files || []).forEach(file => formData.append("files", file));
@@ -1799,6 +1815,7 @@
     if (value === "received") return "contacted";
     if (value === "processing") return "contacted";
     if (value === "estimating") return "quoted";
+    if (value === "quoting") return "quoting";
     if (value === "quote") return "quoted";
     if (value === "estimate") return "quoted";
     if (value === "quoted") return "quoted";
@@ -2433,11 +2450,11 @@
   }
 
   function requestFilterStatuses() {
-    return ["all", "untreated", "contacted", "site_done", "quoted", "completed", "lost"];
+    return ["all", "untreated", "contacted", "quoting", "site_done", "quoted", "completed", "lost"];
   }
 
   function requestBoardStatuses() {
-    return ["untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"];
+    return ["untreated", "contacted", "quoting", "site_done", "quoted", "ordered", "completed", "lost"];
   }
 
   function renderRequestFilterChips() {
@@ -2568,12 +2585,12 @@
   }
 
   function statusSelectHtml(id, current) {
-    const statuses = ["untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"];
+    const statuses = ["untreated", "contacted", "quoting", "site_done", "quoted", "ordered", "completed", "lost"];
     return `<select class="status-select" data-request-status="${escapeHtml(id)}">${statuses.map(status => `<option value="${status}" ${normalizeRequestStatus(current) === status ? "selected" : ""}>${escapeHtml(formatStatus(status))}</option>`).join("")}</select>`;
   }
 
   function requestStatusOptions(current) {
-    return ["untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"]
+    return ["untreated", "contacted", "quoting", "site_done", "quoted", "ordered", "completed", "lost"]
       .map(status => `<option value="${status}" ${normalizeRequestStatus(current) === status ? "selected" : ""}>${escapeHtml(formatStatus(status))}</option>`)
       .join("");
   }
@@ -4823,24 +4840,25 @@
   async function renderQuotes() {
     $("viewRoot").innerHTML = `<section class="section-card"><div class="panel-body">${escapeHtml(t("loading"))}</div></section>`;
     try {
-      const payload = await AdminAPI.getAllQuoteFiles({
+      const payload = await AdminAPI.getQuoteRequests({
         search: state.filters.quoteSearch || "",
         status: state.filters.quoteStatus || "all",
         customerId: state.filters.quoteCustomer || "all"
       });
-      state.quoteFiles = normalizeList(payload.files || payload.data);
+      state.quoteRequests = normalizeList(payload.requests || payload.data);
     } catch (error) {
       console.error(error);
-      state.quoteFiles = [];
+      state.quoteRequests = [];
       toast(error.message || t("failed"));
     }
-    renderQuoteFileManager();
+    renderQuoteRequestManager();
   }
 
-  function quoteFileStatusOptions() {
+  function quoteRequestStatusOptions() {
     return [
       ["all", state.lang === "vi" ? "T\u1ea5t c\u1ea3" : "\u3059\u3079\u3066"],
-      ["draft", quoteFileStatusLabel("draft")],
+      ["quoting", state.lang === "vi" ? "Ch\u01b0a upload file" : "\u672a\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9"],
+      ["file_uploaded", state.lang === "vi" ? "\u0110\u00e3 upload - ch\u01b0a g\u1eedi" : "\u30a2\u30c3\u30d7\u6e08\u307f\u30fb\u672a\u9001\u4fe1"],
       ["sent", quoteFileStatusLabel("sent")],
       ["viewed", quoteFileStatusLabel("viewed")],
       ["accepted", quoteFileStatusLabel("accepted")],
@@ -4857,11 +4875,33 @@
     return value ? formatDate(value) : "-";
   }
 
-  function renderQuoteFileManager() {
-    const files = toList(state.quoteFiles);
-    const customerOptions = [...new Map(files
-      .filter(file => file.userId || file.customerName)
-      .map(file => [String(file.userId || file.customerName), file.customerName || file.userId])).entries()];
+  function quoteRequestStatusLabel(request) {
+    const status = String(request?.quoteStatus || (normalizeRequestStatus(request?.status) === "quoting" ? "quoting" : "") || "quoting");
+    const labels = {
+      quoting: state.lang === "vi" ? "Ch\u01b0a upload file" : "\u672a\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9",
+      file_uploaded: state.lang === "vi" ? "\u0110\u00e3 upload - ch\u01b0a g\u1eedi" : "\u30a2\u30c3\u30d7\u6e08\u307f\u30fb\u672a\u9001\u4fe1",
+      sent: quoteFileStatusLabel("sent"),
+      viewed: quoteFileStatusLabel("viewed"),
+      accepted: quoteFileStatusLabel("accepted"),
+      revision_requested: quoteFileStatusLabel("revision_requested"),
+      rejected: quoteFileStatusLabel("rejected")
+    };
+    return labels[status] || labels.quoting;
+  }
+
+  function quoteRequestFiles(request) {
+    return toList(request?.quoteFiles || request?.files);
+  }
+
+  function quoteRequestDraftFiles(request) {
+    return quoteRequestFiles(request).filter(file => !file.status || file.status === "draft");
+  }
+
+  function renderQuoteRequestManager() {
+    const requests = toList(state.quoteRequests);
+    const customerOptions = [...new Map(requests
+      .filter(request => request.userId || getCustomerName(request))
+      .map(request => [String(request.userId || getCustomerName(request)), getCustomerName(request) || request.userId])).entries()];
     $("viewRoot").innerHTML = `
       <div class="quote-page-head">
         <div class="page-intro"><h1>${escapeHtml(state.lang === "vi" ? "File b\u00e1o gi\u00e1" : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb")}</h1><p>${escapeHtml(state.lang === "vi" ? "Qu\u1ea3n l\u00fd file b\u00e1o gi\u00e1 theo t\u1eebng y\u00eau c\u1ea7u" : "\u4f9d\u983c\u3054\u3068\u306e\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u7ba1\u7406\u3057\u307e\u3059")}</p></div>
@@ -4869,40 +4909,41 @@
       </div>
       <div class="crm-filter-bar quote-filter-bar">
         <input class="filter-input" data-quote-filter="search" value="${escapeHtml(state.filters.quoteSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "T\u00ecm theo m\u00e3 y\u00eau c\u1ea7u / kh\u00e1ch h\u00e0ng / t\u00ean file" : "\u4f9d\u983c\u756a\u53f7\u30fb\u9867\u5ba2\u30fb\u30d5\u30a1\u30a4\u30eb\u540d\u3067\u691c\u7d22")}">
-        <select class="filter-input" data-quote-filter="status">${quoteFileStatusOptions().map(([key, label]) => `<option value="${escapeHtml(key)}" ${String(state.filters.quoteStatus || "all") === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
+        <select class="filter-input" data-quote-filter="status">${quoteRequestStatusOptions().map(([key, label]) => `<option value="${escapeHtml(key)}" ${String(state.filters.quoteStatus || "all") === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
         <select class="filter-input" data-quote-filter="customer"><option value="all">${escapeHtml(t("customer"))}: ${escapeHtml(t("all"))}</option>${customerOptions.map(([key, label]) => `<option value="${escapeHtml(key)}" ${String(state.filters.quoteCustomer || "all") === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
       </div>
       <section class="section-card">
         <div class="panel-body quote-file-manager-body">
-          ${files.length ? `<div class="quote-file-manager-list">${files.map(renderQuoteFileManagerCard).join("")}</div>` : renderQuoteFileEmptyState()}
+          ${requests.length ? `<div class="quote-file-manager-list">${requests.map(renderQuoteRequestManagerCard).join("")}</div>` : renderQuoteRequestEmptyState()}
         </div>
       </section>
     `;
   }
 
-  function renderQuoteFileEmptyState() {
-    return `<div class="empty-state quote-file-empty"><strong>${escapeHtml(state.lang === "vi" ? "Ch\u01b0a c\u00f3 file b\u00e1o gi\u00e1" : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u306f\u307e\u3060\u3042\u308a\u307e\u305b\u3093")}</strong><p>${escapeHtml(state.lang === "vi" ? "H\u00e3y m\u1edf chi ti\u1ebft y\u00eau c\u1ea7u v\u00e0 upload file b\u00e1o gi\u00e1." : "\u4f9d\u983c\u8a73\u7d30\u3092\u958b\u3044\u3066\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u3057\u3066\u304f\u3060\u3055\u3044\u3002")}</p></div>`;
+  function renderQuoteRequestEmptyState() {
+    return `<div class="empty-state quote-file-empty"><strong>${escapeHtml(state.lang === "vi" ? "Ch\u01b0a c\u00f3 y\u00eau c\u1ea7u n\u00e0o \u0111ang b\u00e1o gi\u00e1" : "\u898b\u7a4d\u4e2d\u306e\u4f9d\u983c\u306f\u307e\u3060\u3042\u308a\u307e\u305b\u3093")}</strong><p>${escapeHtml(state.lang === "vi" ? "Chuy\u1ec3n y\u00eau c\u1ea7u sang tr\u1ea1ng th\u00e1i \u0110ang b\u00e1o gi\u00e1 \u0111\u1ec3 b\u1eaft \u0111\u1ea7u." : "\u4f9d\u983c\u3092\u898b\u7a4d\u4e2d\u306b\u5909\u66f4\u3057\u3066\u958b\u59cb\u3057\u3066\u304f\u3060\u3055\u3044\u3002")}</p></div>`;
   }
 
-  function renderQuoteFileManagerCard(file) {
-    const id = quoteFileId(file);
-    const isDraft = !file.status || file.status === "draft";
-    return `<article class="quote-file-manager-card" data-quote-file-card="${escapeHtml(id)}">
+  function renderQuoteRequestManagerCard(request) {
+    const id = getRowId(request);
+    const files = quoteRequestFiles(request);
+    const draftFiles = quoteRequestDraftFiles(request);
+    return `<article class="quote-file-manager-card" data-quote-request-card="${escapeHtml(id)}">
       <div class="quote-file-main">
-        <div class="quote-file-title-row"><strong>${escapeHtml(file.requestNo || file.requestCode || "-")}</strong><span class="status-badge status-${escapeHtml(file.status || "draft")}">${escapeHtml(quoteFileStatusLabel(file.status || "draft", file.customerResponse))}</span></div>
-        <h3>${escapeHtml(file.originalName || file.fileName || "-")}</h3>
-        <p>${escapeHtml(file.customerName || "-")} / ${escapeHtml(file.projectName || file.requestTitle || "-")}</p>
+        <div class="quote-file-title-row"><strong>${escapeHtml(getRequestDisplayId(request))}</strong><span class="status-badge status-${escapeHtml(request.quoteStatus || "quoting")}">${escapeHtml(quoteRequestStatusLabel(request))}</span></div>
+        <h3>${escapeHtml(getRequestContent(request) || request.projectName || request.title || "-")}</h3>
+        <p>${escapeHtml(getCustomerName(request) || "-")} / ${escapeHtml(getRequestPhone(request) || "-")}</p>
       </div>
       <div class="quote-file-meta-grid">
-        ${infoItem(state.lang === "vi" ? "Lo\u1ea1i file" : "\u7a2e\u985e", quoteFileTypeLabel(file))}
-        ${infoItem(state.lang === "vi" ? "Dung l\u01b0\u1ee3ng" : "\u30b5\u30a4\u30ba", quoteFileSizeLabel(file.fileSize))}
-        ${infoItem(state.lang === "vi" ? "Ng\u00e0y upload" : "\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u65e5", quoteFileDateLabel(file.createdAt))}
-        ${infoItem(state.lang === "vi" ? "Ng\u00e0y g\u1eedi" : "\u9001\u4fe1\u65e5", quoteFileDateLabel(file.sentAt))}
+        ${infoItem(state.lang === "vi" ? "Ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch" : "\u62c5\u5f53", getAssigneeName(request) || "-")}
+        ${infoItem(state.lang === "vi" ? "S\u1ed1 file" : "\u30d5\u30a1\u30a4\u30eb\u6570", String(files.length))}
+        ${infoItem(state.lang === "vi" ? "Ng\u00e0y chuy\u1ec3n b\u00e1o gi\u00e1" : "\u898b\u7a4d\u958b\u59cb\u65e5", quoteFileDateLabel(request.quoteStartedAt))}
+        ${infoItem(state.lang === "vi" ? "File m\u1edbi nh\u1ea5t" : "\u6700\u65b0\u30d5\u30a1\u30a4\u30eb", files[0]?.originalName || files[0]?.fileName || "-")}
       </div>
       <div class="actions quote-file-actions">
-        ${file.fileUrl ? `<a class="btn btn-soft" href="${escapeHtml(file.fileUrl)}" target="_blank" rel="noopener" data-quote-file-action-skip>${escapeHtml(state.lang === "vi" ? "Xem file" : "\u8868\u793a")}</a>` : ""}
-        <button class="btn btn-soft" type="button" data-open-request-from-quote-file="${escapeHtml(file.requestMongoId || file.requestId || "")}" data-quote-file-action-skip>${escapeHtml(state.lang === "vi" ? "M\u1edf y\u00eau c\u1ea7u" : "\u4f9d\u983c\u3092\u958b\u304f")}</button>
-        ${isDraft ? `<button class="btn btn-primary" type="button" data-quote-file-send-one="${escapeHtml(id)}" data-quote-file-action-skip>${escapeHtml(t("sendToCustomerApp"))}</button><button class="btn btn-danger" type="button" data-quote-file-delete="${escapeHtml(id)}" data-quote-file-action-skip>${escapeHtml(t("delete"))}</button>` : ""}
+        <button class="btn btn-soft" type="button" data-open-quote-request="${escapeHtml(id)}" data-quote-file-action-skip>${escapeHtml(state.lang === "vi" ? "M\u1edf" : "\u958b\u304f")}</button>
+        <button class="btn btn-soft" type="button" data-open-quote-request="${escapeHtml(id)}" data-quote-step="2" data-quote-file-action-skip>${escapeHtml(state.lang === "vi" ? "Upload file" : "\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9")}</button>
+        ${draftFiles.length ? `<button class="btn btn-primary" type="button" data-quote-request-send="${escapeHtml(id)}" data-quote-file-action-skip>${escapeHtml(t("sendToCustomerApp"))}</button>` : ""}
       </div>
     </article>`;
   }
@@ -4987,7 +5028,7 @@
       projectName: request.projectName || request.title || getRequestContent(request) || source?.projectName || source?.title || "",
       content: getRequestContent(request) || source?.content || "",
       assigneeName: getAssigneeName(request),
-      files: toList(source?.files).length ? toList(source.files) : source?.originalName ? [source] : []
+      files: toList(source?.quoteFiles).length ? toList(source.quoteFiles) : toList(source?.files).length ? toList(source.files) : source?.originalName ? [source] : []
     };
   }
 
@@ -6005,6 +6046,15 @@
     try {
       const response = await AdminAPI.uploadQuoteFiles(quote.requestMongoId, files);
       quote.files = normalizeList(response.data);
+      if (response.request) {
+        quote.quoteStatus = response.request.quoteStatus;
+        quote.quoteStartedAt = response.request.quoteStartedAt;
+        const requestId = getRowId(response.request);
+        const requestIndex = state.requests.findIndex(item => getRowId(item) === requestId);
+        if (requestIndex >= 0) state.requests[requestIndex] = response.request;
+        const quoteIndex = toList(state.quoteRequests).findIndex(item => getRowId(item) === requestId);
+        if (quoteIndex >= 0) state.quoteRequests[quoteIndex] = { ...state.quoteRequests[quoteIndex], ...response.request, quoteFiles: quote.files };
+      }
       window.currentQuoteDetail = quote;
       openQuoteFileModal(quote);
       toast(state.lang === "vi" ? "Upload file th\u00e0nh c\u00f4ng." : "\u30d5\u30a1\u30a4\u30eb\u3092\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u3057\u307e\u3057\u305f\u3002");
@@ -6056,6 +6106,8 @@
         const id = getRowId(response.request);
         const index = state.requests.findIndex(item => getRowId(item) === id);
         if (index >= 0) state.requests[index] = response.request;
+        const quoteIndex = toList(state.quoteRequests).findIndex(item => getRowId(item) === id);
+        if (quoteIndex >= 0) state.quoteRequests[quoteIndex] = { ...state.quoteRequests[quoteIndex], ...response.request, quoteFiles: quote.files };
       }
       openQuoteFileModal(quote);
       toast(t("quoteSentMock"));
@@ -6075,6 +6127,43 @@
       console.error(error);
       toast(error.message || t("failed"));
     }
+  }
+
+  async function sendQuoteRequestFiles(requestId) {
+    if (!requestId) return;
+    try {
+      await AdminAPI.sendQuoteFiles(requestId);
+      if (state.currentView === "quotes") renderQuotes();
+      toast(t("quoteSentMock"));
+    } catch (error) {
+      console.error(error);
+      toast(error.message || t("failed"));
+    }
+  }
+
+  async function openQuoteRequestModal(requestId, step) {
+    const request = toList(state.quoteRequests).find(item => String(getRowId(item)) === String(requestId) || String(getRequestDisplayId(item)) === String(requestId))
+      || state.requests.find(item => String(getRowId(item)) === String(requestId) || String(getRequestDisplayId(item)) === String(requestId));
+    if (!request) {
+      try {
+        const data = await AdminAPI.getRequest(requestId);
+        const files = await AdminAPI.getQuoteFiles(requestId).catch(() => ({}));
+        state.quoteWizardStep = step || 1;
+        openQuoteFileModal({ ...data, quoteFiles: normalizeList(files.data || files.files) });
+      } catch (error) {
+        console.error(error);
+        toast(error.message || t("failed"));
+      }
+      return;
+    }
+    if (!quoteRequestFiles(request).length) {
+      try {
+        const files = await AdminAPI.getQuoteFiles(getRowId(request));
+        request.quoteFiles = normalizeList(files.data || files.files);
+      } catch {}
+    }
+    state.quoteWizardStep = step || 1;
+    openQuoteFileModal(request);
   }
 
   async function refreshData() {
@@ -6240,9 +6329,9 @@
     if (statusSelect && !$("drawer").classList.contains("open")) {
       event.stopPropagation();
       try {
-        await AdminAPI.updateRequest(statusSelect.dataset.requestStatus, { status: statusSelect.value });
+        const response = await AdminAPI.updateRequest(statusSelect.dataset.requestStatus, { status: statusSelect.value });
         const item = state.requests.find(request => getRowId(request) === statusSelect.dataset.requestStatus || getRequestDisplayId(request) === statusSelect.dataset.requestStatus);
-        if (item) item.status = statusSelect.value;
+        if (item) Object.assign(item, response?.data || { status: statusSelect.value });
         renderRequestResults();
         toast(t("saved"));
       } catch (error) {
@@ -6760,9 +6849,9 @@
       const select = event.target.closest("[data-request-status]");
       if (!select || $("drawer").classList.contains("open")) return;
       try {
-        await AdminAPI.updateRequest(select.dataset.requestStatus, { status: select.value });
+        const response = await AdminAPI.updateRequest(select.dataset.requestStatus, { status: select.value });
         const item = state.requests.find(request => getRowId(request) === select.dataset.requestStatus || getRequestDisplayId(request) === select.dataset.requestStatus);
-        if (item) item.status = select.value;
+        if (item) Object.assign(item, response?.data || { status: select.value });
         renderRequestResults();
         toast(t("saved"));
       } catch {
@@ -6847,24 +6936,19 @@
         await sendOneQuoteFile(quoteFileSendOne.dataset.quoteFileSendOne);
         return;
       }
-      const quoteFileCard = event.target.closest("[data-quote-file-card]");
-      if (quoteFileCard && !event.target.closest("[data-quote-file-action-skip]")) {
-        const file = toList(state.quoteFiles).find(item => quoteFileId(item) === quoteFileCard.dataset.quoteFileCard);
-        if (file) openQuoteFileModal(file);
+      const quoteRequestSend = event.target.closest("[data-quote-request-send]");
+      if (quoteRequestSend) {
+        await sendQuoteRequestFiles(quoteRequestSend.dataset.quoteRequestSend);
         return;
       }
-      const openRequestFromQuoteFile = event.target.closest("[data-open-request-from-quote-file]");
-      if (openRequestFromQuoteFile) {
-        const requestId = openRequestFromQuoteFile.dataset.openRequestFromQuoteFile;
-        const request = state.requests.find(item => String(getRowId(item)) === String(requestId) || String(getRequestDisplayId(item)) === String(requestId));
-        if (request) renderRequestDetail(request);
-        else {
-          try {
-            renderRequestDetail(await AdminAPI.getRequest(requestId));
-          } catch (error) {
-            toast(error.message || t("failed"));
-          }
-        }
+      const openQuoteRequest = event.target.closest("[data-open-quote-request]");
+      if (openQuoteRequest) {
+        await openQuoteRequestModal(openQuoteRequest.dataset.openQuoteRequest, Number(openQuoteRequest.dataset.quoteStep || 1));
+        return;
+      }
+      const quoteRequestCard = event.target.closest("[data-quote-request-card]");
+      if (quoteRequestCard && !event.target.closest("[data-quote-file-action-skip]")) {
+        await openQuoteRequestModal(quoteRequestCard.dataset.quoteRequestCard, 1);
         return;
       }
       if (event.target.closest("[data-quote-files-send]")) {
