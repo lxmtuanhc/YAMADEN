@@ -10,6 +10,7 @@ import { StatusBadge } from "../ui/StatusBadge";
 export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote: Quote) => void }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const hasFile = Boolean(quote.fileUrl);
 
   return (
     <Card className="request-card quote-list-card" onClick={() => navigate(`/quotes/${quote.id}`)}>
@@ -22,14 +23,30 @@ export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote
           <StatusBadge status={quote.status} />
         </div>
         <h3>{quote.projectName}</h3>
-        <p>
-          <span>{t("quote.amount")}</span>
-          <span>{formatCurrency(quote.total ?? calculateQuoteTotal(quote.items))}</span>
-        </p>
-        <p>
-          <span>{t("quote.validUntil")}</span>
-          <span>{quote.validUntil}</span>
-        </p>
+        {hasFile ? (
+          <p>
+            <span>{quote.originalName || quote.fileName || "Quote file"}</span>
+            <a
+              href={quote.fileUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={event => event.stopPropagation()}
+            >
+              Open
+            </a>
+          </p>
+        ) : (
+          <>
+            <p>
+              <span>{t("quote.amount")}</span>
+              <span>{formatCurrency(quote.total ?? calculateQuoteTotal(quote.items))}</span>
+            </p>
+            <p>
+              <span>{t("quote.validUntil")}</span>
+              <span>{quote.validUntil}</span>
+            </p>
+          </>
+        )}
         {onDelete ? (
           <button
             className="inline-danger-action"

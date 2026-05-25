@@ -31,6 +31,12 @@ function normalizeQuote(quote: Quote): Quote {
     customerName: quote.customerName || "",
     customerPhone: quote.customerPhone || "",
     customerEmail: quote.customerEmail || "",
+    fileUrl: quote.fileUrl || "",
+    originalName: quote.originalName || quote.fileName || "",
+    fileName: quote.fileName || "",
+    mimeType: quote.mimeType || "",
+    fileSize: quote.fileSize || 0,
+    ext: quote.ext || "",
     sentToCustomerAt: quote.sentToCustomerAt || "",
     acceptedAt: quote.acceptedAt || "",
     rejectedAt: quote.rejectedAt || "",
@@ -196,6 +202,15 @@ export const quoteService = {
 
   async getQuotesByRequestId(requestId: string): Promise<Quote[]> {
     await delay();
+    try {
+      const backendQuotes = await fetchBackendQuotes();
+      if (backendQuotes) {
+        commitQuotes(backendQuotes);
+        return backendQuotes.filter(quote => !quote.isDeleted && quote.requestId === requestId && visibleToCurrentUser(quote));
+      }
+    } catch (error) {
+      console.warn("Unable to load request quotes from backend", error);
+    }
     const allQuotes = readQuotes();
     commitQuotes(allQuotes);
     return allQuotes.filter(quote => !quote.isDeleted && quote.requestId === requestId && visibleToCurrentUser(quote));

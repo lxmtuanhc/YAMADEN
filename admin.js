@@ -1387,10 +1387,7 @@
     quotePipeline: "\u898b\u7a4d\u30d1\u30a4\u30d7\u30e9\u30a4\u30f3",
     quoteLayoutData: "\u30ec\u30a4\u30a2\u30a6\u30c8\u30c7\u30fc\u30bf",
     quoteWizardStep1: "依頼詳細",
-    quoteWizardStep2: "見積明細",
-    quoteWizardStep3: "備考・支払条件",
-    quoteWizardStep4: "支払合計",
-    quoteWizardStep5: "確認・送信",
+    quoteWizardStep2: "見積",
     nextStep: "次へ",
     previousStep: "戻る",
     exportPdf: "PDF出力",
@@ -1503,10 +1500,7 @@
     quotePipeline: "Pipeline b\u00e1o gi\u00e1",
     quoteLayoutData: "D\u1eef li\u1ec7u layout",
     quoteWizardStep1: "Chi tiết yêu cầu",
-    quoteWizardStep2: "Chi tiết báo giá",
-    quoteWizardStep3: "Ghi chú & điều khoản",
-    quoteWizardStep4: "Tổng hợp thanh toán",
-    quoteWizardStep5: "Xem lại & gửi",
+    quoteWizardStep2: "Báo giá",
     nextStep: "Tiếp tục",
     previousStep: "Quay lại",
     exportPdf: "Xuất PDF",
@@ -1637,6 +1631,21 @@
       return requestJson("/admin/requests/" + encodeURIComponent(id) + "/create-quote", {
         method: "POST",
         headers: { "Content-Type": "application/json" }
+      });
+    },
+    getQuoteRequests(params) {
+      const query = new URLSearchParams();
+      Object.entries(params || {}).forEach(([key, value]) => {
+        if (value != null && value !== "" && value !== "all") query.set(key, value);
+      });
+      return requestJson("/admin/quote-requests" + (query.toString() ? "?" + query.toString() : ""));
+    },
+    uploadRequestQuoteFile(requestId, file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      return requestJson("/admin/requests/" + encodeURIComponent(requestId) + "/quote-file", {
+        method: "POST",
+        body: formData
       });
     },
     deleteQuote(id, permanent) {
@@ -4554,7 +4563,10 @@
   }
 
   function quoteWizardLabels() {
-    return [t("quoteWizardStep1"), t("quoteWizardStep2"), t("quoteWizardStep3"), t("quoteWizardStep4"), t("quoteWizardStep5")];
+    return [
+      state.lang === "vi" ? "Chi ti\u1ebft y\u00eau c\u1ea7u" : "\u4f9d\u983c\u8a73\u7d30",
+      state.lang === "vi" ? "B\u00e1o gi\u00e1" : "\u898b\u7a4d"
+    ];
   }
 
   function renderQuoteWizardSteps() {
@@ -4680,7 +4692,7 @@
   function renderQuoteStep4(quote, totals) {
     return `<div class="quote-step-grid quote-step-payment-only">
       <section class="quote-work-card quote-payment-card quote-payment-detail-card">
-        <div class="quote-card-header"><div><h3>${escapeHtml(t("quotePaymentSummary"))}</h3><p class="quote-card-subtitle">${escapeHtml(t("quoteWizardStep4"))}</p></div></div>
+        <div class="quote-card-header"><div><h3>${escapeHtml(t("quotePaymentSummary"))}</h3><p class="quote-card-subtitle">${escapeHtml(t("quotePaymentSummary"))}</p></div></div>
         <div class="quote-money-list">
           <div class="quote-money-row"><span>${escapeHtml(t("subtotal"))}</span><strong data-quote-summary="subtotal">${escapeHtml(quoteCurrency(totals.subtotal))}</strong></div>
           <div class="quote-money-row"><span>${escapeHtml(t("discount"))}</span><strong data-quote-summary="discount">${escapeHtml(quoteCurrency(totals.discountTotal || totals.discount || 0))}</strong></div>
@@ -4704,60 +4716,45 @@
     return `<section class="quote-today-card"><p class="eyebrow">${escapeHtml(t("quoteTodayNeedsAction"))}</p><div class="quote-today-grid">${items.map(([label, value]) => `<div class="quote-today-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(String(value))}</strong></div>`).join("")}</div></section>`;
   }
 
-  function renderQuotes() {
-    const allRows = quoteRows();
-    const rows = filterQuotes(allRows);
-    const acceptedRows = rows.filter(item => quoteAdminStatus(item.status) === "accepted");
-    const totalValue = rows.reduce((sum, item) => sum + calculateQuoteTotals(item).total, 0);
-    const orderedValue = acceptedRows.reduce((sum, item) => sum + calculateQuoteTotals(item).total, 0);
-    const viewMode = state.filters.quoteView || "kanban";
-    const validityOptions = [
-      ["all", t("quoteAllValidity")],
-      ["valid", t("quoteStillValid")],
-      ["expiring", t("quoteExpiringSoonShort")],
-      ["expired", t("quoteExpired")],
-      ["unset", t("quoteNoValidUntil")]
-    ];
-    const assigneeOptions = [...new Map(allRows
-      .filter(item => item.assigneeId || item.assigneeName)
-      .map(item => [String(item.assigneeId || item.assigneeName), item.assigneeName || item.assigneeId])).entries()];
-    const customerOptions = [...new Map(allRows
-      .filter(item => item.customerId || item.customerName)
-      .map(item => [String(item.customerId || item.customerName), item.customerName || item.customerId])).entries()];
+  async function renderQuotes() {
+    $("viewRoot").innerHTML = `<section class="section-card"><div class="panel-body">${escapeHtml(t("loading"))}</div></section>`;
+    let rows = [];
+    try {
+      const payload = await AdminAPI.getQuoteRequests({ search: state.filters.quoteSearch || "" });
+      rows = normalizeList(payload.requests || payload.data);
+      state.quoteRequests = rows;
+    } catch (error) {
+      console.error(error);
+      toast(error.message || t("failed"));
+    }
     $("viewRoot").innerHTML = `
       <div class="quote-page-head">
-        <div class="page-intro"><p>${escapeHtml(t("quoteModuleSubtitle"))}</p></div>
+        <div class="page-intro"><h1>${escapeHtml(state.lang === "vi" ? "B\u00e1o gi\u00e1" : "\u898b\u7a4d")}</h1><p>${escapeHtml(state.lang === "vi" ? "Ch\u1ec9 hi\u1ec3n th\u1ecb y\u00eau c\u1ea7u \u0111ang \u1edf tr\u1ea1ng th\u00e1i B\u00e1o gi\u00e1." : "\u30b9\u30c6\u30fc\u30bf\u30b9\u304c\u898b\u7a4d\u306e\u4f9d\u983c\u306e\u307f\u8868\u793a\u3057\u307e\u3059\u3002")}</p></div>
         <div class="request-command-bar demo-actions quote-toolbar">
-          <button class="btn btn-soft" type="button" data-quote-csv>${escapeHtml(t("quoteCsvExport"))}</button>
           <button class="btn btn-soft" type="button" data-quote-refresh>${escapeHtml(t("refresh"))}</button>
-          <button class="btn btn-primary" type="button" data-quote-action="new">+ ${escapeHtml(t("quoteRegister"))}</button>
         </div>
       </div>
-      <div class="kpi-grid kpi-grid-small quote-kpi-grid">
-        ${statCard(t("quoteTotal"), rows.length, t("quoteLayoutData"), "info", "receipt")}
-        ${statCard(t("totalQuoteValue"), quoteCurrency(totalValue), t("quoteLayoutData"), "warning", "clipboard")}
-        ${statCard(t("orderRate"), rows.length ? Math.round(acceptedRows.length / rows.length * 100) + "%" : "-", t("quoteLayoutData"), "success", "trend")}
-        ${statCard(t("orderedValue"), quoteCurrency(orderedValue), t("quoteLayoutData"), "total", "userCheck")}
-      </div>
-      ${renderQuoteTodaySummary(rows)}
       <div class="crm-filter-bar quote-filter-bar">
-        <input class="filter-input" data-quote-filter="search" value="${escapeHtml(state.filters.quoteSearch || "")}" placeholder="${escapeHtml(t("quoteSearchPlaceholder"))}">
-        <select class="filter-input" data-quote-filter="status"><option value="all">${escapeHtml(t("statusFilter"))}</option>${QUOTE_STATUSES.map(status => `<option value="${escapeHtml(status)}" ${state.filters.quoteStatus === status ? "selected" : ""}>${escapeHtml(quoteStatusLabel(status))}</option>`).join("")}</select>
-        <select class="filter-input" data-quote-filter="assignee"><option value="all">${escapeHtml(t("assignee"))}: ${escapeHtml(t("all"))}</option>${assigneeOptions.map(([key, label]) => `<option value="${escapeHtml(key)}" ${state.filters.quoteAssignee === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
-        <select class="filter-input" data-quote-filter="customer"><option value="all">${escapeHtml(t("customer"))}: ${escapeHtml(t("all"))}</option>${customerOptions.map(([key, label]) => `<option value="${escapeHtml(key)}" ${state.filters.quoteCustomer === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
-        <select class="filter-input" data-quote-filter="validity"><option value="all">${escapeHtml(t("validUntil"))}: ${escapeHtml(t("quoteAllValidity"))}</option>${validityOptions.slice(1).map(([key, label]) => `<option value="${escapeHtml(key)}" ${state.filters.quoteValidity === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
-      </div>
-      <div class="quote-view-switch-wrap">
-        <div class="quote-view-switch" role="tablist" aria-label="${escapeHtml(t("quotes"))}">
-          ${[["kanban", t("kanban")], ["list", t("listView")]].map(([key, label]) => `<button class="quote-view-tab ${viewMode === key ? "active is-active" : ""}" type="button" role="tab" aria-selected="${viewMode === key ? "true" : "false"}" data-quote-view="${escapeHtml(key)}">${escapeHtml(label)}</button>`).join("")}
-        </div>
+        <input class="filter-input" data-quote-filter="search" value="${escapeHtml(state.filters.quoteSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "T\u00ecm m\u00e3 y\u00eau c\u1ea7u / kh\u00e1ch h\u00e0ng / n\u1ed9i dung" : "\u4f9d\u983cID\u30fb\u9867\u5ba2\u30fb\u5185\u5bb9\u3067\u691c\u7d22")}">
       </div>
       <section class="section-card">
-        <div class="panel-head quote-pipeline-head"><div><h2>${escapeHtml(t("quotePipeline"))}</h2><p class="note">${escapeHtml(quotePipelineSummary(rows.length))}</p></div>${viewMode === "kanban" ? `<div class="quote-kanban-controls"><span class="quote-scroll-hint">${escapeHtml(t("quoteKanbanHint"))}</span><button class="icon-btn quote-scroll-button" type="button" data-quote-scroll="-1" aria-label="Scroll left">&larr;</button><button class="icon-btn quote-scroll-button" type="button" data-quote-scroll="1" aria-label="Scroll right">&rarr;</button></div>` : ""}</div>
-        <div class="panel-body quote-board-body">${viewMode === "list" ? renderQuoteList(rows) : renderQuoteKanban(rows)}</div>
+        <div class="panel-body quote-board-body">
+          ${rows.length ? `<div class="quote-request-list">${rows.map(renderQuoteRequestCard).join("")}</div>` : `<div class="empty-state"><strong>${escapeHtml(state.lang === "vi" ? "Ch\u01b0a c\u00f3 y\u00eau c\u1ea7u b\u00e1o gi\u00e1" : "\u898b\u7a4d\u306e\u4f9d\u983c\u306f\u307e\u3060\u3042\u308a\u307e\u305b\u3093")}</strong><p>${escapeHtml(state.lang === "vi" ? "Chuy\u1ec3n y\u00eau c\u1ea7u sang tr\u1ea1ng th\u00e1i B\u00e1o gi\u00e1 \u0111\u1ec3 b\u1eaft \u0111\u1ea7u." : "\u4f9d\u983c\u3092\u898b\u7a4d\u30b9\u30c6\u30fc\u30bf\u30b9\u306b\u5909\u66f4\u3057\u3066\u958b\u59cb\u3057\u307e\u3059\u3002")}</p></div>`}
+        </div>
       </section>
     `;
-    requestAnimationFrame(updateQuoteScrollButtons);
+  }
+
+  function renderQuoteRequestCard(request) {
+    const files = toList(request.quoteFiles);
+    const latest = files[0] || {};
+    const id = getRowId(request);
+    return `<button class="quote-request-card" type="button" data-open-request-quote="${escapeHtml(id)}">
+      <div><strong>${escapeHtml(getRequestDisplayId(request))}</strong><span class="status-badge ${getStatusClass(request.status)}">${escapeHtml(formatStatus(request.status))}</span></div>
+      <h3>${escapeHtml(getRequestContent(request) || request.title || "-")}</h3>
+      <p>${escapeHtml(getCustomerName(request) || "-")} / ${escapeHtml(getRequestPhone(request) || "-")}</p>
+      <div class="quote-request-meta"><span>${escapeHtml(t("assignee"))}: ${escapeHtml(getAssigneeName(request) || "-")}</span><span>${escapeHtml(state.lang === "vi" ? "File" : "\u30d5\u30a1\u30a4\u30eb")}: ${files.length}</span><span>${escapeHtml(latest.originalName || latest.fileName || "")}</span></div>
+    </button>`;
   }
 
   function renderQuoteKanban(rows) {
@@ -4811,62 +4808,86 @@
   }
 
   function renderQuoteDetail(quote) {
-    quote = ensureQuoteDefaults(normalizeQuote(quote));
-    const totals = calculateQuoteTotals(quote);
-    const readonly = ["accepted", "rejected", "expired"].includes(quoteAdminStatus(quote.status));
-    const requestLinked = Boolean(quote.requestId);
-    const itemCountText = t("quoteItemCount").replace("{count}", String(quote.items.length));
-    const currentStep = Number(state.quoteWizardStep || 1);
+    quote = quoteFileFlowState(quote);
+    window.currentQuoteDetail = quote;
+    const currentStep = Math.min(2, Math.max(1, Number(state.quoteWizardStep || 1)));
+    const selectedFileName = state.quoteSelectedFile?.name || quote.originalName || quote.fileName || "";
     openDrawer(`
       <article class="drawer-panel quote-detail-drawer quote-wizard-modal">
         <header class="drawer-head drawer-header quote-workspace-head">
           <div class="quote-head-main">
-            <p class="eyebrow">${escapeHtml(t("quoteQuickCreate"))}</p>
-            <h2>${escapeHtml(quote.quoteNo || t("quoteNew"))}</h2>
-            <p class="note">${escapeHtml(t("quoteCreateSubtitle"))}</p>
-            <span class="status-badge status-${escapeHtml(quoteAdminStatus(quote.status))}">${escapeHtml(quoteStatusLabel(quoteAdminStatus(quote.status)))}</span>
+            <p class="eyebrow">${escapeHtml(state.lang === "vi" ? "B\u00e1o gi\u00e1" : "\u898b\u7a4d")}</p>
+            <h2>${escapeHtml(quote.requestNo || quote.requestId || "-")}</h2>
+            <p class="note">${escapeHtml(state.lang === "vi" ? "Upload file b\u00e1o gi\u00e1 th\u1ee7 c\u00f4ng v\u00e0 g\u1eedi cho kh\u00e1ch h\u00e0ng." : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u3057\u9867\u5ba2\u306b\u9001\u4fe1\u3057\u307e\u3059\u3002")}</p>
+            <span class="status-badge ${getStatusClass("quoted")}">${escapeHtml(formatStatus("quoted"))}</span>
           </div>
           <button class="quote-detail-close" type="button" data-close-drawer aria-label="${escapeHtml(t("close"))}">&times;</button>
         </header>
         ${renderQuoteWizardSteps()}
-        <form class="drawer-body quote-detail-form quote-wizard-form" data-quote-form>
-          <input type="hidden" name="_id" value="${escapeHtml(quote._id || "")}"><input type="hidden" name="id" value="${escapeHtml(quote.id)}"><input type="hidden" name="quoteNo" value="${escapeHtml(quote.quoteNo)}">
+        <form class="drawer-body quote-detail-form quote-wizard-form" data-quote-form data-quote-file-flow>
+          <input type="hidden" name="requestMongoId" value="${escapeHtml(quote.requestMongoId || quote.id || "")}">
           <div class="quote-wizard-content">
             <section class="quote-wizard-panel ${currentStep === 1 ? "is-active" : ""}" data-quote-step-panel="1">
-              <h3>${escapeHtml(t("quoteWizardStep1"))}</h3>
-              ${renderQuoteStep1(quote, readonly, requestLinked)}
+              <h3>${escapeHtml(state.lang === "vi" ? "Chi ti\u1ebft y\u00eau c\u1ea7u" : "\u4f9d\u983c\u8a73\u7d30")}</h3>
+              <section class="quote-work-card">
+                <div class="info-grid">
+                  ${infoItem(t("id"), quote.requestNo || quote.requestId)}
+                  ${infoItem(t("customer"), quote.customerName)}
+                  ${infoItem(t("phone"), quote.customerPhone)}
+                  ${infoItem(t("address"), quote.projectAddress)}
+                  ${infoItem(t("createdAt"), quote.createdAt ? formatDateTime(quote.createdAt) : "-")}
+                  ${infoItem(t("assignee"), quote.assigneeName)}
+                  <div class="info-item wide"><b>${escapeHtml(t("content"))}</b><span>${escapeHtml(quote.content || quote.projectName || "-")}</span></div>
+                </div>
+              </section>
             </section>
             <section class="quote-wizard-panel ${currentStep === 2 ? "is-active" : ""}" data-quote-step-panel="2">
-              <h3>${escapeHtml(t("quoteWizardStep2"))}</h3>
-              ${renderQuoteStep2(quote, readonly, itemCountText)}
-            </section>
-            <section class="quote-wizard-panel ${currentStep === 3 ? "is-active" : ""}" data-quote-step-panel="3">
-              <h3>${escapeHtml(t("quoteWizardStep3"))}</h3>
-              ${renderQuoteStep3(quote, readonly)}
-            </section>
-            <section class="quote-wizard-panel ${currentStep === 4 ? "is-active" : ""}" data-quote-step-panel="4">
-              <h3>${escapeHtml(t("quoteWizardStep4"))}</h3>
-              ${renderQuoteStep4(quote, totals)}
-            </section>
-            <section class="quote-wizard-panel ${currentStep === 5 ? "is-active" : ""}" data-quote-step-panel="5">
-              <h3>${escapeHtml(t("quoteWizardStep5"))}</h3>
-              <section class="quote-work-card"><h3>${escapeHtml(t("quoteDetailTitle"))}</h3><div class="info-grid">${infoItem(t("quoteNo"), quote.quoteNo)}${infoItem(t("status"), quoteStatusLabel(quoteAdminStatus(quote.status)))}${infoItem(t("linkedRequest"), quote.requestId || "-")}${infoItem(t("customer"), quote.customerName || "-")}${infoItem(t("projectContent"), quote.projectName || quote.title || "-")}${infoItem(t("validUntil"), quoteDateLabel(quote.validUntil))}${infoItem(t("assignee"), quote.assigneeName || "-")}</div></section>
-              <section class="quote-work-card"><h3>${escapeHtml(t("quoteItems"))}</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>No.</th><th>${escapeHtml(t("itemName"))}</th><th>${escapeHtml(t("itemDescription"))}</th><th>${escapeHtml(t("unit"))}</th><th>${escapeHtml(t("quantity"))}</th><th>${escapeHtml(t("unitPrice"))}</th><th>${escapeHtml(t("discount"))}</th><th>${escapeHtml(t("lineAmount"))}</th></tr></thead><tbody data-quote-review-items>${renderQuoteReviewRows(quote)}</tbody></table></div></section>
-              <section class="quote-work-card"><h3>${escapeHtml(t("quoteNotes"))}</h3><p data-quote-review-note>${escapeHtml(quote.customerNote || "-")}</p><h3>${escapeHtml(t("paymentTerms"))}</h3><p data-quote-review-terms>${escapeHtml(quote.paymentTerms || "-")}</p></section>
-              ${renderQuoteSummaryCard(quote, totals, false)}
+              <h3>${escapeHtml(state.lang === "vi" ? "B\u00e1o gi\u00e1" : "\u898b\u7a4d")}</h3>
+              <section class="quote-work-card">
+                <div class="quote-file-dropzone" data-quote-file-dropzone role="button" tabindex="0">
+                  <input class="quote-file-input-hidden" type="file" data-quote-file-input accept=".pdf,.xls,.xlsx,.doc,.docx,.jpg,.jpeg,.png,.webp,.zip">
+                  <div class="quote-drop-icon">\u21e7</div>
+                  <strong>${escapeHtml(state.lang === "vi" ? "K\u00e9o th\u1ea3 file b\u00e1o gi\u00e1 v\u00e0o \u0111\u00e2y" : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u3053\u3053\u306b\u30c9\u30ed\u30c3\u30d7")}</strong>
+                  <span>${escapeHtml(state.lang === "vi" ? "ho\u1eb7c b\u1ea5m \u0111\u1ec3 ch\u1ecdn file" : "\u307e\u305f\u306f\u30af\u30ea\u30c3\u30af\u3057\u3066\u9078\u629e")}</span>
+                  <small>PDF, Excel, Word, JPG, PNG, WEBP, ZIP</small>
+                </div>
+                <div class="quote-selected-file" data-quote-selected-file>${selectedFileName ? escapeHtml(selectedFileName) : escapeHtml(state.lang === "vi" ? "Ch\u01b0a ch\u1ecdn file." : "\u30d5\u30a1\u30a4\u30eb\u672a\u9078\u629e")}</div>
+                ${quote.fileUrl ? `<div class="quote-existing-file"><a class="btn btn-soft" href="${escapeHtml(quote.fileUrl)}" target="_blank" rel="noopener">${escapeHtml(state.lang === "vi" ? "Xem file \u0111\u00e3 g\u1eedi" : "\u9001\u4fe1\u6e08\u307f\u30d5\u30a1\u30a4\u30eb\u3092\u8868\u793a")}</a></div>` : ""}
+              </section>
             </section>
           </div>
           <footer class="quote-wizard-footer">
             <div>${currentStep > 1 ? `<button class="btn btn-soft" type="button" data-quote-prev data-quote-prev-step>${escapeHtml(t("previousStep"))}</button>` : ""}</div>
             <div class="quote-wizard-footer-actions">
-              ${currentStep === 5 ? `<button class="btn btn-soft" type="button" data-quote-pdf-preview>${escapeHtml(t("exportPdf"))}</button><button class="btn btn-soft" type="button" data-quote-excel-preview>${escapeHtml(t("exportExcel"))}</button>` : ""}
-              ${currentStep === 5 ? `<button class="btn btn-soft" type="button" data-quote-save ${readonly ? "disabled" : ""}>${escapeHtml(t("saveDraft"))}</button>` : ""}
-              ${currentStep < 5 ? `<button class="btn btn-primary" type="button" data-quote-next data-quote-next-step>${escapeHtml(t("nextStep"))}</button>` : `<button class="btn btn-primary" type="button" data-quote-send ${readonly ? "disabled" : ""}>${escapeHtml(t("sendToCustomerApp"))}</button>`}
+              ${currentStep < 2 ? `<button class="btn btn-primary" type="button" data-quote-next data-quote-next-step>${escapeHtml(t("nextStep"))}</button>` : `<button class="btn btn-primary" type="button" data-quote-send-file>${escapeHtml(state.lang === "vi" ? "G\u1eedi b\u00e1o gi\u00e1" : "\u898b\u7a4d\u9001\u4fe1")}</button>`}
             </div>
           </footer>
         </form>
       </article>
     `);
+  }
+
+  function quoteFileFlowState(source) {
+    const request = source || {};
+    const displayId = getRequestDisplayId(request) || request.requestNo || request.requestId || request.quoteNo || "";
+    const latest = toList(request.quoteFiles)[0] || request;
+    return {
+      useFileFlow: true,
+      id: getRowId(request) || request.id || request._id || "",
+      requestMongoId: getRowId(request) || request._id || request.id || "",
+      requestId: displayId,
+      requestNo: displayId,
+      customerName: getCustomerName(request) || request.customerName || request.name || "",
+      customerPhone: getRequestPhone(request) || request.customerPhone || request.phone || "",
+      customerEmail: request.email || request.contact || request.customerEmail || "",
+      projectAddress: getRequestAddress(request) || request.address || "",
+      projectName: request.projectName || request.title || getRequestContent(request) || "",
+      content: getRequestContent(request) || request.content || request.description || "",
+      assigneeName: getAssigneeName(request) || request.assigneeName || "",
+      createdAt: request.createdAt || "",
+      fileUrl: latest.fileUrl || latest.pdfUrl || "",
+      originalName: latest.originalName || latest.fileName || ""
+    };
   }
 
   function renderQuoteItemRow(item, index) {
@@ -4963,9 +4984,13 @@
   }
 
   function setQuoteWizardStep(step) {
-    const next = Math.min(5, Math.max(1, Number(step || 1)));
+    const next = Math.min(2, Math.max(1, Number(step || 1)));
     const form = document.querySelector("[data-quote-form]");
     state.quoteWizardStep = next;
+    if (form?.matches("[data-quote-file-flow]")) {
+      renderQuoteDetail(window.currentQuoteDetail || {});
+      return;
+    }
     if (form) {
       const existing = quoteRows().find(item => String(item.id) === String(new FormData(form).get("id")));
       renderQuoteDetail(quoteFromForm(form, existing));
@@ -4982,6 +5007,7 @@
   function validateQuoteStep2() {
     const form = document.querySelector("[data-quote-form]");
     if (!form) return false;
+    if (form.matches("[data-quote-file-flow]")) return true;
     if (!form.querySelectorAll("[data-quote-item-row]").length) {
       toast(t("quoteMissingItemsSend"));
       return false;
@@ -5767,29 +5793,59 @@
       return;
     }
     try {
-      const sourceRequest = state.requests.find(item => [getRowId(item), getRequestDisplayId(item)].some(value => value && String(value) === String(requestId)));
-      const data = await AdminAPI.createQuoteFromRequest(requestId);
-      if (!data?.ok || !data.quote) throw new Error(data?.message || "Create quote failed");
-      const requestDisplayId = getRequestDisplayId(data.request) || getRequestDisplayId(sourceRequest) || requestId;
-      const savedQuote = normalizeQuote({ ...data.quote, requestId: requestDisplayId });
-      const requestIdText = requestDisplayId;
-      const requestIndex = state.requests.findIndex(item => [getRowId(item), getRequestDisplayId(item)].some(value => value && String(value) === String(requestIdText)));
-      if (requestIndex >= 0 && data.request) state.requests[requestIndex] = data.request;
-      state.quotes = [savedQuote, ...state.quotes.filter(item => String(item._id || item.id || item.quoteNo) !== String(savedQuote._id || savedQuote.id || savedQuote.quoteNo))];
-      writeCustomerAppQuotes(state.quotes.map(item => ({
-        ...item,
-        status: quoteCustomerAppStatus(item.status),
-        quoteCode: item.quoteNo,
-        items: item.items.map(row => ({ ...row, amount: quoteItemAmount(row) }))
-      })));
-      toast(data.reused
-        ? (state.lang === "vi" ? "Y\u00eau c\u1ea7u n\u00e0y \u0111\u00e3 c\u00f3 b\u00e1o gi\u00e1." : "\u3053\u306e\u4f9d\u983c\u306b\u306f\u65e2\u306b\u898b\u7a4d\u304c\u3042\u308a\u307e\u3059\u3002")
-        : (state.lang === "vi" ? "\u0110\u00e3 t\u1ea1o b\u00e1o gi\u00e1 t\u1eeb y\u00eau c\u1ea7u." : "\u4f9d\u983c\u304b\u3089\u898b\u7a4d\u3092\u4f5c\u6210\u3057\u307e\u3057\u305f\u3002"));
+      let sourceRequest = state.requests.find(item => [getRowId(item), getRequestDisplayId(item)].some(value => value && String(value) === String(requestId)));
+      if (!sourceRequest) sourceRequest = await AdminAPI.getRequest(requestId);
+      if (normalizeRequestStatus(sourceRequest.status) !== "quoted") {
+        toast(state.lang === "vi" ? "H\u00e3y chuy\u1ec3n y\u00eau c\u1ea7u sang tr\u1ea1ng th\u00e1i B\u00e1o gi\u00e1 tr\u01b0\u1edbc." : "\u5148\u306b\u4f9d\u983c\u3092\u898b\u7a4d\u30b9\u30c6\u30fc\u30bf\u30b9\u306b\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\u3002");
+        return;
+      }
       await closeRequestDetail(true);
-      state.currentView = "quotes";
-      renderCurrentView();
       state.quoteWizardStep = 1;
-      openQuoteDetail(savedQuote._id || savedQuote.id || savedQuote.quoteNo);
+      state.quoteSelectedFile = null;
+      renderQuoteDetail(sourceRequest);
+    } catch (error) {
+      console.error(error);
+      toast(error.message || t("failed"));
+    }
+  }
+
+  function setSelectedQuoteFile(file) {
+    state.quoteSelectedFile = file || null;
+    const label = document.querySelector("[data-quote-selected-file]");
+    if (label) label.textContent = file ? file.name : (state.lang === "vi" ? "Ch\u01b0a ch\u1ecdn file." : "\u30d5\u30a1\u30a4\u30eb\u672a\u9078\u629e");
+  }
+
+  async function openRequestQuote(requestId, step = 1) {
+    let request = toList(state.quoteRequests).find(item => String(getRowId(item)) === String(requestId) || String(getRequestDisplayId(item)) === String(requestId))
+      || state.requests.find(item => String(getRowId(item)) === String(requestId) || String(getRequestDisplayId(item)) === String(requestId));
+    if (!request) request = await AdminAPI.getRequest(requestId);
+    state.quoteWizardStep = step;
+    state.quoteSelectedFile = null;
+    renderQuoteDetail(request);
+  }
+
+  async function sendQuoteFileFromModal() {
+    const quote = window.currentQuoteDetail;
+    const file = state.quoteSelectedFile;
+    if (!quote?.requestMongoId) {
+      toast(state.lang === "vi" ? "Kh\u00f4ng t\u00ecm th\u1ea5y y\u00eau c\u1ea7u." : "\u4f9d\u983c\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3002");
+      return;
+    }
+    if (!file) {
+      toast(state.lang === "vi" ? "Vui l\u00f2ng ch\u1ecdn file b\u00e1o gi\u00e1 tr\u01b0\u1edbc khi g\u1eedi." : "\u9001\u4fe1\u524d\u306b\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044\u3002");
+      return;
+    }
+    try {
+      const response = await AdminAPI.uploadRequestQuoteFile(quote.requestMongoId, file);
+      state.quoteSelectedFile = null;
+      if (response.request) {
+        const id = getRowId(response.request);
+        const index = state.requests.findIndex(item => getRowId(item) === id || getRequestDisplayId(item) === getRequestDisplayId(response.request));
+        if (index >= 0) state.requests[index] = response.request;
+      }
+      toast(state.lang === "vi" ? "G\u1eedi b\u00e1o gi\u00e1 th\u00e0nh c\u00f4ng." : "\u898b\u7a4d\u3092\u9001\u4fe1\u3057\u307e\u3057\u305f\u3002");
+      closeDrawer();
+      if (state.currentView === "quotes") renderQuotes();
     } catch (error) {
       console.error(error);
       toast(error.message || t("failed"));
@@ -5798,7 +5854,7 @@
 
   async function refreshData() {
     if (state.currentView === "quotes") {
-      await refreshQuoteLayoutData();
+      await renderQuotes();
       return;
     }
     await loadAll();
@@ -6423,6 +6479,11 @@
     });
 
     bind(document, "change", async event => {
+      const quoteFileInput = event.target.closest("[data-quote-file-input]");
+      if (quoteFileInput) {
+        setSelectedQuoteFile(quoteFileInput.files?.[0] || null);
+        return;
+      }
       const staffForm = event.target.closest("#staffForm");
       if (staffForm) {
         setStaffEditDirty(true);
@@ -6471,6 +6532,25 @@
       }
     });
 
+    bind(document, "dragover", event => {
+      const dropzone = event.target.closest("[data-quote-file-dropzone]");
+      if (!dropzone) return;
+      event.preventDefault();
+      dropzone.classList.add("is-dragover");
+    });
+    bind(document, "dragleave", event => {
+      const dropzone = event.target.closest("[data-quote-file-dropzone]");
+      if (!dropzone) return;
+      if (!event.relatedTarget || !dropzone.contains(event.relatedTarget)) dropzone.classList.remove("is-dragover");
+    });
+    bind(document, "drop", event => {
+      const dropzone = event.target.closest("[data-quote-file-dropzone]");
+      if (!dropzone) return;
+      event.preventDefault();
+      dropzone.classList.remove("is-dragover");
+      setSelectedQuoteFile(event.dataTransfer?.files?.[0] || null);
+    });
+
     bind(document, "click", async event => {
       if (event.defaultPrevented) return;
       if (event.target.closest("[data-close-media-preview]") || event.target.id === "mediaPreviewOverlay") {
@@ -6517,6 +6597,20 @@
       }
       if (event.target.closest("[data-quote-next], [data-quote-next-step]")) {
         nextQuoteStep();
+        return;
+      }
+      const openRequestQuoteButton = event.target.closest("[data-open-request-quote]");
+      if (openRequestQuoteButton) {
+        await openRequestQuote(openRequestQuoteButton.dataset.openRequestQuote, 1);
+        return;
+      }
+      const quoteDropzone = event.target.closest("[data-quote-file-dropzone]");
+      if (quoteDropzone && !event.target.closest("[data-quote-file-input]")) {
+        quoteDropzone.querySelector("[data-quote-file-input]")?.click();
+        return;
+      }
+      if (event.target.closest("[data-quote-send-file]")) {
+        await sendQuoteFileFromModal();
         return;
       }
       const wizardStep = event.target.closest("[data-quote-wizard-step]");

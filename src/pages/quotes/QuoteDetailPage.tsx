@@ -111,6 +111,7 @@ export function QuoteDetailPage() {
   const subtotal = calculateQuoteSubtotal(quote.items);
   const vat = quote.taxAmount ?? calculateQuoteVat(subtotal);
   const total = quote.total ?? subtotal + vat;
+  const hasQuoteFile = Boolean(quote.fileUrl);
   const actionLabel = {
     accepted: language === "ja" ? "承認" : "Đồng ý",
     rejected: language === "ja" ? "却下" : "Từ chối",
@@ -132,32 +133,42 @@ export function QuoteDetailPage() {
         <div className="info-row"><span>{t("request.project")}</span><strong>{quote.projectName}</strong></div>
         <div className="info-row"><span>{t("quote.validUntil")}</span><strong>{quote.validUntil}</strong></div>
       </Card>
-      <Card>
-        <h2 className="section-title">{t("quote.items")}</h2>
-        <table className="quote-table">
-          <thead>
-            <tr>
-              <th>{t("quote.items")}</th>
-              <th>{t("quote.quantity")}</th>
-              <th>{t("quote.unitPrice")}</th>
-              <th>{t("quote.lineTotal")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {quote.items.map(item => (
-              <tr key={item.name}>
-                <td>{item.name}</td>
-                <td>{item.quantity}</td>
-                <td>{formatCurrency(item.unitPrice)}</td>
-                <td>{formatCurrency(item.amount ?? item.quantity * item.unitPrice - (item.discount || 0))}</td>
+      {hasQuoteFile ? (
+        <Card>
+          <h2 className="section-title">{t("quote.related")}</h2>
+          <div className="info-row"><span>{quote.originalName || quote.fileName || "Quote file"}</span><a href={quote.fileUrl} target="_blank" rel="noreferrer">Open</a></div>
+          {quote.mimeType === "application/pdf" || quote.fileUrl?.toLowerCase().endsWith(".pdf") ? (
+            <iframe title={quote.originalName || "Quote file"} src={quote.fileUrl} style={{ width: "100%", minHeight: 520, border: "1px solid #e5e7eb", borderRadius: 12 }} />
+          ) : null}
+        </Card>
+      ) : (
+        <Card>
+          <h2 className="section-title">{t("quote.items")}</h2>
+          <table className="quote-table">
+            <thead>
+              <tr>
+                <th>{t("quote.items")}</th>
+                <th>{t("quote.quantity")}</th>
+                <th>{t("quote.unitPrice")}</th>
+                <th>{t("quote.lineTotal")}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="summary-row"><span>{t("quote.subtotal")}</span><strong>{formatCurrency(subtotal)}</strong></div>
-        <div className="summary-row"><span>{t("quote.vat")}</span><strong>{formatCurrency(vat)}</strong></div>
-        <div className="summary-row total"><span>{t("quote.total")}</span><strong>{formatCurrency(total)}</strong></div>
-      </Card>
+            </thead>
+            <tbody>
+              {quote.items.map(item => (
+                <tr key={item.name}>
+                  <td>{item.name}</td>
+                  <td>{item.quantity}</td>
+                  <td>{formatCurrency(item.unitPrice)}</td>
+                  <td>{formatCurrency(item.amount ?? item.quantity * item.unitPrice - (item.discount || 0))}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="summary-row"><span>{t("quote.subtotal")}</span><strong>{formatCurrency(subtotal)}</strong></div>
+          <div className="summary-row"><span>{t("quote.vat")}</span><strong>{formatCurrency(vat)}</strong></div>
+          <div className="summary-row total"><span>{t("quote.total")}</span><strong>{formatCurrency(total)}</strong></div>
+        </Card>
+      )}
       {error ? <ErrorState message={error} /> : null}
       <div className="two-actions">
         <Button variant="outline" disabled={!!actionLoading} onClick={() => updateStatus("change_requested")}>

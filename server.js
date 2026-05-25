@@ -14,6 +14,8 @@ const { createQuotationPdf, normalizeQuoteForPdf, quotePdfFileName } = require("
 
 const app = express();
 const distPath = path.join(__dirname, "dist");
+const quoteUploadDir = path.join(__dirname, "uploads", "quote-files");
+fs.mkdirSync(quoteUploadDir, { recursive: true });
 
 app.use(cors({ origin: "*" }));
 app.use(express.json({ limit: "10mb" }));
@@ -26,6 +28,7 @@ app.use((req, res, next) => {
 app.use(express.static(distPath));
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 app.use("/css", express.static(path.join(__dirname, "css")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.get("/js/service-worker.js", (req, res) => {
   res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.sendFile(path.join(__dirname, "js", "service-worker.js"));
@@ -39,6 +42,18 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const ok = /^image\/|^video\//.test(file.mimetype || "");
     cb(ok ? null : new Error("Only image or video files are allowed"), ok);
+  }
+});
+
+const quoteFileUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname || "").toLowerCase();
+    const allowed = [".pdf", ".xls", ".xlsx", ".doc", ".docx", ".jpg", ".jpeg", ".png", ".webp", ".zip"];
+    const blocked = [".exe", ".bat", ".cmd", ".js", ".sh", ".php", ".msi", ".com", ".scr", ".ps1", ".vbs", ".jar"];
+    const ok = allowed.includes(ext) && !blocked.includes(ext);
+    cb(ok ? null : new Error("Unsupported quote file type"), ok);
   }
 });
 
@@ -317,7 +332,15 @@ const QuoteSchema = new mongoose.Schema({
   internalNote: String,
   pdfUrl: String,
   pdfPublicId: String,
+  fileUrl: String,
+  filePath: String,
+  originalName: String,
+  fileName: String,
+  mimeType: String,
+  fileSize: Number,
+  ext: String,
   sentToCustomer: { type: Boolean, default: false },
+  visibleToCustomer: { type: Boolean, default: false },
   sentAt: Date,
   customerResponse: {
     type: String,
@@ -1909,6 +1932,67 @@ app.get("/admin/quotes", requireAdmin, async (req, res) => {
   }
 });
 
+app.get("/admin/quote-requests", requireAdmin, async (req, res) => {
+  try {
+    res.set("Cache-Control", "no-store");
+    const search = String(req.query.search || "").trim().toLowerCase();
+    const requests = await Request.find({ status: "quoted", isDeleted: { $ne: true } }).sort({ quotedAt: -1, createdAt: -1 });
+    for (const request of requests) {
+      if (!request.requestCode) {
+        await ensureRequestCode(request);
+        await request.save();
+      }
+    }
+    const requestKeys = requests.flatMap(request => [
+      String(request._id || ""),
+      request.id,
+      request.requestCode,
+      request.requestNo,
+      request.code,
+      request.requestId
+    ].filter(Boolean));
+    const quotes = requestKeys.length
+      ? await Quote.find({ requestId: { $in: requestKeys }, isDeleted: { $ne: true } }).sort({ sentAt: -1, createdAt: -1 }).lean()
+      : [];
+    const quotesByRequest = new Map();
+    quotes.forEach(quote => {
+      const key = String(quote.requestId || "");
+      if (!quotesByRequest.has(key)) quotesByRequest.set(key, []);
+      quotesByRequest.get(key).push(quote);
+    });
+    let data = requests.map(request => {
+      const requestNo = getRequestDisplayId(request);
+      const keys = [String(request._id || ""), request.id, request.requestCode, request.requestNo, request.code, request.requestId].filter(Boolean);
+      const quoteFiles = keys.flatMap(key => quotesByRequest.get(String(key)) || []);
+      return {
+        ...request.toObject(),
+        id: String(request._id || request.id || ""),
+        requestNo,
+        requestCode: requestNo,
+        quoteFiles,
+        quoteFileCount: quoteFiles.length,
+        latestQuoteFile: quoteFiles[0] || null
+      };
+    });
+    if (search) {
+      data = data.filter(item => [
+        item.requestNo,
+        item.requestCode,
+        item.name,
+        item.phone,
+        item.address,
+        item.title,
+        item.content,
+        item.assigneeName,
+        ...(item.quoteFiles || []).map(file => file.originalName || file.fileName || "")
+      ].join(" ").toLowerCase().includes(search));
+    }
+    res.json({ ok: true, requests: data, data });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: "Quote requests load failed", error: error.message });
+  }
+});
+
 function adminQuoteQuery(id) {
   const clauses = [{ id }, { quoteCode: id }, { quoteNo: id }, { quoteNumber: id }, { code: id }, { number: id }];
   if (mongoose.Types.ObjectId.isValid(id)) clauses.unshift({ _id: id });
@@ -1927,6 +2011,24 @@ async function findQuoteDocumentByAnyId(id) {
   if (id && mongoose.Types.ObjectId.isValid(id)) quote = await Quote.findById(id);
   if (!quote && id) quote = await Quote.findOne(adminQuoteQuery(id));
   return quote;
+}
+
+function quoteFileExt(name) {
+  return path.extname(String(name || "")).toLowerCase();
+}
+
+function saveQuoteUploadFile(file, requestNo) {
+  const ext = quoteFileExt(file.originalname);
+  const safeBase = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80) || "quote";
+  const fileName = `${requestNo}-${Date.now()}-${safeBase}${ext}`;
+  const filePath = path.join(quoteUploadDir, fileName);
+  fs.writeFileSync(filePath, file.buffer);
+  return {
+    fileName,
+    filePath,
+    fileUrl: `/uploads/quote-files/${encodeURIComponent(fileName)}`,
+    ext
+  };
 }
 
 function newServerQuoteNo() {
@@ -1961,11 +2063,10 @@ async function findRequestByAnyId(id) {
 
 function getRequestDisplayId(request) {
   return (
-    request?.requestId ||
-    request?.requestCode ||
     request?.requestNo ||
     request?.code ||
-    request?._id ||
+    request?.requestCode ||
+    (/^[a-f\d]{24}$/i.test(String(request?.requestId || "")) ? "" : request?.requestId) ||
     ""
   );
 }
@@ -2095,6 +2196,80 @@ app.post("/admin/quotes", requireAdmin, async (req, res) => {
   } catch (error) {
     console.error("Quote save failed:", error);
     res.status(500).json({ ok: false, message: "Quote save failed", error: error.message });
+  }
+});
+
+app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteFileUpload.single("file"), async (req, res) => {
+  try {
+    const request = await findRequestByAnyId(req.params.requestId);
+    if (!request) return res.status(404).json({ ok: false, message: "Request not found" });
+    if (!req.file) return res.status(400).json({ ok: false, message: "Quote file is required" });
+    const requestNo = await ensureRequestCode(request);
+    const saved = saveQuoteUploadFile(req.file, requestNo);
+    const requestKeys = [String(request._id || ""), request.id, request.requestCode, request.requestNo, request.code, request.requestId].filter(Boolean);
+    let quote = await Quote.findOne({
+      requestId: { $in: requestKeys },
+      isDeleted: { $ne: true },
+      fileUrl: { $nin: [null, ""] }
+    }).sort({ createdAt: -1 });
+    const now = new Date();
+    const payload = {
+      id: quote?.id || `${requestNo}-quote-file`,
+      quoteCode: requestNo,
+      quoteNo: requestNo,
+      quoteNumber: requestNo,
+      code: requestNo,
+      number: requestNo,
+      requestId: requestNo,
+      userId: request.userId ? String(request.userId) : "",
+      customerId: request.userId ? String(request.userId) : "",
+      customerName: request.name || "",
+      name: request.name || "",
+      customerPhone: request.phone || "",
+      phone: request.phone || "",
+      customerEmail: request.email || request.contact || "",
+      email: request.email || request.contact || "",
+      customerAddress: request.address || "",
+      address: request.address || "",
+      projectName: request.projectName || request.title || request.content || "",
+      title: request.projectName || request.title || request.content || "",
+      content: request.content || "",
+      description: request.content || "",
+      assigneeName: request.assigneeName || "",
+      status: "sent_to_customer",
+      quoteItems: [],
+      items: [],
+      subtotal: 0,
+      taxAmount: 0,
+      vatAmount: 0,
+      total: 0,
+      currency: "JPY",
+      sentToCustomer: true,
+      visibleToCustomer: true,
+      sentAt: now,
+      fileUrl: saved.fileUrl,
+      filePath: saved.filePath,
+      originalName: req.file.originalname,
+      fileName: saved.fileName,
+      mimeType: req.file.mimetype,
+      fileSize: req.file.size,
+      ext: saved.ext,
+      updatedAt: now
+    };
+    if (!quote) quote = new Quote({ ...payload, createdAt: now });
+    else Object.assign(quote, payload);
+    await quote.save();
+
+    request.quoteId = quote._id;
+    request.quoteRequested = true;
+    request.quotedAt = request.quotedAt || now;
+    if (typeof request.status === "string") request.status = "quoted";
+    await request.save();
+
+    res.json({ ok: true, quote: quote.toObject(), data: quote.toObject(), request: request.toObject() });
+  } catch (error) {
+    console.error("Quote file upload failed:", error);
+    res.status(500).json({ ok: false, message: error.message || "Quote file upload failed" });
   }
 });
 

@@ -48,11 +48,13 @@ export function RequestDetailPage() {
 
   const fetchRequestDetail = useCallback(async () => {
     if (!id) return null;
-    const [result, quotes, schedules] = await Promise.all([
-      requestService.getRequestById(id),
-      quoteService.getQuotesByRequestId(id),
+    const result = await requestService.getRequestById(id);
+    const quoteKeys = [id, result?.requestCode, result?.id].filter(Boolean) as string[];
+    const [quoteGroups, schedules] = await Promise.all([
+      Promise.all([...new Set(quoteKeys)].map(key => quoteService.getQuotesByRequestId(key))),
       scheduleService.getSchedulesByRequestId(id)
     ]);
+    const quotes = quoteGroups.flat().filter((quote, index, list) => list.findIndex(item => item.id === quote.id) === index);
     const [profile, history] = result
       ? await Promise.all([
           requestService.getAssigneeProfile(result),

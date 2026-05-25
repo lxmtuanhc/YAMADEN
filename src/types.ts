@@ -222,6 +222,12 @@ export interface Quote {
   customerNote?: string;
   internalNote?: string;
   attachments?: string[];
+  fileUrl?: string;
+  originalName?: string;
+  fileName?: string;
+  mimeType?: string;
+  fileSize?: number;
+  ext?: string;
   visibleToCustomer?: boolean;
   sentToCustomerAt?: string;
   viewedByCustomerAt?: string;
