@@ -2197,25 +2197,15 @@ function normalizeQuotePayloadForDb(body = {}) {
   };
 }
 
-function publicQuoteFile(file, request) {
+function publicQuoteFile(file) {
   const item = typeof file.toObject === "function" ? file.toObject() : file;
-  const requestDoc = request && typeof request.toObject === "function" ? request.toObject() : request;
-  const requestNo = item.requestNo || getRequestDisplayId(requestDoc);
-  const projectName = requestDoc?.projectName || requestDoc?.title || requestDoc?.content || "";
   return {
     ...item,
     id: String(item._id || item.id || ""),
-    requestId: String(item.requestId || ""),
-    requestMongoId: String(item.requestId || ""),
-    requestNo,
-    quoteCode: requestNo || "",
+    quoteCode: item.requestNo || "",
     quoteNo: "",
-    requestCode: requestNo || "",
-    customerName: item.customerName || requestDoc?.name || requestDoc?.customerName || "",
-    customerPhone: requestDoc?.phone || "",
-    customerEmail: requestDoc?.email || requestDoc?.contact || "",
-    projectName,
-    requestTitle: projectName,
+    requestCode: item.requestNo || "",
+    projectName: item.originalName || item.fileName || "",
     title: item.originalName || item.fileName || "",
     validUntil: "",
     items: [],
@@ -2301,8 +2291,7 @@ app.post("/admin/requests/:requestId/quote-files", requireAdmin, quoteFileUpload
 
     request.quoteRequested = true;
     await request.save();
-    const allFiles = await QuoteFile.find({ requestId: request._id }).sort({ createdAt: -1 });
-    res.json({ ok: true, data: allFiles.map(file => publicQuoteFile(file, request)), request: request.toObject() });
+    res.json({ ok: true, data: files.map(publicQuoteFile), request: request.toObject() });
   } catch (error) {
     console.error("Quote file upload failed:", error);
     res.status(500).json({ ok: false, message: "Quote file upload failed", error: error.message });
@@ -2314,41 +2303,7 @@ app.get("/admin/requests/:requestId/quote-files", requireAdmin, async (req, res)
     const request = await findRequestByAnyId(req.params.requestId);
     if (!request) return res.status(404).json({ ok: false, message: "Request not found" });
     const files = await QuoteFile.find({ requestId: request._id }).sort({ createdAt: -1 });
-    res.json({ ok: true, data: files.map(file => publicQuoteFile(file, request)), request: request.toObject() });
-  } catch (error) {
-    res.status(500).json({ ok: false, message: "Quote files load failed", error: error.message });
-  }
-});
-
-app.get("/admin/quote-files", requireAdmin, async (req, res) => {
-  try {
-    const status = String(req.query.status || "all").trim();
-    const customerId = String(req.query.customerId || "all").trim();
-    const search = String(req.query.search || "").trim().toLowerCase();
-    const query = {};
-    if (status && status !== "all") query.status = status;
-    if (customerId && customerId !== "all" && mongoose.Types.ObjectId.isValid(customerId)) query.userId = new mongoose.Types.ObjectId(customerId);
-
-    const files = await QuoteFile.find(query).sort({ createdAt: -1 }).lean();
-    const requestIds = [...new Set(files.map(file => String(file.requestId || "")).filter(id => mongoose.Types.ObjectId.isValid(id)))];
-    const requests = requestIds.length ? await Request.find({ _id: { $in: requestIds } }).lean() : [];
-    const requestById = new Map(requests.map(request => [String(request._id), request]));
-    let data = files.map(file => publicQuoteFile(file, requestById.get(String(file.requestId || ""))));
-
-    if (search) {
-      data = data.filter(file => [
-        file.requestNo,
-        file.requestCode,
-        file.customerName,
-        file.projectName,
-        file.requestTitle,
-        file.originalName,
-        file.fileName,
-        file.ext
-      ].join(" ").toLowerCase().includes(search));
-    }
-
-    res.json({ ok: true, files: data, data });
+    res.json({ ok: true, data: files.map(publicQuoteFile), request: request.toObject() });
   } catch (error) {
     res.status(500).json({ ok: false, message: "Quote files load failed", error: error.message });
   }
@@ -2386,14 +2341,7 @@ app.post("/admin/quote-files/:fileId/send", requireAdmin, async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.fileId)) return res.status(404).json({ ok: false, message: "Quote file not found" });
     const files = await sendQuoteFiles({ _id: req.params.fileId });
     if (!files.length) return res.status(404).json({ ok: false, message: "Quote file not found" });
-    const request = files[0] ? await Request.findById(files[0].requestId) : null;
-    if (request) {
-      request.quoteRequested = true;
-      request.quotedAt = new Date();
-      if (typeof request.status === "string") request.status = "quoted";
-      await request.save();
-    }
-    res.json({ ok: true, data: publicQuoteFile(files[0], request) });
+    res.json({ ok: true, data: publicQuoteFile(files[0]) });
   } catch (error) {
     res.status(500).json({ ok: false, message: "Quote file send failed", error: error.message });
   }
@@ -2408,7 +2356,7 @@ app.post("/admin/requests/:requestId/quote-files/send", requireAdmin, async (req
     request.quotedAt = new Date();
     if (typeof request.status === "string") request.status = "quoted";
     await request.save();
-    res.json({ ok: true, data: files.map(file => publicQuoteFile(file, request)), request: request.toObject() });
+    res.json({ ok: true, data: files.map(publicQuoteFile), request: request.toObject() });
   } catch (error) {
     res.status(500).json({ ok: false, message: "Quote files send failed", error: error.message });
   }

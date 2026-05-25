@@ -1637,13 +1637,6 @@
     getQuoteFiles(requestId) {
       return requestJson("/admin/requests/" + encodeURIComponent(requestId) + "/quote-files");
     },
-    getAllQuoteFiles(params) {
-      const query = new URLSearchParams();
-      Object.entries(params || {}).forEach(([key, value]) => {
-        if (value != null && value !== "" && value !== "all") query.set(key, value);
-      });
-      return requestJson("/admin/quote-files" + (query.toString() ? "?" + query.toString() : ""));
-    },
     uploadQuoteFiles(requestId, files) {
       const formData = new FormData();
       Array.from(files || []).forEach(file => formData.append("files", file));
@@ -1654,9 +1647,6 @@
     },
     deleteQuoteFile(fileId) {
       return requestJson("/admin/quote-files/" + encodeURIComponent(fileId), { method: "DELETE" });
-    },
-    sendQuoteFile(fileId) {
-      return requestJson("/admin/quote-files/" + encodeURIComponent(fileId) + "/send", { method: "POST" });
     },
     sendQuoteFiles(requestId) {
       return requestJson("/admin/requests/" + encodeURIComponent(requestId) + "/quote-files/send", { method: "POST" });
@@ -4648,13 +4638,7 @@
     const totalSize = files.reduce((sum, file) => sum + Number(file.fileSize || 0), 0);
     return `<section class="quote-work-card quote-files-card">
       <div class="quote-card-header"><div><h3>${escapeHtml(state.lang === "vi" ? "File b\u00e1o gi\u00e1" : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb")}</h3><p class="quote-card-subtitle">PDF, Excel, Word, image, ZIP. Max 20MB/file, 100MB/request.</p></div></div>
-      <div class="quote-file-dropzone" data-quote-file-dropzone role="button" tabindex="0" aria-label="${escapeHtml(state.lang === "vi" ? "Upload file b\u00e1o gi\u00e1" : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9")}">
-        <input class="quote-file-input-hidden" type="file" multiple data-quote-file-input accept=".pdf,.xls,.xlsx,.doc,.docx,.jpg,.jpeg,.png,.webp,.zip" ${readonly ? "disabled" : ""}>
-        <div class="quote-drop-icon">⇧</div>
-        <strong>${escapeHtml(state.lang === "vi" ? "K\u00e9o th\u1ea3 file b\u00e1o gi\u00e1 v\u00e0o \u0111\u00e2y" : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u3053\u3053\u306b\u30c9\u30ed\u30c3\u30d7")}</strong>
-        <span>${escapeHtml(state.lang === "vi" ? "ho\u1eb7c b\u1ea5m \u0111\u1ec3 ch\u1ecdn file" : "\u307e\u305f\u306f\u30af\u30ea\u30c3\u30af\u3057\u3066\u9078\u629e")}</span>
-        <small>PDF, Excel, Word, JPG, PNG, WEBP, ZIP</small>
-      </div>
+      <label class="quote-field-wide"><span>${escapeHtml(state.lang === "vi" ? "Upload file" : "\u30d5\u30a1\u30a4\u30eb\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9")}</span><input type="file" multiple data-quote-file-input accept=".pdf,.xls,.xlsx,.doc,.docx,.jpg,.jpeg,.png,.webp,.zip" ${readonly ? "disabled" : ""}></label>
       <div class="quote-mini-summary"><span>${escapeHtml(files.length + " file")}</span><span>${escapeHtml(quoteFileSizeLabel(totalSize))} / 100 MB</span></div>
       <div class="quote-file-list" data-quote-file-list>${renderQuoteFileRows(files)}</div>
     </section>`;
@@ -4820,91 +4804,60 @@
     return `<section class="quote-today-card"><p class="eyebrow">${escapeHtml(t("quoteTodayNeedsAction"))}</p><div class="quote-today-grid">${items.map(([label, value]) => `<div class="quote-today-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(String(value))}</strong></div>`).join("")}</div></section>`;
   }
 
-  async function renderQuotes() {
-    $("viewRoot").innerHTML = `<section class="section-card"><div class="panel-body">${escapeHtml(t("loading"))}</div></section>`;
-    try {
-      const payload = await AdminAPI.getAllQuoteFiles({
-        search: state.filters.quoteSearch || "",
-        status: state.filters.quoteStatus || "all",
-        customerId: state.filters.quoteCustomer || "all"
-      });
-      state.quoteFiles = normalizeList(payload.files || payload.data);
-    } catch (error) {
-      console.error(error);
-      state.quoteFiles = [];
-      toast(error.message || t("failed"));
-    }
-    renderQuoteFileManager();
-  }
-
-  function quoteFileStatusOptions() {
-    return [
-      ["all", state.lang === "vi" ? "T\u1ea5t c\u1ea3" : "\u3059\u3079\u3066"],
-      ["draft", quoteFileStatusLabel("draft")],
-      ["sent", quoteFileStatusLabel("sent")],
-      ["viewed", quoteFileStatusLabel("viewed")],
-      ["accepted", quoteFileStatusLabel("accepted")],
-      ["revision_requested", quoteFileStatusLabel("revision_requested")],
-      ["rejected", quoteFileStatusLabel("rejected")]
+  function renderQuotes() {
+    const allRows = quoteRows();
+    const rows = filterQuotes(allRows);
+    const acceptedRows = rows.filter(item => quoteAdminStatus(item.status) === "accepted");
+    const totalValue = rows.reduce((sum, item) => sum + calculateQuoteTotals(item).total, 0);
+    const orderedValue = acceptedRows.reduce((sum, item) => sum + calculateQuoteTotals(item).total, 0);
+    const viewMode = state.filters.quoteView || "kanban";
+    const validityOptions = [
+      ["all", t("quoteAllValidity")],
+      ["valid", t("quoteStillValid")],
+      ["expiring", t("quoteExpiringSoonShort")],
+      ["expired", t("quoteExpired")],
+      ["unset", t("quoteNoValidUntil")]
     ];
-  }
-
-  function quoteFileTypeLabel(file) {
-    return String(file.ext || "").replace(/^\./, "").toUpperCase() || String(file.mimeType || "-");
-  }
-
-  function quoteFileDateLabel(value) {
-    return value ? formatDate(value) : "-";
-  }
-
-  function renderQuoteFileManager() {
-    const files = toList(state.quoteFiles);
-    const customerOptions = [...new Map(files
-      .filter(file => file.userId || file.customerName)
-      .map(file => [String(file.userId || file.customerName), file.customerName || file.userId])).entries()];
+    const assigneeOptions = [...new Map(allRows
+      .filter(item => item.assigneeId || item.assigneeName)
+      .map(item => [String(item.assigneeId || item.assigneeName), item.assigneeName || item.assigneeId])).entries()];
+    const customerOptions = [...new Map(allRows
+      .filter(item => item.customerId || item.customerName)
+      .map(item => [String(item.customerId || item.customerName), item.customerName || item.customerId])).entries()];
     $("viewRoot").innerHTML = `
       <div class="quote-page-head">
-        <div class="page-intro"><h1>${escapeHtml(state.lang === "vi" ? "File b\u00e1o gi\u00e1" : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb")}</h1><p>${escapeHtml(state.lang === "vi" ? "Qu\u1ea3n l\u00fd file b\u00e1o gi\u00e1 theo t\u1eebng y\u00eau c\u1ea7u" : "\u4f9d\u983c\u3054\u3068\u306e\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u7ba1\u7406\u3057\u307e\u3059")}</p></div>
-        <button class="btn btn-soft" type="button" data-quote-refresh>${escapeHtml(t("refresh"))}</button>
+        <div class="page-intro"><p>${escapeHtml(t("quoteModuleSubtitle"))}</p></div>
+        <div class="request-command-bar demo-actions quote-toolbar">
+          <button class="btn btn-soft" type="button" data-quote-csv>${escapeHtml(t("quoteCsvExport"))}</button>
+          <button class="btn btn-soft" type="button" data-quote-refresh>${escapeHtml(t("refresh"))}</button>
+          <button class="btn btn-primary" type="button" disabled title="${escapeHtml(state.lang === "vi" ? "M\u1edf t\u1eeb chi ti\u1ebft y\u00eau c\u1ea7u" : "\u4f9d\u983c\u8a73\u7d30\u304b\u3089\u958b\u3044\u3066\u304f\u3060\u3055\u3044")}">+ ${escapeHtml(t("quoteRegister"))}</button>
+        </div>
       </div>
+      <div class="kpi-grid kpi-grid-small quote-kpi-grid">
+        ${statCard(t("quoteTotal"), rows.length, t("quoteLayoutData"), "info", "receipt")}
+        ${statCard(t("totalQuoteValue"), quoteCurrency(totalValue), t("quoteLayoutData"), "warning", "clipboard")}
+        ${statCard(t("orderRate"), rows.length ? Math.round(acceptedRows.length / rows.length * 100) + "%" : "-", t("quoteLayoutData"), "success", "trend")}
+        ${statCard(t("orderedValue"), quoteCurrency(orderedValue), t("quoteLayoutData"), "total", "userCheck")}
+      </div>
+      ${renderQuoteTodaySummary(rows)}
       <div class="crm-filter-bar quote-filter-bar">
-        <input class="filter-input" data-quote-filter="search" value="${escapeHtml(state.filters.quoteSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "T\u00ecm theo m\u00e3 y\u00eau c\u1ea7u / kh\u00e1ch h\u00e0ng / t\u00ean file" : "\u4f9d\u983c\u756a\u53f7\u30fb\u9867\u5ba2\u30fb\u30d5\u30a1\u30a4\u30eb\u540d\u3067\u691c\u7d22")}">
-        <select class="filter-input" data-quote-filter="status">${quoteFileStatusOptions().map(([key, label]) => `<option value="${escapeHtml(key)}" ${String(state.filters.quoteStatus || "all") === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
-        <select class="filter-input" data-quote-filter="customer"><option value="all">${escapeHtml(t("customer"))}: ${escapeHtml(t("all"))}</option>${customerOptions.map(([key, label]) => `<option value="${escapeHtml(key)}" ${String(state.filters.quoteCustomer || "all") === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
+        <input class="filter-input" data-quote-filter="search" value="${escapeHtml(state.filters.quoteSearch || "")}" placeholder="${escapeHtml(t("quoteSearchPlaceholder"))}">
+        <select class="filter-input" data-quote-filter="status"><option value="all">${escapeHtml(t("statusFilter"))}</option>${QUOTE_STATUSES.map(status => `<option value="${escapeHtml(status)}" ${state.filters.quoteStatus === status ? "selected" : ""}>${escapeHtml(quoteStatusLabel(status))}</option>`).join("")}</select>
+        <select class="filter-input" data-quote-filter="assignee"><option value="all">${escapeHtml(t("assignee"))}: ${escapeHtml(t("all"))}</option>${assigneeOptions.map(([key, label]) => `<option value="${escapeHtml(key)}" ${state.filters.quoteAssignee === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
+        <select class="filter-input" data-quote-filter="customer"><option value="all">${escapeHtml(t("customer"))}: ${escapeHtml(t("all"))}</option>${customerOptions.map(([key, label]) => `<option value="${escapeHtml(key)}" ${state.filters.quoteCustomer === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
+        <select class="filter-input" data-quote-filter="validity"><option value="all">${escapeHtml(t("validUntil"))}: ${escapeHtml(t("quoteAllValidity"))}</option>${validityOptions.slice(1).map(([key, label]) => `<option value="${escapeHtml(key)}" ${state.filters.quoteValidity === key ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
+      </div>
+      <div class="quote-view-switch-wrap">
+        <div class="quote-view-switch" role="tablist" aria-label="${escapeHtml(t("quotes"))}">
+          ${[["kanban", t("kanban")], ["list", t("listView")]].map(([key, label]) => `<button class="quote-view-tab ${viewMode === key ? "active is-active" : ""}" type="button" role="tab" aria-selected="${viewMode === key ? "true" : "false"}" data-quote-view="${escapeHtml(key)}">${escapeHtml(label)}</button>`).join("")}
+        </div>
       </div>
       <section class="section-card">
-        <div class="panel-body quote-file-manager-body">
-          ${files.length ? `<div class="quote-file-manager-list">${files.map(renderQuoteFileManagerCard).join("")}</div>` : renderQuoteFileEmptyState()}
-        </div>
+        <div class="panel-head quote-pipeline-head"><div><h2>${escapeHtml(t("quotePipeline"))}</h2><p class="note">${escapeHtml(quotePipelineSummary(rows.length))}</p></div>${viewMode === "kanban" ? `<div class="quote-kanban-controls"><span class="quote-scroll-hint">${escapeHtml(t("quoteKanbanHint"))}</span><button class="icon-btn quote-scroll-button" type="button" data-quote-scroll="-1" aria-label="Scroll left">&larr;</button><button class="icon-btn quote-scroll-button" type="button" data-quote-scroll="1" aria-label="Scroll right">&rarr;</button></div>` : ""}</div>
+        <div class="panel-body quote-board-body">${viewMode === "list" ? renderQuoteList(rows) : renderQuoteKanban(rows)}</div>
       </section>
     `;
-  }
-
-  function renderQuoteFileEmptyState() {
-    return `<div class="empty-state quote-file-empty"><strong>${escapeHtml(state.lang === "vi" ? "Ch\u01b0a c\u00f3 file b\u00e1o gi\u00e1" : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u306f\u307e\u3060\u3042\u308a\u307e\u305b\u3093")}</strong><p>${escapeHtml(state.lang === "vi" ? "H\u00e3y m\u1edf chi ti\u1ebft y\u00eau c\u1ea7u v\u00e0 upload file b\u00e1o gi\u00e1." : "\u4f9d\u983c\u8a73\u7d30\u3092\u958b\u3044\u3066\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u3057\u3066\u304f\u3060\u3055\u3044\u3002")}</p></div>`;
-  }
-
-  function renderQuoteFileManagerCard(file) {
-    const id = quoteFileId(file);
-    const isDraft = !file.status || file.status === "draft";
-    return `<article class="quote-file-manager-card" data-quote-file-card="${escapeHtml(id)}">
-      <div class="quote-file-main">
-        <div class="quote-file-title-row"><strong>${escapeHtml(file.requestNo || file.requestCode || "-")}</strong><span class="status-badge status-${escapeHtml(file.status || "draft")}">${escapeHtml(quoteFileStatusLabel(file.status || "draft", file.customerResponse))}</span></div>
-        <h3>${escapeHtml(file.originalName || file.fileName || "-")}</h3>
-        <p>${escapeHtml(file.customerName || "-")} / ${escapeHtml(file.projectName || file.requestTitle || "-")}</p>
-      </div>
-      <div class="quote-file-meta-grid">
-        ${infoItem(state.lang === "vi" ? "Lo\u1ea1i file" : "\u7a2e\u985e", quoteFileTypeLabel(file))}
-        ${infoItem(state.lang === "vi" ? "Dung l\u01b0\u1ee3ng" : "\u30b5\u30a4\u30ba", quoteFileSizeLabel(file.fileSize))}
-        ${infoItem(state.lang === "vi" ? "Ng\u00e0y upload" : "\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u65e5", quoteFileDateLabel(file.createdAt))}
-        ${infoItem(state.lang === "vi" ? "Ng\u00e0y g\u1eedi" : "\u9001\u4fe1\u65e5", quoteFileDateLabel(file.sentAt))}
-      </div>
-      <div class="actions quote-file-actions">
-        ${file.fileUrl ? `<a class="btn btn-soft" href="${escapeHtml(file.fileUrl)}" target="_blank" rel="noopener" data-quote-file-action-skip>${escapeHtml(state.lang === "vi" ? "Xem file" : "\u8868\u793a")}</a>` : ""}
-        <button class="btn btn-soft" type="button" data-open-request-from-quote-file="${escapeHtml(file.requestMongoId || file.requestId || "")}" data-quote-file-action-skip>${escapeHtml(state.lang === "vi" ? "M\u1edf y\u00eau c\u1ea7u" : "\u4f9d\u983c\u3092\u958b\u304f")}</button>
-        ${isDraft ? `<button class="btn btn-primary" type="button" data-quote-file-send-one="${escapeHtml(id)}" data-quote-file-action-skip>${escapeHtml(t("sendToCustomerApp"))}</button><button class="btn btn-danger" type="button" data-quote-file-delete="${escapeHtml(id)}" data-quote-file-action-skip>${escapeHtml(t("delete"))}</button>` : ""}
-      </div>
-    </article>`;
+    requestAnimationFrame(updateQuoteScrollButtons);
   }
 
   function renderQuoteKanban(rows) {
@@ -4987,14 +4940,14 @@
       projectName: request.projectName || request.title || getRequestContent(request) || source?.projectName || source?.title || "",
       content: getRequestContent(request) || source?.content || "",
       assigneeName: getAssigneeName(request),
-      files: toList(source?.files).length ? toList(source.files) : source?.originalName ? [source] : []
+      files: toList(source?.files)
     };
   }
 
   function openQuoteFileModal(source) {
     const quote = quoteFileModalState(source);
     if (!quote.requestMongoId) {
-      toast(state.lang === "vi" ? "Kh\u00f4ng t\u00ecm th\u1ea5y y\u00eau c\u1ea7u li\u00ean k\u1ebft." : "\u9023\u643a\u4f9d\u983c\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3002");
+      toast(state.lang === "vi" ? "Vui l\u00f2ng m\u1edf b\u00e1o gi\u00e1 t\u1eeb chi ti\u1ebft y\u00eau c\u1ea7u." : "\u4f9d\u983c\u8a73\u7d30\u304b\u3089\u898b\u7a4d\u3092\u958b\u3044\u3066\u304f\u3060\u3055\u3044\u3002");
       return;
     }
     {
@@ -5994,12 +5947,14 @@
     return "";
   }
 
-  async function uploadQuoteFiles(files) {
+  async function uploadQuoteFilesFromInput(input) {
     const quote = window.currentQuoteDetail;
     if (!quote?.useFileFlow || !quote.requestMongoId) return;
+    const files = input.files || [];
     const message = validateQuoteFiles(files, quote.files);
     if (message) {
       toast(message);
+      input.value = "";
       return;
     }
     try {
@@ -6011,12 +5966,6 @@
     } catch (error) {
       console.error(error);
       toast(error.message || t("failed"));
-    }
-  }
-
-  async function uploadQuoteFilesFromInput(input) {
-    try {
-      await uploadQuoteFiles(input.files || []);
     } finally {
       input.value = "";
     }
@@ -6024,16 +5973,12 @@
 
   async function deleteQuoteFile(fileId) {
     const quote = window.currentQuoteDetail;
-    if (!fileId) return;
+    if (!quote?.useFileFlow || !fileId) return;
     try {
       await AdminAPI.deleteQuoteFile(fileId);
-      if (quote?.useFileFlow) {
-        quote.files = toList(quote.files).filter(file => quoteFileId(file) !== String(fileId));
-        window.currentQuoteDetail = quote;
-        openQuoteFileModal(quote);
-      } else if (state.currentView === "quotes") {
-        renderQuotes();
-      }
+      quote.files = toList(quote.files).filter(file => quoteFileId(file) !== String(fileId));
+      window.currentQuoteDetail = quote;
+      openQuoteFileModal(quote);
       toast(state.lang === "vi" ? "\u0110\u00e3 x\u00f3a file." : "\u30d5\u30a1\u30a4\u30eb\u3092\u524a\u9664\u3057\u307e\u3057\u305f\u3002");
     } catch (error) {
       console.error(error);
@@ -6065,21 +6010,9 @@
     }
   }
 
-  async function sendOneQuoteFile(fileId) {
-    if (!fileId) return;
-    try {
-      await AdminAPI.sendQuoteFile(fileId);
-      if (state.currentView === "quotes") renderQuotes();
-      toast(t("quoteSentMock"));
-    } catch (error) {
-      console.error(error);
-      toast(error.message || t("failed"));
-    }
-  }
-
   async function refreshData() {
     if (state.currentView === "quotes") {
-      await renderQuotes();
+      await refreshQuoteLayoutData();
       return;
     }
     await loadAll();
@@ -6167,7 +6100,7 @@
     if (quoteRefresh) {
       event.preventDefault();
       event.stopPropagation();
-      renderQuotes();
+      refreshQuoteLayoutData();
       return true;
     }
 
@@ -6624,13 +6557,6 @@
       if (handleRequestViewInput(event)) event.stopPropagation();
     });
     bind(document, "input", event => {
-      const quoteSearch = event.target.closest("[data-quote-filter='search']");
-      if (quoteSearch) {
-        state.filters.quoteSearch = quoteSearch.value || "";
-        window.clearTimeout(state.quoteSearchTimer);
-        state.quoteSearchTimer = window.setTimeout(() => renderQuotes(), 250);
-        return;
-      }
       if (event.target.closest("[data-quote-form]")) {
         if (event.target.matches("[data-quote-note-preview]")) {
           const mirror = document.querySelector("[data-quote-note-mirror]");
@@ -6644,12 +6570,6 @@
       }
     });
     bind($("viewRoot"), "keydown", event => {
-      const dropzone = event.target.closest("[data-quote-file-dropzone]");
-      if (dropzone && (event.key === "Enter" || event.key === " ")) {
-        event.preventDefault();
-        dropzone.querySelector("[data-quote-file-input]")?.click();
-        return;
-      }
       if (event.target.id === "requestSearch" && event.key === "Enter") {
         event.preventDefault();
         state.filters.search = event.target.value || "";
@@ -6770,35 +6690,8 @@
       }
     });
 
-    bind(document, "dragover", event => {
-      const dropzone = event.target.closest("[data-quote-file-dropzone]");
-      if (!dropzone) return;
-      event.preventDefault();
-      dropzone.classList.add("is-dragover");
-    });
-
-    bind(document, "dragleave", event => {
-      const dropzone = event.target.closest("[data-quote-file-dropzone]");
-      if (!dropzone) return;
-      const related = event.relatedTarget;
-      if (!related || !dropzone.contains(related)) dropzone.classList.remove("is-dragover");
-    });
-
-    bind(document, "drop", async event => {
-      const dropzone = event.target.closest("[data-quote-file-dropzone]");
-      if (!dropzone) return;
-      event.preventDefault();
-      dropzone.classList.remove("is-dragover");
-      await uploadQuoteFiles(event.dataTransfer?.files || []);
-    });
-
     bind(document, "click", async event => {
       if (event.defaultPrevented) return;
-      const quoteDropzone = event.target.closest("[data-quote-file-dropzone]");
-      if (quoteDropzone && !event.target.closest("[data-quote-file-input]")) {
-        quoteDropzone.querySelector("[data-quote-file-input]")?.click();
-        return;
-      }
       if (event.target.closest("[data-close-media-preview]") || event.target.id === "mediaPreviewOverlay") {
         $("mediaPreviewOverlay")?.remove();
         return;
@@ -6840,31 +6733,6 @@
       const quoteFileDelete = event.target.closest("[data-quote-file-delete]");
       if (quoteFileDelete) {
         await deleteQuoteFile(quoteFileDelete.dataset.quoteFileDelete);
-        return;
-      }
-      const quoteFileSendOne = event.target.closest("[data-quote-file-send-one]");
-      if (quoteFileSendOne) {
-        await sendOneQuoteFile(quoteFileSendOne.dataset.quoteFileSendOne);
-        return;
-      }
-      const quoteFileCard = event.target.closest("[data-quote-file-card]");
-      if (quoteFileCard && !event.target.closest("[data-quote-file-action-skip]")) {
-        const file = toList(state.quoteFiles).find(item => quoteFileId(item) === quoteFileCard.dataset.quoteFileCard);
-        if (file) openQuoteFileModal(file);
-        return;
-      }
-      const openRequestFromQuoteFile = event.target.closest("[data-open-request-from-quote-file]");
-      if (openRequestFromQuoteFile) {
-        const requestId = openRequestFromQuoteFile.dataset.openRequestFromQuoteFile;
-        const request = state.requests.find(item => String(getRowId(item)) === String(requestId) || String(getRequestDisplayId(item)) === String(requestId));
-        if (request) renderRequestDetail(request);
-        else {
-          try {
-            renderRequestDetail(await AdminAPI.getRequest(requestId));
-          } catch (error) {
-            toast(error.message || t("failed"));
-          }
-        }
         return;
       }
       if (event.target.closest("[data-quote-files-send]")) {
@@ -6918,7 +6786,7 @@
       }
 
       if (event.target.closest("[data-quote-refresh]")) {
-        renderQuotes();
+        refreshQuoteLayoutData();
         return;
       }
 
