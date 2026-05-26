@@ -1111,14 +1111,14 @@
     settingsStaffWorkSub: "\u90e8\u9580\u3001\u696d\u52d9\u5185\u5bb9",
     settingsAiAssist: "AI\u30b5\u30dd\u30fc\u30c8",
     settingsAiAssistSub: "AI\u5206\u6790\u3001\u62c5\u5f53\u8005\u5272\u308a\u5f53\u3066",
-    settingsQuoteTax: "\u898b\u7a4d\u30fb\u7a0e",
-    settingsQuoteTaxSub: "\u898b\u7a4d\u66f8\u3001\u7a0e\u3001\u4fa1\u683c",
+    settingsProcessChart: "\u4f9d\u983c\u51e6\u7406\u30d5\u30ed\u30fc\u56f3",
+    settingsProcessChartSub: "\u53d7\u4ed8\u3001\u51e6\u7406\u3001\u898b\u7a4d\u3001\u5b8c\u4e86",
     settingsRequestStatus: "\u4f9d\u983c\u30fb\u30b9\u30c6\u30fc\u30bf\u30b9",
     settingsRequestStatusSub: "\u4f9d\u983c\u51e6\u7406\u30d5\u30ed\u30fc",
     settingsCustomers: "\u9867\u5ba2",
     settingsCustomersSub: "\u30a2\u30ab\u30a6\u30f3\u30c8\u3001\u627f\u8a8d\u3001PIN",
     settingsNotifications: "\u901a\u77e5",
-    settingsNotificationsSub: "Slack\u3001\u30e1\u30fc\u30eb\u3001LINE WORKS",
+    settingsNotificationsSub: "\u30e1\u30fc\u30eb\u3001Slack\u3001LINE WORKS",
     settingsAppearance: "\u753b\u9762\u8868\u793a",
     settingsAppearanceSub: "\u8a00\u8a9e\u3001\u8272\u3001\u30ed\u30b4",
     settingsPermissions: "\u6a29\u9650",
@@ -1139,7 +1139,6 @@
     dateTimeFormat: "\u65e5\u6642\u8868\u793a\u5f62\u5f0f",
     workMaster: "\u696d\u52d9\u30de\u30b9\u30bf",
     workMasterLinked: "\u30b9\u30bf\u30c3\u30d5\u30fb\u9867\u5ba2\u30a2\u30d7\u30ea\u3068\u9023\u643a\u6e08\u307f",
-    quoteTax: "\u898b\u7a4d\u30fb\u7a0e",
     defaultTax: "\u6a19\u6e96\u7a0e\u7387",
     currency: "\u901a\u8ca8",
     quoteTemplate: "\u898b\u7a4d\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8",
@@ -1209,14 +1208,14 @@
     settingsStaffWorkSub: "B\u1ed9 ph\u1eadn, n\u1ed9i dung c\u00f4ng vi\u1ec7c",
     settingsAiAssist: "AI h\u1ed7 tr\u1ee3",
     settingsAiAssistSub: "AI ph\u00e2n t\u00edch, ph\u00e2n c\u00f4ng",
-    settingsQuoteTax: "B\u00e1o gi\u00e1 & thu\u1ebf",
-    settingsQuoteTaxSub: "M\u1eabu b\u00e1o gi\u00e1, thu\u1ebf, gi\u00e1",
+    settingsProcessChart: "Bi\u1ec3u \u0111\u1ed3 x\u1eed l\u00fd y\u00eau c\u1ea7u",
+    settingsProcessChartSub: "Nh\u1eadn, x\u1eed l\u00fd, b\u00e1o gi\u00e1, ho\u00e0n th\u00e0nh",
     settingsRequestStatus: "Y\u00eau c\u1ea7u & tr\u1ea1ng th\u00e1i",
     settingsRequestStatusSub: "Lu\u1ed3ng x\u1eed l\u00fd y\u00eau c\u1ea7u",
     settingsCustomers: "Kh\u00e1ch h\u00e0ng",
     settingsCustomersSub: "T\u00e0i kho\u1ea3n, duy\u1ec7t, PIN",
     settingsNotifications: "Th\u00f4ng b\u00e1o",
-    settingsNotificationsSub: "Slack, email, LINE WORKS",
+    settingsNotificationsSub: "Email, Slack, LINE WORKS",
     settingsAppearance: "Giao di\u1ec7n",
     settingsAppearanceSub: "Ng\u00f4n ng\u1eef, m\u00e0u, logo",
     settingsPermissions: "Quy\u1ec1n h\u1ea1n",
@@ -1237,7 +1236,6 @@
     dateTimeFormat: "\u0110\u1ecbnh d\u1ea1ng ng\u00e0y gi\u1edd",
     workMaster: "Danh m\u1ee5c c\u00f4ng vi\u1ec7c",
     workMasterLinked: "\u0110\u00e3 li\u00ean k\u1ebft v\u1edbi Staff/App kh\u00e1ch h\u00e0ng",
-    quoteTax: "B\u00e1o gi\u00e1 & thu\u1ebf",
     defaultTax: "Thu\u1ebf m\u1eb7c \u0111\u1ecbnh",
     currency: "\u0110\u01a1n v\u1ecb ti\u1ec1n t\u1ec7",
     quoteTemplate: "M\u1eabu b\u00e1o gi\u00e1",
@@ -5500,7 +5498,7 @@
       ["overview", "dashboard", "settingsOverview", "settingsOverviewSub"],
       ["staffWork", "users", "settingsStaffWork", "settingsStaffWorkSub"],
       ["aiAssist", "sparkles", "settingsAiAssist", "settingsAiAssistSub"],
-      ["quoteTax", "receipt", "settingsQuoteTax", "settingsQuoteTaxSub"],
+      ["processChart", "trend", "settingsProcessChart", "settingsProcessChartSub"],
       ["requestStatus", "clipboard", "settingsRequestStatus", "settingsRequestStatusSub"],
       ["customers", "userCheck", "settingsCustomers", "settingsCustomersSub"],
       ["notifications", "bell", "settingsNotifications", "settingsNotificationsSub"],
@@ -5529,6 +5527,7 @@
       receipt: `<svg ${attrs}><path d="M7 3h10a2 2 0 0 1 2 2v16l-3-2-3 2-3-2-3 2-2-1.3V5a2 2 0 0 1 2-2z"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h3"/></svg>`,
       clipboard: `<svg ${attrs}><path d="M9 5h6"/><path d="M9 3h6v4H9z"/><path d="M7 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><path d="m8 13 2 2 5-5"/><path d="M8 18h7"/></svg>`,
       sparkles: `<svg ${attrs}><path d="m12 3 1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="m19 14 .8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z"/><path d="m5 14 1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/></svg>`,
+      trend: `<svg ${attrs}><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/><path d="M4 21h16"/></svg>`,
       userCheck: `<svg ${attrs}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg>`,
       bell: `<svg ${attrs}><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>`,
       palette: `<svg ${attrs}><path d="M12 22a10 10 0 1 1 10-10c0 2.2-1.8 4-4 4h-1.5a2 2 0 0 0-1.7 3l.2.4A1.8 1.8 0 0 1 13.4 22H12z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/><circle cx="16.5" cy="11" r="1"/></svg>`,
@@ -5560,12 +5559,33 @@
     </article>`;
   }
 
+  function settingText(vi, ja) {
+    return state.lang === "vi" ? vi : ja;
+  }
+
+  function settingsButton(label) {
+    return `<button class="btn btn-soft" type="button" disabled>${escapeHtml(label)}</button>`;
+  }
+
+  function settingsChips(items) {
+    return `<div class="settings-chip-list">${items.map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div>`;
+  }
+
+  function settingsTable(headers, rows, emptyText) {
+    if (!rows.length) return `<div class="settings-empty-state">${escapeHtml(emptyText || t("noData"))}</div>`;
+    return `<div class="settings-table-wrap"><table class="settings-table"><thead><tr>${headers.map(header => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead><tbody>${rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  }
+
+  function settingsFlow(items) {
+    return `<div class="settings-flow-list">${items.map((item, index) => `<div class="settings-flow-step"><span>${index + 1}</span><strong>${escapeHtml(item)}</strong></div>`).join("")}</div>`;
+  }
+
   function renderSettingsContent(tab) {
     const renderers = {
       overview: renderSettingsOverview,
       staffWork: renderSettingsStaffWork,
       aiAssist: renderSettingsAiAssist,
-      quoteTax: renderSettingsQuoteTax,
+      processChart: renderSettingsProcessChart,
       requestStatus: renderSettingsRequestStatus,
       customers: renderSettingsCustomers,
       notifications: renderSettingsNotifications,
@@ -5592,8 +5612,12 @@
       settingCard("users", t("settingsStaffWork"), [t("staffCount") + ": " + visibleStaff.length, t("departments") + ": " + departments.length, t("workTypes") + ": " + workTypes.length], t("linked"), "is-live"),
       settingCard("userCheck", t("settingsCustomers"), [t("customersCount") + ": " + visibleUsers.length, customerStatusLabel("pendingApproval") + ": " + pendingUsers, customerStatusLabel("active") + ": " + activeUsers], t("inUse"), "is-live"),
       settingCard("clipboard", t("settingsRequestStatus"), [t("totalRequests") + ": " + visibleRequests.length, t("processing") + ": " + processingRequests, formatStatus("completed") + ": " + completedRequests], t("inUse"), "is-live"),
-      settingCard("receipt", t("quoteTax"), [t("defaultTax"), t("currency") + ": JPY", t("quoteTemplate")], t("linkLater"), "is-planned"),
-      settingCard("bell", t("settingsNotifications"), ["Slack", "Email", "LINE WORKS"], t("linkLater"), "is-planned"),
+      settingCard("trend", t("settingsProcessChart"), [
+        settingText("Lu\u1ed3ng nh\u1eadn y\u00eau c\u1ea7u", "\u4f9d\u983c\u53d7\u4ed8\u30d5\u30ed\u30fc"),
+        settingText("Tr\u1ea1ng th\u00e1i \u898b\u7a4d \u0111\u01b0a sang tab B\u00e1o gi\u00e1", "\u898b\u7a4d\u30b9\u30c6\u30fc\u30bf\u30b9\u3067\u898b\u7a4d\u30bf\u30d6\u306b\u8868\u793a"),
+        settingText("Upload file b\u00e1o gi\u00e1", "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9")
+      ], t("linkLater"), "is-planned"),
+      settingCard("bell", t("settingsNotifications"), ["Email", "Slack", "LINE WORKS"], t("linkLater"), "is-planned"),
       settingCard("database", t("systemData"), [t("csvExport"), t("adminLogs"), t("backup")], t("linkLater"), "is-planned")
     ].join("");
   }
@@ -5605,72 +5629,157 @@
       ? ["Gi\u00e1m \u0111\u1ed1c", "Koumu", "FS", "Kinh doanh", "Thi c\u00f4ng", "Thi\u1ebft k\u1ebf", "D\u1ef1 to\u00e1n"]
       : ["\u4ee3\u8868", "\u5de5\u52d9\u90e8", "FS\u90e8", "\u55b6\u696d\u90e8", "\u5de5\u4e8b\u90e8", "\u8a2d\u8a08\u90e8", "\u4e88\u7b97\u66f8"];
     const preview = (departments.length ? departments.map(workMasterLabel) : fallbackDepartments).slice(0, 8);
+    const staffCount = state.staff.filter(staff => String(staff.status || "active") !== "deleted" && !staff.deletedAt).length;
     return [
-      settingCard("users", t("department"), t("departmentsCardDesc"), t("inUse"), "is-live", `<div class="settings-metrics"><span><b>${departments.length || preview.length}</b>${escapeHtml(t("totalDepartments"))}</span><span><b>${departments.length}</b>${escapeHtml(t("currentlyUsed"))}</span></div><div class="settings-chip-list">${preview.map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("manageLater"))}</button>`),
-      settingCard("clipboard", t("workTypes"), t("workTypesDesc"), types.length ? t("inUse") : t("linkLater"), types.length ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${types.length}</b>${escapeHtml(t("workTypes"))}</span><span><b>${escapeHtml(t("staff"))}</b>${escapeHtml(t("workMasterLinked"))}</span></div><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("manageLater"))}</button>`),
-      settingCard("shield", t("autoAssign"), [t("autoAssignDesc"), t("department"), t("workTypes"), t("status")], t("inUse"), "is-live")
+      settingCard("users", t("department"), t("departmentsCardDesc"), t("inUse"), "is-live", `<div class="settings-metrics"><span><b>${departments.length || preview.length}</b>${escapeHtml(t("totalDepartments"))}</span><span><b>${departments.length}</b>${escapeHtml(t("currentlyUsed"))}</span></div>${settingsChips(preview)}${settingsButton(settingText("Th\u00eam b\u1ed9 ph\u1eadn", "\u90e8\u9580\u3092\u8ffd\u52a0"))}`),
+      settingCard("clipboard", t("workTypes"), t("workTypesDesc"), types.length ? t("inUse") : t("linkLater"), types.length ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${types.length}</b>${escapeHtml(t("workTypes"))}</span><span><b>${escapeHtml(t("staff"))}</b>${escapeHtml(t("workMasterLinked"))}</span></div>${settingsChips((types.length ? types.map(workMasterLabel) : ["\u96fb\u6c17\u5de5\u4e8b", "\u70b9\u691c", "\u898b\u7a4d\u4f5c\u6210"]).slice(0, 12))}${settingsButton(settingText("Th\u00eam n\u1ed9i dung c\u00f4ng vi\u1ec7c", "\u696d\u52d9\u5185\u5bb9\u3092\u8ffd\u52a0"))}`),
+      settingCard("shield", "Staff mapping", [settingText("Li\u00ean k\u1ebft staff v\u1edbi b\u1ed9 ph\u1eadn v\u00e0 k\u1ef9 n\u0103ng", "\u30b9\u30bf\u30c3\u30d5\u3092\u90e8\u9580\u30fb\u30b9\u30ad\u30eb\u3068\u7d10\u3065\u3051"), t("staffCount") + ": " + staffCount], t("linkLater"), "is-planned", settingsButton(settingText("Qu\u1ea3n l\u00fd staff", "\u30b9\u30bf\u30c3\u30d5\u7ba1\u7406"))),
+      settingCard("sparkles", settingText("Ghi ch\u00fa", "\u30e1\u30e2"), settingText("\u0110\u00e2y l\u00e0 d\u1eef li\u1ec7u n\u1ec1n \u0111\u1ec3 AI ph\u00e2n c\u00f4ng ban \u0111\u1ea7u trong c\u00e1c b\u01b0\u1edbc sau.", "\u3053\u306e\u30c7\u30fc\u30bf\u306f\u5c06\u6765\u306eAI\u521d\u671f\u5272\u308a\u5f53\u3066\u306e\u57fa\u790e\u30c7\u30fc\u30bf\u3067\u3059\u3002"), t("prepareLater"), "is-planned")
     ].join("");
   }
 
   function renderSettingsAiAssist() {
+    const aiWorkTypes = ["\u96fb\u6c17\u5de5\u4e8b", "\u898b\u7a4d", "\u70b9\u691c", "\u56f3\u9762\u78ba\u8a8d", "\u305d\u306e\u4ed6"];
+    const skills = ["\u96fb\u6c17\u5de5\u4e8b", "\u7167\u660e", "\u5206\u96fb\u76e4", "\u73fe\u5730\u8abf\u67fb", "\u898b\u7a4d\u4f5c\u6210", "\u56f3\u9762\u78ba\u8a8d"];
+    const ruleRows = [
+      ["\u30b9\u30ad\u30eb / K\u1ef9 n\u0103ng", "40%"],
+      ["\u90e8\u9580 / B\u1ed9 ph\u1eadn", "15%"],
+      ["\u30a8\u30ea\u30a2 / Khu v\u1ef1c", "15%"],
+      [settingText("Kh\u1ed1i l\u01b0\u1ee3ng c\u00f4ng vi\u1ec7c", "\u7a3c\u50cd\u72b6\u6cc1"), "15%"],
+      [settingText("L\u1ecbch s\u1eed x\u1eed l\u00fd", "\u5bfe\u5fdc\u5c65\u6b74"), "10%"],
+      [settingText("Kh\u1ea9n c\u1ea5p", "\u7dca\u6025\u5ea6"), "5%"]
+    ];
     return [
-      settingCard("sparkles", t("settingsAiAssist"), [
-        state.lang === "vi" ? "Ph\u00e2n t\u00edch ti\u00eau \u0111\u1ec1, m\u00f4 t\u1ea3 v\u00e0 \u0111\u1ecba ch\u1ec9" : "\u30bf\u30a4\u30c8\u30eb\u30fb\u8a73\u7d30\u30fb\u4f4f\u6240\u3092\u5206\u6790",
-        state.lang === "vi" ? "G\u1ee3i \u00fd ph\u00e2n lo\u1ea1i v\u00e0 \u0111\u1ed9 kh\u1ea9n c\u1ea5p" : "\u5206\u985e\u3068\u7dca\u6025\u5ea6\u306e\u5019\u88dc\u3092\u63d0\u6848",
-        state.lang === "vi" ? "G\u1ee3i \u00fd ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch ban \u0111\u1ea7u" : "\u521d\u671f\u62c5\u5f53\u8005\u5019\u88dc\u3092\u63d0\u6848"
-      ], t("prepareLater"), "is-planned", `<button class="btn btn-soft" type="button" disabled>${escapeHtml(t("prepareLater"))}</button>`),
-      settingCard("shield", state.lang === "vi" ? "Quy\u1ec1n quy\u1ebft \u0111\u1ecbnh" : "\u6700\u7d42\u5224\u65ad", state.lang === "vi" ? "AI ch\u1ec9 h\u1ed7 tr\u1ee3 b\u01b0\u1edbc \u0111\u1ea7u. Admin v\u1eabn c\u00f3 quy\u1ec1n \u0111\u1ed5i ph\u1ee5 tr\u00e1ch, tr\u1ea1ng th\u00e1i v\u00e0 lu\u1ed3ng x\u1eed l\u00fd." : "AI\u306f\u521d\u671f\u5224\u65ad\u306e\u88dc\u52a9\u306e\u307f\u3067\u3059\u3002\u62c5\u5f53\u8005\u3001\u30b9\u30c6\u30fc\u30bf\u30b9\u3001\u5bfe\u5fdc\u30d5\u30ed\u30fc\u306f\u7ba1\u7406\u8005\u304c\u6700\u7d42\u6c7a\u5b9a\u3057\u307e\u3059\u3002", t("linkLater"), "is-planned")
+      settingCard("sparkles", settingText("T\u1ed5ng quan AI", "AI\u6982\u8981"), settingText("AI h\u1ed7 tr\u1ee3 ph\u00e2n t\u00edch y\u00eau c\u1ea7u, ph\u00e2n lo\u1ea1i n\u1ed9i b\u1ed9 v\u00e0 g\u1ee3i \u00fd ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch ban \u0111\u1ea7u. Admin v\u1eabn quy\u1ebft \u0111\u1ecbnh cu\u1ed1i c\u00f9ng.", "AI\u306f\u4f9d\u983c\u3092\u5206\u6790\u3057\u3001\u5185\u90e8\u5206\u985e\u3068\u521d\u671f\u62c5\u5f53\u8005\u3092\u63d0\u6848\u3057\u307e\u3059\u3002\u6700\u7d42\u5224\u65ad\u306f\u7ba1\u7406\u8005\u304c\u884c\u3044\u307e\u3059\u3002"), settingText("Ch\u01b0a k\u00edch ho\u1ea1t / Layout", "\u672a\u6709\u52b9 / Layout"), "is-planned"),
+      settingCard("users", settingText("B\u1ed9 ph\u1eadn d\u00f9ng cho AI", "AI\u7528\u90e8\u9580"), [settingText("Li\u00ean k\u1ebft v\u1edbi b\u1ed9 ph\u1eadn t\u1eeb Nh\u00e2n vi\u00ean & c\u00f4ng vi\u1ec7c", "\u30b9\u30bf\u30c3\u30d5\u30fb\u696d\u52d9\u306e\u90e8\u9580\u3068\u9023\u643a"), t("departments") + ": " + activeMasterItems("departments").length], t("linkLater"), "is-planned", settingsButton(settingText("C\u1ea5u h\u00ecnh b\u1ed9 ph\u1eadn", "\u90e8\u9580\u8a2d\u5b9a"))),
+      settingCard("clipboard", settingText("Lo\u1ea1i c\u00f4ng vi\u1ec7c", "\u4f5c\u696d\u7a2e\u5225"), "", t("prepareLater"), "is-planned", `${settingsChips(aiWorkTypes)}${settingsButton(settingText("Th\u00eam lo\u1ea1i c\u00f4ng vi\u1ec7c", "\u4f5c\u696d\u7a2e\u5225\u3092\u8ffd\u52a0"))}`),
+      settingCard("palette", settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), "", t("prepareLater"), "is-planned", `${settingsChips(skills)}${settingsButton(settingText("Th\u00eam k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u3092\u8ffd\u52a0"))}`),
+      settingCard("shield", settingText("Lu\u1eadt ph\u00e2n c\u00f4ng", "\u5272\u308a\u5f53\u3066\u30eb\u30fc\u30eb"), "", t("prepareLater"), "is-planned", `${settingsTable([settingText("Y\u1ebfu t\u1ed1", "\u8981\u7d20"), settingText("Tr\u1ecdng s\u1ed1", "\u91cd\u307f")], ruleRows.map(row => [escapeHtml(row[0]), escapeHtml(row[1])]))}<div class="settings-thresholds"><span>${escapeHtml(settingText("T\u1ef1 g\u00e1n", "\u81ea\u52d5\u5272\u5f53"))}: <b>85%</b></span><span>${escapeHtml(settingText("Ch\u1ec9 g\u1ee3i \u00fd", "\u63d0\u6848\u306e\u307f"))}: <b>60%</b></span></div>${settingsButton(settingText("Ch\u1ec9nh lu\u1eadt ph\u00e2n c\u00f4ng", "\u5272\u308a\u5f53\u3066\u30eb\u30fc\u30eb\u8abf\u6574"))}`),
+      settingCard("database", settingText("Y\u00eau c\u1ea7u ch\u01b0a ph\u00e2n lo\u1ea1i", "\u672a\u5206\u985e\u4f9d\u983c"), "", t("prepareLater"), "is-planned", settingsTable(["ID", settingText("Ti\u00eau \u0111\u1ec1", "\u30bf\u30a4\u30c8\u30eb"), "AI confidence", settingText("L\u00fd do", "\u7406\u7531"), settingText("Thao t\u00e1c", "\u64cd\u4f5c")], [], settingText("Hi\u1ec7n ch\u01b0a c\u00f3 y\u00eau c\u1ea7u ch\u01b0a ph\u00e2n lo\u1ea1i.", "\u73fe\u5728\u3001\u672a\u5206\u985e\u306e\u4f9d\u983c\u306f\u3042\u308a\u307e\u305b\u3093\u3002"))),
+      settingCard("database", settingText("L\u1ecbch s\u1eed AI \u0111\u1ec1 xu\u1ea5t", "AI\u63d0\u6848\u5c65\u6b74"), "", t("prepareLater"), "is-planned", settingsTable(["Request ID", settingText("AI \u0111\u1ec1 xu\u1ea5t", "AI\u63d0\u6848"), settingText("Ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch cu\u1ed1i", "\u6700\u7d42\u62c5\u5f53\u8005"), "Confidence", settingText("Admin c\u00f3 \u0111\u1ed5i kh\u00f4ng", "\u7ba1\u7406\u8005\u5909\u66f4"), settingText("Ng\u00e0y t\u1ea1o", "\u4f5c\u6210\u65e5")], [], t("noData")))
     ].join("");
   }
 
-  function renderSettingsQuoteTax() {
+  function renderSettingsProcessChart() {
+    const standardStatuses = ["\u672a\u5bfe\u5fdc", "\u9023\u7d61\u6e08", "\u73fe\u5730\u6e08", "\u898b\u7a4d", "\u53d7\u6ce8", "\u5b8c\u4e86", "\u5931\u6ce8"];
+    const businessFlow = [
+      settingText("Kh\u00e1ch g\u1eedi y\u00eau c\u1ea7u", "\u9867\u5ba2\u304c\u4f9d\u983c\u3092\u9001\u4fe1"),
+      settingText("Admin ti\u1ebfp nh\u1eadn", "\u7ba1\u7406\u8005\u304c\u53d7\u4ed8"),
+      settingText("Li\u00ean h\u1ec7 / kh\u1ea3o s\u00e1t", "\u9023\u7d61 / \u73fe\u5730\u78ba\u8a8d"),
+      settingText("Chuy\u1ec3n sang \u898b\u7a4d n\u1ebfu c\u1ea7n b\u00e1o gi\u00e1", "\u898b\u7a4d\u304c\u5fc5\u8981\u306a\u5834\u5408\u306f\u898b\u7a4d\u3078"),
+      settingText("Upload file b\u00e1o gi\u00e1", "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9"),
+      settingText("Kh\u00e1ch xem b\u00e1o gi\u00e1", "\u9867\u5ba2\u304c\u898b\u7a4d\u3092\u78ba\u8a8d"),
+      "\u53d7\u6ce8 / \u5b8c\u4e86 / \u5931\u6ce8"
+    ];
+    const diagram = settingsFlow([
+      settingText("Kh\u00e1ch g\u1eedi y\u00eau c\u1ea7u", "\u9867\u5ba2\u304c\u4f9d\u983c\u3092\u9001\u4fe1"),
+      settingText("Admin nh\u1eadn \u1edf tab Y\u00eau c\u1ea7u", "\u7ba1\u7406\u8005\u304c\u4f9d\u983c\u30bf\u30d6\u3067\u53d7\u4ed8"),
+      settingText("\u0110\u1ed5i tr\u1ea1ng th\u00e1i: \u898b\u7a4d", "\u30b9\u30c6\u30fc\u30bf\u30b9\u5909\u66f4: \u898b\u7a4d"),
+      settingText("Tab B\u00e1o gi\u00e1", "\u898b\u7a4d\u30bf\u30d6"),
+      settingText("Upload file b\u00e1o gi\u00e1", "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9"),
+      settingText("Kh\u00e1ch xem b\u00e1o gi\u00e1", "\u9867\u5ba2\u304c\u898b\u7a4d\u3092\u78ba\u8a8d")
+    ]);
     return [
-      settingCard("receipt", t("quoteConfig"), [t("autoQuoteCode"), t("quoteTemplate"), t("quoteValidity")], t("linkLater"), "is-planned", `<button class="btn btn-soft" type="button" disabled>${escapeHtml(t("prepareLater"))}</button>`),
-      settingCard("receipt", t("taxCurrency"), [t("currency") + ": JPY", t("defaultTax") + ": 10%", t("autoTax"), t("priceRounding")], t("linkLater"), "is-planned", `<button class="btn btn-soft" type="button" disabled>${escapeHtml(t("prepareLater"))}</button>`),
-      settingCard("database", t("defaultPriceItems"), [t("labor"), t("materials"), t("surveyFee"), t("deliveryFee"), t("otherCosts")], t("linkLater"), "is-planned", `<button class="btn btn-soft" type="button" disabled>${escapeHtml(t("prepareLater"))}</button>`),
-      settingCard("clipboard", t("quoteTerms"), [t("paymentTerms"), t("constructionTerms"), t("quoteNotes")], t("linkLater"), "is-planned", `<button class="btn btn-soft" type="button" disabled>${escapeHtml(t("prepareLater"))}</button>`)
+      settingCard("trend", settingText("T\u1ed5ng quan lu\u1ed3ng x\u1eed l\u00fd", "\u51e6\u7406\u30d5\u30ed\u30fc\u6982\u8981"), "", t("inUse"), "is-live", settingsFlow(businessFlow)),
+      settingCard("clipboard", settingText("Tr\u1ea1ng th\u00e1i chu\u1ea9n", "\u6a19\u6e96\u30b9\u30c6\u30fc\u30bf\u30b9"), "", t("inUse"), "is-live", settingsChips(standardStatuses)),
+      settingCard("database", settingText("Mapping tr\u1ea1ng th\u00e1i v\u1edbi m\u00e0n h\u00ecnh", "\u30b9\u30c6\u30fc\u30bf\u30b9\u3068\u753b\u9762\u306e\u5bfe\u5fdc"), [
+        "\u672a\u5bfe\u5fdc / \u9023\u7d61\u6e08 / \u73fe\u5730\u6e08: " + settingText("hi\u1ec3n th\u1ecb trong tab Y\u00eau c\u1ea7u", "\u4f9d\u983c\u30bf\u30d6\u306b\u8868\u793a"),
+        "\u898b\u7a4d: " + settingText("hi\u1ec3n th\u1ecb trong tab B\u00e1o gi\u00e1", "\u898b\u7a4d\u30bf\u30d6\u306b\u8868\u793a"),
+        "\u53d7\u6ce8 / \u5b8c\u4e86 / \u5931\u6ce8: " + settingText("l\u01b0u l\u1ecbch s\u1eed ho\u1eb7c danh s\u00e1ch t\u01b0\u01a1ng \u1ee9ng", "\u5c65\u6b74\u307e\u305f\u306f\u5bfe\u5fdc\u30ea\u30b9\u30c8\u306b\u8868\u793a")
+      ], t("inUse"), "is-live"),
+      settingCard("receipt", settingText("Lu\u1ed3ng b\u00e1o gi\u00e1 m\u1edbi", "\u65b0\u898b\u7a4d\u30d5\u30ed\u30fc"), [
+        settingText("Y\u00eau c\u1ea7u t\u1ef1 xu\u1ea5t hi\u1ec7n \u1edf tab B\u00e1o gi\u00e1 khi chuy\u1ec3n sang \u898b\u7a4d", "\u898b\u7a4d\u3078\u5909\u66f4\u3059\u308b\u3068\u898b\u7a4d\u30bf\u30d6\u306b\u8868\u793a"),
+        settingText("Th\u00f4ng tin y\u00eau c\u1ea7u \u0111\u01b0\u1ee3c t\u1ef1 \u0111i\u1ec1n", "\u4f9d\u983c\u60c5\u5831\u3092\u81ea\u52d5\u8868\u793a"),
+        settingText("Admin k\u00e9o th\u1ea3/ch\u1ecdn file v\u00e0 g\u1eedi b\u00e1o gi\u00e1", "\u7ba1\u7406\u8005\u304c\u30d5\u30a1\u30a4\u30eb\u3092\u9078\u629e\u3057\u9001\u4fe1"),
+        settingText("Kh\u00e1ch xem file b\u00e1o gi\u00e1 trong app", "\u9867\u5ba2\u304c\u30a2\u30d7\u30ea\u3067\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u78ba\u8a8d")
+      ], t("inUse"), "is-live"),
+      settingCard("trend", settingText("Bi\u1ec3u \u0111\u1ed3 minh h\u1ecda", "\u56f3\u89e3"), "", t("inUse"), "is-live", diagram),
+      settingCard("shield", settingText("Ghi ch\u00fa", "\u30e1\u30e2"), settingText("Bi\u1ec3u \u0111\u1ed3 n\u00e0y m\u00f4 t\u1ea3 lu\u1ed3ng x\u1eed l\u00fd nghi\u1ec7p v\u1ee5. C\u00e1c thao t\u00e1c th\u1ef1c t\u1ebf v\u1eabn th\u1ef1c hi\u1ec7n trong tab Y\u00eau c\u1ea7u v\u00e0 tab B\u00e1o gi\u00e1.", "\u3053\u306e\u56f3\u306f\u696d\u52d9\u30d5\u30ed\u30fc\u3092\u793a\u3057\u307e\u3059\u3002\u5b9f\u969b\u306e\u64cd\u4f5c\u306f\u4f9d\u983c\u30bf\u30d6\u3068\u898b\u7a4d\u30bf\u30d6\u3067\u884c\u3044\u307e\u3059\u3002"), t("inUse"), "is-live")
     ].join("");
   }
 
   function renderSettingsRequestStatus() {
-    const statuses = ["untreated", "contacted", "site_done", "quoted", "completed", "lost"];
-    const urgencies = ["urgent", "high", "medium", "low", t("unjudged")];
-    const statusPreview = `<div class="settings-status-preview">${statuses.map(status => `<span class="status-badge status-${escapeHtml(status)}">${escapeHtml(formatStatus(status))}</span>`).join("")}</div>`;
+    const standardStatuses = ["\u672a\u5bfe\u5fdc", "\u9023\u7d61\u6e08", "\u73fe\u5730\u6e08", "\u898b\u7a4d", "\u53d7\u6ce8", "\u5b8c\u4e86", "\u5931\u6ce8"];
+    const statusClasses = ["untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"];
+    const statusPreview = `<div class="settings-status-preview">${standardStatuses.map((status, index) => `<span class="status-badge status-${escapeHtml(statusClasses[index])}">${escapeHtml(status)}</span>`).join("")}</div>`;
     return [
-      settingCard("clipboard", t("requestStatusSettings"), statuses.map(formatStatus), t("linkLater"), "is-planned"),
-      settingCard("shield", t("urgencyLevel"), urgencies, t("linkLater"), "is-planned"),
-      settingCard("database", t("responseDeadlines"), [t("firstResponseTime"), t("handlingDeadline"), t("overdueRule")], t("linkLater"), "is-planned"),
-      settingCard("palette", t("statusColors"), "", t("linkLater"), "is-planned", statusPreview)
+      settingCard("clipboard", settingText("Tr\u1ea1ng th\u00e1i chu\u1ea9n", "\u6a19\u6e96\u30b9\u30c6\u30fc\u30bf\u30b9"), "", t("inUse"), "is-live", settingsChips(standardStatuses)),
+      settingCard("trend", settingText("Lu\u1ed3ng x\u1eed l\u00fd", "\u51e6\u7406\u30d5\u30ed\u30fc"), settingText("\u898b\u7a4d tr\u1ea1ng th\u00e1i s\u1ebd \u0111\u01b0a y\u00eau c\u1ea7u sang tab B\u00e1o gi\u00e1.", "\u898b\u7a4d\u30b9\u30c6\u30fc\u30bf\u30b9\u306e\u4f9d\u983c\u306f\u898b\u7a4d\u30bf\u30d6\u306b\u8868\u793a\u3055\u308c\u307e\u3059\u3002"), t("inUse"), "is-live"),
+      settingCard("palette", settingText("M\u00e0u tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9\u30ab\u30e9\u30fc"), "", t("linkLater"), "is-planned", statusPreview),
+      settingCard("database", settingText("Quy t\u1eafc hi\u1ec3n th\u1ecb tab", "\u30bf\u30d6\u8868\u793a\u30eb\u30fc\u30eb"), [
+        settingText("Y\u00eau c\u1ea7u m\u1edbi \u2192 tab Y\u00eau c\u1ea7u", "\u65b0\u898f\u4f9d\u983c \u2192 \u4f9d\u983c\u30bf\u30d6"),
+        "\u898b\u7a4d \u2192 " + settingText("tab B\u00e1o gi\u00e1", "\u898b\u7a4d\u30bf\u30d6"),
+        settingText("Ho\u00e0n th\u00e0nh / \u5931\u6ce8 \u2192 l\u01b0u l\u1ecbch s\u1eed", "\u5b8c\u4e86 / \u5931\u6ce8 \u2192 \u5c65\u6b74\u306b\u4fdd\u5b58")
+      ], t("inUse"), "is-live")
     ].join("");
   }
 
   function renderSettingsCustomers() {
+    const visibleUsers = state.users.filter(user => !isSoftDeleted(user));
+    const pendingUsers = visibleUsers.filter(user => normalizeUserStatusValue(user.status) === "pendingApproval" || normalizeUserStatusValue(user.status) === "pending").length;
+    const activeUsers = visibleUsers.filter(user => normalizeUserStatusValue(user.status) === "active").length;
+    const lockedUsers = visibleUsers.filter(user => normalizeUserStatusValue(user.status) === "suspended" || normalizeUserStatusValue(user.status) === "locked").length;
     return [
-      settingCard("userCheck", t("settingsCustomers"), [t("accountApproval"), t("customerStatus"), t("resetPin"), t("softDeleteTrash"), t("customerRequestHistory")], t("linkLater"), "is-planned")
+      settingCard("userCheck", settingText("Duy\u1ec7t t\u00e0i kho\u1ea3n", "\u30a2\u30ab\u30a6\u30f3\u30c8\u627f\u8a8d"), [customerStatusLabel("pendingApproval") + ": " + pendingUsers], t("linkLater"), "is-planned", settingsButton(settingText("Xem danh s\u00e1ch", "\u4e00\u89a7\u3092\u8868\u793a"))),
+      settingCard("shield", "PIN / " + settingText("b\u1ea3o m\u1eadt", "\u30bb\u30ad\u30e5\u30ea\u30c6\u30a3"), settingText("Qu\u1ea3n l\u00fd PIN kh\u00e1ch h\u00e0ng, kh\u00f3a t\u00e0i kho\u1ea3n v\u00e0 kh\u00f4i ph\u1ee5c truy c\u1eadp.", "\u9867\u5ba2PIN\u3001\u30a2\u30ab\u30a6\u30f3\u30c8\u30ed\u30c3\u30af\u3001\u30a2\u30af\u30bb\u30b9\u5fa9\u65e7\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002"), t("linkLater"), "is-planned"),
+      settingCard("palette", settingText("Tr\u1ea1ng th\u00e1i kh\u00e1ch h\u00e0ng", "\u9867\u5ba2\u30b9\u30c6\u30fc\u30bf\u30b9"), [customerStatusLabel("active") + ": " + activeUsers, settingText("T\u1ea1m kh\u00f3a", "\u4e00\u6642\u505c\u6b62") + ": " + lockedUsers, customerStatusLabel("pendingApproval") + ": " + pendingUsers], t("inUse"), "is-live"),
+      settingCard("database", settingText("L\u1ecbch s\u1eed y\u00eau c\u1ea7u theo kh\u00e1ch h\u00e0ng", "\u9867\u5ba2\u5225\u4f9d\u983c\u5c65\u6b74"), settingText("Layout t\u1ed5ng h\u1ee3p y\u00eau c\u1ea7u, tr\u1ea1ng th\u00e1i v\u00e0 l\u1ecbch s\u1eed x\u1eed l\u00fd theo t\u1eebng kh\u00e1ch h\u00e0ng.", "\u9867\u5ba2\u3054\u3068\u306e\u4f9d\u983c\u3001\u30b9\u30c6\u30fc\u30bf\u30b9\u3001\u5bfe\u5fdc\u5c65\u6b74\u3092\u96c6\u7d04\u3059\u308b\u30ec\u30a4\u30a2\u30a6\u30c8\u3067\u3059\u3002"), t("prepareLater"), "is-planned")
     ].join("");
   }
 
   function renderSettingsNotifications() {
     return [
-      settingCard("bell", t("settingsNotifications"), [t("newRequestAdminNotice"), t("customerStatusNotice"), "Slack", "Email", "LINE WORKS", t("notificationTemplates")], t("linkLater"), "is-planned")
+      settingCard("bell", "Email notification", [
+        settingText("Tr\u1ea1ng th\u00e1i: \u0110ang d\u00f9ng", "\u30b9\u30c6\u30fc\u30bf\u30b9: \u5229\u7528\u4e2d"),
+        "Provider: Resend",
+        "MAIL_FROM",
+        "ADMIN_NOTIFICATION_EMAIL",
+        settingText("Email ch\u1ec9 d\u00f9ng \u0111\u1ec3 th\u00f4ng b\u00e1o, x\u1eed l\u00fd ch\u00ednh v\u1eabn trong app/admin.", "\u30e1\u30fc\u30eb\u306f\u901a\u77e5\u7528\u3067\u3001\u4e3b\u306a\u51e6\u7406\u306f\u30a2\u30d7\u30ea/\u7ba1\u7406\u753b\u9762\u3067\u884c\u3044\u307e\u3059\u3002")
+      ], t("inUse"), "is-live"),
+      settingCard("bell", "Slack", settingText("Tr\u1ea1ng th\u00e1i: Kh\u00f4ng d\u00f9ng / S\u1ebd li\u00ean k\u1ebft sau", "\u30b9\u30c6\u30fc\u30bf\u30b9: \u672a\u4f7f\u7528 / \u5f8c\u65e5\u9023\u643a"), t("linkLater"), "is-planned"),
+      settingCard("bell", "LINE WORKS", settingText("Tr\u1ea1ng th\u00e1i: S\u1ebd li\u00ean k\u1ebft sau", "\u30b9\u30c6\u30fc\u30bf\u30b9: \u5f8c\u65e5\u9023\u643a"), t("linkLater"), "is-planned"),
+      settingCard("database", settingText("S\u1ef1 ki\u1ec7n g\u1eedi th\u00f4ng b\u00e1o", "\u901a\u77e5\u30a4\u30d9\u30f3\u30c8"), [
+        settingText("Kh\u00e1ch g\u1eedi y\u00eau c\u1ea7u m\u1edbi", "\u9867\u5ba2\u304c\u65b0\u898f\u4f9d\u983c\u3092\u9001\u4fe1"),
+        settingText("Admin chuy\u1ec3n sang \u898b\u7a4d", "\u7ba1\u7406\u8005\u304c\u898b\u7a4d\u3078\u5909\u66f4"),
+        settingText("Admin g\u1eedi b\u00e1o gi\u00e1", "\u7ba1\u7406\u8005\u304c\u898b\u7a4d\u3092\u9001\u4fe1")
+      ], t("prepareLater"), "is-planned")
     ].join("");
   }
 
   function renderSettingsAppearance() {
     return [
-      settingCard("palette", t("settingsAppearance"), [t("defaultLanguage"), t("appLogo"), t("primaryColor"), t("splashScreen"), t("appName"), t("statusColorRules")], t("linkLater"), "is-planned")
+      settingCard("palette", settingText("Ng\u00f4n ng\u1eef", "\u8a00\u8a9e"), ["Ti\u1ebfng Vi\u1ec7t", "\u65e5\u672c\u8a9e", "English"], t("linkLater"), "is-planned"),
+      settingCard("database", settingText("Logo & th\u01b0\u01a1ng hi\u1ec7u", "\u30ed\u30b4\u30fb\u30d6\u30e9\u30f3\u30c9"), ["Logo", "YAMADEN", "Slogan"], t("linkLater"), "is-planned"),
+      settingCard("palette", settingText("M\u00e0u giao di\u1ec7n", "\u753b\u9762\u30ab\u30e9\u30fc"), [settingText("M\u00e0u ch\u1ee7 \u0111\u1ea1o", "\u30e1\u30a4\u30f3\u30ab\u30e9\u30fc"), "Theme"], t("linkLater"), "is-planned"),
+      settingCard("clipboard", settingText("\u0110\u1ecbnh d\u1ea1ng ng\u00e0y gi\u1edd", "\u65e5\u6642\u5f62\u5f0f"), ["YYYY/MM/DD HH:mm", "Asia/Tokyo"], t("inUse"), "is-live")
     ].join("");
   }
 
   function renderSettingsPermissions() {
+    const permissionRows = [
+      [settingText("Xem y\u00eau c\u1ea7u", "\u4f9d\u983c\u95b2\u89a7"), "Super Admin / Manager / Staff / Viewer"],
+      [settingText("S\u1eeda y\u00eau c\u1ea7u", "\u4f9d\u983c\u7de8\u96c6"), "Super Admin / Manager / Staff"],
+      [settingText("\u0110\u1ed5i tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9\u5909\u66f4"), "Super Admin / Manager / Staff"],
+      [settingText("G\u1eedi b\u00e1o gi\u00e1", "\u898b\u7a4d\u9001\u4fe1"), "Super Admin / Manager"],
+      [settingText("Qu\u1ea3n l\u00fd staff", "\u30b9\u30bf\u30c3\u30d5\u7ba1\u7406"), "Super Admin / Manager"],
+      [settingText("Qu\u1ea3n l\u00fd c\u00e0i \u0111\u1eb7t", "\u8a2d\u5b9a\u7ba1\u7406"), "Super Admin"]
+    ];
     return [
-      settingCard("shield", t("settingsPermissions"), ["Admin", t("manager"), t("employee"), t("viewOnly")], t("expandLater"), "is-planned")
+      settingCard("shield", settingText("Vai tr\u00f2 admin", "\u7ba1\u7406\u8005\u30ed\u30fc\u30eb"), ["Super Admin", "Manager", "Staff", "Viewer"], t("linkLater"), "is-planned"),
+      settingCard("clipboard", settingText("Quy\u1ec1n thao t\u00e1c", "\u64cd\u4f5c\u6a29\u9650"), "", t("prepareLater"), "is-planned", settingsTable([settingText("Quy\u1ec1n", "\u6a29\u9650"), settingText("Vai tr\u00f2", "\u30ed\u30fc\u30eb")], permissionRows.map(row => [escapeHtml(row[0]), escapeHtml(row[1])]))),
+      settingCard("shield", settingText("Ghi ch\u00fa b\u1ea3o m\u1eadt", "\u30bb\u30ad\u30e5\u30ea\u30c6\u30a3\u30e1\u30e2"), settingText("Layout ph\u00e2n quy\u1ec1n d\u1ef1 ki\u1ebfn, ch\u01b0a k\u00edch ho\u1ea1t CRUD th\u1eadt.", "\u6a29\u9650\u8a2d\u8a08\u7528\u30ec\u30a4\u30a2\u30a6\u30c8\u3067\u3001\u307e\u3060CRUD\u306f\u6709\u52b9\u5316\u3057\u3066\u3044\u307e\u305b\u3093\u3002"), t("prepareLater"), "is-planned")
     ].join("");
   }
 
   function renderSettingsSystemData() {
+    const logRows = [
+      [escapeHtml(settingText("Ch\u01b0a c\u00f3 d\u1eef li\u1ec7u", "\u30c7\u30fc\u30bf\u306a\u3057")), "-", "-", "-"]
+    ];
     return [
-      settingCard("database", t("settingsSystemData"), [t("csvExport"), t("backup"), t("adminLogs"), t("apiWebhook"), t("dataSync"), t("trashCleanup")], t("linkLater"), "is-planned")
+      settingCard("database", settingText("Xu\u1ea5t d\u1eef li\u1ec7u", "\u30c7\u30fc\u30bf\u30a8\u30af\u30b9\u30dd\u30fc\u30c8"), [t("csvExport"), settingText("Xu\u1ea5t y\u00eau c\u1ea7u", "\u4f9d\u983c\u30a8\u30af\u30b9\u30dd\u30fc\u30c8"), settingText("Xu\u1ea5t kh\u00e1ch h\u00e0ng", "\u9867\u5ba2\u30a8\u30af\u30b9\u30dd\u30fc\u30c8")], t("linkLater"), "is-planned", settingsButton(t("csvExport"))),
+      settingCard("clipboard", settingText("Nh\u1eadt k\u00fd thao t\u00e1c admin", "\u7ba1\u7406\u8005\u64cd\u4f5c\u30ed\u30b0"), "", t("prepareLater"), "is-planned", settingsTable([settingText("Ng\u00e0y", "\u65e5\u4ed8"), "Admin", settingText("H\u00e0nh \u0111\u1ed9ng", "\u64cd\u4f5c"), settingText("\u0110\u1ed1i t\u01b0\u1ee3ng", "\u5bfe\u8c61")], logRows)),
+      settingCard("database", settingText("Sao l\u01b0u", "\u30d0\u30c3\u30af\u30a2\u30c3\u30d7"), settingText("Card m\u00f4 t\u1ea3 lu\u1ed3ng backup d\u1eef li\u1ec7u h\u1ec7 th\u1ed1ng, chu\u1ea9n b\u1ecb cho giai \u0111o\u1ea1n sau.", "\u5f8c\u7d9a\u30d5\u30a7\u30fc\u30ba\u7528\u306e\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u30ec\u30a4\u30a2\u30a6\u30c8\u3067\u3059\u3002"), t("prepareLater"), "is-planned"),
+      settingCard("database", settingText("Import d\u1eef li\u1ec7u", "\u30c7\u30fc\u30bf\u30a4\u30f3\u30dd\u30fc\u30c8"), settingText("Layout chu\u1ea9n b\u1ecb cho import CSV ho\u1eb7c \u0111\u1ed3ng b\u1ed9 d\u1eef li\u1ec7u sau n\u00e0y.", "\u5c06\u6765\u306eCSV\u30a4\u30f3\u30dd\u30fc\u30c8\u3084\u30c7\u30fc\u30bf\u540c\u671f\u7528\u30ec\u30a4\u30a2\u30a6\u30c8\u3067\u3059\u3002"), t("prepareLater"), "is-planned")
     ].join("");
   }
 
