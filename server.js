@@ -85,12 +85,13 @@ const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || "";
 const SLACK_ENABLED = false;
 const ADMIN_URL = process.env.ADMIN_URL || "https://yamaden.onrender.com/admin.html";
 const ADMIN_NOTIFICATION_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || "tuan@w-yamaden.jp";
-const MAIL_FROM = process.env.MAIL_FROM || process.env.SMTP_USER || "";
+const MAIL_FROM = process.env.MAIL_FROM || "";
 const SMTP_HOST = process.env.SMTP_HOST || "";
 const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
 const SMTP_USER = process.env.SMTP_USER || "";
 const SMTP_PASS = process.env.SMTP_PASS || "";
 let mailTransporter = null;
+let mailConfigLogged = false;
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
@@ -172,7 +173,8 @@ function mailValue(value, fallback = "-") {
 
 function getMailTransporter() {
   if (!SMTP_HOST || !MAIL_FROM || !ADMIN_NOTIFICATION_EMAIL) {
-    console.log("[mail] SMTP env missing; admin email notification skipped", {
+    console.log("[MAIL_ERROR] Failed to send email notification", {
+      reason: "SMTP config missing",
       SMTP_HOST: Boolean(SMTP_HOST),
       MAIL_FROM: Boolean(MAIL_FROM),
       ADMIN_NOTIFICATION_EMAIL: Boolean(ADMIN_NOTIFICATION_EMAIL)
@@ -180,10 +182,21 @@ function getMailTransporter() {
     return null;
   }
   if (mailTransporter) return mailTransporter;
+  const secure = SMTP_PORT === 465;
+  if (!mailConfigLogged) {
+    console.log("[MAIL_CONFIG] SMTP config loaded", {
+      SMTP_HOST: Boolean(SMTP_HOST),
+      SMTP_PORT,
+      MAIL_FROM: Boolean(MAIL_FROM),
+      ADMIN_NOTIFICATION_EMAIL,
+      secure
+    });
+    mailConfigLogged = true;
+  }
   mailTransporter = nodemailer.createTransport({
     host: SMTP_HOST,
     port: SMTP_PORT,
-    secure: SMTP_PORT === 465,
+    secure,
     auth: SMTP_USER || SMTP_PASS ? { user: SMTP_USER, pass: SMTP_PASS } : undefined
   });
   return mailTransporter;
@@ -294,10 +307,19 @@ function notifyAdminEmail(kind, payload = {}) {
       return false;
     })
     .then(sent => {
-      if (sent) console.log("[mail] admin notification sent:", kind);
+      if (!sent) return;
+      const messageByKind = {
+        request_created: "New request notification sent",
+        request_quoted: "Quote status notification sent",
+        quote_sent: "Quote sent notification sent"
+      };
+      console.log("[MAIL_SENT] " + (messageByKind[kind] || "Admin notification sent"));
     })
     .catch(error => {
-      console.log("[mail] admin notification error:", error.message);
+      console.log("[MAIL_ERROR] Failed to send email notification", {
+        kind,
+        message: error.message
+      });
     });
 }
 
