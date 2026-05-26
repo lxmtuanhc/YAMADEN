@@ -10,6 +10,7 @@ const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
 const { createQuotationPdf, normalizeQuoteForPdf, quotePdfFileName } = require("./lib/quotationPdf");
 
 const app = express();
@@ -81,8 +82,15 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const JWT_SECRET = process.env.JWT_SECRET;
 const USER_JWT_SECRET = process.env.USER_JWT_SECRET || JWT_SECRET;
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || "";
-const SLACK_ENABLED = process.env.SLACK_ENABLED === "true";
+const SLACK_ENABLED = false;
 const ADMIN_URL = process.env.ADMIN_URL || "https://yamaden.onrender.com/admin.html";
+const ADMIN_NOTIFICATION_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || "tuan@w-yamaden.jp";
+const MAIL_FROM = process.env.MAIL_FROM || process.env.SMTP_USER || "";
+const SMTP_HOST = process.env.SMTP_HOST || "";
+const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
+const SMTP_USER = process.env.SMTP_USER || "";
+const SMTP_PASS = process.env.SMTP_PASS || "";
+let mailTransporter = null;
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
@@ -149,6 +157,148 @@ async function requireUser(req, res, next) {
 function truncateText(text, max = 220) {
   const value = String(text || "").trim();
   return value.length > max ? value.slice(0, max - 3) + "..." : value;
+}
+
+function formatMailDate(value = new Date()) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+}
+
+function mailValue(value, fallback = "-") {
+  const text = String(value || "").trim();
+  return text || fallback;
+}
+
+function getMailTransporter() {
+  if (!SMTP_HOST || !MAIL_FROM || !ADMIN_NOTIFICATION_EMAIL) {
+    console.log("[mail] SMTP env missing; admin email notification skipped", {
+      SMTP_HOST: Boolean(SMTP_HOST),
+      MAIL_FROM: Boolean(MAIL_FROM),
+      ADMIN_NOTIFICATION_EMAIL: Boolean(ADMIN_NOTIFICATION_EMAIL)
+    });
+    return null;
+  }
+  if (mailTransporter) return mailTransporter;
+  mailTransporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_PORT === 465,
+    auth: SMTP_USER || SMTP_PASS ? { user: SMTP_USER, pass: SMTP_PASS } : undefined
+  });
+  return mailTransporter;
+}
+
+async function sendEmailNotification({ to = ADMIN_NOTIFICATION_EMAIL, subject, text }) {
+  const transporter = getMailTransporter();
+  if (!transporter) return false;
+  await transporter.sendMail({
+    from: MAIL_FROM,
+    to,
+    subject,
+    text
+  });
+  return true;
+}
+
+async function requestNotificationContext(request) {
+  const requestNo = getRequestDisplayId(request) || request?.requestCode || request?.id || "";
+  let user = null;
+  if (request?.userId && mongoose.Types.ObjectId.isValid(String(request.userId))) {
+    user = await User.findById(request.userId).lean().catch(() => null);
+  }
+  return {
+    requestNo,
+    customerName: request?.name || user?.name || "",
+    companyName: user?.company || user?.companyName || user?.projectName || "",
+    phone: request?.phone || user?.phone || "",
+    address: request?.address || user?.address || "",
+    content: request?.content || request?.title || request?.category || "",
+    hasAttachments: normalizeRequestMediaForMail(request).length > 0
+  };
+}
+
+function normalizeRequestMediaForMail(request) {
+  return []
+    .concat(Array.isArray(request?.mediaFiles) ? request.mediaFiles : [])
+    .concat(Array.isArray(request?.attachments) ? request.attachments : [])
+    .concat(Array.isArray(request?.files) ? request.files : [])
+    .concat(request?.mediaUrl ? [request.mediaUrl] : [])
+    .concat(request?.image ? [request.image] : [])
+    .filter(Boolean);
+}
+
+function notifyAdminEmail(kind, payload = {}) {
+  Promise.resolve()
+    .then(async () => {
+      if (kind === "request_created") {
+        const context = await requestNotificationContext(payload.request);
+        return sendEmailNotification({
+          subject: `【YAMADEN】新しい依頼が届きました（${context.requestNo}）`,
+          text: [
+            "新しい依頼が届きました。",
+            "",
+            `依頼ID: ${mailValue(context.requestNo)}`,
+            `お客様名: ${mailValue(context.customerName)}`,
+            `会社名: ${mailValue(context.companyName)}`,
+            `電話番号: ${mailValue(context.phone)}`,
+            `住所: ${mailValue(context.address)}`,
+            `依頼内容: ${mailValue(truncateText(context.content, 500))}`,
+            `添付ファイル: ${context.hasAttachments ? "あり" : "なし"}`,
+            `送信日時: ${formatMailDate(payload.request?.createdAt || new Date())}`,
+            "",
+            "管理画面で詳細を確認してください。",
+            ADMIN_URL
+          ].join("\n")
+        });
+      }
+
+      if (kind === "request_quoted") {
+        const context = await requestNotificationContext(payload.request);
+        return sendEmailNotification({
+          subject: `【YAMADEN】見積対応が必要な依頼があります（${context.requestNo}）`,
+          text: [
+            "見積対応が必要な依頼があります。",
+            "",
+            `依頼ID: ${mailValue(context.requestNo)}`,
+            `お客様名: ${mailValue(context.customerName)}`,
+            `会社名: ${mailValue(context.companyName)}`,
+            `依頼内容: ${mailValue(truncateText(context.content, 500))}`,
+            "現在ステータス: 見積",
+            "",
+            "管理画面の「見積」タブから対応してください。",
+            ADMIN_URL
+          ].join("\n")
+        });
+      }
+
+      if (kind === "quote_sent") {
+        const context = await requestNotificationContext(payload.request);
+        return sendEmailNotification({
+          subject: `【YAMADEN】見積書を送信しました（${context.requestNo}）`,
+          text: [
+            "見積書をお客様へ送信しました。",
+            "",
+            `依頼ID: ${mailValue(context.requestNo)}`,
+            `お客様名: ${mailValue(context.customerName)}`,
+            `会社名: ${mailValue(context.companyName)}`,
+            `見積ファイル名: ${mailValue(payload.quote?.originalName || payload.quote?.fileName)}`,
+            `送信日時: ${formatMailDate(payload.quote?.sentAt || new Date())}`,
+            "",
+            "管理画面で送信履歴を確認してください。",
+            ADMIN_URL
+          ].join("\n")
+        });
+      }
+
+      return false;
+    })
+    .then(sent => {
+      if (sent) console.log("[mail] admin notification sent:", kind);
+    })
+    .catch(error => {
+      console.log("[mail] admin notification error:", error.message);
+    });
 }
 
 function postSlackMessage(text) {
@@ -2265,6 +2415,7 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteFileUpload.
     request.quotedAt = request.quotedAt || now;
     if (typeof request.status === "string") request.status = "quoted";
     await request.save();
+    notifyAdminEmail("quote_sent", { request, quote });
 
     res.json({ ok: true, quote: quote.toObject(), data: quote.toObject(), request: request.toObject() });
   } catch (error) {
@@ -3037,6 +3188,7 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
       requestCode,
       mongoId: String(newRequest._id)
     });
+    notifyAdminEmail("request_created", { request: newRequest });
 
     const mediaSummary = mediaFiles.length > 0
       ? mediaFiles.length + " file (" + mediaFiles.map(file => file.type).join(", ") + ")"
@@ -3157,6 +3309,7 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
     }
 
     if (!item.requestCode) await ensureRequestCode(item);
+    const previousStatus = normalizeRequestStatus(item.status);
 
     if (req.body.status) {
       item.status = normalizeRequestStatus(req.body.status);
@@ -3187,6 +3340,10 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
     }
 
     await item.save();
+
+    if (req.body.status && previousStatus !== "quoted" && normalizeRequestStatus(item.status) === "quoted") {
+      notifyAdminEmail("request_quoted", { request: item });
+    }
 
     res.json({
       message: "Updated",
