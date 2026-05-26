@@ -5492,7 +5492,8 @@
             </div>
           </main>
         </div>
-      </section>`;
+      </section>
+      ${state.settingsDetail ? renderSettingsDetailModal() : ""}`;
   }
 
   function settingsTabs() {
@@ -5544,11 +5545,14 @@
   }
 
   function settingList(items) {
-    return `<ul class="settings-detail-list">${items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+    const list = (items || []).slice(0, 4);
+    const more = (items || []).length - list.length;
+    return `<ul class="settings-detail-list">${list.map(item => `<li>${escapeHtml(item)}</li>`).join("")}${more > 0 ? `<li>+${more}</li>` : ""}</ul>`;
   }
 
   function settingCard(icon, title, items, status, tone, extra) {
-    return `<article class="settings-shell-card">
+    const detailKey = `${state.settingsTab || "overview"}:${title}`;
+    return `<article class="settings-shell-card" data-settings-detail="${escapeHtml(detailKey)}" tabindex="0" role="button">
       <div class="settings-card-head">
         <span class="settings-card-icon">${settingsIcon(icon)}</span>
         <div>
@@ -5556,8 +5560,13 @@
           ${status ? settingsBadge(status, tone) : ""}
         </div>
       </div>
-      ${Array.isArray(items) ? settingList(items) : `<p class="settings-card-note">${escapeHtml(items || "")}</p>`}
-      ${extra || ""}
+      <div class="settings-card-body">
+        ${Array.isArray(items) ? settingList(items) : `<p class="settings-card-note">${escapeHtml(items || "")}</p>`}
+        ${extra || ""}
+      </div>
+      <div class="settings-card-footer">
+        <button class="btn btn-soft" type="button" data-settings-detail="${escapeHtml(detailKey)}">${escapeHtml(settingText("Mở chi tiết", "\u8a73\u7d30\u3092\u958b\u304f"))}</button>
+      </div>
     </article>`;
   }
 
@@ -5570,7 +5579,9 @@
   }
 
   function settingsChips(items) {
-    return `<div class="settings-chip-list">${items.map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div>`;
+    const list = (items || []).slice(0, 8);
+    const more = (items || []).length - list.length;
+    return `<div class="settings-chip-list">${list.map(item => `<span>${escapeHtml(item)}</span>`).join("")}${more > 0 ? `<span>+${more}</span>` : ""}</div>`;
   }
 
   function settingsTable(headers, rows, emptyText) {
@@ -5635,8 +5646,8 @@
     return [
       settingCard("users", t("department"), t("departmentsCardDesc"), t("inUse"), "is-live", `<div class="settings-metrics"><span><b>${departments.length || preview.length}</b>${escapeHtml(t("totalDepartments"))}</span><span><b>${departments.length}</b>${escapeHtml(t("currentlyUsed"))}</span></div>${settingsChips(preview)}${settingsButton(settingText("Th\u00eam b\u1ed9 ph\u1eadn", "\u90e8\u9580\u3092\u8ffd\u52a0"))}`),
       settingCard("clipboard", t("workTypes"), t("workTypesDesc"), types.length ? t("inUse") : t("linkLater"), types.length ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${types.length}</b>${escapeHtml(t("workTypes"))}</span><span><b>${escapeHtml(t("staff"))}</b>${escapeHtml(t("workMasterLinked"))}</span></div>${settingsChips((types.length ? types.map(workMasterLabel) : ["\u96fb\u6c17\u5de5\u4e8b", "\u70b9\u691c", "\u898b\u7a4d\u4f5c\u6210"]).slice(0, 12))}${settingsButton(settingText("Th\u00eam n\u1ed9i dung c\u00f4ng vi\u1ec7c", "\u696d\u52d9\u5185\u5bb9\u3092\u8ffd\u52a0"))}`),
+      settingCard("palette", settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText("Danh m\u1ee5c k\u1ef9 n\u0103ng d\u00f9ng cho staff v\u00e0 AI matching.", "\u30b9\u30bf\u30c3\u30d5\u3068AI\u30de\u30c3\u30c1\u30f3\u30b0\u7528\u306e\u30b9\u30ad\u30eb\u4e00\u89a7\u3067\u3059\u3002"), t("prepareLater"), "is-planned", settingsChips(["\u96fb\u6c17\u5de5\u4e8b", "\u7167\u660e", "\u5206\u96fb\u76e4", "\u73fe\u5730\u8abf\u67fb", "\u898b\u7a4d\u4f5c\u6210", "\u56f3\u9762\u78ba\u8a8d"])),
       settingCard("shield", "Staff mapping", [settingText("Li\u00ean k\u1ebft staff v\u1edbi b\u1ed9 ph\u1eadn v\u00e0 k\u1ef9 n\u0103ng", "\u30b9\u30bf\u30c3\u30d5\u3092\u90e8\u9580\u30fb\u30b9\u30ad\u30eb\u3068\u7d10\u3065\u3051"), t("staffCount") + ": " + staffCount], t("linkLater"), "is-planned", settingsButton(settingText("Qu\u1ea3n l\u00fd staff", "\u30b9\u30bf\u30c3\u30d5\u7ba1\u7406"))),
-      settingCard("sparkles", settingText("Ghi ch\u00fa", "\u30e1\u30e2"), settingText("\u0110\u00e2y l\u00e0 d\u1eef li\u1ec7u n\u1ec1n \u0111\u1ec3 AI ph\u00e2n c\u00f4ng ban \u0111\u1ea7u trong c\u00e1c b\u01b0\u1edbc sau.", "\u3053\u306e\u30c7\u30fc\u30bf\u306f\u5c06\u6765\u306eAI\u521d\u671f\u5272\u308a\u5f53\u3066\u306e\u57fa\u790e\u30c7\u30fc\u30bf\u3067\u3059\u3002"), t("prepareLater"), "is-planned")
     ].join("");
   }
 
@@ -5783,6 +5794,125 @@
       settingCard("database", settingText("Sao l\u01b0u", "\u30d0\u30c3\u30af\u30a2\u30c3\u30d7"), settingText("Card m\u00f4 t\u1ea3 lu\u1ed3ng backup d\u1eef li\u1ec7u h\u1ec7 th\u1ed1ng, chu\u1ea9n b\u1ecb cho giai \u0111o\u1ea1n sau.", "\u5f8c\u7d9a\u30d5\u30a7\u30fc\u30ba\u7528\u306e\u30d0\u30c3\u30af\u30a2\u30c3\u30d7\u30ec\u30a4\u30a2\u30a6\u30c8\u3067\u3059\u3002"), t("prepareLater"), "is-planned"),
       settingCard("database", settingText("Import d\u1eef li\u1ec7u", "\u30c7\u30fc\u30bf\u30a4\u30f3\u30dd\u30fc\u30c8"), settingText("Layout chu\u1ea9n b\u1ecb cho import CSV ho\u1eb7c \u0111\u1ed3ng b\u1ed9 d\u1eef li\u1ec7u sau n\u00e0y.", "\u5c06\u6765\u306eCSV\u30a4\u30f3\u30dd\u30fc\u30c8\u3084\u30c7\u30fc\u30bf\u540c\u671f\u7528\u30ec\u30a4\u30a2\u30a6\u30c8\u3067\u3059\u3002"), t("prepareLater"), "is-planned")
     ].join("");
+  }
+
+  function settingsDetailMeta() {
+    const raw = String(state.settingsDetail?.key || "");
+    const [, title = raw] = raw.split(":");
+    const lower = title.toLowerCase();
+    const isDept = title.includes(t("department")) || lower.includes("department") || title.includes("\u90e8\u9580") || title.includes("B\u1ed9 ph\u1eadn");
+    const isWork = title.includes(t("workTypes")) || title.includes("N\u1ed9i dung") || title.includes("\u696d\u52d9") || title.includes("c\u00f4ng vi\u1ec7c");
+    const isSkill = title.includes("K\u1ef9 n\u0103ng") || title.includes("\u30b9\u30ad\u30eb");
+    const isStaffMap = lower.includes("staff mapping");
+    const isRule = title.includes("Lu\u1eadt") || title.includes("\u30eb\u30fc\u30eb");
+    if (isDept) return {
+      kind: "departments",
+      title: settingText("Qu\u1ea3n l\u00fd b\u1ed9 ph\u1eadn", "\u90e8\u9580\u7ba1\u7406"),
+      desc: settingText("Th\u00eam, s\u1eeda v\u00e0 b\u1eadt/t\u1eaft b\u1ed9 ph\u1eadn d\u00f9ng cho staff v\u00e0 AI ph\u00e2n c\u00f4ng.", "\u30b9\u30bf\u30c3\u30d5\u3068AI\u5272\u308a\u5f53\u3066\u306b\u4f7f\u3046\u90e8\u9580\u3092\u8ffd\u52a0\u30fb\u7de8\u96c6\u30fb\u6709\u52b9\u5316\u3057\u307e\u3059\u3002"),
+      add: settingText("+ Th\u00eam b\u1ed9 ph\u1eadn", "+ \u90e8\u9580\u3092\u8ffd\u52a0"),
+      headers: [settingText("T\u00ean b\u1ed9 ph\u1eadn", "\u90e8\u9580\u540d"), settingText("M\u00f4 t\u1ea3", "\u8aac\u660e"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), settingText("S\u1ed1 staff li\u00ean k\u1ebft", "\u9023\u643a\u30b9\u30bf\u30c3\u30d5\u6570"), settingText("Thao t\u00e1c", "\u64cd\u4f5c")]
+    };
+    if (isWork) return {
+      kind: "workTypes",
+      title: settingText("Qu\u1ea3n l\u00fd n\u1ed9i dung c\u00f4ng vi\u1ec7c", "\u696d\u52d9\u5185\u5bb9\u7ba1\u7406"),
+      desc: settingText("Qu\u1ea3n l\u00fd danh s\u00e1ch c\u00f4ng vi\u1ec7c d\u00f9ng cho app kh\u00e1ch, staff v\u00e0 AI.", "\u9867\u5ba2\u30a2\u30d7\u30ea\u3001\u30b9\u30bf\u30c3\u30d5\u3001AI\u3067\u4f7f\u3046\u696d\u52d9\u4e00\u89a7\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002"),
+      add: settingText("+ Th\u00eam n\u1ed9i dung c\u00f4ng vi\u1ec7c", "+ \u696d\u52d9\u5185\u5bb9\u3092\u8ffd\u52a0"),
+      headers: [settingText("T\u00ean c\u00f4ng vi\u1ec7c", "\u696d\u52d9\u540d"), settingText("T\u1eeb kh\u00f3a", "\u30ad\u30fc\u30ef\u30fc\u30c9"), settingText("B\u1ed9 ph\u1eadn", "\u90e8\u9580"), settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), settingText("Thao t\u00e1c", "\u64cd\u4f5c")]
+    };
+    if (isSkill) return {
+      kind: "skills",
+      title: settingText("Qu\u1ea3n l\u00fd k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u7ba1\u7406"),
+      desc: settingText("Qu\u1ea3n l\u00fd k\u1ef9 n\u0103ng d\u00f9ng \u0111\u1ec3 g\u00e1n cho staff v\u00e0 AI matching.", "\u30b9\u30bf\u30c3\u30d5\u3068AI\u30de\u30c3\u30c1\u30f3\u30b0\u306b\u4f7f\u3046\u30b9\u30ad\u30eb\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002"),
+      add: settingText("+ Th\u00eam k\u1ef9 n\u0103ng", "+ \u30b9\u30ad\u30eb\u3092\u8ffd\u52a0"),
+      headers: [settingText("T\u00ean k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u540d"), settingText("M\u00f4 t\u1ea3", "\u8aac\u660e"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), settingText("Thao t\u00e1c", "\u64cd\u4f5c")]
+    };
+    if (isStaffMap) return {
+      kind: "staffMap",
+      title: "Staff mapping",
+      desc: settingText("Li\u00ean k\u1ebft staff v\u1edbi b\u1ed9 ph\u1eadn, k\u1ef9 n\u0103ng v\u00e0 n\u1ed9i dung c\u00f4ng vi\u1ec7c \u0111\u1ec3 AI ph\u00e2n c\u00f4ng ch\u00ednh x\u00e1c h\u01a1n.", "\u30b9\u30bf\u30c3\u30d5\u3092\u90e8\u9580\u30fb\u30b9\u30ad\u30eb\u30fb\u696d\u52d9\u5185\u5bb9\u3068\u7d10\u3065\u3051\u3001AI\u5272\u308a\u5f53\u3066\u7cbe\u5ea6\u3092\u9ad8\u3081\u307e\u3059\u3002"),
+      add: settingText("+ Th\u00eam mapping", "+ mapping\u8ffd\u52a0"),
+      headers: ["Staff", settingText("B\u1ed9 ph\u1eadn", "\u90e8\u9580"), settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText("N\u1ed9i dung c\u00f4ng vi\u1ec7c", "\u696d\u52d9\u5185\u5bb9"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9")]
+    };
+    if (isRule) return {
+      kind: "rules",
+      title: settingText("Lu\u1eadt ph\u00e2n c\u00f4ng", "\u5272\u308a\u5f53\u3066\u30eb\u30fc\u30eb"),
+      desc: settingText("Thi\u1ebft l\u1eadp tr\u1ecdng s\u1ed1 v\u00e0 ng\u01b0\u1ee1ng g\u1ee3i \u00fd/t\u1ef1 g\u00e1n cho AI.", "AI\u306e\u63d0\u6848/\u81ea\u52d5\u5272\u5f53\u306e\u91cd\u307f\u3068\u95be\u5024\u3092\u8a2d\u5b9a\u3057\u307e\u3059\u3002"),
+      add: settingText("Ch\u1ec9nh lu\u1eadt", "\u30eb\u30fc\u30eb\u7de8\u96c6"),
+      headers: [settingText("Y\u1ebfu t\u1ed1", "\u8981\u7d20"), settingText("Tr\u1ecdng s\u1ed1", "\u91cd\u307f"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9")]
+    };
+    return {
+      kind: "generic",
+      title: title || t("settings"),
+      desc: settingText("M\u00e0n chi ti\u1ebft layout cho m\u1ee5c c\u00e0i \u0111\u1eb7t n\u00e0y. Ch\u1ee9c n\u0103ng th\u1eadt s\u1ebd ph\u00e1t tri\u1ec3n sau.", "\u3053\u306e\u8a2d\u5b9a\u9805\u76ee\u306e\u8a73\u7d30\u30ec\u30a4\u30a2\u30a6\u30c8\u3067\u3059\u3002\u5b9f\u6a5f\u80fd\u306f\u5f8c\u65e5\u5b9f\u88c5\u3057\u307e\u3059\u3002"),
+      add: settingText("+ Th\u00eam", "+ \u8ffd\u52a0"),
+      headers: [settingText("M\u1ee5c", "\u9805\u76ee"), settingText("M\u00f4 t\u1ea3", "\u8aac\u660e"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), settingText("Thao t\u00e1c", "\u64cd\u4f5c")]
+    };
+  }
+
+  function renderSettingsDetailModal() {
+    const meta = settingsDetailMeta();
+    return `<div class="settings-detail-overlay" data-settings-detail-overlay>
+      <section class="settings-detail-modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(meta.title)}">
+        <header class="settings-detail-head">
+          <div><h2>${escapeHtml(meta.title)}</h2><p>${escapeHtml(meta.desc)}</p></div>
+          <button class="settings-detail-close" type="button" data-settings-detail-close aria-label="Close">×</button>
+        </header>
+        <div class="settings-detail-body">
+          ${renderSettingsDetailBody(meta)}
+        </div>
+        <footer class="settings-detail-footer">
+          <button class="btn btn-soft" type="button" data-settings-detail-cancel>${escapeHtml(settingText("H\u1ee7y", "\u30ad\u30e3\u30f3\u30bb\u30eb"))}</button>
+          <button class="primary-button" type="button" data-settings-detail-save disabled>${escapeHtml(settingText("L\u01b0u", "\u4fdd\u5b58"))}</button>
+        </footer>
+      </section>
+    </div>`;
+  }
+
+  function renderSettingsDetailBody(meta) {
+    const rows = settingsDetailRows(meta);
+    return `<div class="settings-detail-toolbar">
+      <button class="primary-button" type="button" data-settings-detail-dirty>${escapeHtml(meta.add)}</button>
+      <span>${escapeHtml(settingText("Layout only - ch\u01b0a ghi database.", "\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u307f - DB\u306b\u306f\u4fdd\u5b58\u3057\u307e\u305b\u3093\u3002"))}</span>
+    </div>
+    ${settingsTable(meta.headers, rows)}
+    <div class="settings-detail-form">
+      <label><span>${escapeHtml(settingText("T\u00ean *", "\u540d\u524d *"))}</span><input data-settings-detail-dirty type="text" placeholder="${escapeHtml(settingText("Nh\u1eadp t\u00ean", "\u540d\u524d\u3092\u5165\u529b"))}" /></label>
+      <label><span>${escapeHtml(settingText("M\u00f4 t\u1ea3", "\u8aac\u660e"))}</span><textarea data-settings-detail-dirty rows="3"></textarea></label>
+      <label class="settings-detail-toggle"><input data-settings-detail-dirty type="checkbox" checked /> ${escapeHtml("active")}</label>
+    </div>`;
+  }
+
+  function closeSettingsDetail(force = false) {
+    if (state.settingsDetail?.dirty && !force) {
+      const ok = window.confirm(settingText("B\u1ea1n c\u00f3 thay \u0111\u1ed5i ch\u01b0a l\u01b0u. B\u1ea1n c\u00f3 mu\u1ed1n tho\u00e1t kh\u00f4ng?", "\u672a\u4fdd\u5b58\u306e\u5909\u66f4\u304c\u3042\u308a\u307e\u3059\u3002\u9589\u3058\u307e\u3059\u304b\uff1f"));
+      if (!ok) return false;
+    }
+    state.settingsDetail = null;
+    renderSettings();
+    return true;
+  }
+
+  function markSettingsDetailDirty() {
+    if (!state.settingsDetail) return;
+    state.settingsDetail.dirty = true;
+    const save = document.querySelector("[data-settings-detail-save]");
+    if (save) save.disabled = false;
+  }
+
+  function settingsDetailRows(meta) {
+    const action = `<button class="mini-button" type="button" data-settings-detail-dirty>${escapeHtml(settingText("S\u1eeda", "\u7de8\u96c6"))}</button> <button class="mini-button" type="button" data-settings-detail-dirty>active/inactive</button>`;
+    if (meta.kind === "rules") return [
+      [escapeHtml(settingText("K\u1ef9 n\u0103ng ph\u00f9 h\u1ee3p", "\u30b9\u30ad\u30eb\u9069\u5408")), "40%", "active"],
+      [escapeHtml(settingText("B\u1ed9 ph\u1eadn", "\u90e8\u9580")), "15%", "active"],
+      [escapeHtml(settingText("Khu v\u1ef1c", "\u30a8\u30ea\u30a2")), "15%", "active"],
+      [escapeHtml(settingText("Ng\u01b0\u1ee1ng t\u1ef1 g\u00e1n", "\u81ea\u52d5\u5272\u5f53\u95be\u5024")), "85%", "active"],
+      [escapeHtml(settingText("Ng\u01b0\u1ee1ng ch\u1ec9 g\u1ee3i \u00fd", "\u63d0\u6848\u306e\u307f\u95be\u5024")), "60%", "active"]
+    ];
+    if (meta.kind === "staffMap") return state.staff.slice(0, 5).map(staff => [escapeHtml(staff.name || staff.fullName || "-"), escapeHtml(staff.department || "-"), "-", "-", "active"]);
+    if (meta.kind === "workTypes") return (activeMasterItems("workTypes").slice(0, 8).map(item => [escapeHtml(workMasterLabel(item)), "-", escapeHtml(item.departmentCode || "-"), "-", item.active === false ? "inactive" : "active", action]));
+    if (meta.kind === "departments") return (activeMasterItems("departments").slice(0, 8).map(item => [escapeHtml(workMasterLabel(item)), escapeHtml(item.descriptionVi || item.descriptionJa || "-"), item.active === false ? "inactive" : "active", "0", action]));
+    if (meta.kind === "skills") return [["\u96fb\u6c17\u5de5\u4e8b", "-", "active", action], ["\u7167\u660e", "-", "active", action], ["\u898b\u7a4d\u4f5c\u6210", "-", "active", action]];
+    return [["Sample", escapeHtml(meta.desc), "layout", action]];
   }
 
   async function reloadWorkMaster() {
@@ -6517,11 +6647,40 @@
       renderCurrentView();
     });
     bind($("viewRoot"), "click", event => {
+      if (state.currentView === "settings") {
+        if (event.target.closest("[data-settings-detail-save]")) {
+          state.settingsDetail = null;
+          showToast(settingText("Ch\u1ee9c n\u0103ng s\u1ebd ph\u00e1t tri\u1ec3n sau", "\u6a5f\u80fd\u306f\u5f8c\u65e5\u5b9f\u88c5\u3057\u307e\u3059"));
+          renderSettings();
+          return;
+        }
+        if (event.target.closest("[data-settings-detail-dirty]")) {
+          markSettingsDetailDirty();
+        }
+        if (event.target.closest("[data-settings-detail-close]") || event.target.closest("[data-settings-detail-cancel]")) {
+          event.preventDefault();
+          closeSettingsDetail();
+          return;
+        }
+        if (event.target.matches("[data-settings-detail-overlay]")) {
+          closeSettingsDetail();
+          return;
+        }
+      }
       const settingsTab = event.target.closest("[data-settings-tab]");
       if (settingsTab && state.currentView === "settings") {
         event.preventDefault();
         event.stopPropagation();
         state.settingsTab = settingsTab.dataset.settingsTab || "overview";
+        state.settingsDetail = null;
+        renderSettings();
+        return;
+      }
+      const settingsDetail = event.target.closest("[data-settings-detail]");
+      if (settingsDetail && state.currentView === "settings") {
+        event.preventDefault();
+        event.stopPropagation();
+        state.settingsDetail = { key: settingsDetail.dataset.settingsDetail, dirty: false };
         renderSettings();
         return;
       }
@@ -6530,6 +6689,10 @@
     });
     bind($("viewRoot"), "change", handleRequestViewChange);
     bind($("viewRoot"), "input", event => {
+      if (state.currentView === "settings" && event.target.closest("[data-settings-detail-dirty]")) {
+        markSettingsDetailDirty();
+        return;
+      }
       if (handleRequestViewInput(event)) event.stopPropagation();
     });
     bind(document, "input", event => {
@@ -6575,6 +6738,11 @@
       if (event.key === "Escape" && $("requestDetailOverlay")) {
         event.preventDefault();
         void closeRequestDetail();
+        return;
+      }
+      if (event.key === "Escape" && state.currentView === "settings" && state.settingsDetail) {
+        event.preventDefault();
+        closeSettingsDetail();
         return;
       }
       if (event.key === "Escape" && state.currentView === "customers" && state.selectedUser) {
