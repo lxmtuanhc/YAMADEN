@@ -4669,18 +4669,20 @@ body {
   gap: 18px;
   min-width: 0;
   align-content: start;
+  align-items: start;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0 4px 8px 0;
+  padding: 0 4px 14px 0;
 }
 
 .settings-shell-card {
   min-width: 0;
-  min-height: 218px;
+  min-height: auto;
+  align-self: start;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 20px 20px 24px;
+  gap: 18px;
+  padding: 24px 22px 30px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #fff;
@@ -4697,7 +4699,7 @@ body {
   grid-template-columns: 38px minmax(0, 1fr);
   gap: 12px;
   align-items: start;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .settings-card-head h3 {
@@ -4734,17 +4736,17 @@ body {
 
 .settings-detail-list {
   display: grid;
-  gap: 10px;
-  margin: 0;
+  gap: 12px;
+  margin: 0 0 4px;
   padding: 0;
   list-style: none;
 }
 
 .settings-detail-list li {
-  min-height: 34px;
+  min-height: 42px;
   display: flex;
   align-items: center;
-  padding: 9px 11px;
+  padding: 11px 14px;
   border: 1px solid #edf2f7;
   border-radius: 10px;
   background: #f8fafc;
@@ -4755,7 +4757,7 @@ body {
 }
 
 .settings-card-note {
-  margin: 0;
+  margin: 0 0 4px;
   color: #475569;
   line-height: 1.7;
   font-weight: 750;

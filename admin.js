@@ -6517,6 +6517,14 @@
       renderCurrentView();
     });
     bind($("viewRoot"), "click", event => {
+      const settingsTab = event.target.closest("[data-settings-tab]");
+      if (settingsTab && state.currentView === "settings") {
+        event.preventDefault();
+        event.stopPropagation();
+        state.settingsTab = settingsTab.dataset.settingsTab || "overview";
+        renderSettings();
+        return;
+      }
       if (handleQuoteDashboardClick(event)) return;
       void handleRequestViewClick(event);
     });
