@@ -4520,24 +4520,50 @@ body {
   display: grid;
   gap: 0;
   min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.admin-v2[data-view="settings"] .main {
+  overflow: hidden;
+}
+
+.admin-v2[data-view="settings"] .content {
+  height: calc(100dvh - var(--topbar-height));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-v2[data-view="settings"] .view-head {
+  flex: 0 0 auto;
+}
+
+.admin-v2[data-view="settings"] .view {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .settings-layout {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .settings-menu-card {
   position: sticky;
-  top: 88px;
-  height: calc(100vh - 104px);
-  overflow-y: auto;
-  align-self: start;
+  top: 0;
+  height: 100%;
+  overflow: hidden;
+  align-self: stretch;
   display: grid;
-  gap: 8px;
-  padding: 10px;
+  align-content: start;
+  gap: 5px;
+  padding: 8px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #fff;
@@ -4546,14 +4572,14 @@ body {
 
 .settings-menu-item {
   width: 100%;
-  min-height: 66px;
+  min-height: 48px;
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 8px;
   align-items: center;
-  padding: 10px;
+  padding: 6px 8px;
   border: 1px solid transparent;
-  border-radius: 14px;
+  border-radius: 10px;
   background: transparent;
   color: var(--text);
   text-align: left;
@@ -4580,6 +4606,12 @@ body {
   color: var(--primary);
 }
 
+.settings-menu-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+}
+
 .settings-menu-icon svg,
 .settings-card-icon svg {
   width: 21px;
@@ -4591,6 +4623,11 @@ body {
   stroke-linejoin: round;
 }
 
+.settings-menu-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
 .settings-menu-item strong,
 .settings-menu-item small {
   display: block;
@@ -4600,24 +4637,68 @@ body {
 }
 
 .settings-menu-item strong {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 950;
   white-space: nowrap;
 }
 
 .settings-menu-item small {
-  margin-top: 3px;
+  margin-top: 1px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
-  line-height: 1.35;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.settings-content-panel {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.settings-content-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.settings-content-head h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.settings-content-head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .settings-content-grid {
+  flex: 1 1 auto;
+  min-height: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(260px, 1fr));
   gap: 16px;
   min-width: 0;
+  align-content: start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
 }
 
 .settings-shell-card {
@@ -5067,10 +5148,29 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .admin-v2[data-view="settings"] .main {
+    overflow-y: auto;
+  }
+
+  .admin-v2[data-view="settings"] .content,
+  .admin-v2[data-view="settings"] .view,
+  .settings-shell,
+  .settings-layout,
+  .settings-content-panel {
+    height: auto;
+    overflow: visible;
+  }
+
   .settings-menu-card {
     position: static;
     height: auto;
     max-height: none;
+    overflow: visible;
+  }
+
+  .settings-content-grid {
+    overflow: visible;
+    padding-right: 0;
   }
 
   .quote-filter-bar {
