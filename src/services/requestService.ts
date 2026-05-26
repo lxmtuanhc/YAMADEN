@@ -4,6 +4,7 @@ import type { AssigneeRequestHistoryItem, RequestAssignee, RequestMediaFile, Req
 import { createRequestId, todayLabel } from "../utils/format";
 import { REQUEST_TIMELINE_MESSAGE_KEYS } from "../constants/requestStatus";
 import { APP_STORAGE_KEY } from "../constants/storageKeys";
+import { uploadConfig } from "../constants/uploadConfig";
 import { getUserToken } from "./authService";
 
 export interface CreateRequestInput {
@@ -553,7 +554,7 @@ async function createBackendRequest(input: CreateRequestInput): Promise<SupportR
   });
 
   if (hasFiles && body instanceof FormData) {
-    const uploadFiles = input.files?.slice(0, 12) || [];
+    const uploadFiles = input.files?.slice(0, uploadConfig.CUSTOMER_MAX_FILES) || [];
     console.log("[request:create] selected media files", {
       count: uploadFiles.length,
       files: uploadFiles.map(file => ({

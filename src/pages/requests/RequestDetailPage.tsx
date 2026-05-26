@@ -227,8 +227,14 @@ export function RequestDetailPage() {
                 <div className="request-media-item" key={media.url}>
                   {isVideoMedia(media) ? (
                     <video className="request-media-video" src={media.url} controls playsInline preload="metadata" />
-                  ) : (
+                  ) : isImageMedia(media) ? (
                     <img className="request-media-thumb" src={media.url} alt={media.name} />
+                  ) : (
+                    <div className="request-file-preview">
+                      <strong>{media.name}</strong>
+                      <span>{language === "vi" ? "File này không thể xem trực tiếp trong app. Vui lòng tải về hoặc mở bằng ứng dụng phù hợp." : "This file cannot be previewed in the app. Please download it."}</span>
+                      <a href={media.url} target="_blank" rel="noreferrer">{language === "vi" ? "Mở / tải file" : "Open / download"}</a>
+                    </div>
                   )}
                   <div className="request-media-name">{media.name}</div>
                 </div>
@@ -726,8 +732,15 @@ function isVideoMedia(media: RequestMediaFile) {
   return /video|\.mp4|\.mov|\.webm|\.m4v/i.test(value);
 }
 
+function isImageMedia(media: RequestMediaFile) {
+  const value = `${media.resourceType || ""} ${media.type || ""} ${media.mimetype || ""} ${media.url || ""}`;
+  return /image|\.jpg|\.jpeg|\.png|\.webp/i.test(value);
+}
+
 function mediaTypeFromUrl(url: string) {
-  return /(\.mp4|\.mov|\.webm|\.m4v)(\?|$)/i.test(url) ? "video" : "image";
+  if (/(\.mp4|\.mov|\.webm|\.m4v)(\?|$)/i.test(url)) return "video";
+  if (/(\.jpg|\.jpeg|\.png|\.webp)(\?|$)/i.test(url)) return "image";
+  return "file";
 }
 
 function mediaNameFromUrl(url: string) {

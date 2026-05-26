@@ -7,6 +7,8 @@
   const LOGIN_TIME_KEY = "loginTime";
   const TOKEN_MAX_AGE = 24 * 60 * 60 * 1000;
   const ADMIN_PATH = "/admin.html";
+  const QUOTE_MAX_FILE_SIZE = 25 * 1024 * 1024;
+  const QUOTE_ALLOWED_EXTENSIONS = [".pdf", ".xlsx", ".xls", ".docx", ".doc"];
 
   const i18n = {
     ja: {
@@ -2587,8 +2589,12 @@
 
   function renderRequestMediaItem(item, index) {
     const url = item.secureUrl || item.url;
-    const type = item.type || item.resourceType || (/(\.mp4|\.mov|\.webm|\.m4v)(\?|$)/i.test(url) ? "video" : "image");
+    const type = item.type || item.resourceType || (/(\.mp4|\.mov|\.webm|\.m4v)(\?|$)/i.test(url) ? "video" : /(\.jpg|\.jpeg|\.png|\.webp)(\?|$)/i.test(url) ? "image" : "file");
     const attrs = `data-media-preview="${escapeHtml(url)}" data-media-type="${escapeHtml(type)}"`;
+    if (type !== "video" && type !== "image") {
+      const name = item.originalName || item.fileName || url.split("/").pop() || "File";
+      return `<a class="request-media-item request-file-item" href="${escapeHtml(url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(name)}"><span>${escapeHtml(name)}</span><small>${escapeHtml(state.lang === "vi" ? "File nay khong the xem truc tiep trong app. Vui long tai ve hoac mo bang ung dung phu hop." : "This file cannot be previewed in the app. Please download it.")}</small></a>`;
+    }
     return `<button class="request-media-item" type="button" ${attrs} aria-label="${escapeHtml(t("media"))} ${index + 1}">${type === "video"
       ? `<video src="${escapeHtml(url)}" controls playsinline></video>`
       : `<img src="${escapeHtml(url)}" alt="">`}</button>`;
@@ -4851,11 +4857,11 @@
               <h3>${escapeHtml(state.lang === "vi" ? "B\u00e1o gi\u00e1" : "\u898b\u7a4d")}</h3>
               <section class="quote-work-card">
                 <div class="quote-file-dropzone" data-quote-file-dropzone role="button" tabindex="0">
-                  <input class="quote-file-input-hidden" type="file" data-quote-file-input accept=".pdf,.xls,.xlsx,.doc,.docx,.jpg,.jpeg,.png,.webp,.zip">
+                  <input class="quote-file-input-hidden" type="file" data-quote-file-input accept=".pdf,.xls,.xlsx,.doc,.docx">
                   <div class="quote-drop-icon">\u21e7</div>
                   <strong>${escapeHtml(state.lang === "vi" ? "K\u00e9o th\u1ea3 file b\u00e1o gi\u00e1 v\u00e0o \u0111\u00e2y" : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u3053\u3053\u306b\u30c9\u30ed\u30c3\u30d7")}</strong>
                   <span>${escapeHtml(state.lang === "vi" ? "ho\u1eb7c b\u1ea5m \u0111\u1ec3 ch\u1ecdn file" : "\u307e\u305f\u306f\u30af\u30ea\u30c3\u30af\u3057\u3066\u9078\u629e")}</span>
-                  <small>PDF, Excel, Word, JPG, PNG, WEBP, ZIP</small>
+                  <small>${escapeHtml(state.lang === "vi" ? "PDF bao gia toi da 25MB. Co the dung Excel/Word neu can." : "Quote PDF max 25MB. Excel/Word is also allowed.")}</small>
                 </div>
                 <div class="quote-selected-file" data-quote-selected-file>${selectedFileName ? escapeHtml(selectedFileName) : escapeHtml(state.lang === "vi" ? "Ch\u01b0a ch\u1ecdn file." : "\u30d5\u30a1\u30a4\u30eb\u672a\u9078\u629e")}</div>
                 ${quote.fileUrl ? `<div class="quote-existing-file"><a class="btn btn-soft" href="${escapeHtml(quote.fileUrl)}" target="_blank" rel="noopener">${escapeHtml(state.lang === "vi" ? "Xem file \u0111\u00e3 g\u1eedi" : "\u9001\u4fe1\u6e08\u307f\u30d5\u30a1\u30a4\u30eb\u3092\u8868\u793a")}</a></div>` : ""}
@@ -6066,6 +6072,16 @@
   }
 
   function setSelectedQuoteFile(file) {
+    if (file) {
+      const ext = "." + String(file.name || "").split(".").pop().toLowerCase();
+      if (!QUOTE_ALLOWED_EXTENSIONS.includes(ext)) {
+        toast(state.lang === "vi" ? "File bao gia khong duoc ho tro." : "Quote file type is not supported.");
+        file = null;
+      } else if (file.size > QUOTE_MAX_FILE_SIZE) {
+        toast(state.lang === "vi" ? "File bao gia vuot qua dung luong cho phep." : "Quote file exceeds the allowed size.");
+        file = null;
+      }
+    }
     state.quoteSelectedFile = file || null;
     const label = document.querySelector("[data-quote-selected-file]");
     if (label) label.textContent = file ? file.name : (state.lang === "vi" ? "Ch\u01b0a ch\u1ecdn file." : "\u30d5\u30a1\u30a4\u30eb\u672a\u9078\u629e");
@@ -6088,7 +6104,11 @@
       return;
     }
     if (!file) {
-      toast(state.lang === "vi" ? "Vui l\u00f2ng ch\u1ecdn file b\u00e1o gi\u00e1 tr\u01b0\u1edbc khi g\u1eedi." : "\u9001\u4fe1\u524d\u306b\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044\u3002");
+      toast(state.lang === "vi" ? "Vui long chon file bao gia." : "Please select a quote file.");
+      return;
+    }
+    if (file.size > QUOTE_MAX_FILE_SIZE) {
+      toast(state.lang === "vi" ? "File bao gia vuot qua dung luong cho phep." : "Quote file exceeds the allowed size.");
       return;
     }
     try {

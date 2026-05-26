@@ -11,6 +11,14 @@ const cloudinary = require("cloudinary").v2;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { createQuotationPdf, normalizeQuoteForPdf, quotePdfFileName } = require("./lib/quotationPdf");
+const {
+  uploadConfig,
+  mb,
+  customerFileKind,
+  customerFileLimitBytes,
+  isCustomerFileAllowed,
+  isQuoteFileAllowed
+} = require("./uploadConfig");
 
 const app = express();
 const distPath = path.join(__dirname, "dist");
@@ -38,22 +46,25 @@ app.use("/data", express.static(path.join(__dirname, "data")));
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 },
+  limits: {
+    fileSize: mb(uploadConfig.VIDEO_MAX_SIZE_MB),
+    files: uploadConfig.CUSTOMER_MAX_FILES
+  },
   fileFilter: (req, file, cb) => {
-    const ok = /^image\/|^video\//.test(file.mimetype || "");
-    cb(ok ? null : new Error("Only image or video files are allowed"), ok);
+    const ok = isCustomerFileAllowed(file);
+    cb(ok ? null : new Error(`File ${file.originalname} không được hỗ trợ.`), ok);
   }
 });
 
 const quoteFileUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 20 * 1024 * 1024 },
+  limits: {
+    fileSize: mb(uploadConfig.QUOTE_MAX_FILE_SIZE_MB),
+    files: uploadConfig.QUOTE_MAX_FILES
+  },
   fileFilter: (req, file, cb) => {
-    const ext = path.extname(file.originalname || "").toLowerCase();
-    const allowed = [".pdf", ".xls", ".xlsx", ".doc", ".docx", ".jpg", ".jpeg", ".png", ".webp", ".zip"];
-    const blocked = [".exe", ".bat", ".cmd", ".js", ".sh", ".php", ".msi", ".com", ".scr", ".ps1", ".vbs", ".jar"];
-    const ok = allowed.includes(ext) && !blocked.includes(ext);
-    cb(ok ? null : new Error("Unsupported quote file type"), ok);
+    const ok = isQuoteFileAllowed(file);
+    cb(ok ? null : new Error("File báo giá không được hỗ trợ."), ok);
   }
 });
 
@@ -1229,10 +1240,10 @@ async function ensureRequestCode(item) {
   return code;
 }
 
-function uploadMediaToCloudinary(fileBuffer) {
+function uploadMediaToCloudinary(fileBuffer, resourceType = "auto") {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: "yamaden_requests", resource_type: "auto" },
+      { folder: "yamaden_requests", resource_type: resourceType },
       (error, result) => {
         if (error) reject(error);
         else resolve(result);
@@ -1243,8 +1254,43 @@ function uploadMediaToCloudinary(fileBuffer) {
   });
 }
 
+function uploadResourceTypeForFile(file) {
+  const kind = customerFileKind(file);
+  if (kind === "image") return "image";
+  if (kind === "video") return "video";
+  return "raw";
+}
+
+function validateCustomerUploadFiles(files) {
+  const list = Array.isArray(files) ? files : [];
+  if (list.length > uploadConfig.CUSTOMER_MAX_FILES) {
+    return `Chỉ có thể đính kèm tối đa ${uploadConfig.CUSTOMER_MAX_FILES} file.`;
+  }
+  const total = list.reduce((sum, file) => sum + Number(file.size || 0), 0);
+  if (total > mb(uploadConfig.CUSTOMER_MAX_TOTAL_SIZE_MB)) {
+    return `Tổng dung lượng file vượt quá ${uploadConfig.CUSTOMER_MAX_TOTAL_SIZE_MB}MB.`;
+  }
+  for (const file of list) {
+    if (!isCustomerFileAllowed(file)) return `File ${file.originalname} không được hỗ trợ.`;
+    const limit = customerFileLimitBytes(file);
+    if (!limit || Number(file.size || 0) > limit) {
+      return `File ${file.originalname} vượt quá dung lượng cho phép.`;
+    }
+  }
+  return "";
+}
+
+function quoteFileValidationMessage(file) {
+  if (!file) return "Vui lòng chọn file báo giá.";
+  if (!isQuoteFileAllowed(file)) return "File báo giá không được hỗ trợ.";
+  if (Number(file.size || 0) > mb(uploadConfig.QUOTE_MAX_FILE_SIZE_MB)) {
+    return "File báo giá vượt quá dung lượng cho phép.";
+  }
+  return "";
+}
+
 function requestUploadMiddleware(req, res, next) {
-  upload.array("image", 12)(req, res, error => {
+  upload.array("image", uploadConfig.CUSTOMER_MAX_FILES)(req, res, error => {
     if (!error) return next();
 
     const isMulterError = error instanceof multer.MulterError;
@@ -1259,12 +1305,34 @@ function requestUploadMiddleware(req, res, next) {
       contentLength: req.headers["content-length"] || ""
     });
 
+    const message = error.code === "LIMIT_FILE_SIZE"
+      ? `File vượt quá dung lượng cho phép. Video tối đa ${uploadConfig.VIDEO_MAX_SIZE_MB}MB, file thường tối đa ${uploadConfig.DOCUMENT_MAX_SIZE_MB}MB.`
+      : error.code === "LIMIT_FILE_COUNT"
+        ? `Chỉ có thể đính kèm tối đa ${uploadConfig.CUSTOMER_MAX_FILES} file.`
+        : error.message || "Upload failed";
     return res.status(isMulterError ? 400 : 415).json({
       success: false,
       code: error.code || "UPLOAD_ERROR",
-      message: "Upload failed",
+      message,
       error: error.message,
       field: error.field
+    });
+  });
+}
+
+function quoteUploadMiddleware(req, res, next) {
+  quoteFileUpload.single("file")(req, res, error => {
+    if (!error) return next();
+    const message = error.code === "LIMIT_FILE_SIZE"
+      ? "File báo giá vượt quá dung lượng cho phép."
+      : error.code === "LIMIT_FILE_COUNT"
+        ? `Chỉ có thể upload tối đa ${uploadConfig.QUOTE_MAX_FILES} file báo giá.`
+        : error.message || "Upload quote file failed";
+    return res.status(400).json({
+      ok: false,
+      code: error.code || "QUOTE_UPLOAD_ERROR",
+      message,
+      error: error.message
     });
   });
 }
@@ -2408,11 +2476,12 @@ app.post("/admin/quotes", requireAdmin, async (req, res) => {
   }
 });
 
-app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteFileUpload.single("file"), async (req, res) => {
+app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddleware, async (req, res) => {
   try {
     const request = await findRequestByAnyId(req.params.requestId);
     if (!request) return res.status(404).json({ ok: false, message: "Request not found" });
-    if (!req.file) return res.status(400).json({ ok: false, message: "Quote file is required" });
+    const quoteFileError = quoteFileValidationMessage(req.file);
+    if (quoteFileError) return res.status(400).json({ ok: false, message: quoteFileError });
     const requestNo = await ensureRequestCode(request);
     const saved = saveQuoteUploadFile(req.file, requestNo);
     const requestKeys = [String(request._id || ""), request.id, request.requestCode, request.requestNo, request.code, request.requestId].filter(Boolean);
@@ -3094,6 +3163,14 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
 
     const mediaFiles = [];
     const files = Array.isArray(req.files) ? req.files : [];
+    const uploadValidationError = validateCustomerUploadFiles(files);
+    if (uploadValidationError) {
+      return res.status(400).json({
+        success: false,
+        code: "UPLOAD_LIMIT",
+        message: uploadValidationError
+      });
+    }
     console.info("[request:create] multipart debug", {
       requestCode,
       method: req.method,
@@ -3141,10 +3218,12 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
             size: file.size,
             hasBuffer: Boolean(file.buffer)
           });
-          const uploadResult = await uploadMediaToCloudinary(file.buffer);
+          const uploadResult = await uploadMediaToCloudinary(file.buffer, uploadResourceTypeForFile(file));
           const type = uploadResult.resource_type === "video" || (file.mimetype || "").startsWith("video/")
             ? "video"
-            : "image";
+            : uploadResult.resource_type === "image" || (file.mimetype || "").startsWith("image/")
+              ? "image"
+              : "file";
 
           return {
             url: uploadResult.secure_url,

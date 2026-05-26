@@ -6,13 +6,24 @@ import { Card } from "../../components/ui/Card";
 import { useTranslation } from "../../hooks/useTranslation";
 import { requestService } from "../../services/requestService";
 import { useAppStore } from "../../stores/appStore";
+import { customerFileLimitBytes, isCustomerFileAllowed, uploadConfig } from "../../constants/uploadConfig";
 import { categoryOptions } from "./requestHelpers";
 
-const maxUploadFiles = 12;
+const maxUploadFiles = uploadConfig.CUSTOMER_MAX_FILES;
 const defaultCategory = categoryOptions[0].value;
+const customerAccept = [
+  ...uploadConfig.ALLOWED_IMAGE_EXTENSIONS,
+  ...uploadConfig.ALLOWED_VIDEO_EXTENSIONS,
+  ...uploadConfig.ALLOWED_DOCUMENT_EXTENSIONS,
+  ...uploadConfig.ALLOWED_DRAWING_EXTENSIONS
+].join(",");
 
 function fileKey(file: File) {
   return `${file.name}-${file.size}-${file.lastModified}`;
+}
+
+function totalFileSize(files: File[]) {
+  return files.reduce((sum, file) => sum + file.size, 0);
 }
 
 export function RequestCreatePage() {
@@ -92,7 +103,7 @@ export function RequestCreatePage() {
       navigate(`/requests/${request.id}`);
     } catch (submitError) {
       console.warn("Request submit failed", submitError);
-      setError(t("request.uploadFailed"));
+      setError(submitError instanceof Error ? submitError.message : t("request.uploadFailed"));
     } finally {
       submitInFlightRef.current = false;
       setIsSubmitting(false);
@@ -104,10 +115,16 @@ export function RequestCreatePage() {
     setSelectedMediaFiles(current => {
       const next = [...current];
       let hitLimit = false;
-      let hasInvalidFile = false;
+      let errorMessage = "";
       Array.from(selectedFiles).forEach(file => {
-        if (!/^image\/|^video\//.test(file.type || "")) {
-          hasInvalidFile = true;
+        if (errorMessage) return;
+        if (!isCustomerFileAllowed(file)) {
+          errorMessage = language === "vi" ? `File ${file.name} không được hỗ trợ.` : `ファイル ${file.name} はサポートされていません。`;
+          return;
+        }
+        const limit = customerFileLimitBytes(file);
+        if (!limit || file.size > limit) {
+          errorMessage = language === "vi" ? `File ${file.name} vượt quá dung lượng cho phép.` : `ファイル ${file.name} は許可サイズを超えています。`;
           return;
         }
         const duplicate = next.some(item => (
@@ -122,8 +139,14 @@ export function RequestCreatePage() {
           hitLimit = true;
         }
       });
-      if (hasInvalidFile) setError(t("request.fileInvalid"));
-      if (hitLimit) setError(t("request.fileLimit").replace("{count}", String(maxUploadFiles)));
+      if (!errorMessage && totalFileSize(next) > uploadConfig.CUSTOMER_MAX_TOTAL_SIZE_MB * 1024 * 1024) {
+        errorMessage = language === "vi"
+          ? `Tổng dung lượng file vượt quá ${uploadConfig.CUSTOMER_MAX_TOTAL_SIZE_MB}MB.`
+          : `添付ファイルの合計サイズが${uploadConfig.CUSTOMER_MAX_TOTAL_SIZE_MB}MBを超えています。`;
+      }
+      if (hitLimit) errorMessage = language === "vi" ? "Chỉ có thể đính kèm tối đa 12 file." : "添付できるファイルは最大12件です。";
+      if (errorMessage) setError(errorMessage);
+      else setError("");
       return next;
     });
   }
@@ -188,8 +211,16 @@ export function RequestCreatePage() {
             <span>
               {t("request.attachments")} <small>{language === "vi" ? "Không bắt buộc" : "任意"}</small>
             </span>
-            <span>{selectedMediaFiles.length ? t("request.filesSelected").replace("{count}", String(selectedMediaFiles.length)) : t("request.uploadHint")}</span>
-            <span className="upload-limit-text">{t("request.fileLimit").replace("{count}", String(maxUploadFiles))}</span>
+            <span>
+              {selectedMediaFiles.length
+                ? (language === "vi" ? `Đã chọn ${selectedMediaFiles.length} file` : `${selectedMediaFiles.length}件のファイルを選択済み`)
+                : (language === "vi" ? "Chọn ảnh/video/tài liệu hoặc kéo thả vào đây" : "画像・動画・書類を選択してください")}
+            </span>
+            <span className="upload-limit-text">
+              {language === "vi"
+                ? "Có thể gửi ảnh, video, PDF, Excel, Word, JWW/DXF. Tối đa 12 file. Ảnh tối đa 10MB/file, tài liệu 25MB/file, video 100MB/file."
+                : "画像、動画、PDF、Excel、Word、JWW/DXFを添付できます。最大12件。画像10MB、書類25MB、動画100MBまで。"}
+            </span>
             <button className="media-picker-button" type="button" onClick={() => mediaInputRef.current?.click()}>
               {t("request.chooseMedia")}
             </button>
@@ -198,7 +229,7 @@ export function RequestCreatePage() {
               id="request-media-input"
               className="request-media-input"
               type="file"
-              accept="image/*,video/*"
+              accept={customerAccept}
               multiple
               onChange={event => {
                 handleFileChange(event.target.files);

@@ -265,6 +265,26 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .request-media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
 .request-media-item { border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; background: #f1f5f9; aspect-ratio: 4 / 3; padding: 0; cursor: zoom-in; }
 .request-media-item img, .request-media-item video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.request-file-item {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  padding: 14px;
+  color: #0f172a;
+  text-decoration: none;
+  cursor: pointer;
+}
+.request-file-item span,
+.request-file-item small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.request-file-item small {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 750;
+}
 .request-detail-footer { flex: 0 0 auto; display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 16px 20px; border-top: 1px solid #e2e8f0; background: #fff; }
 .request-unsaved-note { margin-right: auto; color: #d97706; font-weight: 900; }
 .media-preview-overlay { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; padding: 24px; background: rgba(15, 23, 42, .72); }

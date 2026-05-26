@@ -1062,6 +1062,40 @@ p {
   text-overflow: ellipsis;
 }
 
+.request-file-preview {
+  min-height: 96px;
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.request-file-preview strong,
+.request-file-preview span,
+.request-file-preview a {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.request-file-preview strong {
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.request-file-preview span {
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 750;
+}
+
+.request-file-preview a {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .request-detail-actions {
   min-width: 0;
   display: inline-flex;
