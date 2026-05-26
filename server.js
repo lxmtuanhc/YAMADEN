@@ -477,6 +477,12 @@ const RequestSchema = new mongoose.Schema({
     default: null
   },
   quoteRequested: { type: Boolean, default: false },
+  quoteSent: { type: Boolean, default: false },
+  quoteSentAt: { type: Date, default: null },
+  quoteFiles: [mongoose.Schema.Types.Mixed],
+  quoteFileCount: { type: Number, default: 0 },
+  quoteSentBy: String,
+  quoteStatus: { type: String, default: "not_sent" },
   timeline: [TimelineEventSchema],
   isDeleted: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },
@@ -2253,7 +2259,11 @@ app.get("/admin/quote-requests", requireAdmin, async (req, res) => {
     let data = requests.map(request => {
       const requestNo = getRequestDisplayId(request);
       const keys = [String(request._id || ""), request.id, request.requestCode, request.requestNo, request.code, request.requestId].filter(Boolean);
-      const quoteFiles = keys.flatMap(key => quotesByRequest.get(String(key)) || []);
+      const quoteFiles = keys
+        .flatMap(key => quotesByRequest.get(String(key)) || [])
+        .filter(file => file.fileUrl || file.pdfUrl);
+      const quoteSent = request.quoteSent === true || quoteFiles.length > 0;
+      const quoteSentAt = request.quoteSentAt || quoteFiles[0]?.sentAt || quoteFiles[0]?.createdAt || null;
       return {
         ...request.toObject(),
         id: String(request._id || request.id || ""),
@@ -2261,7 +2271,11 @@ app.get("/admin/quote-requests", requireAdmin, async (req, res) => {
         requestCode: requestNo,
         quoteFiles,
         quoteFileCount: quoteFiles.length,
-        latestQuoteFile: quoteFiles[0] || null
+        latestQuoteFile: quoteFiles[0] || null,
+        quoteSent,
+        quoteSentAt,
+        quoteStatus: quoteSent ? "sent" : "not_sent",
+        quoteSentBy: request.quoteSentBy || ""
       };
     });
     if (search) {
@@ -2499,6 +2513,7 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddl
     const requestNo = await ensureRequestCode(request);
     const now = new Date();
     const quotes = [];
+    const quoteFileRecords = [];
     for (const [index, file] of uploadFiles.entries()) {
       const saved = saveQuoteUploadFile(file, requestNo);
       const quoteId = `${requestNo}-quote-file-${Date.now()}-${index + 1}`;
@@ -2548,12 +2563,32 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddl
       const quote = new Quote({ ...payload, createdAt: now });
       await quote.save();
       quotes.push(quote);
+      quoteFileRecords.push({
+        quoteId: quote._id,
+        id: quoteId,
+        requestId: requestNo,
+        fileName: saved.fileName,
+        originalName: file.originalname,
+        fileUrl: saved.fileUrl,
+        filePath: saved.filePath,
+        mimeType: file.mimetype,
+        fileSize: file.size,
+        ext: saved.ext,
+        sentAt: now,
+        uploadedAt: now,
+        uploadedBy: req.admin?.email || req.admin?.name || "admin"
+      });
     }
 
     request.quoteId = quotes[0]?._id || request.quoteId;
     request.quoteRequested = true;
     request.quotedAt = request.quotedAt || now;
-    if (typeof request.status === "string") request.status = "quoted";
+    request.quoteSent = true;
+    request.quoteSentAt = now;
+    request.quoteFiles = quoteFileRecords;
+    request.quoteFileCount = quoteFileRecords.length;
+    request.quoteSentBy = req.admin?.email || req.admin?.name || "admin";
+    request.quoteStatus = "sent";
     await request.save();
 
     const data = quotes.map(quote => quote.toObject());

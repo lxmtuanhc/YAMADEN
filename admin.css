@@ -5262,6 +5262,38 @@ body {
   color: var(--muted, #64748b);
 }
 
+.quote-request-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.quote-sent-badge {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.quote-pending-badge {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.quote-sent-summary {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.quote-sent-summary span {
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .quote-file-dropzone {
   min-height: 240px;
   border: 2px dashed #9db9e8;

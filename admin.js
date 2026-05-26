@@ -4737,6 +4737,10 @@
     try {
       const payload = await AdminAPI.getQuoteRequests({ search: state.filters.quoteSearch || "" });
       rows = normalizeList(payload.requests || payload.data);
+      const sendStatus = state.filters.quoteSendStatus || "all";
+      if (sendStatus !== "all") {
+        rows = rows.filter(item => quoteSentInfo(item).sent === (sendStatus === "sent"));
+      }
       state.quoteRequests = rows;
     } catch (error) {
       console.error(error);
@@ -4751,6 +4755,11 @@
       </div>
       <div class="crm-filter-bar quote-filter-bar">
         <input class="filter-input" data-quote-filter="search" value="${escapeHtml(state.filters.quoteSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "T\u00ecm m\u00e3 y\u00eau c\u1ea7u / kh\u00e1ch h\u00e0ng / n\u1ed9i dung" : "\u4f9d\u983cID\u30fb\u9867\u5ba2\u30fb\u5185\u5bb9\u3067\u691c\u7d22")}">
+        <select class="filter-input" data-quote-filter="sendStatus">
+          <option value="all" ${state.filters.quoteSendStatus === "all" || !state.filters.quoteSendStatus ? "selected" : ""}>${escapeHtml(state.lang === "vi" ? "Tat ca" : "All")}</option>
+          <option value="not_sent" ${state.filters.quoteSendStatus === "not_sent" ? "selected" : ""}>${escapeHtml(state.lang === "vi" ? "Chua gui" : "Not sent")}</option>
+          <option value="sent" ${state.filters.quoteSendStatus === "sent" ? "selected" : ""}>${escapeHtml(state.lang === "vi" ? "Da gui" : "Sent")}</option>
+        </select>
       </div>
       <section class="section-card">
         <div class="panel-body quote-board-body">
@@ -4760,15 +4769,40 @@
     `;
   }
 
+  function quoteSentInfo(request) {
+    const files = toList(request.quoteFiles).filter(file => file.fileUrl || file.pdfUrl);
+    const sent = request.quoteSent === true || request.quoteStatus === "sent" || files.length > 0;
+    return {
+      sent,
+      files,
+      count: Number(request.quoteFileCount || files.length || 0),
+      sentAt: request.quoteSentAt || files[0]?.sentAt || files[0]?.createdAt || "",
+      sentBy: request.quoteSentBy || files[0]?.uploadedBy || ""
+    };
+  }
+
+  function requestAttachmentCount(request) {
+    return normalizeRequestMedia(request).length;
+  }
+
   function renderQuoteRequestCard(request) {
-    const files = toList(request.quoteFiles);
-    const latest = files[0] || {};
+    const quoteInfo = quoteSentInfo(request);
     const id = getRowId(request);
+    const sentLabel = state.lang === "vi" ? "Da gui bao gia" : "Quote sent";
+    const pendingLabel = state.lang === "vi" ? "Chua gui bao gia" : "Quote not sent";
+    const sentAt = quoteInfo.sentAt ? formatDateTime(quoteInfo.sentAt) : "";
     return `<button class="quote-request-card" type="button" data-open-request-quote="${escapeHtml(id)}">
-      <div><strong>${escapeHtml(getRequestDisplayId(request))}</strong><span class="status-badge ${getStatusClass(request.status)}">${escapeHtml(formatStatus(request.status))}</span></div>
+      <div><strong>${escapeHtml(getRequestDisplayId(request))}</strong><span class="status-badge ${quoteInfo.sent ? "quote-sent-badge" : "quote-pending-badge"}">${escapeHtml(quoteInfo.sent ? sentLabel : pendingLabel)}</span></div>
       <h3>${escapeHtml(getRequestContent(request) || request.title || "-")}</h3>
       <p>${escapeHtml(getCustomerName(request) || "-")} / ${escapeHtml(getRequestPhone(request) || "-")}</p>
-      <div class="quote-request-meta"><span>${escapeHtml(t("assignee"))}: ${escapeHtml(getAssigneeName(request) || "-")}</span><span>${escapeHtml(state.lang === "vi" ? "File" : "\u30d5\u30a1\u30a4\u30eb")}: ${files.length}</span><span>${escapeHtml(latest.originalName || latest.fileName || "")}</span></div>
+      <div class="quote-request-meta">
+        <span>${escapeHtml(t("assignee"))}: ${escapeHtml(getAssigneeName(request) || "-")}</span>
+        <span>${escapeHtml(state.lang === "vi" ? "File yeu cau" : "Request files")}: ${escapeHtml(String(requestAttachmentCount(request)))}</span>
+        <span>${escapeHtml(state.lang === "vi" ? "File bao gia" : "Quote files")}: ${escapeHtml(String(quoteInfo.count))}</span>
+        ${sentAt ? `<span>${escapeHtml(state.lang === "vi" ? "Da gui" : "Sent")}: ${escapeHtml(sentAt)}</span>` : ""}
+        ${quoteInfo.sentBy ? `<span>${escapeHtml(state.lang === "vi" ? "Nguoi gui" : "Sender")}: ${escapeHtml(quoteInfo.sentBy)}</span>` : ""}
+      </div>
+      <div class="quote-request-actions"><span class="btn btn-soft">${escapeHtml(quoteInfo.sent ? (state.lang === "vi" ? "Xem bao gia / Cap nhat" : "View / update quote") : (state.lang === "vi" ? "Gui bao gia" : "Send quote"))}</span></div>
     </button>`;
   }
 
@@ -4826,6 +4860,7 @@
     quote = quoteFileFlowState(quote);
     window.currentQuoteDetail = quote;
     const currentStep = Math.min(2, Math.max(1, Number(state.quoteWizardStep || 1)));
+    const quoteInfo = quoteSentInfo(quote);
     openDrawer(`
       <article class="drawer-panel quote-detail-drawer quote-wizard-modal">
         <header class="drawer-head drawer-header quote-workspace-head">
@@ -4833,7 +4868,7 @@
             <p class="eyebrow">${escapeHtml(state.lang === "vi" ? "B\u00e1o gi\u00e1" : "\u898b\u7a4d")}</p>
             <h2>${escapeHtml(quote.requestNo || quote.requestId || "-")}</h2>
             <p class="note">${escapeHtml(state.lang === "vi" ? "Upload file b\u00e1o gi\u00e1 th\u1ee7 c\u00f4ng v\u00e0 g\u1eedi cho kh\u00e1ch h\u00e0ng." : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u3057\u9867\u5ba2\u306b\u9001\u4fe1\u3057\u307e\u3059\u3002")}</p>
-            <span class="status-badge ${getStatusClass("quoted")}">${escapeHtml(formatStatus("quoted"))}</span>
+            <span class="status-badge ${quoteInfo.sent ? "quote-sent-badge" : "quote-pending-badge"}">${escapeHtml(quoteInfo.sent ? (state.lang === "vi" ? "Da gui bao gia" : "Quote sent") : (state.lang === "vi" ? "Chua gui bao gia" : "Quote not sent"))}</span>
           </div>
           <button class="quote-detail-close" type="button" data-close-drawer aria-label="${escapeHtml(t("close"))}">&times;</button>
         </header>
@@ -4858,6 +4893,7 @@
             <section class="quote-wizard-panel ${currentStep === 2 ? "is-active" : ""}" data-quote-step-panel="2">
               <h3>${escapeHtml(state.lang === "vi" ? "B\u00e1o gi\u00e1" : "\u898b\u7a4d")}</h3>
               <section class="quote-work-card">
+                ${quoteInfo.sent ? `<div class="quote-sent-summary"><strong>${escapeHtml(state.lang === "vi" ? "Bao gia da gui" : "Sent quote files")}</strong><span>${escapeHtml(state.lang === "vi" ? "Da gui" : "Sent")}: ${escapeHtml(quoteInfo.sentAt ? formatDateTime(quoteInfo.sentAt) : "-")}</span>${quoteInfo.sentBy ? `<span>${escapeHtml(state.lang === "vi" ? "Nguoi gui" : "Sender")}: ${escapeHtml(quoteInfo.sentBy)}</span>` : ""}</div>` : ""}
                 <div class="quote-file-dropzone" data-quote-file-dropzone role="button" tabindex="0">
                   <input class="quote-file-input-hidden" type="file" data-quote-file-input accept=".pdf,.xls,.xlsx,.doc,.docx" multiple>
                   <div class="quote-drop-icon">\u21e7</div>
@@ -4872,7 +4908,7 @@
           <footer class="quote-wizard-footer">
             <div>${currentStep > 1 ? `<button class="btn btn-soft" type="button" data-quote-prev data-quote-prev-step>${escapeHtml(t("previousStep"))}</button>` : ""}</div>
             <div class="quote-wizard-footer-actions">
-              ${currentStep < 2 ? `<button class="btn btn-primary" type="button" data-quote-next data-quote-next-step>${escapeHtml(t("nextStep"))}</button>` : `<button class="btn btn-primary" type="button" data-quote-send-file>${escapeHtml(state.lang === "vi" ? "G\u1eedi b\u00e1o gi\u00e1" : "\u898b\u7a4d\u9001\u4fe1")}</button>`}
+              ${currentStep < 2 ? `<button class="btn btn-primary" type="button" data-quote-next data-quote-next-step>${escapeHtml(t("nextStep"))}</button>` : `<button class="btn btn-primary" type="button" data-quote-send-file>${escapeHtml(quoteInfo.sent ? (state.lang === "vi" ? "Gui lai / Cap nhat bao gia" : "Resend / update quote") : (state.lang === "vi" ? "G\u1eedi b\u00e1o gi\u00e1" : "\u898b\u7a4d\u9001\u4fe1"))}</button>`}
             </div>
           </footer>
         </form>
@@ -4883,7 +4919,7 @@
   function quoteFileFlowState(source) {
     const request = source || {};
     const displayId = getRequestDisplayId(request) || request.requestNo || request.requestId || request.quoteNo || "";
-    const files = toList(request.quoteFiles);
+    const files = toList(request.quoteFiles).filter(file => file.fileUrl || file.pdfUrl);
     const latest = files[0] || request;
     return {
       useFileFlow: true,
@@ -4901,7 +4937,11 @@
       createdAt: request.createdAt || "",
       fileUrl: latest.fileUrl || latest.pdfUrl || "",
       originalName: latest.originalName || latest.fileName || "",
-      quoteFiles: files
+      quoteFiles: files,
+      quoteSent: request.quoteSent === true || request.quoteStatus === "sent" || files.length > 0,
+      quoteSentAt: request.quoteSentAt || latest.sentAt || latest.createdAt || "",
+      quoteFileCount: request.quoteFileCount || files.length || 0,
+      quoteSentBy: request.quoteSentBy || latest.uploadedBy || ""
     };
   }
 
