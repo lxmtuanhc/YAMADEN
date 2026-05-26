@@ -169,6 +169,14 @@ export interface Request {
   issueTags?: string[];
   workTypeIds?: string[];
   departmentCode?: string;
+  autoTags?: string[];
+  autoCategory?: string | null;
+  autoUrgency?: string | null;
+  autoArea?: string | null;
+  assignmentCandidates?: unknown[];
+  assignmentConfidence?: number | null;
+  assignmentReason?: string | null;
+  assignedBy?: string | null;
   adminReply?: string;
   assigneeId?: string;
   assigneeName?: string;

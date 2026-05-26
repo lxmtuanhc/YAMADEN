@@ -313,6 +313,14 @@ function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): 
     issueTags: Array.isArray(item.issueTags) ? item.issueTags : input?.issueTags || [],
     workTypeIds: Array.isArray(item.workTypeIds) ? item.workTypeIds : input?.workTypeIds || [],
     departmentCode: item.departmentCode || input?.departmentCode || "",
+    autoTags: Array.isArray(item.autoTags) ? item.autoTags : [],
+    autoCategory: item.autoCategory || null,
+    autoUrgency: item.autoUrgency || null,
+    autoArea: item.autoArea || null,
+    assignmentCandidates: Array.isArray(item.assignmentCandidates) ? item.assignmentCandidates : [],
+    assignmentConfidence: item.assignmentConfidence ?? null,
+    assignmentReason: item.assignmentReason || null,
+    assignedBy: item.assignedBy || null,
     adminReply: item.adminReply || item.adminResponse || item.response || item.feedback || item.note || latestTimelineNote(item.timeline) || "",
     assigneeId: item.assigneeId || "",
     assigneeName: item.assigneeName || "",
@@ -709,7 +717,17 @@ export const requestService = {
       createdBy: input.name || user?.name || user?.phone || "Customer",
       phone: input.phone || user?.phone || "",
       contact: input.contact || user?.contactPerson || user?.email || "",
-      issueTags: input.issueTags || []
+      issueTags: input.issueTags || [],
+      workTypeIds: input.workTypeIds || [],
+      departmentCode: input.departmentCode || "",
+      autoTags: [],
+      autoCategory: null,
+      autoUrgency: null,
+      autoArea: null,
+      assignmentCandidates: [],
+      assignmentConfidence: null,
+      assignmentReason: null,
+      assignedBy: null
     };
     commitRequests([request, ...readRequests()]);
     return request;

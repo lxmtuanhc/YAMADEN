@@ -2637,7 +2637,7 @@
               ${infoItem(t("quoteRequested"), hasQuoteRequested(request) ? t("quoteRequested") : "-")}
               <div class="info-item wide"><b>${escapeHtml(t("address"))}</b><span>${escapeHtml(getRequestAddress(request) || "-")}</span></div>
               <div class="info-item wide"><b>${escapeHtml(t("content"))}</b><span>${escapeHtml(getRequestDescriptionText(request))}</span></div>
-              <div class="info-item wide"><b>${escapeHtml(t("issueTags"))}</b><span>${escapeHtml(Array.isArray(request.issueTags) ? request.issueTags.join(", ") : "-")}</span></div>
+              <div class="info-item wide"><b>${escapeHtml(t("issueTags"))}</b><span>${escapeHtml(Array.isArray(request.issueTags) && request.issueTags.length ? request.issueTags.join(", ") : (state.lang === "vi" ? "Chưa phân loại" : "未分類"))}</span></div>
             </div>
             <section class="request-admin-edit">
               <div class="request-detail-section-head"><h3>${escapeHtml(t("adminEditSection"))}</h3></div>

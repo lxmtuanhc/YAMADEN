@@ -1,11 +1,10 @@
-import { ChevronDown, FileVideo, Upload, X } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FileVideo, Upload, X } from "lucide-react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { useTranslation } from "../../hooks/useTranslation";
 import { requestService } from "../../services/requestService";
-import type { WorkMaster } from "../../services/requestService";
 import { useAppStore } from "../../stores/appStore";
 import { categoryOptions } from "./requestHelpers";
 
@@ -24,11 +23,6 @@ export function RequestCreatePage() {
   const [phone, setPhone] = useState(user?.phone || "");
   const [contact, setContact] = useState(user?.contactPerson || user?.email || "");
   const [title, setTitle] = useState("");
-  const [issueSearch, setIssueSearch] = useState("");
-  const [isIssueDropdownOpen, setIsIssueDropdownOpen] = useState(false);
-  const [selectedIssues, setSelectedIssues] = useState<string[]>([]);
-  const [issueOptions, setIssueOptions] = useState<string[]>([]);
-  const [workMaster, setWorkMaster] = useState<WorkMaster>({ departments: [], workGroups: [], workTypes: [] });
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState(user?.address || "");
   const [datetime, setDatetime] = useState("");
@@ -37,7 +31,6 @@ export function RequestCreatePage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitInFlightRef = useRef(false);
-  const issueDropdownRef = useRef<HTMLDivElement | null>(null);
   const mediaInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -46,41 +39,6 @@ export function RequestCreatePage() {
     setContact(current => current || user?.contactPerson || user?.email || "");
     setAddress(current => current || user?.address || "");
   }, [user]);
-
-  useEffect(() => {
-    let mounted = true;
-    requestService.getWorkMaster()
-      .then(master => {
-        if (!mounted) return;
-        setWorkMaster(master);
-        const locale = localStorage.getItem("language") === "vi" ? "vi" : "ja";
-        const options = master.workTypes.map(item => (
-          locale === "vi" ? item.nameVi || item.nameJa || item.code : item.nameJa || item.nameVi || item.code
-        ));
-        setIssueOptions(Array.from(new Set(options.map(option => option.trim()).filter(Boolean))));
-      })
-      .catch(() => {
-        if (mounted) setIssueOptions([]);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    function handleOutside(event: MouseEvent | TouchEvent) {
-      const target = event.target;
-      if (target instanceof Node && issueDropdownRef.current && !issueDropdownRef.current.contains(target)) {
-        setIsIssueDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleOutside);
-    document.addEventListener("touchstart", handleOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleOutside);
-      document.removeEventListener("touchstart", handleOutside);
-    };
-  }, []);
 
   useEffect(() => {
     const previews = selectedMediaFiles.map(file => ({
@@ -95,22 +53,10 @@ export function RequestCreatePage() {
     };
   }, [selectedMediaFiles]);
 
-  const filteredIssueOptions = useMemo(() => {
-    const keyword = issueSearch.trim().toLowerCase();
-    return issueOptions.filter(option => (
-      !selectedIssues.includes(option) &&
-      (!keyword || option.toLowerCase().includes(keyword))
-    ));
-  }, [issueOptions, issueSearch, selectedIssues]);
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitInFlightRef.current || isSubmitting) {
       console.warn("[request:create] duplicate submit blocked");
-      return;
-    }
-    if (!selectedIssues.length) {
-      setError(t("request.issueRequired"));
       return;
     }
     if (!name.trim() || !phone.trim() || !title.trim() || !address.trim()) {
@@ -121,9 +67,6 @@ export function RequestCreatePage() {
     submitInFlightRef.current = true;
     setIsSubmitting(true);
     try {
-      const selectedWorkTypes = workMaster.workTypes.filter(item => selectedIssues.some(issue => (
-        [item.code, item.nameVi, item.nameJa].some(value => String(value || "").trim().toLowerCase() === issue.trim().toLowerCase())
-      )));
       console.log("[request:create] submit media state", {
         selectedMediaFilesLength: selectedMediaFiles.length,
         files: selectedMediaFiles.map(file => ({
@@ -142,9 +85,9 @@ export function RequestCreatePage() {
         name: name.trim(),
         phone: phone.trim(),
         contact: contact.trim(),
-        issueTags: selectedIssues,
-        workTypeIds: selectedWorkTypes.map(item => item.id || item.code).filter(Boolean),
-        departmentCode: selectedWorkTypes[0]?.departmentCode || ""
+        issueTags: [],
+        workTypeIds: [],
+        departmentCode: ""
       });
       navigate(`/requests/${request.id}`);
     } catch (submitError) {
@@ -193,18 +136,6 @@ export function RequestCreatePage() {
     )));
   }
 
-  function addIssue(issue: string) {
-    const value = issue.trim();
-    if (!value || selectedIssues.includes(value)) return;
-    setSelectedIssues(current => [...current, value]);
-    setIssueSearch("");
-    setIsIssueDropdownOpen(true);
-  }
-
-  function removeIssue(issueToRemove: string) {
-    setSelectedIssues(current => current.filter(issue => issue !== issueToRemove));
-  }
-
   return (
     <section className="page request-create-page">
       <div className="page-header">
@@ -219,57 +150,6 @@ export function RequestCreatePage() {
             <span>{t("request.subject")} *</span>
             <input value={title} placeholder={t("request.titlePlaceholder")} onChange={event => setTitle(event.target.value)} />
           </label>
-
-          <div className="field issue-multi-select" ref={issueDropdownRef}>
-            <span>{t("request.issue")} *</span>
-            <div className="issue-search-box">
-              {selectedIssues.length ? (
-                <div className="issue-selected-label">{t("request.issueSelected")}</div>
-              ) : null}
-              {selectedIssues.length ? (
-                <div className="issue-chip-list">
-                  {selectedIssues.map(selectedIssue => (
-                    <span className="issue-chip" key={selectedIssue}>
-                      <span>{selectedIssue}</span>
-                      <button className="issue-chip-remove" type="button" onClick={() => removeIssue(selectedIssue)} aria-label={t("request.removeIssue")}>
-                        <X size={14} />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-              <input
-                value={issueSearch}
-                placeholder={t("request.issueSearchPlaceholder")}
-                onFocus={() => setIsIssueDropdownOpen(true)}
-                onChange={event => {
-                  setIssueSearch(event.target.value);
-                  setIsIssueDropdownOpen(true);
-                }}
-              />
-              <button
-                className={`issue-dropdown-toggle ${isIssueDropdownOpen ? "open" : ""}`}
-                type="button"
-                aria-label={t("request.issueToggle")}
-                onClick={() => setIsIssueDropdownOpen(current => !current)}
-              >
-                <ChevronDown size={18} />
-              </button>
-            </div>
-            {isIssueDropdownOpen ? (
-              <div className="issue-option-list">
-                {filteredIssueOptions.length ? (
-                  filteredIssueOptions.map(option => (
-                    <button type="button" key={option} onClick={() => addIssue(option)}>
-                      <span>{option}</span>
-                    </button>
-                  ))
-                ) : (
-                  <span>{t("request.issueNoResults")}</span>
-                )}
-              </div>
-            ) : null}
-          </div>
 
           <label className="field">
             <span>{t("auth.name")} *</span>
