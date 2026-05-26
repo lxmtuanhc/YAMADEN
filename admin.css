@@ -4533,10 +4533,11 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding: 18px 22px 22px;
 }
 
 .admin-v2[data-view="settings"] .view-head {
-  flex: 0 0 auto;
+  display: none;
 }
 
 .admin-v2[data-view="settings"] .view {
@@ -4546,8 +4547,8 @@ body {
 
 .settings-layout {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 20px;
   align-items: stretch;
   min-height: 0;
   height: 100%;
@@ -4562,24 +4563,24 @@ body {
   align-self: stretch;
   display: grid;
   align-content: start;
-  gap: 5px;
-  padding: 8px;
+  gap: 4px;
+  padding: 7px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #fff;
-  box-shadow: var(--shadow);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, .055);
 }
 
 .settings-menu-item {
   width: 100%;
-  min-height: 48px;
+  min-height: 43px;
   display: grid;
-  grid-template-columns: 30px minmax(0, 1fr);
-  gap: 8px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 7px;
   align-items: center;
-  padding: 6px 8px;
+  padding: 5px 7px;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: 9px;
   background: transparent;
   color: var(--text);
   text-align: left;
@@ -4587,7 +4588,7 @@ body {
 
 .settings-menu-item:hover,
 .settings-menu-item.active {
-  border-color: #bfdbfe;
+  border-color: transparent;
   background: #eff6ff;
 }
 
@@ -4607,9 +4608,9 @@ body {
 }
 
 .settings-menu-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
 }
 
 .settings-menu-icon svg,
@@ -4624,8 +4625,8 @@ body {
 }
 
 .settings-menu-icon svg {
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
 }
 
 .settings-menu-item strong,
@@ -4637,7 +4638,7 @@ body {
 }
 
 .settings-menu-item strong {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 950;
   white-space: nowrap;
 }
@@ -4645,9 +4646,9 @@ body {
 .settings-menu-item small {
   margin-top: 1px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.15;
   white-space: nowrap;
 }
 
@@ -4660,63 +4661,35 @@ body {
   overflow: hidden;
 }
 
-.settings-content-head {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 64px;
-  margin-bottom: 14px;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: #fff;
-  box-shadow: var(--shadow);
-}
-
-.settings-content-head h2 {
-  margin: 0;
-  color: var(--text);
-  font-size: 20px;
-  line-height: 1.2;
-}
-
-.settings-content-head p {
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-}
-
 .settings-content-grid {
   flex: 1 1 auto;
   min-height: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(260px, 1fr));
-  gap: 16px;
+  gap: 18px;
   min-width: 0;
   align-content: start;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-right: 4px;
+  padding: 0 4px 8px 0;
 }
 
 .settings-shell-card {
   min-width: 0;
-  min-height: 210px;
+  min-height: 218px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 18px;
+  gap: 16px;
+  padding: 20px 20px 24px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #fff;
-  box-shadow: var(--shadow);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, .055);
 }
 
 .settings-shell-card .btn {
   align-self: flex-start;
-  margin-top: auto;
+  margin-top: 4px;
 }
 
 .settings-card-head {
@@ -4724,7 +4697,7 @@ body {
   grid-template-columns: 38px minmax(0, 1fr);
   gap: 12px;
   align-items: start;
-  margin-bottom: 0;
+  margin-bottom: 2px;
 }
 
 .settings-card-head h3 {
@@ -4761,7 +4734,7 @@ body {
 
 .settings-detail-list {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -4771,7 +4744,7 @@ body {
   min-height: 34px;
   display: flex;
   align-items: center;
-  padding: 8px 10px;
+  padding: 9px 11px;
   border: 1px solid #edf2f7;
   border-radius: 10px;
   background: #f8fafc;
@@ -4784,20 +4757,20 @@ body {
 .settings-card-note {
   margin: 0;
   color: #475569;
-  line-height: 1.65;
+  line-height: 1.7;
   font-weight: 750;
 }
 
 .settings-metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
 .settings-metrics span {
   display: grid;
-  gap: 3px;
-  padding: 12px;
+  gap: 5px;
+  padding: 13px;
   border: 1px solid #edf2f7;
   border-radius: 12px;
   background: #f8fafc;
@@ -4816,7 +4789,7 @@ body {
 .settings-status-preview {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 9px;
 }
 
 .settings-chip-list span {

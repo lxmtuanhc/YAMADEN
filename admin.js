@@ -5480,7 +5480,6 @@
   function renderSettings() {
     const activeTab = settingsTabs().some(tab => tab.id === state.settingsTab) ? state.settingsTab : "overview";
     state.settingsTab = activeTab;
-    const activeSettingsTab = settingsTabs().find(tab => tab.id === activeTab) || settingsTabs()[0];
     $("viewRoot").innerHTML = `
       <section class="settings-shell">
         <div class="settings-layout">
@@ -5488,12 +5487,6 @@
             ${settingsTabs().map(renderSettingsMenuItem).join("")}
           </aside>
           <main class="settings-content-panel">
-            <header class="settings-content-head">
-              <div>
-                <h2>${escapeHtml(t(activeSettingsTab.titleKey))}</h2>
-                <p>${escapeHtml(t(activeSettingsTab.subtitleKey))}</p>
-              </div>
-            </header>
             <div class="settings-content-grid">
               ${renderSettingsContent(activeTab)}
             </div>
