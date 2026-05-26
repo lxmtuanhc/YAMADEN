@@ -1289,6 +1289,19 @@ function quoteFileValidationMessage(file) {
   return "";
 }
 
+function quoteFilesValidationMessage(files) {
+  const list = Array.isArray(files) ? files.filter(Boolean) : [];
+  if (!list.length) return "Vui long chon file bao gia.";
+  if (list.length > uploadConfig.QUOTE_MAX_FILES) {
+    return `Chi co the gui toi da ${uploadConfig.QUOTE_MAX_FILES} file bao gia.`;
+  }
+  for (const file of list) {
+    const error = quoteFileValidationMessage(file);
+    if (error) return error;
+  }
+  return "";
+}
+
 function requestUploadMiddleware(req, res, next) {
   upload.array("image", uploadConfig.CUSTOMER_MAX_FILES)(req, res, error => {
     if (!error) return next();
@@ -1321,11 +1334,11 @@ function requestUploadMiddleware(req, res, next) {
 }
 
 function quoteUploadMiddleware(req, res, next) {
-  quoteFileUpload.single("file")(req, res, error => {
+  quoteFileUpload.array("file", uploadConfig.QUOTE_MAX_FILES)(req, res, error => {
     if (!error) return next();
     const message = error.code === "LIMIT_FILE_SIZE"
       ? "File báo giá vượt quá dung lượng cho phép."
-      : error.code === "LIMIT_FILE_COUNT"
+      : error.code === "LIMIT_FILE_COUNT" || error.code === "LIMIT_UNEXPECTED_FILE"
         ? `Chỉ có thể upload tối đa ${uploadConfig.QUOTE_MAX_FILES} file báo giá.`
         : error.message || "Upload quote file failed";
     return res.status(400).json({
@@ -2480,19 +2493,17 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddl
   try {
     const request = await findRequestByAnyId(req.params.requestId);
     if (!request) return res.status(404).json({ ok: false, message: "Request not found" });
-    const quoteFileError = quoteFileValidationMessage(req.file);
+    const uploadFiles = Array.isArray(req.files) ? req.files : (req.file ? [req.file] : []);
+    const quoteFileError = quoteFilesValidationMessage(uploadFiles);
     if (quoteFileError) return res.status(400).json({ ok: false, message: quoteFileError });
     const requestNo = await ensureRequestCode(request);
-    const saved = saveQuoteUploadFile(req.file, requestNo);
-    const requestKeys = [String(request._id || ""), request.id, request.requestCode, request.requestNo, request.code, request.requestId].filter(Boolean);
-    let quote = await Quote.findOne({
-      requestId: { $in: requestKeys },
-      isDeleted: { $ne: true },
-      fileUrl: { $nin: [null, ""] }
-    }).sort({ createdAt: -1 });
     const now = new Date();
-    const payload = {
-      id: quote?.id || `${requestNo}-quote-file`,
+    const quotes = [];
+    for (const [index, file] of uploadFiles.entries()) {
+      const saved = saveQuoteUploadFile(file, requestNo);
+      const quoteId = `${requestNo}-quote-file-${Date.now()}-${index + 1}`;
+      const payload = {
+      id: quoteId,
       quoteCode: requestNo,
       quoteNo: requestNo,
       quoteNumber: requestNo,
@@ -2527,24 +2538,26 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddl
       sentAt: now,
       fileUrl: saved.fileUrl,
       filePath: saved.filePath,
-      originalName: req.file.originalname,
+      originalName: file.originalname,
       fileName: saved.fileName,
-      mimeType: req.file.mimetype,
-      fileSize: req.file.size,
+      mimeType: file.mimetype,
+      fileSize: file.size,
       ext: saved.ext,
       updatedAt: now
-    };
-    if (!quote) quote = new Quote({ ...payload, createdAt: now });
-    else Object.assign(quote, payload);
-    await quote.save();
+      };
+      const quote = new Quote({ ...payload, createdAt: now });
+      await quote.save();
+      quotes.push(quote);
+    }
 
-    request.quoteId = quote._id;
+    request.quoteId = quotes[0]?._id || request.quoteId;
     request.quoteRequested = true;
     request.quotedAt = request.quotedAt || now;
     if (typeof request.status === "string") request.status = "quoted";
     await request.save();
 
-    res.json({ ok: true, quote: quote.toObject(), data: quote.toObject(), request: request.toObject() });
+    const data = quotes.map(quote => quote.toObject());
+    res.json({ ok: true, quote: data[0] || null, quotes: data, data, request: request.toObject() });
   } catch (error) {
     console.error("Quote file upload failed:", error);
     res.status(500).json({ ok: false, message: error.message || "Quote file upload failed" });

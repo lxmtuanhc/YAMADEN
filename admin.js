@@ -8,6 +8,7 @@
   const TOKEN_MAX_AGE = 24 * 60 * 60 * 1000;
   const ADMIN_PATH = "/admin.html";
   const QUOTE_MAX_FILE_SIZE = 25 * 1024 * 1024;
+  const QUOTE_MAX_FILES = 3;
   const QUOTE_ALLOWED_EXTENSIONS = [".pdf", ".xlsx", ".xls", ".docx", ".doc"];
 
   const i18n = {
@@ -1536,6 +1537,7 @@
     selectedStaff: null,
     selectedQuoteId: null,
     quoteWizardStep: 1,
+    quoteSelectedFiles: [],
     staffStatusUpdating: new Set(),
     errors: {},
     loading: {
@@ -1644,9 +1646,10 @@
       });
       return requestJson("/admin/quote-requests" + (query.toString() ? "?" + query.toString() : ""));
     },
-    uploadRequestQuoteFile(requestId, file) {
+    uploadRequestQuoteFile(requestId, files) {
       const formData = new FormData();
-      formData.append("file", file);
+      const list = Array.isArray(files) ? files : [files].filter(Boolean);
+      list.forEach(file => formData.append("file", file));
       return requestJson("/admin/requests/" + encodeURIComponent(requestId) + "/quote-file", {
         method: "POST",
         body: formData
@@ -4823,7 +4826,6 @@
     quote = quoteFileFlowState(quote);
     window.currentQuoteDetail = quote;
     const currentStep = Math.min(2, Math.max(1, Number(state.quoteWizardStep || 1)));
-    const selectedFileName = state.quoteSelectedFile?.name || quote.originalName || quote.fileName || "";
     openDrawer(`
       <article class="drawer-panel quote-detail-drawer quote-wizard-modal">
         <header class="drawer-head drawer-header quote-workspace-head">
@@ -4857,14 +4859,13 @@
               <h3>${escapeHtml(state.lang === "vi" ? "B\u00e1o gi\u00e1" : "\u898b\u7a4d")}</h3>
               <section class="quote-work-card">
                 <div class="quote-file-dropzone" data-quote-file-dropzone role="button" tabindex="0">
-                  <input class="quote-file-input-hidden" type="file" data-quote-file-input accept=".pdf,.xls,.xlsx,.doc,.docx">
+                  <input class="quote-file-input-hidden" type="file" data-quote-file-input accept=".pdf,.xls,.xlsx,.doc,.docx" multiple>
                   <div class="quote-drop-icon">\u21e7</div>
-                  <strong>${escapeHtml(state.lang === "vi" ? "K\u00e9o th\u1ea3 file b\u00e1o gi\u00e1 v\u00e0o \u0111\u00e2y" : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u3053\u3053\u306b\u30c9\u30ed\u30c3\u30d7")}</strong>
-                  <span>${escapeHtml(state.lang === "vi" ? "ho\u1eb7c b\u1ea5m \u0111\u1ec3 ch\u1ecdn file" : "\u307e\u305f\u306f\u30af\u30ea\u30c3\u30af\u3057\u3066\u9078\u629e")}</span>
-                  <small>${escapeHtml(state.lang === "vi" ? "PDF bao gia toi da 25MB. Co the dung Excel/Word neu can." : "Quote PDF max 25MB. Excel/Word is also allowed.")}</small>
+                  <strong>${escapeHtml(state.lang === "vi" ? "Keo tha hoac chon file bao gia" : "Drop or select quote files")}</strong>
+                  <span>${escapeHtml(state.lang === "vi" ? "Toi da 3 file. PDF/Excel/Word, toi da 25MB/file." : "Up to 3 files. PDF/Excel/Word, max 25MB/file.")}</span>
                 </div>
-                <div class="quote-selected-file" data-quote-selected-file>${selectedFileName ? escapeHtml(selectedFileName) : escapeHtml(state.lang === "vi" ? "Ch\u01b0a ch\u1ecdn file." : "\u30d5\u30a1\u30a4\u30eb\u672a\u9078\u629e")}</div>
-                ${quote.fileUrl ? `<div class="quote-existing-file"><a class="btn btn-soft" href="${escapeHtml(quote.fileUrl)}" target="_blank" rel="noopener">${escapeHtml(state.lang === "vi" ? "Xem file \u0111\u00e3 g\u1eedi" : "\u9001\u4fe1\u6e08\u307f\u30d5\u30a1\u30a4\u30eb\u3092\u8868\u793a")}</a></div>` : ""}
+                <div class="quote-selected-files" data-quote-selected-files>${renderSelectedQuoteFiles()}</div>
+                ${renderExistingQuoteFiles(quote)}
               </section>
             </section>
           </div>
@@ -4882,7 +4883,8 @@
   function quoteFileFlowState(source) {
     const request = source || {};
     const displayId = getRequestDisplayId(request) || request.requestNo || request.requestId || request.quoteNo || "";
-    const latest = toList(request.quoteFiles)[0] || request;
+    const files = toList(request.quoteFiles);
+    const latest = files[0] || request;
     return {
       useFileFlow: true,
       id: getRowId(request) || request.id || request._id || "",
@@ -4898,7 +4900,8 @@
       assigneeName: getAssigneeName(request) || request.assigneeName || "",
       createdAt: request.createdAt || "",
       fileUrl: latest.fileUrl || latest.pdfUrl || "",
-      originalName: latest.originalName || latest.fileName || ""
+      originalName: latest.originalName || latest.fileName || "",
+      quoteFiles: files
     };
   }
 
@@ -6064,6 +6067,7 @@
       await closeRequestDetail(true);
       state.quoteWizardStep = 1;
       state.quoteSelectedFile = null;
+      state.quoteSelectedFiles = [];
       renderQuoteDetail(sourceRequest);
     } catch (error) {
       console.error(error);
@@ -6071,20 +6075,132 @@
     }
   }
 
-  function setSelectedQuoteFile(file) {
-    if (file) {
-      const ext = "." + String(file.name || "").split(".").pop().toLowerCase();
-      if (!QUOTE_ALLOWED_EXTENSIONS.includes(ext)) {
-        toast(state.lang === "vi" ? "File bao gia khong duoc ho tro." : "Quote file type is not supported.");
-        file = null;
-      } else if (file.size > QUOTE_MAX_FILE_SIZE) {
-        toast(state.lang === "vi" ? "File bao gia vuot qua dung luong cho phep." : "Quote file exceeds the allowed size.");
-        file = null;
-      }
+  function quoteSelectedFiles() {
+    if (Array.isArray(state.quoteSelectedFiles)) return state.quoteSelectedFiles.filter(Boolean);
+    return state.quoteSelectedFile ? [state.quoteSelectedFile] : [];
+  }
+
+  function quoteFileSizeLabel(size) {
+    const bytes = Number(size || 0);
+    if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(bytes >= 10 * 1024 * 1024 ? 0 : 1) + "MB";
+    if (bytes >= 1024) return Math.max(1, Math.round(bytes / 1024)) + "KB";
+    return bytes + "B";
+  }
+
+  function quoteFileExtension(file) {
+    const name = String(file?.name || file?.originalName || file?.fileName || "");
+    const dot = name.lastIndexOf(".");
+    return dot >= 0 ? name.slice(dot).toLowerCase() : "";
+  }
+
+  function quoteFileIcon(file) {
+    const ext = quoteFileExtension(file);
+    if (ext === ".pdf") return "PDF";
+    if (ext === ".xlsx" || ext === ".xls") return "XLS";
+    if (ext === ".docx" || ext === ".doc") return "DOC";
+    return "FILE";
+  }
+
+  function validateQuoteFile(file) {
+    if (!file) return state.lang === "vi" ? "Vui long chon file bao gia." : "Please select a quote file.";
+    const ext = quoteFileExtension(file);
+    if (!QUOTE_ALLOWED_EXTENSIONS.includes(ext)) {
+      return state.lang === "vi"
+        ? `File ${file.name || ""} khong duoc ho tro. Vui long chon PDF, Excel hoac Word.`
+        : `File ${file.name || ""} is not supported. Please select PDF, Excel or Word.`;
     }
-    state.quoteSelectedFile = file || null;
-    const label = document.querySelector("[data-quote-selected-file]");
-    if (label) label.textContent = file ? file.name : (state.lang === "vi" ? "Ch\u01b0a ch\u1ecdn file." : "\u30d5\u30a1\u30a4\u30eb\u672a\u9078\u629e");
+    if (Number(file.size || 0) > QUOTE_MAX_FILE_SIZE) {
+      return state.lang === "vi"
+        ? `File ${file.name || ""} vuot qua dung luong cho phep 25MB.`
+        : `File ${file.name || ""} exceeds the 25MB limit.`;
+    }
+    return "";
+  }
+
+  function quoteFileKey(file) {
+    return [file?.name || "", file?.size || 0, file?.lastModified || ""].join(":");
+  }
+
+  function renderSelectedQuoteFiles() {
+    const files = quoteSelectedFiles();
+    if (!files.length) {
+      return `<div class="quote-selected-empty">${escapeHtml(state.lang === "vi" ? "Chua chon file bao gia." : "No quote file selected.")}</div>`;
+    }
+    return `<div class="quote-selected-file-list">${files.map((file, index) => `
+      <div class="quote-selected-file-row" data-selected-quote-file-row="${index}">
+        <span class="quote-file-type">${escapeHtml(quoteFileIcon(file))}</span>
+        <span class="quote-file-name">${escapeHtml(file.name || "")}</span>
+        <span class="quote-file-size">${escapeHtml(quoteFileSizeLabel(file.size))}</span>
+        <button class="quote-file-remove" type="button" data-quote-remove-file="${index}" aria-label="Remove file">&times;</button>
+      </div>
+    `).join("")}</div>`;
+  }
+
+  function renderExistingQuoteFiles(quote) {
+    const files = toList(quote.quoteFiles).filter(file => file.fileUrl || file.pdfUrl);
+    if (!files.length && (quote.fileUrl || quote.pdfUrl)) files.push(quote);
+    if (!files.length) return "";
+    return `<div class="quote-existing-file-list">
+      <strong>${escapeHtml(state.lang === "vi" ? "File da gui" : "Sent files")}</strong>
+      ${files.map(file => {
+        const name = file.originalName || file.fileName || "Quote file";
+        const url = file.fileUrl || file.pdfUrl || "#";
+        return `<a class="quote-existing-file-row" href="${escapeHtml(url)}" target="_blank" rel="noopener">
+          <span class="quote-file-type">${escapeHtml(quoteFileIcon(file))}</span>
+          <span class="quote-file-name">${escapeHtml(name)}</span>
+          <span class="quote-file-size">${escapeHtml(file.fileSize ? quoteFileSizeLabel(file.fileSize) : "")}</span>
+        </a>`;
+      }).join("")}
+    </div>`;
+  }
+
+  function updateSelectedQuoteFilesUI() {
+    const holder = document.querySelector("[data-quote-selected-files]");
+    if (holder) holder.innerHTML = renderSelectedQuoteFiles();
+  }
+
+  function addSelectedQuoteFiles(files) {
+    const incoming = Array.from(files || []).filter(Boolean);
+    if (!incoming.length) return;
+    const selected = quoteSelectedFiles();
+    const keys = new Set(selected.map(quoteFileKey));
+    const incomingUnique = incoming.filter(file => {
+      const key = quoteFileKey(file);
+      if (keys.has(key)) return false;
+      keys.add(key);
+      return true;
+    });
+    if (!incomingUnique.length) return;
+    if (selected.length + incomingUnique.length > QUOTE_MAX_FILES) {
+      toast(state.lang === "vi" ? "Chi co the gui toi da 3 file bao gia." : "You can send up to 3 quote files.");
+      return;
+    }
+    for (const file of incomingUnique) {
+      const error = validateQuoteFile(file);
+      if (error) {
+        toast(error);
+        continue;
+      }
+      selected.push(file);
+    }
+    state.quoteSelectedFiles = selected;
+    state.quoteSelectedFile = selected[0] || null;
+    updateSelectedQuoteFilesUI();
+  }
+
+  function removeSelectedQuoteFile(index) {
+    const selected = quoteSelectedFiles();
+    selected.splice(Number(index), 1);
+    state.quoteSelectedFiles = selected;
+    state.quoteSelectedFile = selected[0] || null;
+    updateSelectedQuoteFilesUI();
+  }
+
+  function setSelectedQuoteFile(file) {
+    state.quoteSelectedFiles = [];
+    state.quoteSelectedFile = null;
+    if (file) addSelectedQuoteFiles([file]);
+    else updateSelectedQuoteFilesUI();
   }
 
   async function openRequestQuote(requestId, step = 1) {
@@ -6093,27 +6209,34 @@
     if (!request) request = await AdminAPI.getRequest(requestId);
     state.quoteWizardStep = step;
     state.quoteSelectedFile = null;
+    state.quoteSelectedFiles = [];
     renderQuoteDetail(request);
   }
 
   async function sendQuoteFileFromModal() {
     const quote = window.currentQuoteDetail;
-    const file = state.quoteSelectedFile;
+    const files = quoteSelectedFiles();
     if (!quote?.requestMongoId) {
       toast(state.lang === "vi" ? "Kh\u00f4ng t\u00ecm th\u1ea5y y\u00eau c\u1ea7u." : "\u4f9d\u983c\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3002");
       return;
     }
-    if (!file) {
+    if (!files.length) {
       toast(state.lang === "vi" ? "Vui long chon file bao gia." : "Please select a quote file.");
       return;
     }
-    if (file.size > QUOTE_MAX_FILE_SIZE) {
-      toast(state.lang === "vi" ? "File bao gia vuot qua dung luong cho phep." : "Quote file exceeds the allowed size.");
+    if (files.length > QUOTE_MAX_FILES) {
+      toast(state.lang === "vi" ? "Chi co the gui toi da 3 file bao gia." : "You can send up to 3 quote files.");
+      return;
+    }
+    const invalid = files.map(validateQuoteFile).find(Boolean);
+    if (invalid) {
+      toast(invalid);
       return;
     }
     try {
-      const response = await AdminAPI.uploadRequestQuoteFile(quote.requestMongoId, file);
+      const response = await AdminAPI.uploadRequestQuoteFile(quote.requestMongoId, files);
       state.quoteSelectedFile = null;
+      state.quoteSelectedFiles = [];
       if (response.request) {
         const id = getRowId(response.request);
         const index = state.requests.findIndex(item => getRowId(item) === id || getRequestDisplayId(item) === getRequestDisplayId(response.request));
@@ -6803,7 +6926,8 @@
     bind(document, "change", async event => {
       const quoteFileInput = event.target.closest("[data-quote-file-input]");
       if (quoteFileInput) {
-        setSelectedQuoteFile(quoteFileInput.files?.[0] || null);
+        addSelectedQuoteFiles(quoteFileInput.files || []);
+        quoteFileInput.value = "";
         return;
       }
       const staffForm = event.target.closest("#staffForm");
@@ -6870,7 +6994,7 @@
       if (!dropzone) return;
       event.preventDefault();
       dropzone.classList.remove("is-dragover");
-      setSelectedQuoteFile(event.dataTransfer?.files?.[0] || null);
+      addSelectedQuoteFiles(event.dataTransfer?.files || []);
     });
 
     bind(document, "click", async event => {
@@ -6929,6 +7053,11 @@
       const quoteDropzone = event.target.closest("[data-quote-file-dropzone]");
       if (quoteDropzone && !event.target.closest("[data-quote-file-input]")) {
         quoteDropzone.querySelector("[data-quote-file-input]")?.click();
+        return;
+      }
+      const removeQuoteFileButton = event.target.closest("[data-quote-remove-file]");
+      if (removeQuoteFileButton) {
+        removeSelectedQuoteFile(removeQuoteFileButton.dataset.quoteRemoveFile);
         return;
       }
       if (event.target.closest("[data-quote-send-file]")) {

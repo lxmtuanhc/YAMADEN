@@ -6,7 +6,7 @@ const uploadConfig = {
   IMAGE_MAX_SIZE_MB: 10,
   DOCUMENT_MAX_SIZE_MB: 25,
   VIDEO_MAX_SIZE_MB: 100,
-  QUOTE_MAX_FILES: 1,
+  QUOTE_MAX_FILES: 3,
   QUOTE_MAX_FILE_SIZE_MB: 25,
   ALLOWED_IMAGE_EXTENSIONS: [".jpg", ".jpeg", ".png", ".webp"],
   ALLOWED_VIDEO_EXTENSIONS: [".mp4", ".mov"],

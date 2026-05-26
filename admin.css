@@ -5302,11 +5302,83 @@ body {
   line-height: 1;
 }
 
-.quote-selected-file,
-.quote-existing-file {
+.quote-selected-files,
+.quote-existing-file-list {
   margin-top: 12px;
   color: var(--muted, #64748b);
   font-weight: 800;
+}
+
+.quote-selected-empty {
+  padding: 14px 16px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.quote-selected-file-list,
+.quote-existing-file-list {
+  display: grid;
+  gap: 10px;
+}
+
+.quote-selected-file-row,
+.quote-existing-file-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  background: #fff;
+  color: #0f172a;
+  text-decoration: none;
+}
+
+.quote-existing-file-row {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.quote-file-type {
+  min-width: 44px;
+  padding: 5px 8px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.quote-file-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quote-file-size {
+  color: var(--muted, #64748b);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.quote-file-remove {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.quote-file-remove:hover {
+  background: #fecaca;
 }
 
 @media (max-width: 900px) {
