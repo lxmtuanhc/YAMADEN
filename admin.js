@@ -1109,6 +1109,8 @@
     settingsOverviewSub: "\u4e3b\u8981\u8a2d\u5b9a",
     settingsStaffWork: "\u30b9\u30bf\u30c3\u30d5\u30fb\u696d\u52d9",
     settingsStaffWorkSub: "\u90e8\u9580\u3001\u696d\u52d9\u5185\u5bb9",
+    settingsAiAssist: "AI\u30b5\u30dd\u30fc\u30c8",
+    settingsAiAssistSub: "AI\u5206\u6790\u3001\u62c5\u5f53\u8005\u5272\u308a\u5f53\u3066",
     settingsQuoteTax: "\u898b\u7a4d\u30fb\u7a0e",
     settingsQuoteTaxSub: "\u898b\u7a4d\u66f8\u3001\u7a0e\u3001\u4fa1\u683c",
     settingsRequestStatus: "\u4f9d\u983c\u30fb\u30b9\u30c6\u30fc\u30bf\u30b9",
@@ -1205,6 +1207,8 @@
     settingsOverviewSub: "C\u1ea5u h\u00ecnh ch\u00ednh",
     settingsStaffWork: "Nh\u00e2n vi\u00ean & c\u00f4ng vi\u1ec7c",
     settingsStaffWorkSub: "B\u1ed9 ph\u1eadn, n\u1ed9i dung c\u00f4ng vi\u1ec7c",
+    settingsAiAssist: "AI h\u1ed7 tr\u1ee3",
+    settingsAiAssistSub: "AI ph\u00e2n t\u00edch, ph\u00e2n c\u00f4ng",
     settingsQuoteTax: "B\u00e1o gi\u00e1 & thu\u1ebf",
     settingsQuoteTaxSub: "M\u1eabu b\u00e1o gi\u00e1, thu\u1ebf, gi\u00e1",
     settingsRequestStatus: "Y\u00eau c\u1ea7u & tr\u1ea1ng th\u00e1i",
@@ -5480,13 +5484,6 @@
     state.settingsTab = activeTab;
     $("viewRoot").innerHTML = `
       <section class="settings-shell">
-        <header class="settings-page-head">
-          <div>
-            <p class="eyebrow">YAMADEN ADMIN</p>
-            <h2>${escapeHtml(t("settingsSystemTitle"))}</h2>
-            <p>${escapeHtml(t("settingsSystemSubtitle"))}</p>
-          </div>
-        </header>
         <div class="settings-layout">
           <aside class="settings-menu-card" aria-label="${escapeHtml(t("settingsSystemTitle"))}">
             ${settingsTabs().map(renderSettingsMenuItem).join("")}
@@ -5502,6 +5499,7 @@
     return [
       ["overview", "dashboard", "settingsOverview", "settingsOverviewSub"],
       ["staffWork", "users", "settingsStaffWork", "settingsStaffWorkSub"],
+      ["aiAssist", "sparkles", "settingsAiAssist", "settingsAiAssistSub"],
       ["quoteTax", "receipt", "settingsQuoteTax", "settingsQuoteTaxSub"],
       ["requestStatus", "clipboard", "settingsRequestStatus", "settingsRequestStatusSub"],
       ["customers", "userCheck", "settingsCustomers", "settingsCustomersSub"],
@@ -5530,6 +5528,7 @@
       users: `<svg ${attrs}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.8"/><path d="M16 3.2a4 4 0 0 1 0 7.6"/></svg>`,
       receipt: `<svg ${attrs}><path d="M7 3h10a2 2 0 0 1 2 2v16l-3-2-3 2-3-2-3 2-2-1.3V5a2 2 0 0 1 2-2z"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h3"/></svg>`,
       clipboard: `<svg ${attrs}><path d="M9 5h6"/><path d="M9 3h6v4H9z"/><path d="M7 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><path d="m8 13 2 2 5-5"/><path d="M8 18h7"/></svg>`,
+      sparkles: `<svg ${attrs}><path d="m12 3 1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="m19 14 .8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z"/><path d="m5 14 1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/></svg>`,
       userCheck: `<svg ${attrs}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg>`,
       bell: `<svg ${attrs}><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>`,
       palette: `<svg ${attrs}><path d="M12 22a10 10 0 1 1 10-10c0 2.2-1.8 4-4 4h-1.5a2 2 0 0 0-1.7 3l.2.4A1.8 1.8 0 0 1 13.4 22H12z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/><circle cx="16.5" cy="11" r="1"/></svg>`,
@@ -5565,6 +5564,7 @@
     const renderers = {
       overview: renderSettingsOverview,
       staffWork: renderSettingsStaffWork,
+      aiAssist: renderSettingsAiAssist,
       quoteTax: renderSettingsQuoteTax,
       requestStatus: renderSettingsRequestStatus,
       customers: renderSettingsCustomers,
@@ -5609,6 +5609,17 @@
       settingCard("users", t("department"), t("departmentsCardDesc"), t("inUse"), "is-live", `<div class="settings-metrics"><span><b>${departments.length || preview.length}</b>${escapeHtml(t("totalDepartments"))}</span><span><b>${departments.length}</b>${escapeHtml(t("currentlyUsed"))}</span></div><div class="settings-chip-list">${preview.map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("manageLater"))}</button>`),
       settingCard("clipboard", t("workTypes"), t("workTypesDesc"), types.length ? t("inUse") : t("linkLater"), types.length ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${types.length}</b>${escapeHtml(t("workTypes"))}</span><span><b>${escapeHtml(t("staff"))}</b>${escapeHtml(t("workMasterLinked"))}</span></div><button class="btn btn-soft" type="button" disabled>${escapeHtml(t("manageLater"))}</button>`),
       settingCard("shield", t("autoAssign"), [t("autoAssignDesc"), t("department"), t("workTypes"), t("status")], t("inUse"), "is-live")
+    ].join("");
+  }
+
+  function renderSettingsAiAssist() {
+    return [
+      settingCard("sparkles", t("settingsAiAssist"), [
+        state.lang === "vi" ? "Ph\u00e2n t\u00edch ti\u00eau \u0111\u1ec1, m\u00f4 t\u1ea3 v\u00e0 \u0111\u1ecba ch\u1ec9" : "\u30bf\u30a4\u30c8\u30eb\u30fb\u8a73\u7d30\u30fb\u4f4f\u6240\u3092\u5206\u6790",
+        state.lang === "vi" ? "G\u1ee3i \u00fd ph\u00e2n lo\u1ea1i v\u00e0 \u0111\u1ed9 kh\u1ea9n c\u1ea5p" : "\u5206\u985e\u3068\u7dca\u6025\u5ea6\u306e\u5019\u88dc\u3092\u63d0\u6848",
+        state.lang === "vi" ? "G\u1ee3i \u00fd ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch ban \u0111\u1ea7u" : "\u521d\u671f\u62c5\u5f53\u8005\u5019\u88dc\u3092\u63d0\u6848"
+      ], t("prepareLater"), "is-planned", `<button class="btn btn-soft" type="button" disabled>${escapeHtml(t("prepareLater"))}</button>`),
+      settingCard("shield", state.lang === "vi" ? "Quy\u1ec1n quy\u1ebft \u0111\u1ecbnh" : "\u6700\u7d42\u5224\u65ad", state.lang === "vi" ? "AI ch\u1ec9 h\u1ed7 tr\u1ee3 b\u01b0\u1edbc \u0111\u1ea7u. Admin v\u1eabn c\u00f3 quy\u1ec1n \u0111\u1ed5i ph\u1ee5 tr\u00e1ch, tr\u1ea1ng th\u00e1i v\u00e0 lu\u1ed3ng x\u1eed l\u00fd." : "AI\u306f\u521d\u671f\u5224\u65ad\u306e\u88dc\u52a9\u306e\u307f\u3067\u3059\u3002\u62c5\u5f53\u8005\u3001\u30b9\u30c6\u30fc\u30bf\u30b9\u3001\u5bfe\u5fdc\u30d5\u30ed\u30fc\u306f\u7ba1\u7406\u8005\u304c\u6700\u7d42\u6c7a\u5b9a\u3057\u307e\u3059\u3002", t("linkLater"), "is-planned")
     ].join("");
   }
 

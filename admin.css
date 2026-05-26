@@ -4518,7 +4518,7 @@ body {
 
 .settings-shell {
   display: grid;
-  gap: 18px;
+  gap: 0;
   min-width: 0;
 }
 
@@ -4553,7 +4553,10 @@ body {
 
 .settings-menu-card {
   position: sticky;
-  top: 96px;
+  top: 88px;
+  max-height: calc(100vh - 104px);
+  overflow-y: auto;
+  align-self: start;
   display: grid;
   gap: 8px;
   padding: 10px;
