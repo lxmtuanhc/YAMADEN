@@ -10,7 +10,6 @@ const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const nodemailer = require("nodemailer");
 const { createQuotationPdf, normalizeQuoteForPdf, quotePdfFileName } = require("./lib/quotationPdf");
 
 const app = express();
@@ -84,14 +83,10 @@ const USER_JWT_SECRET = process.env.USER_JWT_SECRET || JWT_SECRET;
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || "";
 const SLACK_ENABLED = false;
 const ADMIN_URL = process.env.ADMIN_URL || "https://yamaden.onrender.com/admin.html";
-const ADMIN_NOTIFICATION_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || "tuan@w-yamaden.jp";
+const MAIL_PROVIDER = process.env.MAIL_PROVIDER || "";
+const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
+const ADMIN_NOTIFICATION_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || "lxmtuanhc@gmail.com";
 const MAIL_FROM = process.env.MAIL_FROM || "";
-const SMTP_HOST = process.env.SMTP_HOST || "";
-const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
-const SMTP_USER = process.env.SMTP_USER || "";
-const SMTP_PASS = process.env.SMTP_PASS || "";
-let mailTransporter = null;
-let mailConfigLogged = false;
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
@@ -171,46 +166,43 @@ function mailValue(value, fallback = "-") {
   return text || fallback;
 }
 
-function getMailTransporter() {
-  if (!SMTP_HOST || !MAIL_FROM || !ADMIN_NOTIFICATION_EMAIL) {
+async function sendEmailNotification({ to = ADMIN_NOTIFICATION_EMAIL, subject, text }) {
+  const provider = RESEND_API_KEY ? "resend" : MAIL_PROVIDER || "none";
+  console.log("[MAIL_PROVIDER]", provider);
+  if (!RESEND_API_KEY || provider !== "resend") {
     console.log("[MAIL_ERROR] Failed to send email notification", {
-      reason: "SMTP config missing",
-      SMTP_HOST: Boolean(SMTP_HOST),
+      reason: "Resend is not configured",
+      MAIL_PROVIDER: provider,
+      MAIL_FROM: Boolean(MAIL_FROM),
+      ADMIN_NOTIFICATION_EMAIL: Boolean(ADMIN_NOTIFICATION_EMAIL),
+      RESEND_API_KEY: Boolean(RESEND_API_KEY)
+    });
+    return false;
+  }
+  if (!MAIL_FROM || !ADMIN_NOTIFICATION_EMAIL) {
+    console.log("[MAIL_ERROR] Failed to send email notification", {
+      reason: "Mail sender or recipient missing",
       MAIL_FROM: Boolean(MAIL_FROM),
       ADMIN_NOTIFICATION_EMAIL: Boolean(ADMIN_NOTIFICATION_EMAIL)
     });
-    return null;
+    return false;
   }
-  if (mailTransporter) return mailTransporter;
-  const secure = SMTP_PORT === 465;
-  if (!mailConfigLogged) {
-    console.log("[MAIL_CONFIG] SMTP config loaded", {
-      SMTP_HOST: Boolean(SMTP_HOST),
-      SMTP_PORT,
-      MAIL_FROM: Boolean(MAIL_FROM),
-      ADMIN_NOTIFICATION_EMAIL,
-      secure
-    });
-    mailConfigLogged = true;
+  console.log("[MAIL_START] Sending email notification");
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ from: MAIL_FROM, to, subject, text })
+  });
+  if (!response.ok) {
+    let detail = "";
+    try {
+      detail = await response.text();
+    } catch {}
+    throw new Error(`Resend API failed: ${response.status} ${truncateText(detail, 300)}`);
   }
-  mailTransporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: SMTP_PORT,
-    secure,
-    auth: SMTP_USER || SMTP_PASS ? { user: SMTP_USER, pass: SMTP_PASS } : undefined
-  });
-  return mailTransporter;
-}
-
-async function sendEmailNotification({ to = ADMIN_NOTIFICATION_EMAIL, subject, text }) {
-  const transporter = getMailTransporter();
-  if (!transporter) return false;
-  await transporter.sendMail({
-    from: MAIL_FROM,
-    to,
-    subject,
-    text
-  });
   return true;
 }
 
@@ -241,7 +233,44 @@ function normalizeRequestMediaForMail(request) {
     .filter(Boolean);
 }
 
+function newRequestMailPayload(request, context) {
+  return {
+    subject: `\u3010YAMADEN\u3011\u65b0\u3057\u3044\u4f9d\u983c\u304c\u5c4a\u304d\u307e\u3057\u305f\uff08${context.requestNo}\uff09`,
+    text: [
+      "\u65b0\u3057\u3044\u4f9d\u983c\u304c\u5c4a\u304d\u307e\u3057\u305f\u3002",
+      "",
+      `\u4f9d\u983cID: ${mailValue(context.requestNo)}`,
+      `\u304a\u5ba2\u69d8\u540d: ${mailValue(context.customerName)}`,
+      `\u4f1a\u793e\u540d: ${mailValue(context.companyName)}`,
+      `\u96fb\u8a71\u756a\u53f7: ${mailValue(context.phone)}`,
+      `\u4f4f\u6240: ${mailValue(context.address)}`,
+      `\u4f9d\u983c\u5185\u5bb9: ${mailValue(truncateText(context.content, 500))}`,
+      `\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb: ${context.hasAttachments ? "\u3042\u308a" : "\u306a\u3057"}`,
+      `\u9001\u4fe1\u65e5\u6642: ${formatMailDate(request?.createdAt || new Date())}`,
+      "",
+      "\u7ba1\u7406\u753b\u9762\u3067\u8a73\u7d30\u3092\u78ba\u8a8d\u3057\u3066\u304f\u3060\u3055\u3044\u3002"
+    ].join("\n")
+  };
+}
+
 function notifyAdminEmail(kind, payload = {}) {
+  if (kind !== "request_created") return;
+  Promise.resolve()
+    .then(async () => {
+      const context = await requestNotificationContext(payload.request);
+      return sendEmailNotification(newRequestMailPayload(payload.request, context));
+    })
+    .then(sent => {
+      if (sent) console.log("[MAIL_SENT] Email notification sent");
+    })
+    .catch(error => {
+      console.log("[MAIL_ERROR] Failed to send email notification", {
+        kind,
+        message: error.message
+      });
+    });
+  return;
+
   Promise.resolve()
     .then(async () => {
       if (kind === "request_created") {
@@ -2437,7 +2466,6 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteFileUpload.
     request.quotedAt = request.quotedAt || now;
     if (typeof request.status === "string") request.status = "quoted";
     await request.save();
-    notifyAdminEmail("quote_sent", { request, quote });
 
     res.json({ ok: true, quote: quote.toObject(), data: quote.toObject(), request: request.toObject() });
   } catch (error) {
@@ -3331,8 +3359,6 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
     }
 
     if (!item.requestCode) await ensureRequestCode(item);
-    const previousStatus = normalizeRequestStatus(item.status);
-
     if (req.body.status) {
       item.status = normalizeRequestStatus(req.body.status);
       applyStatusTimestamps(item, item.status);
@@ -3362,10 +3388,6 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
     }
 
     await item.save();
-
-    if (req.body.status && previousStatus !== "quoted" && normalizeRequestStatus(item.status) === "quoted") {
-      notifyAdminEmail("request_quoted", { request: item });
-    }
 
     res.json({
       message: "Updated",
