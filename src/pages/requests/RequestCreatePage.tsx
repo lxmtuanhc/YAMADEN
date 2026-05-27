@@ -1,12 +1,12 @@
-import { FileVideo, Upload, X } from "lucide-react";
+import { FileText, Image as ImageIcon, Upload, Video, X } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
+import { customerFileLimitBytes, isCustomerFileAllowed, uploadConfig } from "../../constants/uploadConfig";
 import { useTranslation } from "../../hooks/useTranslation";
 import { requestService } from "../../services/requestService";
 import { useAppStore } from "../../stores/appStore";
-import { customerFileLimitBytes, isCustomerFileAllowed, uploadConfig } from "../../constants/uploadConfig";
 import { categoryOptions } from "./requestHelpers";
 
 const maxUploadFiles = uploadConfig.CUSTOMER_MAX_FILES;
@@ -26,6 +26,23 @@ function totalFileSize(files: File[]) {
   return files.reduce((sum, file) => sum + file.size, 0);
 }
 
+function formatFileSize(size: number) {
+  if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(size >= 10 * 1024 * 1024 ? 0 : 1)}MB`;
+  if (size >= 1024) return `${Math.max(1, Math.round(size / 1024))}KB`;
+  return `${size}B`;
+}
+
+function fileExtension(file: File) {
+  const index = file.name.lastIndexOf(".");
+  return index >= 0 ? file.name.slice(index + 1).toUpperCase() : "FILE";
+}
+
+function fileIcon(file: File) {
+  if (file.type.startsWith("image/")) return <ImageIcon size={18} />;
+  if (file.type.startsWith("video/")) return <Video size={18} />;
+  return <FileText size={18} />;
+}
+
 export function RequestCreatePage() {
   const { t, language } = useTranslation();
   const navigate = useNavigate();
@@ -38,8 +55,9 @@ export function RequestCreatePage() {
   const [address, setAddress] = useState(user?.address || "");
   const [datetime, setDatetime] = useState("");
   const [selectedMediaFiles, setSelectedMediaFiles] = useState<File[]>([]);
-  const [mediaPreviews, setMediaPreviews] = useState<Array<{ key: string; name: string; type: string; url: string }>>([]);
+  const [mediaPreviews, setMediaPreviews] = useState<Array<{ key: string; url: string }>>([]);
   const [error, setError] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitInFlightRef = useRef(false);
   const mediaInputRef = useRef<HTMLInputElement | null>(null);
@@ -52,12 +70,12 @@ export function RequestCreatePage() {
   }, [user]);
 
   useEffect(() => {
-    const previews = selectedMediaFiles.map(file => ({
-      key: fileKey(file),
-      name: file.name,
-      type: file.type,
-      url: URL.createObjectURL(file)
-    }));
+    const previews = selectedMediaFiles
+      .filter(file => file.type.startsWith("image/") || file.type.startsWith("video/"))
+      .map(file => ({
+        key: fileKey(file),
+        url: URL.createObjectURL(file)
+      }));
     setMediaPreviews(previews);
     return () => {
       previews.forEach(preview => URL.revokeObjectURL(preview.url));
@@ -100,6 +118,9 @@ export function RequestCreatePage() {
         workTypeIds: [],
         departmentCode: ""
       });
+      setSelectedMediaFiles([]);
+      setMediaPreviews([]);
+      if (mediaInputRef.current) mediaInputRef.current.value = "";
       navigate(`/requests/${request.id}`);
     } catch (submitError) {
       console.warn("Request submit failed", submitError);
@@ -110,13 +131,14 @@ export function RequestCreatePage() {
     }
   }
 
-  function handleFileChange(selectedFiles: FileList | null) {
+  function handleFileChange(selectedFiles: FileList | File[] | null) {
     if (!selectedFiles?.length) return;
+    const incomingFiles = Array.from(selectedFiles);
     setSelectedMediaFiles(current => {
       const next = [...current];
-      let hitLimit = false;
       let errorMessage = "";
-      Array.from(selectedFiles).forEach(file => {
+
+      incomingFiles.forEach(file => {
         if (errorMessage) return;
         if (!isCustomerFileAllowed(file)) {
           errorMessage = language === "vi" ? `File ${file.name} không được hỗ trợ.` : `ファイル ${file.name} はサポートされていません。`;
@@ -127,37 +149,37 @@ export function RequestCreatePage() {
           errorMessage = language === "vi" ? `File ${file.name} vượt quá dung lượng cho phép.` : `ファイル ${file.name} は許可サイズを超えています。`;
           return;
         }
-        const duplicate = next.some(item => (
-          item.name === file.name &&
-          item.size === file.size &&
-          item.lastModified === file.lastModified
-        ));
+        const duplicate = next.some(item => fileKey(item) === fileKey(file));
         if (duplicate) return;
-        if (next.length < maxUploadFiles) {
-          next.push(file);
-        } else {
-          hitLimit = true;
+        if (next.length >= maxUploadFiles) {
+          errorMessage = language === "vi" ? "Số lượng file tối đa là 12." : "添付できるファイルは最大12件です。";
+          return;
         }
+        next.push(file);
       });
+
       if (!errorMessage && totalFileSize(next) > uploadConfig.CUSTOMER_MAX_TOTAL_SIZE_MB * 1024 * 1024) {
         errorMessage = language === "vi"
           ? `Tổng dung lượng file vượt quá ${uploadConfig.CUSTOMER_MAX_TOTAL_SIZE_MB}MB.`
           : `添付ファイルの合計サイズが${uploadConfig.CUSTOMER_MAX_TOTAL_SIZE_MB}MBを超えています。`;
       }
-      if (hitLimit) errorMessage = language === "vi" ? "Chỉ có thể đính kèm tối đa 12 file." : "添付できるファイルは最大12件です。";
-      if (errorMessage) setError(errorMessage);
-      else setError("");
+
+      if (errorMessage) {
+        setError(errorMessage);
+        return current;
+      }
+
+      setError("");
       return next;
     });
   }
 
   function removeFile(fileToRemove: File) {
-    setSelectedMediaFiles(current => current.filter(file => (
-      file.name !== fileToRemove.name ||
-      file.size !== fileToRemove.size ||
-      file.lastModified !== fileToRemove.lastModified
-    )));
+    setSelectedMediaFiles(current => current.filter(file => fileKey(file) !== fileKey(fileToRemove)));
+    if (mediaInputRef.current) mediaInputRef.current.value = "";
   }
+
+  const selectedTotalSize = totalFileSize(selectedMediaFiles);
 
   return (
     <section className="page request-create-page">
@@ -206,7 +228,19 @@ export function RequestCreatePage() {
             <input value={datetime} placeholder={t("request.datetimePlaceholder")} onChange={event => setDatetime(event.target.value)} />
           </label>
 
-          <div className="upload-field">
+          <div
+            className={`upload-field${isDragging ? " is-dragging" : ""}`}
+            onDragOver={event => {
+              event.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={event => {
+              event.preventDefault();
+              setIsDragging(false);
+              handleFileChange(event.dataTransfer.files);
+            }}
+          >
             <Upload size={22} />
             <span>
               {t("request.attachments")} <small>{language === "vi" ? "Không bắt buộc" : "任意"}</small>
@@ -218,7 +252,7 @@ export function RequestCreatePage() {
             </span>
             <span className="upload-limit-text">
               {language === "vi"
-                ? "Có thể gửi ảnh, video, PDF, Excel, Word, JWW/DXF. Tối đa 12 file. Ảnh tối đa 10MB/file, tài liệu 25MB/file, video 100MB/file."
+                ? "Có thể gửi ảnh, video, PDF, Excel, Word, JWW/DXF. Tối đa 12 file. Ảnh 10MB/file, tài liệu 25MB/file, video 100MB/file."
                 : "画像、動画、PDF、Excel、Word、JWW/DXFを添付できます。最大12件。画像10MB、書類25MB、動画100MBまで。"}
             </span>
             <button className="media-picker-button" type="button" onClick={() => mediaInputRef.current?.click()}>
@@ -237,28 +271,38 @@ export function RequestCreatePage() {
               }}
             />
           </div>
+
           {selectedMediaFiles.length ? (
             <div className="upload-file-list" aria-label={t("request.attachments")}>
-              {mediaPreviews.map(preview => (
-                <div className="upload-file-item" key={preview.key}>
-                  <div className="upload-preview">
-                    {preview.type.startsWith("image/") ? (
-                      <img src={preview.url} alt={preview.name} />
-                    ) : preview.type.startsWith("video/") ? (
-                      <video src={preview.url} muted preload="metadata" />
-                    ) : (
-                      <FileVideo size={18} />
-                    )}
+              <div className="upload-file-list-header">
+                <strong>{language === "vi" ? "File đã chọn" : "選択済みファイル"}</strong>
+                <span>
+                  {selectedMediaFiles.length}/{maxUploadFiles} file · {language === "vi" ? "Tổng" : "合計"}: {formatFileSize(selectedTotalSize)} / {uploadConfig.CUSTOMER_MAX_TOTAL_SIZE_MB}MB
+                </span>
+              </div>
+              {selectedMediaFiles.map((file, index) => {
+                const preview = mediaPreviews.find(item => item.key === fileKey(file));
+                return (
+                  <div className="upload-file-item" key={fileKey(file)}>
+                    <div className="upload-preview">
+                      {preview && file.type.startsWith("image/") ? (
+                        <img src={preview.url} alt={file.name} />
+                      ) : preview && file.type.startsWith("video/") ? (
+                        <video src={preview.url} muted preload="metadata" />
+                      ) : (
+                        fileIcon(file)
+                      )}
+                    </div>
+                    <div className="upload-file-meta">
+                      <strong>{index + 1}. {file.name}</strong>
+                      <span>{fileExtension(file)} · {formatFileSize(file.size)}</span>
+                    </div>
+                    <button type="button" onClick={() => removeFile(file)} aria-label={t("request.removeAttachment")}>
+                      <X size={16} />
+                    </button>
                   </div>
-                  <span>{preview.name}</span>
-                  <button type="button" onClick={() => {
-                    const file = selectedMediaFiles.find(item => fileKey(item) === preview.key);
-                    if (file) removeFile(file);
-                  }} aria-label={t("request.removeAttachment")}>
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : null}
 
