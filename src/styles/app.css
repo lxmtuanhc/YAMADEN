@@ -3100,6 +3100,7 @@ textarea {
 }
 
 .quote-file-link-actions a,
+.quote-file-link-actions button,
 .quote-file-list-button {
   display: inline-flex;
   align-items: center;
@@ -3111,10 +3112,22 @@ textarea {
   font-size: 12px;
   font-weight: 900;
   text-decoration: none;
+  cursor: pointer;
 }
 
-.quote-file-link-actions a {
+.quote-file-link-actions a,
+.quote-file-link-actions button {
   padding: 7px 9px;
+}
+
+.quote-file-error {
+  margin-top: 8px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .quote-file-list-button {

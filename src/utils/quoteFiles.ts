@@ -7,6 +7,28 @@ export type DisplayQuoteFile = QuoteFile & {
   displayDate?: string;
 };
 
+export function getQuoteFileUrl(file?: QuoteFile | null) {
+  return file?.fileUrl || file?.url || file?.secureUrl || file?.secure_url || "";
+}
+
+export function isValidFileUrl(url: unknown) {
+  return typeof url === "string" && /^https?:\/\//i.test(url.trim());
+}
+
+function repairMojibake(text: string) {
+  if (!/[ÃÂã�]|Ná|á»/.test(text)) return text;
+  try {
+    return decodeURIComponent(escape(text));
+  } catch {
+    return text;
+  }
+}
+
+export function getQuoteFileName(file: QuoteFile, index: number) {
+  const name = file.originalName || file.fileName || file.name || `Báo giá ${index + 1}`;
+  return repairMojibake(String(name));
+}
+
 function fileKey(file: DisplayQuoteFile, index: number) {
   return file.id || file.quoteId || file.displayUrl || file.fileName || file.originalName || String(index);
 }
@@ -32,19 +54,17 @@ export function getQuoteFiles(quote?: Quote | null): DisplayQuoteFile[] {
     ...(quote.quoteFiles || []),
     ...directFile
   ];
-  const normalized = rawFiles
-    .map((file, index) => {
-      const displayUrl = file.fileUrl || file.url || file.secureUrl || file.secure_url || "";
-      const displayName = file.originalName || file.fileName || file.name || `Báo giá ${index + 1}`;
-      return {
-        ...file,
-        displayName,
-        displayUrl,
-        displaySize: file.fileSize || file.size,
-        displayDate: file.sentAt || file.uploadedAt || file.createdAt
-      };
-    })
-    .filter(file => file.displayUrl);
+  const normalized = rawFiles.map((file, index) => {
+    const displayUrl = getQuoteFileUrl(file);
+    const displayName = getQuoteFileName(file, index);
+    return {
+      ...file,
+      displayName,
+      displayUrl,
+      displaySize: file.fileSize || file.size,
+      displayDate: file.sentAt || file.uploadedAt || file.createdAt
+    };
+  });
   const seen = new Set<string>();
   return normalized.filter((file, index) => {
     const key = fileKey(file, index);

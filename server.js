@@ -2062,7 +2062,12 @@ app.get("/api/customer/quotes", requireUser, async (req, res) => {
       isDeleted: { $ne: true }
     }).sort({ createdAt: -1 });
     res.set("Cache-Control", "no-store");
-    res.json({ data: quotes });
+    res.json({ data: quotes.map(quote => {
+      const item = quote.toObject();
+      const quotationFiles = Array.isArray(item.quotationFiles) ? item.quotationFiles.map(file => publicQuoteFile(file, req)) : [];
+      const quoteFiles = Array.isArray(item.quoteFiles) ? item.quoteFiles.map(file => publicQuoteFile(file, req)) : [];
+      return publicQuoteFile({ ...item, quotationFiles, quoteFiles }, req);
+    }) });
   } catch (error) {
     res.status(500).json({ message: "Quotes load failed", error: error.message });
   }
@@ -2328,9 +2333,41 @@ function quoteFileExt(name) {
   return path.extname(String(name || "")).toLowerCase();
 }
 
+function decodeUploadOriginalName(name) {
+  const text = String(name || "").trim();
+  if (!text) return "quote";
+  try {
+    const decoded = Buffer.from(text, "latin1").toString("utf8");
+    return /Ã|Â|ã|Ná|á»|�/.test(text) && decoded ? decoded : text;
+  } catch {
+    return text;
+  }
+}
+
+function absolutePublicUrl(req, url) {
+  const text = String(url || "").trim();
+  if (!text) return "";
+  if (/^https?:\/\//i.test(text)) return text;
+  const proto = req.get("x-forwarded-proto") || req.protocol || "https";
+  const host = req.get("x-forwarded-host") || req.get("host");
+  if (!host) return text;
+  return `${proto}://${host}${text.startsWith("/") ? text : `/${text}`}`;
+}
+
+function publicQuoteFile(file, req) {
+  if (!file) return file;
+  const item = typeof file.toObject === "function" ? file.toObject() : { ...file };
+  return {
+    ...item,
+    fileUrl: absolutePublicUrl(req, item.fileUrl || item.url || item.secureUrl || item.secure_url || ""),
+    originalName: decodeUploadOriginalName(item.originalName || item.name || item.fileName || "")
+  };
+}
+
 function saveQuoteUploadFile(file, requestNo) {
-  const ext = quoteFileExt(file.originalname);
-  const safeBase = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80) || "quote";
+  const originalName = decodeUploadOriginalName(file.originalname);
+  const ext = quoteFileExt(originalName);
+  const safeBase = path.basename(originalName, ext).replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80) || "quote";
   const fileName = `${requestNo}-${Date.now()}-${safeBase}${ext}`;
   const filePath = path.join(quoteUploadDir, fileName);
   fs.writeFileSync(filePath, file.buffer);
@@ -2338,6 +2375,7 @@ function saveQuoteUploadFile(file, requestNo) {
     fileName,
     filePath,
     fileUrl: `/uploads/quote-files/${encodeURIComponent(fileName)}`,
+    originalName,
     ext
   };
 }
@@ -2560,7 +2598,7 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddl
       sentAt: now,
       fileUrl: saved.fileUrl,
       filePath: saved.filePath,
-      originalName: file.originalname,
+      originalName: saved.originalName,
       fileName: saved.fileName,
       mimeType: file.mimetype,
       fileSize: file.size,
@@ -2575,7 +2613,7 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddl
         id: quoteId,
         requestId: requestNo,
         fileName: saved.fileName,
-        originalName: file.originalname,
+        originalName: saved.originalName,
         fileUrl: saved.fileUrl,
         filePath: saved.filePath,
         mimeType: file.mimetype,

@@ -13,7 +13,7 @@ import { useTranslation } from "../../hooks/useTranslation";
 import { quoteService } from "../../services/quoteService";
 import type { Quote } from "../../types";
 import { formatCurrency } from "../../utils/format";
-import { formatQuoteFileSize, getQuoteFiles, quoteFileType } from "../../utils/quoteFiles";
+import { formatQuoteFileSize, getQuoteFiles, isValidFileUrl, quoteFileType } from "../../utils/quoteFiles";
 
 export function QuoteDetailPage() {
   const { id } = useParams();
@@ -145,10 +145,12 @@ export function QuoteDetailPage() {
                   <strong>{file.displayName}</strong>
                   <span>{[quoteFileType(file), formatQuoteFileSize(file.displaySize)].filter(Boolean).join(" · ")}</span>
                 </div>
-                <div className="quote-file-link-actions">
-                  <a href={file.displayUrl} target="_blank" rel="noreferrer">{language === "ja" ? "開く" : "Mở"}</a>
-                  <a href={file.displayUrl} download={file.displayName}>{language === "ja" ? "ダウンロード" : "Tải về"}</a>
-                </div>
+                {isValidFileUrl(file.displayUrl) ? (
+                  <div className="quote-file-link-actions">
+                    <button type="button" onClick={() => window.open(file.displayUrl, "_blank", "noopener,noreferrer")}>{language === "ja" ? "開く" : "Mở"}</button>
+                    <a href={file.displayUrl} download={file.displayName}>{language === "ja" ? "ダウンロード" : "Tải về"}</a>
+                  </div>
+                ) : <span className="muted-line">{language === "ja" ? "ファイルが見つかりません" : "Không tìm thấy file"}</span>}
               </div>
             ))}
           </div>

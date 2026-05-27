@@ -2,12 +2,13 @@ import { Download, ExternalLink, FileText, ReceiptText, Trash2, X } from "lucide
 import { useEffect, useState } from "react";
 import { useTranslation } from "../../hooks/useTranslation";
 import type { Quote } from "../../types";
-import { formatQuoteFileSize, getQuoteFiles, quoteFileType } from "../../utils/quoteFiles";
+import { formatQuoteFileSize, getQuoteFiles, isValidFileUrl, quoteFileType } from "../../utils/quoteFiles";
 import { Card } from "../ui/Card";
 
 export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote: Quote) => void }) {
   const { t, language } = useTranslation();
   const [isFileListOpen, setIsFileListOpen] = useState(false);
+  const [fileError, setFileError] = useState("");
   const labels = quoteLabels(language);
   const files = getQuoteFiles(quote);
   const previewFiles = files.slice(0, 3);
@@ -34,7 +35,7 @@ export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote
         <div className="quote-file-list-compact" aria-label={labels.quoteFiles}>
           <strong>{labels.quoteFiles}</strong>
           {previewFiles.length ? previewFiles.map((file, index) => (
-            <QuoteFileRow key={`${file.displayUrl}-${index}`} file={file} index={index} labels={labels} compact />
+            <QuoteFileRow key={`${file.displayUrl || file.displayName}-${index}`} file={file} index={index} labels={labels} compact onError={setFileError} />
           )) : <span className="muted-line">{labels.notFound}</span>}
         </div>
         {files.length > 3 ? (
@@ -59,6 +60,7 @@ export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote
             <span>{t("quote.deleteAction")}</span>
           </button>
         ) : null}
+        {fileError ? <div className="quote-file-error">{fileError}</div> : null}
       </div>
       {isFileListOpen ? (
         <div className="quote-file-modal-overlay" role="presentation" onClick={() => setIsFileListOpen(false)}>
@@ -74,7 +76,7 @@ export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote
             </div>
             <div className="quote-file-modal-body">
               {files.length ? files.map((file, index) => (
-                <QuoteFileRow key={`${file.displayUrl}-${index}`} file={file} index={index} labels={labels} />
+                <QuoteFileRow key={`${file.displayUrl || file.displayName}-${index}`} file={file} index={index} labels={labels} onError={setFileError} />
               )) : <div className="muted-line">{labels.notFound}</div>}
             </div>
             <button className="button button-secondary quote-file-modal-footer" type="button" onClick={() => setIsFileListOpen(false)}>
@@ -101,7 +103,9 @@ function quoteLabels(language: string) {
       open: "開く",
       download: "ダウンロード",
       close: "閉じる",
+      back: "戻る",
       notFound: "ファイルが見つかりません",
+      cannotPreview: "このファイルは直接表示できません。ダウンロードしてください。",
       empty: "見積はまだありません",
       sentAt: "送信日",
       fileCount: "ファイル数",
@@ -117,7 +121,9 @@ function quoteLabels(language: string) {
     open: "Mở",
     download: "Tải về",
     close: "Đóng",
+    back: "Quay lại",
     notFound: "Không tìm thấy file",
+    cannotPreview: "File này không thể xem trực tiếp. Vui lòng tải về.",
     empty: "Chưa có báo giá",
     sentAt: "Ngày gửi",
     fileCount: "Số file",
@@ -125,7 +131,28 @@ function quoteLabels(language: string) {
   };
 }
 
-function QuoteFileRow({ file, index, labels, compact = false }: { file: QuoteFile; index: number; labels: QuoteLabels; compact?: boolean }) {
+function QuoteFileRow({ file, index, labels, compact = false, onError }: { file: QuoteFile; index: number; labels: QuoteLabels; compact?: boolean; onError: (message: string) => void }) {
+  const validUrl = isValidFileUrl(file.displayUrl);
+  const openFile = () => {
+    if (!validUrl) {
+      onError(labels.notFound);
+      return;
+    }
+    window.open(file.displayUrl, "_blank", "noopener,noreferrer");
+  };
+  const downloadFile = () => {
+    if (!validUrl) {
+      onError(labels.notFound);
+      return;
+    }
+    const link = document.createElement("a");
+    link.href = file.displayUrl;
+    link.download = file.displayName;
+    link.rel = "noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
   return (
     <div className={`quote-file-link-row${compact ? " compact" : ""}`}>
       <span className="quote-file-link-index">{index + 1}.</span>
@@ -136,16 +163,16 @@ function QuoteFileRow({ file, index, labels, compact = false }: { file: QuoteFil
           <span>{[quoteFileType(file), formatQuoteFileSize(file.displaySize), file.displayDate ? formatQuoteDate(file.displayDate) : ""].filter(Boolean).join(" · ")}</span>
         ) : null}
       </div>
-      {file.displayUrl ? (
+      {validUrl ? (
         <div className="quote-file-link-actions">
-          <a href={file.displayUrl} target="_blank" rel="noreferrer">
+          <button type="button" onClick={openFile}>
             <ExternalLink size={14} />
             <span>{labels.open}</span>
-          </a>
-          <a href={file.displayUrl} download={file.displayName}>
+          </button>
+          <button type="button" onClick={downloadFile}>
             <Download size={14} />
             <span>{labels.download}</span>
-          </a>
+          </button>
         </div>
       ) : (
         <span className="muted-line">{labels.notFound}</span>
