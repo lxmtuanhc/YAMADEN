@@ -1,5 +1,5 @@
 import { Download, ExternalLink, FileText, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { ActionConfirmModal } from "../../components/ActionConfirmModal";
 import { AppToast } from "../../components/AppToast";
@@ -10,7 +10,14 @@ import { LoadingState } from "../../components/ui/LoadingState";
 import { useTranslation } from "../../hooks/useTranslation";
 import { quoteService } from "../../services/quoteService";
 import type { Quote } from "../../types";
-import { formatQuoteFileSize, getQuoteFiles, isPreviewableFile, isSpecialSoftwareFile, isValidFileUrl, quoteFileType } from "../../utils/quoteFiles";
+import {
+  formatQuoteFileSize,
+  getQuoteFiles,
+  isPreviewableFile,
+  isSpecialSoftwareFile,
+  isValidFileUrl,
+  quoteFileType
+} from "../../utils/quoteFiles";
 
 export function QuoteDetailPage() {
   const { id } = useParams();
@@ -57,6 +64,8 @@ export function QuoteDetailPage() {
     const timeout = window.setTimeout(() => setToast(null), 2400);
     return () => window.clearTimeout(timeout);
   }, [toast]);
+
+  const files = useMemo(() => getQuoteFiles(quote), [quote]);
 
   if (!id) return <Navigate to="/quotes" replace />;
 
@@ -111,15 +120,16 @@ export function QuoteDetailPage() {
     );
   }
 
-  const files = getQuoteFiles(quote);
   const status = quoteResponseStatus(quote, labels);
   const acceptedAt = quote.acceptedAt || "";
   const revisionAt = quote.quoteRevisionRequestedAt || quote.changeRequestedAt || "";
   const revisionText = quote.quoteRevisionMessage || quote.changeRequestMessage || "";
-  const hasResponded = status.key === "accepted" || status.key === "revision_requested";
+  const requestCode = getRequestCode(quote, labels);
+  const requestTitle = getRequestTitle(quote, labels);
+  const quoteSentAt = getQuoteSentAt(quote, files);
 
   return (
-    <section className="page quote-detail-page">
+    <section className="page request-detail-page quote-detail-page">
       <div className="page-header">
         <div>
           <h1>{labels.detailTitle}</h1>
@@ -128,17 +138,30 @@ export function QuoteDetailPage() {
       </div>
 
       <Card>
+        <h2 className="section-title">{labels.quoteSummary}</h2>
+        <div className="info-grid">
+          <InfoRow label={labels.requestId} value={requestCode} />
+          <InfoRow label={labels.subject} value={requestTitle} />
+          <InfoRow label={labels.status} value={status.label} />
+          <InfoRow label={labels.sentAt} value={quoteSentAt ? formatQuoteDate(quoteSentAt, language) : labels.noDate} />
+          <InfoRow label={labels.fileCount} value={String(files.length)} />
+        </div>
+      </Card>
+
+      <Card>
         <h2 className="section-title">{labels.requestInfo}</h2>
         <div className="info-grid">
-          <InfoRow label={labels.requestId} value={quote.requestId || quote.quoteCode || quote.id} />
-          <InfoRow label={labels.subject} value={quote.projectName || quote.title || "-"} />
-          <InfoRow label={labels.customer} value={quote.customerName || "-"} />
-          <InfoRow label={labels.phone} value={quote.customerPhone || "-"} />
-          <InfoRow label={labels.address} value={quote.projectAddress || quote.customerAddress || quote.address || "-"} />
-          <InfoRow label={labels.requestDate} value={quote.createdAt ? formatQuoteDate(quote.createdAt, language) : "-"} />
-          <InfoRow label={labels.sentAt} value={(quote.quoteSentAt || quote.sentAt) ? formatQuoteDate(quote.quoteSentAt || quote.sentAt || "", language) : "-"} />
-          <InfoRow label={labels.assignee} value={quote.assigneeName || quote.staffName || "-"} />
-          <InfoRow label={labels.content} value={quote.content || quote.description || "-"} />
+          <InfoRow label={labels.requestId} value={requestCode} />
+          <InfoRow label={labels.subject} value={requestTitle} />
+          <InfoRow label={labels.content} value={safeText(quote.content || quote.description, labels.noContent)} />
+          <InfoRow label={labels.customer} value={safeText(quote.customerName, "-")} />
+          <InfoRow label={labels.company} value={safeText((quote as Quote & Record<string, unknown>).companyName, "-")} />
+          <InfoRow label={labels.phone} value={safeText(quote.customerPhone, "-")} />
+          <InfoRow label={labels.email} value={safeText(quote.customerEmail, "-")} />
+          <InfoRow label={labels.address} value={safeText(quote.projectAddress || quote.customerAddress || quote.address, "-")} />
+          <InfoRow label={labels.requestDate} value={quote.createdAt ? formatQuoteDate(quote.createdAt, language) : labels.noDate} />
+          <InfoRow label={labels.requestStatus} value={safeText((quote as Quote & Record<string, unknown>).requestStatus || quote.status, "-")} />
+          <InfoRow label={labels.assignee} value={safeText(quote.assigneeName || quote.staffName, "-")} />
         </div>
       </Card>
 
@@ -147,7 +170,7 @@ export function QuoteDetailPage() {
         <div className="quote-file-list-compact">
           {files.length ? files.map((file, index) => (
             <QuoteFileRow key={`${file.displayUrl || file.displayName}-${index}`} file={file} index={index} labels={labels} onToast={setToast} />
-          )) : <div className="muted-line">{labels.notFound}</div>}
+          )) : <div className="muted-line">{labels.noQuoteFiles}</div>}
         </div>
       </Card>
 
@@ -165,16 +188,18 @@ export function QuoteDetailPage() {
             {revisionAt ? <p>{labels.revisionAt}: {formatQuoteDate(revisionAt, language)}</p> : null}
           </div>
         ) : (
-          <div className="quote-response-actions">
-            <Button disabled={!!actionLoading} onClick={() => setAcceptConfirmOpen(true)}>
-              {labels.acceptQuote}
-            </Button>
-            <button type="button" className="quote-secondary-button" disabled={!!actionLoading} onClick={() => setRevisionOpen(true)}>
-              {labels.requestRevision}
-            </button>
-          </div>
+          <>
+            <div className="quote-response-actions">
+              <Button disabled={!!actionLoading} onClick={() => setAcceptConfirmOpen(true)}>
+                {labels.acceptQuote}
+              </Button>
+              <button type="button" className="quote-secondary-button" disabled={!!actionLoading} onClick={() => setRevisionOpen(true)}>
+                {labels.requestRevision}
+              </button>
+            </div>
+            <p className="muted-line">{labels.responseHint}</p>
+          </>
         )}
-        {hasResponded ? null : <p className="muted-line">{labels.responseHint}</p>}
       </Card>
 
       {error ? <ErrorState message={error} /> : null}
@@ -189,9 +214,9 @@ export function QuoteDetailPage() {
       />
       {revisionOpen ? (
         <div className="assignee-modal-overlay assignee-modal-backdrop" role="presentation" onClick={() => setRevisionOpen(false)}>
-          <div className="assignee-modal" role="dialog" aria-modal="true" onClick={event => event.stopPropagation()}>
+          <div className="assignee-modal" role="dialog" aria-modal="true" aria-labelledby="quote-revision-title" onClick={event => event.stopPropagation()}>
             <div className="assignee-modal-header">
-              <h2>{labels.revisionTitle}</h2>
+              <h2 id="quote-revision-title">{labels.revisionTitle}</h2>
               <button type="button" className="assignee-modal-close" aria-label={labels.cancel} onClick={() => setRevisionOpen(false)}>
                 <X size={18} />
               </button>
@@ -217,8 +242,18 @@ export function QuoteDetailPage() {
 type DisplayFile = ReturnType<typeof getQuoteFiles>[number];
 type Labels = ReturnType<typeof quoteDetailLabels>;
 
-function QuoteFileRow({ file, index, labels, onToast }: { file: DisplayFile; index: number; labels: Labels; onToast: (toast: { message: string; tone: "success" | "error" }) => void }) {
-  const validUrl = isValidFileUrl(file.displayUrl);
+function QuoteFileRow({
+  file,
+  index,
+  labels,
+  onToast
+}: {
+  file: DisplayFile;
+  index: number;
+  labels: Labels;
+  onToast: (toast: { message: string; tone: "success" | "error" }) => void;
+}) {
+  const validUrl = hasUsableFileUrl(file.displayUrl);
   const previewable = isPreviewableFile(file);
   const specialFile = isSpecialSoftwareFile(file);
 
@@ -281,13 +316,19 @@ function quoteDetailLabels(language: string) {
     return {
       language,
       detailTitle: "見積詳細",
+      quoteSummary: "見積",
       requestInfo: "依頼情報",
       requestId: "依頼ID",
       subject: "件名",
+      status: "ステータス",
+      fileCount: "ファイル数",
       customer: "お客様名",
+      company: "会社名",
       phone: "電話番号",
+      email: "メール",
       address: "住所",
       requestDate: "依頼日",
+      requestStatus: "依頼ステータス",
       sentAt: "見積送信日",
       assignee: "担当者",
       content: "依頼内容",
@@ -307,12 +348,17 @@ function quoteDetailLabels(language: string) {
       revisionRequired: "修正内容を入力してください。",
       sendResponse: "送信する",
       cancel: "キャンセル",
-      revisionSent: "見積修正依頼を送信しました",
-      responseHint: "内容をご確認のうえ回答してください。",
+      revisionSent: "修正依頼送信済み",
+      responseHint: "見積ファイルを確認してから回答してください。",
       sendFailed: "送信できませんでした。",
       open: "開く",
       download: "ダウンロード",
       notFound: "ファイルが見つかりません。",
+      noDate: "送信日未設定",
+      noContent: "依頼内容はありません",
+      noCode: "YMD-未設定",
+      noTitle: "タイトル未設定",
+      noQuoteFiles: "見積はまだありません。",
       cannotPreview: "このファイルは直接表示できません。ダウンロードしてください。",
       specialFileNote: "このファイルは専用ソフトが必要です。ダウンロードして開いてください。"
     };
@@ -320,13 +366,19 @@ function quoteDetailLabels(language: string) {
   return {
     language,
     detailTitle: "Chi tiết báo giá",
+    quoteSummary: "Báo giá",
     requestInfo: "Thông tin yêu cầu",
     requestId: "Mã yêu cầu",
     subject: "Tiêu đề",
+    status: "Trạng thái",
+    fileCount: "Số file",
     customer: "Khách hàng",
+    company: "Công ty",
     phone: "Số điện thoại",
+    email: "Email",
     address: "Địa chỉ",
     requestDate: "Ngày gửi yêu cầu",
+    requestStatus: "Trạng thái yêu cầu",
     sentAt: "Ngày gửi báo giá",
     assignee: "Người phụ trách",
     content: "Nội dung yêu cầu",
@@ -346,12 +398,17 @@ function quoteDetailLabels(language: string) {
     revisionRequired: "Vui lòng nhập nội dung cần chỉnh sửa.",
     sendResponse: "Gửi phản hồi",
     cancel: "Hủy",
-    revisionSent: "Đã gửi yêu cầu chỉnh sửa báo giá",
+    revisionSent: "Đã yêu cầu chỉnh sửa",
     responseHint: "Vui lòng kiểm tra file báo giá trước khi phản hồi.",
     sendFailed: "Không thể gửi phản hồi.",
     open: "Mở",
     download: "Tải về",
     notFound: "Không tìm thấy file.",
+    noDate: "Chưa có ngày gửi",
+    noContent: "Chưa có nội dung yêu cầu",
+    noCode: "Không có mã",
+    noTitle: "Không có tiêu đề",
+    noQuoteFiles: "Chưa có báo giá.",
     cannotPreview: "File này không thể xem trực tiếp. Vui lòng tải về.",
     specialFileNote: "File này cần phần mềm chuyên dụng. Vui lòng tải về để mở."
   };
@@ -365,6 +422,36 @@ function quoteResponseStatus(quote: Quote, labels: Labels) {
     return { key: "revision_requested", label: labels.revisionRequested, tone: "warning" };
   }
   return { key: "received", label: labels.received, tone: "" };
+}
+
+function getRequestCode(quote: Quote, labels: Labels) {
+  const item = quote as Quote & Record<string, unknown>;
+  return safeText(item.requestCode || item.code || item.requestNo || item.displayId || quote.requestId || quote.quoteCode || quote.id, labels.noCode);
+}
+
+function getRequestTitle(quote: Quote, labels: Labels) {
+  const item = quote as Quote & Record<string, unknown>;
+  return safeText(quote.title || item.requestTitle || item.subject || quote.projectName || quote.content || quote.description, labels.noTitle);
+}
+
+function getQuoteSentAt(quote: Quote, files: DisplayFile[]) {
+  const item = quote as Quote & Record<string, unknown>;
+  return safeText(quote.quoteSentAt || item.quoteUpdatedAt || quote.sentAt || quote.sentToCustomerAt || files[0]?.displayDate || quote.updatedAt || quote.createdAt, "");
+}
+
+function safeText(value: unknown, fallback: string) {
+  const text = String(value || "").trim();
+  return text || fallback;
+}
+
+function hasUsableFileUrl(url: string) {
+  if (!isValidFileUrl(url)) return false;
+  try {
+    const parsed = new URL(url);
+    return !parsed.pathname.includes("/uploads/quote-files/");
+  } catch {
+    return false;
+  }
 }
 
 function formatQuoteDate(value: string, language = "vi") {
