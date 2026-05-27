@@ -4736,16 +4736,26 @@
     let rows = [];
     try {
       const payload = await AdminAPI.getQuoteRequests({ search: state.filters.quoteSearch || "" });
-      rows = normalizeList(payload.requests || payload.data);
+      const allRows = normalizeList(payload.requests || payload.data);
+      const quoteCounts = {
+        all: allRows.length,
+        not_sent: allRows.filter(item => !isQuoteSent(item)).length,
+        sent: allRows.filter(item => isQuoteSent(item)).length
+      };
+      rows = allRows;
       const sendStatus = state.filters.quoteSendStatus || "all";
       if (sendStatus !== "all") {
-        rows = rows.filter(item => quoteSentInfo(item).sent === (sendStatus === "sent"));
+        rows = rows.filter(item => isQuoteSent(item) === (sendStatus === "sent"));
       }
       state.quoteRequests = rows;
+      state.quoteRequestAllRows = allRows;
+      state.quoteRequestCounts = quoteCounts;
     } catch (error) {
       console.error(error);
       toast(error.message || t("failed"));
     }
+    const counts = state.quoteRequestCounts || { all: rows.length, not_sent: 0, sent: 0 };
+    const activeSendStatus = state.filters.quoteSendStatus || "all";
     $("viewRoot").innerHTML = `
       <div class="quote-page-head">
         <div class="page-intro"><h1>${escapeHtml(state.lang === "vi" ? "B\u00e1o gi\u00e1" : "\u898b\u7a4d")}</h1><p>${escapeHtml(state.lang === "vi" ? "Ch\u1ec9 hi\u1ec3n th\u1ecb y\u00eau c\u1ea7u \u0111ang \u1edf tr\u1ea1ng th\u00e1i B\u00e1o gi\u00e1." : "\u30b9\u30c6\u30fc\u30bf\u30b9\u304c\u898b\u7a4d\u306e\u4f9d\u983c\u306e\u307f\u8868\u793a\u3057\u307e\u3059\u3002")}</p></div>
@@ -4755,11 +4765,9 @@
       </div>
       <div class="crm-filter-bar quote-filter-bar">
         <input class="filter-input" data-quote-filter="search" value="${escapeHtml(state.filters.quoteSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "T\u00ecm m\u00e3 y\u00eau c\u1ea7u / kh\u00e1ch h\u00e0ng / n\u1ed9i dung" : "\u4f9d\u983cID\u30fb\u9867\u5ba2\u30fb\u5185\u5bb9\u3067\u691c\u7d22")}">
-        <select class="filter-input" data-quote-filter="sendStatus">
-          <option value="all" ${state.filters.quoteSendStatus === "all" || !state.filters.quoteSendStatus ? "selected" : ""}>${escapeHtml(state.lang === "vi" ? "Tat ca" : "All")}</option>
-          <option value="not_sent" ${state.filters.quoteSendStatus === "not_sent" ? "selected" : ""}>${escapeHtml(state.lang === "vi" ? "Chua gui" : "Not sent")}</option>
-          <option value="sent" ${state.filters.quoteSendStatus === "sent" ? "selected" : ""}>${escapeHtml(state.lang === "vi" ? "Da gui" : "Sent")}</option>
-        </select>
+        <div class="quote-send-tabs" role="tablist">
+          ${["all", "not_sent", "sent"].map(value => `<button class="quote-send-tab ${activeSendStatus === value ? "is-active" : ""}" type="button" data-quote-send-filter="${escapeHtml(value)}">${escapeHtml(quoteText(value === "all" ? "all" : value === "sent" ? "sentShort" : "notSentShort"))} <span>${escapeHtml(String(counts[value] || 0))}</span></button>`).join("")}
+        </div>
       </div>
       <section class="section-card">
         <div class="panel-body quote-board-body">
@@ -4769,9 +4777,77 @@
     `;
   }
 
+  function quoteText(key) {
+    const vi = {
+      all: "Tất cả",
+      sentShort: "Đã gửi",
+      notSentShort: "Chưa gửi",
+      sentBadge: "Đã gửi báo giá",
+      notSentBadge: "Chưa gửi báo giá",
+      requestFiles: "File yêu cầu",
+      quoteFiles: "File báo giá",
+      sentAt: "Đã gửi",
+      sentBy: "Người gửi",
+      viewUpdate: "Xem báo giá / Cập nhật",
+      sendQuote: "Gửi báo giá",
+      sentFilesTitle: "Báo giá đã gửi",
+      dropTitle: "Kéo thả hoặc chọn file báo giá",
+      dropHint: "Tối đa 3 file. PDF/Excel/Word, tối đa 25MB/file.",
+      resend: "Gửi lại / Cập nhật báo giá",
+      noSelectedFile: "Chưa chọn file báo giá.",
+      maxFilesError: "Chỉ có thể gửi tối đa 3 file báo giá.",
+      selectFileError: "Vui lòng chọn file báo giá.",
+      fileLabel: "File",
+      unsupportedFile: "không được hỗ trợ. Vui lòng chọn PDF, Excel hoặc Word.",
+      oversizeFile: "vượt quá dung lượng cho phép 25MB."
+    };
+    const ja = {
+      all: "すべて",
+      sentShort: "送信済み",
+      notSentShort: "未送信",
+      sentBadge: "見積送信済み",
+      notSentBadge: "見積未送信",
+      requestFiles: "依頼ファイル",
+      quoteFiles: "見積ファイル",
+      sentAt: "送信済み",
+      sentBy: "送信者",
+      viewUpdate: "見積を確認 / 更新",
+      sendQuote: "見積送信",
+      sentFilesTitle: "送信済み見積ファイル",
+      dropTitle: "見積ファイルをドロップまたは選択",
+      dropHint: "最大3ファイル。PDF/Excel/Word、1ファイル25MBまで。",
+      resend: "見積を再送 / 更新",
+      noSelectedFile: "ファイル未選択",
+      maxFilesError: "見積ファイルは最大3件まで送信できます。",
+      selectFileError: "見積ファイルを選択してください。",
+      fileLabel: "ファイル",
+      unsupportedFile: "は対応していません。PDF、Excel、Wordを選択してください。",
+      oversizeFile: "は25MBの上限を超えています。"
+    };
+    return (state.lang === "vi" ? vi : ja)[key] || key;
+  }
+
+  function getQuoteFiles(request) {
+    const seen = new Set();
+    return [
+      ...toList(request?.quotationFiles),
+      ...toList(request?.quoteFiles)
+    ].filter(file => file && (file.fileUrl || file.pdfUrl))
+      .filter((file, index) => {
+        const key = String(file._id || file.quoteId || file.fileUrl || file.pdfUrl || file.fileName || index);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }
+
+  function isQuoteSent(request) {
+    return request?.quoteSent === true || request?.quoteStatus === "sent" || getQuoteFiles(request).length > 0;
+  }
+
   function quoteSentInfo(request) {
-    const files = toList(request.quoteFiles).filter(file => file.fileUrl || file.pdfUrl);
-    const sent = request.quoteSent === true || request.quoteStatus === "sent" || files.length > 0;
+    const files = getQuoteFiles(request);
+    const sent = isQuoteSent(request);
     return {
       sent,
       files,
@@ -4788,21 +4864,19 @@
   function renderQuoteRequestCard(request) {
     const quoteInfo = quoteSentInfo(request);
     const id = getRowId(request);
-    const sentLabel = state.lang === "vi" ? "Da gui bao gia" : "Quote sent";
-    const pendingLabel = state.lang === "vi" ? "Chua gui bao gia" : "Quote not sent";
     const sentAt = quoteInfo.sentAt ? formatDateTime(quoteInfo.sentAt) : "";
     return `<button class="quote-request-card" type="button" data-open-request-quote="${escapeHtml(id)}">
-      <div><strong>${escapeHtml(getRequestDisplayId(request))}</strong><span class="status-badge ${quoteInfo.sent ? "quote-sent-badge" : "quote-pending-badge"}">${escapeHtml(quoteInfo.sent ? sentLabel : pendingLabel)}</span></div>
+      <div><strong>${escapeHtml(getRequestDisplayId(request))}</strong><span class="status-badge ${quoteInfo.sent ? "quote-sent-badge" : "quote-pending-badge"}">${escapeHtml(quoteInfo.sent ? quoteText("sentBadge") : quoteText("notSentBadge"))}</span></div>
       <h3>${escapeHtml(getRequestContent(request) || request.title || "-")}</h3>
       <p>${escapeHtml(getCustomerName(request) || "-")} / ${escapeHtml(getRequestPhone(request) || "-")}</p>
       <div class="quote-request-meta">
         <span>${escapeHtml(t("assignee"))}: ${escapeHtml(getAssigneeName(request) || "-")}</span>
-        <span>${escapeHtml(state.lang === "vi" ? "File yeu cau" : "Request files")}: ${escapeHtml(String(requestAttachmentCount(request)))}</span>
-        <span>${escapeHtml(state.lang === "vi" ? "File bao gia" : "Quote files")}: ${escapeHtml(String(quoteInfo.count))}</span>
-        ${sentAt ? `<span>${escapeHtml(state.lang === "vi" ? "Da gui" : "Sent")}: ${escapeHtml(sentAt)}</span>` : ""}
-        ${quoteInfo.sentBy ? `<span>${escapeHtml(state.lang === "vi" ? "Nguoi gui" : "Sender")}: ${escapeHtml(quoteInfo.sentBy)}</span>` : ""}
+        <span>${escapeHtml(quoteText("requestFiles"))}: ${escapeHtml(String(requestAttachmentCount(request)))}</span>
+        <span>${escapeHtml(quoteText("quoteFiles"))}: ${escapeHtml(String(quoteInfo.count))}</span>
+        ${sentAt ? `<span>${escapeHtml(quoteText("sentAt"))}: ${escapeHtml(sentAt)}</span>` : ""}
+        ${quoteInfo.sentBy ? `<span>${escapeHtml(quoteText("sentBy"))}: ${escapeHtml(quoteInfo.sentBy)}</span>` : ""}
       </div>
-      <div class="quote-request-actions"><span class="btn btn-soft">${escapeHtml(quoteInfo.sent ? (state.lang === "vi" ? "Xem bao gia / Cap nhat" : "View / update quote") : (state.lang === "vi" ? "Gui bao gia" : "Send quote"))}</span></div>
+      <div class="quote-request-actions"><span class="btn btn-soft">${escapeHtml(quoteInfo.sent ? quoteText("viewUpdate") : quoteText("sendQuote"))}</span></div>
     </button>`;
   }
 
@@ -4868,7 +4942,7 @@
             <p class="eyebrow">${escapeHtml(state.lang === "vi" ? "B\u00e1o gi\u00e1" : "\u898b\u7a4d")}</p>
             <h2>${escapeHtml(quote.requestNo || quote.requestId || "-")}</h2>
             <p class="note">${escapeHtml(state.lang === "vi" ? "Upload file b\u00e1o gi\u00e1 th\u1ee7 c\u00f4ng v\u00e0 g\u1eedi cho kh\u00e1ch h\u00e0ng." : "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u3092\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u3057\u9867\u5ba2\u306b\u9001\u4fe1\u3057\u307e\u3059\u3002")}</p>
-            <span class="status-badge ${quoteInfo.sent ? "quote-sent-badge" : "quote-pending-badge"}">${escapeHtml(quoteInfo.sent ? (state.lang === "vi" ? "Da gui bao gia" : "Quote sent") : (state.lang === "vi" ? "Chua gui bao gia" : "Quote not sent"))}</span>
+            <span class="status-badge ${quoteInfo.sent ? "quote-sent-badge" : "quote-pending-badge"}">${escapeHtml(quoteInfo.sent ? quoteText("sentBadge") : quoteText("notSentBadge"))}</span>
           </div>
           <button class="quote-detail-close" type="button" data-close-drawer aria-label="${escapeHtml(t("close"))}">&times;</button>
         </header>
@@ -4893,12 +4967,12 @@
             <section class="quote-wizard-panel ${currentStep === 2 ? "is-active" : ""}" data-quote-step-panel="2">
               <h3>${escapeHtml(state.lang === "vi" ? "B\u00e1o gi\u00e1" : "\u898b\u7a4d")}</h3>
               <section class="quote-work-card">
-                ${quoteInfo.sent ? `<div class="quote-sent-summary"><strong>${escapeHtml(state.lang === "vi" ? "Bao gia da gui" : "Sent quote files")}</strong><span>${escapeHtml(state.lang === "vi" ? "Da gui" : "Sent")}: ${escapeHtml(quoteInfo.sentAt ? formatDateTime(quoteInfo.sentAt) : "-")}</span>${quoteInfo.sentBy ? `<span>${escapeHtml(state.lang === "vi" ? "Nguoi gui" : "Sender")}: ${escapeHtml(quoteInfo.sentBy)}</span>` : ""}</div>` : ""}
+                ${quoteInfo.sent ? `<div class="quote-sent-summary"><strong>${escapeHtml(quoteText("sentFilesTitle"))}</strong><span>${escapeHtml(quoteText("sentAt"))}: ${escapeHtml(quoteInfo.sentAt ? formatDateTime(quoteInfo.sentAt) : "-")}</span><span>${escapeHtml(quoteText("quoteFiles"))}: ${escapeHtml(String(quoteInfo.count))}</span>${quoteInfo.sentBy ? `<span>${escapeHtml(quoteText("sentBy"))}: ${escapeHtml(quoteInfo.sentBy)}</span>` : ""}</div>` : ""}
                 <div class="quote-file-dropzone" data-quote-file-dropzone role="button" tabindex="0">
                   <input class="quote-file-input-hidden" type="file" data-quote-file-input accept=".pdf,.xls,.xlsx,.doc,.docx" multiple>
                   <div class="quote-drop-icon">\u21e7</div>
-                  <strong>${escapeHtml(state.lang === "vi" ? "Keo tha hoac chon file bao gia" : "Drop or select quote files")}</strong>
-                  <span>${escapeHtml(state.lang === "vi" ? "Toi da 3 file. PDF/Excel/Word, toi da 25MB/file." : "Up to 3 files. PDF/Excel/Word, max 25MB/file.")}</span>
+                  <strong>${escapeHtml(quoteText("dropTitle"))}</strong>
+                  <span>${escapeHtml(quoteText("dropHint"))}</span>
                 </div>
                 <div class="quote-selected-files" data-quote-selected-files>${renderSelectedQuoteFiles()}</div>
                 ${renderExistingQuoteFiles(quote)}
@@ -4908,7 +4982,7 @@
           <footer class="quote-wizard-footer">
             <div>${currentStep > 1 ? `<button class="btn btn-soft" type="button" data-quote-prev data-quote-prev-step>${escapeHtml(t("previousStep"))}</button>` : ""}</div>
             <div class="quote-wizard-footer-actions">
-              ${currentStep < 2 ? `<button class="btn btn-primary" type="button" data-quote-next data-quote-next-step>${escapeHtml(t("nextStep"))}</button>` : `<button class="btn btn-primary" type="button" data-quote-send-file>${escapeHtml(quoteInfo.sent ? (state.lang === "vi" ? "Gui lai / Cap nhat bao gia" : "Resend / update quote") : (state.lang === "vi" ? "G\u1eedi b\u00e1o gi\u00e1" : "\u898b\u7a4d\u9001\u4fe1"))}</button>`}
+              ${currentStep < 2 ? `<button class="btn btn-primary" type="button" data-quote-next data-quote-next-step>${escapeHtml(t("nextStep"))}</button>` : `<button class="btn btn-primary" type="button" data-quote-send-file>${escapeHtml(quoteInfo.sent ? quoteText("resend") : quoteText("sendQuote"))}</button>`}
             </div>
           </footer>
         </form>
@@ -4919,7 +4993,7 @@
   function quoteFileFlowState(source) {
     const request = source || {};
     const displayId = getRequestDisplayId(request) || request.requestNo || request.requestId || request.quoteNo || "";
-    const files = toList(request.quoteFiles).filter(file => file.fileUrl || file.pdfUrl);
+    const files = getQuoteFiles(request);
     const latest = files[0] || request;
     return {
       useFileFlow: true,
@@ -6142,17 +6216,13 @@
   }
 
   function validateQuoteFile(file) {
-    if (!file) return state.lang === "vi" ? "Vui long chon file bao gia." : "Please select a quote file.";
+    if (!file) return quoteText("selectFileError");
     const ext = quoteFileExtension(file);
     if (!QUOTE_ALLOWED_EXTENSIONS.includes(ext)) {
-      return state.lang === "vi"
-        ? `File ${file.name || ""} khong duoc ho tro. Vui long chon PDF, Excel hoac Word.`
-        : `File ${file.name || ""} is not supported. Please select PDF, Excel or Word.`;
+      return `${quoteText("fileLabel")} ${file.name || ""} ${quoteText("unsupportedFile")}`;
     }
     if (Number(file.size || 0) > QUOTE_MAX_FILE_SIZE) {
-      return state.lang === "vi"
-        ? `File ${file.name || ""} vuot qua dung luong cho phep 25MB.`
-        : `File ${file.name || ""} exceeds the 25MB limit.`;
+      return `${quoteText("fileLabel")} ${file.name || ""} ${quoteText("oversizeFile")}`;
     }
     return "";
   }
@@ -6164,7 +6234,7 @@
   function renderSelectedQuoteFiles() {
     const files = quoteSelectedFiles();
     if (!files.length) {
-      return `<div class="quote-selected-empty">${escapeHtml(state.lang === "vi" ? "Chua chon file bao gia." : "No quote file selected.")}</div>`;
+      return `<div class="quote-selected-empty">${escapeHtml(quoteText("noSelectedFile"))}</div>`;
     }
     return `<div class="quote-selected-file-list">${files.map((file, index) => `
       <div class="quote-selected-file-row" data-selected-quote-file-row="${index}">
@@ -6177,11 +6247,11 @@
   }
 
   function renderExistingQuoteFiles(quote) {
-    const files = toList(quote.quoteFiles).filter(file => file.fileUrl || file.pdfUrl);
+    const files = getQuoteFiles(quote);
     if (!files.length && (quote.fileUrl || quote.pdfUrl)) files.push(quote);
     if (!files.length) return "";
     return `<div class="quote-existing-file-list">
-      <strong>${escapeHtml(state.lang === "vi" ? "File da gui" : "Sent files")}</strong>
+      <strong>${escapeHtml(quoteText("sentFilesTitle"))}</strong>
       ${files.map(file => {
         const name = file.originalName || file.fileName || "Quote file";
         const url = file.fileUrl || file.pdfUrl || "#";
@@ -6212,7 +6282,7 @@
     });
     if (!incomingUnique.length) return;
     if (selected.length + incomingUnique.length > QUOTE_MAX_FILES) {
-      toast(state.lang === "vi" ? "Chi co the gui toi da 3 file bao gia." : "You can send up to 3 quote files.");
+      toast(quoteText("maxFilesError"));
       return;
     }
     for (const file of incomingUnique) {
@@ -6245,7 +6315,18 @@
 
   async function openRequestQuote(requestId, step = 1) {
     let request = toList(state.quoteRequests).find(item => String(getRowId(item)) === String(requestId) || String(getRequestDisplayId(item)) === String(requestId))
+      || toList(state.quoteRequestAllRows).find(item => String(getRowId(item)) === String(requestId) || String(getRequestDisplayId(item)) === String(requestId))
       || state.requests.find(item => String(getRowId(item)) === String(requestId) || String(getRequestDisplayId(item)) === String(requestId));
+    if (state.currentView === "quotes" && (!request || (!request.quoteSent && !getQuoteFiles(request).length))) {
+      try {
+        const payload = await AdminAPI.getQuoteRequests({});
+        const rows = normalizeList(payload.requests || payload.data);
+        state.quoteRequestAllRows = rows;
+        request = rows.find(item => String(getRowId(item)) === String(requestId) || String(getRequestDisplayId(item)) === String(requestId)) || request;
+      } catch (error) {
+        console.warn("Quote request refresh failed:", error);
+      }
+    }
     if (!request) request = await AdminAPI.getRequest(requestId);
     state.quoteWizardStep = step;
     state.quoteSelectedFile = null;
@@ -6261,11 +6342,11 @@
       return;
     }
     if (!files.length) {
-      toast(state.lang === "vi" ? "Vui long chon file bao gia." : "Please select a quote file.");
+      toast(quoteText("selectFileError"));
       return;
     }
     if (files.length > QUOTE_MAX_FILES) {
-      toast(state.lang === "vi" ? "Chi co the gui toi da 3 file bao gia." : "You can send up to 3 quote files.");
+      toast(quoteText("maxFilesError"));
       return;
     }
     const invalid = files.map(validateQuoteFile).find(Boolean);
@@ -6277,14 +6358,29 @@
       const response = await AdminAPI.uploadRequestQuoteFile(quote.requestMongoId, files);
       state.quoteSelectedFile = null;
       state.quoteSelectedFiles = [];
-      if (response.request) {
-        const id = getRowId(response.request);
-        const index = state.requests.findIndex(item => getRowId(item) === id || getRequestDisplayId(item) === getRequestDisplayId(response.request));
-        if (index >= 0) state.requests[index] = response.request;
+      const responseQuoteFiles = normalizeList(response.quotes || response.data).filter(file => file.fileUrl || file.pdfUrl);
+      const updatedRequest = response.request ? {
+        ...response.request,
+        quoteFiles: getQuoteFiles(response.request).length ? getQuoteFiles(response.request) : responseQuoteFiles,
+        quotationFiles: getQuoteFiles(response.request).length ? getQuoteFiles(response.request) : responseQuoteFiles,
+        quoteSent: true,
+        quoteStatus: "sent",
+        quoteFileCount: Number(response.request.quoteFileCount || responseQuoteFiles.length || getQuoteFiles(response.request).length || 0),
+        quoteSentAt: response.request.quoteSentAt || new Date().toISOString()
+      } : null;
+      if (updatedRequest) {
+        const id = getRowId(updatedRequest);
+        const index = state.requests.findIndex(item => getRowId(item) === id || getRequestDisplayId(item) === getRequestDisplayId(updatedRequest));
+        if (index >= 0) state.requests[index] = Object.assign({}, state.requests[index], updatedRequest);
+        const quoteIndex = toList(state.quoteRequestAllRows).findIndex(item => getRowId(item) === id || getRequestDisplayId(item) === getRequestDisplayId(updatedRequest));
+        if (quoteIndex >= 0) state.quoteRequestAllRows[quoteIndex] = Object.assign({}, state.quoteRequestAllRows[quoteIndex], updatedRequest);
       }
       toast(state.lang === "vi" ? "G\u1eedi b\u00e1o gi\u00e1 th\u00e0nh c\u00f4ng." : "\u898b\u7a4d\u3092\u9001\u4fe1\u3057\u307e\u3057\u305f\u3002");
-      closeDrawer();
-      if (state.currentView === "quotes") renderQuotes();
+      if (state.currentView === "quotes") await renderQuotes();
+      if (updatedRequest) {
+        state.quoteWizardStep = 2;
+        renderQuoteDetail(updatedRequest);
+      }
     } catch (error) {
       console.error(error);
       toast(error.message || t("failed"));
@@ -7088,6 +7184,12 @@
       const openRequestQuoteButton = event.target.closest("[data-open-request-quote]");
       if (openRequestQuoteButton) {
         await openRequestQuote(openRequestQuoteButton.dataset.openRequestQuote, 1);
+        return;
+      }
+      const quoteSendFilter = event.target.closest("[data-quote-send-filter]");
+      if (quoteSendFilter) {
+        state.filters.quoteSendStatus = quoteSendFilter.dataset.quoteSendFilter || "all";
+        await renderQuotes();
         return;
       }
       const quoteDropzone = event.target.closest("[data-quote-file-dropzone]");

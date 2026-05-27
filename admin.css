@@ -5267,6 +5267,37 @@ body {
   justify-content: flex-end;
 }
 
+.quote-send-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--border, #dbe5f2);
+  border-radius: 999px;
+  background: #f8fafc;
+}
+
+.quote-send-tab {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: transparent;
+  color: #64748b;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.quote-send-tab span {
+  margin-left: 6px;
+  color: inherit;
+  opacity: .8;
+}
+
+.quote-send-tab.is-active {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
 .quote-sent-badge {
   background: #dcfce7;
   color: #15803d;

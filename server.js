@@ -480,6 +480,7 @@ const RequestSchema = new mongoose.Schema({
   quoteSent: { type: Boolean, default: false },
   quoteSentAt: { type: Date, default: null },
   quoteFiles: [mongoose.Schema.Types.Mixed],
+  quotationFiles: [mongoose.Schema.Types.Mixed],
   quoteFileCount: { type: Number, default: 0 },
   quoteSentBy: String,
   quoteStatus: { type: String, default: "not_sent" },
@@ -2262,16 +2263,22 @@ app.get("/admin/quote-requests", requireAdmin, async (req, res) => {
       const quoteFiles = keys
         .flatMap(key => quotesByRequest.get(String(key)) || [])
         .filter(file => file.fileUrl || file.pdfUrl);
-      const quoteSent = request.quoteSent === true || quoteFiles.length > 0;
-      const quoteSentAt = request.quoteSentAt || quoteFiles[0]?.sentAt || quoteFiles[0]?.createdAt || null;
+      const storedQuoteFiles = [
+        ...(Array.isArray(request.quotationFiles) ? request.quotationFiles : []),
+        ...(Array.isArray(request.quoteFiles) ? request.quoteFiles : [])
+      ].filter(file => file && (file.fileUrl || file.pdfUrl));
+      const quotationFiles = quoteFiles.length ? quoteFiles : storedQuoteFiles;
+      const quoteSent = request.quoteSent === true || quotationFiles.length > 0;
+      const quoteSentAt = request.quoteSentAt || quotationFiles[0]?.sentAt || quotationFiles[0]?.createdAt || null;
       return {
         ...request.toObject(),
         id: String(request._id || request.id || ""),
         requestNo,
         requestCode: requestNo,
-        quoteFiles,
-        quoteFileCount: quoteFiles.length,
-        latestQuoteFile: quoteFiles[0] || null,
+        quoteFiles: quotationFiles,
+        quotationFiles,
+        quoteFileCount: quotationFiles.length,
+        latestQuoteFile: quotationFiles[0] || null,
         quoteSent,
         quoteSentAt,
         quoteStatus: quoteSent ? "sent" : "not_sent",
@@ -2586,6 +2593,7 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddl
     request.quoteSent = true;
     request.quoteSentAt = now;
     request.quoteFiles = quoteFileRecords;
+    request.quotationFiles = quoteFileRecords;
     request.quoteFileCount = quoteFileRecords.length;
     request.quoteSentBy = req.admin?.email || req.admin?.name || "admin";
     request.quoteStatus = "sent";
