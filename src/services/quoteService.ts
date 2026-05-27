@@ -5,7 +5,7 @@ import type { Quote, QuoteStatus } from "../types";
 import { APP_STORAGE_KEY } from "../constants/storageKeys";
 import { getUserToken } from "./authService";
 
-export type UpdateQuoteInput = Partial<Pick<Quote, "status" | "validUntil" | "items" | "projectName" | "visibleToCustomer" | "viewedByCustomerAt" | "acceptedAt" | "rejectedAt" | "changeRequestedAt" | "changeRequestMessage">>;
+export type UpdateQuoteInput = Partial<Pick<Quote, "status" | "validUntil" | "items" | "projectName" | "visibleToCustomer" | "viewedByCustomerAt" | "acceptedAt" | "rejectedAt" | "changeRequestedAt" | "changeRequestMessage" | "quoteResponseStatus" | "quoteRevisionMessage" | "quoteRevisionRequestedAt">>;
 
 const QUOTE_LAYOUT_STORAGE_KEY = "yamaden-quotes-layout-v1";
 const quoteSeedById = new Map(initialQuotes.map(quote => [quote.id, quote]));
@@ -49,6 +49,9 @@ function normalizeQuote(quote: Quote): Quote {
     rejectedAt: quote.rejectedAt || "",
     changeRequestedAt: quote.changeRequestedAt || "",
     changeRequestMessage: quote.changeRequestMessage || "",
+    quoteResponseStatus: quote.quoteResponseStatus || (quote.status === "accepted" ? "accepted" : quote.status === "revision_requested" || quote.status === "change_requested" ? "revision_requested" : null),
+    quoteRevisionMessage: quote.quoteRevisionMessage || quote.changeRequestMessage || "",
+    quoteRevisionRequestedAt: quote.quoteRevisionRequestedAt || quote.changeRequestedAt || "",
     isDeleted: Boolean(quote.isDeleted),
     deletedAt: quote.deletedAt || null,
     deletedBy: quote.deletedBy || "",
@@ -333,11 +336,53 @@ export const quoteService = {
   },
 
   async approveQuote(id: string): Promise<Quote> {
-    return quoteService.updateQuote(id, { status: "accepted", acceptedAt: new Date().toISOString() });
+    const token = getUserToken();
+    if (token) {
+      const response = await fetch(`/api/customer/quotes/${encodeURIComponent(id)}/response`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: "accepted" })
+      });
+      if (!response.ok) throw new Error("Quote approval failed");
+      const payload = await response.json();
+      const updated = normalizeQuote(payload.data || payload);
+      commitQuotes(readQuotes().map(quote => (quote.id === id || quote.quoteCode === id ? updated : quote)));
+      return updated;
+    }
+    return quoteService.updateQuote(id, { status: "accepted", acceptedAt: new Date().toISOString(), quoteResponseStatus: "accepted" });
   },
 
-  async requestRevision(id: string): Promise<Quote> {
-    return quoteService.updateQuote(id, { status: "change_requested", changeRequestedAt: new Date().toISOString() });
+  async requestRevision(id: string, message = ""): Promise<Quote> {
+    const token = getUserToken();
+    if (token) {
+      const response = await fetch(`/api/customer/quotes/${encodeURIComponent(id)}/response`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ action: "revision_requested", message })
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.message || "Quote revision request failed");
+      }
+      const payload = await response.json();
+      const updated = normalizeQuote(payload.data || payload);
+      commitQuotes(readQuotes().map(quote => (quote.id === id || quote.quoteCode === id ? updated : quote)));
+      return updated;
+    }
+    return quoteService.updateQuote(id, {
+      status: "change_requested",
+      changeRequestedAt: new Date().toISOString(),
+      changeRequestMessage: message,
+      quoteResponseStatus: "revision_requested",
+      quoteRevisionMessage: message,
+      quoteRevisionRequestedAt: new Date().toISOString()
+    });
   },
 
   async rejectQuote(id: string): Promise<Quote> {

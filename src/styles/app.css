@@ -3176,6 +3176,29 @@ textarea {
   font-weight: 800;
 }
 
+.quote-response-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.quote-secondary-button {
+  min-height: 38px;
+  padding: 9px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  color: #0f172a;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.quote-file-status.warning {
+  color: #92400e;
+  background: #fef3c7;
+}
+
 @media (max-width: 420px) {
   .quote-file-link-row {
     grid-template-columns: auto minmax(0, 1fr);

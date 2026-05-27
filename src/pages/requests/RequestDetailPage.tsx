@@ -140,6 +140,23 @@ export function RequestDetailPage() {
     }
   }
 
+  async function requestQuote() {
+    if (!request) return;
+    try {
+      const updated = await requestService.requestQuote(request.id);
+      setRequest(updated);
+      setToast({
+        message: language === "ja" ? "見積依頼を送信しました" : "Đã gửi yêu cầu báo giá",
+        tone: "success"
+      });
+    } catch {
+      setToast({
+        message: language === "ja" ? "見積依頼を送信できませんでした" : "Không thể gửi yêu cầu báo giá.",
+        tone: "error"
+      });
+    }
+  }
+
   if (!id) return <Navigate to="/requests" replace />;
 
   if (isLoading) {
@@ -160,6 +177,9 @@ export function RequestDetailPage() {
 
   const categoryLabel = categoryOptions.find(option => option.value === request.category)?.key ?? "request.categoryElectrical";
   const mediaItems = requestMediaItems(request);
+  const storedQuoteFiles = [...(request.quotationFiles || []), ...(request.quoteFiles || [])];
+  const hasSentQuote = request.quoteSent === true || storedQuoteFiles.length > 0 || relatedQuotes.length > 0;
+  const canRequestQuote = !hasSentQuote && request.quoteRequested !== true;
 
   return (
     <section className="page request-detail-page">
@@ -197,6 +217,16 @@ export function RequestDetailPage() {
           <InfoRow label={t("request.datetime")} value={request.datetime || "-"} />
           <InfoRow label={t("request.description")} value={request.description || (language === "vi" ? "Chưa có mô tả" : "未入力")} />
         </div>
+        {!hasSentQuote ? <div className="quote-response-actions">
+          <button
+            type="button"
+            className="media-picker-button"
+            disabled={!canRequestQuote}
+            onClick={requestQuote}
+          >
+            {request.quoteRequested ? (language === "ja" ? "見積依頼を送信しました" : "Đã gửi yêu cầu báo giá") : (language === "ja" ? "見積を依頼する" : "Muốn báo giá")}
+          </button>
+        </div> : null}
       </Card>
 
       <Card className={`assignee-card${assignee?.name ? " assignee-card-clickable" : ""}`}>

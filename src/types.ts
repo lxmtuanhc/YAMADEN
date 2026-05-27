@@ -178,6 +178,17 @@ export interface Request {
   assignmentReason?: string | null;
   assignedBy?: string | null;
   adminReply?: string;
+  quoteRequested?: boolean;
+  quoteRequestedAt?: string | null;
+  quoteSent?: boolean;
+  quoteSentAt?: string | null;
+  quoteUpdatedAt?: string | null;
+  quoteResponseStatus?: "accepted" | "revision_requested" | null;
+  quoteAcceptedAt?: string | null;
+  quoteRevisionMessage?: string;
+  quoteRevisionRequestedAt?: string | null;
+  quoteFiles?: QuoteFile[];
+  quotationFiles?: QuoteFile[];
   assigneeId?: string;
   assigneeName?: string;
   assignedStaff?: RequestAssignee | string;
@@ -269,6 +280,9 @@ export interface Quote {
   rejectedAt?: string;
   changeRequestedAt?: string;
   changeRequestMessage?: string;
+  quoteResponseStatus?: "accepted" | "revision_requested" | null;
+  quoteRevisionMessage?: string;
+  quoteRevisionRequestedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
   isDeleted?: boolean;

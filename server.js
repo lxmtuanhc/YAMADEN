@@ -180,32 +180,37 @@ function mailValue(value, fallback = "-") {
 async function sendEmailNotification({ to = ADMIN_NOTIFICATION_EMAIL, subject, text }) {
   const provider = RESEND_API_KEY ? "resend" : MAIL_PROVIDER || "none";
   console.log("[MAIL_PROVIDER]", provider);
+  const recipient = String(to || "").trim();
+  if (!recipient) {
+    console.log("[MAIL_SKIP] Email not found");
+    return false;
+  }
   if (!RESEND_API_KEY || provider !== "resend") {
-    console.log("[MAIL_ERROR] Failed to send email notification", {
+    console.log("[MAIL_ERROR] Failed to send notification", {
       reason: "Resend is not configured",
       MAIL_PROVIDER: provider,
       MAIL_FROM: Boolean(MAIL_FROM),
-      ADMIN_NOTIFICATION_EMAIL: Boolean(ADMIN_NOTIFICATION_EMAIL),
+      recipient: Boolean(recipient),
       RESEND_API_KEY: Boolean(RESEND_API_KEY)
     });
     return false;
   }
-  if (!MAIL_FROM || !ADMIN_NOTIFICATION_EMAIL) {
-    console.log("[MAIL_ERROR] Failed to send email notification", {
+  if (!MAIL_FROM) {
+    console.log("[MAIL_ERROR] Failed to send notification", {
       reason: "Mail sender or recipient missing",
       MAIL_FROM: Boolean(MAIL_FROM),
-      ADMIN_NOTIFICATION_EMAIL: Boolean(ADMIN_NOTIFICATION_EMAIL)
+      recipient: Boolean(recipient)
     });
     return false;
   }
-  console.log("[MAIL_START] Sending email notification");
+  console.log("[MAIL_START] Sending notification");
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${RESEND_API_KEY}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ from: MAIL_FROM, to, subject, text })
+    body: JSON.stringify({ from: MAIL_FROM, to: recipient, subject, text })
   });
   if (!response.ok) {
     let detail = "";
@@ -228,10 +233,26 @@ async function requestNotificationContext(request) {
     customerName: request?.name || user?.name || "",
     companyName: user?.company || user?.companyName || user?.projectName || "",
     phone: request?.phone || user?.phone || "",
+    customerEmail: getCustomerEmail(request, user),
     address: request?.address || user?.address || "",
+    title: request?.title || request?.content || request?.category || "",
     content: request?.content || request?.title || request?.category || "",
     hasAttachments: normalizeRequestMediaForMail(request).length > 0
   };
+}
+
+function getCustomerEmail(request, user = null) {
+  const contact = String(request?.contact || "").trim();
+  return String(
+    request?.customerEmail ||
+    request?.contactEmail ||
+    request?.email ||
+    (contact.includes("@") ? contact : "") ||
+    user?.email ||
+    request?.customer?.email ||
+    request?.user?.email ||
+    ""
+  ).trim();
 }
 
 function normalizeRequestMediaForMail(request) {
@@ -254,6 +275,7 @@ function newRequestMailPayload(request, context) {
       `\u304a\u5ba2\u69d8\u540d: ${mailValue(context.customerName)}`,
       `\u4f1a\u793e\u540d: ${mailValue(context.companyName)}`,
       `\u96fb\u8a71\u756a\u53f7: ${mailValue(context.phone)}`,
+      `メール: ${mailValue(context.customerEmail)}`,
       `\u4f4f\u6240: ${mailValue(context.address)}`,
       `\u4f9d\u983c\u5185\u5bb9: ${mailValue(truncateText(context.content, 500))}`,
       `\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb: ${context.hasAttachments ? "\u3042\u308a" : "\u306a\u3057"}`,
@@ -265,17 +287,73 @@ function newRequestMailPayload(request, context) {
 }
 
 function notifyAdminEmail(kind, payload = {}) {
-  if (kind !== "request_created") return;
   Promise.resolve()
     .then(async () => {
       const context = await requestNotificationContext(payload.request);
-      return sendEmailNotification(newRequestMailPayload(payload.request, context));
+      if (kind === "request_created") {
+        return sendEmailNotification(newRequestMailPayload(payload.request, context));
+      }
+      if (kind === "quote_requested") {
+        return sendEmailNotification({
+          to: ADMIN_NOTIFICATION_EMAIL,
+          subject: `【YAMADEN】見積依頼が届きました（${context.requestNo}）`,
+          text: [
+            "お客様から見積依頼が届きました。",
+            "",
+            `依頼ID: ${mailValue(context.requestNo)}`,
+            `件名: ${mailValue(context.title)}`,
+            `お客様名: ${mailValue(context.customerName)}`,
+            `会社名: ${mailValue(context.companyName)}`,
+            `電話番号: ${mailValue(context.phone)}`,
+            `メール: ${mailValue(context.customerEmail)}`,
+            `送信日時: ${formatMailDate(payload.request?.quoteRequestedAt || new Date())}`,
+            "",
+            "管理画面で詳細を確認してください。"
+          ].join("\n")
+        });
+      }
+      if (kind === "quote_accepted") {
+        return sendEmailNotification({
+          to: ADMIN_NOTIFICATION_EMAIL,
+          subject: `【YAMADEN】見積が承認されました（${context.requestNo}）`,
+          text: [
+            "お客様が見積を承認しました。",
+            "",
+            `依頼ID: ${mailValue(context.requestNo)}`,
+            `件名: ${mailValue(context.title)}`,
+            `お客様名: ${mailValue(context.customerName)}`,
+            `承認日時: ${formatMailDate(payload.request?.quoteAcceptedAt || new Date())}`,
+            "",
+            "管理画面で詳細を確認してください。"
+          ].join("\n")
+        });
+      }
+      if (kind === "quote_revision_requested") {
+        return sendEmailNotification({
+          to: ADMIN_NOTIFICATION_EMAIL,
+          subject: `【YAMADEN】見積修正依頼が届きました（${context.requestNo}）`,
+          text: [
+            "お客様から見積修正依頼が届きました。",
+            "",
+            `依頼ID: ${mailValue(context.requestNo)}`,
+            `件名: ${mailValue(context.title)}`,
+            `お客様名: ${mailValue(context.customerName)}`,
+            "修正依頼内容:",
+            mailValue(payload.request?.quoteRevisionMessage),
+            "",
+            `送信日時: ${formatMailDate(payload.request?.quoteRevisionRequestedAt || new Date())}`,
+            "",
+            "管理画面で詳細を確認してください。"
+          ].join("\n")
+        });
+      }
+      return false;
     })
     .then(sent => {
-      if (sent) console.log("[MAIL_SENT] Email notification sent");
+      if (sent) console.log("[MAIL_SENT] Notification sent");
     })
     .catch(error => {
-      console.log("[MAIL_ERROR] Failed to send email notification", {
+      console.log("[MAIL_ERROR] Failed to send notification", {
         kind,
         message: error.message
       });
@@ -306,7 +384,7 @@ function notifyAdminEmail(kind, payload = {}) {
         });
       }
 
-      if (kind === "request_quoted") {
+      if (kind === "legacy_quote_status") {
         const context = await requestNotificationContext(payload.request);
         return sendEmailNotification({
           subject: `【YAMADEN】見積対応が必要な依頼があります（${context.requestNo}）`,
@@ -350,13 +428,80 @@ function notifyAdminEmail(kind, payload = {}) {
       if (!sent) return;
       const messageByKind = {
         request_created: "New request notification sent",
-        request_quoted: "Quote status notification sent",
+        legacy_quote_status: "Quote status notification sent",
         quote_sent: "Quote sent notification sent"
       };
       console.log("[MAIL_SENT] " + (messageByKind[kind] || "Admin notification sent"));
     })
     .catch(error => {
-      console.log("[MAIL_ERROR] Failed to send email notification", {
+      console.log("[MAIL_ERROR] Failed to send notification", {
+        kind,
+        message: error.message
+      });
+    });
+}
+
+function notifyCustomerEmail(kind, payload = {}) {
+  Promise.resolve()
+    .then(async () => {
+      const context = await requestNotificationContext(payload.request);
+      const to = getCustomerEmail(payload.request);
+      if (kind === "request_accepted") {
+        return sendEmailNotification({
+          to,
+          subject: `【YAMADEN】ご依頼を受け付けました（${context.requestNo}）`,
+          text: [
+            "ご依頼を受け付けました。",
+            "",
+            `依頼ID: ${mailValue(context.requestNo)}`,
+            `件名: ${mailValue(context.title)}`,
+            `受付日時: ${formatMailDate(payload.request?.contactedAt || payload.request?.firstResponseAt || new Date())}`,
+            "",
+            "担当者より順次ご連絡いたします。"
+          ].join("\n")
+        });
+      }
+      if (kind === "quote_sent" || kind === "quote_updated") {
+        const isUpdate = kind === "quote_updated";
+        return sendEmailNotification({
+          to,
+          subject: `【YAMADEN】${isUpdate ? "お見積書が更新されました" : "お見積書が届きました"}（${context.requestNo}）`,
+          text: [
+            isUpdate ? "お見積書が更新されました。" : "お見積書が届きました。",
+            "",
+            `依頼ID: ${mailValue(context.requestNo)}`,
+            `件名: ${mailValue(context.title)}`,
+            `見積ファイル数: ${mailValue(payload.fileCount)}`,
+            `${isUpdate ? "更新日時" : "送信日時"}: ${formatMailDate(payload.request?.quoteUpdatedAt || payload.request?.quoteSentAt || new Date())}`,
+            "",
+            isUpdate
+              ? "アプリの依頼詳細画面から最新のお見積書をご確認ください。"
+              : "アプリの依頼詳細画面からお見積書をご確認ください。"
+          ].join("\n")
+        });
+      }
+      if (kind === "request_completed") {
+        return sendEmailNotification({
+          to,
+          subject: `【YAMADEN】対応が完了しました（${context.requestNo}）`,
+          text: [
+            "ご依頼の対応が完了しました。",
+            "",
+            `依頼ID: ${mailValue(context.requestNo)}`,
+            `件名: ${mailValue(context.title)}`,
+            `完了日時: ${formatMailDate(payload.request?.completedAt || new Date())}`,
+            "",
+            "詳細はアプリの依頼詳細画面からご確認ください。"
+          ].join("\n")
+        });
+      }
+      return false;
+    })
+    .then(sent => {
+      if (sent) console.log("[MAIL_SENT] Notification sent");
+    })
+    .catch(error => {
+      console.log("[MAIL_ERROR] Failed to send notification", {
         kind,
         message: error.message
       });
@@ -477,13 +622,21 @@ const RequestSchema = new mongoose.Schema({
     default: null
   },
   quoteRequested: { type: Boolean, default: false },
+  quoteRequestedAt: { type: Date, default: null },
+  quoteResponseStatus: { type: String, default: null },
+  quoteAcceptedAt: { type: Date, default: null },
+  quoteRevisionMessage: String,
+  quoteRevisionRequestedAt: { type: Date, default: null },
   quoteSent: { type: Boolean, default: false },
   quoteSentAt: { type: Date, default: null },
+  quoteUpdatedAt: { type: Date, default: null },
   quoteFiles: [mongoose.Schema.Types.Mixed],
   quotationFiles: [mongoose.Schema.Types.Mixed],
   quoteFileCount: { type: Number, default: 0 },
   quoteSentBy: String,
   quoteStatus: { type: String, default: "not_sent" },
+  customerNotifiedAccepted: { type: Boolean, default: false },
+  customerNotifiedCompleted: { type: Boolean, default: false },
   timeline: [TimelineEventSchema],
   isDeleted: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },
@@ -2045,6 +2198,30 @@ app.patch("/api/customer/requests/:id/restore", requireUser, async (req, res) =>
   }
 });
 
+app.post("/api/customer/requests/:id/quote-request", requireUser, async (req, res) => {
+  try {
+    const item = await Request.findOne(customerItemQuery(req.params.id, req.user.userId));
+    if (!item) return res.status(404).json({ message: "Not found" });
+    const files = []
+      .concat(Array.isArray(item.quotationFiles) ? item.quotationFiles : [])
+      .concat(Array.isArray(item.quoteFiles) ? item.quoteFiles : [])
+      .filter(file => file && (file.fileUrl || file.url || file.secureUrl));
+    if (item.quoteSent === true || files.length > 0) {
+      return res.status(400).json({ message: "Quote has already been sent" });
+    }
+    if (!item.quoteRequested) {
+      item.quoteRequested = true;
+      item.quoteRequestedAt = new Date();
+      mergeStatusTimeline(item, item.status || "untreated", "quote_requested");
+      await item.save();
+      notifyAdminEmail("quote_requested", { request: item });
+    }
+    res.json({ data: item, message: "Quote requested" });
+  } catch (error) {
+    res.status(500).json({ message: "Quote request failed", error: error.message });
+  }
+});
+
 app.delete("/api/customer/requests/:id/permanent", requireUser, async (req, res) => {
   try {
     const result = await Request.deleteOne(customerDeletedItemQuery(req.params.id, req.user.userId));
@@ -2099,6 +2276,52 @@ app.delete("/api/customer/quotes/:id", requireUser, async (req, res) => {
     res.json({ data: publicDeletedItem(quote), message: "Deleted" });
   } catch (error) {
     res.status(500).json({ message: "Delete failed", error: error.message });
+  }
+});
+
+app.post("/api/customer/quotes/:id/response", requireUser, async (req, res) => {
+  try {
+    const quote = await findCustomerQuote(req.params.id, req.user.userId, false);
+    if (!quote) return res.status(404).json({ message: "Not found" });
+    const action = String(req.body?.action || req.body?.status || "").trim();
+    const request = await findRequestByAnyId(quote.requestId);
+    if (!request || String(request.userId || "") !== String(req.user.userId)) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+    if (action === "accepted") {
+      const now = new Date();
+      quote.status = "accepted";
+      quote.customerResponse = "accepted";
+      quote.customerRespondedAt = now;
+      quote.acceptedAt = now;
+      request.quoteResponseStatus = "accepted";
+      request.quoteAcceptedAt = now;
+      await quote.save();
+      await request.save();
+      notifyAdminEmail("quote_accepted", { request, quote });
+      return res.json({ data: quote, request, message: "Quote accepted" });
+    }
+    if (action === "revision_requested") {
+      const message = String(req.body?.message || req.body?.note || "").trim();
+      if (!message) return res.status(400).json({ message: "Revision message is required" });
+      const now = new Date();
+      quote.status = "revision_requested";
+      quote.customerResponse = "revision_requested";
+      quote.customerResponseNote = message;
+      quote.customerRespondedAt = now;
+      quote.changeRequestedAt = now;
+      quote.changeRequestMessage = message;
+      request.quoteResponseStatus = "revision_requested";
+      request.quoteRevisionMessage = message;
+      request.quoteRevisionRequestedAt = now;
+      await quote.save();
+      await request.save();
+      notifyAdminEmail("quote_revision_requested", { request, quote });
+      return res.json({ data: quote, request, message: "Quote revision requested" });
+    }
+    return res.status(400).json({ message: "Unsupported quote response" });
+  } catch (error) {
+    res.status(500).json({ message: "Quote response failed", error: error.message });
   }
 });
 
@@ -2557,6 +2780,9 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddl
     if (quoteFileError) return res.status(400).json({ ok: false, message: quoteFileError });
     const requestNo = await ensureRequestCode(request);
     const now = new Date();
+    const wasQuoteSent = request.quoteSent === true || Number(request.quoteFileCount || 0) > 0 ||
+      (Array.isArray(request.quotationFiles) && request.quotationFiles.length > 0) ||
+      (Array.isArray(request.quoteFiles) && request.quoteFiles.length > 0);
     const quotes = [];
     const quoteFileRecords = [];
     for (const [index, file] of uploadFiles.entries()) {
@@ -2630,12 +2856,17 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddl
     request.quotedAt = request.quotedAt || now;
     request.quoteSent = true;
     request.quoteSentAt = now;
+    if (wasQuoteSent) request.quoteUpdatedAt = now;
     request.quoteFiles = quoteFileRecords;
     request.quotationFiles = quoteFileRecords;
     request.quoteFileCount = quoteFileRecords.length;
     request.quoteSentBy = req.admin?.email || req.admin?.name || "admin";
     request.quoteStatus = "sent";
     await request.save();
+    notifyCustomerEmail(wasQuoteSent ? "quote_updated" : "quote_sent", {
+      request,
+      fileCount: quoteFileRecords.length
+    });
 
     const data = quotes.map(quote => quote.toObject());
     res.json({ ok: true, quote: data[0] || null, quotes: data, data, request: request.toObject() });
@@ -3392,6 +3623,16 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
       assignmentReason: null,
       assignedBy: null,
       quoteRequested: req.body.quoteRequested === "true" || req.body.quoteRequested === true,
+      quoteRequestedAt: null,
+      quoteResponseStatus: null,
+      quoteAcceptedAt: null,
+      quoteRevisionMessage: "",
+      quoteRevisionRequestedAt: null,
+      quoteSent: false,
+      quoteSentAt: null,
+      quoteUpdatedAt: null,
+      customerNotifiedAccepted: false,
+      customerNotifiedCompleted: false,
       assigneeId: bestAssignee ? String(bestAssignee._id) : "",
       assigneeName: bestAssignee ? bestAssignee.name : "",
       status: "untreated",
@@ -3548,6 +3789,7 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
     }
 
     if (!item.requestCode) await ensureRequestCode(item);
+    const previousStatus = item.status;
     if (req.body.status) {
       item.status = normalizeRequestStatus(req.body.status);
       applyStatusTimestamps(item, item.status);
@@ -3577,6 +3819,16 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
     }
 
     await item.save();
+    if (item.status === "contacted" && previousStatus !== "contacted" && !item.customerNotifiedAccepted) {
+      item.customerNotifiedAccepted = true;
+      await item.save();
+      notifyCustomerEmail("request_accepted", { request: item });
+    }
+    if (item.status === "completed" && previousStatus !== "completed" && !item.customerNotifiedCompleted) {
+      item.customerNotifiedCompleted = true;
+      await item.save();
+      notifyCustomerEmail("request_completed", { request: item });
+    }
 
     res.json({
       message: "Updated",

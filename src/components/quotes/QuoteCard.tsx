@@ -5,7 +5,17 @@ import type { Quote } from "../../types";
 import { formatQuoteFileSize, getQuoteFiles, isPreviewableFile, isSpecialSoftwareFile, isValidFileUrl, quoteFileType } from "../../utils/quoteFiles";
 import { Card } from "../ui/Card";
 
-export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote: Quote) => void }) {
+export function QuoteCard({
+  quote,
+  onDelete,
+  onAccept,
+  onRequestRevision
+}: {
+  quote: Quote;
+  onDelete?: (quote: Quote) => void;
+  onAccept?: (quote: Quote) => void;
+  onRequestRevision?: (quote: Quote) => void;
+}) {
   const { t, language } = useTranslation();
   const [fileError, setFileError] = useState("");
   const labels = quoteLabels(language);
@@ -44,6 +54,20 @@ export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote
             <span>{t("quote.deleteAction")}</span>
           </button>
         ) : null}
+        {onAccept || onRequestRevision ? (
+          <div className="quote-response-actions">
+            {quote.quoteResponseStatus === "accepted" || quote.status === "accepted" ? (
+              <span className="quote-file-status">{labels.accepted}</span>
+            ) : (
+              onAccept ? <button type="button" className="media-picker-button" onClick={() => onAccept(quote)}>{labels.acceptQuote}</button> : null
+            )}
+            {quote.quoteResponseStatus === "revision_requested" || quote.status === "revision_requested" || quote.status === "change_requested" ? (
+              <span className="quote-file-status warning">{labels.revisionSent}</span>
+            ) : (
+              onRequestRevision ? <button type="button" className="quote-secondary-button" onClick={() => onRequestRevision(quote)}>{labels.requestRevision}</button> : null
+            )}
+          </div>
+        ) : null}
         {fileError ? <div className="quote-file-error">{fileError}</div> : null}
       </div>
     </Card>
@@ -64,7 +88,11 @@ function quoteLabels(language: string) {
       cannotPreview: "このファイルは直接表示できません。ダウンロードしてください。",
       specialFileNote: "このファイルは専用ソフトが必要です。ダウンロードして開いてください。",
       sentAt: "送信日",
-      fileCount: "ファイル数"
+      fileCount: "ファイル数",
+      accepted: "見積を承認しました",
+      acceptQuote: "見積を承認する",
+      requestRevision: "修正を依頼する",
+      revisionSent: "見積修正依頼を送信しました"
     };
   }
   return {
@@ -76,7 +104,11 @@ function quoteLabels(language: string) {
     cannotPreview: "File này không thể xem trực tiếp. Vui lòng tải về.",
     specialFileNote: "File này cần phần mềm chuyên dụng. Vui lòng tải về để mở.",
     sentAt: "Ngày gửi",
-    fileCount: "Số file"
+    fileCount: "Số file",
+    accepted: "Đã chấp nhận báo giá",
+    acceptQuote: "Chấp nhận báo giá",
+    requestRevision: "Yêu cầu chỉnh sửa",
+    revisionSent: "Đã gửi yêu cầu chỉnh sửa báo giá"
   };
 }
 

@@ -323,6 +323,17 @@ function backendRequestToSupportRequest(item: any, input?: CreateRequestInput): 
     assignmentReason: item.assignmentReason || null,
     assignedBy: item.assignedBy || null,
     adminReply: item.adminReply || item.adminResponse || item.response || item.feedback || item.note || latestTimelineNote(item.timeline) || "",
+    quoteRequested: item.quoteRequested === true,
+    quoteRequestedAt: item.quoteRequestedAt || null,
+    quoteSent: item.quoteSent === true || Boolean(item.quotationFiles?.length) || Boolean(item.quoteFiles?.length),
+    quoteSentAt: item.quoteSentAt || null,
+    quoteUpdatedAt: item.quoteUpdatedAt || null,
+    quoteResponseStatus: item.quoteResponseStatus || null,
+    quoteAcceptedAt: item.quoteAcceptedAt || null,
+    quoteRevisionMessage: item.quoteRevisionMessage || "",
+    quoteRevisionRequestedAt: item.quoteRevisionRequestedAt || null,
+    quoteFiles: Array.isArray(item.quoteFiles) ? item.quoteFiles : [],
+    quotationFiles: Array.isArray(item.quotationFiles) ? item.quotationFiles : [],
     assigneeId: item.assigneeId || "",
     assigneeName: item.assigneeName || "",
     assignedStaff: item.assignedStaff,
@@ -791,6 +802,24 @@ export const requestService = {
     });
     commitRequests(requests.map(request => (sameRequest(request, deleted) ? deleted : request)));
     return deleted;
+  },
+
+  async requestQuote(id: string): Promise<SupportRequest> {
+    await delay();
+    const token = getUserToken();
+    if (!token) throw new Error("User login required");
+    const response = await fetch(`/api/customer/requests/${encodeURIComponent(id)}/quote-request`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      throw new Error(payload.message || "Quote request failed");
+    }
+    const payload = await response.json();
+    const updated = backendRequestToSupportRequest(payload.data || payload);
+    commitRequests(upsertRequest(updated, readRequests()));
+    return updated;
   },
 
   async getDeletedRequests(): Promise<SupportRequest[]> {
