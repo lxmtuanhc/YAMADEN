@@ -249,7 +249,13 @@ export interface Quote {
   customerName?: string;
   customerPhone?: string;
   customerEmail?: string;
+  customerAddress?: string;
+  address?: string;
   projectAddress?: string;
+  content?: string;
+  description?: string;
+  assigneeName?: string;
+  staffName?: string;
   subtotal?: number;
   discount?: number;
   taxRate?: number;

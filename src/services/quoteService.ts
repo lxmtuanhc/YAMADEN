@@ -4,6 +4,7 @@ import { useAppStore } from "../stores/appStore";
 import type { Quote, QuoteStatus } from "../types";
 import { APP_STORAGE_KEY } from "../constants/storageKeys";
 import { getUserToken } from "./authService";
+import { groupQuotesByRequest } from "../utils/quoteFiles";
 
 export type UpdateQuoteInput = Partial<Pick<Quote, "status" | "validUntil" | "items" | "projectName" | "visibleToCustomer" | "viewedByCustomerAt" | "acceptedAt" | "rejectedAt" | "changeRequestedAt" | "changeRequestMessage" | "quoteResponseStatus" | "quoteRevisionMessage" | "quoteRevisionRequestedAt">>;
 
@@ -202,7 +203,20 @@ export const quoteService = {
 
   async getQuoteById(id: string): Promise<Quote | null> {
     await delay();
-    const quote = readQuotes().find(item => !item.isDeleted && (item.id === id || item.quoteCode === id));
+    const cachedMatches = readQuotes().filter(item => !item.isDeleted && (item.id === id || item.quoteCode === id || item.requestId === id));
+    let quote = cachedMatches.length > 1 ? groupQuotesByRequest(cachedMatches)[0] : cachedMatches[0];
+    if (!quote) {
+      try {
+        const backendQuotes = await fetchBackendQuotes();
+        if (backendQuotes) {
+          commitQuotes(backendQuotes);
+          const matches = backendQuotes.filter(item => !item.isDeleted && (item.id === id || item.quoteCode === id || item.requestId === id));
+          quote = matches.length > 1 ? groupQuotesByRequest(matches)[0] : matches[0];
+        }
+      } catch (error) {
+        console.warn("Unable to load quote detail from backend", error);
+      }
+    }
     if (!quote || !visibleToCurrentUser(quote)) return null;
     if (!quote.viewedByCustomerAt && quote.status === "sent_to_customer") {
       return quoteService.updateQuote(quote.id, { status: "viewed_by_customer", viewedByCustomerAt: new Date().toISOString() });

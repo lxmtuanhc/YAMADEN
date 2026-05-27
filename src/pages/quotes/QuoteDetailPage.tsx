@@ -1,29 +1,29 @@
-import { Trash2 } from "lucide-react";
+import { Download, ExternalLink, FileText, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { ActionConfirmModal } from "../../components/ActionConfirmModal";
 import { AppToast } from "../../components/AppToast";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { ErrorState } from "../../components/ui/ErrorState";
 import { LoadingState } from "../../components/ui/LoadingState";
-import { calculateQuoteSubtotal, calculateQuoteVat } from "../../constants/quoteStatus";
 import { useTranslation } from "../../hooks/useTranslation";
 import { quoteService } from "../../services/quoteService";
 import type { Quote } from "../../types";
-import { formatCurrency } from "../../utils/format";
 import { formatQuoteFileSize, getQuoteFiles, isPreviewableFile, isSpecialSoftwareFile, isValidFileUrl, quoteFileType } from "../../utils/quoteFiles";
 
 export function QuoteDetailPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { t, language } = useTranslation();
+  const labels = quoteDetailLabels(language);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState("");
   const [error, setError] = useState("");
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
+  const [acceptConfirmOpen, setAcceptConfirmOpen] = useState(false);
+  const [revisionOpen, setRevisionOpen] = useState(false);
+  const [revisionMessage, setRevisionMessage] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -54,40 +54,44 @@ export function QuoteDetailPage() {
 
   useEffect(() => {
     if (!toast) return;
-    const timeout = window.setTimeout(() => setToast(null), 2200);
+    const timeout = window.setTimeout(() => setToast(null), 2400);
     return () => window.clearTimeout(timeout);
   }, [toast]);
 
   if (!id) return <Navigate to="/quotes" replace />;
 
-  async function updateStatus(status: "accepted" | "change_requested" | "rejected") {
+  async function acceptQuote() {
     if (!quote) return;
-    setActionLoading(status);
-    setError("");
+    setActionLoading("accepted");
     try {
-      const updated = status === "accepted"
-        ? await quoteService.approveQuote(quote.id)
-        : status === "rejected"
-          ? await quoteService.rejectQuote(quote.id)
-          : await quoteService.requestRevision(quote.id);
+      const updated = await quoteService.approveQuote(quote.id);
       setQuote(updated);
+      setToast({ message: labels.accepted, tone: "success" });
     } catch {
-      setError(t("common.empty"));
+      setToast({ message: labels.sendFailed, tone: "error" });
     } finally {
       setActionLoading("");
+      setAcceptConfirmOpen(false);
     }
   }
 
-  async function confirmDeleteQuote() {
+  async function submitRevision() {
     if (!quote) return;
+    if (!revisionMessage.trim()) {
+      setToast({ message: labels.revisionRequired, tone: "error" });
+      return;
+    }
+    setActionLoading("revision_requested");
     try {
-      await quoteService.deleteQuote(quote.id);
-      setToast({ message: t("quote.deleteSuccess"), tone: "success" });
-      window.setTimeout(() => navigate("/quotes"), 360);
+      const updated = await quoteService.requestRevision(quote.id, revisionMessage.trim());
+      setQuote(updated);
+      setToast({ message: labels.revisionSent, tone: "success" });
+      setRevisionOpen(false);
+      setRevisionMessage("");
     } catch {
-      setToast({ message: t("quote.deleteError"), tone: "error" });
+      setToast({ message: labels.sendFailed, tone: "error" });
     } finally {
-      setIsDeleteConfirmOpen(false);
+      setActionLoading("");
     }
   }
 
@@ -107,122 +111,279 @@ export function QuoteDetailPage() {
     );
   }
 
-  const subtotal = calculateQuoteSubtotal(quote.items);
-  const vat = quote.taxAmount ?? calculateQuoteVat(subtotal);
-  const total = quote.total ?? subtotal + vat;
-  const quoteFiles = getQuoteFiles(quote);
-  const hasQuoteFile = quoteFiles.length > 0;
-  const actionLabel = {
-    accepted: language === "ja" ? "承認" : "Đồng ý",
-    rejected: language === "ja" ? "却下" : "Từ chối",
-    change_requested: language === "ja" ? "修正依頼" : "Yêu cầu chỉnh sửa"
-  };
-  const quoteFileLabels = {
-    received: language === "ja" ? "見積受信済み" : "Đã nhận báo giá",
-    fileTitle: language === "ja" ? "見積ファイル" : "File báo giá",
-    specialFileNote: language === "ja"
-      ? "このファイルは専用ソフトが必要です。ダウンロードして開いてください。"
-      : "File này cần phần mềm chuyên dụng. Vui lòng tải về để mở.",
-    open: language === "ja" ? "開く" : "Mở",
-    download: language === "ja" ? "ダウンロード" : "Tải về",
-    notFound: language === "ja" ? "ファイルが見つかりません。" : "Không tìm thấy file."
-  };
+  const files = getQuoteFiles(quote);
+  const status = quoteResponseStatus(quote, labels);
+  const acceptedAt = quote.acceptedAt || "";
+  const revisionAt = quote.quoteRevisionRequestedAt || quote.changeRequestedAt || "";
+  const revisionText = quote.quoteRevisionMessage || quote.changeRequestMessage || "";
+  const hasResponded = status.key === "accepted" || status.key === "revision_requested";
 
   return (
-    <section className="page">
+    <section className="page quote-detail-page">
       <div className="page-header">
-        <h1>{t("quote.detail")}</h1>
-        {hasQuoteFile ? <span className="quote-file-status">{quoteFileLabels.received}</span> : null}
+        <div>
+          <h1>{labels.detailTitle}</h1>
+        </div>
+        <span className={`quote-file-status ${status.tone}`}>{status.label}</span>
       </div>
+
       <Card>
-        <h2 className="section-title">{t("quote.company")}</h2>
-        <div className="info-row"><span>{t("brand.jp")}</span><strong>{t("brand.en")}</strong></div>
+        <h2 className="section-title">{labels.requestInfo}</h2>
+        <div className="info-grid">
+          <InfoRow label={labels.requestId} value={quote.requestId || quote.quoteCode || quote.id} />
+          <InfoRow label={labels.subject} value={quote.projectName || quote.title || "-"} />
+          <InfoRow label={labels.customer} value={quote.customerName || "-"} />
+          <InfoRow label={labels.phone} value={quote.customerPhone || "-"} />
+          <InfoRow label={labels.address} value={quote.projectAddress || quote.customerAddress || quote.address || "-"} />
+          <InfoRow label={labels.requestDate} value={quote.createdAt ? formatQuoteDate(quote.createdAt, language) : "-"} />
+          <InfoRow label={labels.sentAt} value={(quote.quoteSentAt || quote.sentAt) ? formatQuoteDate(quote.quoteSentAt || quote.sentAt || "", language) : "-"} />
+          <InfoRow label={labels.assignee} value={quote.assigneeName || quote.staffName || "-"} />
+          <InfoRow label={labels.content} value={quote.content || quote.description || "-"} />
+        </div>
       </Card>
+
       <Card>
-        <div className="info-row"><span>{t("quote.id")}</span><strong>{quote.id}</strong></div>
-        <div className="info-row"><span>{t("request.project")}</span><strong>{quote.projectName}</strong></div>
-        <div className="info-row"><span>{t("quote.validUntil")}</span><strong>{quote.validUntil}</strong></div>
+        <h2 className="section-title">{labels.quoteFiles}</h2>
+        <div className="quote-file-list-compact">
+          {files.length ? files.map((file, index) => (
+            <QuoteFileRow key={`${file.displayUrl || file.displayName}-${index}`} file={file} index={index} labels={labels} onToast={setToast} />
+          )) : <div className="muted-line">{labels.notFound}</div>}
+        </div>
       </Card>
-      {hasQuoteFile ? (
-        <Card>
-          <h2 className="section-title">{quoteFileLabels.fileTitle}</h2>
-          <div className="quote-file-list-compact">
-            {quoteFiles.map((file, index) => (
-              <div className="quote-file-link-row" key={`${file.displayUrl}-${index}`}>
-                <span className="quote-file-link-index">{index + 1}.</span>
-                <div className="quote-file-link-main">
-                  <strong>{file.displayName}</strong>
-                  <span>{[quoteFileType(file), formatQuoteFileSize(file.displaySize)].filter(Boolean).join(" · ")}</span>
-                  {isSpecialSoftwareFile(file) ? <em>{quoteFileLabels.specialFileNote}</em> : null}
-                </div>
-                {isValidFileUrl(file.displayUrl) ? (
-                  <div className="quote-file-link-actions">
-                    {isPreviewableFile(file) ? (
-                      <button type="button" onClick={() => window.open(file.displayUrl, "_blank", "noopener,noreferrer")}>
-                        {quoteFileLabels.open}
-                      </button>
-                    ) : null}
-                    <a href={file.displayUrl} download={file.displayName} target="_blank" rel="noreferrer">
-                      {quoteFileLabels.download}
-                    </a>
-                  </div>
-                ) : <span className="muted-line">{quoteFileLabels.notFound}</span>}
-              </div>
-            ))}
+
+      <Card>
+        <h2 className="section-title">{labels.responseTitle}</h2>
+        {status.key === "accepted" ? (
+          <div className="quote-response-state">
+            <span className="quote-file-status success">{labels.accepted}</span>
+            {acceptedAt ? <p>{labels.acceptedAt}: {formatQuoteDate(acceptedAt, language)}</p> : null}
           </div>
-        </Card>
-      ) : (
-        <Card>
-          <h2 className="section-title">{t("quote.items")}</h2>
-          <table className="quote-table">
-            <thead>
-              <tr>
-                <th>{t("quote.items")}</th>
-                <th>{t("quote.quantity")}</th>
-                <th>{t("quote.unitPrice")}</th>
-                <th>{t("quote.lineTotal")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {quote.items.map(item => (
-                <tr key={item.name}>
-                  <td>{item.name}</td>
-                  <td>{item.quantity}</td>
-                  <td>{formatCurrency(item.unitPrice)}</td>
-                  <td>{formatCurrency(item.amount ?? item.quantity * item.unitPrice - (item.discount || 0))}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="summary-row"><span>{t("quote.subtotal")}</span><strong>{formatCurrency(subtotal)}</strong></div>
-          <div className="summary-row"><span>{t("quote.vat")}</span><strong>{formatCurrency(vat)}</strong></div>
-          <div className="summary-row total"><span>{t("quote.total")}</span><strong>{formatCurrency(total)}</strong></div>
-        </Card>
-      )}
+        ) : status.key === "revision_requested" ? (
+          <div className="quote-response-state">
+            <span className="quote-file-status warning">{labels.revisionRequested}</span>
+            {revisionText ? <p>{revisionText}</p> : null}
+            {revisionAt ? <p>{labels.revisionAt}: {formatQuoteDate(revisionAt, language)}</p> : null}
+          </div>
+        ) : (
+          <div className="quote-response-actions">
+            <Button disabled={!!actionLoading} onClick={() => setAcceptConfirmOpen(true)}>
+              {labels.acceptQuote}
+            </Button>
+            <button type="button" className="quote-secondary-button" disabled={!!actionLoading} onClick={() => setRevisionOpen(true)}>
+              {labels.requestRevision}
+            </button>
+          </div>
+        )}
+        {hasResponded ? null : <p className="muted-line">{labels.responseHint}</p>}
+      </Card>
+
       {error ? <ErrorState message={error} /> : null}
-      <div className="two-actions">
-        <Button variant="outline" disabled={!!actionLoading} onClick={() => updateStatus("change_requested")}>
-          {actionLoading === "change_requested" ? t("common.loading") : actionLabel.change_requested}
-        </Button>
-        <Button variant="outline" disabled={!!actionLoading} onClick={() => updateStatus("rejected")}>
-          {actionLoading === "rejected" ? t("common.loading") : actionLabel.rejected}
-        </Button>
-        <Button disabled={!!actionLoading} onClick={() => updateStatus("accepted")}>
-          {actionLoading === "accepted" ? t("common.loading") : actionLabel.accepted}
-        </Button>
-      </div>
-      <Button variant="danger" icon={<Trash2 size={18} />} onClick={() => setIsDeleteConfirmOpen(true)}>
-        {t("quote.deleteAction")}
-      </Button>
+
       <ActionConfirmModal
-        open={isDeleteConfirmOpen}
-        title={t("quote.deleteTitle")}
-        message={t("quote.deleteConfirmText")}
-        confirmLabel={t("common.delete")}
-        onCancel={() => setIsDeleteConfirmOpen(false)}
-        onConfirm={confirmDeleteQuote}
+        open={acceptConfirmOpen}
+        title={labels.acceptQuote}
+        message={labels.acceptConfirm}
+        confirmLabel={labels.acceptConfirmButton}
+        onCancel={() => setAcceptConfirmOpen(false)}
+        onConfirm={acceptQuote}
       />
+      {revisionOpen ? (
+        <div className="assignee-modal-overlay assignee-modal-backdrop" role="presentation" onClick={() => setRevisionOpen(false)}>
+          <div className="assignee-modal" role="dialog" aria-modal="true" onClick={event => event.stopPropagation()}>
+            <div className="assignee-modal-header">
+              <h2>{labels.revisionTitle}</h2>
+              <button type="button" className="assignee-modal-close" aria-label={labels.cancel} onClick={() => setRevisionOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="assignee-modal-body">
+              <label className="field">
+                <span>{labels.revisionContent}</span>
+                <textarea value={revisionMessage} onChange={event => setRevisionMessage(event.target.value)} />
+              </label>
+              <div className="two-actions">
+                <button type="button" className="quote-secondary-button" onClick={() => setRevisionOpen(false)}>{labels.cancel}</button>
+                <button type="button" className="media-picker-button" disabled={!!actionLoading} onClick={submitRevision}>{labels.sendResponse}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {toast ? <AppToast message={toast.message} tone={toast.tone} /> : null}
     </section>
+  );
+}
+
+type DisplayFile = ReturnType<typeof getQuoteFiles>[number];
+type Labels = ReturnType<typeof quoteDetailLabels>;
+
+function QuoteFileRow({ file, index, labels, onToast }: { file: DisplayFile; index: number; labels: Labels; onToast: (toast: { message: string; tone: "success" | "error" }) => void }) {
+  const validUrl = isValidFileUrl(file.displayUrl);
+  const previewable = isPreviewableFile(file);
+  const specialFile = isSpecialSoftwareFile(file);
+
+  function openFile() {
+    if (!validUrl) {
+      onToast({ message: labels.notFound, tone: "error" });
+      return;
+    }
+    if (!previewable) {
+      onToast({ message: specialFile ? labels.specialFileNote : labels.cannotPreview, tone: "error" });
+      return;
+    }
+    window.open(file.displayUrl, "_blank", "noopener,noreferrer");
+  }
+
+  function downloadFile() {
+    if (!validUrl) {
+      onToast({ message: labels.notFound, tone: "error" });
+      return;
+    }
+    const link = document.createElement("a");
+    link.href = file.displayUrl;
+    link.download = file.displayName;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
+  return (
+    <div className="quote-file-link-row">
+      <span className="quote-file-link-index">{index + 1}.</span>
+      <FileText size={16} />
+      <div className="quote-file-link-main">
+        <strong>{file.displayName}</strong>
+        <span>{[quoteFileType(file), formatQuoteFileSize(file.displaySize), file.displayDate ? formatQuoteDate(file.displayDate, labels.language) : ""].filter(Boolean).join(" · ")}</span>
+        {specialFile ? <em>{labels.specialFileNote}</em> : null}
+      </div>
+      {validUrl ? (
+        <div className="quote-file-link-actions">
+          {previewable ? (
+            <button type="button" onClick={openFile}>
+              <ExternalLink size={14} />
+              <span>{labels.open}</span>
+            </button>
+          ) : null}
+          <button type="button" onClick={downloadFile}>
+            <Download size={14} />
+            <span>{labels.download}</span>
+          </button>
+        </div>
+      ) : <span className="muted-line">{labels.notFound}</span>}
+    </div>
+  );
+}
+
+function quoteDetailLabels(language: string) {
+  if (language === "ja") {
+    return {
+      language,
+      detailTitle: "見積詳細",
+      requestInfo: "依頼情報",
+      requestId: "依頼ID",
+      subject: "件名",
+      customer: "お客様名",
+      phone: "電話番号",
+      address: "住所",
+      requestDate: "依頼日",
+      sentAt: "見積送信日",
+      assignee: "担当者",
+      content: "依頼内容",
+      quoteFiles: "見積ファイル",
+      responseTitle: "見積への回答",
+      received: "見積受信済み",
+      accepted: "見積承認済み",
+      revisionRequested: "修正依頼送信済み",
+      acceptQuote: "見積を承認する",
+      requestRevision: "修正を依頼する",
+      acceptConfirm: "この見積を承認してもよろしいですか？",
+      acceptConfirmButton: "承認",
+      acceptedAt: "承認日時",
+      revisionAt: "送信日時",
+      revisionTitle: "見積修正依頼",
+      revisionContent: "修正内容",
+      revisionRequired: "修正内容を入力してください。",
+      sendResponse: "送信する",
+      cancel: "キャンセル",
+      revisionSent: "見積修正依頼を送信しました",
+      responseHint: "内容をご確認のうえ回答してください。",
+      sendFailed: "送信できませんでした。",
+      open: "開く",
+      download: "ダウンロード",
+      notFound: "ファイルが見つかりません。",
+      cannotPreview: "このファイルは直接表示できません。ダウンロードしてください。",
+      specialFileNote: "このファイルは専用ソフトが必要です。ダウンロードして開いてください。"
+    };
+  }
+  return {
+    language,
+    detailTitle: "Chi tiết báo giá",
+    requestInfo: "Thông tin yêu cầu",
+    requestId: "Mã yêu cầu",
+    subject: "Tiêu đề",
+    customer: "Khách hàng",
+    phone: "Số điện thoại",
+    address: "Địa chỉ",
+    requestDate: "Ngày gửi yêu cầu",
+    sentAt: "Ngày gửi báo giá",
+    assignee: "Người phụ trách",
+    content: "Nội dung yêu cầu",
+    quoteFiles: "File báo giá",
+    responseTitle: "Phản hồi báo giá",
+    received: "Đã nhận báo giá",
+    accepted: "Đã chấp nhận báo giá",
+    revisionRequested: "Đã yêu cầu chỉnh sửa",
+    acceptQuote: "Chấp nhận báo giá",
+    requestRevision: "Yêu cầu chỉnh sửa",
+    acceptConfirm: "Bạn có chắc muốn chấp nhận báo giá này không?",
+    acceptConfirmButton: "Đồng ý",
+    acceptedAt: "Thời gian chấp nhận",
+    revisionAt: "Thời gian gửi phản hồi",
+    revisionTitle: "Yêu cầu chỉnh sửa báo giá",
+    revisionContent: "Nội dung cần chỉnh sửa",
+    revisionRequired: "Vui lòng nhập nội dung cần chỉnh sửa.",
+    sendResponse: "Gửi phản hồi",
+    cancel: "Hủy",
+    revisionSent: "Đã gửi yêu cầu chỉnh sửa báo giá",
+    responseHint: "Vui lòng kiểm tra file báo giá trước khi phản hồi.",
+    sendFailed: "Không thể gửi phản hồi.",
+    open: "Mở",
+    download: "Tải về",
+    notFound: "Không tìm thấy file.",
+    cannotPreview: "File này không thể xem trực tiếp. Vui lòng tải về.",
+    specialFileNote: "File này cần phần mềm chuyên dụng. Vui lòng tải về để mở."
+  };
+}
+
+function quoteResponseStatus(quote: Quote, labels: Labels) {
+  if (quote.quoteResponseStatus === "accepted" || quote.status === "accepted") {
+    return { key: "accepted", label: labels.accepted, tone: "success" };
+  }
+  if (quote.quoteResponseStatus === "revision_requested" || quote.status === "revision_requested" || quote.status === "change_requested") {
+    return { key: "revision_requested", label: labels.revisionRequested, tone: "warning" };
+  }
+  return { key: "received", label: labels.received, tone: "" };
+}
+
+function formatQuoteDate(value: string, language = "vi") {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(language === "ja" ? "ja-JP" : "vi-VN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="info-row">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
   );
 }

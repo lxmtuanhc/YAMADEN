@@ -3069,6 +3069,32 @@ textarea {
   cursor: default;
 }
 
+.quote-summary-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.quote-summary-button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.quote-summary-button:active {
+  background: #eff6ff;
+}
+
+.quote-summary-chevron {
+  color: #94a3b8;
+}
+
 .quote-file-status {
   display: inline-flex;
   align-items: center;
@@ -3197,6 +3223,24 @@ textarea {
 .quote-file-status.warning {
   color: #92400e;
   background: #fef3c7;
+}
+
+.quote-file-status.success {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.quote-response-state {
+  display: grid;
+  gap: 10px;
+}
+
+.quote-response-state p {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
 }
 
 @media (max-width: 420px) {
