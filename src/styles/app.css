@@ -3076,6 +3076,7 @@ textarea {
 
 .quote-summary-button {
   width: 100%;
+  height: 100%;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
@@ -3087,8 +3088,31 @@ textarea {
   text-align: left;
 }
 
+.quote-summary-button .list-body {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.quote-summary-button .list-id {
+  color: #1262e3;
+}
+
+.quote-summary-button h3 {
+  color: #0f172a;
+}
+
+.quote-summary-button p {
+  color: #64748b;
+}
+
 .quote-summary-button:active {
   background: #eff6ff;
+}
+
+.quote-summary-button:focus-visible {
+  outline: 2px solid #1262e3;
+  outline-offset: -2px;
 }
 
 .quote-summary-chevron {
@@ -3228,6 +3252,11 @@ textarea {
 .quote-file-status.success {
   color: #047857;
   background: #d1fae5;
+}
+
+.quote-file-status.muted {
+  color: #64748b;
+  background: #f1f5f9;
 }
 
 .quote-response-state {

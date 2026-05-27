@@ -36,24 +36,33 @@ export function QuotesPage() {
     };
   }, [language, t]);
 
+  const pageTitle = language === "ja" ? "見積" : "Báo giá";
+  const listTitle = language === "ja" ? "見積一覧" : "Danh sách báo giá";
+  const emptyMessage = language === "ja" ? "見積はまだありません。" : "Chưa có báo giá.";
+
   return (
     <section className="page">
       <div className="page-header">
-        <h1>{language === "ja" ? "見積" : "Báo giá"}</h1>
+        <h1>{pageTitle}</h1>
       </div>
-      <h2 className="section-title">{language === "ja" ? "見積一覧" : "Danh sách báo giá"}</h2>
+      <h2 className="section-title">{listTitle}</h2>
       <div className="list-stack">
         {isLoading ? <LoadingState /> : null}
         {!isLoading && error ? <ErrorState message={error} /> : null}
         {!isLoading && !error && quotes.length ? quotes.map(quote => (
           <QuoteCard
-            key={quote.requestId || quote.id}
+            key={getQuoteDetailId(quote)}
             quote={quote}
-            onOpen={item => navigate(`/quotes/${encodeURIComponent(item.requestId || item.quoteCode || item.id)}`)}
+            onOpen={item => navigate(`/quotes/${encodeURIComponent(getQuoteDetailId(item))}`)}
           />
         )) : null}
-        {!isLoading && !error && !quotes.length ? <EmptyState message={t("quote.empty")} /> : null}
+        {!isLoading && !error && !quotes.length ? <EmptyState message={t("quote.empty") || emptyMessage} /> : null}
       </div>
     </section>
   );
+}
+
+function getQuoteDetailId(quote: Quote) {
+  const item = quote as Quote & Record<string, unknown>;
+  return String(quote.requestId || quote.quoteCode || quote.id || item.requestCode || item.code || item.requestNo || "unknown");
 }
