@@ -32,7 +32,7 @@ function normalizeQuote(quote: Quote): Quote {
     customerName: quote.customerName || "",
     customerPhone: quote.customerPhone || "",
     customerEmail: quote.customerEmail || "",
-    fileUrl: quote.fileUrl || "",
+    fileUrl: quote.fileUrl || quote.pdfUrl || "",
     originalName: quote.originalName || quote.fileName || "",
     fileName: quote.fileName || "",
     mimeType: quote.mimeType || "",

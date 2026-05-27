@@ -66,6 +66,9 @@ export function QuoteDetailPage() {
   }, [toast]);
 
   const files = useMemo(() => getQuoteFiles(quote), [quote]);
+  useEffect(() => {
+    console.log("[QUOTE_DETAIL_FILES]", files);
+  }, [files]);
 
   if (!id) return <Navigate to="/quotes" replace />;
 
@@ -253,7 +256,9 @@ function QuoteFileRow({
   labels: Labels;
   onToast: (toast: { message: string; tone: "success" | "error" }) => void;
 }) {
-  const validUrl = hasUsableFileUrl(file.displayUrl);
+  console.log("[QUOTE_DETAIL_FILE]", file);
+  const normalizedUrl = file.displayUrl;
+  const validUrl = hasUsableFileUrl(normalizedUrl);
   const previewable = isPreviewableFile(file);
   const specialFile = isSpecialSoftwareFile(file);
 
@@ -266,7 +271,7 @@ function QuoteFileRow({
       onToast({ message: specialFile ? labels.specialFileNote : labels.cannotPreview, tone: "error" });
       return;
     }
-    window.open(file.displayUrl, "_blank", "noopener,noreferrer");
+    window.open(normalizedUrl, "_blank", "noopener,noreferrer");
   }
 
   function downloadFile() {
@@ -275,7 +280,7 @@ function QuoteFileRow({
       return;
     }
     const link = document.createElement("a");
-    link.href = file.displayUrl;
+    link.href = normalizedUrl;
     link.download = file.displayName;
     link.target = "_blank";
     link.rel = "noreferrer";
@@ -445,13 +450,7 @@ function safeText(value: unknown, fallback: string) {
 }
 
 function hasUsableFileUrl(url: string) {
-  if (!isValidFileUrl(url)) return false;
-  try {
-    const parsed = new URL(url);
-    return !parsed.pathname.includes("/uploads/quote-files/");
-  } catch {
-    return false;
-  }
+  return isValidFileUrl(url);
 }
 
 function formatQuoteDate(value: string, language = "vi") {

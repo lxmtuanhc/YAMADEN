@@ -9,8 +9,6 @@ import { quoteService } from "../../services/quoteService";
 import type { Quote } from "../../types";
 import { groupQuotesByRequest } from "../../utils/quoteFiles";
 
-const QUOTE_UI_VERSION = "2026-05-28-01";
-
 export function QuotesPage() {
   const { language } = useTranslation();
   const navigate = useNavigate();
@@ -18,11 +16,6 @@ export function QuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-
-  console.log("[CUSTOMER_QUOTES_PAGE_RENDER]");
-  console.log("[CUSTOMER_QUOTES_RAW]", quotes);
-  console.log("[CUSTOMER_QUOTES_COUNT]", quotes?.length);
-  console.log("[CUSTOMER_QUOTES_FIRST]", quotes?.[0]);
 
   useEffect(() => {
     let mounted = true;
@@ -52,7 +45,6 @@ export function QuotesPage() {
         <h1>{labels.title}</h1>
       </div>
       <h2 className="section-title">{labels.listTitle}</h2>
-      <div className="quote-ui-version">Quote UI version: {QUOTE_UI_VERSION}</div>
 
       {isLoading ? <LoadingState /> : null}
       {!isLoading && error ? <ErrorState message={error} /> : null}

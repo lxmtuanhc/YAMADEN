@@ -223,9 +223,12 @@ export interface QuoteFile {
   originalName?: string;
   fileName?: string;
   fileUrl?: string;
+  downloadUrl?: string;
   url?: string;
   secureUrl?: string;
   secure_url?: string;
+  pdfUrl?: string;
+  path?: string;
   mimeType?: string;
   fileSize?: number;
   size?: number;
@@ -267,6 +270,7 @@ export interface Quote {
   internalNote?: string;
   attachments?: string[];
   fileUrl?: string;
+  pdfUrl?: string;
   originalName?: string;
   fileName?: string;
   mimeType?: string;

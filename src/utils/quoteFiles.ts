@@ -8,11 +8,21 @@ export type DisplayQuoteFile = QuoteFile & {
 };
 
 export function getQuoteFileUrl(file?: QuoteFile | null) {
-  const raw = file?.fileUrl || file?.url || file?.secureUrl || file?.secure_url || "";
-  if (typeof window !== "undefined" && typeof raw === "string" && raw.startsWith("/")) {
-    return `${window.location.origin}${raw}`;
+  const raw = file?.fileUrl || file?.url || file?.secureUrl || file?.secure_url || file?.downloadUrl || file?.pdfUrl || file?.path || "";
+  return normalizeFileUrl(raw);
+}
+
+export function normalizeFileUrl(url: unknown) {
+  const text = String(url || "").trim();
+  if (!text) return "";
+  if (/^https?:\/\//i.test(text)) return text;
+  if (typeof window !== "undefined" && text.startsWith("/")) {
+    return `${window.location.origin}${text}`;
   }
-  return raw;
+  if (typeof window !== "undefined" && /^(uploads|quote-files)\//i.test(text)) {
+    return `${window.location.origin}/${text}`;
+  }
+  return text;
 }
 
 export function isValidFileUrl(url: unknown) {
@@ -54,13 +64,14 @@ function fileKey(file: DisplayQuoteFile, index: number) {
 
 export function getQuoteFiles(quote?: Quote | null): DisplayQuoteFile[] {
   if (!quote) return [];
-  const directFile = quote.fileUrl
+  const directFileUrl = quote.fileUrl || quote.pdfUrl || "";
+  const directFile = directFileUrl
     ? [{
         id: quote.id,
         quoteId: quote.id,
         originalName: quote.originalName,
         fileName: quote.fileName,
-        fileUrl: quote.fileUrl,
+        fileUrl: directFileUrl,
         mimeType: quote.mimeType,
         fileSize: quote.fileSize,
         ext: quote.ext,

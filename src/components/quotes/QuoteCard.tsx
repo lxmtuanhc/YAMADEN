@@ -29,7 +29,7 @@ export function QuoteCard({ quote, onOpen }: { quote: Quote; onOpen?: (quote: Qu
           <strong className="customer-quote-card-code">{requestCode}</strong>
           <span className={`customer-quote-card-badge ${status.tone}`}>{status.label}</span>
         </span>
-        <span className="customer-quote-card-title">TEST QUOTE CARD - {title}</span>
+        <span className="customer-quote-card-title">{title}</span>
         <span className="customer-quote-card-meta">
           <span>{labels.sentAt}: {quoteDate}</span>
           <span>{labels.fileCount}: {files.length}</span>
