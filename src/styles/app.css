@@ -3259,6 +3259,146 @@ textarea {
   background: #f1f5f9;
 }
 
+.customer-quotes-page-v20260528 {
+  gap: 12px;
+}
+
+.quote-ui-version {
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.customer-quote-list-v20260528 {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.customer-quote-card-v20260528 {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #e1e8f2;
+  border-radius: 20px;
+  background: #fff;
+  color: #0f172a;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, .06);
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 18px;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  text-align: left;
+}
+
+.customer-quote-card-v20260528:active {
+  transform: scale(.99);
+  background: #f8fbff;
+}
+
+.customer-quote-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #eef5ff;
+  color: #1262e3;
+  display: grid;
+  place-items: center;
+}
+
+.customer-quote-card-main {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.customer-quote-card-top {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.customer-quote-card-code {
+  min-width: 0;
+  color: #1262e3;
+  font-size: 12px;
+  font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-quote-card-badge {
+  flex: 0 0 auto;
+  max-width: 48%;
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: #15803d;
+  background: #dcfce7;
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-quote-card-badge.accepted {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.customer-quote-card-badge.revision {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.customer-quote-card-badge.none {
+  color: #64748b;
+  background: #f1f5f9;
+}
+
+.customer-quote-card-title {
+  min-width: 0;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 950;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-quote-card-meta {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.customer-quote-card-meta span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-quote-card-chevron {
+  color: #94a3b8;
+}
+
 .quote-response-state {
   display: grid;
   gap: 10px;
