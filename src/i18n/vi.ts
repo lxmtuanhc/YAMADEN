@@ -195,7 +195,7 @@ export const vi = {
   "quote.pending": "Chờ xác nhận",
   "quote.draft": "Đang tạo",
   "quote.pendingApproval": "Chờ duyệt",
-  "quote.sentToCustomer": "Đã gửi app",
+  "quote.sentToCustomer": "Đã gửi khách hàng",
   "quote.viewedByCustomer": "Khách đang xem",
   "quote.approved": "Đã đồng ý",
   "quote.revision_requested": "Cần chỉnh sửa",

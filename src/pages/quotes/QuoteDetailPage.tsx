@@ -1,7 +1,6 @@
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { ActionConfirmModal } from "../../components/ActionConfirmModal";
 import { AppToast } from "../../components/AppToast";
 import { Button } from "../../components/ui/Button";
@@ -13,7 +12,7 @@ import { useTranslation } from "../../hooks/useTranslation";
 import { quoteService } from "../../services/quoteService";
 import type { Quote } from "../../types";
 import { formatCurrency } from "../../utils/format";
-import { formatQuoteFileSize, getQuoteFiles, isValidFileUrl, quoteFileType } from "../../utils/quoteFiles";
+import { formatQuoteFileSize, getQuoteFiles, isPreviewableFile, isSpecialSoftwareFile, isValidFileUrl, quoteFileType } from "../../utils/quoteFiles";
 
 export function QuoteDetailPage() {
   const { id } = useParams();
@@ -118,12 +117,22 @@ export function QuoteDetailPage() {
     rejected: language === "ja" ? "却下" : "Từ chối",
     change_requested: language === "ja" ? "修正依頼" : "Yêu cầu chỉnh sửa"
   };
+  const quoteFileLabels = {
+    received: language === "ja" ? "見積受信済み" : "Đã nhận báo giá",
+    fileTitle: language === "ja" ? "見積ファイル" : "File báo giá",
+    specialFileNote: language === "ja"
+      ? "このファイルは専用ソフトが必要です。ダウンロードして開いてください。"
+      : "File này cần phần mềm chuyên dụng. Vui lòng tải về để mở.",
+    open: language === "ja" ? "開く" : "Mở",
+    download: language === "ja" ? "ダウンロード" : "Tải về",
+    notFound: language === "ja" ? "ファイルが見つかりません。" : "Không tìm thấy file."
+  };
 
   return (
     <section className="page">
       <div className="page-header">
         <h1>{t("quote.detail")}</h1>
-        {hasQuoteFile ? <span className="quote-file-status">{language === "ja" ? "見積受信済み" : "Đã nhận báo giá"}</span> : null}
+        {hasQuoteFile ? <span className="quote-file-status">{quoteFileLabels.received}</span> : null}
       </div>
       <Card>
         <h2 className="section-title">{t("quote.company")}</h2>
@@ -136,7 +145,7 @@ export function QuoteDetailPage() {
       </Card>
       {hasQuoteFile ? (
         <Card>
-          <h2 className="section-title">{language === "ja" ? "見積ファイル" : "File báo giá"}</h2>
+          <h2 className="section-title">{quoteFileLabels.fileTitle}</h2>
           <div className="quote-file-list-compact">
             {quoteFiles.map((file, index) => (
               <div className="quote-file-link-row" key={`${file.displayUrl}-${index}`}>
@@ -144,13 +153,20 @@ export function QuoteDetailPage() {
                 <div className="quote-file-link-main">
                   <strong>{file.displayName}</strong>
                   <span>{[quoteFileType(file), formatQuoteFileSize(file.displaySize)].filter(Boolean).join(" · ")}</span>
+                  {isSpecialSoftwareFile(file) ? <em>{quoteFileLabels.specialFileNote}</em> : null}
                 </div>
                 {isValidFileUrl(file.displayUrl) ? (
                   <div className="quote-file-link-actions">
-                    <button type="button" onClick={() => window.open(file.displayUrl, "_blank", "noopener,noreferrer")}>{language === "ja" ? "開く" : "Mở"}</button>
-                    <a href={file.displayUrl} download={file.displayName}>{language === "ja" ? "ダウンロード" : "Tải về"}</a>
+                    {isPreviewableFile(file) ? (
+                      <button type="button" onClick={() => window.open(file.displayUrl, "_blank", "noopener,noreferrer")}>
+                        {quoteFileLabels.open}
+                      </button>
+                    ) : null}
+                    <a href={file.displayUrl} download={file.displayName} target="_blank" rel="noreferrer">
+                      {quoteFileLabels.download}
+                    </a>
                   </div>
-                ) : <span className="muted-line">{language === "ja" ? "ファイルが見つかりません" : "Không tìm thấy file"}</span>}
+                ) : <span className="muted-line">{quoteFileLabels.notFound}</span>}
               </div>
             ))}
           </div>

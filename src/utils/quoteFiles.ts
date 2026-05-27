@@ -8,7 +8,11 @@ export type DisplayQuoteFile = QuoteFile & {
 };
 
 export function getQuoteFileUrl(file?: QuoteFile | null) {
-  return file?.fileUrl || file?.url || file?.secureUrl || file?.secure_url || "";
+  const raw = file?.fileUrl || file?.url || file?.secureUrl || file?.secure_url || "";
+  if (typeof window !== "undefined" && typeof raw === "string" && raw.startsWith("/")) {
+    return `${window.location.origin}${raw}`;
+  }
+  return raw;
 }
 
 export function isValidFileUrl(url: unknown) {
@@ -25,8 +29,23 @@ function repairMojibake(text: string) {
 }
 
 export function getQuoteFileName(file: QuoteFile, index: number) {
-  const name = file.originalName || file.fileName || file.name || `Báo giá ${index + 1}`;
+  const name = file.originalName || file.fileName || file.name || `File ${index + 1}`;
   return repairMojibake(String(name));
+}
+
+export function getFileExtension(file: QuoteFile | DisplayQuoteFile) {
+  const source = file.ext || file.originalName || file.fileName || file.name || ("displayName" in file ? file.displayName : "") || getQuoteFileUrl(file);
+  const name = String(source || "").split("?")[0];
+  const ext = name.includes(".") ? name.split(".").pop() : "";
+  return String(ext || "").replace(".", "").toLowerCase();
+}
+
+export function isPreviewableFile(file: QuoteFile | DisplayQuoteFile) {
+  return ["pdf", "jpg", "jpeg", "png", "webp", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "csv"].includes(getFileExtension(file));
+}
+
+export function isSpecialSoftwareFile(file: QuoteFile | DisplayQuoteFile) {
+  return ["jww", "jwc", "dxf", "dwg", "cad", "tfs", "tfas", "zip", "rar"].includes(getFileExtension(file));
 }
 
 function fileKey(file: DisplayQuoteFile, index: number) {
@@ -108,7 +127,7 @@ export function groupQuotesByRequest(quotes: Quote[]): Quote[] {
 }
 
 export function quoteFileType(file: DisplayQuoteFile) {
-  const ext = (file.ext || file.displayName.split(".").pop() || "").replace(".", "").toUpperCase();
+  const ext = getFileExtension(file).toUpperCase();
   return ext || "FILE";
 }
 
