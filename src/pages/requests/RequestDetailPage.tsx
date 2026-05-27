@@ -15,6 +15,7 @@ import { quoteService } from "../../services/quoteService";
 import { requestService } from "../../services/requestService";
 import { scheduleService } from "../../services/scheduleService";
 import type { AssigneeRequestHistoryItem, Quote, RequestAssignee, RequestMediaFile, Schedule, StaffProfile, SupportRequest, TimelineEvent } from "../../types";
+import { groupQuotesByRequest } from "../../utils/quoteFiles";
 import { categoryOptions } from "./requestHelpers";
 import { REQUEST_STATUS_LABEL_KEYS, REQUEST_TIMELINE_MESSAGE_KEYS } from "../../constants/requestStatus";
 
@@ -54,7 +55,7 @@ export function RequestDetailPage() {
       Promise.all([...new Set(quoteKeys)].map(key => quoteService.getQuotesByRequestId(key))),
       scheduleService.getSchedulesByRequestId(id)
     ]);
-    const quotes = quoteGroups.flat().filter((quote, index, list) => list.findIndex(item => item.id === quote.id) === index);
+    const quotes = groupQuotesByRequest(quoteGroups.flat().filter((quote, index, list) => list.findIndex(item => item.id === quote.id) === index));
     const [profile, history] = result
       ? await Promise.all([
           requestService.getAssigneeProfile(result),
@@ -243,16 +244,14 @@ export function RequestDetailPage() {
         </div>
       </Card>
 
-      {relatedQuotes.length ? (
-        <Card>
-          <h2 className="section-title">{t("quote.related")}</h2>
-          <div className="list-stack">
-            {relatedQuotes.map(quote => (
-              <QuoteCard key={quote.id} quote={quote} />
-            ))}
-          </div>
-        </Card>
-      ) : null}
+      <Card>
+        <h2 className="section-title">{language === "ja" ? "関連見積" : "Báo giá liên quan"}</h2>
+        <div className="list-stack">
+          {relatedQuotes.length ? relatedQuotes.map(quote => (
+            <QuoteCard key={quote.requestId || quote.id} quote={quote} />
+          )) : <div className="muted-line">{language === "ja" ? "見積はまだありません" : "Chưa có báo giá"}</div>}
+        </div>
+      </Card>
 
       <Card>
         <div className="list-row">

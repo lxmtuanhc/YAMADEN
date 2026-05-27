@@ -205,6 +205,25 @@ export interface QuoteItem {
   amount?: number;
 }
 
+export interface QuoteFile {
+  id?: string;
+  quoteId?: string;
+  name?: string;
+  originalName?: string;
+  fileName?: string;
+  fileUrl?: string;
+  url?: string;
+  secureUrl?: string;
+  secure_url?: string;
+  mimeType?: string;
+  fileSize?: number;
+  size?: number;
+  ext?: string;
+  sentAt?: string;
+  uploadedAt?: string;
+  createdAt?: string;
+}
+
 export interface Quote {
   id: string;
   quoteCode?: string;
@@ -236,6 +255,13 @@ export interface Quote {
   mimeType?: string;
   fileSize?: number;
   ext?: string;
+  quoteFiles?: QuoteFile[];
+  quotationFiles?: QuoteFile[];
+  quoteSent?: boolean;
+  quoteSentAt?: string;
+  quoteSentBy?: string;
+  quoteFileCount?: number;
+  sentAt?: string;
   visibleToCustomer?: boolean;
   sentToCustomerAt?: string;
   viewedByCustomerAt?: string;

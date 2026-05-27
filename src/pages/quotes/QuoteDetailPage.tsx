@@ -8,12 +8,12 @@ import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { ErrorState } from "../../components/ui/ErrorState";
 import { LoadingState } from "../../components/ui/LoadingState";
-import { StatusBadge } from "../../components/ui/StatusBadge";
 import { calculateQuoteSubtotal, calculateQuoteVat } from "../../constants/quoteStatus";
 import { useTranslation } from "../../hooks/useTranslation";
 import { quoteService } from "../../services/quoteService";
 import type { Quote } from "../../types";
 import { formatCurrency } from "../../utils/format";
+import { formatQuoteFileSize, getQuoteFiles, quoteFileType } from "../../utils/quoteFiles";
 
 export function QuoteDetailPage() {
   const { id } = useParams();
@@ -111,7 +111,8 @@ export function QuoteDetailPage() {
   const subtotal = calculateQuoteSubtotal(quote.items);
   const vat = quote.taxAmount ?? calculateQuoteVat(subtotal);
   const total = quote.total ?? subtotal + vat;
-  const hasQuoteFile = Boolean(quote.fileUrl);
+  const quoteFiles = getQuoteFiles(quote);
+  const hasQuoteFile = quoteFiles.length > 0;
   const actionLabel = {
     accepted: language === "ja" ? "承認" : "Đồng ý",
     rejected: language === "ja" ? "却下" : "Từ chối",
@@ -122,7 +123,7 @@ export function QuoteDetailPage() {
     <section className="page">
       <div className="page-header">
         <h1>{t("quote.detail")}</h1>
-        <StatusBadge status={quote.status} />
+        {hasQuoteFile ? <span className="quote-file-status">{language === "ja" ? "見積受信済み" : "Đã nhận báo giá"}</span> : null}
       </div>
       <Card>
         <h2 className="section-title">{t("quote.company")}</h2>
@@ -135,11 +136,22 @@ export function QuoteDetailPage() {
       </Card>
       {hasQuoteFile ? (
         <Card>
-          <h2 className="section-title">{t("quote.related")}</h2>
-          <div className="info-row"><span>{quote.originalName || quote.fileName || "Quote file"}</span><a href={quote.fileUrl} target="_blank" rel="noreferrer">Open</a></div>
-          {quote.mimeType === "application/pdf" || quote.fileUrl?.toLowerCase().endsWith(".pdf") ? (
-            <iframe title={quote.originalName || "Quote file"} src={quote.fileUrl} style={{ width: "100%", minHeight: 520, border: "1px solid #e5e7eb", borderRadius: 12 }} />
-          ) : null}
+          <h2 className="section-title">{language === "ja" ? "見積ファイル" : "File báo giá"}</h2>
+          <div className="quote-file-list-compact">
+            {quoteFiles.map((file, index) => (
+              <div className="quote-file-link-row" key={`${file.displayUrl}-${index}`}>
+                <span className="quote-file-link-index">{index + 1}.</span>
+                <div className="quote-file-link-main">
+                  <strong>{file.displayName}</strong>
+                  <span>{[quoteFileType(file), formatQuoteFileSize(file.displaySize)].filter(Boolean).join(" · ")}</span>
+                </div>
+                <div className="quote-file-link-actions">
+                  <a href={file.displayUrl} target="_blank" rel="noreferrer">{language === "ja" ? "開く" : "Mở"}</a>
+                  <a href={file.displayUrl} download={file.displayName}>{language === "ja" ? "ダウンロード" : "Tải về"}</a>
+                </div>
+              </div>
+            ))}
+          </div>
         </Card>
       ) : (
         <Card>

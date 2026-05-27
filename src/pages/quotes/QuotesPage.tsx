@@ -8,6 +8,7 @@ import { LoadingState } from "../../components/ui/LoadingState";
 import { useTranslation } from "../../hooks/useTranslation";
 import { quoteService } from "../../services/quoteService";
 import type { Quote } from "../../types";
+import { groupQuotesByRequest } from "../../utils/quoteFiles";
 
 export function QuotesPage() {
   const { t, language } = useTranslation();
@@ -63,7 +64,7 @@ export function QuotesPage() {
       <div className="list-stack">
         {isLoading ? <LoadingState /> : null}
         {!isLoading && error ? <ErrorState message={error} /> : null}
-        {!isLoading && !error && quotes.length ? quotes.map(quote => <QuoteCard key={quote.id} quote={quote} onDelete={setDeleteTarget} />) : null}
+        {!isLoading && !error && quotes.length ? groupQuotesByRequest(quotes).map(quote => <QuoteCard key={quote.requestId || quote.id} quote={quote} onDelete={setDeleteTarget} />) : null}
         {!isLoading && !error && !quotes.length ? <EmptyState message={t("quote.empty")} /> : null}
       </div>
       <ActionConfirmModal

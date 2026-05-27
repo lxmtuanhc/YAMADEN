@@ -1,52 +1,51 @@
-import { ChevronRight, ReceiptText, Trash2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { calculateQuoteTotal } from "../../constants/quoteStatus";
+import { Download, ExternalLink, FileText, ReceiptText, Trash2, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "../../hooks/useTranslation";
 import type { Quote } from "../../types";
-import { formatCurrency } from "../../utils/format";
+import { formatQuoteFileSize, getQuoteFiles, quoteFileType } from "../../utils/quoteFiles";
 import { Card } from "../ui/Card";
-import { StatusBadge } from "../ui/StatusBadge";
 
 export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote: Quote) => void }) {
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-  const hasFile = Boolean(quote.fileUrl);
+  const { t, language } = useTranslation();
+  const [isFileListOpen, setIsFileListOpen] = useState(false);
+  const labels = quoteLabels(language);
+  const files = getQuoteFiles(quote);
+  const previewFiles = files.slice(0, 3);
+  const sentAt = quote.quoteSentAt || quote.sentAt || files[0]?.displayDate || quote.createdAt || "";
+
+  useEffect(() => {
+    document.body.classList.toggle("modal-open", isFileListOpen);
+    return () => document.body.classList.remove("modal-open");
+  }, [isFileListOpen]);
 
   return (
-    <Card className="request-card quote-list-card" onClick={() => navigate(`/quotes/${quote.id}`)}>
+    <Card className="request-card quote-list-card quote-file-card">
       <div className="list-icon">
         <ReceiptText size={22} />
       </div>
       <div className="list-body">
         <div className="list-row">
-          <span className="list-id">{quote.id}</span>
-          <StatusBadge status={quote.status} />
+          <span className="list-id">{quote.requestId || quote.quoteCode || quote.id}</span>
+          <span className="quote-file-status">{labels.received}</span>
         </div>
         <h3>{quote.projectName}</h3>
-        {hasFile ? (
-          <p>
-            <span>{quote.originalName || quote.fileName || "Quote file"}</span>
-            <a
-              href={quote.fileUrl}
-              target="_blank"
-              rel="noreferrer"
-              onClick={event => event.stopPropagation()}
-            >
-              Open
-            </a>
-          </p>
-        ) : (
-          <>
-            <p>
-              <span>{t("quote.amount")}</span>
-              <span>{formatCurrency(quote.total ?? calculateQuoteTotal(quote.items))}</span>
-            </p>
-            <p>
-              <span>{t("quote.validUntil")}</span>
-              <span>{quote.validUntil}</span>
-            </p>
-          </>
-        )}
+        <p><span>{labels.sentAt}</span><span>{sentAt ? formatQuoteDate(sentAt, language) : "-"}</span></p>
+        <p><span>{labels.fileCount}</span><span>{files.length}</span></p>
+        <div className="quote-file-list-compact" aria-label={labels.quoteFiles}>
+          <strong>{labels.quoteFiles}</strong>
+          {previewFiles.length ? previewFiles.map((file, index) => (
+            <QuoteFileRow key={`${file.displayUrl}-${index}`} file={file} index={index} labels={labels} compact />
+          )) : <span className="muted-line">{labels.notFound}</span>}
+        </div>
+        {files.length > 3 ? (
+          <button className="quote-file-list-button" type="button" onClick={() => setIsFileListOpen(true)}>
+            {labels.viewAllFiles} ({files.length})
+          </button>
+        ) : files.length ? (
+          <button className="quote-file-list-button" type="button" onClick={() => setIsFileListOpen(true)}>
+            {labels.viewFileList}
+          </button>
+        ) : null}
         {onDelete ? (
           <button
             className="inline-danger-action"
@@ -61,7 +60,108 @@ export function QuoteCard({ quote, onDelete }: { quote: Quote; onDelete?: (quote
           </button>
         ) : null}
       </div>
-      <ChevronRight className="list-arrow" size={18} />
+      {isFileListOpen ? (
+        <div className="quote-file-modal-overlay" role="presentation" onClick={() => setIsFileListOpen(false)}>
+          <div className="quote-file-modal" role="dialog" aria-modal="true" aria-labelledby="quote-file-modal-title" onClick={event => event.stopPropagation()}>
+            <div className="quote-file-modal-header">
+              <div>
+                <h2 id="quote-file-modal-title">{labels.quoteFiles}</h2>
+                <p>{labels.fileListDescription}</p>
+              </div>
+              <button className="quote-file-modal-close" type="button" aria-label={labels.close} onClick={() => setIsFileListOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="quote-file-modal-body">
+              {files.length ? files.map((file, index) => (
+                <QuoteFileRow key={`${file.displayUrl}-${index}`} file={file} index={index} labels={labels} />
+              )) : <div className="muted-line">{labels.notFound}</div>}
+            </div>
+            <button className="button button-secondary quote-file-modal-footer" type="button" onClick={() => setIsFileListOpen(false)}>
+              {labels.close}
+            </button>
+          </div>
+        </div>
+      ) : null}
     </Card>
   );
+}
+
+type QuoteLabels = ReturnType<typeof quoteLabels>;
+type QuoteFile = ReturnType<typeof getQuoteFiles>[number];
+
+function quoteLabels(language: string) {
+  if (language === "ja") {
+    return {
+      related: "関連見積",
+      received: "見積受信済み",
+      quoteFiles: "見積ファイル",
+      viewFileList: "ファイル一覧を見る",
+      viewAllFiles: "すべてのファイルを見る",
+      open: "開く",
+      download: "ダウンロード",
+      close: "閉じる",
+      notFound: "ファイルが見つかりません",
+      empty: "見積はまだありません",
+      sentAt: "送信日",
+      fileCount: "ファイル数",
+      fileListDescription: "管理者から送信された見積ファイルの一覧です。"
+    };
+  }
+  return {
+    related: "Báo giá liên quan",
+    received: "Đã nhận báo giá",
+    quoteFiles: "File báo giá",
+    viewFileList: "Xem danh sách file",
+    viewAllFiles: "Xem tất cả file",
+    open: "Mở",
+    download: "Tải về",
+    close: "Đóng",
+    notFound: "Không tìm thấy file",
+    empty: "Chưa có báo giá",
+    sentAt: "Ngày gửi",
+    fileCount: "Số file",
+    fileListDescription: "Danh sách file báo giá admin đã gửi."
+  };
+}
+
+function QuoteFileRow({ file, index, labels, compact = false }: { file: QuoteFile; index: number; labels: QuoteLabels; compact?: boolean }) {
+  return (
+    <div className={`quote-file-link-row${compact ? " compact" : ""}`}>
+      <span className="quote-file-link-index">{index + 1}.</span>
+      <FileText size={16} />
+      <div className="quote-file-link-main">
+        <strong>{file.displayName}</strong>
+        {!compact ? (
+          <span>{[quoteFileType(file), formatQuoteFileSize(file.displaySize), file.displayDate ? formatQuoteDate(file.displayDate) : ""].filter(Boolean).join(" · ")}</span>
+        ) : null}
+      </div>
+      {file.displayUrl ? (
+        <div className="quote-file-link-actions">
+          <a href={file.displayUrl} target="_blank" rel="noreferrer">
+            <ExternalLink size={14} />
+            <span>{labels.open}</span>
+          </a>
+          <a href={file.displayUrl} download={file.displayName}>
+            <Download size={14} />
+            <span>{labels.download}</span>
+          </a>
+        </div>
+      ) : (
+        <span className="muted-line">{labels.notFound}</span>
+      )}
+    </div>
+  );
+}
+
+function formatQuoteDate(value: string, language = "vi") {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(language === "ja" ? "ja-JP" : "vi-VN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
 }
