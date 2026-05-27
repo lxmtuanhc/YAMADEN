@@ -107,7 +107,7 @@
       requests: "Quản lý yêu cầu",
       customers: "Quản lý khách hàng",
       staff: "Quản lý staff",
-      quotes: "Báo giá / đề xuất",
+      quotes: "Báo giá",
       notifications: "Thông báo",
       settings: "Cài đặt",
       search: "Tìm kiếm...",
@@ -314,7 +314,7 @@
     requests: "Qu\u1ea3n l\u00fd y\u00eau c\u1ea7u",
     customers: "Qu\u1ea3n l\u00fd kh\u00e1ch h\u00e0ng",
     staff: "Qu\u1ea3n l\u00fd staff",
-    quotes: "B\u00e1o gi\u00e1 / \u0111\u1ec1 xu\u1ea5t",
+    quotes: "B\u00e1o gi\u00e1",
     notifications: "Th\u00f4ng b\u00e1o",
     settings: "C\u00e0i \u0111\u1eb7t",
     search: "T\u00ecm ki\u1ebfm...",
@@ -2175,6 +2175,7 @@
     $("languageSelect").value = state.lang;
     $("logoutButton").textContent = t("logout");
     $("refreshButton").textContent = t("refresh");
+    $("refreshButton").style.display = state.currentView === "quotes" ? "none" : "";
     const renderNavItem = ([view, labelKey, icon]) => `
       <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}" data-tooltip="${escapeHtml(navLabel(view, labelKey))}" aria-label="${escapeHtml(navLabel(view, labelKey))}">
         <span class="nav-icon">${navIcon(view, icon)}</span>
@@ -4757,17 +4758,13 @@
     const counts = state.quoteRequestCounts || { all: rows.length, not_sent: 0, sent: 0 };
     const activeSendStatus = state.filters.quoteSendStatus || "all";
     $("viewRoot").innerHTML = `
-      <div class="quote-page-head">
-        <div class="page-intro"><h1>${escapeHtml(state.lang === "vi" ? "B\u00e1o gi\u00e1" : "\u898b\u7a4d")}</h1><p>${escapeHtml(state.lang === "vi" ? "Ch\u1ec9 hi\u1ec3n th\u1ecb y\u00eau c\u1ea7u \u0111ang \u1edf tr\u1ea1ng th\u00e1i B\u00e1o gi\u00e1." : "\u30b9\u30c6\u30fc\u30bf\u30b9\u304c\u898b\u7a4d\u306e\u4f9d\u983c\u306e\u307f\u8868\u793a\u3057\u307e\u3059\u3002")}</p></div>
-        <div class="request-command-bar demo-actions quote-toolbar">
-          <button class="btn btn-soft" type="button" data-quote-refresh>${escapeHtml(t("refresh"))}</button>
-        </div>
-      </div>
       <div class="crm-filter-bar quote-filter-bar">
+        <p class="quote-filter-description">${escapeHtml(state.lang === "vi" ? "Qu\u1ea3n l\u00fd c\u00e1c y\u00eau c\u1ea7u \u0111ang \u1edf tr\u1ea1ng th\u00e1i b\u00e1o gi\u00e1." : "\u898b\u7a4d\u30b9\u30c6\u30fc\u30bf\u30b9\u306e\u4f9d\u983c\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002")}</p>
         <input class="filter-input" data-quote-filter="search" value="${escapeHtml(state.filters.quoteSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "T\u00ecm m\u00e3 y\u00eau c\u1ea7u / kh\u00e1ch h\u00e0ng / n\u1ed9i dung" : "\u4f9d\u983cID\u30fb\u9867\u5ba2\u30fb\u5185\u5bb9\u3067\u691c\u7d22")}">
         <div class="quote-send-tabs" role="tablist">
-          ${["all", "not_sent", "sent"].map(value => `<button class="quote-send-tab ${activeSendStatus === value ? "is-active" : ""}" type="button" data-quote-send-filter="${escapeHtml(value)}">${escapeHtml(quoteText(value === "all" ? "all" : value === "sent" ? "sentShort" : "notSentShort"))} <span>${escapeHtml(String(counts[value] || 0))}</span></button>`).join("")}
+          ${["all", "not_sent", "sent"].map(value => `<button class="quote-send-tab ${activeSendStatus === value ? "is-active" : ""}" type="button" data-quote-send-filter="${escapeHtml(value)}">${escapeHtml(quoteText(value === "all" ? "all" : value === "sent" ? "sentShort" : "notSentShort"))} (${escapeHtml(String(counts[value] || 0))})</button>`).join("")}
         </div>
+        <button class="btn btn-soft quote-filter-refresh" type="button" data-quote-refresh>${escapeHtml(t("refresh"))}</button>
       </div>
       <section class="section-card">
         <div class="panel-body quote-board-body">

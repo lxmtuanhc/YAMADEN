@@ -2324,8 +2324,19 @@ body {
 }
 
 .quote-filter-bar {
-  grid-template-columns: minmax(240px, 1.4fr) repeat(4, minmax(130px, .75fr));
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto auto;
   align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.quote-filter-description {
+  grid-column: 1 / -1;
+  margin: 0 0 -2px;
+  color: var(--muted, #64748b);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .quote-page-head .quote-dev-note {
@@ -5270,32 +5281,37 @@ body {
 .quote-send-tabs {
   display: inline-flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 6px;
   padding: 4px;
   border: 1px solid var(--border, #dbe5f2);
   border-radius: 999px;
   background: #f8fafc;
+  white-space: nowrap;
 }
 
 .quote-send-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: 999px;
   padding: 8px 14px;
   background: transparent;
   color: #64748b;
+  line-height: 1;
   font-weight: 900;
+  white-space: nowrap;
   cursor: pointer;
-}
-
-.quote-send-tab span {
-  margin-left: 6px;
-  color: inherit;
-  opacity: .8;
 }
 
 .quote-send-tab.is-active {
   background: #dbeafe;
   color: #2563eb;
+}
+
+.quote-filter-refresh {
+  white-space: nowrap;
 }
 
 .quote-sent-badge {
