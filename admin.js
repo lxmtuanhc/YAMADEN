@@ -1789,6 +1789,13 @@
 
   function normalizeRequestStatus(status) {
     const value = String(status || "").toLowerCase();
+    if (String(status || "") === "\u672a\u5bfe\u5fdc") return "untreated";
+    if (String(status || "") === "\u9023\u7d61\u6e08") return "contacted";
+    if (String(status || "") === "\u73fe\u5730\u6e08") return "site_done";
+    if (String(status || "") === "\u898b\u7a4d") return "quoted";
+    if (String(status || "") === "\u53d7\u6ce8") return "ordered";
+    if (String(status || "") === "\u5b8c\u4e86") return "completed";
+    if (String(status || "") === "\u5931\u6ce8") return "lost";
     if (value === "pending") return "untreated";
     if (value === "received") return "contacted";
     if (value === "processing") return "contacted";
@@ -1811,6 +1818,21 @@
 
   window.normalizeRequestStatus = normalizeRequestStatus;
 
+  const REQUEST_STATUSES = Object.freeze(["untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"]);
+
+  function uniqueRequestStatuses(values) {
+    const seen = new Set();
+    return values.map(normalizeRequestStatus).filter(status => {
+      if (!REQUEST_STATUSES.includes(status) || seen.has(status)) return false;
+      seen.add(status);
+      return true;
+    });
+  }
+
+  function requestStatusValues() {
+    return uniqueRequestStatuses(REQUEST_STATUSES);
+  }
+
   function formatStatus(status) {
     const normalized = normalizeRequestStatus(status);
     const cleanLabelsJa = {
@@ -1829,7 +1851,7 @@
       quoted: "B\u00e1o gi\u00e1",
       ordered: "\u0110\u00e3 nh\u1eadn \u0111\u01a1n",
       completed: "Ho\u00e0n th\u00e0nh",
-      lost: "M\u1ea5t \u0111\u01a1n"
+      lost: "Th\u1ea5t ch\u00fa / Kh\u00f4ng th\u00e0nh"
     };
     const cleanLabels = state.lang === "vi" ? cleanLabelsVi : cleanLabelsJa;
     return cleanLabels[normalized] || cleanLabelsJa[normalized] || normalized;
@@ -2428,11 +2450,11 @@
   }
 
   function requestFilterStatuses() {
-    return ["all", "untreated", "contacted", "site_done", "quoted", "completed", "lost"];
+    return ["all", ...requestStatusValues()];
   }
 
   function requestBoardStatuses() {
-    return ["untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"];
+    return requestStatusValues();
   }
 
   function renderRequestFilterChips() {
@@ -2563,12 +2585,12 @@
   }
 
   function statusSelectHtml(id, current) {
-    const statuses = ["untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"];
+    const statuses = requestStatusValues();
     return `<select class="status-select" data-request-status="${escapeHtml(id)}">${statuses.map(status => `<option value="${status}" ${normalizeRequestStatus(current) === status ? "selected" : ""}>${escapeHtml(formatStatus(status))}</option>`).join("")}</select>`;
   }
 
   function requestStatusOptions(current) {
-    return ["untreated", "contacted", "site_done", "quoted", "ordered", "completed", "lost"]
+    return requestStatusValues()
       .map(status => `<option value="${status}" ${normalizeRequestStatus(current) === status ? "selected" : ""}>${escapeHtml(formatStatus(status))}</option>`)
       .join("");
   }
