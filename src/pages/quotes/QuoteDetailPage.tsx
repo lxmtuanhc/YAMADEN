@@ -178,7 +178,10 @@ export function QuoteDetailPage() {
       </Card>
 
       <Card>
-        <h2 className="section-title">{labels.responseTitle}</h2>
+        <div className="quote-response-card-header">
+          <h2 className="section-title">{labels.responseTitle}</h2>
+          <p>{labels.responseHint}</p>
+        </div>
         {status.key === "accepted" ? (
           <div className="quote-response-state">
             <span className="quote-file-status success">{labels.accepted}</span>
@@ -193,14 +196,13 @@ export function QuoteDetailPage() {
         ) : (
           <>
             <div className="quote-response-actions">
-              <Button disabled={!!actionLoading} onClick={() => setAcceptConfirmOpen(true)}>
+              <Button className="quote-response-primary" disabled={!!actionLoading} onClick={() => setAcceptConfirmOpen(true)}>
                 {labels.acceptQuote}
               </Button>
               <button type="button" className="quote-secondary-button" disabled={!!actionLoading} onClick={() => setRevisionOpen(true)}>
                 {labels.requestRevision}
               </button>
             </div>
-            <p className="muted-line">{labels.responseHint}</p>
           </>
         )}
       </Card>
@@ -216,22 +218,26 @@ export function QuoteDetailPage() {
         onConfirm={acceptQuote}
       />
       {revisionOpen ? (
-        <div className="assignee-modal-overlay assignee-modal-backdrop" role="presentation" onClick={() => setRevisionOpen(false)}>
-          <div className="assignee-modal" role="dialog" aria-modal="true" aria-labelledby="quote-revision-title" onClick={event => event.stopPropagation()}>
-            <div className="assignee-modal-header">
+        <div className="assignee-modal-overlay assignee-modal-backdrop quote-revision-modal-overlay" role="presentation" onClick={() => setRevisionOpen(false)}>
+          <div className="assignee-modal quote-revision-modal" role="dialog" aria-modal="true" aria-labelledby="quote-revision-title" onClick={event => event.stopPropagation()}>
+            <div className="assignee-modal-header quote-revision-modal-header">
               <h2 id="quote-revision-title">{labels.revisionTitle}</h2>
               <button type="button" className="assignee-modal-close" aria-label={labels.cancel} onClick={() => setRevisionOpen(false)}>
                 <X size={18} />
               </button>
             </div>
-            <div className="assignee-modal-body">
-              <label className="field">
+            <div className="assignee-modal-body quote-revision-modal-body">
+              <label className="field quote-revision-field">
                 <span>{labels.revisionContent}</span>
-                <textarea value={revisionMessage} onChange={event => setRevisionMessage(event.target.value)} />
+                <textarea
+                  value={revisionMessage}
+                  onChange={event => setRevisionMessage(event.target.value)}
+                  placeholder={labels.revisionPlaceholder}
+                />
               </label>
-              <div className="two-actions">
+              <div className="two-actions quote-revision-actions">
                 <button type="button" className="quote-secondary-button" onClick={() => setRevisionOpen(false)}>{labels.cancel}</button>
-                <button type="button" className="media-picker-button" disabled={!!actionLoading} onClick={submitRevision}>{labels.sendResponse}</button>
+                <button type="button" className="media-picker-button quote-revision-submit" disabled={!!actionLoading} onClick={submitRevision}>{labels.sendResponse}</button>
               </div>
             </div>
           </div>
@@ -350,6 +356,7 @@ function quoteDetailLabels(language: string) {
       revisionAt: "送信日時",
       revisionTitle: "見積修正依頼",
       revisionContent: "修正内容",
+      revisionPlaceholder: "例：材料費と工事費を分けて記載してください。",
       revisionRequired: "修正内容を入力してください。",
       sendResponse: "送信する",
       cancel: "キャンセル",
@@ -400,6 +407,7 @@ function quoteDetailLabels(language: string) {
     revisionAt: "Thời gian gửi phản hồi",
     revisionTitle: "Yêu cầu chỉnh sửa báo giá",
     revisionContent: "Nội dung cần chỉnh sửa",
+    revisionPlaceholder: "Ví dụ: Vui lòng tách riêng chi phí vật tư và nhân công.",
     revisionRequired: "Vui lòng nhập nội dung cần chỉnh sửa.",
     sendResponse: "Gửi phản hồi",
     cancel: "Hủy",
