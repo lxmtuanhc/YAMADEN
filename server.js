@@ -615,6 +615,9 @@ const RequestSchema = new mongoose.Schema({
   assignmentCandidates: [mongoose.Schema.Types.Mixed],
   assignmentConfidence: { type: Number, default: null },
   assignmentReason: { type: String, default: null },
+  assignmentSource: { type: String, default: null },
+  assignmentAcceptedAt: { type: Date, default: null },
+  assignmentHistory: [mongoose.Schema.Types.Mixed],
   assignedBy: { type: String, default: null },
   quoteId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -1804,6 +1807,84 @@ async function findBestAssigneeForRequest({ issueTags, workTypeIds, departmentCo
     if (best) return best;
   }
   return findBestAssignee(issueTags);
+}
+
+async function buildAssignmentSuggestion({ issueTags, workTypeIds, departmentCode }) {
+  const tags = parseRequestTags(issueTags);
+  const ids = normalizeTagList(workTypeIds);
+  const department = String(departmentCode || "").trim();
+
+  if (!department && !ids.length && !tags.length) {
+    console.info("[AUTO_ASSIGN_SKIP] insufficient data for suggestion");
+    return {
+      assignmentCandidates: [],
+      assignmentConfidence: 0,
+      assignmentReason: "Chưa đủ dữ liệu để gợi ý người phụ trách",
+      assignmentSource: "insufficient_data"
+    };
+  }
+
+  const staffList = await Staff.find({
+    status: { $nin: ["off", "inactive", "deleted"] },
+    $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+    autoAssignEnabled: { $ne: false }
+  });
+
+  const normalizedTags = normalizeTagList(tags);
+  const candidates = staffList.map(staff => {
+    const reasons = [];
+    let score = 0;
+    const staffDept = String(staff.departmentCode || "").trim();
+    const staffWorkTypeIds = normalizeTagList(staff.workTypeIds);
+    const staffTagList = staffTags(staff);
+    const workMatches = ids.filter(id => staffWorkTypeIds.includes(id));
+    const tagMatches = normalizedTags.filter(tag => staffTagList.includes(tag));
+
+    if (department && staffDept && staffDept === department) {
+      score += 25;
+      reasons.push(`Bộ phận phù hợp: ${department}`);
+    }
+    if (workMatches.length) {
+      score += Math.min(40, workMatches.length * 20);
+      reasons.push(`Nội dung công việc phù hợp: ${workMatches.join(", ")}`);
+    }
+    if (tagMatches.length) {
+      score += Math.min(25, tagMatches.length * 10);
+      reasons.push(`Tag phù hợp: ${tagMatches.join(", ")}`);
+    }
+
+    if (!score) return null;
+
+    return {
+      staffId: String(staff._id),
+      staffName: staff.name || staff.email || staff.phone || "",
+      departmentCode: staff.departmentCode || "",
+      score: Math.min(100, score),
+      reasons
+    };
+  }).filter(Boolean).sort((a, b) => b.score - a.score).slice(0, 3);
+
+  if (!candidates.length) {
+    console.info("[AUTO_ASSIGN_SKIP] no matching staff for suggestion");
+    return {
+      assignmentCandidates: [],
+      assignmentConfidence: 0,
+      assignmentReason: "Chưa tìm thấy nhân viên phù hợp với dữ liệu hiện tại",
+      assignmentSource: "rule_suggestion"
+    };
+  }
+
+  console.info("[AUTO_ASSIGN_SUGGESTION] candidates generated", {
+    count: candidates.length,
+    topScore: candidates[0]?.score || 0
+  });
+
+  return {
+    assignmentCandidates: candidates,
+    assignmentConfidence: candidates[0]?.score || 0,
+    assignmentReason: candidates[0]?.reasons?.join("; ") || "Đã tạo gợi ý phân công",
+    assignmentSource: "rule_suggestion"
+  };
 }
 
 app.get("/", (req, res) => {
@@ -3584,7 +3665,7 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
     const issueTags = parseRequestTags(req.body.issueTags);
     const workTypeIds = parseRequestTags(req.body.workTypeIds);
     const departmentCode = cleanText(req.body.departmentCode);
-    const bestAssignee = await findBestAssigneeForRequest({ issueTags, workTypeIds, departmentCode });
+    const assignmentSuggestion = await buildAssignmentSuggestion({ issueTags, workTypeIds, departmentCode });
     const timeline = normalizeTimelineEvents([{
       id: "tl-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
       type: "submitted",
@@ -3618,9 +3699,12 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
       autoCategory: null,
       autoUrgency: null,
       autoArea: null,
-      assignmentCandidates: [],
-      assignmentConfidence: null,
-      assignmentReason: null,
+      assignmentCandidates: assignmentSuggestion.assignmentCandidates,
+      assignmentConfidence: assignmentSuggestion.assignmentConfidence,
+      assignmentReason: assignmentSuggestion.assignmentReason,
+      assignmentSource: assignmentSuggestion.assignmentSource,
+      assignmentAcceptedAt: null,
+      assignmentHistory: [],
       assignedBy: null,
       quoteRequested: req.body.quoteRequested === "true" || req.body.quoteRequested === true,
       quoteRequestedAt: null,
@@ -3633,8 +3717,11 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
       quoteUpdatedAt: null,
       customerNotifiedAccepted: false,
       customerNotifiedCompleted: false,
-      assigneeId: bestAssignee ? String(bestAssignee._id) : "",
-      assigneeName: bestAssignee ? bestAssignee.name : "",
+      assigneeId: "",
+      assigneeName: "",
+      assignedStaff: null,
+      assignedTo: null,
+      responsiblePerson: null,
       status: "untreated",
       adminReply: "",
       timeline,
@@ -3790,14 +3877,64 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
 
     if (!item.requestCode) await ensureRequestCode(item);
     const previousStatus = item.status;
+    const previousAssigneeId = String(item.assigneeId || "");
+    const previousAssigneeName = String(item.assigneeName || "");
     if (req.body.status) {
       item.status = normalizeRequestStatus(req.body.status);
       applyStatusTimestamps(item, item.status);
       mergeStatusTimeline(item, item.status, req.body.adminReply);
     }
 
-    if (req.body.assigneeId !== undefined) item.assigneeId = req.body.assigneeId;
-    if (req.body.assigneeName !== undefined) item.assigneeName = req.body.assigneeName;
+    const hasAssigneeUpdate = req.body.assigneeId !== undefined || req.body.assigneeName !== undefined;
+    if (hasAssigneeUpdate) {
+      const nextAssigneeId = String(req.body.assigneeId || "");
+      const nextAssigneeName = String(req.body.assigneeName || "");
+      item.assigneeId = nextAssigneeId;
+      item.assigneeName = nextAssigneeName;
+
+      const changed = nextAssigneeId !== previousAssigneeId || nextAssigneeName !== previousAssigneeName;
+      if (changed && (nextAssigneeId || nextAssigneeName)) {
+        const now = new Date();
+        const source = req.body.assignmentSource === "admin_from_suggestion" ? "admin_from_suggestion" : "manual";
+        const score = Number(req.body.assignmentScore || 0);
+        const reason = String(req.body.assignmentReason || "").trim();
+        item.assignedBy = "admin";
+        item.assignmentAcceptedAt = now;
+        item.assignmentHistory = Array.isArray(item.assignmentHistory) ? item.assignmentHistory : [];
+        item.assignmentHistory.push({
+          staffId: nextAssigneeId,
+          staffName: nextAssigneeName,
+          action: "assigned",
+          source,
+          score,
+          reason,
+          assignedAt: now,
+          assignedBy: "admin"
+        });
+        item.timeline = Array.isArray(item.timeline) ? item.timeline : [];
+        item.timeline.push({
+          id: "tl-assign-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+          type: "assignment",
+          status: item.status || "untreated",
+          message: "assignment.assigned",
+          note: nextAssigneeName ? `Phân công phụ trách: ${nextAssigneeName}` : "Phân công phụ trách",
+          actor: "admin",
+          createdAt: now
+        });
+        if (source === "admin_from_suggestion") {
+          console.info("[ASSIGNMENT_ACCEPTED] admin selected suggested staff", {
+            requestCode: item.requestCode || item.requestId || item.id,
+            staffId: nextAssigneeId,
+            score
+          });
+        } else {
+          console.info("[ASSIGNMENT_MANUAL] admin selected staff manually", {
+            requestCode: item.requestCode || item.requestId || item.id,
+            staffId: nextAssigneeId
+          });
+        }
+      }
+    }
     if (req.body.urgency !== undefined) item.urgency = req.body.urgency;
     if (req.body.dueAt !== undefined) {
       const dueAt = req.body.dueAt ? new Date(req.body.dueAt) : null;

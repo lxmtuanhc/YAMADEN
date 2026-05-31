@@ -2626,11 +2626,80 @@
       : `<img src="${escapeHtml(url)}" alt="">`}</button>`;
   }
 
+  function getAssignmentCandidates(request) {
+    return Array.isArray(request?.assignmentCandidates) ? request.assignmentCandidates.filter(Boolean) : [];
+  }
+
+  function getAssignmentCandidateStaffId(candidate) {
+    return String(candidate?.staffId || candidate?.id || candidate?._id || "");
+  }
+
+  function getAssignmentCandidateName(candidate) {
+    return String(candidate?.staffName || candidate?.name || candidate?.staff?.name || "");
+  }
+
+  function getAssignmentCandidateReasons(candidate) {
+    if (Array.isArray(candidate?.reasons)) return candidate.reasons.filter(Boolean).map(String);
+    if (candidate?.reason) return [String(candidate.reason)];
+    return [];
+  }
+
+  function renderAssignmentSuggestionPanel(request, candidates, requestId) {
+    const emptyReason = request?.assignmentReason || (state.lang === "vi"
+      ? "Chưa đủ dữ liệu để gợi ý người phụ trách"
+      : "担当者を提案するための情報が不足しています");
+    const title = state.lang === "vi" ? "Gợi ý phân công" : escapeHtml(t("suggestAssignee"));
+    if (!candidates.length) {
+      return `
+        <section class="assign-suggestion">
+          <div>
+            <strong>${escapeHtml(title)}</strong>
+            <p class="note">${escapeHtml(emptyReason)}</p>
+          </div>
+        </section>
+      `;
+    }
+    return `
+      <section class="assign-suggestion assign-suggestion-list">
+        <div class="assign-suggestion-head">
+          <strong>${escapeHtml(title)}</strong>
+          <p class="note">${escapeHtml(request?.assignmentReason || (state.lang === "vi" ? "Admin chọn một nhân sự phù hợp từ danh sách gợi ý." : "候補から担当者を選択してください。"))}</p>
+        </div>
+        <div class="assignment-candidate-list">
+          ${candidates.map(candidate => {
+            const staffId = getAssignmentCandidateStaffId(candidate);
+            const name = getAssignmentCandidateName(candidate) || "-";
+            const reasons = getAssignmentCandidateReasons(candidate);
+            const score = Number(candidate?.score || 0);
+            const department = candidate?.departmentCode ? ` · ${candidate.departmentCode}` : "";
+            return `
+              <article class="assignment-candidate-card">
+                <div>
+                  <strong>${escapeHtml(name)}</strong>
+                  <p class="note">${escapeHtml(`${state.lang === "vi" ? "Điểm" : "スコア"}: ${score}${department}`)}</p>
+                  ${reasons.length ? `<ul>${reasons.map(reason => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>` : ""}
+                </div>
+                <button class="btn btn-soft" type="button"
+                  data-accept-assignment-candidate="${escapeHtml(requestId)}"
+                  data-staff-id="${escapeHtml(staffId)}"
+                  data-staff-name="${escapeHtml(name)}"
+                  data-assignment-score="${escapeHtml(String(score))}"
+                  data-assignment-reason="${escapeHtml(reasons.join("; "))}">
+                  ${escapeHtml(state.lang === "vi" ? "Chọn người này" : t("applyAssignee"))}
+                </button>
+              </article>
+            `;
+          }).join("")}
+        </div>
+      </section>
+    `;
+  }
+
   function renderRequestDetail(request) {
     const id = getRowId(request);
     const media = normalizeRequestMedia(request);
     const timeline = Array.isArray(request.timeline) ? request.timeline : [];
-    const suggestion = recommendAssignee(request);
+    const assignmentCandidates = getAssignmentCandidates(request);
     const quoteLinked = Boolean(request.quoteId || request.quoteNo || request.quoteCode);
     const quoteButtonLabel = quoteLinked
       ? (state.lang === "vi" ? "M\u1edf b\u00e1o gi\u00e1" : "\u898b\u7a4d\u3092\u958b\u304f")
@@ -2683,13 +2752,7 @@
                 <label class="field"><span>${escapeHtml(t("amount"))}</span><input type="text" data-request-edit-field="amount" value="${escapeHtml(request.amount || request.totalAmount || "")}"></label>
                 <label class="field full"><span>${escapeHtml(t("adminNote"))}</span><textarea data-request-edit-field="adminReply">${escapeHtml(request.adminReply || "")}</textarea></label>
               </div>
-              <section class="assign-suggestion">
-                <div>
-                  <strong>${escapeHtml(t("suggestAssignee"))}</strong>
-                  <p class="note">${suggestion ? `${escapeHtml(suggestion.staff.name || "-")} - ${escapeHtml(t("assigneeReason"))}: ${escapeHtml(suggestion.matched.join(", "))}` : escapeHtml(t("noAssigneeSuggestion"))}</p>
-                </div>
-                ${suggestion ? `<button class="btn btn-soft" type="button" data-apply-assignee="${escapeHtml(id)}" data-staff-id="${escapeHtml(getRowId(suggestion.staff))}">${escapeHtml(t("applyAssignee"))}</button>` : ""}
-              </section>
+              ${renderAssignmentSuggestionPanel(request, assignmentCandidates, id)}
             </section>
             <section>
               <h3>${escapeHtml(t("timeline"))}</h3>
@@ -6161,7 +6224,9 @@
     const dueAt = root.querySelector("[data-request-edit-field='dueAt']")?.value || "";
     const amount = root.querySelector("[data-request-edit-field='amount']")?.value || "";
     const staff = state.staff.find(item => getRowId(item) === staffId);
-    const response = await AdminAPI.updateRequest(id, {
+    const currentRequest = state.requests.find(item => String(getRowId(item) || getRequestDisplayId(item)) === String(id));
+    const previousStaffId = String(currentRequest?.assigneeId || currentRequest?.assignedStaffId || "");
+    const payload = {
       status,
       adminReply: reply,
       assigneeId: staff ? getRowId(staff) : "",
@@ -6169,7 +6234,11 @@
       urgency: urgency === "none" ? "" : urgency,
       dueAt,
       amount
-    });
+    };
+    if (staff && getRowId(staff) !== previousStaffId) {
+      payload.assignmentSource = "manual";
+    }
+    const response = await AdminAPI.updateRequest(id, payload);
     const updated = response?.data || response;
     const index = state.requests.findIndex(item => String(getRowId(item) || getRequestDisplayId(item)) === String(id));
     if (index >= 0 && updated) state.requests[index] = Object.assign({}, state.requests[index], updated);
@@ -7455,6 +7524,35 @@
         return;
       }
 
+      const acceptAssignmentCandidate = event.target.closest("[data-accept-assignment-candidate]");
+      if (acceptAssignmentCandidate) {
+        const requestId = acceptAssignmentCandidate.dataset.acceptAssignmentCandidate;
+        const staffId = acceptAssignmentCandidate.dataset.staffId || "";
+        const staffName = acceptAssignmentCandidate.dataset.staffName || "";
+        try {
+          const response = await AdminAPI.updateRequest(requestId, {
+            assigneeId: staffId,
+            assigneeName: staffName,
+            assignmentSource: "admin_from_suggestion",
+            assignmentScore: acceptAssignmentCandidate.dataset.assignmentScore || "0",
+            assignmentReason: acceptAssignmentCandidate.dataset.assignmentReason || ""
+          });
+          const updated = response?.data || response;
+          const index = state.requests.findIndex(item => String(getRowId(item) || getRequestDisplayId(item)) === String(requestId));
+          if (index >= 0 && updated) state.requests[index] = Object.assign({}, state.requests[index], updated);
+          if ($("requestDetailOverlay")) {
+            setRequestDetailDirty(false);
+            renderRequestDetail(state.requests[index] || updated);
+          }
+          if ($("requestResults")) renderRequestResults();
+          toast(t("savedAssignee"));
+        } catch (error) {
+          console.error(error);
+          toast(t("failed"));
+        }
+        return;
+      }
+
       const applyAssignee = event.target.closest("[data-apply-assignee]");
       if (applyAssignee) {
         const staff = state.staff.find(item => getRowId(item) === applyAssignee.dataset.staffId);
@@ -7469,7 +7567,8 @@
         try {
           await AdminAPI.updateRequest(applyAssignee.dataset.applyAssignee, {
             assigneeId: getRowId(staff),
-            assigneeName: staff.name || ""
+            assigneeName: staff.name || "",
+            assignmentSource: "manual"
           });
           await refreshData();
           closeDrawer();

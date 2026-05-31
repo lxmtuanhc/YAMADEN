@@ -4183,6 +4183,42 @@ body {
   margin: 4px 0 0;
 }
 
+.assign-suggestion-list {
+  display: block;
+}
+
+.assign-suggestion-head {
+  margin-bottom: 10px;
+}
+
+.assignment-candidate-list {
+  display: grid;
+  gap: 10px;
+}
+
+.assignment-candidate-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.assignment-candidate-card ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.assignment-candidate-card .btn {
+  flex: 0 0 auto;
+}
+
 .split-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(340px, .75fr);
