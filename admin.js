@@ -5897,7 +5897,7 @@
   }
 
   function overviewField(section, field, label, options = {}) {
-    const editing = Boolean(state.overviewSettingsEditing[section]);
+    const editing = Boolean(state.overviewSettingsEditing[section]) || state.settingsDetail?.overviewSection === section;
     const data = overviewSectionData(section);
     const value = data[field] ?? "";
     const name = `data-overview-field="${escapeHtml(section)}.${escapeHtml(field)}"`;
@@ -5917,63 +5917,42 @@
     return `<label class="overview-field"><span>${escapeHtml(label)}</span>${control}${error ? `<small class="overview-error">${escapeHtml(error)}</small>` : ""}</label>`;
   }
 
-  function renderOverviewEditableCard(section, icon, title, description, fieldsHtml, note) {
-    const editing = Boolean(state.overviewSettingsEditing[section]);
-    return `<section class="settings-overview-card" data-overview-section="${escapeHtml(section)}">
-      <header class="settings-overview-card-head">
+  function overviewSummaryCard(section, icon, title, status, lines, description) {
+    const detailKey = `overview:${section}`;
+    return `<article class="settings-shell-card settings-overview-summary-card" data-settings-detail="${escapeHtml(detailKey)}" tabindex="0" role="button">
+      <div class="settings-card-head">
         <span class="settings-card-icon">${settingsIcon(icon)}</span>
         <div>
           <h3>${escapeHtml(title)}</h3>
-          <p>${escapeHtml(description)}</p>
+          ${status ? settingsBadge(status, section === "dataStatus" ? "is-planned" : "is-live") : ""}
         </div>
-        <div class="settings-overview-actions">
-          ${editing
-            ? `<button class="btn btn-soft" type="button" data-overview-cancel="${escapeHtml(section)}">${escapeHtml(settingText("Hủy", "\u30ad\u30e3\u30f3\u30bb\u30eb"))}</button><button class="primary-button" type="button" data-overview-save="${escapeHtml(section)}">${escapeHtml(settingText("Lưu", "\u4fdd\u5b58"))}</button>`
-            : `<button class="btn btn-soft" type="button" data-overview-edit="${escapeHtml(section)}">${escapeHtml(settingText("Sửa", "\u7de8\u96c6"))}</button>`}
-        </div>
-      </header>
-      ${note ? `<p class="settings-overview-note">${escapeHtml(note)}</p>` : ""}
-      <div class="settings-overview-form">${fieldsHtml}</div>
-    </section>`;
+      </div>
+      <div class="settings-card-body">
+        ${description ? `<p class="settings-card-note">${escapeHtml(description)}</p>` : ""}
+        ${settingList(lines)}
+      </div>
+      <div class="settings-card-footer">
+        <button class="btn btn-soft" type="button" data-settings-detail="${escapeHtml(detailKey)}">${escapeHtml(settingText("Mở chi tiết", "\u8a73\u7d30\u3092\u958b\u304f"))}</button>
+      </div>
+    </article>`;
+  }
+
+  function pocStatusLabel(value) {
+    const labels = {
+      preparing: settingText("Đang chuẩn bị", "\u6e96\u5099\u4e2d"),
+      running: settingText("Đang chạy POC", "POC\u5b9f\u884c\u4e2d"),
+      completed: settingText("Đã hoàn tất POC", "POC\u5b8c\u4e86")
+    };
+    return labels[value] || labels.running;
   }
 
   function renderSettingsOverview() {
     const settings = normalizeOverviewSettings(state.overviewSettings);
     const status = state.overviewSettingsStatus || {};
-    const pocOptions = [
-      { value: "preparing", label: settingText("Đang chuẩn bị", "\u6e96\u5099\u4e2d") },
-      { value: "running", label: settingText("Đang chạy POC", "POC\u5b9f\u884c\u4e2d") },
-      { value: "completed", label: settingText("Đã hoàn tất POC", "POC\u5b8c\u4e86") }
-    ];
-    const company = renderOverviewEditableCard("company", "palette", settingText("Thông tin công ty", "\u4f1a\u793e\u60c5\u5831"), settingText("Thông tin hiển thị chung cho admin và các màn dùng cấu hình hệ thống.", "\u7ba1\u7406\u753b\u9762\u3068\u5171\u901a\u8a2d\u5b9a\u3067\u4f7f\u3046\u4f1a\u793e\u60c5\u5831\u3067\u3059\u3002"), [
-      overviewField("company", "nameJa", settingText("Tên công ty tiếng Nhật", "\u4f1a\u793e\u540d\uff08\u65e5\u672c\u8a9e\uff09")),
-      overviewField("company", "nameEn", settingText("Tên công ty tiếng Anh", "\u4f1a\u793e\u540d\uff08\u82f1\u8a9e\uff09")),
-      overviewField("company", "sloganJa", settingText("Slogan tiếng Nhật", "\u30b9\u30ed\u30fc\u30ac\u30f3\uff08\u65e5\u672c\u8a9e\uff09")),
-      overviewField("company", "sloganEn", settingText("Slogan tiếng Anh", "\u30b9\u30ed\u30fc\u30ac\u30f3\uff08\u82f1\u8a9e\uff09")),
-      overviewField("company", "email", "Email"),
-      overviewField("company", "phone", settingText("Số điện thoại", "\u96fb\u8a71\u756a\u53f7")),
-      overviewField("company", "address", settingText("Địa chỉ công ty", "\u4f1a\u793e\u4f4f\u6240"), { type: "textarea", rows: 2 }),
-      overviewField("company", "logoUrl", "Logo URL")
-    ].join(""));
-    const system = renderOverviewEditableCard("system", "database", settingText("Cấu hình hệ thống", "\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a"), settingText("Thiết lập ngôn ngữ mặc định, múi giờ và chế độ vận hành.", "\u65e2\u5b9a\u8a00\u8a9e\u3001\u30bf\u30a4\u30e0\u30be\u30fc\u30f3\u3001\u904b\u7528\u30e2\u30fc\u30c9\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002"), [
-      overviewField("system", "defaultLanguage", settingText("Ngôn ngữ mặc định", "\u65e2\u5b9a\u8a00\u8a9e"), { type: "select", options: [{ value: "vi", label: "Tiếng Việt" }, { value: "ja", label: "\u65e5\u672c\u8a9e" }] }),
-      overviewField("system", "timezone", settingText("Múi giờ", "\u30bf\u30a4\u30e0\u30be\u30fc\u30f3")),
-      overviewField("system", "dateFormat", settingText("Định dạng ngày giờ", "\u65e5\u6642\u5f62\u5f0f")),
-      overviewField("system", "pocMode", settingText("Chế độ POC", "POC\u30e2\u30fc\u30c9"), { type: "checkbox", checkboxLabel: settingText("Đang bật POC", "POC\u30e2\u30fc\u30c9\u3092\u6709\u52b9\u306b\u3059\u308b") }),
-      overviewField("system", "environmentName", settingText("Tên môi trường", "\u74b0\u5883\u540d"))
-    ].join(""));
-    const requestCode = renderOverviewEditableCard("requestCode", "clipboard", settingText("Mã yêu cầu", "\u4f9d\u983cID"), settingText("Cấu hình mã cho yêu cầu mới. Yêu cầu cũ giữ nguyên.", "\u65b0\u898f\u4f9d\u983c\u306eID\u8a2d\u5b9a\u3067\u3059\u3002\u65e2\u5b58\u4f9d\u983c\u306f\u5909\u66f4\u3057\u307e\u305b\u3093\u3002"), [
-      overviewField("requestCode", "prefix", settingText("Prefix mã yêu cầu", "\u63a5\u982d\u8f9e")),
-      overviewField("requestCode", "format", settingText("Định dạng hiển thị", "\u8868\u793a\u5f62\u5f0f")),
-      overviewField("requestCode", "digits", settingText("Số chữ số", "\u6841\u6570"), { type: "number" })
-    ].join(""), settingText("Thay đổi cấu hình này chỉ áp dụng cho yêu cầu mới.", "\u3053\u306e\u8a2d\u5b9a\u5909\u66f4\u306f\u65b0\u898f\u4f9d\u983c\u306b\u306e\u307f\u9069\u7528\u3055\u308c\u307e\u3059\u3002"));
-    const poc = renderOverviewEditableCard("poc", "trend", "POC / vận hành", settingText("Theo dõi trạng thái POC và ghi chú vận hành.", "POC\u306e\u72b6\u614b\u3068\u904b\u7528\u30e1\u30e2\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002"), [
-      overviewField("poc", "groupName", settingText("Tên nhóm thử nghiệm", "\u691c\u8a3c\u30b0\u30eb\u30fc\u30d7\u540d")),
-      overviewField("poc", "status", settingText("Trạng thái POC", "POC\u72b6\u614b"), { type: "select", options: pocOptions }),
-      overviewField("poc", "startDate", settingText("Ngày bắt đầu POC", "POC\u958b\u59cb\u65e5"), { type: "date" }),
-      overviewField("poc", "expectedEndDate", settingText("Ngày kết thúc dự kiến", "\u7d42\u4e86\u4e88\u5b9a\u65e5"), { type: "date" }),
-      overviewField("poc", "note", settingText("Ghi chú vận hành", "\u904b\u7528\u30e1\u30e2"), { type: "textarea", rows: 4, placeholder: settingText("Ghi chú về phạm vi POC, nhóm test hoặc vấn đề vận hành.", "POC\u7bc4\u56f2\u3001\u691c\u8a3c\u30b0\u30eb\u30fc\u30d7\u3001\u904b\u7528\u8ab2\u984c\u3092\u8a18\u5165") })
-    ].join(""));
+    const company = settings.company;
+    const system = settings.system;
+    const requestCode = settings.requestCode;
+    const poc = settings.poc;
     const statusRows = [
       ["Database", status.database || (state.errors.overviewSettings ? "disconnected" : "connected")],
       ["Email provider", status.emailProvider || "not configured"],
@@ -5983,15 +5962,34 @@
       [settingText("Tổng số staff", "\u30b9\u30bf\u30c3\u30d5\u6570"), status.staffCount ?? state.staff.length],
       [settingText("Tổng số báo giá đã gửi", "\u9001\u4fe1\u6e08\u307f\u898b\u7a4d\u6570"), status.sentQuoteCount ?? state.requests.filter(isQuoteSent).length]
     ];
-    const dataStatus = `<section class="settings-overview-card settings-overview-readonly">
-      <header class="settings-overview-card-head">
-        <span class="settings-card-icon">${settingsIcon("database")}</span>
-        <div><h3>${escapeHtml(settingText("Trạng thái dữ liệu", "\u30c7\u30fc\u30bf\u72b6\u614b"))}</h3><p>${escapeHtml(settingText("Thông tin xem nhanh, không chỉnh sửa trong mục này.", "\u78ba\u8a8d\u7528\u306e\u60c5\u5831\u3067\u3001\u3053\u3053\u3067\u306f\u7de8\u96c6\u3067\u304d\u307e\u305b\u3093\u3002"))}</p></div>
-      </header>
-      <div class="settings-overview-status-grid">${statusRows.map(row => `<div><span>${escapeHtml(row[0])}</span><strong>${escapeHtml(row[1])}</strong></div>`).join("")}</div>
-      ${state.errors.overviewSettings ? `<p class="overview-error">${escapeHtml(settingText("Không thể tải cài đặt. Đang dùng dữ liệu fallback.", "\u8a2d\u5b9a\u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093\u3002\u4ee3\u66ff\u30c7\u30fc\u30bf\u3092\u8868\u793a\u3057\u3066\u3044\u307e\u3059\u3002"))}</p>` : ""}
-    </section>`;
-    return `<div class="settings-overview-real">${company}${system}${requestCode}${poc}${dataStatus}</div>`;
+    const langLabel = system.defaultLanguage === "vi" ? "Tiếng Việt" : "\u65e5\u672c\u8a9e";
+    return `<div class="settings-overview-grid">
+      ${overviewSummaryCard("company", "palette", settingText("Thông tin công ty", "\u4f1a\u793e\u60c5\u5831"), settingText("Đang dùng", "\u4f7f\u7528\u4e2d"), [
+        company.nameJa || "-",
+        company.nameEn || "-",
+        company.sloganJa || company.sloganEn || "-"
+      ], settingText("Tên công ty, slogan, liên hệ và logo.", "\u4f1a\u793e\u540d\u3001\u30b9\u30ed\u30fc\u30ac\u30f3\u3001\u9023\u7d61\u5148\u3001\u30ed\u30b4\u3002"))}
+      ${overviewSummaryCard("system", "database", settingText("Cấu hình hệ thống", "\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a"), settingText("Đang dùng", "\u4f7f\u7528\u4e2d"), [
+        `${settingText("Ngôn ngữ", "\u8a00\u8a9e")}: ${langLabel}`,
+        `${settingText("Múi giờ", "\u30bf\u30a4\u30e0\u30be\u30fc\u30f3")}: ${system.timezone || "Asia/Tokyo"}`,
+        `${settingText("Chế độ", "\u30e2\u30fc\u30c9")}: ${system.pocMode ? "POC" : (system.environmentName || "Production")}`
+      ], settingText("Ngôn ngữ mặc định, múi giờ và vận hành.", "\u65e2\u5b9a\u8a00\u8a9e\u3001\u30bf\u30a4\u30e0\u30be\u30fc\u30f3\u3001\u904b\u7528\u3002"))}
+      ${overviewSummaryCard("requestCode", "clipboard", settingText("Mã yêu cầu", "\u4f9d\u983cID"), settingText("Đang dùng", "\u4f7f\u7528\u4e2d"), [
+        `Prefix: ${requestCode.prefix || "YMD"}`,
+        `${settingText("Định dạng", "\u5f62\u5f0f")}: ${requestCode.format || "YMD-xxxxxx"}`,
+        settingText("Áp dụng: yêu cầu mới", "\u9069\u7528: \u65b0\u898f\u4f9d\u983c")
+      ], settingText("Chỉ áp dụng cho yêu cầu mới, không đổi dữ liệu cũ.", "\u65b0\u898f\u4f9d\u983c\u306b\u306e\u307f\u9069\u7528\u3002\u65e2\u5b58\u30c7\u30fc\u30bf\u306f\u5909\u66f4\u3057\u307e\u305b\u3093\u3002"))}
+      ${overviewSummaryCard("poc", "trend", "POC / vận hành", pocStatusLabel(poc.status), [
+        `${settingText("Nhóm", "\u30b0\u30eb\u30fc\u30d7")}: ${poc.groupName || "-"}`,
+        `${settingText("Trạng thái", "\u72b6\u614b")}: ${pocStatusLabel(poc.status)}`,
+        poc.startDate || poc.expectedEndDate ? `${poc.startDate || "-"} - ${poc.expectedEndDate || "-"}` : settingText("Chưa đặt thời gian", "\u671f\u9593\u672a\u8a2d\u5b9a")
+      ], settingText("Theo dõi POC và ghi chú vận hành.", "POC\u3068\u904b\u7528\u30e1\u30e2\u3092\u7ba1\u7406\u3002"))}
+      ${overviewSummaryCard("dataStatus", "database", settingText("Trạng thái dữ liệu", "\u30c7\u30fc\u30bf\u72b6\u614b"), "Read-only", [
+        `Database: ${statusRows[0][1]}`,
+        `Email: ${statusRows[1][1]}`,
+        `${settingText("Tổng yêu cầu", "\u4f9d\u983c\u6570")}: ${statusRows[3][1]}`
+      ], settingText("Thông tin xem nhanh, không chỉnh sửa.", "\u78ba\u8a8d\u7528\u306e\u60c5\u5831\u3067\u3059\u3002"))}
+    </div>`;
   }
 
   function beginOverviewEdit(section) {
@@ -6061,6 +6059,7 @@
       state.overviewSettingsDrafts = {};
       state.overviewSettingsEditing = {};
       state.overviewSettingsErrors = {};
+      state.settingsDetail = null;
       toast(settingText("Đã lưu cài đặt.", "\u8a2d\u5b9a\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002"));
       try {
         const refreshed = await AdminAPI.getOverviewSettings();
@@ -6076,6 +6075,61 @@
       toast(settingText("Không thể lưu cài đặt.", "\u8a2d\u5b9a\u3092\u4fdd\u5b58\u3067\u304d\u307e\u305b\u3093\u3002"));
       renderSettings();
     }
+  }
+
+  function renderOverviewDetailBody(meta) {
+    const section = meta.overviewSection;
+    const status = state.overviewSettingsStatus || {};
+    if (section === "dataStatus") {
+      const rows = [
+        ["Database", status.database || (state.errors.overviewSettings ? "disconnected" : "connected")],
+        ["Email provider", status.emailProvider || "not configured"],
+        ["ADMIN_NOTIFICATION_EMAIL", status.adminNotificationEmailConfigured ? settingText("Đã cấu hình", "\u8a2d\u5b9a\u6e08\u307f") : settingText("Chưa cấu hình", "\u672a\u8a2d\u5b9a")],
+        [settingText("Tổng số yêu cầu", "\u4f9d\u983c\u6570"), status.requestCount ?? state.requests.length],
+        [settingText("Tổng khách hàng", "\u9867\u5ba2\u6570"), status.customerCount ?? state.users.length],
+        [settingText("Tổng staff", "\u30b9\u30bf\u30c3\u30d5\u6570"), status.staffCount ?? state.staff.length],
+        [settingText("Tổng báo giá đã gửi", "\u9001\u4fe1\u6e08\u307f\u898b\u7a4d\u6570"), status.sentQuoteCount ?? state.requests.filter(isQuoteSent).length]
+      ];
+      return `<div class="settings-overview-status-grid overview-detail-status">${rows.map(row => `<div><span>${escapeHtml(row[0])}</span><strong>${escapeHtml(row[1])}</strong></div>`).join("")}</div>`;
+    }
+    const pocOptions = [
+      { value: "preparing", label: settingText("Đang chuẩn bị", "\u6e96\u5099\u4e2d") },
+      { value: "running", label: settingText("Đang chạy POC", "POC\u5b9f\u884c\u4e2d") },
+      { value: "completed", label: settingText("Đã hoàn tất POC", "POC\u5b8c\u4e86") }
+    ];
+    const groups = {
+      company: [
+        overviewField("company", "nameJa", settingText("Tên công ty tiếng Nhật", "\u4f1a\u793e\u540d\uff08\u65e5\u672c\u8a9e\uff09")),
+        overviewField("company", "nameEn", settingText("Tên công ty tiếng Anh", "\u4f1a\u793e\u540d\uff08\u82f1\u8a9e\uff09")),
+        overviewField("company", "sloganJa", settingText("Slogan tiếng Nhật", "\u30b9\u30ed\u30fc\u30ac\u30f3\uff08\u65e5\u672c\u8a9e\uff09")),
+        overviewField("company", "sloganEn", settingText("Slogan tiếng Anh", "\u30b9\u30ed\u30fc\u30ac\u30f3\uff08\u82f1\u8a9e\uff09")),
+        overviewField("company", "email", "Email"),
+        overviewField("company", "phone", settingText("Số điện thoại", "\u96fb\u8a71\u756a\u53f7")),
+        overviewField("company", "address", settingText("Địa chỉ công ty", "\u4f1a\u793e\u4f4f\u6240"), { type: "textarea", rows: 2 }),
+        overviewField("company", "logoUrl", "Logo URL")
+      ],
+      system: [
+        overviewField("system", "defaultLanguage", settingText("Ngôn ngữ mặc định", "\u65e2\u5b9a\u8a00\u8a9e"), { type: "select", options: [{ value: "vi", label: "Tiếng Việt" }, { value: "ja", label: "\u65e5\u672c\u8a9e" }] }),
+        overviewField("system", "timezone", settingText("Múi giờ", "\u30bf\u30a4\u30e0\u30be\u30fc\u30f3")),
+        overviewField("system", "dateFormat", settingText("Định dạng ngày giờ", "\u65e5\u6642\u5f62\u5f0f")),
+        overviewField("system", "pocMode", settingText("Chế độ POC", "POC\u30e2\u30fc\u30c9"), { type: "checkbox", checkboxLabel: settingText("Đang bật POC", "POC\u30e2\u30fc\u30c9\u3092\u6709\u52b9\u306b\u3059\u308b") }),
+        overviewField("system", "environmentName", settingText("Tên môi trường", "\u74b0\u5883\u540d"))
+      ],
+      requestCode: [
+        `<p class="settings-overview-note">${escapeHtml(settingText("Thay đổi này chỉ áp dụng cho yêu cầu mới.", "\u3053\u306e\u5909\u66f4\u306f\u65b0\u898f\u4f9d\u983c\u306b\u306e\u307f\u9069\u7528\u3055\u308c\u307e\u3059\u3002"))}</p>`,
+        overviewField("requestCode", "prefix", settingText("Prefix mã yêu cầu", "\u63a5\u982d\u8f9e")),
+        overviewField("requestCode", "format", settingText("Định dạng hiển thị", "\u8868\u793a\u5f62\u5f0f")),
+        overviewField("requestCode", "digits", settingText("Số chữ số", "\u6841\u6570"), { type: "number" })
+      ],
+      poc: [
+        overviewField("poc", "groupName", settingText("Tên nhóm thử nghiệm", "\u691c\u8a3c\u30b0\u30eb\u30fc\u30d7\u540d")),
+        overviewField("poc", "status", settingText("Trạng thái POC", "POC\u72b6\u614b"), { type: "select", options: pocOptions }),
+        overviewField("poc", "startDate", settingText("Ngày bắt đầu POC", "POC\u958b\u59cb\u65e5"), { type: "date" }),
+        overviewField("poc", "expectedEndDate", settingText("Ngày kết thúc dự kiến", "\u7d42\u4e86\u4e88\u5b9a\u65e5"), { type: "date" }),
+        overviewField("poc", "note", settingText("Ghi chú vận hành", "\u904b\u7528\u30e1\u30e2"), { type: "textarea", rows: 4 })
+      ]
+    };
+    return `<div class="settings-overview-form settings-overview-detail-form">${(groups[section] || []).join("")}</div>`;
   }
 
   function renderSettingsStaffWork() {
@@ -6241,7 +6295,44 @@
 
   function settingsDetailMeta() {
     const raw = String(state.settingsDetail?.key || "");
-    const [, title = raw] = raw.split(":");
+    const [group, detail = raw] = raw.split(":");
+    if (group === "overview") {
+      const map = {
+        company: {
+          kind: "overview",
+          overviewSection: "company",
+          title: settingText("Thông tin công ty", "\u4f1a\u793e\u60c5\u5831"),
+          desc: settingText("Chỉnh sửa tên công ty, slogan, thông tin liên hệ và logo.", "\u4f1a\u793e\u540d\u3001\u30b9\u30ed\u30fc\u30ac\u30f3\u3001\u9023\u7d61\u5148\u3001\u30ed\u30b4\u3092\u7de8\u96c6\u3057\u307e\u3059\u3002")
+        },
+        system: {
+          kind: "overview",
+          overviewSection: "system",
+          title: settingText("Cấu hình hệ thống", "\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a"),
+          desc: settingText("Thiết lập ngôn ngữ mặc định, múi giờ, định dạng ngày giờ và chế độ vận hành.", "\u65e2\u5b9a\u8a00\u8a9e\u3001\u30bf\u30a4\u30e0\u30be\u30fc\u30f3\u3001\u65e5\u6642\u5f62\u5f0f\u3001\u904b\u7528\u30e2\u30fc\u30c9\u3092\u8a2d\u5b9a\u3057\u307e\u3059\u3002")
+        },
+        requestCode: {
+          kind: "overview",
+          overviewSection: "requestCode",
+          title: settingText("Mã yêu cầu", "\u4f9d\u983cID"),
+          desc: settingText("Cấu hình mã cho yêu cầu mới. Yêu cầu cũ không thay đổi.", "\u65b0\u898f\u4f9d\u983c\u306eID\u8a2d\u5b9a\u3067\u3059\u3002\u65e2\u5b58\u4f9d\u983c\u306f\u5909\u66f4\u3057\u307e\u305b\u3093\u3002")
+        },
+        poc: {
+          kind: "overview",
+          overviewSection: "poc",
+          title: "POC / vận hành",
+          desc: settingText("Theo dõi trạng thái POC, thời gian và ghi chú vận hành.", "POC\u306e\u72b6\u614b\u3001\u671f\u9593\u3001\u904b\u7528\u30e1\u30e2\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002")
+        },
+        dataStatus: {
+          kind: "overview",
+          overviewSection: "dataStatus",
+          readOnly: true,
+          title: settingText("Trạng thái dữ liệu", "\u30c7\u30fc\u30bf\u72b6\u614b"),
+          desc: settingText("Thông tin hệ thống chỉ để xem nhanh.", "\u30b7\u30b9\u30c6\u30e0\u72b6\u614b\u306e\u78ba\u8a8d\u7528\u60c5\u5831\u3067\u3059\u3002")
+        }
+      };
+      return map[detail] || map.company;
+    }
+    const title = detail || raw;
     const lower = title.toLowerCase();
     const isDept = title.includes(t("department")) || lower.includes("department") || title.includes("\u90e8\u9580") || title.includes("B\u1ed9 ph\u1eadn");
     const isWork = title.includes(t("workTypes")) || title.includes("N\u1ed9i dung") || title.includes("\u696d\u52d9") || title.includes("c\u00f4ng vi\u1ec7c");
@@ -6294,6 +6385,24 @@
 
   function renderSettingsDetailModal() {
     const meta = settingsDetailMeta();
+    const isOverview = meta.kind === "overview";
+    if (isOverview) {
+      return `<div class="settings-detail-overlay" data-settings-detail-overlay>
+        <section class="settings-detail-modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(meta.title)}">
+          <header class="settings-detail-head">
+            <div><h2>${escapeHtml(meta.title)}</h2><p>${escapeHtml(meta.desc)}</p></div>
+            <button class="settings-detail-close" type="button" data-settings-detail-close aria-label="Close">&times;</button>
+          </header>
+          <div class="settings-detail-body">
+            ${renderOverviewDetailBody(meta)}
+          </div>
+          <footer class="settings-detail-footer">
+            <button class="btn btn-soft" type="button" data-settings-detail-cancel>${escapeHtml(meta.readOnly ? settingText("Đóng", "\u9589\u3058\u308b") : settingText("Hủy", "\u30ad\u30e3\u30f3\u30bb\u30eb"))}</button>
+            ${meta.readOnly ? "" : `<button class="primary-button" type="button" data-overview-save="${escapeHtml(meta.overviewSection)}">${escapeHtml(settingText("Lưu", "\u4fdd\u5b58"))}</button>`}
+          </footer>
+        </section>
+      </div>`;
+    }
     return `<div class="settings-detail-overlay" data-settings-detail-overlay>
       <section class="settings-detail-modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(meta.title)}">
         <header class="settings-detail-head">
@@ -6329,6 +6438,10 @@
     if (state.settingsDetail?.dirty && !force) {
       const ok = window.confirm(settingText("B\u1ea1n c\u00f3 thay \u0111\u1ed5i ch\u01b0a l\u01b0u. B\u1ea1n c\u00f3 mu\u1ed1n tho\u00e1t kh\u00f4ng?", "\u672a\u4fdd\u5b58\u306e\u5909\u66f4\u304c\u3042\u308a\u307e\u3059\u3002\u9589\u3058\u307e\u3059\u304b\uff1f"));
       if (!ok) return false;
+    }
+    if (state.settingsDetail?.overviewSection) {
+      delete state.overviewSettingsDrafts[state.settingsDetail.overviewSection];
+      state.overviewSettingsErrors = {};
     }
     state.settingsDetail = null;
     renderSettings();
@@ -7303,7 +7416,15 @@
       if (settingsDetail && state.currentView === "settings") {
         event.preventDefault();
         event.stopPropagation();
-        state.settingsDetail = { key: settingsDetail.dataset.settingsDetail, dirty: false };
+        const key = settingsDetail.dataset.settingsDetail;
+        const [, overviewSection] = String(key || "").split(":");
+        state.settingsDetail = { key, dirty: false };
+        if (String(key || "").startsWith("overview:")) {
+          state.settingsDetail.overviewSection = overviewSection;
+          if (overviewSection !== "dataStatus") {
+            state.overviewSettingsDrafts[overviewSection] = JSON.parse(JSON.stringify(normalizeOverviewSettings(state.overviewSettings)[overviewSection] || {}));
+          }
+        }
         renderSettings();
         return;
       }
@@ -7311,9 +7432,22 @@
       void handleRequestViewClick(event);
     });
     bind($("viewRoot"), "change", handleRequestViewChange);
+    bind($("viewRoot"), "change", event => {
+      if (state.currentView === "settings" && event.target.matches("[data-overview-field]")) {
+        const section = event.target.getAttribute("data-overview-field").split(".")[0];
+        if (section) state.overviewSettingsDrafts[section] = collectOverviewSection(section);
+        if (state.settingsDetail) state.settingsDetail.dirty = true;
+      }
+    });
     bind($("viewRoot"), "input", event => {
       if (state.currentView === "settings" && event.target.closest("[data-settings-detail-dirty]")) {
         markSettingsDetailDirty();
+        return;
+      }
+      if (state.currentView === "settings" && event.target.matches("[data-overview-field]")) {
+        const section = event.target.getAttribute("data-overview-field").split(".")[0];
+        if (section) state.overviewSettingsDrafts[section] = collectOverviewSection(section);
+        if (state.settingsDetail) state.settingsDetail.dirty = true;
         return;
       }
       if (handleRequestViewInput(event)) event.stopPropagation();

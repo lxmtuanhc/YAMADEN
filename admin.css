@@ -5014,9 +5014,24 @@ body {
   font-weight: 900;
 }
 
-.settings-overview-real {
+.settings-overview-real,
+.settings-overview-grid {
   display: grid;
   gap: 18px;
+}
+
+.settings-overview-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  width: 100%;
+}
+
+.settings-overview-summary-card {
+  cursor: pointer;
+}
+
+.settings-overview-summary-card .settings-card-body {
+  min-height: 120px;
 }
 
 .settings-overview-card {
@@ -6580,7 +6595,8 @@ textarea {
     width: 100%;
   }
   .settings-overview-form,
-  .settings-overview-status-grid {
+  .settings-overview-status-grid,
+  .settings-overview-grid {
     grid-template-columns: 1fr;
   }
 }
