@@ -5973,6 +5973,39 @@
     </article>`;
   }
 
+  function settingsSummaryCard({ detailKey, icon, title, status, tone, description, summary }) {
+    return `<article class="settings-shell-card settings-summary-card" data-settings-detail="${escapeHtml(detailKey)}" tabindex="0" role="button">
+      <div class="settings-card-head">
+        <span class="settings-card-icon">${settingsIcon(icon)}</span>
+        <div>
+          <h3>${escapeHtml(title)}</h3>
+          ${status ? settingsBadge(status, tone || "") : ""}
+        </div>
+      </div>
+      <div class="settings-card-body">
+        <p class="settings-card-note settings-summary-description">${escapeHtml(description || "")}</p>
+        <div class="settings-summary-body">${summary || ""}</div>
+      </div>
+      <div class="settings-card-footer settings-summary-footer">
+        <button class="btn btn-soft" type="button" data-settings-detail="${escapeHtml(detailKey)}">${escapeHtml(settingText("Mở chi tiết", "\u8a73\u7d30\u3092\u958b\u304f"))}</button>
+      </div>
+    </article>`;
+  }
+
+  function overviewSummaryCard(section, icon, title, status, lines, description) {
+    const detailKey = `overview:${section}`;
+    const summary = `<div class="settings-summary-rows">
+      ${(lines || []).map(line => {
+        const text = String(line || "-");
+        const parts = text.includes(":") ? text.split(/:(.*)/s) : null;
+        return parts && parts[1] !== undefined
+          ? `<div><span>${escapeHtml(parts[0])}</span><strong>${escapeHtml(parts[1].trim() || "-")}</strong></div>`
+          : `<p>${escapeHtml(text)}</p>`;
+      }).join("")}
+    </div>`;
+    return settingsSummaryCard({ detailKey, icon, title, status, tone: section === "dataStatus" ? "is-planned" : "is-live", description, summary });
+  }
+
   function overviewFieldGroup(title, fields) {
     return `<section class="overview-field-group">
       <h3>${escapeHtml(title)}</h3>
@@ -6242,6 +6275,14 @@
         <button class="btn btn-soft" type="button" data-settings-detail="${escapeHtml(detailKey)}">${escapeHtml(settingText("Mở chi tiết", "\u8a73\u7d30\u3092\u958b\u304f"))}</button>
       </div>
     </article>`;
+  }
+
+  function staffWorkSummaryCard(icon, title, description, status, tone, metrics, chips, detailKey) {
+    const stats = `<div class="settings-summary-stats">
+      ${(metrics || []).slice(0, 2).map(([label, value]) => `<span><b>${escapeHtml(value)}</b><small>${escapeHtml(label)}</small></span>`).join("")}
+    </div>`;
+    const chipHtml = (chips || []).length ? `<div class="settings-summary-chips">${settingsChips(chips || [])}</div>` : `<div class="settings-summary-chips is-empty"></div>`;
+    return settingsSummaryCard({ detailKey, icon, title, status, tone, description, summary: stats + chipHtml });
   }
 
   function renderSettingsAiAssist() {
