@@ -3539,7 +3539,25 @@ app.put("/admin/departments/:id", requireAdmin, async (req, res) => {
     const item = await Department.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Department not found" });
     const payload = cleanMasterPayload(req.body || {}, ["code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
-    if (payload.code) payload.code = slugifyCode(payload.code, item.code);
+    if (payload.code) {
+      const nextCode = slugifyCode(payload.code, item.code);
+      if (nextCode !== item.code) {
+        const related = await Promise.all([
+          Staff.countDocuments({ $or: [{ departmentCode: item.code }, { department: new RegExp(item.nameVi || item.nameJa || item.code, "i") }] }),
+          Request.countDocuments({ departmentCode: item.code }),
+          WorkType.countDocuments({ departmentCode: item.code }),
+          WorkGroup.countDocuments({ departmentCode: item.code })
+        ]);
+        const relatedCount = related.reduce((sum, count) => sum + count, 0);
+        if (relatedCount > 0) {
+          delete payload.code;
+        } else {
+          payload.code = nextCode;
+        }
+      } else {
+        payload.code = nextCode;
+      }
+    }
     Object.assign(item, payload, { updatedAt: new Date() });
     await item.save();
     res.json({ message: "Department saved", data: publicDepartment(item) });
@@ -3574,9 +3592,14 @@ app.delete("/admin/departments/:id", requireAdmin, async (req, res) => {
     const relatedCount = related.reduce((sum, count) => sum + count, 0);
     if (relatedCount > 0) {
       return res.status(409).json({
-        message: "Department has related data and cannot be deleted. Please hide it instead.",
+        errorCode: "DEPARTMENT_HAS_RELATIONS",
+        message: "Bộ phận này đang được liên kết với staff hoặc dữ liệu khác, không thể xóa. Vui lòng dùng Ẩn nếu không muốn sử dụng nữa.",
         data: publicDepartment(item),
-        relatedCount
+        relatedCount,
+        relatedStaffCount: related[0],
+        relatedRequestCount: related[1],
+        relatedWorkTypeCount: related[2],
+        relatedWorkGroupCount: related[3]
       });
     }
     await item.deleteOne();

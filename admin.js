@@ -1604,7 +1604,9 @@
     }
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
-      throw new Error(body.message || body.error || "API failed: " + response.status);
+      const error = new Error(body.message || body.error || "API failed: " + response.status);
+      Object.assign(error, body, { status: response.status });
+      throw error;
     }
     return response.json().catch(() => ({}));
   }
@@ -6553,8 +6555,8 @@
             ${renderStaffWorkDetailBody(meta)}
           </div>
           <footer class="settings-detail-footer">
-            <button class="btn btn-soft" type="button" data-settings-detail-cancel>${escapeHtml(settingText("Hủy", "\u30ad\u30e3\u30f3\u30bb\u30eb"))}</button>
-            <button class="primary-button" type="button" data-staff-work-save="${escapeHtml(meta.kind)}" ${editing ? "" : "disabled"}>${escapeHtml(settingText("Lưu", "\u4fdd\u5b58"))}</button>
+            <button class="btn btn-soft" type="button" data-settings-detail-cancel>${escapeHtml(editing ? settingText("Hủy", "\u30ad\u30e3\u30f3\u30bb\u30eb") : settingText("Đóng", "\u9589\u3058\u308b"))}</button>
+            ${editing ? `<button class="primary-button" type="button" data-staff-work-save="${escapeHtml(meta.kind)}">${escapeHtml(settingText("Lưu", "\u4fdd\u5b58"))}</button>` : ""}
           </footer>
         </section>
       </div>`;
@@ -6873,6 +6875,15 @@
     return state.settingsMasterEdit.id ? (state.workMaster[type] || []).find(item => String(item.id) === String(state.settingsMasterEdit.id)) || null : {};
   }
 
+  function departmentRelationCounts(department) {
+    if (!department) return { staff: 0, requests: 0, workTypes: 0, total: 0 };
+    const code = String(department.code || "");
+    const staff = state.staff.filter(item => staffDepartmentCodeForStaff(item) === code).length;
+    const requests = state.requests.filter(item => String(item.departmentCode || "") === code).length;
+    const workTypes = (state.workMaster.workTypes || []).filter(item => String(item.departmentCode || "") === code).length;
+    return { staff, requests, workTypes, total: staff + requests + workTypes };
+  }
+
   function renderStaffWorkDetailBody(meta) {
     const editing = staffWorkEditItem(meta.kind);
     return `<div class="settings-detail-toolbar settings-real-toolbar">
@@ -6899,8 +6910,8 @@
       const deleteAction = meta.kind === "departments" ? ` <button class="mini-button danger" type="button" data-staff-work-delete="departments" data-master-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>` : "";
       const actions = `<button class="mini-button" type="button" data-staff-work-edit="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button> <button class="mini-button" type="button" data-staff-work-status="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}" data-master-active="${item.active === false ? "true" : "false"}">${escapeHtml(item.active === false ? t("show") : t("hide"))}</button>${deleteAction}`;
       if (meta.kind === "departments") {
-        const staffCount = state.staff.filter(staff => staffDepartmentCodeForStaff(staff) === item.code).length;
-        return [label, escapeHtml(item.code || "-"), escapeHtml(item.descriptionVi || item.descriptionJa || "-"), renderMasterStatus(item), escapeHtml(staffCount), actions];
+        const relationCounts = departmentRelationCounts(item);
+        return [label, escapeHtml(item.code || "-"), escapeHtml(item.descriptionVi || item.descriptionJa || "-"), renderMasterStatus(item), escapeHtml(relationCounts.staff), actions];
       }
       if (meta.kind === "workTypes") {
         const dept = findDepartmentByCodeOrLabel(item.departmentCode);
@@ -6918,11 +6929,13 @@
     const workTypes = state.workMaster.workTypes || [];
     const isWorkType = kind === "workTypes";
     const isSkill = kind === "skills";
+    const relationCounts = kind === "departments" ? departmentRelationCounts(item) : { total: 0 };
+    const lockCode = kind === "departments" && item?.id && relationCounts.total > 0;
     return `<form class="settings-real-form" data-staff-work-form="${escapeHtml(kind)}" data-master-id="${escapeHtml(item?.id || "")}">
       <h3>${escapeHtml(item?.id ? t("edit") : settingText("Thêm", "\u8ffd\u52a0"))}</h3>
       <div class="settings-real-form-grid">
         ${isWorkType ? `<label><span>${escapeHtml(t("department"))}</span><select name="departmentCode">${masterSelectOptions(departments, item?.departmentCode || departments[0]?.code || "", t("selectDepartment"))}</select></label>` : ""}
-        <label><span>${escapeHtml(t("code"))} *</span><input name="code" value="${masterFormValue(item, "code")}"></label>
+        <label><span>${escapeHtml(t("code"))} *</span><input name="code" value="${masterFormValue(item, "code")}" ${lockCode ? "readonly" : ""}>${lockCode ? `<small class="settings-form-note">${escapeHtml(settingText("Mã bộ phận đang được sử dụng, không thể đổi.", "\u90e8\u9580\u30b3\u30fc\u30c9\u306f\u4f7f\u7528\u4e2d\u306e\u305f\u3081\u5909\u66f4\u3067\u304d\u307e\u305b\u3093\u3002"))}</small>` : ""}</label>
         <label><span>${escapeHtml(t("nameVi"))} *</span><input name="nameVi" value="${masterFormValue(item, "nameVi")}"></label>
         <label><span>${escapeHtml(t("nameJa"))}</span><input name="nameJa" value="${masterFormValue(item, "nameJa")}"></label>
         <label><span>${escapeHtml(t("descriptionVi"))}</span><textarea name="descriptionVi" rows="2">${masterFormValue(item, "descriptionVi")}</textarea></label>
@@ -7038,15 +7051,16 @@
   async function deleteSettingsDepartment(id) {
     const department = (state.workMaster.departments || []).find(item => String(item.id) === String(id));
     if (!department) return;
-    const staffCount = state.staff.filter(staff => staffDepartmentCodeForStaff(staff) === department.code).length;
-    if (staffCount > 0) {
-      await confirmAction({
+    const relationCounts = departmentRelationCounts(department);
+    if (relationCounts.total > 0) {
+      const hide = await confirmAction({
         title: settingText("Không thể xóa bộ phận", "\u90e8\u9580\u3092\u524a\u9664\u3067\u304d\u307e\u305b\u3093"),
-        message: settingText("Bộ phận này đang được liên kết với staff hoặc dữ liệu khác, không thể xóa. Bạn chỉ có thể ẩn.", "\u3053\u306e\u90e8\u9580\u306f\u30b9\u30bf\u30c3\u30d5\u307e\u305f\u306f\u4ed6\u306e\u30c7\u30fc\u30bf\u3068\u9023\u643a\u3055\u308c\u3066\u3044\u308b\u305f\u3081\u524a\u9664\u3067\u304d\u307e\u305b\u3093\u3002\u975e\u8868\u793a\u306e\u307f\u53ef\u80fd\u3067\u3059\u3002"),
+        message: settingText(`Bộ phận này đang có ${relationCounts.staff} staff liên kết. Bạn có thể ẩn bộ phận này, hoặc chuyển staff sang bộ phận khác trước khi xóa.`, `この部門は${relationCounts.staff}名のスタッフに紐づいています。削除する前に非表示にするか、スタッフを別の部門へ移動してください。`),
         cancelLabel: settingText("Đóng", "\u9589\u3058\u308b"),
-        confirmLabel: settingText("Đã hiểu", "\u4e86\u89e3"),
+        confirmLabel: settingText("Ẩn bộ phận", "\u975e\u8868\u793a\u306b\u3059\u308b"),
         variant: "warning"
       });
+      if (hide) await setSettingsStaffWorkStatus("departments", id, false);
       return;
     }
     const ok = await confirmAction({
@@ -7064,7 +7078,10 @@
       toast(settingText("Đã xóa bộ phận.", "\u90e8\u9580\u3092\u524a\u9664\u3057\u307e\u3057\u305f\u3002"));
     } catch (error) {
       console.error(error);
-      toast(error?.message || settingText("Không thể xóa bộ phận.", "\u90e8\u9580\u3092\u524a\u9664\u3067\u304d\u307e\u305b\u3093\u3002"));
+      const message = error?.errorCode === "DEPARTMENT_HAS_RELATIONS"
+        ? settingText("Bộ phận này đang được liên kết với staff hoặc dữ liệu khác, không thể xóa. Vui lòng dùng Ẩn nếu không muốn sử dụng nữa.", "\u3053\u306e\u90e8\u9580\u306f\u30b9\u30bf\u30c3\u30d5\u307e\u305f\u306f\u4ed6\u306e\u30c7\u30fc\u30bf\u306b\u7d10\u3065\u3044\u3066\u3044\u308b\u305f\u3081\u524a\u9664\u3067\u304d\u307e\u305b\u3093\u3002\u4f7f\u7528\u3057\u306a\u3044\u5834\u5408\u306f\u975e\u8868\u793a\u306b\u3057\u3066\u304f\u3060\u3055\u3044\u3002")
+        : error?.message || settingText("Không thể xóa bộ phận.", "\u90e8\u9580\u3092\u524a\u9664\u3067\u304d\u307e\u305b\u3093\u3002");
+      toast(message);
     }
   }
 
