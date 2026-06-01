@@ -5903,13 +5903,24 @@
     const name = `data-overview-field="${escapeHtml(section)}.${escapeHtml(field)}"`;
     const disabled = editing ? "" : "disabled";
     const error = overviewError(section, field);
+    if (options.type === "checkbox" && section === "system" && field === "pocMode") {
+      options = {
+        ...options,
+        onLabel: settingText("Bật POC", "POC\u30aa\u30f3"),
+        offLabel: settingText("Tắt POC", "POC\u30aa\u30d5")
+      };
+    }
     let control = "";
     if (options.type === "textarea") {
       control = `<textarea ${name} ${disabled} rows="${options.rows || 3}" placeholder="${escapeHtml(options.placeholder || "")}">${escapeHtml(value)}</textarea>`;
     } else if (options.type === "select") {
       control = `<select ${name} ${disabled}>${(options.options || []).map(item => `<option value="${escapeHtml(item.value)}" ${String(value) === String(item.value) ? "selected" : ""}>${escapeHtml(item.label)}</option>`).join("")}</select>`;
     } else if (options.type === "checkbox") {
-      control = `<label class="overview-toggle"><input ${name} ${disabled} type="checkbox" ${value ? "checked" : ""}> <span>${escapeHtml(options.checkboxLabel || label)}</span></label>`;
+      const isOn = Boolean(value);
+      const toggleLabel = isOn
+        ? (options.onLabel || options.checkboxLabel || label)
+        : (options.offLabel || options.checkboxLabel || label);
+      control = `<label class="overview-toggle ${isOn ? "is-on" : ""}"><input ${name} ${disabled} type="checkbox" ${isOn ? "checked" : ""}><span class="overview-toggle-track" aria-hidden="true"><i></i></span><span>${escapeHtml(toggleLabel)}</span></label>`;
       return `<div class="overview-field overview-field-toggle">${control}${error ? `<small class="overview-error">${escapeHtml(error)}</small>` : ""}</div>`;
     } else {
       control = `<input ${name} ${disabled} type="${escapeHtml(options.type || "text")}" value="${escapeHtml(value)}" placeholder="${escapeHtml(options.placeholder || "")}">`;
@@ -5943,6 +5954,13 @@
         <button class="btn btn-soft" type="button" data-settings-detail="${escapeHtml(detailKey)}">${escapeHtml(settingText("Mở chi tiết", "\u8a73\u7d30\u3092\u958b\u304f"))}</button>
       </div>
     </article>`;
+  }
+
+  function overviewFieldGroup(title, fields) {
+    return `<section class="overview-field-group">
+      <h3>${escapeHtml(title)}</h3>
+      <div class="settings-overview-form">${(fields || []).join("")}</div>
+    </section>`;
   }
 
   function pocStatusLabel(value) {
@@ -6138,7 +6156,24 @@
         overviewField("poc", "note", settingText("Ghi chú vận hành", "\u904b\u7528\u30e1\u30e2"), { type: "textarea", rows: 4 })
       ]
     };
-    return `<div class="settings-overview-form settings-overview-detail-form">${(groups[section] || []).join("")}</div>`;
+    const groupedFields = {
+      company: [
+        overviewFieldGroup(settingText("Thông tin hiển thị", "\u8868\u793a\u60c5\u5831"), groups.company.slice(0, 4)),
+        overviewFieldGroup(settingText("Thông tin liên hệ", "\u9023\u7d61\u5148\u60c5\u5831"), groups.company.slice(4))
+      ],
+      system: [
+        overviewFieldGroup(settingText("Ngôn ngữ & thời gian", "\u8a00\u8a9e\u3068\u65e5\u6642"), groups.system.slice(0, 3)),
+        overviewFieldGroup(settingText("Chế độ vận hành", "\u904b\u7528\u30e2\u30fc\u30c9"), groups.system.slice(3))
+      ],
+      requestCode: [
+        overviewFieldGroup(settingText("Mã yêu cầu", "\u4f9d\u983cID"), groups.requestCode)
+      ],
+      poc: [
+        overviewFieldGroup(settingText("Thông tin POC", "POC\u60c5\u5831"), groups.poc.slice(0, 4)),
+        overviewFieldGroup(settingText("Ghi chú vận hành", "\u904b\u7528\u30e1\u30e2"), groups.poc.slice(4))
+      ]
+    };
+    return `<div class="settings-overview-detail-form">${(groupedFields[section] || groups[section] || []).join("")}</div>`;
   }
 
   function renderSettingsStaffWork() {
@@ -6397,7 +6432,7 @@
     const isOverview = meta.kind === "overview";
     if (isOverview) {
       return `<div class="settings-detail-overlay" data-settings-detail-overlay>
-        <section class="settings-detail-modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(meta.title)}">
+        <section class="settings-detail-modal settings-overview-detail-modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(meta.title)}">
           <header class="settings-detail-head">
             <div><h2>${escapeHtml(meta.title)}</h2><p>${escapeHtml(meta.desc)}</p></div>
             <button class="settings-detail-close" type="button" data-settings-detail-close aria-label="Close">&times;</button>
@@ -7445,6 +7480,14 @@
       if (state.currentView === "settings" && event.target.matches("[data-overview-field]")) {
         const section = event.target.getAttribute("data-overview-field").split(".")[0];
         if (section) state.overviewSettingsDrafts[section] = collectOverviewSection(section);
+        if (event.target.type === "checkbox") {
+          const toggle = event.target.closest(".overview-toggle");
+          toggle?.classList.toggle("is-on", event.target.checked);
+          const label = toggle?.querySelector("span:last-child");
+          if (label && event.target.getAttribute("data-overview-field") === "system.pocMode") {
+            label.textContent = event.target.checked ? settingText("Bật POC", "POC\u30aa\u30f3") : settingText("Tắt POC", "POC\u30aa\u30d5");
+          }
+        }
         if (state.settingsDetail) state.settingsDetail.dirty = true;
       }
     });
