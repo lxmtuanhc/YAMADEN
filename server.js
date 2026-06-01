@@ -837,6 +837,9 @@ const WorkGroupSchema = new mongoose.Schema({
 
 const WorkTypeSchema = new mongoose.Schema({
   departmentCode: { type: String, index: true },
+  departmentCodes: [String],
+  department: String,
+  departmentId: String,
   workGroupCode: String,
   code: { type: String, unique: true, index: true },
   nameVi: String,
@@ -857,6 +860,10 @@ const WorkTypeSchema = new mongoose.Schema({
 
 const SkillSchema = new mongoose.Schema({
   code: { type: String, unique: true, index: true },
+  departmentCode: String,
+  departmentCodes: [String],
+  department: String,
+  departmentId: String,
   nameVi: String,
   nameJa: String,
   descriptionVi: String,
@@ -1327,6 +1334,33 @@ async function departmentRelationCounts(item) {
   return { relatedStaffCount, relatedRequestCount, relatedCustomerCount, relatedWorkTypeCount, relatedSkillCount };
 }
 
+function departmentSoftRelationQuery(item) {
+  const values = masterReferenceValues(item);
+  return { $and: [
+    matchAnyField(["departmentCode", "departmentCodes", "department", "departmentId"], values),
+    nonDeletedMasterCondition()
+  ] };
+}
+
+async function departmentRelatedWorkTypes(item) {
+  const rows = await WorkType.find(departmentSoftRelationQuery(item)).sort({ sortOrder: 1, createdAt: 1 }).limit(20);
+  return rows.map(publicWorkType);
+}
+
+async function unlinkDepartmentSoftRelations(item) {
+  const values = masterReferenceValues(item);
+  await Promise.all([
+    WorkType.updateMany(departmentSoftRelationQuery(item), {
+      $set: { departmentCode: "", department: "", departmentId: "", updatedAt: new Date() },
+      $pull: { departmentCodes: { $in: values } }
+    }),
+    Skill.updateMany(departmentSoftRelationQuery(item), {
+      $set: { departmentCode: "", department: "", departmentId: "", updatedAt: new Date() },
+      $pull: { departmentCodes: { $in: values } }
+    })
+  ]);
+}
+
 async function workTypeRelationCounts(item) {
   const values = masterReferenceValues(item);
   const [relatedStaffCount, relatedRequestCount, relatedCustomerCount, relatedWorkTypeCount, relatedSkillCount] = await Promise.all([
@@ -1396,6 +1430,40 @@ function totalMasterRelations(counts) {
     + Number(counts.relatedSkillCount || 0);
 }
 
+function hardDepartmentRelationCount(counts) {
+  return Number(counts.relatedStaffCount || 0)
+    + Number(counts.relatedRequestCount || 0)
+    + Number(counts.relatedCustomerCount || 0);
+}
+
+function softDepartmentRelationCount(counts) {
+  return Number(counts.relatedWorkTypeCount || 0)
+    + Number(counts.relatedSkillCount || 0);
+}
+
+function departmentDeleteDecision(counts, protected) {
+  const hardRelations = {
+    staff: Number(counts.relatedStaffCount || 0),
+    requests: Number(counts.relatedRequestCount || 0),
+    customers: Number(counts.relatedCustomerCount || 0)
+  };
+  const softRelations = {
+    workTypes: Number(counts.relatedWorkTypeCount || 0),
+    skills: Number(counts.relatedSkillCount || 0),
+    mappings: 0
+  };
+  if (protected) {
+    return { canDelete: false, canDeleteWithSoftUnlink: false, hardRelations, softRelations, reason: "PROTECTED" };
+  }
+  if (hardDepartmentRelationCount(counts) > 0) {
+    return { canDelete: false, canDeleteWithSoftUnlink: false, hardRelations, softRelations, reason: "HARD_RELATIONS" };
+  }
+  if (softDepartmentRelationCount(counts) > 0) {
+    return { canDelete: false, canDeleteWithSoftUnlink: true, hardRelations, softRelations, reason: "SOFT_RELATIONS_ONLY" };
+  }
+  return { canDelete: true, canDeleteWithSoftUnlink: false, hardRelations, softRelations, reason: "NO_RELATIONS" };
+}
+
 function masterRelationError(item, counts) {
   return {
     errorCode: "MASTER_HAS_RELATIONS",
@@ -1403,6 +1471,29 @@ function masterRelationError(item, counts) {
     data: item,
     relatedCount: totalMasterRelations(counts),
     ...counts
+  };
+}
+
+function departmentHardRelationError(item, counts, decision) {
+  return {
+    errorCode: "DEPARTMENT_HARD_RELATIONS",
+    message: "Bộ phận này đang được sử dụng bởi dữ liệu nghiệp vụ, nên không thể xóa trực tiếp.",
+    data: item,
+    relatedCount: hardDepartmentRelationCount(counts),
+    ...counts,
+    ...decision
+  };
+}
+
+function departmentSoftRelationResponse(item, counts, decision, workTypes = []) {
+  return {
+    errorCode: "DEPARTMENT_SOFT_RELATIONS",
+    message: "Bộ phận này đang được liên kết với nội dung công việc. Có thể gỡ liên kết và chuyển bộ phận vào Thùng rác.",
+    data: item,
+    relatedCount: softDepartmentRelationCount(counts),
+    ...counts,
+    ...decision,
+    relatedWorkTypes: workTypes
   };
 }
 
@@ -3764,27 +3855,40 @@ app.delete("/admin/departments/:id", requireAdmin, async (req, res) => {
     const item = await Department.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Department not found" });
     const counts = await departmentRelationCounts(item);
-    const relatedCount = totalMasterRelations(counts);
     const protected = isMasterProtected(item);
-    const canDelete = !protected && relatedCount === 0;
+    const decision = departmentDeleteDecision(counts, protected);
+    const relatedWorkTypes = decision.reason === "SOFT_RELATIONS_ONLY" ? await departmentRelatedWorkTypes(item) : [];
     console.log("[DEPARTMENT_DELETE_CHECK]", {
       departmentId: String(item._id || ""),
       departmentCode: item.code || "",
       ...counts,
       protected,
-      canDelete
+      canDelete: decision.canDelete,
+      canDeleteWithSoftUnlink: decision.canDeleteWithSoftUnlink,
+      hardRelations: decision.hardRelations,
+      softRelations: decision.softRelations,
+      reason: decision.reason
     });
     if (protected) return res.status(409).json(protectedMasterError(publicDepartment(item)));
-    if (relatedCount > 0) return res.status(409).json(masterRelationError(publicDepartment(item), counts));
+    if (decision.reason === "HARD_RELATIONS") {
+      return res.status(409).json(departmentHardRelationError(publicDepartment(item), counts, decision));
+    }
+    if (decision.reason === "SOFT_RELATIONS_ONLY" && req.query.unlinkSoftRelations !== "true") {
+      return res.status(409).json(departmentSoftRelationResponse(publicDepartment(item), counts, decision, relatedWorkTypes));
+    }
     if (req.query.permanent === "true") {
       await item.deleteOne();
       return res.json({ message: "Department permanently deleted", data: publicDepartment(item), relatedCount: 0 });
+    }
+    if (decision.reason === "SOFT_RELATIONS_ONLY") {
+      await unlinkDepartmentSoftRelations(item);
     }
     await softDeleteMasterItem(item, "department", req);
     res.json({
       message: "Department moved to trash",
       data: publicDepartment(item),
-      relatedCount: 0
+      relatedCount: 0,
+      ...decision
     });
   } catch (error) {
     res.status(400).json({ message: "Department delete failed", error: error.message });

@@ -1714,8 +1714,11 @@
     setDepartmentStatus(id, active) {
       return requestJson("/admin/departments/" + encodeURIComponent(id) + "/status", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active }) });
     },
-    deleteDepartment(id, permanent) {
-      return requestJson("/admin/departments/" + encodeURIComponent(id) + (permanent ? "?permanent=true" : ""), { method: "DELETE" });
+    deleteDepartment(id, permanent, unlinkSoftRelations) {
+      const query = new URLSearchParams();
+      if (permanent) query.set("permanent", "true");
+      if (unlinkSoftRelations) query.set("unlinkSoftRelations", "true");
+      return requestJson("/admin/departments/" + encodeURIComponent(id) + (query.toString() ? "?" + query.toString() : ""), { method: "DELETE" });
     },
     restoreDepartment(id) {
       return requestJson("/admin/departments/" + encodeURIComponent(id) + "/restore", { method: "PATCH" });
@@ -6958,12 +6961,16 @@
   }
 
   function departmentRelationCounts(department) {
-    if (!department) return { staff: 0, requests: 0, workTypes: 0, total: 0 };
+    if (!department) return { staff: 0, requests: 0, customers: 0, workTypes: 0, skills: 0, hardTotal: 0, softTotal: 0, total: 0 };
     const values = departmentReferenceValues(department);
-    const staff = state.staff.filter(item => departmentLinkedBy(item, values)).length;
-    const requests = state.requests.filter(item => departmentLinkedBy(item, values)).length;
+    const staff = state.staff.filter(item => !item.deletedAt && String(item.status || "") !== "deleted" && departmentLinkedBy(item, values)).length;
+    const requests = state.requests.filter(item => !isSoftDeleted(item) && departmentLinkedBy(item, values)).length;
+    const customers = state.users.filter(item => !item.deletedAt && normalizeUserStatusValue(item.status) !== "deleted" && departmentLinkedBy(item, values)).length;
     const workTypes = visibleMasterItems("workTypes").filter(item => departmentLinkedBy(item, values)).length;
-    return { staff, requests, workTypes, total: staff + requests + workTypes };
+    const skills = visibleMasterItems("skills").filter(item => departmentLinkedBy(item, values)).length;
+    const hardTotal = staff + requests + customers;
+    const softTotal = workTypes + skills;
+    return { staff, requests, customers, workTypes, skills, hardTotal, softTotal, total: hardTotal + softTotal };
   }
 
   function departmentReferenceValues(department) {
@@ -7018,6 +7025,18 @@
     return settingText(
       `Bộ phận này đang được liên kết với ${viParts.join(", ")}. Bạn có thể ẩn bộ phận này, hoặc chuyển dữ liệu liên kết sang bộ phận khác trước khi xóa.`,
       `この部門は${jaParts.join("、")}に紐づいています。削除する前に非表示にするか、関連データを別の部門へ移動してください。`
+    );
+  }
+
+  function departmentSoftRelationMessage(counts, department) {
+    const workTypes = visibleMasterItems("workTypes").filter(item => departmentLinkedBy(item, departmentReferenceValues(department)));
+    const skills = visibleMasterItems("skills").filter(item => departmentLinkedBy(item, departmentReferenceValues(department)));
+    const count = Number(counts?.workTypes ?? counts?.relatedWorkTypeCount ?? workTypes.length) + Number(counts?.skills ?? counts?.relatedSkillCount ?? skills.length);
+    const names = workTypes.concat(skills).slice(0, 6).map(workMasterLabel).filter(Boolean);
+    const list = names.length ? `\n- ${names.join("\n- ")}` : "";
+    return settingText(
+      `Bộ phận này đang được liên kết với ${count} nội dung công việc/kỹ năng. Bạn có muốn gỡ liên kết các dữ liệu này và chuyển bộ phận vào Thùng rác không?${list}`,
+      `この部門は${count}件の業務内容・スキルに紐づいています。連携を解除して部門をゴミ箱に移動しますか？${list}`
     );
   }
 
@@ -7279,7 +7298,38 @@
     if (!item) return;
     const name = settingsMasterName(kind);
     const localCounts = settingsMasterRelationCounts(kind, item);
-    if (localCounts.total > 0) {
+    if (kind === "departments" && Number(localCounts.hardTotal || 0) > 0) {
+      const hide = await confirmAction({
+        title: settingText(`Không thể xóa ${name}`, `${name}を削除できません`),
+        message: departmentDeleteRelationMessage(localCounts),
+        cancelLabel: settingText("Đóng", "\u9589\u3058\u308b"),
+        confirmLabel: settingText("Ẩn", "\u975e\u8868\u793a"),
+        variant: "warning"
+      });
+      if (hide) await setSettingsStaffWorkStatus(kind, id, false);
+      return;
+    }
+    if (kind === "departments" && Number(localCounts.softTotal || 0) > 0) {
+      const unlink = await confirmAction({
+        title: settingText("Xóa bộ phận?", "\u90e8\u9580\u3092\u524a\u9664\u3057\u307e\u3059\u304b\uff1f"),
+        message: departmentSoftRelationMessage(localCounts, item),
+        cancelLabel: settingText("Hủy", "キャンセル"),
+        confirmLabel: settingText("Gỡ liên kết & xóa", "\u9023\u643a\u89e3\u9664\u30fb\u524a\u9664"),
+        danger: true
+      });
+      if (!unlink) return;
+      try {
+        await AdminAPI.deleteDepartment(id, false, true);
+        await reloadWorkMaster();
+        renderSettings();
+        toast(settingText("Đã gỡ liên kết và chuyển bộ phận vào Thùng rác.", "連携を解除し、部門をゴミ箱に移動しました。"));
+      } catch (error) {
+        console.error(error);
+        toast(error?.message || settingText("Không thể xóa dữ liệu.", "データを削除できません。"));
+      }
+      return;
+    }
+    if (kind !== "departments" && localCounts.total > 0) {
       const hide = await confirmAction({
         title: settingText(`Không thể xóa ${name}`, `${name}を削除できません`),
         message: departmentDeleteRelationMessage(localCounts),
@@ -7312,6 +7362,22 @@
       console.error(error);
       if (error?.errorCode === "MASTER_PROTECTED" || error?.errorCode === "DEPARTMENT_PROTECTED") {
         toast(departmentProtectedMessage());
+        return;
+      }
+      if (kind === "departments" && error?.errorCode === "DEPARTMENT_SOFT_RELATIONS") {
+        const unlink = await confirmAction({
+          title: settingText("Xóa bộ phận?", "\u90e8\u9580\u3092\u524a\u9664\u3057\u307e\u3059\u304b\uff1f"),
+          message: departmentSoftRelationMessage(error, item),
+          cancelLabel: settingText("Hủy", "キャンセル"),
+          confirmLabel: settingText("Gỡ liên kết & xóa", "\u9023\u643a\u89e3\u9664\u30fb\u524a\u9664"),
+          danger: true
+        });
+        if (unlink) {
+          await AdminAPI.deleteDepartment(id, false, true);
+          await reloadWorkMaster();
+          renderSettings();
+          toast(settingText("Đã gỡ liên kết và chuyển bộ phận vào Thùng rác.", "連携を解除し、部門をゴミ箱に移動しました。"));
+        }
         return;
       }
       if (error?.errorCode === "MASTER_HAS_RELATIONS" || error?.errorCode === "DEPARTMENT_HAS_RELATIONS") {
