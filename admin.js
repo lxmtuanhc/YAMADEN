@@ -5892,7 +5892,7 @@
   function renderSettingsContent(tab) {
     const renderers = {
       overview: renderSettingsOverview,
-      staffWork: renderSettingsStaffWork,
+      staffWork: renderSettingsStaffWorkV2,
       aiAssist: renderSettingsAiAssist,
       processChart: renderSettingsProcessChart,
       requestStatus: renderSettingsRequestStatus,
@@ -6206,6 +6206,42 @@
       settingCard("palette", settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText("Danh m\u1ee5c k\u1ef9 n\u0103ng d\u00f9ng cho staff v\u00e0 AI matching.", "\u30b9\u30bf\u30c3\u30d5\u3068AI\u30de\u30c3\u30c1\u30f3\u30b0\u7528\u306e\u30b9\u30ad\u30eb\u4e00\u89a7\u3067\u3059\u3002"), skills.length ? t("inUse") : t("prepareLater"), skills.length ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${skills.length}</b>${escapeHtml(settingText("T\u1ed5ng k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u6570"))}</span></div>${settingsChips(skills.map(workMasterLabel))}`),
       settingCard("shield", "Staff mapping", settingText("Li\u00ean k\u1ebft staff v\u1edbi b\u1ed9 ph\u1eadn, n\u1ed9i dung c\u00f4ng vi\u1ec7c, k\u1ef9 n\u0103ng.", "\u30b9\u30bf\u30c3\u30d5\u3092\u90e8\u9580\u30fb\u696d\u52d9\u5185\u5bb9\u30fb\u30b9\u30ad\u30eb\u3068\u7d10\u3065\u3051\u307e\u3059\u3002"), mappedStaff ? t("inUse") : t("linkLater"), mappedStaff ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${staffCount}</b>${escapeHtml(t("staffCount"))}</span><span><b>${mappedStaff}</b>${escapeHtml(settingText("Đã mapping", "\u9023\u643a\u6e08\u307f"))}</span></div>`),
     ].join("");
+  }
+
+  function renderSettingsStaffWorkV2() {
+    const departments = activeMasterItems("departments");
+    const types = activeMasterItems("workTypes");
+    const skills = activeMasterItems("skills");
+    const staffCount = state.staff.filter(staff => String(staff.status || "active") !== "deleted" && !staff.deletedAt).length;
+    const mappedStaff = state.staff.filter(staff => staffDepartmentCodeForStaff(staff) || toList(staff.workTypeIds).length || toList(staff.workTags).length || compactText(staff.skills, "")).length;
+    return [
+      staffWorkSummaryCard("users", t("department"), t("departmentsCardDesc"), t("inUse"), "is-live", [[t("totalDepartments"), departments.length], [t("currentlyUsed"), departments.filter(item => item.active !== false).length]], departments.map(workMasterLabel), "staffWork:" + t("department")),
+      staffWorkSummaryCard("clipboard", t("workTypes"), t("workTypesDesc"), types.length ? t("inUse") : t("linkLater"), types.length ? "is-live" : "is-planned", [[t("workTypes"), types.length], [t("workMasterLinked"), types.length ? settingText("Đã liên kết", "\u9023\u643a\u6e08\u307f") : "-"]], types.map(workMasterLabel), "staffWork:" + t("workTypes")),
+      staffWorkSummaryCard("palette", settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText("Danh m\u1ee5c k\u1ef9 n\u0103ng d\u00f9ng cho staff v\u00e0 AI matching.", "\u30b9\u30bf\u30c3\u30d5\u3068AI\u30de\u30c3\u30c1\u30f3\u30b0\u7528\u306e\u30b9\u30ad\u30eb\u4e00\u89a7\u3067\u3059\u3002"), skills.length ? t("inUse") : t("prepareLater"), skills.length ? "is-live" : "is-planned", [[settingText("T\u1ed5ng k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u6570"), skills.length], [settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), skills.length ? t("inUse") : t("prepareLater")]], skills.map(workMasterLabel), "staffWork:" + settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb")),
+      staffWorkSummaryCard("shield", "Staff mapping", settingText("Li\u00ean k\u1ebft staff v\u1edbi b\u1ed9 ph\u1eadn, n\u1ed9i dung c\u00f4ng vi\u1ec7c, k\u1ef9 n\u0103ng.", "\u30b9\u30bf\u30c3\u30d5\u3092\u90e8\u9580\u30fb\u696d\u52d9\u5185\u5bb9\u30fb\u30b9\u30ad\u30eb\u3068\u7d10\u3065\u3051\u307e\u3059\u3002"), mappedStaff ? t("inUse") : t("linkLater"), mappedStaff ? "is-live" : "is-planned", [[t("staffCount"), staffCount], [settingText("Đã mapping", "\u9023\u643a\u6e08\u307f"), mappedStaff]], [], "staffWork:Staff mapping")
+    ].join("");
+  }
+
+  function staffWorkSummaryCard(icon, title, description, status, tone, metrics, chips, detailKey) {
+    return `<article class="settings-shell-card settings-staffwork-card" data-settings-detail="${escapeHtml(detailKey)}" tabindex="0" role="button">
+      <div class="settings-card-head">
+        <span class="settings-card-icon">${settingsIcon(icon)}</span>
+        <div>
+          <h3>${escapeHtml(title)}</h3>
+          ${status ? settingsBadge(status, tone) : ""}
+        </div>
+      </div>
+      <div class="settings-card-body">
+        <p class="settings-card-note settings-staffwork-description">${escapeHtml(description || "")}</p>
+        <div class="settings-staffwork-summary">
+          ${(metrics || []).slice(0, 2).map(([label, value]) => `<span><b>${escapeHtml(value)}</b><small>${escapeHtml(label)}</small></span>`).join("")}
+        </div>
+        <div class="settings-staffwork-chip-zone">${settingsChips(chips || [])}</div>
+      </div>
+      <div class="settings-card-footer">
+        <button class="btn btn-soft" type="button" data-settings-detail="${escapeHtml(detailKey)}">${escapeHtml(settingText("Mở chi tiết", "\u8a73\u7d30\u3092\u958b\u304f"))}</button>
+      </div>
+    </article>`;
   }
 
   function renderSettingsAiAssist() {
@@ -6819,7 +6855,8 @@
     const rows = (state.workMaster[type] || []).map(item => {
       const id = item.id;
       const label = escapeHtml(workMasterLabel(item) || item.code || "-");
-      const actions = `<button class="mini-button" type="button" data-staff-work-edit="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button> <button class="mini-button" type="button" data-staff-work-status="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}" data-master-active="${item.active === false ? "true" : "false"}">${escapeHtml(item.active === false ? t("show") : t("hide"))}</button>`;
+      const deleteAction = meta.kind === "departments" ? ` <button class="mini-button danger" type="button" data-staff-work-delete="departments" data-master-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>` : "";
+      const actions = `<button class="mini-button" type="button" data-staff-work-edit="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button> <button class="mini-button" type="button" data-staff-work-status="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}" data-master-active="${item.active === false ? "true" : "false"}">${escapeHtml(item.active === false ? t("show") : t("hide"))}</button>${deleteAction}`;
       if (meta.kind === "departments") {
         const staffCount = state.staff.filter(staff => staffDepartmentCodeForStaff(staff) === item.code).length;
         return [label, escapeHtml(item.code || "-"), escapeHtml(item.descriptionVi || item.descriptionJa || "-"), renderMasterStatus(item), escapeHtml(staffCount), actions];
@@ -6954,6 +6991,39 @@
     } catch (error) {
       console.error(error);
       toast(error?.message || settingText("Không thể lưu dữ liệu.", "\u30c7\u30fc\u30bf\u3092\u4fdd\u5b58\u3067\u304d\u307e\u305b\u3093\u3002"));
+    }
+  }
+
+  async function deleteSettingsDepartment(id) {
+    const department = (state.workMaster.departments || []).find(item => String(item.id) === String(id));
+    if (!department) return;
+    const staffCount = state.staff.filter(staff => staffDepartmentCodeForStaff(staff) === department.code).length;
+    if (staffCount > 0) {
+      await confirmAction({
+        title: settingText("Không thể xóa bộ phận", "\u90e8\u9580\u3092\u524a\u9664\u3067\u304d\u307e\u305b\u3093"),
+        message: settingText("Bộ phận này đang được liên kết với staff hoặc dữ liệu khác, không thể xóa. Bạn chỉ có thể ẩn.", "\u3053\u306e\u90e8\u9580\u306f\u30b9\u30bf\u30c3\u30d5\u307e\u305f\u306f\u4ed6\u306e\u30c7\u30fc\u30bf\u3068\u9023\u643a\u3055\u308c\u3066\u3044\u308b\u305f\u3081\u524a\u9664\u3067\u304d\u307e\u305b\u3093\u3002\u975e\u8868\u793a\u306e\u307f\u53ef\u80fd\u3067\u3059\u3002"),
+        cancelLabel: settingText("Đóng", "\u9589\u3058\u308b"),
+        confirmLabel: settingText("Đã hiểu", "\u4e86\u89e3"),
+        variant: "warning"
+      });
+      return;
+    }
+    const ok = await confirmAction({
+      title: settingText("Bạn có chắc muốn xóa bộ phận này không?", "\u3053\u306e\u90e8\u9580\u3092\u524a\u9664\u3057\u307e\u3059\u304b\uff1f"),
+      message: settingText("Thao tác này không thể hoàn tác.", "\u3053\u306e\u64cd\u4f5c\u306f\u5143\u306b\u623b\u305b\u307e\u305b\u3093\u3002"),
+      cancelLabel: settingText("Hủy", "\u30ad\u30e3\u30f3\u30bb\u30eb"),
+      confirmLabel: settingText("Xóa", "\u524a\u9664"),
+      danger: true
+    });
+    if (!ok) return;
+    try {
+      await AdminAPI.deleteDepartment(id);
+      await reloadWorkMaster();
+      renderSettings();
+      toast(settingText("Đã xóa bộ phận.", "\u90e8\u9580\u3092\u524a\u9664\u3057\u307e\u3057\u305f\u3002"));
+    } catch (error) {
+      console.error(error);
+      toast(error?.message || settingText("Không thể xóa bộ phận.", "\u90e8\u9580\u3092\u524a\u9664\u3067\u304d\u307e\u305b\u3093\u3002"));
     }
   }
 
@@ -7658,6 +7728,12 @@
         if (staffWorkStatus) {
           event.preventDefault();
           void setSettingsStaffWorkStatus(staffWorkStatus.dataset.staffWorkStatus || "", staffWorkStatus.dataset.masterId || "", staffWorkStatus.dataset.masterActive === "true");
+          return;
+        }
+        const staffWorkDelete = event.target.closest("[data-staff-work-delete]");
+        if (staffWorkDelete) {
+          event.preventDefault();
+          void deleteSettingsDepartment(staffWorkDelete.dataset.masterId || "");
           return;
         }
         const staffWorkSave = event.target.closest("[data-staff-work-save]");

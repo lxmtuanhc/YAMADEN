@@ -3571,13 +3571,19 @@ app.delete("/admin/departments/:id", requireAdmin, async (req, res) => {
       WorkType.countDocuments({ departmentCode: item.code }),
       WorkGroup.countDocuments({ departmentCode: item.code })
     ]);
-    item.active = false;
-    item.updatedAt = new Date();
-    await item.save();
+    const relatedCount = related.reduce((sum, count) => sum + count, 0);
+    if (relatedCount > 0) {
+      return res.status(409).json({
+        message: "Department has related data and cannot be deleted. Please hide it instead.",
+        data: publicDepartment(item),
+        relatedCount
+      });
+    }
+    await item.deleteOne();
     res.json({
-      message: related.some(Boolean) ? "Department has related data and was hidden" : "Department hidden",
+      message: "Department deleted",
       data: publicDepartment(item),
-      relatedCount: related.reduce((sum, count) => sum + count, 0)
+      relatedCount: 0
     });
   } catch (error) {
     res.status(400).json({ message: "Department delete failed", error: error.message });
