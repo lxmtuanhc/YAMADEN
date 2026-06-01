@@ -6877,11 +6877,63 @@
 
   function departmentRelationCounts(department) {
     if (!department) return { staff: 0, requests: 0, workTypes: 0, total: 0 };
-    const code = String(department.code || "");
-    const staff = state.staff.filter(item => staffDepartmentCodeForStaff(item) === code).length;
-    const requests = state.requests.filter(item => String(item.departmentCode || "") === code).length;
-    const workTypes = (state.workMaster.workTypes || []).filter(item => String(item.departmentCode || "") === code).length;
+    const values = departmentReferenceValues(department);
+    const staff = state.staff.filter(item => departmentLinkedBy(item, values)).length;
+    const requests = state.requests.filter(item => departmentLinkedBy(item, values)).length;
+    const workTypes = (state.workMaster.workTypes || []).filter(item => departmentLinkedBy(item, values)).length;
     return { staff, requests, workTypes, total: staff + requests + workTypes };
+  }
+
+  function departmentReferenceValues(department) {
+    return [department?.code, department?.nameVi, department?.nameJa, department?.id, department?._id]
+      .map(value => String(value || "").trim())
+      .filter(Boolean);
+  }
+
+  function departmentLinkedBy(item, departmentValues) {
+    if (!item || !departmentValues?.length) return false;
+    const directValues = [item.departmentCode, item.department, item.departmentId]
+      .map(value => String(value || "").trim())
+      .filter(Boolean);
+    if (directValues.some(value => departmentValues.includes(value))) return true;
+    return toList(item.departmentCodes).some(value => departmentValues.includes(String(value || "").trim()));
+  }
+
+  function departmentDeleteRelationMessage(counts) {
+    const staff = Number(counts?.staff ?? counts?.relatedStaffCount ?? 0);
+    const requests = Number(counts?.requests ?? counts?.relatedRequestCount ?? 0);
+    const workTypes = Number(counts?.workTypes ?? counts?.relatedWorkTypeCount ?? 0);
+    const viParts = [];
+    const jaParts = [];
+    if (staff > 0) {
+      viParts.push(`${staff} staff`);
+      jaParts.push(`${staff}名のスタッフ`);
+    }
+    if (requests > 0) {
+      viParts.push(`${requests} yêu cầu`);
+      jaParts.push(`${requests}件の依頼`);
+    }
+    if (workTypes > 0) {
+      viParts.push(`${workTypes} nội dung công việc`);
+      jaParts.push(`${workTypes}件の業務内容`);
+    }
+    if (!viParts.length) {
+      return settingText(
+        "Bộ phận này đang có dữ liệu liên quan, không thể xóa. Vui lòng dùng Ẩn nếu không muốn sử dụng nữa.",
+        "この部門は関連データに紐づいているため削除できません。使用しない場合は非表示にしてください。"
+      );
+    }
+    return settingText(
+      `Bộ phận này đang được liên kết với ${viParts.join(", ")}. Bạn có thể ẩn bộ phận này, hoặc chuyển dữ liệu liên kết sang bộ phận khác trước khi xóa.`,
+      `この部門は${jaParts.join("、")}に紐づいています。削除する前に非表示にするか、関連データを別の部門へ移動してください。`
+    );
+  }
+
+  function departmentProtectedMessage() {
+    return settingText(
+      "Đây là bộ phận mặc định của hệ thống, không thể xóa. Bạn có thể Ẩn nếu không sử dụng.",
+      "この部門はシステム既定の部門のため削除できません。使用しない場合は非表示にしてください。"
+    );
   }
 
   function renderStaffWorkDetailBody(meta) {
@@ -7052,10 +7104,11 @@
     const department = (state.workMaster.departments || []).find(item => String(item.id) === String(id));
     if (!department) return;
     const relationCounts = departmentRelationCounts(department);
-    if (relationCounts.total > 0) {
+    const isProtected = department.isSystemDefault === true || department.protected === true;
+    if (isProtected || relationCounts.total > 0) {
       const hide = await confirmAction({
-        title: settingText("Không thể xóa bộ phận", "\u90e8\u9580\u3092\u524a\u9664\u3067\u304d\u307e\u305b\u3093"),
-        message: settingText(`Bộ phận này đang có ${relationCounts.staff} staff liên kết. Bạn có thể ẩn bộ phận này, hoặc chuyển staff sang bộ phận khác trước khi xóa.`, `この部門は${relationCounts.staff}名のスタッフに紐づいています。削除する前に非表示にするか、スタッフを別の部門へ移動してください。`),
+        title: isProtected ? settingText("Không thể xóa bộ phận mặc định", "既定の部門を削除できません") : settingText("Không thể xóa bộ phận", "\u90e8\u9580\u3092\u524a\u9664\u3067\u304d\u307e\u305b\u3093"),
+        message: isProtected ? departmentProtectedMessage() : departmentDeleteRelationMessage(relationCounts),
         cancelLabel: settingText("Đóng", "\u9589\u3058\u308b"),
         confirmLabel: settingText("Ẩn bộ phận", "\u975e\u8868\u793a\u306b\u3059\u308b"),
         variant: "warning"
@@ -7078,6 +7131,18 @@
       toast(settingText("Đã xóa bộ phận.", "\u90e8\u9580\u3092\u524a\u9664\u3057\u307e\u3057\u305f\u3002"));
     } catch (error) {
       console.error(error);
+      if (error?.errorCode === "DEPARTMENT_PROTECTED") {
+        toast(departmentProtectedMessage());
+        return;
+      }
+      if (error?.errorCode === "DEPARTMENT_HAS_RELATIONS") {
+        toast(departmentDeleteRelationMessage({
+          relatedStaffCount: error.relatedStaffCount,
+          relatedRequestCount: error.relatedRequestCount,
+          relatedWorkTypeCount: error.relatedWorkTypeCount
+        }));
+        return;
+      }
       const message = error?.errorCode === "DEPARTMENT_HAS_RELATIONS"
         ? settingText("Bộ phận này đang được liên kết với staff hoặc dữ liệu khác, không thể xóa. Vui lòng dùng Ẩn nếu không muốn sử dụng nữa.", "\u3053\u306e\u90e8\u9580\u306f\u30b9\u30bf\u30c3\u30d5\u307e\u305f\u306f\u4ed6\u306e\u30c7\u30fc\u30bf\u306b\u7d10\u3065\u3044\u3066\u3044\u308b\u305f\u3081\u524a\u9664\u3067\u304d\u307e\u305b\u3093\u3002\u4f7f\u7528\u3057\u306a\u3044\u5834\u5408\u306f\u975e\u8868\u793a\u306b\u3057\u3066\u304f\u3060\u3055\u3044\u3002")
         : error?.message || settingText("Không thể xóa bộ phận.", "\u90e8\u9580\u3092\u524a\u9664\u3067\u304d\u307e\u305b\u3093\u3002");

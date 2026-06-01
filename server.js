@@ -3583,23 +3583,56 @@ app.delete("/admin/departments/:id", requireAdmin, async (req, res) => {
   try {
     const item = await Department.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Department not found" });
-    const related = await Promise.all([
-      Staff.countDocuments({ $or: [{ departmentCode: item.code }, { department: new RegExp(item.nameVi || item.nameJa || item.code, "i") }] }),
-      Request.countDocuments({ departmentCode: item.code }),
-      WorkType.countDocuments({ departmentCode: item.code }),
-      WorkGroup.countDocuments({ departmentCode: item.code })
+    const departmentId = String(item._id || "");
+    const departmentCode = String(item.code || "").trim();
+    const departmentValues = [departmentCode, item.nameVi, item.nameJa, departmentId]
+      .map(value => String(value || "").trim())
+      .filter(Boolean);
+    const departmentIdValues = [departmentId, departmentCode].filter(Boolean);
+    const [relatedStaffCount, relatedRequestCount, relatedWorkTypeCount] = await Promise.all([
+      Staff.countDocuments({ $or: [
+        { departmentCode },
+        { department: { $in: departmentValues } },
+        { departmentId: { $in: departmentIdValues } }
+      ] }),
+      Request.countDocuments({ $or: [
+        { departmentCode },
+        { department: { $in: departmentValues } },
+        { departmentId: { $in: departmentIdValues } }
+      ] }),
+      WorkType.countDocuments({ $or: [
+        { departmentCode },
+        { departmentCodes: { $in: departmentValues } },
+        { departmentId: { $in: departmentIdValues } }
+      ] })
     ]);
-    const relatedCount = related.reduce((sum, count) => sum + count, 0);
+    console.log("[DEPARTMENT_DELETE_CHECK]", {
+      departmentId,
+      departmentCode,
+      relatedStaffCount,
+      relatedRequestCount,
+      relatedWorkTypeCount
+    });
+    if (item.isSystemDefault === true || item.get?.("protected") === true) {
+      return res.status(409).json({
+        errorCode: "DEPARTMENT_PROTECTED",
+        message: "Đây là bộ phận mặc định của hệ thống, không thể xóa. Bạn có thể Ẩn nếu không sử dụng.",
+        data: publicDepartment(item),
+        relatedStaffCount,
+        relatedRequestCount,
+        relatedWorkTypeCount
+      });
+    }
+    const relatedCount = relatedStaffCount + relatedRequestCount + relatedWorkTypeCount;
     if (relatedCount > 0) {
       return res.status(409).json({
         errorCode: "DEPARTMENT_HAS_RELATIONS",
         message: "Bộ phận này đang được liên kết với staff hoặc dữ liệu khác, không thể xóa. Vui lòng dùng Ẩn nếu không muốn sử dụng nữa.",
         data: publicDepartment(item),
         relatedCount,
-        relatedStaffCount: related[0],
-        relatedRequestCount: related[1],
-        relatedWorkTypeCount: related[2],
-        relatedWorkGroupCount: related[3]
+        relatedStaffCount,
+        relatedRequestCount,
+        relatedWorkTypeCount
       });
     }
     await item.deleteOne();
