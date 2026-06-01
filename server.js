@@ -836,6 +836,19 @@ const WorkTypeSchema = new mongoose.Schema({
   updatedAt: Date
 });
 
+const SkillSchema = new mongoose.Schema({
+  code: { type: String, unique: true, index: true },
+  nameVi: String,
+  nameJa: String,
+  descriptionVi: String,
+  descriptionJa: String,
+  relatedWorkTypeIds: [String],
+  active: { type: Boolean, default: true },
+  sortOrder: { type: Number, default: 0 },
+  createdAt: Date,
+  updatedAt: Date
+});
+
 const Request = mongoose.model("Request", RequestSchema);
 const Quote = mongoose.model("Quote", QuoteSchema);
 const User = mongoose.model("User", UserSchema);
@@ -843,6 +856,7 @@ const Staff = mongoose.model("Staff", StaffSchema);
 const Department = mongoose.model("Department", DepartmentSchema);
 const WorkGroup = mongoose.model("WorkGroup", WorkGroupSchema);
 const WorkType = mongoose.model("WorkType", WorkTypeSchema);
+const Skill = mongoose.model("Skill", SkillSchema);
 const AppSetting = mongoose.model("AppSetting", AppSettingSchema);
 
 const DEFAULT_OVERVIEW_SETTINGS = Object.freeze({
@@ -1199,6 +1213,14 @@ function publicWorkGroup(item) {
   return data;
 }
 
+function publicSkill(item) {
+  const data = item && item.toObject ? item.toObject() : { ...(item || {}) };
+  data.id = String(data._id || data.id || "");
+  delete data._id;
+  delete data.__v;
+  return data;
+}
+
 function slugifyCode(value, fallback = "item") {
   const normalized = String(value || "")
     .normalize("NFD")
@@ -1214,6 +1236,11 @@ function cleanMasterPayload(body, fields) {
   fields.forEach(field => {
     if (body[field] !== undefined) payload[field] = cleanText(body[field]);
   });
+  if (body.relatedWorkTypeIds !== undefined) {
+    payload.relatedWorkTypeIds = Array.isArray(body.relatedWorkTypeIds)
+      ? body.relatedWorkTypeIds.map(item => cleanText(item)).filter(Boolean)
+      : parseRequestTags(body.relatedWorkTypeIds);
+  }
   if (body.sortOrder !== undefined) payload.sortOrder = Number(body.sortOrder) || 0;
   if (body.active !== undefined) payload.active = body.active === true || body.active === "true";
   return payload;
@@ -1308,10 +1335,12 @@ async function loadWorkMaster({ activeOnly = false } = {}) {
   const visibleWorkTypes = activeOnly
     ? workTypes.filter(item => !item.workGroupCode || activeGroupCodes.includes(item.workGroupCode))
     : workTypes;
+  const skills = await Skill.find(activeOnly ? { active: true } : {}).sort({ sortOrder: 1, createdAt: 1 });
   return {
     departments: activeDepartments.map(publicDepartment),
     workGroups: workGroups.map(publicWorkGroup),
-    workTypes: visibleWorkTypes.map(publicWorkType)
+    workTypes: visibleWorkTypes.map(publicWorkType),
+    skills: skills.map(publicSkill)
   };
 }
 
@@ -3671,6 +3700,99 @@ app.delete("/admin/work-types/:id", requireAdmin, async (req, res) => {
     res.json({ message: related.some(Boolean) ? "Work type has related data and was hidden" : "Work type hidden", data: publicWorkType(item), relatedCount: related.reduce((sum, count) => sum + count, 0) });
   } catch (error) {
     res.status(400).json({ message: "Work type delete failed", error: error.message });
+  }
+});
+
+app.get("/admin/skills", requireAdmin, async (req, res) => {
+  try {
+    const skills = await Skill.find().sort({ sortOrder: 1, createdAt: 1 });
+    res.json({ data: skills.map(publicSkill) });
+  } catch (error) {
+    res.status(500).json({ message: "Skill load failed", error: error.message });
+  }
+});
+
+app.post("/admin/skills", requireAdmin, async (req, res) => {
+  try {
+    const now = new Date();
+    const payload = cleanMasterPayload(req.body || {}, ["code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
+    payload.code = slugifyCode(payload.code || payload.nameVi || payload.nameJa, "skill");
+    payload.createdAt = now;
+    payload.updatedAt = now;
+    const item = await Skill.create(payload);
+    res.json({ message: "Skill saved", data: publicSkill(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Skill save failed", error: error.message });
+  }
+});
+
+app.put("/admin/skills/:id", requireAdmin, async (req, res) => {
+  try {
+    const item = await Skill.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Skill not found" });
+    const payload = cleanMasterPayload(req.body || {}, ["code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
+    if (payload.code) payload.code = slugifyCode(payload.code, item.code);
+    Object.assign(item, payload, { updatedAt: new Date() });
+    await item.save();
+    res.json({ message: "Skill saved", data: publicSkill(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Skill save failed", error: error.message });
+  }
+});
+
+app.put("/admin/skills/:id/status", requireAdmin, async (req, res) => {
+  try {
+    const item = await Skill.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Skill not found" });
+    item.active = req.body.active === true || req.body.active === "true";
+    item.updatedAt = new Date();
+    await item.save();
+    res.json({ message: "Skill status saved", data: publicSkill(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Skill status failed", error: error.message });
+  }
+});
+
+app.delete("/admin/skills/:id", requireAdmin, async (req, res) => {
+  try {
+    const item = await Skill.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Skill not found" });
+    item.active = false;
+    item.updatedAt = new Date();
+    await item.save();
+    res.json({ message: "Skill hidden", data: publicSkill(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Skill delete failed", error: error.message });
+  }
+});
+
+app.get("/admin/staff-mapping", requireAdmin, async (req, res) => {
+  try {
+    const staff = await Staff.find().sort({ createdAt: -1 });
+    res.json({ data: staff });
+  } catch (error) {
+    res.status(500).json({ message: "Staff mapping load failed", error: error.message });
+  }
+});
+
+app.put("/admin/staff/:id/mapping", requireAdmin, async (req, res) => {
+  try {
+    const staff = await Staff.findById(req.params.id);
+    if (!staff) return res.status(404).json({ message: "Staff not found" });
+    const workTypeIds = Array.isArray(req.body.workTypeIds) ? req.body.workTypeIds : parseRequestTags(req.body.workTypeIds);
+    const skillIds = Array.isArray(req.body.skillIds) ? req.body.skillIds : parseRequestTags(req.body.skillIds);
+    if (req.body.departmentCode !== undefined) staff.departmentCode = cleanText(req.body.departmentCode);
+    if (req.body.department !== undefined) staff.department = cleanText(req.body.department);
+    if (req.body.areas !== undefined) staff.areas = cleanText(req.body.areas);
+    if (req.body.workTypeIds !== undefined) staff.workTypeIds = workTypeIds.map(item => cleanText(item)).filter(Boolean);
+    if (req.body.workTags !== undefined) staff.workTags = parseRequestTags(req.body.workTags);
+    if (req.body.skills !== undefined || req.body.skillIds !== undefined) staff.skills = parseRequestTags(req.body.skills || skillIds).join(", ");
+    if (req.body.autoAssignEnabled !== undefined) staff.autoAssignEnabled = req.body.autoAssignEnabled === true || req.body.autoAssignEnabled === "true";
+    if (req.body.status !== undefined) staff.status = cleanText(req.body.status) || "active";
+    await staff.save();
+    res.json({ message: "Staff mapping saved", data: staff });
+  } catch (error) {
+    res.status(400).json({ message: "Staff mapping save failed", error: error.message });
   }
 });
 

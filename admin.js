@@ -1531,7 +1531,7 @@
     users: [],
     staff: [],
     quotes: [],
-    workMaster: { departments: [], workGroups: [], workTypes: [] },
+    workMaster: { departments: [], workGroups: [], workTypes: [], skills: [] },
     selectedRequest: null,
     selectedUser: null,
     selectedStaff: null,
@@ -1565,6 +1565,7 @@
     overviewSettingsDrafts: {},
     overviewSettingsEditing: {},
     overviewSettingsErrors: {},
+    settingsMasterEdit: null,
     lang: localStorage.getItem("language") || "ja"
   };
 
@@ -1737,6 +1738,21 @@
     },
     deleteWorkType(id) {
       return requestJson("/admin/work-types/" + encodeURIComponent(id), { method: "DELETE" });
+    },
+    createSkill(payload) {
+      return requestJson("/admin/skills", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
+    },
+    updateSkill(id, payload) {
+      return requestJson("/admin/skills/" + encodeURIComponent(id), { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
+    },
+    setSkillStatus(id, active) {
+      return requestJson("/admin/skills/" + encodeURIComponent(id) + "/status", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active }) });
+    },
+    deleteSkill(id) {
+      return requestJson("/admin/skills/" + encodeURIComponent(id), { method: "DELETE" });
+    },
+    updateStaffMapping(id, payload) {
+      return requestJson("/admin/staff/" + encodeURIComponent(id) + "/mapping", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
     },
     getStaffHistory(id) {
       return requestJson("/api/requests/staff/" + encodeURIComponent(id) + "/history");
@@ -2283,7 +2299,7 @@
     state.users = users.status === "fulfilled" ? normalizeList(users.value) : [];
     state.staff = staff.status === "fulfilled" ? normalizeList(staff.value) : [];
     state.quotes = quotes.status === "fulfilled" ? normalizeList(quotes.value) : [];
-    state.workMaster = workMaster.status === "fulfilled" ? normalizeWorkMaster(workMaster.value) : { departments: [], workGroups: [], workTypes: [] };
+    state.workMaster = workMaster.status === "fulfilled" ? normalizeWorkMaster(workMaster.value) : { departments: [], workGroups: [], workTypes: [], skills: [] };
     if (overviewSettings.status === "fulfilled") {
       state.overviewSettings = normalizeOverviewSettings(overviewSettings.value?.settings || overviewSettings.value);
       state.overviewSettingsStatus = overviewSettings.value?.status || null;
@@ -2318,7 +2334,8 @@
     return {
       departments: Array.isArray(data.departments) ? data.departments : [],
       workGroups: Array.isArray(data.workGroups) ? data.workGroups : [],
-      workTypes: Array.isArray(data.workTypes) ? data.workTypes : []
+      workTypes: Array.isArray(data.workTypes) ? data.workTypes : [],
+      skills: Array.isArray(data.skills) ? data.skills : []
     };
   }
 
@@ -6179,16 +6196,15 @@
   function renderSettingsStaffWork() {
     const departments = activeMasterItems("departments");
     const types = activeMasterItems("workTypes");
-    const fallbackDepartments = state.lang === "vi"
-      ? ["Gi\u00e1m \u0111\u1ed1c", "Koumu", "FS", "Kinh doanh", "Thi c\u00f4ng", "Thi\u1ebft k\u1ebf", "D\u1ef1 to\u00e1n"]
-      : ["\u4ee3\u8868", "\u5de5\u52d9\u90e8", "FS\u90e8", "\u55b6\u696d\u90e8", "\u5de5\u4e8b\u90e8", "\u8a2d\u8a08\u90e8", "\u4e88\u7b97\u66f8"];
-    const preview = (departments.length ? departments.map(workMasterLabel) : fallbackDepartments).slice(0, 8);
+    const skills = activeMasterItems("skills");
+    const preview = departments.map(workMasterLabel).slice(0, 8);
     const staffCount = state.staff.filter(staff => String(staff.status || "active") !== "deleted" && !staff.deletedAt).length;
+    const mappedStaff = state.staff.filter(staff => staffDepartmentCodeForStaff(staff) || toList(staff.workTypeIds).length || toList(staff.workTags).length || compactText(staff.skills, "")).length;
     return [
-      settingCard("users", t("department"), t("departmentsCardDesc"), t("inUse"), "is-live", `<div class="settings-metrics"><span><b>${departments.length || preview.length}</b>${escapeHtml(t("totalDepartments"))}</span><span><b>${departments.length}</b>${escapeHtml(t("currentlyUsed"))}</span></div>${settingsChips(preview)}${settingsButton(settingText("Th\u00eam b\u1ed9 ph\u1eadn", "\u90e8\u9580\u3092\u8ffd\u52a0"))}`),
-      settingCard("clipboard", t("workTypes"), t("workTypesDesc"), types.length ? t("inUse") : t("linkLater"), types.length ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${types.length}</b>${escapeHtml(t("workTypes"))}</span><span><b>${escapeHtml(t("staff"))}</b>${escapeHtml(t("workMasterLinked"))}</span></div>${settingsChips((types.length ? types.map(workMasterLabel) : ["\u96fb\u6c17\u5de5\u4e8b", "\u70b9\u691c", "\u898b\u7a4d\u4f5c\u6210"]).slice(0, 12))}${settingsButton(settingText("Th\u00eam n\u1ed9i dung c\u00f4ng vi\u1ec7c", "\u696d\u52d9\u5185\u5bb9\u3092\u8ffd\u52a0"))}`),
-      settingCard("palette", settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText("Danh m\u1ee5c k\u1ef9 n\u0103ng d\u00f9ng cho staff v\u00e0 AI matching.", "\u30b9\u30bf\u30c3\u30d5\u3068AI\u30de\u30c3\u30c1\u30f3\u30b0\u7528\u306e\u30b9\u30ad\u30eb\u4e00\u89a7\u3067\u3059\u3002"), t("prepareLater"), "is-planned", settingsChips(["\u96fb\u6c17\u5de5\u4e8b", "\u7167\u660e", "\u5206\u96fb\u76e4", "\u73fe\u5730\u8abf\u67fb", "\u898b\u7a4d\u4f5c\u6210", "\u56f3\u9762\u78ba\u8a8d"])),
-      settingCard("shield", "Staff mapping", [settingText("Li\u00ean k\u1ebft staff v\u1edbi b\u1ed9 ph\u1eadn v\u00e0 k\u1ef9 n\u0103ng", "\u30b9\u30bf\u30c3\u30d5\u3092\u90e8\u9580\u30fb\u30b9\u30ad\u30eb\u3068\u7d10\u3065\u3051"), t("staffCount") + ": " + staffCount], t("linkLater"), "is-planned", settingsButton(settingText("Qu\u1ea3n l\u00fd staff", "\u30b9\u30bf\u30c3\u30d5\u7ba1\u7406"))),
+      settingCard("users", t("department"), t("departmentsCardDesc"), t("inUse"), "is-live", `<div class="settings-metrics"><span><b>${departments.length}</b>${escapeHtml(t("totalDepartments"))}</span><span><b>${departments.filter(item => item.active !== false).length}</b>${escapeHtml(t("currentlyUsed"))}</span></div>${settingsChips(preview)}`),
+      settingCard("clipboard", t("workTypes"), t("workTypesDesc"), types.length ? t("inUse") : t("linkLater"), types.length ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${types.length}</b>${escapeHtml(t("workTypes"))}</span><span><b>${escapeHtml(t("staff"))}</b>${escapeHtml(t("workMasterLinked"))}</span></div>${settingsChips(types.map(workMasterLabel).slice(0, 12))}`),
+      settingCard("palette", settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText("Danh m\u1ee5c k\u1ef9 n\u0103ng d\u00f9ng cho staff v\u00e0 AI matching.", "\u30b9\u30bf\u30c3\u30d5\u3068AI\u30de\u30c3\u30c1\u30f3\u30b0\u7528\u306e\u30b9\u30ad\u30eb\u4e00\u89a7\u3067\u3059\u3002"), skills.length ? t("inUse") : t("prepareLater"), skills.length ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${skills.length}</b>${escapeHtml(settingText("T\u1ed5ng k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u6570"))}</span></div>${settingsChips(skills.map(workMasterLabel))}`),
+      settingCard("shield", "Staff mapping", settingText("Li\u00ean k\u1ebft staff v\u1edbi b\u1ed9 ph\u1eadn, n\u1ed9i dung c\u00f4ng vi\u1ec7c, k\u1ef9 n\u0103ng.", "\u30b9\u30bf\u30c3\u30d5\u3092\u90e8\u9580\u30fb\u696d\u52d9\u5185\u5bb9\u30fb\u30b9\u30ad\u30eb\u3068\u7d10\u3065\u3051\u307e\u3059\u3002"), mappedStaff ? t("inUse") : t("linkLater"), mappedStaff ? "is-live" : "is-planned", `<div class="settings-metrics"><span><b>${staffCount}</b>${escapeHtml(t("staffCount"))}</span><span><b>${mappedStaff}</b>${escapeHtml(settingText("Đã mapping", "\u9023\u643a\u6e08\u307f"))}</span></div>`),
     ].join("");
   }
 
@@ -6388,28 +6404,28 @@
       title: settingText("Qu\u1ea3n l\u00fd b\u1ed9 ph\u1eadn", "\u90e8\u9580\u7ba1\u7406"),
       desc: settingText("Th\u00eam, s\u1eeda v\u00e0 b\u1eadt/t\u1eaft b\u1ed9 ph\u1eadn d\u00f9ng cho staff v\u00e0 AI ph\u00e2n c\u00f4ng.", "\u30b9\u30bf\u30c3\u30d5\u3068AI\u5272\u308a\u5f53\u3066\u306b\u4f7f\u3046\u90e8\u9580\u3092\u8ffd\u52a0\u30fb\u7de8\u96c6\u30fb\u6709\u52b9\u5316\u3057\u307e\u3059\u3002"),
       add: settingText("+ Th\u00eam b\u1ed9 ph\u1eadn", "+ \u90e8\u9580\u3092\u8ffd\u52a0"),
-      headers: [settingText("T\u00ean b\u1ed9 ph\u1eadn", "\u90e8\u9580\u540d"), settingText("M\u00f4 t\u1ea3", "\u8aac\u660e"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), settingText("S\u1ed1 staff li\u00ean k\u1ebft", "\u9023\u643a\u30b9\u30bf\u30c3\u30d5\u6570"), settingText("Thao t\u00e1c", "\u64cd\u4f5c")]
+      headers: [settingText("T\u00ean b\u1ed9 ph\u1eadn", "\u90e8\u9580\u540d"), settingText("M\u00e3", "\u30b3\u30fc\u30c9"), settingText("M\u00f4 t\u1ea3", "\u8aac\u660e"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), settingText("S\u1ed1 staff li\u00ean k\u1ebft", "\u9023\u643a\u30b9\u30bf\u30c3\u30d5\u6570"), settingText("Thao t\u00e1c", "\u64cd\u4f5c")]
     };
     if (isWork) return {
       kind: "workTypes",
       title: settingText("Qu\u1ea3n l\u00fd n\u1ed9i dung c\u00f4ng vi\u1ec7c", "\u696d\u52d9\u5185\u5bb9\u7ba1\u7406"),
       desc: settingText("Qu\u1ea3n l\u00fd danh s\u00e1ch c\u00f4ng vi\u1ec7c d\u00f9ng cho app kh\u00e1ch, staff v\u00e0 AI.", "\u9867\u5ba2\u30a2\u30d7\u30ea\u3001\u30b9\u30bf\u30c3\u30d5\u3001AI\u3067\u4f7f\u3046\u696d\u52d9\u4e00\u89a7\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002"),
       add: settingText("+ Th\u00eam n\u1ed9i dung c\u00f4ng vi\u1ec7c", "+ \u696d\u52d9\u5185\u5bb9\u3092\u8ffd\u52a0"),
-      headers: [settingText("T\u00ean c\u00f4ng vi\u1ec7c", "\u696d\u52d9\u540d"), settingText("T\u1eeb kh\u00f3a", "\u30ad\u30fc\u30ef\u30fc\u30c9"), settingText("B\u1ed9 ph\u1eadn", "\u90e8\u9580"), settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), settingText("Thao t\u00e1c", "\u64cd\u4f5c")]
+      headers: [settingText("T\u00ean c\u00f4ng vi\u1ec7c", "\u696d\u52d9\u540d"), settingText("M\u00e3", "\u30b3\u30fc\u30c9"), settingText("B\u1ed9 ph\u1eadn", "\u90e8\u9580"), settingText("M\u00f4 t\u1ea3", "\u8aac\u660e"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), settingText("Thao t\u00e1c", "\u64cd\u4f5c")]
     };
     if (isSkill) return {
       kind: "skills",
       title: settingText("Qu\u1ea3n l\u00fd k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u7ba1\u7406"),
       desc: settingText("Qu\u1ea3n l\u00fd k\u1ef9 n\u0103ng d\u00f9ng \u0111\u1ec3 g\u00e1n cho staff v\u00e0 AI matching.", "\u30b9\u30bf\u30c3\u30d5\u3068AI\u30de\u30c3\u30c1\u30f3\u30b0\u306b\u4f7f\u3046\u30b9\u30ad\u30eb\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002"),
       add: settingText("+ Th\u00eam k\u1ef9 n\u0103ng", "+ \u30b9\u30ad\u30eb\u3092\u8ffd\u52a0"),
-      headers: [settingText("T\u00ean k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u540d"), settingText("M\u00f4 t\u1ea3", "\u8aac\u660e"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), settingText("Thao t\u00e1c", "\u64cd\u4f5c")]
+      headers: [settingText("T\u00ean k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u540d"), settingText("M\u00e3", "\u30b3\u30fc\u30c9"), settingText("M\u00f4 t\u1ea3", "\u8aac\u660e"), settingText("Work type", "Work type"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), settingText("Thao t\u00e1c", "\u64cd\u4f5c")]
     };
     if (isStaffMap) return {
       kind: "staffMap",
       title: "Staff mapping",
       desc: settingText("Li\u00ean k\u1ebft staff v\u1edbi b\u1ed9 ph\u1eadn, k\u1ef9 n\u0103ng v\u00e0 n\u1ed9i dung c\u00f4ng vi\u1ec7c \u0111\u1ec3 AI ph\u00e2n c\u00f4ng ch\u00ednh x\u00e1c h\u01a1n.", "\u30b9\u30bf\u30c3\u30d5\u3092\u90e8\u9580\u30fb\u30b9\u30ad\u30eb\u30fb\u696d\u52d9\u5185\u5bb9\u3068\u7d10\u3065\u3051\u3001AI\u5272\u308a\u5f53\u3066\u7cbe\u5ea6\u3092\u9ad8\u3081\u307e\u3059\u3002"),
       add: settingText("+ Th\u00eam mapping", "+ mapping\u8ffd\u52a0"),
-      headers: ["Staff", settingText("B\u1ed9 ph\u1eadn", "\u90e8\u9580"), settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText("N\u1ed9i dung c\u00f4ng vi\u1ec7c", "\u696d\u52d9\u5185\u5bb9"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9")]
+      headers: ["Staff", settingText("B\u1ed9 ph\u1eadn", "\u90e8\u9580"), settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText("N\u1ed9i dung c\u00f4ng vi\u1ec7c", "\u696d\u52d9\u5185\u5bb9"), settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), settingText("Thao t\u00e1c", "\u64cd\u4f5c")]
     };
     if (isRule) return {
       kind: "rules",
@@ -6430,6 +6446,7 @@
   function renderSettingsDetailModal() {
     const meta = settingsDetailMeta();
     const isOverview = meta.kind === "overview";
+    const isStaffWorkDetail = ["departments", "workTypes", "skills", "staffMap"].includes(meta.kind);
     if (isOverview) {
       return `<div class="settings-detail-overlay" data-settings-detail-overlay>
         <section class="settings-detail-modal settings-overview-detail-modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(meta.title)}">
@@ -6443,6 +6460,24 @@
           <footer class="settings-detail-footer">
             <button class="btn btn-soft" type="button" data-settings-detail-cancel>${escapeHtml(meta.readOnly ? settingText("Đóng", "\u9589\u3058\u308b") : settingText("Hủy", "\u30ad\u30e3\u30f3\u30bb\u30eb"))}</button>
             ${meta.readOnly ? "" : `<button class="primary-button" type="button" data-overview-save="${escapeHtml(meta.overviewSection)}">${escapeHtml(settingText("Lưu", "\u4fdd\u5b58"))}</button>`}
+          </footer>
+        </section>
+      </div>`;
+    }
+    if (isStaffWorkDetail) {
+      const editing = Boolean(state.settingsMasterEdit?.kind === meta.kind);
+      return `<div class="settings-detail-overlay" data-settings-detail-overlay>
+        <section class="settings-detail-modal settings-overview-detail-modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(meta.title)}">
+          <header class="settings-detail-head">
+            <div><h2>${escapeHtml(meta.title)}</h2><p>${escapeHtml(meta.desc)}</p></div>
+            <button class="settings-detail-close" type="button" data-settings-detail-close aria-label="Close">&times;</button>
+          </header>
+          <div class="settings-detail-body">
+            ${renderStaffWorkDetailBody(meta)}
+          </div>
+          <footer class="settings-detail-footer">
+            <button class="btn btn-soft" type="button" data-settings-detail-cancel>${escapeHtml(settingText("Hủy", "\u30ad\u30e3\u30f3\u30bb\u30eb"))}</button>
+            <button class="primary-button" type="button" data-staff-work-save="${escapeHtml(meta.kind)}" ${editing ? "" : "disabled"}>${escapeHtml(settingText("Lưu", "\u4fdd\u5b58"))}</button>
           </footer>
         </section>
       </div>`;
@@ -6487,6 +6522,7 @@
       delete state.overviewSettingsDrafts[state.settingsDetail.overviewSection];
       state.overviewSettingsErrors = {};
     }
+    state.settingsMasterEdit = null;
     state.settingsDetail = null;
     renderSettings();
     return true;
@@ -6497,6 +6533,8 @@
     state.settingsDetail.dirty = true;
     const save = document.querySelector("[data-settings-detail-save]");
     if (save) save.disabled = false;
+    const staffWorkSave = document.querySelector("[data-staff-work-save]");
+    if (staffWorkSave) staffWorkSave.disabled = false;
   }
 
   function settingsDetailRows(meta) {
@@ -6745,6 +6783,178 @@
         </a>`;
       }).join("")}
     </div>`;
+  }
+
+  function masterKindType(kind) {
+    return kind === "departments" ? "departments" : kind === "workTypes" ? "workTypes" : kind === "skills" ? "skills" : "";
+  }
+
+  function staffWorkEditItem(kind) {
+    if (!state.settingsMasterEdit || state.settingsMasterEdit.kind !== kind) return null;
+    if (kind === "staffMap") return state.staff.find(item => getRowId(item) === state.settingsMasterEdit.id) || null;
+    const type = masterKindType(kind);
+    return state.settingsMasterEdit.id ? (state.workMaster[type] || []).find(item => String(item.id) === String(state.settingsMasterEdit.id)) || null : {};
+  }
+
+  function renderStaffWorkDetailBody(meta) {
+    const editing = staffWorkEditItem(meta.kind);
+    return `<div class="settings-detail-toolbar settings-real-toolbar">
+      <button class="primary-button" type="button" data-staff-work-add="${escapeHtml(meta.kind)}">${escapeHtml(meta.add)}</button>
+      <span>${escapeHtml(settingText("Dữ liệu được lưu trực tiếp vào database.", "\u30c7\u30fc\u30bf\u306f\u76f4\u63a5DB\u306b\u4fdd\u5b58\u3055\u308c\u307e\u3059\u3002"))}</span>
+    </div>
+    ${renderStaffWorkTable(meta)}
+    ${editing ? renderStaffWorkEditForm(meta.kind, editing) : ""}`;
+  }
+
+  function renderStaffWorkTable(meta) {
+    if (meta.kind === "staffMap") {
+      const rows = state.staff.filter(staff => !staff.deletedAt).map(staff => {
+        const id = getRowId(staff);
+        const workLabels = staffWorkItems(staff).map(getWorkItemLabel).join(", ") || "-";
+        return [escapeHtml(staff.name || "-"), escapeHtml(staffDepartment(staff) || "-"), escapeHtml(compactText(staff.skills, "-")), escapeHtml(workLabels), renderMasterStatus(staff), `<button class="mini-button" type="button" data-staff-work-edit="staffMap" data-master-id="${escapeHtml(id)}">${escapeHtml(settingText("Sửa mapping", "\u9023\u643a\u7de8\u96c6"))}</button>`];
+      });
+      return settingsTable(meta.headers, rows, t("noData"));
+    }
+    const type = masterKindType(meta.kind);
+    const rows = (state.workMaster[type] || []).map(item => {
+      const id = item.id;
+      const label = escapeHtml(workMasterLabel(item) || item.code || "-");
+      const actions = `<button class="mini-button" type="button" data-staff-work-edit="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button> <button class="mini-button" type="button" data-staff-work-status="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}" data-master-active="${item.active === false ? "true" : "false"}">${escapeHtml(item.active === false ? t("show") : t("hide"))}</button>`;
+      if (meta.kind === "departments") {
+        const staffCount = state.staff.filter(staff => staffDepartmentCodeForStaff(staff) === item.code).length;
+        return [label, escapeHtml(item.code || "-"), escapeHtml(item.descriptionVi || item.descriptionJa || "-"), renderMasterStatus(item), escapeHtml(staffCount), actions];
+      }
+      if (meta.kind === "workTypes") {
+        const dept = findDepartmentByCodeOrLabel(item.departmentCode);
+        return [label, escapeHtml(item.code || "-"), escapeHtml(dept ? workMasterLabel(dept) : item.departmentCode || "-"), escapeHtml(item.descriptionVi || item.descriptionJa || "-"), renderMasterStatus(item), actions];
+      }
+      const related = toList(item.relatedWorkTypeIds).map(value => workMasterLabel(findWorkTypeByValue(value)) || value).filter(Boolean).join(", ");
+      return [label, escapeHtml(item.code || "-"), escapeHtml(item.descriptionVi || item.descriptionJa || "-"), escapeHtml(related || "-"), renderMasterStatus(item), actions];
+    });
+    return settingsTable(meta.headers, rows, t("noData"));
+  }
+
+  function renderStaffWorkEditForm(kind, item) {
+    if (kind === "staffMap") return renderStaffMappingForm(item);
+    const departments = state.workMaster.departments || [];
+    const workTypes = state.workMaster.workTypes || [];
+    const isWorkType = kind === "workTypes";
+    const isSkill = kind === "skills";
+    return `<form class="settings-real-form" data-staff-work-form="${escapeHtml(kind)}" data-master-id="${escapeHtml(item?.id || "")}">
+      <h3>${escapeHtml(item?.id ? t("edit") : settingText("Thêm", "\u8ffd\u52a0"))}</h3>
+      <div class="settings-real-form-grid">
+        ${isWorkType ? `<label><span>${escapeHtml(t("department"))}</span><select name="departmentCode">${masterSelectOptions(departments, item?.departmentCode || departments[0]?.code || "", t("selectDepartment"))}</select></label>` : ""}
+        <label><span>${escapeHtml(t("code"))} *</span><input name="code" value="${masterFormValue(item, "code")}"></label>
+        <label><span>${escapeHtml(t("nameVi"))} *</span><input name="nameVi" value="${masterFormValue(item, "nameVi")}"></label>
+        <label><span>${escapeHtml(t("nameJa"))}</span><input name="nameJa" value="${masterFormValue(item, "nameJa")}"></label>
+        <label><span>${escapeHtml(t("descriptionVi"))}</span><textarea name="descriptionVi" rows="2">${masterFormValue(item, "descriptionVi")}</textarea></label>
+        <label><span>${escapeHtml(t("descriptionJa"))}</span><textarea name="descriptionJa" rows="2">${masterFormValue(item, "descriptionJa")}</textarea></label>
+        <label><span>${escapeHtml(t("sortOrder"))}</span><input name="sortOrder" type="number" value="${escapeHtml(item?.sortOrder ?? 0)}"></label>
+        ${isSkill ? `<label><span>${escapeHtml(settingText("Work type liên quan", "\u95a2\u9023\u696d\u52d9"))}</span><select name="relatedWorkTypeIds" multiple>${workTypes.map(type => `<option value="${escapeHtml(type.code || type.id)}" ${toList(item?.relatedWorkTypeIds).includes(type.code || type.id) ? "selected" : ""}>${escapeHtml(workMasterLabel(type))}</option>`).join("")}</select></label>` : ""}
+        <label class="overview-toggle ${item?.active === false ? "" : "is-on"}"><input name="active" type="checkbox" ${item?.active === false ? "" : "checked"}><span class="overview-toggle-track" aria-hidden="true"><i></i></span><span>Active</span></label>
+      </div>
+    </form>`;
+  }
+
+  function renderStaffMappingForm(staff) {
+    const departmentCode = staffDepartmentCodeForStaff(staff);
+    const selectedWorkTypes = new Set(toList(staff?.workTypeIds).concat(toList(staff?.workTags)));
+    const skillText = compactText(staff?.skills, "");
+    return `<form class="settings-real-form" data-staff-work-form="staffMap" data-master-id="${escapeHtml(getRowId(staff))}">
+      <h3>${escapeHtml(staff?.name || "Staff")}</h3>
+      <div class="settings-real-form-grid">
+        <label><span>${escapeHtml(t("department"))}</span><select name="departmentCode">${masterSelectOptions(state.workMaster.departments || [], departmentCode, t("selectDepartment"))}</select></label>
+        <label><span>${escapeHtml(settingText("Kỹ năng", "\u30b9\u30ad\u30eb"))}</span><input name="skills" value="${escapeHtml(skillText)}" placeholder="${escapeHtml(settingText("VD: 電気工事, 見積作成", "\u4f8b: \u96fb\u6c17\u5de5\u4e8b, \u898b\u7a4d\u4f5c\u6210"))}"></label>
+        <label><span>${escapeHtml(settingText("Tự động gợi ý", "\u81ea\u52d5\u63d0\u6848"))}</span><select name="autoAssignEnabled"><option value="true" ${staff?.autoAssignEnabled === false ? "" : "selected"}>Active</option><option value="false" ${staff?.autoAssignEnabled === false ? "selected" : ""}>Inactive</option></select></label>
+      </div>
+      <div class="settings-checkbox-grid">
+        ${(state.workMaster.workTypes || []).map(type => {
+          const value = type.code || type.id;
+          return `<label><input type="checkbox" name="workTypeIds" value="${escapeHtml(value)}" ${selectedWorkTypes.has(value) || selectedWorkTypes.has(workMasterLabel(type)) ? "checked" : ""}> <span>${escapeHtml(workMasterLabel(type))}</span></label>`;
+        }).join("")}
+      </div>
+    </form>`;
+  }
+
+  function staffWorkPayloadFromForm(form, kind) {
+    const raw = new FormData(form);
+    if (kind === "staffMap") {
+      const departmentCode = String(raw.get("departmentCode") || "");
+      const department = findDepartmentByCodeOrLabel(departmentCode);
+      const workTypeIds = raw.getAll("workTypeIds").map(item => String(item || "").trim()).filter(Boolean);
+      return {
+        departmentCode,
+        department: department ? workMasterLabel(department) : departmentCode,
+        areas: department ? workMasterLabel(department) : departmentCode,
+        workTypeIds,
+        workTags: workTypeIds,
+        skills: String(raw.get("skills") || "").trim(),
+        autoAssignEnabled: raw.get("autoAssignEnabled") !== "false"
+      };
+    }
+    const payload = {
+      departmentCode: String(raw.get("departmentCode") || ""),
+      code: String(raw.get("code") || "").trim(),
+      nameVi: String(raw.get("nameVi") || "").trim(),
+      nameJa: String(raw.get("nameJa") || "").trim(),
+      descriptionVi: String(raw.get("descriptionVi") || "").trim(),
+      descriptionJa: String(raw.get("descriptionJa") || "").trim(),
+      sortOrder: Number(raw.get("sortOrder") || 0),
+      active: raw.get("active") === "on"
+    };
+    if (kind === "skills") payload.relatedWorkTypeIds = raw.getAll("relatedWorkTypeIds").map(item => String(item || "").trim()).filter(Boolean);
+    return payload;
+  }
+
+  async function saveSettingsStaffWork(kind) {
+    const form = document.querySelector(`[data-staff-work-form="${CSS.escape(kind)}"]`);
+    if (!form) return;
+    const id = form.dataset.masterId || "";
+    const payload = staffWorkPayloadFromForm(form, kind);
+    if (kind !== "staffMap" && (!payload.code || (!payload.nameVi && !payload.nameJa))) {
+      toast(settingText("Tên và mã không được rỗng.", "\u540d\u524d\u3068\u30b3\u30fc\u30c9\u306f\u5fc5\u9808\u3067\u3059\u3002"));
+      return;
+    }
+    try {
+      if (kind === "departments") {
+        if (id) await AdminAPI.updateDepartment(id, payload);
+        else await AdminAPI.createDepartment(payload);
+      }
+      if (kind === "workTypes") {
+        if (id) await AdminAPI.updateWorkType(id, payload);
+        else await AdminAPI.createWorkType(payload);
+      }
+      if (kind === "skills") {
+        if (id) await AdminAPI.updateSkill(id, payload);
+        else await AdminAPI.createSkill(payload);
+      }
+      if (kind === "staffMap") {
+        await AdminAPI.updateStaffMapping(id, payload);
+        state.staff = normalizeList(await AdminAPI.getStaff());
+      }
+      await reloadWorkMaster();
+      state.settingsMasterEdit = null;
+      if (state.settingsDetail) state.settingsDetail.dirty = false;
+      renderSettings();
+      toast(settingText("Đã lưu cài đặt.", "\u8a2d\u5b9a\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002"));
+    } catch (error) {
+      console.error(error);
+      toast(error?.message || settingText("Không thể lưu dữ liệu.", "\u30c7\u30fc\u30bf\u3092\u4fdd\u5b58\u3067\u304d\u307e\u305b\u3093\u3002"));
+    }
+  }
+
+  async function setSettingsStaffWorkStatus(kind, id, active) {
+    try {
+      if (kind === "departments") await AdminAPI.setDepartmentStatus(id, active);
+      if (kind === "workTypes") await AdminAPI.setWorkTypeStatus(id, active);
+      if (kind === "skills") await AdminAPI.setSkillStatus(id, active);
+      await reloadWorkMaster();
+      renderSettings();
+      toast(t("workMasterUpdated"));
+    } catch (error) {
+      console.error(error);
+      toast(error?.message || settingText("Không thể lưu dữ liệu.", "\u30c7\u30fc\u30bf\u3092\u4fdd\u5b58\u3067\u304d\u307e\u305b\u3093\u3002"));
+    }
   }
 
   function updateSelectedQuoteFilesUI() {
@@ -7428,6 +7638,34 @@
           void saveOverviewSection(overviewSave.dataset.overviewSave);
           return;
         }
+        const staffWorkAdd = event.target.closest("[data-staff-work-add]");
+        if (staffWorkAdd) {
+          event.preventDefault();
+          state.settingsMasterEdit = { kind: staffWorkAdd.dataset.staffWorkAdd || "", id: "" };
+          if (state.settingsDetail) state.settingsDetail.dirty = true;
+          renderSettings();
+          return;
+        }
+        const staffWorkEdit = event.target.closest("[data-staff-work-edit]");
+        if (staffWorkEdit) {
+          event.preventDefault();
+          state.settingsMasterEdit = { kind: staffWorkEdit.dataset.staffWorkEdit || "", id: staffWorkEdit.dataset.masterId || "" };
+          if (state.settingsDetail) state.settingsDetail.dirty = true;
+          renderSettings();
+          return;
+        }
+        const staffWorkStatus = event.target.closest("[data-staff-work-status]");
+        if (staffWorkStatus) {
+          event.preventDefault();
+          void setSettingsStaffWorkStatus(staffWorkStatus.dataset.staffWorkStatus || "", staffWorkStatus.dataset.masterId || "", staffWorkStatus.dataset.masterActive === "true");
+          return;
+        }
+        const staffWorkSave = event.target.closest("[data-staff-work-save]");
+        if (staffWorkSave && !staffWorkSave.disabled) {
+          event.preventDefault();
+          void saveSettingsStaffWork(staffWorkSave.dataset.staffWorkSave || "");
+          return;
+        }
         if (event.target.closest("[data-settings-detail-save]")) {
           state.settingsDetail = null;
           showToast(settingText("Ch\u1ee9c n\u0103ng s\u1ebd ph\u00e1t tri\u1ec3n sau", "\u6a5f\u80fd\u306f\u5f8c\u65e5\u5b9f\u88c5\u3057\u307e\u3059"));
@@ -7490,8 +7728,15 @@
         }
         if (state.settingsDetail) state.settingsDetail.dirty = true;
       }
+      if (state.currentView === "settings" && event.target.closest("[data-staff-work-form]")) {
+        markSettingsDetailDirty();
+      }
     });
     bind($("viewRoot"), "input", event => {
+      if (state.currentView === "settings" && event.target.closest("[data-staff-work-form]")) {
+        markSettingsDetailDirty();
+        return;
+      }
       if (state.currentView === "settings" && event.target.closest("[data-settings-detail-dirty]")) {
         markSettingsDetailDirty();
         return;
