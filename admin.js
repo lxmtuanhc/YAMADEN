@@ -5929,7 +5929,15 @@
       </div>
       <div class="settings-card-body">
         ${description ? `<p class="settings-card-note">${escapeHtml(description)}</p>` : ""}
-        ${settingList(lines)}
+        <div class="settings-overview-summary-list">
+          ${(lines || []).map(line => {
+            const text = String(line || "-");
+            const parts = text.includes(":") ? text.split(/:(.*)/s) : null;
+            return parts && parts[1] !== undefined
+              ? `<div class="settings-overview-summary-row"><span>${escapeHtml(parts[0])}</span><strong>${escapeHtml(parts[1].trim() || "-")}</strong></div>`
+              : `<div class="settings-overview-summary-value">${escapeHtml(text)}</div>`;
+          }).join("")}
+        </div>
       </div>
       <div class="settings-card-footer">
         <button class="btn btn-soft" type="button" data-settings-detail="${escapeHtml(detailKey)}">${escapeHtml(settingText("Mở chi tiết", "\u8a73\u7d30\u3092\u958b\u304f"))}</button>
@@ -5987,7 +5995,8 @@
       overviewSummaryCard("dataStatus", "database", settingText("Trạng thái dữ liệu", "\u30c7\u30fc\u30bf\u72b6\u614b"), "Read-only", [
         `Database: ${statusRows[0][1]}`,
         `Email: ${statusRows[1][1]}`,
-        `${settingText("Tổng yêu cầu", "\u4f9d\u983c\u6570")}: ${statusRows[3][1]}`
+        `${settingText("Tổng yêu cầu", "\u4f9d\u983c\u6570")}: ${statusRows[3][1]}`,
+        `Staff: ${statusRows[5][1]}`
       ], settingText("Thông tin xem nhanh, không chỉnh sửa.", "\u78ba\u8a8d\u7528\u306e\u60c5\u5831\u3067\u3059\u3002"))
     ].join("");
   }
