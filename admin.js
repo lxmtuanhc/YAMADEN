@@ -1560,6 +1560,11 @@
       trashSearch: ""
     },
     settingsTab: "overview",
+    overviewSettings: null,
+    overviewSettingsStatus: null,
+    overviewSettingsDrafts: {},
+    overviewSettingsEditing: {},
+    overviewSettingsErrors: {},
     lang: localStorage.getItem("language") || "ja"
   };
 
@@ -1757,6 +1762,16 @@
     },
     restoreStaff(id) {
       return requestJson("/admin/staff/" + encodeURIComponent(id) + "/restore", { method: "PATCH" });
+    },
+    getOverviewSettings() {
+      return requestJson("/api/admin/settings/overview");
+    },
+    updateOverviewSettings(payload) {
+      return requestJson("/api/admin/settings/overview", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload || {})
+      });
     }
   };
 
@@ -2256,23 +2271,32 @@
     state.loading.staff = true;
     state.errors = {};
     state.loading.quotes = true;
-    const [requests, users, staff, quotes, workMaster] = await Promise.allSettled([
+    const [requests, users, staff, quotes, workMaster, overviewSettings] = await Promise.allSettled([
       AdminAPI.getRequests(),
       AdminAPI.getUsers(),
       AdminAPI.getStaff(),
       AdminAPI.getQuotes(),
-      AdminAPI.getWorkMaster()
+      AdminAPI.getWorkMaster(),
+      AdminAPI.getOverviewSettings()
     ]);
     state.requests = requests.status === "fulfilled" ? normalizeList(requests.value) : [];
     state.users = users.status === "fulfilled" ? normalizeList(users.value) : [];
     state.staff = staff.status === "fulfilled" ? normalizeList(staff.value) : [];
     state.quotes = quotes.status === "fulfilled" ? normalizeList(quotes.value) : [];
     state.workMaster = workMaster.status === "fulfilled" ? normalizeWorkMaster(workMaster.value) : { departments: [], workGroups: [], workTypes: [] };
+    if (overviewSettings.status === "fulfilled") {
+      state.overviewSettings = normalizeOverviewSettings(overviewSettings.value?.settings || overviewSettings.value);
+      state.overviewSettingsStatus = overviewSettings.value?.status || null;
+    } else {
+      state.overviewSettings = normalizeOverviewSettings(state.overviewSettings);
+      state.overviewSettingsStatus = null;
+    }
     state.errors.requests = requests.status === "rejected" ? requests.reason?.message || "failed" : "";
     state.errors.users = users.status === "rejected" ? users.reason?.message || "failed" : "";
     state.errors.staff = staff.status === "rejected" ? staff.reason?.message || "failed" : "";
     state.errors.quotes = quotes.status === "rejected" ? quotes.reason?.message || "failed" : "";
     state.errors.workMaster = workMaster.status === "rejected" ? workMaster.reason?.message || "failed" : "";
+    state.errors.overviewSettings = overviewSettings.status === "rejected" ? overviewSettings.reason?.message || "failed" : "";
     state.loading.requests = false;
     state.loading.users = false;
     state.loading.staff = false;
@@ -2296,6 +2320,56 @@
       workGroups: Array.isArray(data.workGroups) ? data.workGroups : [],
       workTypes: Array.isArray(data.workTypes) ? data.workTypes : []
     };
+  }
+
+  function defaultOverviewSettings() {
+    return {
+      company: {
+        nameJa: "\u682a\u5f0f\u4f1a\u793e \u5c71\u96fb",
+        nameEn: "YAMADEN.CO.LTD",
+        sloganJa: "\u4eba\u3092\u5b88\u308a\u3001\u5e78\u305b\u3092\u5275\u308b",
+        sloganEn: "Protecting people. Creating happiness.",
+        email: "",
+        phone: "",
+        address: "",
+        logoUrl: ""
+      },
+      system: {
+        defaultLanguage: "vi",
+        timezone: "Asia/Tokyo",
+        dateFormat: "YYYY/MM/DD HH:mm",
+        pocMode: true,
+        environmentName: "POC"
+      },
+      requestCode: {
+        prefix: "YMD",
+        format: "YMD-xxxxxx",
+        digits: 6
+      },
+      poc: {
+        groupName: "\u307f\u3069\u308a\u30b0\u30eb\u30fc\u30d7",
+        status: "running",
+        note: "",
+        startDate: "",
+        expectedEndDate: ""
+      }
+    };
+  }
+
+  function normalizeOverviewSettings(value) {
+    const base = defaultOverviewSettings();
+    const input = value || {};
+    ["company", "system", "requestCode", "poc"].forEach(section => {
+      base[section] = Object.assign({}, base[section], input[section] || {});
+    });
+    base.system.defaultLanguage = ["vi", "ja"].includes(base.system.defaultLanguage) ? base.system.defaultLanguage : "vi";
+    base.system.timezone = base.system.timezone || "Asia/Tokyo";
+    base.system.dateFormat = base.system.dateFormat || "YYYY/MM/DD HH:mm";
+    base.system.pocMode = base.system.pocMode !== false;
+    base.requestCode.prefix = base.requestCode.prefix || "YMD";
+    base.requestCode.digits = Number(base.requestCode.digits || 6);
+    base.requestCode.format = base.requestCode.format || `${base.requestCode.prefix}-${"x".repeat(base.requestCode.digits || 6)}`;
+    return base;
   }
 
   function isSoftDeleted(item) {
@@ -5814,30 +5888,194 @@
     return (renderers[tab] || renderSettingsOverview)();
   }
 
+  function overviewSectionData(section) {
+    return state.overviewSettingsDrafts[section] || normalizeOverviewSettings(state.overviewSettings)[section] || {};
+  }
+
+  function overviewError(section, field) {
+    return state.overviewSettingsErrors?.[`${section}.${field}`] || "";
+  }
+
+  function overviewField(section, field, label, options = {}) {
+    const editing = Boolean(state.overviewSettingsEditing[section]);
+    const data = overviewSectionData(section);
+    const value = data[field] ?? "";
+    const name = `data-overview-field="${escapeHtml(section)}.${escapeHtml(field)}"`;
+    const disabled = editing ? "" : "disabled";
+    const error = overviewError(section, field);
+    let control = "";
+    if (options.type === "textarea") {
+      control = `<textarea ${name} ${disabled} rows="${options.rows || 3}" placeholder="${escapeHtml(options.placeholder || "")}">${escapeHtml(value)}</textarea>`;
+    } else if (options.type === "select") {
+      control = `<select ${name} ${disabled}>${(options.options || []).map(item => `<option value="${escapeHtml(item.value)}" ${String(value) === String(item.value) ? "selected" : ""}>${escapeHtml(item.label)}</option>`).join("")}</select>`;
+    } else if (options.type === "checkbox") {
+      control = `<label class="overview-toggle"><input ${name} ${disabled} type="checkbox" ${value ? "checked" : ""}> <span>${escapeHtml(options.checkboxLabel || label)}</span></label>`;
+      return `<div class="overview-field overview-field-toggle">${control}${error ? `<small class="overview-error">${escapeHtml(error)}</small>` : ""}</div>`;
+    } else {
+      control = `<input ${name} ${disabled} type="${escapeHtml(options.type || "text")}" value="${escapeHtml(value)}" placeholder="${escapeHtml(options.placeholder || "")}">`;
+    }
+    return `<label class="overview-field"><span>${escapeHtml(label)}</span>${control}${error ? `<small class="overview-error">${escapeHtml(error)}</small>` : ""}</label>`;
+  }
+
+  function renderOverviewEditableCard(section, icon, title, description, fieldsHtml, note) {
+    const editing = Boolean(state.overviewSettingsEditing[section]);
+    return `<section class="settings-overview-card" data-overview-section="${escapeHtml(section)}">
+      <header class="settings-overview-card-head">
+        <span class="settings-card-icon">${settingsIcon(icon)}</span>
+        <div>
+          <h3>${escapeHtml(title)}</h3>
+          <p>${escapeHtml(description)}</p>
+        </div>
+        <div class="settings-overview-actions">
+          ${editing
+            ? `<button class="btn btn-soft" type="button" data-overview-cancel="${escapeHtml(section)}">${escapeHtml(settingText("Hủy", "\u30ad\u30e3\u30f3\u30bb\u30eb"))}</button><button class="primary-button" type="button" data-overview-save="${escapeHtml(section)}">${escapeHtml(settingText("Lưu", "\u4fdd\u5b58"))}</button>`
+            : `<button class="btn btn-soft" type="button" data-overview-edit="${escapeHtml(section)}">${escapeHtml(settingText("Sửa", "\u7de8\u96c6"))}</button>`}
+        </div>
+      </header>
+      ${note ? `<p class="settings-overview-note">${escapeHtml(note)}</p>` : ""}
+      <div class="settings-overview-form">${fieldsHtml}</div>
+    </section>`;
+  }
+
   function renderSettingsOverview() {
-    const langLabel = state.lang === "vi" ? "Ti\u1ebfng Vi\u1ec7t" : "\u65e5\u672c\u8a9e";
-    const visibleStaff = state.staff.filter(staff => String(staff.status || "active") !== "deleted" && !staff.deletedAt);
-    const departments = activeMasterItems("departments");
-    const workTypes = activeMasterItems("workTypes");
-    const visibleUsers = state.users.filter(user => !isSoftDeleted(user));
-    const pendingUsers = visibleUsers.filter(user => normalizeUserStatusValue(user.status) === "pendingApproval" || normalizeUserStatusValue(user.status) === "pending").length;
-    const activeUsers = visibleUsers.filter(user => normalizeUserStatusValue(user.status) === "active").length;
-    const visibleRequests = state.requests.filter(request => !isSoftDeleted(request));
-    const processingRequests = visibleRequests.filter(request => ["processing", "contacted", "site_done", "quoted", "ordered"].includes(normalizeRequestStatus(request.status))).length;
-    const completedRequests = visibleRequests.filter(request => normalizeRequestStatus(request.status) === "completed").length;
-    return [
-      settingCard("palette", t("languageRegion"), [t("currentLanguage") + ": " + langLabel, t("timezone") + ": Asia/Tokyo", t("dateTimeFormat") + ": YYYY/MM/DD HH:mm"], t("inUse"), "is-live"),
-      settingCard("users", t("settingsStaffWork"), [t("staffCount") + ": " + visibleStaff.length, t("departments") + ": " + departments.length, t("workTypes") + ": " + workTypes.length], t("linked"), "is-live"),
-      settingCard("userCheck", t("settingsCustomers"), [t("customersCount") + ": " + visibleUsers.length, customerStatusLabel("pendingApproval") + ": " + pendingUsers, customerStatusLabel("active") + ": " + activeUsers], t("inUse"), "is-live"),
-      settingCard("clipboard", t("settingsRequestStatus"), [t("totalRequests") + ": " + visibleRequests.length, t("processing") + ": " + processingRequests, formatStatus("completed") + ": " + completedRequests], t("inUse"), "is-live"),
-      settingCard("trend", t("settingsProcessChart"), [
-        settingText("Lu\u1ed3ng nh\u1eadn y\u00eau c\u1ea7u", "\u4f9d\u983c\u53d7\u4ed8\u30d5\u30ed\u30fc"),
-        settingText("Tr\u1ea1ng th\u00e1i \u898b\u7a4d \u0111\u01b0a sang tab B\u00e1o gi\u00e1", "\u898b\u7a4d\u30b9\u30c6\u30fc\u30bf\u30b9\u3067\u898b\u7a4d\u30bf\u30d6\u306b\u8868\u793a"),
-        settingText("Upload file b\u00e1o gi\u00e1", "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9")
-      ], t("linkLater"), "is-planned"),
-      settingCard("bell", t("settingsNotifications"), ["Email", "Slack", "LINE WORKS"], t("linkLater"), "is-planned"),
-      settingCard("database", t("systemData"), [t("csvExport"), t("adminLogs"), t("backup")], t("linkLater"), "is-planned")
-    ].join("");
+    const settings = normalizeOverviewSettings(state.overviewSettings);
+    const status = state.overviewSettingsStatus || {};
+    const pocOptions = [
+      { value: "preparing", label: settingText("Đang chuẩn bị", "\u6e96\u5099\u4e2d") },
+      { value: "running", label: settingText("Đang chạy POC", "POC\u5b9f\u884c\u4e2d") },
+      { value: "completed", label: settingText("Đã hoàn tất POC", "POC\u5b8c\u4e86") }
+    ];
+    const company = renderOverviewEditableCard("company", "palette", settingText("Thông tin công ty", "\u4f1a\u793e\u60c5\u5831"), settingText("Thông tin hiển thị chung cho admin và các màn dùng cấu hình hệ thống.", "\u7ba1\u7406\u753b\u9762\u3068\u5171\u901a\u8a2d\u5b9a\u3067\u4f7f\u3046\u4f1a\u793e\u60c5\u5831\u3067\u3059\u3002"), [
+      overviewField("company", "nameJa", settingText("Tên công ty tiếng Nhật", "\u4f1a\u793e\u540d\uff08\u65e5\u672c\u8a9e\uff09")),
+      overviewField("company", "nameEn", settingText("Tên công ty tiếng Anh", "\u4f1a\u793e\u540d\uff08\u82f1\u8a9e\uff09")),
+      overviewField("company", "sloganJa", settingText("Slogan tiếng Nhật", "\u30b9\u30ed\u30fc\u30ac\u30f3\uff08\u65e5\u672c\u8a9e\uff09")),
+      overviewField("company", "sloganEn", settingText("Slogan tiếng Anh", "\u30b9\u30ed\u30fc\u30ac\u30f3\uff08\u82f1\u8a9e\uff09")),
+      overviewField("company", "email", "Email"),
+      overviewField("company", "phone", settingText("Số điện thoại", "\u96fb\u8a71\u756a\u53f7")),
+      overviewField("company", "address", settingText("Địa chỉ công ty", "\u4f1a\u793e\u4f4f\u6240"), { type: "textarea", rows: 2 }),
+      overviewField("company", "logoUrl", "Logo URL")
+    ].join(""));
+    const system = renderOverviewEditableCard("system", "database", settingText("Cấu hình hệ thống", "\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a"), settingText("Thiết lập ngôn ngữ mặc định, múi giờ và chế độ vận hành.", "\u65e2\u5b9a\u8a00\u8a9e\u3001\u30bf\u30a4\u30e0\u30be\u30fc\u30f3\u3001\u904b\u7528\u30e2\u30fc\u30c9\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002"), [
+      overviewField("system", "defaultLanguage", settingText("Ngôn ngữ mặc định", "\u65e2\u5b9a\u8a00\u8a9e"), { type: "select", options: [{ value: "vi", label: "Tiếng Việt" }, { value: "ja", label: "\u65e5\u672c\u8a9e" }] }),
+      overviewField("system", "timezone", settingText("Múi giờ", "\u30bf\u30a4\u30e0\u30be\u30fc\u30f3")),
+      overviewField("system", "dateFormat", settingText("Định dạng ngày giờ", "\u65e5\u6642\u5f62\u5f0f")),
+      overviewField("system", "pocMode", settingText("Chế độ POC", "POC\u30e2\u30fc\u30c9"), { type: "checkbox", checkboxLabel: settingText("Đang bật POC", "POC\u30e2\u30fc\u30c9\u3092\u6709\u52b9\u306b\u3059\u308b") }),
+      overviewField("system", "environmentName", settingText("Tên môi trường", "\u74b0\u5883\u540d"))
+    ].join(""));
+    const requestCode = renderOverviewEditableCard("requestCode", "clipboard", settingText("Mã yêu cầu", "\u4f9d\u983cID"), settingText("Cấu hình mã cho yêu cầu mới. Yêu cầu cũ giữ nguyên.", "\u65b0\u898f\u4f9d\u983c\u306eID\u8a2d\u5b9a\u3067\u3059\u3002\u65e2\u5b58\u4f9d\u983c\u306f\u5909\u66f4\u3057\u307e\u305b\u3093\u3002"), [
+      overviewField("requestCode", "prefix", settingText("Prefix mã yêu cầu", "\u63a5\u982d\u8f9e")),
+      overviewField("requestCode", "format", settingText("Định dạng hiển thị", "\u8868\u793a\u5f62\u5f0f")),
+      overviewField("requestCode", "digits", settingText("Số chữ số", "\u6841\u6570"), { type: "number" })
+    ].join(""), settingText("Thay đổi cấu hình này chỉ áp dụng cho yêu cầu mới.", "\u3053\u306e\u8a2d\u5b9a\u5909\u66f4\u306f\u65b0\u898f\u4f9d\u983c\u306b\u306e\u307f\u9069\u7528\u3055\u308c\u307e\u3059\u3002"));
+    const poc = renderOverviewEditableCard("poc", "trend", "POC / vận hành", settingText("Theo dõi trạng thái POC và ghi chú vận hành.", "POC\u306e\u72b6\u614b\u3068\u904b\u7528\u30e1\u30e2\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002"), [
+      overviewField("poc", "groupName", settingText("Tên nhóm thử nghiệm", "\u691c\u8a3c\u30b0\u30eb\u30fc\u30d7\u540d")),
+      overviewField("poc", "status", settingText("Trạng thái POC", "POC\u72b6\u614b"), { type: "select", options: pocOptions }),
+      overviewField("poc", "startDate", settingText("Ngày bắt đầu POC", "POC\u958b\u59cb\u65e5"), { type: "date" }),
+      overviewField("poc", "expectedEndDate", settingText("Ngày kết thúc dự kiến", "\u7d42\u4e86\u4e88\u5b9a\u65e5"), { type: "date" }),
+      overviewField("poc", "note", settingText("Ghi chú vận hành", "\u904b\u7528\u30e1\u30e2"), { type: "textarea", rows: 4, placeholder: settingText("Ghi chú về phạm vi POC, nhóm test hoặc vấn đề vận hành.", "POC\u7bc4\u56f2\u3001\u691c\u8a3c\u30b0\u30eb\u30fc\u30d7\u3001\u904b\u7528\u8ab2\u984c\u3092\u8a18\u5165") })
+    ].join(""));
+    const statusRows = [
+      ["Database", status.database || (state.errors.overviewSettings ? "disconnected" : "connected")],
+      ["Email provider", status.emailProvider || "not configured"],
+      ["Admin notification email", status.adminNotificationEmailConfigured ? settingText("Đã cấu hình", "\u8a2d\u5b9a\u6e08\u307f") : settingText("Chưa cấu hình", "\u672a\u8a2d\u5b9a")],
+      [settingText("Tổng số yêu cầu", "\u4f9d\u983c\u6570"), status.requestCount ?? state.requests.length],
+      [settingText("Tổng số khách hàng", "\u9867\u5ba2\u6570"), status.customerCount ?? state.users.length],
+      [settingText("Tổng số staff", "\u30b9\u30bf\u30c3\u30d5\u6570"), status.staffCount ?? state.staff.length],
+      [settingText("Tổng số báo giá đã gửi", "\u9001\u4fe1\u6e08\u307f\u898b\u7a4d\u6570"), status.sentQuoteCount ?? state.requests.filter(isQuoteSent).length]
+    ];
+    const dataStatus = `<section class="settings-overview-card settings-overview-readonly">
+      <header class="settings-overview-card-head">
+        <span class="settings-card-icon">${settingsIcon("database")}</span>
+        <div><h3>${escapeHtml(settingText("Trạng thái dữ liệu", "\u30c7\u30fc\u30bf\u72b6\u614b"))}</h3><p>${escapeHtml(settingText("Thông tin xem nhanh, không chỉnh sửa trong mục này.", "\u78ba\u8a8d\u7528\u306e\u60c5\u5831\u3067\u3001\u3053\u3053\u3067\u306f\u7de8\u96c6\u3067\u304d\u307e\u305b\u3093\u3002"))}</p></div>
+      </header>
+      <div class="settings-overview-status-grid">${statusRows.map(row => `<div><span>${escapeHtml(row[0])}</span><strong>${escapeHtml(row[1])}</strong></div>`).join("")}</div>
+      ${state.errors.overviewSettings ? `<p class="overview-error">${escapeHtml(settingText("Không thể tải cài đặt. Đang dùng dữ liệu fallback.", "\u8a2d\u5b9a\u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093\u3002\u4ee3\u66ff\u30c7\u30fc\u30bf\u3092\u8868\u793a\u3057\u3066\u3044\u307e\u3059\u3002"))}</p>` : ""}
+    </section>`;
+    return `<div class="settings-overview-real">${company}${system}${requestCode}${poc}${dataStatus}</div>`;
+  }
+
+  function beginOverviewEdit(section) {
+    const settings = normalizeOverviewSettings(state.overviewSettings);
+    state.overviewSettingsDrafts[section] = JSON.parse(JSON.stringify(settings[section] || {}));
+    state.overviewSettingsEditing[section] = true;
+    state.overviewSettingsErrors = {};
+    renderSettings();
+  }
+
+  function cancelOverviewEdit(section) {
+    delete state.overviewSettingsDrafts[section];
+    delete state.overviewSettingsEditing[section];
+    state.overviewSettingsErrors = {};
+    renderSettings();
+  }
+
+  function collectOverviewSection(section) {
+    const data = Object.assign({}, overviewSectionData(section));
+    document.querySelectorAll(`[data-overview-field^="${CSS.escape(section)}."]`).forEach(field => {
+      const key = field.getAttribute("data-overview-field").split(".").slice(1).join(".");
+      if (!key) return;
+      if (field.type === "checkbox") data[key] = field.checked;
+      else if (field.type === "number") data[key] = Number(field.value || 0);
+      else data[key] = field.value;
+    });
+    return data;
+  }
+
+  function validateOverviewSection(section, data) {
+    const errors = {};
+    if (section === "company") {
+      if (!String(data.nameJa || data.nameEn || "").trim()) errors["company.nameJa"] = settingText("Tên công ty không được rỗng.", "\u4f1a\u793e\u540d\u306f\u5fc5\u9808\u3067\u3059\u3002");
+      if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(data.email))) errors["company.email"] = settingText("Email không đúng định dạng.", "\u30e1\u30fc\u30eb\u5f62\u5f0f\u304c\u6b63\u3057\u304f\u3042\u308a\u307e\u305b\u3093\u3002");
+    }
+    if (section === "system") {
+      if (!["vi", "ja"].includes(data.defaultLanguage)) errors["system.defaultLanguage"] = settingText("Ngôn ngữ mặc định chỉ được là vi hoặc ja.", "\u65e2\u5b9a\u8a00\u8a9e\u306f vi \u307e\u305f\u306f ja \u306e\u307f\u3067\u3059\u3002");
+      if (!String(data.timezone || "").trim()) data.timezone = "Asia/Tokyo";
+    }
+    if (section === "requestCode") {
+      if (!String(data.prefix || "").trim()) errors["requestCode.prefix"] = settingText("Prefix mã yêu cầu không được rỗng.", "\u63a5\u982d\u8f9e\u306f\u5fc5\u9808\u3067\u3059\u3002");
+      const digits = Number(data.digits);
+      if (!Number.isFinite(digits) || digits < 4 || digits > 8) errors["requestCode.digits"] = settingText("Số chữ số phải từ 4 đến 8.", "\u6841\u6570\u306f4\u304b\u30898\u306e\u9593\u3067\u3059\u3002");
+    }
+    return errors;
+  }
+
+  async function saveOverviewSection(section) {
+    const sectionData = collectOverviewSection(section);
+    const errors = validateOverviewSection(section, sectionData);
+    if (Object.keys(errors).length) {
+      state.overviewSettingsErrors = errors;
+      state.overviewSettingsDrafts[section] = sectionData;
+      renderSettings();
+      return;
+    }
+    const payload = normalizeOverviewSettings(state.overviewSettings);
+    payload[section] = sectionData;
+    if (section === "requestCode") {
+      payload.requestCode.prefix = String(payload.requestCode.prefix || "YMD").trim().replace(/[^A-Za-z0-9]/g, "") || "YMD";
+      payload.requestCode.digits = Number(payload.requestCode.digits || 6);
+      payload.requestCode.format = `${payload.requestCode.prefix}-${"x".repeat(payload.requestCode.digits)}`;
+    }
+    try {
+      const response = await AdminAPI.updateOverviewSettings(payload);
+      state.overviewSettings = normalizeOverviewSettings(response?.settings || response);
+      state.overviewSettingsDrafts = {};
+      state.overviewSettingsEditing = {};
+      state.overviewSettingsErrors = {};
+      toast(settingText("Đã lưu cài đặt.", "\u8a2d\u5b9a\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002"));
+      try {
+        const refreshed = await AdminAPI.getOverviewSettings();
+        state.overviewSettings = normalizeOverviewSettings(refreshed?.settings || refreshed);
+        state.overviewSettingsStatus = refreshed?.status || state.overviewSettingsStatus;
+      } catch {}
+      renderSettings();
+    } catch (error) {
+      console.error(error);
+      state.overviewSettingsDrafts[section] = sectionData;
+      const apiErrors = error?.errors || {};
+      state.overviewSettingsErrors = apiErrors;
+      toast(settingText("Không thể lưu cài đặt.", "\u8a2d\u5b9a\u3092\u4fdd\u5b58\u3067\u304d\u307e\u305b\u3093\u3002"));
+      renderSettings();
+    }
   }
 
   function renderSettingsStaffWork() {
@@ -7015,6 +7253,24 @@
     });
     bind($("viewRoot"), "click", event => {
       if (state.currentView === "settings") {
+        const overviewEdit = event.target.closest("[data-overview-edit]");
+        if (overviewEdit) {
+          event.preventDefault();
+          beginOverviewEdit(overviewEdit.dataset.overviewEdit);
+          return;
+        }
+        const overviewCancel = event.target.closest("[data-overview-cancel]");
+        if (overviewCancel) {
+          event.preventDefault();
+          cancelOverviewEdit(overviewCancel.dataset.overviewCancel);
+          return;
+        }
+        const overviewSave = event.target.closest("[data-overview-save]");
+        if (overviewSave) {
+          event.preventDefault();
+          void saveOverviewSection(overviewSave.dataset.overviewSave);
+          return;
+        }
         if (event.target.closest("[data-settings-detail-save]")) {
           state.settingsDetail = null;
           showToast(settingText("Ch\u1ee9c n\u0103ng s\u1ebd ph\u00e1t tri\u1ec3n sau", "\u6a5f\u80fd\u306f\u5f8c\u65e5\u5b9f\u88c5\u3057\u307e\u3059"));

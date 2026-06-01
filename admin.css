@@ -5014,6 +5014,138 @@ body {
   font-weight: 900;
 }
 
+.settings-overview-real {
+  display: grid;
+  gap: 18px;
+}
+
+.settings-overview-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
+  padding: 22px;
+}
+
+.settings-overview-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.settings-overview-card-head h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 950;
+  color: var(--text);
+}
+
+.settings-overview-card-head p,
+.settings-overview-note {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.settings-overview-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-overview-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.overview-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.overview-field input,
+.overview-field textarea,
+.overview-field select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 12px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+}
+
+.overview-field textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.overview-field input:disabled,
+.overview-field textarea:disabled,
+.overview-field select:disabled {
+  background: #f8fafc;
+  color: #334155;
+}
+
+.overview-field-toggle {
+  justify-content: end;
+}
+
+.overview-toggle {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #fff;
+  color: var(--text);
+  font-weight: 900;
+}
+
+.overview-error {
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.settings-overview-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.settings-overview-status-grid div {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 12px 14px;
+}
+
+.settings-overview-status-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  margin-bottom: 5px;
+}
+
+.settings-overview-status-grid strong {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 950;
+}
+
 .settings-detail-overlay {
   position: fixed;
   inset: 0;
@@ -6442,6 +6574,15 @@ textarea {
   .work-master-panel .panel-head { display: grid; gap: 12px; }
   .work-master-search { max-width: none; width: 100%; }
   .work-master-table-wrap { max-height: none; }
+  .settings-overview-card-head,
+  .settings-overview-actions {
+    display: grid;
+    width: 100%;
+  }
+  .settings-overview-form,
+  .settings-overview-status-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 980px) {

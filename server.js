@@ -647,6 +647,13 @@ const RequestSchema = new mongoose.Schema({
   deletedByRole: String
 });
 
+const AppSettingSchema = new mongoose.Schema({
+  key: { type: String, unique: true, index: true },
+  value: mongoose.Schema.Types.Mixed,
+  updatedAt: { type: Date, default: Date.now },
+  updatedBy: String
+});
+
 const QuoteItemSchema = new mongoose.Schema({
   id: String,
   name: String,
@@ -836,6 +843,79 @@ const Staff = mongoose.model("Staff", StaffSchema);
 const Department = mongoose.model("Department", DepartmentSchema);
 const WorkGroup = mongoose.model("WorkGroup", WorkGroupSchema);
 const WorkType = mongoose.model("WorkType", WorkTypeSchema);
+const AppSetting = mongoose.model("AppSetting", AppSettingSchema);
+
+const DEFAULT_OVERVIEW_SETTINGS = Object.freeze({
+  company: {
+    nameJa: "株式会社 山電",
+    nameEn: "YAMADEN.CO.LTD",
+    sloganJa: "人を守り、幸せを創る",
+    sloganEn: "Protecting people. Creating happiness.",
+    email: "",
+    phone: "",
+    address: "",
+    logoUrl: ""
+  },
+  system: {
+    defaultLanguage: "vi",
+    timezone: "Asia/Tokyo",
+    dateFormat: "YYYY/MM/DD HH:mm",
+    pocMode: true,
+    environmentName: "POC"
+  },
+  requestCode: {
+    prefix: "YMD",
+    format: "YMD-xxxxxx",
+    digits: 6
+  },
+  poc: {
+    groupName: "みどりグループ",
+    status: "running",
+    note: "",
+    startDate: "",
+    expectedEndDate: ""
+  }
+});
+
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value || {}));
+}
+
+function mergeOverviewSettings(value) {
+  const incoming = value || {};
+  const merged = cloneJson(DEFAULT_OVERVIEW_SETTINGS);
+  ["company", "system", "requestCode", "poc"].forEach(section => {
+    merged[section] = Object.assign({}, merged[section], incoming[section] || {});
+  });
+  merged.system.defaultLanguage = ["vi", "ja"].includes(merged.system.defaultLanguage) ? merged.system.defaultLanguage : "vi";
+  merged.system.timezone = String(merged.system.timezone || "Asia/Tokyo").trim() || "Asia/Tokyo";
+  merged.system.dateFormat = String(merged.system.dateFormat || "YYYY/MM/DD HH:mm").trim() || "YYYY/MM/DD HH:mm";
+  merged.system.pocMode = merged.system.pocMode !== false;
+  merged.requestCode.prefix = String(merged.requestCode.prefix || "YMD").trim().replace(/[^A-Za-z0-9]/g, "") || "YMD";
+  merged.requestCode.digits = Math.min(8, Math.max(4, Number(merged.requestCode.digits || 6) || 6));
+  merged.requestCode.format = `${merged.requestCode.prefix}-${"x".repeat(merged.requestCode.digits)}`;
+  return merged;
+}
+
+async function getOverviewSettings() {
+  const doc = await AppSetting.findOne({ key: "overview" }).lean();
+  return mergeOverviewSettings(doc?.value);
+}
+
+function validateOverviewSettings(settings) {
+  const errors = {};
+  const companyName = String(settings?.company?.nameJa || settings?.company?.nameEn || "").trim();
+  const prefix = String(settings?.requestCode?.prefix || "").trim();
+  const email = String(settings?.company?.email || "").trim();
+  const digits = Number(settings?.requestCode?.digits);
+
+  if (!companyName) errors["company.nameJa"] = "Tên công ty không được rỗng.";
+  if (!prefix) errors["requestCode.prefix"] = "Prefix mã yêu cầu không được rỗng.";
+  if (!["vi", "ja"].includes(settings?.system?.defaultLanguage)) errors["system.defaultLanguage"] = "Ngôn ngữ mặc định chỉ được là vi hoặc ja.";
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors["company.email"] = "Email không đúng định dạng.";
+  if (!Number.isFinite(digits) || digits < 4 || digits > 8) errors["requestCode.digits"] = "Số chữ số phải từ 4 đến 8.";
+  return errors;
+}
 
 const USER_STATUS_PENDING = "pendingApproval";
 const SOFT_DELETE_RETENTION_DAYS = 30;
@@ -1375,9 +1455,13 @@ function latestRequestTime(item) {
 async function generateRequestCode() {
   let code;
   let exists;
+  const overview = await getOverviewSettings();
+  const prefix = String(overview?.requestCode?.prefix || "YMD").trim().replace(/[^A-Za-z0-9]/g, "") || "YMD";
+  const digits = Math.min(8, Math.max(4, Number(overview?.requestCode?.digits || 6) || 6));
 
   do {
-    code = "YMD-" + Math.floor(Math.random() * 1000000).toString().padStart(6, "0");
+    const max = 10 ** digits;
+    code = prefix + "-" + Math.floor(Math.random() * max).toString().padStart(digits, "0");
     exists = await Request.findOne({
       $or: [
         { requestCode: code },
@@ -1392,7 +1476,7 @@ async function generateRequestCode() {
 
 async function ensureRequestCode(item) {
   if (!item) return "";
-  if (item.requestCode && /^YMD-\d{6}$/.test(String(item.requestCode))) {
+  if (item.requestCode && /^[A-Za-z0-9]+-\d{4,8}$/.test(String(item.requestCode))) {
     if (!item.requestId) item.requestId = item.requestCode;
     return item.requestCode;
   }
@@ -1936,6 +2020,60 @@ app.post("/admin/login", (req, res) => {
 
   const token = jwt.sign({ role: "admin" }, JWT_SECRET, { expiresIn: "1d" });
   res.json({ message: "Login success", token });
+});
+
+app.get("/api/admin/settings/overview", requireAdmin, async (req, res) => {
+  try {
+    const settings = await getOverviewSettings();
+    const [requestCount, customerCount, staffCount, sentQuoteCount] = await Promise.all([
+      Request.countDocuments({ $or: [{ isDeleted: false }, { isDeleted: { $exists: false } }] }),
+      User.countDocuments({ $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] }),
+      Staff.countDocuments({ status: { $nin: ["deleted"] }, $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] }),
+      Request.countDocuments({
+        $or: [
+          { quoteSent: true },
+          { "quotationFiles.0": { $exists: true } },
+          { "quoteFiles.0": { $exists: true } }
+        ]
+      })
+    ]);
+
+    res.json({
+      ok: true,
+      settings,
+      status: {
+        database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+        emailProvider: process.env.RESEND_API_KEY ? "Resend" : "not configured",
+        adminNotificationEmailConfigured: Boolean(process.env.ADMIN_NOTIFICATION_EMAIL),
+        requestCount,
+        customerCount,
+        staffCount,
+        sentQuoteCount
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: "Settings read failed", error: error.message });
+  }
+});
+
+app.put("/api/admin/settings/overview", requireAdmin, async (req, res) => {
+  try {
+    const merged = mergeOverviewSettings(req.body || {});
+    const errors = validateOverviewSettings(merged);
+    if (Object.keys(errors).length) {
+      return res.status(400).json({ ok: false, message: "Validation failed", errors });
+    }
+
+    const doc = await AppSetting.findOneAndUpdate(
+      { key: "overview" },
+      { key: "overview", value: merged, updatedAt: new Date(), updatedBy: "admin" },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    ).lean();
+
+    res.json({ ok: true, settings: mergeOverviewSettings(doc.value) });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: "Settings save failed", error: error.message });
+  }
 });
 
 app.post("/user/register", async (req, res) => {
