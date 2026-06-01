@@ -5919,7 +5919,7 @@
 
   function overviewSummaryCard(section, icon, title, status, lines, description) {
     const detailKey = `overview:${section}`;
-    return `<article class="settings-shell-card settings-overview-summary-card" data-settings-detail="${escapeHtml(detailKey)}" tabindex="0" role="button">
+    return `<article class="settings-shell-card" data-settings-detail="${escapeHtml(detailKey)}" tabindex="0" role="button">
       <div class="settings-card-head">
         <span class="settings-card-icon">${settingsIcon(icon)}</span>
         <div>
@@ -5963,33 +5963,33 @@
       [settingText("Tổng số báo giá đã gửi", "\u9001\u4fe1\u6e08\u307f\u898b\u7a4d\u6570"), status.sentQuoteCount ?? state.requests.filter(isQuoteSent).length]
     ];
     const langLabel = system.defaultLanguage === "vi" ? "Tiếng Việt" : "\u65e5\u672c\u8a9e";
-    return `<div class="settings-overview-grid">
-      ${overviewSummaryCard("company", "palette", settingText("Thông tin công ty", "\u4f1a\u793e\u60c5\u5831"), settingText("Đang dùng", "\u4f7f\u7528\u4e2d"), [
+    return [
+      overviewSummaryCard("company", "palette", settingText("Thông tin công ty", "\u4f1a\u793e\u60c5\u5831"), settingText("Đang dùng", "\u4f7f\u7528\u4e2d"), [
         company.nameJa || "-",
         company.nameEn || "-",
         company.sloganJa || company.sloganEn || "-"
-      ], settingText("Tên công ty, slogan, liên hệ và logo.", "\u4f1a\u793e\u540d\u3001\u30b9\u30ed\u30fc\u30ac\u30f3\u3001\u9023\u7d61\u5148\u3001\u30ed\u30b4\u3002"))}
-      ${overviewSummaryCard("system", "database", settingText("Cấu hình hệ thống", "\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a"), settingText("Đang dùng", "\u4f7f\u7528\u4e2d"), [
+      ], settingText("Tên công ty, slogan, liên hệ và logo.", "\u4f1a\u793e\u540d\u3001\u30b9\u30ed\u30fc\u30ac\u30f3\u3001\u9023\u7d61\u5148\u3001\u30ed\u30b4\u3002")),
+      overviewSummaryCard("system", "database", settingText("Cấu hình hệ thống", "\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a"), settingText("Đang dùng", "\u4f7f\u7528\u4e2d"), [
         `${settingText("Ngôn ngữ", "\u8a00\u8a9e")}: ${langLabel}`,
         `${settingText("Múi giờ", "\u30bf\u30a4\u30e0\u30be\u30fc\u30f3")}: ${system.timezone || "Asia/Tokyo"}`,
         `${settingText("Chế độ", "\u30e2\u30fc\u30c9")}: ${system.pocMode ? "POC" : (system.environmentName || "Production")}`
-      ], settingText("Ngôn ngữ mặc định, múi giờ và vận hành.", "\u65e2\u5b9a\u8a00\u8a9e\u3001\u30bf\u30a4\u30e0\u30be\u30fc\u30f3\u3001\u904b\u7528\u3002"))}
-      ${overviewSummaryCard("requestCode", "clipboard", settingText("Mã yêu cầu", "\u4f9d\u983cID"), settingText("Đang dùng", "\u4f7f\u7528\u4e2d"), [
+      ], settingText("Ngôn ngữ mặc định, múi giờ và vận hành.", "\u65e2\u5b9a\u8a00\u8a9e\u3001\u30bf\u30a4\u30e0\u30be\u30fc\u30f3\u3001\u904b\u7528\u3002")),
+      overviewSummaryCard("requestCode", "clipboard", settingText("Mã yêu cầu", "\u4f9d\u983cID"), settingText("Đang dùng", "\u4f7f\u7528\u4e2d"), [
         `Prefix: ${requestCode.prefix || "YMD"}`,
         `${settingText("Định dạng", "\u5f62\u5f0f")}: ${requestCode.format || "YMD-xxxxxx"}`,
         settingText("Áp dụng: yêu cầu mới", "\u9069\u7528: \u65b0\u898f\u4f9d\u983c")
-      ], settingText("Chỉ áp dụng cho yêu cầu mới, không đổi dữ liệu cũ.", "\u65b0\u898f\u4f9d\u983c\u306b\u306e\u307f\u9069\u7528\u3002\u65e2\u5b58\u30c7\u30fc\u30bf\u306f\u5909\u66f4\u3057\u307e\u305b\u3093\u3002"))}
-      ${overviewSummaryCard("poc", "trend", "POC / vận hành", pocStatusLabel(poc.status), [
+      ], settingText("Chỉ áp dụng cho yêu cầu mới, không đổi dữ liệu cũ.", "\u65b0\u898f\u4f9d\u983c\u306b\u306e\u307f\u9069\u7528\u3002\u65e2\u5b58\u30c7\u30fc\u30bf\u306f\u5909\u66f4\u3057\u307e\u305b\u3093\u3002")),
+      overviewSummaryCard("poc", "trend", "POC / vận hành", pocStatusLabel(poc.status), [
         `${settingText("Nhóm", "\u30b0\u30eb\u30fc\u30d7")}: ${poc.groupName || "-"}`,
         `${settingText("Trạng thái", "\u72b6\u614b")}: ${pocStatusLabel(poc.status)}`,
         poc.startDate || poc.expectedEndDate ? `${poc.startDate || "-"} - ${poc.expectedEndDate || "-"}` : settingText("Chưa đặt thời gian", "\u671f\u9593\u672a\u8a2d\u5b9a")
-      ], settingText("Theo dõi POC và ghi chú vận hành.", "POC\u3068\u904b\u7528\u30e1\u30e2\u3092\u7ba1\u7406\u3002"))}
-      ${overviewSummaryCard("dataStatus", "database", settingText("Trạng thái dữ liệu", "\u30c7\u30fc\u30bf\u72b6\u614b"), "Read-only", [
+      ], settingText("Theo dõi POC và ghi chú vận hành.", "POC\u3068\u904b\u7528\u30e1\u30e2\u3092\u7ba1\u7406\u3002")),
+      overviewSummaryCard("dataStatus", "database", settingText("Trạng thái dữ liệu", "\u30c7\u30fc\u30bf\u72b6\u614b"), "Read-only", [
         `Database: ${statusRows[0][1]}`,
         `Email: ${statusRows[1][1]}`,
         `${settingText("Tổng yêu cầu", "\u4f9d\u983c\u6570")}: ${statusRows[3][1]}`
-      ], settingText("Thông tin xem nhanh, không chỉnh sửa.", "\u78ba\u8a8d\u7528\u306e\u60c5\u5831\u3067\u3059\u3002"))}
-    </div>`;
+      ], settingText("Thông tin xem nhanh, không chỉnh sửa.", "\u78ba\u8a8d\u7528\u306e\u60c5\u5831\u3067\u3059\u3002"))
+    ].join("");
   }
 
   function beginOverviewEdit(section) {
