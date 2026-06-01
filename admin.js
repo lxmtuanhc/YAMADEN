@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   "use strict";
 
   console.log("[admin-v2] script loaded");
@@ -1714,8 +1714,11 @@
     setDepartmentStatus(id, active) {
       return requestJson("/admin/departments/" + encodeURIComponent(id) + "/status", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active }) });
     },
-    deleteDepartment(id) {
-      return requestJson("/admin/departments/" + encodeURIComponent(id), { method: "DELETE" });
+    deleteDepartment(id, permanent) {
+      return requestJson("/admin/departments/" + encodeURIComponent(id) + (permanent ? "?permanent=true" : ""), { method: "DELETE" });
+    },
+    restoreDepartment(id) {
+      return requestJson("/admin/departments/" + encodeURIComponent(id) + "/restore", { method: "PATCH" });
     },
     createWorkGroup(payload) {
       return requestJson("/admin/work-groups", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
@@ -1738,8 +1741,11 @@
     setWorkTypeStatus(id, active) {
       return requestJson("/admin/work-types/" + encodeURIComponent(id) + "/status", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active }) });
     },
-    deleteWorkType(id) {
-      return requestJson("/admin/work-types/" + encodeURIComponent(id), { method: "DELETE" });
+    deleteWorkType(id, permanent) {
+      return requestJson("/admin/work-types/" + encodeURIComponent(id) + (permanent ? "?permanent=true" : ""), { method: "DELETE" });
+    },
+    restoreWorkType(id) {
+      return requestJson("/admin/work-types/" + encodeURIComponent(id) + "/restore", { method: "PATCH" });
     },
     createSkill(payload) {
       return requestJson("/admin/skills", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
@@ -1750,8 +1756,11 @@
     setSkillStatus(id, active) {
       return requestJson("/admin/skills/" + encodeURIComponent(id) + "/status", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active }) });
     },
-    deleteSkill(id) {
-      return requestJson("/admin/skills/" + encodeURIComponent(id), { method: "DELETE" });
+    deleteSkill(id, permanent) {
+      return requestJson("/admin/skills/" + encodeURIComponent(id) + (permanent ? "?permanent=true" : ""), { method: "DELETE" });
+    },
+    restoreSkill(id) {
+      return requestJson("/admin/skills/" + encodeURIComponent(id) + "/restore", { method: "PATCH" });
     },
     updateStaffMapping(id, payload) {
       return requestJson("/admin/staff/" + encodeURIComponent(id) + "/mapping", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
@@ -3829,7 +3838,15 @@
   }
 
   function activeMasterItems(type) {
-    return (state.workMaster?.[type] || []).filter(item => item.active !== false);
+    return (state.workMaster?.[type] || []).filter(item => item.active !== false && !isMasterDeleted(item));
+  }
+
+  function visibleMasterItems(type) {
+    return (state.workMaster?.[type] || []).filter(item => !isMasterDeleted(item));
+  }
+
+  function isMasterDeleted(item) {
+    return item?.isDeleted === true || Boolean(item?.deletedAt);
   }
 
   function departmentMasterKey(item) {
@@ -5451,7 +5468,8 @@
       ["customers", t("customers")],
       ["requests", t("requests")],
       ["quotes", t("quotes")],
-      ["staff", t("staff")]
+      ["staff", t("staff")],
+      ["settings", settingText("Cài đặt hệ thống", "\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a")]
     ];
   }
 
@@ -5460,7 +5478,24 @@
     if (category === "requests") return state.requests.filter(isSoftDeleted);
     if (category === "quotes") return state.quotes.filter(isSoftDeleted);
     if (category === "staff") return state.staff.filter(staff => staff.status === "deleted" || staff.deletedAt);
+    if (category === "settings") return settingsTrashRows();
     return [];
+  }
+
+  function settingsTrashRows() {
+    const mapItem = (item, kind) => Object.assign({}, item, { trashKind: kind });
+    return [
+      ...((state.workMaster.departments || []).filter(isMasterDeleted).map(item => mapItem(item, "departments"))),
+      ...((state.workMaster.workTypes || []).filter(isMasterDeleted).map(item => mapItem(item, "workTypes"))),
+      ...((state.workMaster.skills || []).filter(isMasterDeleted).map(item => mapItem(item, "skills")))
+    ].sort((a, b) => new Date(b.deletedAt || 0) - new Date(a.deletedAt || 0));
+  }
+
+  function settingsTrashTypeLabel(kind) {
+    if (kind === "departments") return settingText("Bộ phận", "\u90e8\u9580");
+    if (kind === "workTypes") return settingText("Nội dung công việc", "\u696d\u52d9\u5185\u5bb9");
+    if (kind === "skills") return settingText("Kỹ năng", "\u30b9\u30ad\u30eb");
+    return settingText("Cài đặt", "\u8a2d\u5b9a");
   }
 
   function renderTrash() {
@@ -5488,7 +5523,8 @@
       customers: t("trashCustomers"),
       requests: t("trashRequests"),
       quotes: t("trashQuotes"),
-      staff: t("trashStaff")
+      staff: t("trashStaff"),
+      settings: settingText("Cài đặt hệ thống đã xóa", "\u524a\u9664\u6e08\u307f\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a")
     };
     return map[category] || t("trash");
   }
@@ -5512,6 +5548,12 @@
         const id = getRowId(item) || item.quoteCode || item.id;
         const total = Array.isArray(item.items) ? item.items.reduce((sum, line) => sum + Number(line.quantity || 0) * Number(line.unitPrice || 0), 0) : "";
         return `<tr><td>${escapeHtml(item.quoteCode || item.id || id)}</td><td>${escapeHtml(item.customerName || item.name || "-")}</td><td>${escapeHtml(item.requestId || "-")}</td><td>${escapeHtml(total || item.amount || "-")}</td><td>${escapeHtml(item.status || "-")}</td><td>${escapeHtml(formatDate(item.deletedAt))}</td><td>${trashActions("quotes", id)}</td></tr>`;
+      }).join("")}</tbody></table></div>`;
+    }
+    if (category === "settings") {
+      return `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table"><thead><tr><th>${escapeHtml(settingText("Loại", "\u7a2e\u5225"))}</th><th>${escapeHtml(settingText("Tên dữ liệu", "\u540d\u524d"))}</th><th>${escapeHtml(t("code"))}</th><th>${escapeHtml(t("deletedAt"))}</th><th>${escapeHtml(settingText("Người xóa", "\u524a\u9664\u8005"))}</th><th>${escapeHtml(t("action"))}</th></tr></thead><tbody>${rows.map(item => {
+        const id = getRowId(item) || item.id;
+        return `<tr><td>${escapeHtml(settingsTrashTypeLabel(item.trashKind))}</td><td>${escapeHtml(workMasterLabel(item) || item.code || "-")}</td><td>${escapeHtml(item.code || "-")}</td><td>${escapeHtml(formatDate(item.deletedAt))}</td><td>${escapeHtml(item.deletedBy || "-")}</td><td>${trashActions("settings", id)}</td></tr>`;
       }).join("")}</tbody></table></div>`;
     }
     return `<div class="table-wrap crm-table-wrap"><table class="data-table staff-table"><thead><tr><th>${t("staff")}</th><th>${t("department")}</th><th>${t("skillsWork")}</th><th>${t("status")}</th><th>${t("deletedAt")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(staff => {
@@ -5567,6 +5609,16 @@
         [t("deletedAt"), formatDate(item.deletedAt)]
       ];
     }
+    if (type === "settings") {
+      return [
+        [settingText("Loại dữ liệu", "\u30c7\u30fc\u30bf\u7a2e\u5225"), settingsTrashTypeLabel(item.trashKind)],
+        [settingText("Tên dữ liệu", "\u540d\u524d"), workMasterLabel(item) || item.code],
+        [t("code"), item.code],
+        [settingText("Mô tả", "\u8aac\u660e"), item.descriptionVi || item.descriptionJa],
+        [t("deletedAt"), formatDate(item.deletedAt)],
+        [settingText("Người xóa", "\u524a\u9664\u8005"), item.deletedBy || "-"]
+      ];
+    }
     return [
       [t("staff"), item.name],
       [t("department"), staffDepartment(item)],
@@ -5585,7 +5637,8 @@
       customers: item.name || item.company || item.companyName || item.phone || t("customer"),
       requests: getRequestDisplayId(item),
       quotes: item.quoteCode || item.id || getRowId(item) || t("quote"),
-      staff: item.name || t("staff")
+      staff: item.name || t("staff"),
+      settings: workMasterLabel(item) || item.code || settingText("Cài đặt", "\u8a2d\u5b9a")
     };
     openDrawer(`
       <article class="drawer-panel">
@@ -5633,6 +5686,7 @@
     if (type === "requests") response = await AdminAPI.restoreRequest(id);
     if (type === "quotes") response = await AdminAPI.restoreQuote(id);
     if (type === "staff") response = await AdminAPI.restoreStaff(id);
+    if (type === "settings") response = await restoreSettingsTrashItem(id);
     if (!response) {
       toast(t("restorePlanned"));
       return;
@@ -5649,6 +5703,7 @@
     if (type === "requests") await AdminAPI.deleteRequest(id, true);
     if (type === "quotes") await AdminAPI.deleteQuote(id, true);
     if (type === "staff") await AdminAPI.deleteStaff(id, true);
+    if (type === "settings") await permanentDeleteSettingsTrashItem(id);
     removeTrashState(type, id);
     closeDrawer();
     toast(t("permanentDeletedSuccess"));
@@ -5662,6 +5717,11 @@
     if (type === "requests") state.requests = state.requests.map(item => String(getRowId(item) || getRequestDisplayId(item)) === String(id) ? apply(item) : item);
     if (type === "quotes") state.quotes = state.quotes.map(item => String(getRowId(item) || item.id || item.quoteCode) === String(id) ? apply(item) : item);
     if (type === "staff") state.staff = state.staff.map(item => String(getRowId(item)) === String(id) ? apply(item) : item);
+    if (type === "settings") state.workMaster = normalizeWorkMaster(Object.assign({}, state.workMaster, {
+      departments: state.workMaster.departments.map(item => String(item.id) === String(id) ? apply(item) : item),
+      workTypes: state.workMaster.workTypes.map(item => String(item.id) === String(id) ? apply(item) : item),
+      skills: state.workMaster.skills.map(item => String(item.id) === String(id) ? apply(item) : item)
+    }));
   }
 
   function removeTrashState(type, id) {
@@ -5669,6 +5729,28 @@
     if (type === "requests") state.requests = state.requests.filter(item => String(getRowId(item) || getRequestDisplayId(item)) !== String(id));
     if (type === "quotes") state.quotes = state.quotes.filter(item => String(getRowId(item) || item.id || item.quoteCode) !== String(id));
     if (type === "staff") state.staff = state.staff.filter(item => String(getRowId(item)) !== String(id));
+    if (type === "settings") {
+      state.workMaster.departments = state.workMaster.departments.filter(item => String(item.id) !== String(id));
+      state.workMaster.workTypes = state.workMaster.workTypes.filter(item => String(item.id) !== String(id));
+      state.workMaster.skills = state.workMaster.skills.filter(item => String(item.id) !== String(id));
+    }
+  }
+
+  async function restoreSettingsTrashItem(id) {
+    const item = trashItemByType("settings", id);
+    if (!item) return null;
+    if (item.trashKind === "departments") return AdminAPI.restoreDepartment(id);
+    if (item.trashKind === "workTypes") return AdminAPI.restoreWorkType(id);
+    if (item.trashKind === "skills") return AdminAPI.restoreSkill(id);
+    return null;
+  }
+
+  async function permanentDeleteSettingsTrashItem(id) {
+    const item = trashItemByType("settings", id);
+    if (!item) return;
+    if (item.trashKind === "departments") await AdminAPI.deleteDepartment(id, true);
+    if (item.trashKind === "workTypes") await AdminAPI.deleteWorkType(id, true);
+    if (item.trashKind === "skills") await AdminAPI.deleteSkill(id, true);
   }
 
   function renderNotifications() {
@@ -5701,7 +5783,7 @@
   }
 
   function renderWorkMasterForm(type, item) {
-    const departments = state.workMaster.departments || [];
+    const departments = visibleMasterItems("departments");
     const groups = state.workMaster.workGroups || [];
     const titleKey = item?.id ? "edit" : type === "departments" ? "addDepartment" : type === "workGroups" ? "addWorkGroup" : "addWorkType";
     const departmentSelect = type !== "departments"
@@ -5732,11 +5814,11 @@
 
   function renderWorkMasterTable(type) {
     const search = (state.filters.workMasterSearch || "").toLowerCase();
-    const rows = (state.workMaster[type] || []).filter(item => {
+    const rows = visibleMasterItems(type).filter(item => {
       const text = [item.code, item.nameVi, item.nameJa, item.descriptionVi, item.descriptionJa, item.departmentCode, item.workGroupCode].join(" ").toLowerCase();
       return !search || text.includes(search);
     });
-    const departmentByCode = Object.fromEntries((state.workMaster.departments || []).map(item => [item.code, workMasterLabel(item)]));
+    const departmentByCode = Object.fromEntries(visibleMasterItems("departments").map(item => [item.code, workMasterLabel(item)]));
     const groupByCode = Object.fromEntries((state.workMaster.workGroups || []).map(item => [item.code, workMasterLabel(item)]));
     return `<div class="table-wrap work-master-table-wrap"><table class="data-table work-master-table">
       <thead><tr><th>${escapeHtml(t("code"))}</th><th>${escapeHtml(t("nameVi"))}</th><th>${escapeHtml(t("nameJa"))}</th><th>${escapeHtml(t("department"))}</th><th>${escapeHtml(t("workGroup"))}</th><th>${escapeHtml(t("sortOrder"))}</th><th>${escapeHtml(t("status"))}</th><th>${escapeHtml(t("action"))}</th></tr></thead>
@@ -6880,7 +6962,7 @@
     const values = departmentReferenceValues(department);
     const staff = state.staff.filter(item => departmentLinkedBy(item, values)).length;
     const requests = state.requests.filter(item => departmentLinkedBy(item, values)).length;
-    const workTypes = (state.workMaster.workTypes || []).filter(item => departmentLinkedBy(item, values)).length;
+    const workTypes = visibleMasterItems("workTypes").filter(item => departmentLinkedBy(item, values)).length;
     return { staff, requests, workTypes, total: staff + requests + workTypes };
   }
 
@@ -6902,7 +6984,9 @@
   function departmentDeleteRelationMessage(counts) {
     const staff = Number(counts?.staff ?? counts?.relatedStaffCount ?? 0);
     const requests = Number(counts?.requests ?? counts?.relatedRequestCount ?? 0);
+    const customers = Number(counts?.customers ?? counts?.relatedCustomerCount ?? 0);
     const workTypes = Number(counts?.workTypes ?? counts?.relatedWorkTypeCount ?? 0);
+    const skills = Number(counts?.skills ?? counts?.relatedSkillCount ?? 0);
     const viParts = [];
     const jaParts = [];
     if (staff > 0) {
@@ -6913,9 +6997,17 @@
       viParts.push(`${requests} yêu cầu`);
       jaParts.push(`${requests}件の依頼`);
     }
+    if (customers > 0) {
+      viParts.push(`${customers} khách hàng`);
+      jaParts.push(`${customers}件の顧客`);
+    }
     if (workTypes > 0) {
       viParts.push(`${workTypes} nội dung công việc`);
       jaParts.push(`${workTypes}件の業務内容`);
+    }
+    if (skills > 0) {
+      viParts.push(`${skills} kỹ năng/mapping`);
+      jaParts.push(`${skills}件のスキル・連携`);
     }
     if (!viParts.length) {
       return settingText(
@@ -6931,9 +7023,40 @@
 
   function departmentProtectedMessage() {
     return settingText(
-      "Đây là bộ phận mặc định của hệ thống, không thể xóa. Bạn có thể Ẩn nếu không sử dụng.",
-      "この部門はシステム既定の部門のため削除できません。使用しない場合は非表示にしてください。"
+      "Đây là dữ liệu bắt buộc của hệ thống, không thể xóa.",
+      "これはシステム必須データのため削除できません。"
     );
+  }
+
+  function settingsMasterName(kind) {
+    if (kind === "departments") return settingText("bộ phận", "\u90e8\u9580");
+    if (kind === "workTypes") return settingText("nội dung công việc", "\u696d\u52d9\u5185\u5bb9");
+    if (kind === "skills") return settingText("kỹ năng", "\u30b9\u30ad\u30eb");
+    return settingText("dữ liệu", "\u30c7\u30fc\u30bf");
+  }
+
+  function settingsMasterMovedToast(kind) {
+    if (kind === "departments") return settingText("Đã chuyển bộ phận vào Thùng rác.", "部門をゴミ箱に移動しました。");
+    if (kind === "workTypes") return settingText("Đã chuyển nội dung công việc vào Thùng rác.", "業務内容をゴミ箱に移動しました。");
+    if (kind === "skills") return settingText("Đã chuyển kỹ năng vào Thùng rác.", "スキルをゴミ箱に移動しました。");
+    return t("movedToTrash");
+  }
+
+  function settingsMasterRelationCounts(kind, item) {
+    if (kind === "departments") return departmentRelationCounts(item);
+    const values = departmentReferenceValues(item);
+    if (kind === "workTypes") {
+      const staff = state.staff.filter(staff => !staff.deletedAt && (toList(staff.workTypeIds).some(value => values.includes(String(value || "").trim())) || toList(staff.workTags).some(value => values.includes(String(value || "").trim())))).length;
+      const requests = state.requests.filter(request => !isSoftDeleted(request) && (toList(request.workTypeIds).some(value => values.includes(String(value || "").trim())) || toList(request.issueTags).some(value => values.includes(String(value || "").trim())))).length;
+      const skills = visibleMasterItems("skills").filter(skill => toList(skill.relatedWorkTypeIds).some(value => values.includes(String(value || "").trim()))).length;
+      return { staff, requests, customers: 0, workTypes: 0, skills, total: staff + requests + skills };
+    }
+    if (kind === "skills") {
+      const staff = state.staff.filter(staff => !staff.deletedAt && (toList(staff.workTags).some(value => values.includes(String(value || "").trim())) || values.some(value => String(staff.skills || "").includes(value)))).length;
+      const requests = state.requests.filter(request => !isSoftDeleted(request) && (toList(request.issueTags).some(value => values.includes(String(value || "").trim())) || toList(request.autoTags).some(value => values.includes(String(value || "").trim())))).length;
+      return { staff, requests, customers: 0, workTypes: 0, skills: 0, total: staff + requests };
+    }
+    return { staff: 0, requests: 0, customers: 0, workTypes: 0, skills: 0, total: 0 };
   }
 
   function renderStaffWorkDetailBody(meta) {
@@ -6956,10 +7079,10 @@
       return settingsTable(meta.headers, rows, t("noData"));
     }
     const type = masterKindType(meta.kind);
-    const rows = (state.workMaster[type] || []).map(item => {
+    const rows = visibleMasterItems(type).map(item => {
       const id = item.id;
       const label = escapeHtml(workMasterLabel(item) || item.code || "-");
-      const deleteAction = meta.kind === "departments" ? ` <button class="mini-button danger" type="button" data-staff-work-delete="departments" data-master-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>` : "";
+      const deleteAction = ` <button class="mini-button danger" type="button" data-staff-work-delete="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>`;
       const actions = `<button class="mini-button" type="button" data-staff-work-edit="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button> <button class="mini-button" type="button" data-staff-work-status="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}" data-master-active="${item.active === false ? "true" : "false"}">${escapeHtml(item.active === false ? t("show") : t("hide"))}</button>${deleteAction}`;
       if (meta.kind === "departments") {
         const relationCounts = departmentRelationCounts(item);
@@ -6977,8 +7100,8 @@
 
   function renderStaffWorkEditForm(kind, item) {
     if (kind === "staffMap") return renderStaffMappingForm(item);
-    const departments = state.workMaster.departments || [];
-    const workTypes = state.workMaster.workTypes || [];
+    const departments = visibleMasterItems("departments");
+    const workTypes = visibleMasterItems("workTypes");
     const isWorkType = kind === "workTypes";
     const isSkill = kind === "skills";
     const relationCounts = kind === "departments" ? departmentRelationCounts(item) : { total: 0 };
@@ -7006,12 +7129,12 @@
     return `<form class="settings-real-form" data-staff-work-form="staffMap" data-master-id="${escapeHtml(getRowId(staff))}">
       <h3>${escapeHtml(staff?.name || "Staff")}</h3>
       <div class="settings-real-form-grid">
-        <label><span>${escapeHtml(t("department"))}</span><select name="departmentCode">${masterSelectOptions(state.workMaster.departments || [], departmentCode, t("selectDepartment"))}</select></label>
+        <label><span>${escapeHtml(t("department"))}</span><select name="departmentCode">${masterSelectOptions(visibleMasterItems("departments"), departmentCode, t("selectDepartment"))}</select></label>
         <label><span>${escapeHtml(settingText("Kỹ năng", "\u30b9\u30ad\u30eb"))}</span><input name="skills" value="${escapeHtml(skillText)}" placeholder="${escapeHtml(settingText("VD: 電気工事, 見積作成", "\u4f8b: \u96fb\u6c17\u5de5\u4e8b, \u898b\u7a4d\u4f5c\u6210"))}"></label>
         <label><span>${escapeHtml(settingText("Tự động gợi ý", "\u81ea\u52d5\u63d0\u6848"))}</span><select name="autoAssignEnabled"><option value="true" ${staff?.autoAssignEnabled === false ? "" : "selected"}>Active</option><option value="false" ${staff?.autoAssignEnabled === false ? "selected" : ""}>Inactive</option></select></label>
       </div>
       <div class="settings-checkbox-grid">
-        ${(state.workMaster.workTypes || []).map(type => {
+        ${visibleMasterItems("workTypes").map(type => {
           const value = type.code || type.id;
           return `<label><input type="checkbox" name="workTypeIds" value="${escapeHtml(value)}" ${selectedWorkTypes.has(value) || selectedWorkTypes.has(workMasterLabel(type)) ? "checked" : ""}> <span>${escapeHtml(workMasterLabel(type))}</span></label>`;
         }).join("")}
@@ -7119,7 +7242,7 @@
     const ok = await confirmAction({
       title: settingText("Bạn có chắc muốn xóa bộ phận này không?", "\u3053\u306e\u90e8\u9580\u3092\u524a\u9664\u3057\u307e\u3059\u304b\uff1f"),
       message: settingText("Thao tác này không thể hoàn tác.", "\u3053\u306e\u64cd\u4f5c\u306f\u5143\u306b\u623b\u305b\u307e\u305b\u3093\u3002"),
-      cancelLabel: settingText("Hủy", "\u30ad\u30e3\u30f3\u30bb\u30eb"),
+      cancelLabel: settingText("Hủy", "キャンセル"),
       confirmLabel: settingText("Xóa", "\u524a\u9664"),
       danger: true
     });
@@ -7147,6 +7270,62 @@
         ? settingText("Bộ phận này đang được liên kết với staff hoặc dữ liệu khác, không thể xóa. Vui lòng dùng Ẩn nếu không muốn sử dụng nữa.", "\u3053\u306e\u90e8\u9580\u306f\u30b9\u30bf\u30c3\u30d5\u307e\u305f\u306f\u4ed6\u306e\u30c7\u30fc\u30bf\u306b\u7d10\u3065\u3044\u3066\u3044\u308b\u305f\u3081\u524a\u9664\u3067\u304d\u307e\u305b\u3093\u3002\u4f7f\u7528\u3057\u306a\u3044\u5834\u5408\u306f\u975e\u8868\u793a\u306b\u3057\u3066\u304f\u3060\u3055\u3044\u3002")
         : error?.message || settingText("Không thể xóa bộ phận.", "\u90e8\u9580\u3092\u524a\u9664\u3067\u304d\u307e\u305b\u3093\u3002");
       toast(message);
+    }
+  }
+
+  async function deleteSettingsMasterItem(kind, id) {
+    const type = masterKindType(kind);
+    const item = visibleMasterItems(type).find(entry => String(entry.id) === String(id));
+    if (!item) return;
+    const name = settingsMasterName(kind);
+    const localCounts = settingsMasterRelationCounts(kind, item);
+    if (localCounts.total > 0) {
+      const hide = await confirmAction({
+        title: settingText(`Không thể xóa ${name}`, `${name}を削除できません`),
+        message: departmentDeleteRelationMessage(localCounts),
+        cancelLabel: settingText("Đóng", "\u9589\u3058\u308b"),
+        confirmLabel: settingText("Ẩn", "\u975e\u8868\u793a"),
+        variant: "warning"
+      });
+      if (hide) await setSettingsStaffWorkStatus(kind, id, false);
+      return;
+    }
+    const ok = await confirmAction({
+      title: settingText(`Xóa ${name}?`, `${name}を削除しますか？`),
+      message: settingText(
+        `Bạn có chắc muốn xóa ${name} này không? Dữ liệu sẽ được chuyển vào Thùng rác và có thể khôi phục sau.`,
+        `この${name}を削除してもよろしいですか？データはゴミ箱に移動され、後で復元できます。`
+      ),
+      cancelLabel: settingText("Hủy", "キャンセル"),
+      confirmLabel: settingText("Xóa", "\u524a\u9664"),
+      danger: true
+    });
+    if (!ok) return;
+    try {
+      if (kind === "departments") await AdminAPI.deleteDepartment(id);
+      if (kind === "workTypes") await AdminAPI.deleteWorkType(id);
+      if (kind === "skills") await AdminAPI.deleteSkill(id);
+      await reloadWorkMaster();
+      renderSettings();
+      toast(settingsMasterMovedToast(kind));
+    } catch (error) {
+      console.error(error);
+      if (error?.errorCode === "MASTER_PROTECTED" || error?.errorCode === "DEPARTMENT_PROTECTED") {
+        toast(departmentProtectedMessage());
+        return;
+      }
+      if (error?.errorCode === "MASTER_HAS_RELATIONS" || error?.errorCode === "DEPARTMENT_HAS_RELATIONS") {
+        const hide = await confirmAction({
+          title: settingText(`Không thể xóa ${name}`, `${name}を削除できません`),
+          message: departmentDeleteRelationMessage(error),
+          cancelLabel: settingText("Đóng", "\u9589\u3058\u308b"),
+          confirmLabel: settingText("Ẩn", "\u975e\u8868\u793a"),
+          variant: "warning"
+        });
+        if (hide) await setSettingsStaffWorkStatus(kind, id, false);
+        return;
+      }
+      toast(error?.message || settingText("Không thể xóa dữ liệu.", "データを削除できません。"));
     }
   }
 
@@ -7856,7 +8035,7 @@
         const staffWorkDelete = event.target.closest("[data-staff-work-delete]");
         if (staffWorkDelete) {
           event.preventDefault();
-          void deleteSettingsDepartment(staffWorkDelete.dataset.masterId || "");
+          void deleteSettingsMasterItem(staffWorkDelete.dataset.staffWorkDelete || "", staffWorkDelete.dataset.masterId || "");
           return;
         }
         const staffWorkSave = event.target.closest("[data-staff-work-save]");

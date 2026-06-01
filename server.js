@@ -758,6 +758,13 @@ const UserSchema = new mongoose.Schema({
   projectName: String,
   address: String,
   companyAddress: String,
+  departmentCode: String,
+  department: String,
+  departmentId: String,
+  workTypeIds: [String],
+  issueTags: [String],
+  skillIds: [String],
+  skills: String,
   taxId: String,
   constructionType: String,
   notificationsEnabled: Boolean,
@@ -805,6 +812,12 @@ const DepartmentSchema = new mongoose.Schema({
   sortOrder: { type: Number, default: 0 },
   active: { type: Boolean, default: true },
   isSystemDefault: { type: Boolean, default: false },
+  protected: { type: Boolean, default: false },
+  systemRequired: { type: Boolean, default: false },
+  isDeleted: { type: Boolean, default: false },
+  deletedAt: Date,
+  deletedBy: String,
+  trashType: String,
   createdAt: Date,
   updatedAt: Date
 });
@@ -832,6 +845,12 @@ const WorkTypeSchema = new mongoose.Schema({
   descriptionJa: String,
   active: { type: Boolean, default: true },
   sortOrder: { type: Number, default: 0 },
+  protected: { type: Boolean, default: false },
+  systemRequired: { type: Boolean, default: false },
+  isDeleted: { type: Boolean, default: false },
+  deletedAt: Date,
+  deletedBy: String,
+  trashType: String,
   createdAt: Date,
   updatedAt: Date
 });
@@ -845,6 +864,12 @@ const SkillSchema = new mongoose.Schema({
   relatedWorkTypeIds: [String],
   active: { type: Boolean, default: true },
   sortOrder: { type: Number, default: 0 },
+  protected: { type: Boolean, default: false },
+  systemRequired: { type: Boolean, default: false },
+  isDeleted: { type: Boolean, default: false },
+  deletedAt: Date,
+  deletedBy: String,
+  trashType: String,
   createdAt: Date,
   updatedAt: Date
 });
@@ -1246,6 +1271,160 @@ function cleanMasterPayload(body, fields) {
   return payload;
 }
 
+function nonDeletedCondition() {
+  return { $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] };
+}
+
+function nonDeletedMasterCondition() {
+  return { $and: [{ isDeleted: { $ne: true } }, nonDeletedCondition()] };
+}
+
+function masterReferenceValues(item) {
+  return [item?._id, item?.id, item?.code, item?.nameVi, item?.nameJa]
+    .map(value => String(value || "").trim())
+    .filter(Boolean);
+}
+
+function matchAnyField(fields, values) {
+  const cleanValues = [...new Set((values || []).map(value => String(value || "").trim()).filter(Boolean))];
+  if (!cleanValues.length) return { _id: null };
+  return { $or: fields.map(field => ({ [field]: { $in: cleanValues } })) };
+}
+
+function adminDeletedBy(req) {
+  return req.admin?.email || req.admin?.name || req.admin?.username || "admin";
+}
+
+function isMasterProtected(item) {
+  return item?.protected === true || item?.systemRequired === true;
+}
+
+async function departmentRelationCounts(item) {
+  const values = masterReferenceValues(item);
+  const [relatedStaffCount, relatedRequestCount, relatedCustomerCount, relatedWorkTypeCount, relatedSkillCount] = await Promise.all([
+    Staff.countDocuments({ $and: [
+      matchAnyField(["departmentCode", "department", "departmentId"], values),
+      { status: { $ne: "deleted" } },
+      nonDeletedCondition()
+    ] }),
+    Request.countDocuments({ $and: [
+      matchAnyField(["departmentCode", "department", "departmentId"], values),
+      nonDeletedMasterCondition()
+    ] }),
+    User.countDocuments({ $and: [
+      matchAnyField(["departmentCode", "department", "departmentId"], values),
+      nonDeletedCondition()
+    ] }),
+    WorkType.countDocuments({ $and: [
+      matchAnyField(["departmentCode", "departmentCodes", "department", "departmentId"], values),
+      nonDeletedMasterCondition()
+    ] }),
+    Skill.countDocuments({ $and: [
+      matchAnyField(["departmentCode", "departmentCodes", "department", "departmentId"], values),
+      nonDeletedMasterCondition()
+    ] })
+  ]);
+  return { relatedStaffCount, relatedRequestCount, relatedCustomerCount, relatedWorkTypeCount, relatedSkillCount };
+}
+
+async function workTypeRelationCounts(item) {
+  const values = masterReferenceValues(item);
+  const [relatedStaffCount, relatedRequestCount, relatedCustomerCount, relatedWorkTypeCount, relatedSkillCount] = await Promise.all([
+    Staff.countDocuments({ $and: [
+      { $or: [
+        { workTypeIds: { $in: values } },
+        { workTags: { $in: values } },
+        { workContent: { $in: values } }
+      ] },
+      { status: { $ne: "deleted" } },
+      nonDeletedCondition()
+    ] }),
+    Request.countDocuments({ $and: [
+      { $or: [
+        { workTypeIds: { $in: values } },
+        { issueTags: { $in: values } },
+        { autoTags: { $in: values } },
+        { autoCategory: { $in: values } }
+      ] },
+      nonDeletedMasterCondition()
+    ] }),
+    User.countDocuments({ $and: [
+      { $or: [{ workTypeIds: { $in: values } }, { issueTags: { $in: values } }] },
+      nonDeletedCondition()
+    ] }),
+    WorkType.countDocuments({ _id: null }),
+    Skill.countDocuments({ $and: [
+      { relatedWorkTypeIds: { $in: values } },
+      nonDeletedMasterCondition()
+    ] })
+  ]);
+  return { relatedStaffCount, relatedRequestCount, relatedCustomerCount, relatedWorkTypeCount, relatedSkillCount };
+}
+
+async function skillRelationCounts(item) {
+  const values = masterReferenceValues(item);
+  const regexes = values.map(value => new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"));
+  const [relatedStaffCount, relatedRequestCount, relatedCustomerCount, relatedWorkTypeCount, relatedSkillCount] = await Promise.all([
+    Staff.countDocuments({ $and: [
+      { $or: [
+        { workTags: { $in: values } },
+        { skills: { $in: values } },
+        ...regexes.map(regex => ({ skills: regex }))
+      ] },
+      { status: { $ne: "deleted" } },
+      nonDeletedCondition()
+    ] }),
+    Request.countDocuments({ $and: [
+      { $or: [{ issueTags: { $in: values } }, { autoTags: { $in: values } }] },
+      nonDeletedMasterCondition()
+    ] }),
+    User.countDocuments({ $and: [
+      { $or: [{ skillIds: { $in: values } }, { skills: { $in: values } }] },
+      nonDeletedCondition()
+    ] }),
+    WorkType.countDocuments({ _id: null }),
+    Skill.countDocuments({ _id: null })
+  ]);
+  return { relatedStaffCount, relatedRequestCount, relatedCustomerCount, relatedWorkTypeCount, relatedSkillCount };
+}
+
+function totalMasterRelations(counts) {
+  return Number(counts.relatedStaffCount || 0)
+    + Number(counts.relatedRequestCount || 0)
+    + Number(counts.relatedCustomerCount || 0)
+    + Number(counts.relatedWorkTypeCount || 0)
+    + Number(counts.relatedSkillCount || 0);
+}
+
+function masterRelationError(item, counts) {
+  return {
+    errorCode: "MASTER_HAS_RELATIONS",
+    message: "Dữ liệu này đang được liên kết với dữ liệu khác, không thể xóa. Vui lòng Ẩn hoặc chuyển dữ liệu liên kết trước khi xóa.",
+    data: item,
+    relatedCount: totalMasterRelations(counts),
+    ...counts
+  };
+}
+
+function protectedMasterError(item) {
+  return {
+    errorCode: "MASTER_PROTECTED",
+    message: "Đây là dữ liệu bắt buộc của hệ thống, không thể xóa.",
+    data: item
+  };
+}
+
+async function softDeleteMasterItem(item, trashType, req) {
+  item.isDeleted = true;
+  item.deletedAt = new Date();
+  item.deletedBy = adminDeletedBy(req);
+  item.trashType = trashType;
+  item.active = false;
+  item.updatedAt = new Date();
+  await item.save();
+  return item;
+}
+
 async function seedWorkMasterData() {
   const [departmentCount, workGroupCount, workTypeCount] = await Promise.all([
     Department.countDocuments(),
@@ -1320,14 +1499,15 @@ async function seedWorkMasterData() {
 
 async function loadWorkMaster({ activeOnly = false } = {}) {
   await seedWorkMasterData();
-  const departmentQuery = activeOnly ? { active: true } : {};
+  const notDeletedQuery = { isDeleted: { $ne: true }, $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] };
+  const departmentQuery = activeOnly ? { active: true, ...notDeletedQuery } : {};
   const activeDepartments = await Department.find(departmentQuery).sort({ sortOrder: 1, createdAt: 1 });
-  const departmentCodes = activeDepartments.map(item => item.code);
+  const departmentCodes = activeDepartments.filter(item => item.isDeleted !== true && !item.deletedAt).map(item => item.code);
   const workGroupQuery = activeOnly
     ? { active: true, departmentCode: { $in: departmentCodes } }
     : {};
   const workTypeQuery = activeOnly
-    ? { active: true, departmentCode: { $in: departmentCodes } }
+    ? { active: true, departmentCode: { $in: departmentCodes }, ...notDeletedQuery }
     : {};
   const workGroups = await WorkGroup.find(workGroupQuery).sort({ departmentCode: 1, sortOrder: 1, createdAt: 1 });
   const activeGroupCodes = workGroups.map(item => item.code);
@@ -1335,7 +1515,7 @@ async function loadWorkMaster({ activeOnly = false } = {}) {
   const visibleWorkTypes = activeOnly
     ? workTypes.filter(item => !item.workGroupCode || activeGroupCodes.includes(item.workGroupCode))
     : workTypes;
-  const skills = await Skill.find(activeOnly ? { active: true } : {}).sort({ sortOrder: 1, createdAt: 1 });
+  const skills = await Skill.find(activeOnly ? { active: true, ...notDeletedQuery } : {}).sort({ sortOrder: 1, createdAt: 1 });
   return {
     departments: activeDepartments.map(publicDepartment),
     workGroups: workGroups.map(publicWorkGroup),
@@ -3583,66 +3763,49 @@ app.delete("/admin/departments/:id", requireAdmin, async (req, res) => {
   try {
     const item = await Department.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Department not found" });
-    const departmentId = String(item._id || "");
-    const departmentCode = String(item.code || "").trim();
-    const departmentValues = [departmentCode, item.nameVi, item.nameJa, departmentId]
-      .map(value => String(value || "").trim())
-      .filter(Boolean);
-    const departmentIdValues = [departmentId, departmentCode].filter(Boolean);
-    const [relatedStaffCount, relatedRequestCount, relatedWorkTypeCount] = await Promise.all([
-      Staff.countDocuments({ $or: [
-        { departmentCode },
-        { department: { $in: departmentValues } },
-        { departmentId: { $in: departmentIdValues } }
-      ] }),
-      Request.countDocuments({ $or: [
-        { departmentCode },
-        { department: { $in: departmentValues } },
-        { departmentId: { $in: departmentIdValues } }
-      ] }),
-      WorkType.countDocuments({ $or: [
-        { departmentCode },
-        { departmentCodes: { $in: departmentValues } },
-        { departmentId: { $in: departmentIdValues } }
-      ] })
-    ]);
+    const counts = await departmentRelationCounts(item);
+    const relatedCount = totalMasterRelations(counts);
+    const protected = isMasterProtected(item);
+    const canDelete = !protected && relatedCount === 0;
     console.log("[DEPARTMENT_DELETE_CHECK]", {
-      departmentId,
-      departmentCode,
-      relatedStaffCount,
-      relatedRequestCount,
-      relatedWorkTypeCount
+      departmentId: String(item._id || ""),
+      departmentCode: item.code || "",
+      ...counts,
+      protected,
+      canDelete
     });
-    if (item.isSystemDefault === true || item.get?.("protected") === true) {
-      return res.status(409).json({
-        errorCode: "DEPARTMENT_PROTECTED",
-        message: "Đây là bộ phận mặc định của hệ thống, không thể xóa. Bạn có thể Ẩn nếu không sử dụng.",
-        data: publicDepartment(item),
-        relatedStaffCount,
-        relatedRequestCount,
-        relatedWorkTypeCount
-      });
+    if (protected) return res.status(409).json(protectedMasterError(publicDepartment(item)));
+    if (relatedCount > 0) return res.status(409).json(masterRelationError(publicDepartment(item), counts));
+    if (req.query.permanent === "true") {
+      await item.deleteOne();
+      return res.json({ message: "Department permanently deleted", data: publicDepartment(item), relatedCount: 0 });
     }
-    const relatedCount = relatedStaffCount + relatedRequestCount + relatedWorkTypeCount;
-    if (relatedCount > 0) {
-      return res.status(409).json({
-        errorCode: "DEPARTMENT_HAS_RELATIONS",
-        message: "Bộ phận này đang được liên kết với staff hoặc dữ liệu khác, không thể xóa. Vui lòng dùng Ẩn nếu không muốn sử dụng nữa.",
-        data: publicDepartment(item),
-        relatedCount,
-        relatedStaffCount,
-        relatedRequestCount,
-        relatedWorkTypeCount
-      });
-    }
-    await item.deleteOne();
+    await softDeleteMasterItem(item, "department", req);
     res.json({
-      message: "Department deleted",
+      message: "Department moved to trash",
       data: publicDepartment(item),
       relatedCount: 0
     });
   } catch (error) {
     res.status(400).json({ message: "Department delete failed", error: error.message });
+  }
+});
+
+app.patch("/admin/departments/:id/restore", requireAdmin, async (req, res) => {
+  try {
+    const item = await Department.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Department not found" });
+    const duplicate = await Department.findOne({ _id: { $ne: item._id }, code: item.code, isDeleted: { $ne: true }, $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] });
+    if (duplicate) return res.status(409).json({ errorCode: "MASTER_CODE_CONFLICT", message: "Mã bộ phận đã tồn tại, không thể khôi phục." });
+    item.isDeleted = false;
+    item.deletedAt = null;
+    item.deletedBy = "";
+    item.trashType = "";
+    item.updatedAt = new Date();
+    await item.save();
+    res.json({ message: "Department restored", data: publicDepartment(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Department restore failed", error: error.message });
   }
 });
 
@@ -3752,16 +3915,45 @@ app.delete("/admin/work-types/:id", requireAdmin, async (req, res) => {
   try {
     const item = await WorkType.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Work type not found" });
-    const related = await Promise.all([
-      Staff.countDocuments({ $or: [{ workTypeIds: String(item._id) }, { workTypeIds: item.code }, { workTags: { $in: [item.code, item.nameVi, item.nameJa] } }] }),
-      Request.countDocuments({ $or: [{ workTypeIds: String(item._id) }, { workTypeIds: item.code }, { issueTags: { $in: [item.code, item.nameVi, item.nameJa] } }] })
-    ]);
-    item.active = false;
-    item.updatedAt = new Date();
-    await item.save();
-    res.json({ message: related.some(Boolean) ? "Work type has related data and was hidden" : "Work type hidden", data: publicWorkType(item), relatedCount: related.reduce((sum, count) => sum + count, 0) });
+    const counts = await workTypeRelationCounts(item);
+    const relatedCount = totalMasterRelations(counts);
+    const protected = isMasterProtected(item);
+    const canDelete = !protected && relatedCount === 0;
+    console.log("[WORK_TYPE_DELETE_CHECK]", {
+      workTypeId: String(item._id || ""),
+      workTypeCode: item.code || "",
+      ...counts,
+      protected,
+      canDelete
+    });
+    if (protected) return res.status(409).json(protectedMasterError(publicWorkType(item)));
+    if (relatedCount > 0) return res.status(409).json(masterRelationError(publicWorkType(item), counts));
+    if (req.query.permanent === "true") {
+      await item.deleteOne();
+      return res.json({ message: "Work type permanently deleted", data: publicWorkType(item), relatedCount: 0 });
+    }
+    await softDeleteMasterItem(item, "workType", req);
+    res.json({ message: "Work type moved to trash", data: publicWorkType(item), relatedCount: 0 });
   } catch (error) {
     res.status(400).json({ message: "Work type delete failed", error: error.message });
+  }
+});
+
+app.patch("/admin/work-types/:id/restore", requireAdmin, async (req, res) => {
+  try {
+    const item = await WorkType.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Work type not found" });
+    const duplicate = await WorkType.findOne({ _id: { $ne: item._id }, code: item.code, isDeleted: { $ne: true }, $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] });
+    if (duplicate) return res.status(409).json({ errorCode: "MASTER_CODE_CONFLICT", message: "Mã nội dung công việc đã tồn tại, không thể khôi phục." });
+    item.isDeleted = false;
+    item.deletedAt = null;
+    item.deletedBy = "";
+    item.trashType = "";
+    item.updatedAt = new Date();
+    await item.save();
+    res.json({ message: "Work type restored", data: publicWorkType(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Work type restore failed", error: error.message });
   }
 });
 
@@ -3819,12 +4011,45 @@ app.delete("/admin/skills/:id", requireAdmin, async (req, res) => {
   try {
     const item = await Skill.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Skill not found" });
-    item.active = false;
-    item.updatedAt = new Date();
-    await item.save();
-    res.json({ message: "Skill hidden", data: publicSkill(item) });
+    const counts = await skillRelationCounts(item);
+    const relatedCount = totalMasterRelations(counts);
+    const protected = isMasterProtected(item);
+    const canDelete = !protected && relatedCount === 0;
+    console.log("[SKILL_DELETE_CHECK]", {
+      skillId: String(item._id || ""),
+      skillCode: item.code || "",
+      ...counts,
+      protected,
+      canDelete
+    });
+    if (protected) return res.status(409).json(protectedMasterError(publicSkill(item)));
+    if (relatedCount > 0) return res.status(409).json(masterRelationError(publicSkill(item), counts));
+    if (req.query.permanent === "true") {
+      await item.deleteOne();
+      return res.json({ message: "Skill permanently deleted", data: publicSkill(item), relatedCount: 0 });
+    }
+    await softDeleteMasterItem(item, "skill", req);
+    res.json({ message: "Skill moved to trash", data: publicSkill(item), relatedCount: 0 });
   } catch (error) {
     res.status(400).json({ message: "Skill delete failed", error: error.message });
+  }
+});
+
+app.patch("/admin/skills/:id/restore", requireAdmin, async (req, res) => {
+  try {
+    const item = await Skill.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Skill not found" });
+    const duplicate = await Skill.findOne({ _id: { $ne: item._id }, code: item.code, isDeleted: { $ne: true }, $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] });
+    if (duplicate) return res.status(409).json({ errorCode: "MASTER_CODE_CONFLICT", message: "Mã kỹ năng đã tồn tại, không thể khôi phục." });
+    item.isDeleted = false;
+    item.deletedAt = null;
+    item.deletedBy = "";
+    item.trashType = "";
+    item.updatedAt = new Date();
+    await item.save();
+    res.json({ message: "Skill restored", data: publicSkill(item) });
+  } catch (error) {
+    res.status(400).json({ message: "Skill restore failed", error: error.message });
   }
 });
 
