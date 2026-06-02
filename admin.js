@@ -1557,6 +1557,7 @@
       sort: "priority",
       requestViewMode: "table",
       trashCategory: "customers",
+      trashSubcategory: "all",
       trashSearch: ""
     },
     settingsTab: "overview",
@@ -5483,12 +5484,56 @@
 
   function trashCategories() {
     return [
-      ["customers", t("customers")],
-      ["requests", t("requests")],
+      ["customers", settingText("Quản lý khách hàng", "\u9867\u5ba2\u7ba1\u7406")],
+      ["requests", settingText("Quản lý yêu cầu", "\u4f9d\u983c\u7ba1\u7406")],
       ["quotes", t("quotes")],
-      ["staff", t("staff")],
+      ["staff", settingText("Quản lý staff", "\u30b9\u30bf\u30c3\u30d5\u7ba1\u7406")],
       ["settings", settingText("Cài đặt hệ thống", "\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a")]
     ];
+  }
+
+  function trashSubcategories(module) {
+    const map = {
+      customers: [
+        ["all", t("all")],
+        ["customer", settingText("Tài khoản khách hàng", "\u9867\u5ba2\u30a2\u30ab\u30a6\u30f3\u30c8")],
+        ["pendingCustomer", settingText("Khách chờ duyệt", "\u627f\u8a8d\u5f85\u3061\u9867\u5ba2")],
+        ["blockedCustomer", settingText("Khách đã khóa / đã ẩn", "\u30ed\u30c3\u30af\u30fb\u975e\u8868\u793a\u9867\u5ba2")]
+      ],
+      requests: [
+        ["all", t("all")],
+        ["request", settingText("Yêu cầu đã xóa", "\u524a\u9664\u6e08\u307f\u4f9d\u983c")],
+        ["requestFile", settingText("File yêu cầu", "\u4f9d\u983c\u30d5\u30a1\u30a4\u30eb")],
+        ["requestHistory", settingText("Lịch sử xử lý / ghi chú", "\u5bfe\u5fdc\u5c65\u6b74\u30fb\u30e1\u30e2")]
+      ],
+      quotes: [
+        ["all", t("all")],
+        ["quote", settingText("Báo giá đã xóa", "\u524a\u9664\u6e08\u307f\u898b\u7a4d")],
+        ["quoteFile", settingText("File báo giá", "\u898b\u7a4d\u30d5\u30a1\u30a4\u30eb")],
+        ["quoteFeedback", settingText("Phản hồi báo giá", "\u898b\u7a4d\u30d5\u30a3\u30fc\u30c9\u30d0\u30c3\u30af")]
+      ],
+      staff: [
+        ["all", t("all")],
+        ["staff", settingText("Staff đã xóa", "\u524a\u9664\u6e08\u307f\u30b9\u30bf\u30c3\u30d5")],
+        ["staffMapping", "Staff mapping"],
+        ["assignmentHistory", settingText("Lịch sử phân công", "\u5272\u308a\u5f53\u3066\u5c65\u6b74")]
+      ],
+      settings: [
+        ["all", t("all")],
+        ["department", settingText("Bộ phận", "\u90e8\u9580")],
+        ["workType", settingText("Nội dung công việc", "\u696d\u52d9\u5185\u5bb9")],
+        ["skill", settingText("Kỹ năng", "\u30b9\u30ad\u30eb")]
+      ]
+    };
+    return map[module] || [["all", t("all")]];
+  }
+
+  function trashSubcategoryLabel(module, subtype) {
+    return (trashSubcategories(module).find(([key]) => key === subtype) || [subtype, subtype])[1];
+  }
+
+  function trashCategoryLabel(category) {
+    return (trashCategories().find(([key]) => key === category) || [category, category])[1];
   }
 
   function deletedRowsFor(category) {
@@ -5521,6 +5566,132 @@
     return deletedRowsFor(category).filter(item => !text || trashRowSearchText(item, category).includes(text));
   }
 
+  function normalizeTrashRow(item, options) {
+    const id = options.id || getRowId(item) || item.id || item._id || item.quoteCode || getRequestDisplayId(item);
+    return {
+      id,
+      module: options.module,
+      type: options.type,
+      typeLabel: options.typeLabel || trashSubcategoryLabel(options.module, options.type),
+      actionType: options.actionType || options.module,
+      name: options.name || "-",
+      code: options.code || id || "-",
+      status: options.status || "-",
+      deletedAt: item?.deletedAt || options.deletedAt || "",
+      deletedBy: item?.deletedBy || item?.deletedByName || options.deletedBy || "-",
+      description: options.description || "",
+      canRestore: options.canRestore !== false,
+      canDeleteForever: options.canDeleteForever !== false,
+      originalData: item
+    };
+  }
+
+  function customerTrashType(user) {
+    const status = normalizeUserStatusValue(user.previousStatus || user.status);
+    if (status === "pendingApproval" || status === "pending") return "pendingCustomer";
+    if (status === "blocked" || status === "hidden" || status === "inactive" || user.active === false) return "blockedCustomer";
+    return "customer";
+  }
+
+  function settingsTrashType(kind) {
+    if (kind === "departments") return "department";
+    if (kind === "workTypes") return "workType";
+    if (kind === "skills") return "skill";
+    return "settings";
+  }
+
+  function allTrashRows() {
+    const customerRows = deletedRowsFor("customers").map(user => {
+      const type = customerTrashType(user);
+      return normalizeTrashRow(user, {
+        module: "customers",
+        type,
+        actionType: "customers",
+        typeLabel: trashSubcategoryLabel("customers", type),
+        name: user.name || user.company || user.companyName || user.phone || "-",
+        code: getRowId(user) || user.phone || user.email || "-",
+        status: customerStatusLabel(user.previousStatus || user.status || "deleted"),
+        description: [user.email, user.phone, user.company || user.companyName].filter(Boolean).join(" ")
+      });
+    });
+    const requestRows = deletedRowsFor("requests").map(item => normalizeTrashRow(item, {
+      module: "requests",
+      type: "request",
+      actionType: "requests",
+      typeLabel: trashSubcategoryLabel("requests", "request"),
+      name: getRequestContent(item) || getRequestDisplayId(item),
+      code: getRequestDisplayId(item) || getRowId(item),
+      status: formatStatus(item.status),
+      description: [getCustomerName(item), item.phone, item.address].filter(Boolean).join(" ")
+    }));
+    const quoteRows = deletedRowsFor("quotes").map(item => {
+      const id = getRowId(item) || item.quoteCode || item.id;
+      return normalizeTrashRow(item, {
+        module: "quotes",
+        type: "quote",
+        actionType: "quotes",
+        typeLabel: trashSubcategoryLabel("quotes", "quote"),
+        name: item.quoteCode || item.projectName || item.title || id || "-",
+        code: item.quoteCode || id || "-",
+        status: item.status || "-",
+        description: [item.customerName || item.name, item.requestId].filter(Boolean).join(" ")
+      });
+    });
+    const staffRows = deletedRowsFor("staff").map(staff => normalizeTrashRow(staff, {
+      module: "staff",
+      type: "staff",
+      actionType: "staff",
+      typeLabel: trashSubcategoryLabel("staff", "staff"),
+      name: staff.name || "-",
+      code: getRowId(staff) || staff.email || "-",
+      status: staffStatusMap[staff.status] || staff.status || "-",
+      description: [staffDepartment(staff), staff.workContent || staff.skills].filter(Boolean).join(" ")
+    }));
+    const settingRows = settingsTrashRows().map(item => {
+      const type = settingsTrashType(item.trashKind);
+      return normalizeTrashRow(item, {
+        module: "settings",
+        type,
+        actionType: "settings",
+        typeLabel: trashSubcategoryLabel("settings", type),
+        name: workMasterLabel(item) || item.code || "-",
+        code: item.code || getRowId(item) || "-",
+        status: item.active === false ? t("hidden") : t("active"),
+        description: workMasterDescription(item)
+      });
+    });
+    return [...customerRows, ...requestRows, ...quoteRows, ...staffRows, ...settingRows].sort((a, b) => new Date(b.deletedAt || 0) - new Date(a.deletedAt || 0));
+  }
+
+  function trashRowsFor(module, subtype = "all") {
+    return allTrashRows().filter(row => row.module === module && (subtype === "all" || row.type === subtype));
+  }
+
+  function trashSearchText(row) {
+    return [
+      row.typeLabel,
+      row.name,
+      row.code,
+      row.id,
+      row.status,
+      row.deletedBy,
+      row.description
+    ].join(" ").toLowerCase();
+  }
+
+  function filteredTrashRows(module, subtype, search = state.filters.trashSearch || "") {
+    const text = String(search || "").trim().toLowerCase();
+    return trashRowsFor(module, subtype).filter(row => !text || trashSearchText(row).includes(text));
+  }
+
+  function trashModuleCounts() {
+    return Object.fromEntries(trashCategories().map(([module]) => [module, trashRowsFor(module, "all").length]));
+  }
+
+  function trashSubcategoryCounts(module) {
+    return Object.fromEntries(trashSubcategories(module).map(([type]) => [type, trashRowsFor(module, type).length]));
+  }
+
   function settingsTrashRows() {
     const mapItem = (item, kind) => Object.assign({}, item, { trashKind: kind });
     return [
@@ -5539,31 +5710,41 @@
 
   function renderTrash() {
     const category = state.filters.trashCategory || "customers";
+    const availableSubcategories = trashSubcategories(category).map(([key]) => key);
+    const activeSubcategory = availableSubcategories.includes(state.filters.trashSubcategory) ? state.filters.trashSubcategory : "all";
+    state.filters.trashSubcategory = activeSubcategory;
     const search = (state.filters.trashSearch || "").toLowerCase();
-    const rows = filteredDeletedRowsFor(category, search);
-    const counts = Object.fromEntries(trashCategories().map(([key]) => [key, filteredDeletedRowsFor(key, search).length]));
+    const rows = filteredTrashRows(category, activeSubcategory, search);
+    const counts = trashModuleCounts();
+    const subCounts = trashSubcategoryCounts(category);
     const tabs = trashCategories().map(([key, label]) => ({ key, label, count: counts[key] || 0 }));
+    const subtabs = trashSubcategories(category).map(([key, label]) => ({ key, label, count: subCounts[key] || 0 }));
     console.log("[TRASH_ACTIVE_TAB]", category);
+    console.log("[TRASH_ACTIVE_SUBTAB]", activeSubcategory);
     console.log("[TRASH_TABS_RENDER]", tabs);
-    console.log("[TRASH_FETCH_URL]", `/admin/trash?category=${encodeURIComponent(category)}`);
-    console.log("[TRASH_FETCH_RESULT]", { source: "admin-state", category, count: rows.length });
+    console.log("[TRASH_SUBTABS_RENDER]", subtabs);
+    console.log("[TRASH_FETCH_URL]", `/api/admin/trash?module=${encodeURIComponent(category)}&type=${encodeURIComponent(activeSubcategory)}`);
+    console.log("[TRASH_FETCH_RESULT]", { source: "admin-state", category, subcategory: activeSubcategory, count: rows.length });
     console.log("[TRASH_VISIBLE_ITEMS]", rows);
     $("viewRoot").innerHTML = `
-      <div class="page-intro"><p>${escapeHtml(t("trashSubtitle"))}</p></div>
-      <div class="request-status-row trash-status-row">
+      <div class="page-intro trash-intro"><span class="eyebrow">${escapeHtml(settingText("THÙNG RÁC", "\u30b4\u30df\u7bb1"))}</span><h1>${escapeHtml(t("trash"))}</h1><p>${escapeHtml(t("trashSubtitle"))}</p></div>
+      <div class="request-status-row trash-status-row trash-main-tabs">
         ${trashCategories().map(([key, label]) => `<button class="request-status-chip ${category === key ? "active" : ""}" type="button" data-trash-category="${escapeHtml(key)}"><span class="chip-label">${escapeHtml(label)}</span><b class="chip-count">${counts[key] || 0}</b></button>`).join("")}
+      </div>
+      <div class="trash-subtab-row">
+        ${trashSubcategories(category).map(([key, label]) => `<button class="trash-subtab-chip ${activeSubcategory === key ? "active" : ""}" type="button" data-trash-subcategory="${escapeHtml(key)}"><span>${escapeHtml(label)}</span><b>${subCounts[key] || 0}</b></button>`).join("")}
       </div>
       <div class="crm-filter-bar">
         <input class="filter-input" data-trash-search value="${escapeHtml(state.filters.trashSearch || "")}" placeholder="${escapeHtml(t("search"))}" />
       </div>
       <section class="section-card">
-        <div class="panel-head"><h2>${escapeHtml(trashTitle(category))}</h2><span class="note">${rows.length}</span></div>
-        <div class="panel-body crm-table-body">${renderTrashTable(category, rows)}</div>
+        <div class="panel-head"><h2>${escapeHtml(trashTitle(category, activeSubcategory))}</h2><span class="note">${rows.length}</span></div>
+        <div class="panel-body crm-table-body">${renderTrashTable(category, rows, activeSubcategory)}</div>
       </section>
     `;
   }
 
-  function trashTitle(category) {
+  function trashTitle(category, subtype = "all") {
     const map = {
       customers: settingText("Thùng rác khách hàng", "\u9867\u5ba2\u30b4\u30df\u7bb1"),
       requests: settingText("Thùng rác yêu cầu", "\u4f9d\u983c\u30b4\u30df\u7bb1"),
@@ -5571,10 +5752,17 @@
       staff: settingText("Thùng rác staff", "\u30b9\u30bf\u30c3\u30d5\u30b4\u30df\u7bb1"),
       settings: settingText("Thùng rác cài đặt hệ thống", "\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a\u30b4\u30df\u7bb1")
     };
-    return map[category] || t("trash");
+    const base = map[category] || t("trash");
+    return subtype === "all" ? base : `${base} - ${trashSubcategoryLabel(category, subtype)}`;
   }
 
-  function trashEmptyText(category) {
+  function trashEmptyText(category, subtype = "all") {
+    if (subtype !== "all") {
+      return settingText(
+        `Chưa có ${String(trashSubcategoryLabel(category, subtype)).toLowerCase()} nào trong thùng rác.`,
+        `${trashSubcategoryLabel(category, subtype)}はゴミ箱にありません。`
+      );
+    }
     const map = {
       customers: settingText("Chưa có khách hàng nào trong thùng rác.", "\u30b4\u30df\u7bb1\u306b\u9867\u5ba2\u306f\u3042\u308a\u307e\u305b\u3093\u3002"),
       requests: settingText("Chưa có yêu cầu nào trong thùng rác.", "\u30b4\u30df\u7bb1\u306b\u4f9d\u983c\u306f\u3042\u308a\u307e\u305b\u3093\u3002"),
@@ -5585,44 +5773,18 @@
     return map[category] || t("trashEmpty");
   }
 
-  function renderTrashTable(category, rows) {
-    if (!rows.length) return showEmptyState(trashEmptyText(category));
-    if (category === "customers") {
-      return `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table"><thead><tr><th>${t("customerName")}</th><th>${t("phone")}</th><th>${t("email")}</th><th>${t("deletedBeforeStatus")}</th><th>${t("deletedAt")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(user => {
-        const id = getRowId(user);
-        return `<tr><td>${escapeHtml(user.name || user.company || user.phone || "-")}</td><td>${escapeHtml(user.phone || "-")}</td><td>${escapeHtml(user.email || "-")}</td><td>${escapeHtml(customerStatusLabel(user.previousStatus || user.status || "deleted"))}</td><td>${escapeHtml(formatDate(user.deletedAt))}</td><td>${trashActions("customers", id)}</td></tr>`;
-      }).join("")}</tbody></table></div>`;
-    }
-    if (category === "requests") {
-      return `<div class="table-wrap crm-table-wrap"><table class="data-table request-table"><thead><tr><th>${t("id")}</th><th>${t("customer")}</th><th>${t("content")}</th><th>${t("status")}</th><th>${t("createdAt")}</th><th>${t("deletedAt")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(item => {
-        const id = getRowId(item) || getRequestDisplayId(item);
-        return `<tr><td>${escapeHtml(getRequestDisplayId(item))}</td><td>${escapeHtml(getCustomerName(item))}</td><td>${escapeHtml(getRequestContent(item))}</td><td>${escapeHtml(formatStatus(item.status))}</td><td>${escapeHtml(formatDate(item.createdAt))}</td><td>${escapeHtml(formatDate(item.deletedAt))}</td><td>${trashActions("requests", id)}</td></tr>`;
-      }).join("")}</tbody></table></div>`;
-    }
-    if (category === "quotes") {
-      return `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table"><thead><tr><th>${t("quote")}</th><th>${t("customer")}</th><th>${t("relatedRequest")}</th><th>${t("amount")}</th><th>${t("status")}</th><th>${t("deletedAt")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(item => {
-        const id = getRowId(item) || item.quoteCode || item.id;
-        const total = Array.isArray(item.items) ? item.items.reduce((sum, line) => sum + Number(line.quantity || 0) * Number(line.unitPrice || 0), 0) : "";
-        return `<tr><td>${escapeHtml(item.quoteCode || item.id || id)}</td><td>${escapeHtml(item.customerName || item.name || "-")}</td><td>${escapeHtml(item.requestId || "-")}</td><td>${escapeHtml(total || item.amount || "-")}</td><td>${escapeHtml(item.status || "-")}</td><td>${escapeHtml(formatDate(item.deletedAt))}</td><td>${trashActions("quotes", id)}</td></tr>`;
-      }).join("")}</tbody></table></div>`;
-    }
-    if (category === "settings") {
-      return `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table"><thead><tr><th>${escapeHtml(settingText("Loại", "\u7a2e\u5225"))}</th><th>${escapeHtml(settingText("Tên dữ liệu", "\u540d\u524d"))}</th><th>${escapeHtml(t("code"))}</th><th>${escapeHtml(t("status"))}</th><th>${escapeHtml(t("deletedAt"))}</th><th>${escapeHtml(settingText("Người xóa", "\u524a\u9664\u8005"))}</th><th>${escapeHtml(t("action"))}</th></tr></thead><tbody>${rows.map(item => {
-        const id = getRowId(item) || item.id;
-        return `<tr><td>${escapeHtml(settingsTrashTypeLabel(item.trashKind))}</td><td>${escapeHtml(workMasterLabel(item) || item.code || "-")}</td><td>${escapeHtml(item.code || "-")}</td><td>${renderMasterStatus(item)}</td><td>${escapeHtml(formatDate(item.deletedAt))}</td><td>${escapeHtml(item.deletedBy || "-")}</td><td>${trashActions("settings", id)}</td></tr>`;
-      }).join("")}</tbody></table></div>`;
-    }
-    return `<div class="table-wrap crm-table-wrap"><table class="data-table staff-table"><thead><tr><th>${t("staff")}</th><th>${t("department")}</th><th>${t("skillsWork")}</th><th>${t("status")}</th><th>${t("deletedAt")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(staff => {
-      const id = getRowId(staff);
-      return `<tr><td>${escapeHtml(staff.name || "-")}</td><td>${escapeHtml(staffDepartment(staff))}</td><td>${escapeHtml(staff.workContent || staff.skills || "-")}</td><td>${escapeHtml(staffStatusMap[staff.status] || staff.status || "-")}</td><td>${escapeHtml(formatDate(staff.deletedAt))}</td><td>${trashActions("staff", id)}</td></tr>`;
-    }).join("")}</tbody></table></div>`;
+  function renderTrashTable(category, rows, subtype = "all") {
+    if (!rows.length) return showEmptyState(trashEmptyText(category, subtype));
+    return `<div class="table-wrap crm-table-wrap trash-table-wrap"><table class="data-table crm-table"><thead><tr><th>${escapeHtml(settingText("Loại", "\u7a2e\u5225"))}</th><th>${escapeHtml(settingText("Tên dữ liệu", "\u540d\u524d"))}</th><th>${escapeHtml(settingText("Mã / ID", "\u30b3\u30fc\u30c9 / ID"))}</th><th>${escapeHtml(t("status"))}</th><th>${escapeHtml(t("deletedAt"))}</th><th>${escapeHtml(settingText("Người xóa", "\u524a\u9664\u8005"))}</th><th>${escapeHtml(t("action"))}</th></tr></thead><tbody>${rows.map(row => `<tr><td>${escapeHtml(row.typeLabel || "-")}</td><td><strong>${escapeHtml(row.name || "-")}</strong>${row.description ? `<small class="trash-row-note">${escapeHtml(row.description)}</small>` : ""}</td><td>${escapeHtml(row.code || row.id || "-")}</td><td>${escapeHtml(row.status || "-")}</td><td>${escapeHtml(formatDate(row.deletedAt))}</td><td>${escapeHtml(row.deletedBy || "-")}</td><td>${trashActions(row.actionType, row.id, row)}</td></tr>`).join("")}</tbody></table></div>`;
   }
 
-  function trashActions(type, id) {
+  function trashActions(type, id, row = {}) {
+    const disabledRestore = row.canRestore === false ? " disabled title=\"" + escapeHtml(settingText("Chưa hỗ trợ khôi phục loại dữ liệu này.", "\u3053\u306e\u30c7\u30fc\u30bf\u7a2e\u5225\u306e\u5fa9\u5143\u306f\u307e\u3060\u30b5\u30dd\u30fc\u30c8\u3055\u308c\u3066\u3044\u307e\u305b\u3093\u3002")) + "\"" : "";
+    const disabledDelete = row.canDeleteForever === false ? " disabled title=\"" + escapeHtml(settingText("Chưa hỗ trợ xóa vĩnh viễn loại dữ liệu này.", "\u3053\u306e\u30c7\u30fc\u30bf\u7a2e\u5225\u306e\u5b8c\u5168\u524a\u9664\u306f\u307e\u3060\u30b5\u30dd\u30fc\u30c8\u3055\u308c\u3066\u3044\u307e\u305b\u3093\u3002")) + "\"" : "";
     return `<div class="actions crm-actions">
       <button class="btn btn-soft trash-action-btn" type="button" data-trash-action="detail" data-trash-type="${escapeHtml(type)}" data-trash-id="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
-      <button class="btn btn-soft trash-action-btn" type="button" data-trash-action="restore" data-trash-type="${escapeHtml(type)}" data-trash-id="${escapeHtml(id)}">${escapeHtml(t("restore"))}</button>
-      <button class="btn btn-danger trash-action-btn danger" type="button" data-trash-action="permanent-delete" data-trash-type="${escapeHtml(type)}" data-trash-id="${escapeHtml(id)}">${escapeHtml(t("permanentDelete"))}</button>
+      <button class="btn btn-primary trash-action-btn" type="button" data-trash-action="restore" data-trash-type="${escapeHtml(type)}" data-trash-id="${escapeHtml(id)}"${disabledRestore}>${escapeHtml(t("restore"))}</button>
+      <button class="btn btn-danger trash-action-btn danger" type="button" data-trash-action="permanent-delete" data-trash-type="${escapeHtml(type)}" data-trash-id="${escapeHtml(id)}"${disabledDelete}>${escapeHtml(t("permanentDelete"))}</button>
     </div>`;
   }
 
@@ -8646,7 +8808,21 @@
         const nextCategory = trashCategoryButton.dataset.trashCategory || "customers";
         console.log("[TRASH_TAB_CLICK]", nextCategory);
         state.filters.trashCategory = nextCategory;
+        state.filters.trashSubcategory = "all";
         console.log("[TRASH_ACTIVE_TAB]", state.filters.trashCategory);
+        console.log("[TRASH_ACTIVE_SUBTAB]", state.filters.trashSubcategory);
+        renderTrash();
+        return;
+      }
+      const trashSubcategoryButton = event.target.closest("[data-trash-subcategory]");
+      if (trashSubcategoryButton && state.currentView === "trash") {
+        event.preventDefault();
+        event.stopPropagation();
+        const nextSubcategory = trashSubcategoryButton.dataset.trashSubcategory || "all";
+        console.log("[TRASH_SUBTAB_CLICK]", nextSubcategory);
+        state.filters.trashSubcategory = nextSubcategory;
+        console.log("[TRASH_ACTIVE_TAB]", state.filters.trashCategory || "customers");
+        console.log("[TRASH_ACTIVE_SUBTAB]", state.filters.trashSubcategory);
         renderTrash();
         return;
       }
@@ -8747,7 +8923,10 @@
         if (state.currentView === "requests" && filter !== "requestStatus") state.filters.requestStatus = "all";
         if (filter === "requestStatus") state.filters.requestStatus = value || "all";
         if (filter === "customerStatus") state.filters.customerStatus = value || "all";
-        if (filter === "trashCategory") state.filters.trashCategory = value || "customers";
+        if (filter === "trashCategory") {
+          state.filters.trashCategory = value || "customers";
+          state.filters.trashSubcategory = "all";
+        }
         if (filter === "media") state.filters.media = value || "all";
         if (filter === "notification") state.currentView = "notifications";
         renderCurrentView();

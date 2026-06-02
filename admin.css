@@ -361,6 +361,13 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .request-status-chip[data-trash-category] { cursor: pointer; pointer-events: auto; user-select: none; }
 .request-status-chip[data-trash-category] .chip-label,
 .request-status-chip[data-trash-category] .chip-count { pointer-events: none; }
+.trash-main-tabs { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.trash-subtab-row { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; margin: 0 0 12px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
+.trash-subtab-chip { min-height: 38px; border: 1px solid var(--border); background: #fff; color: var(--muted); border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; padding: 0 13px; font-weight: 900; white-space: nowrap; cursor: pointer; pointer-events: auto; user-select: none; }
+.trash-subtab-chip b { min-width: 22px; height: 22px; border-radius: 999px; background: #f1f5f9; color: var(--muted); display: inline-grid; place-items: center; font-size: 11px; }
+.trash-subtab-chip.active { color: var(--primary); border-color: rgba(37, 99, 235, .28); background: #eff6ff; }
+.trash-subtab-chip.active b { background: #dbeafe; color: var(--primary); }
+.trash-row-note { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; font-weight: 750; line-height: 1.35; }
 .request-filter-bar { display: grid; grid-template-columns: minmax(240px, 1.6fr) minmax(112px, .55fr) repeat(5, minmax(0, 1fr)); gap: 14px; align-items: center; width: 100%; min-width: 0; max-width: 100%; overflow: visible; margin-bottom: 14px; }
 .request-filter-bar > * { min-width: 0; }
 .request-search-input,
