@@ -5500,6 +5500,27 @@
     return [];
   }
 
+  function trashRowSearchText(item, category) {
+    if (!item) return "";
+    if (category === "settings") {
+      return [
+        settingsTrashTypeLabel(item.trashKind),
+        workMasterLabel(item),
+        workMasterDescription(item),
+        item.code,
+        item.deletedBy,
+        item.trashKind,
+        item.trashType
+      ].join(" ").toLowerCase();
+    }
+    return JSON.stringify(item || {}).toLowerCase();
+  }
+
+  function filteredDeletedRowsFor(category, search = state.filters.trashSearch || "") {
+    const text = String(search || "").trim().toLowerCase();
+    return deletedRowsFor(category).filter(item => !text || trashRowSearchText(item, category).includes(text));
+  }
+
   function settingsTrashRows() {
     const mapItem = (item, kind) => Object.assign({}, item, { trashKind: kind });
     return [
@@ -5519,8 +5540,8 @@
   function renderTrash() {
     const category = state.filters.trashCategory || "customers";
     const search = (state.filters.trashSearch || "").toLowerCase();
-    const rows = deletedRowsFor(category).filter(item => JSON.stringify(item || {}).toLowerCase().includes(search));
-    const counts = Object.fromEntries(trashCategories().map(([key]) => [key, deletedRowsFor(key).length]));
+    const rows = filteredDeletedRowsFor(category, search);
+    const counts = Object.fromEntries(trashCategories().map(([key]) => [key, filteredDeletedRowsFor(key, search).length]));
     $("viewRoot").innerHTML = `
       <div class="page-intro"><p>${escapeHtml(t("trashSubtitle"))}</p></div>
       <div class="request-status-row">
@@ -5569,9 +5590,9 @@
       }).join("")}</tbody></table></div>`;
     }
     if (category === "settings") {
-      return `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table"><thead><tr><th>${escapeHtml(settingText("Loại", "\u7a2e\u5225"))}</th><th>${escapeHtml(settingText("Tên dữ liệu", "\u540d\u524d"))}</th><th>${escapeHtml(t("code"))}</th><th>${escapeHtml(t("deletedAt"))}</th><th>${escapeHtml(settingText("Người xóa", "\u524a\u9664\u8005"))}</th><th>${escapeHtml(t("action"))}</th></tr></thead><tbody>${rows.map(item => {
+      return `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table"><thead><tr><th>${escapeHtml(settingText("Loại", "\u7a2e\u5225"))}</th><th>${escapeHtml(settingText("Tên dữ liệu", "\u540d\u524d"))}</th><th>${escapeHtml(t("code"))}</th><th>${escapeHtml(t("status"))}</th><th>${escapeHtml(t("deletedAt"))}</th><th>${escapeHtml(settingText("Người xóa", "\u524a\u9664\u8005"))}</th><th>${escapeHtml(t("action"))}</th></tr></thead><tbody>${rows.map(item => {
         const id = getRowId(item) || item.id;
-        return `<tr><td>${escapeHtml(settingsTrashTypeLabel(item.trashKind))}</td><td>${escapeHtml(workMasterLabel(item) || item.code || "-")}</td><td>${escapeHtml(item.code || "-")}</td><td>${escapeHtml(formatDate(item.deletedAt))}</td><td>${escapeHtml(item.deletedBy || "-")}</td><td>${trashActions("settings", id)}</td></tr>`;
+        return `<tr><td>${escapeHtml(settingsTrashTypeLabel(item.trashKind))}</td><td>${escapeHtml(workMasterLabel(item) || item.code || "-")}</td><td>${escapeHtml(item.code || "-")}</td><td>${renderMasterStatus(item)}</td><td>${escapeHtml(formatDate(item.deletedAt))}</td><td>${escapeHtml(item.deletedBy || "-")}</td><td>${trashActions("settings", id)}</td></tr>`;
       }).join("")}</tbody></table></div>`;
     }
     return `<div class="table-wrap crm-table-wrap"><table class="data-table staff-table"><thead><tr><th>${t("staff")}</th><th>${t("department")}</th><th>${t("skillsWork")}</th><th>${t("status")}</th><th>${t("deletedAt")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(staff => {
@@ -5699,33 +5720,49 @@
 
   async function restoreTrashItem(type, id) {
     if (!await confirmAction({ title: t("restoreTrashTitle"), message: t("restoreTrashText"), confirmLabel: t("restore") })) return;
-    let response;
-    if (type === "customers") response = await AdminAPI.updateUser(id, { status: "active" });
-    if (type === "requests") response = await AdminAPI.restoreRequest(id);
-    if (type === "quotes") response = await AdminAPI.restoreQuote(id);
-    if (type === "staff") response = await AdminAPI.restoreStaff(id);
-    if (type === "settings") response = await restoreSettingsTrashItem(id);
-    if (!response) {
-      toast(t("restorePlanned"));
-      return;
+    try {
+      let response;
+      if (type === "customers") response = await AdminAPI.updateUser(id, { status: "active" });
+      if (type === "requests") response = await AdminAPI.restoreRequest(id);
+      if (type === "quotes") response = await AdminAPI.restoreQuote(id);
+      if (type === "staff") response = await AdminAPI.restoreStaff(id);
+      if (type === "settings") response = await restoreSettingsTrashItem(id);
+      if (!response) {
+        toast(t("restorePlanned"));
+        return;
+      }
+      updateTrashState(type, response, id);
+      closeDrawer();
+      toast(type === "settings" ? settingText("Đã khôi phục dữ liệu.", "データを復元しました。") : t("restoredSuccess"));
+      renderCurrentView();
+    } catch (error) {
+      console.error(error);
+      const message = error?.errorCode === "MASTER_CODE_CONFLICT"
+        ? settingText("Mã này đã tồn tại, không thể khôi phục.", "コードがすでに存在するため復元できません。")
+        : error?.message || t("failed");
+      toast(message);
     }
-    updateTrashState(type, response, id);
-    closeDrawer();
-    toast(t("restoredSuccess"));
-    renderCurrentView();
   }
 
   async function permanentDeleteTrashItem(type, id) {
     if (!await confirmAction({ title: t("permanentDeleteTrashTitle"), message: t("permanentDeleteTrashText"), confirmLabel: t("permanentDelete"), danger: true })) return;
-    if (type === "customers") await AdminAPI.deleteUser(id, true);
-    if (type === "requests") await AdminAPI.deleteRequest(id, true);
-    if (type === "quotes") await AdminAPI.deleteQuote(id, true);
-    if (type === "staff") await AdminAPI.deleteStaff(id, true);
-    if (type === "settings") await permanentDeleteSettingsTrashItem(id);
-    removeTrashState(type, id);
-    closeDrawer();
-    toast(t("permanentDeletedSuccess"));
-    renderCurrentView();
+    try {
+      if (type === "customers") await AdminAPI.deleteUser(id, true);
+      if (type === "requests") await AdminAPI.deleteRequest(id, true);
+      if (type === "quotes") await AdminAPI.deleteQuote(id, true);
+      if (type === "staff") await AdminAPI.deleteStaff(id, true);
+      if (type === "settings") await permanentDeleteSettingsTrashItem(id);
+      removeTrashState(type, id);
+      closeDrawer();
+      toast(type === "settings" ? settingText("Đã xóa vĩnh viễn.", "完全に削除しました。") : t("permanentDeletedSuccess"));
+      renderCurrentView();
+    } catch (error) {
+      console.error(error);
+      const message = (error?.errorCode === "MASTER_HAS_RELATIONS" || error?.errorCode === "DEPARTMENT_HAS_RELATIONS")
+        ? settingText("Dữ liệu này vẫn còn liên kết, không thể xóa vĩnh viễn.", "このデータはまだ関連付けられているため完全に削除できません。")
+        : error?.message || t("failed");
+      toast(message);
+    }
   }
 
   function updateTrashState(type, response, id) {

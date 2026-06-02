@@ -1637,6 +1637,35 @@ async function loadWorkMaster({ activeOnly = false } = {}) {
   };
 }
 
+function publicSettingsTrashItem(item, type) {
+  const data = item && item.toObject ? item.toObject() : { ...(item || {}) };
+  const name = data.name || data.nameVi || data.nameJa || data.code || "";
+  const description = data.description || data.descriptionVi || data.descriptionJa || "";
+  return {
+    id: String(data._id || data.id || ""),
+    type,
+    typeLabel: type === "department" ? "Bộ phận" : type === "workType" ? "Nội dung công việc" : type === "skill" ? "Kỹ năng" : "Cài đặt",
+    name,
+    code: data.code || "",
+    description,
+    deletedAt: data.deletedAt || null,
+    deletedBy: data.deletedBy || "",
+    canRestore: true,
+    canDeleteForever: true,
+    originalData: data
+  };
+}
+
+async function loadSettingsTrash(type = "settings") {
+  const deletedQuery = { isDeleted: true };
+  const jobs = [];
+  if (type === "settings" || type === "department") jobs.push(Department.find(deletedQuery).sort({ deletedAt: -1 }).then(rows => rows.map(item => publicSettingsTrashItem(item, "department"))));
+  if (type === "settings" || type === "workType") jobs.push(WorkType.find(deletedQuery).sort({ deletedAt: -1 }).then(rows => rows.map(item => publicSettingsTrashItem(item, "workType"))));
+  if (type === "settings" || type === "skill") jobs.push(Skill.find(deletedQuery).sort({ deletedAt: -1 }).then(rows => rows.map(item => publicSettingsTrashItem(item, "skill"))));
+  const groups = await Promise.all(jobs);
+  return groups.flat().sort((a, b) => new Date(b.deletedAt || 0) - new Date(a.deletedAt || 0));
+}
+
 function daysLeftBeforePermanentDelete(deletedAt) {
   if (!deletedAt) return SOFT_DELETE_RETENTION_DAYS;
   const expiresAt = new Date(deletedAt).getTime() + SOFT_DELETE_RETENTION_MS;
@@ -3813,6 +3842,28 @@ app.get("/admin/work-master", requireAdmin, async (req, res) => {
   }
 });
 
+app.get("/api/admin/trash", requireAdmin, async (req, res) => {
+  try {
+    const type = cleanText(req.query.type || "settings");
+    const normalized = ["settings", "department", "workType", "skill"].includes(type) ? type : "settings";
+    const items = await loadSettingsTrash(normalized);
+    res.set("Cache-Control", "no-store");
+    res.json({ ok: true, type: normalized, count: items.length, items });
+  } catch (error) {
+    res.status(500).json({ message: "Trash load failed", error: error.message });
+  }
+});
+
+app.get("/api/admin/trash/settings", requireAdmin, async (req, res) => {
+  try {
+    const items = await loadSettingsTrash("settings");
+    res.set("Cache-Control", "no-store");
+    res.json({ ok: true, type: "settings", count: items.length, items });
+  } catch (error) {
+    res.status(500).json({ message: "Trash load failed", error: error.message });
+  }
+});
+
 app.post("/admin/departments", requireAdmin, async (req, res) => {
   try {
     const now = new Date();
@@ -4072,6 +4123,10 @@ app.patch("/admin/work-types/:id/restore", requireAdmin, async (req, res) => {
     if (!item) return res.status(404).json({ message: "Work type not found" });
     const duplicate = await WorkType.findOne({ _id: { $ne: item._id }, code: item.code, isDeleted: { $ne: true }, $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] });
     if (duplicate) return res.status(409).json({ errorCode: "MASTER_CODE_CONFLICT", message: "Mã nội dung công việc đã tồn tại, không thể khôi phục." });
+    if (item.departmentCode) {
+      const department = await Department.findOne({ code: item.departmentCode, isDeleted: { $ne: true }, $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] });
+      if (!department) item.departmentCode = "";
+    }
     item.isDeleted = false;
     item.deletedAt = null;
     item.deletedBy = "";
