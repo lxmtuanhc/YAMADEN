@@ -805,8 +805,10 @@ const StaffSchema = new mongoose.Schema({
 
 const DepartmentSchema = new mongoose.Schema({
   code: { type: String, unique: true, index: true },
+  name: String,
   nameVi: String,
   nameJa: String,
+  description: String,
   descriptionVi: String,
   descriptionJa: String,
   sortOrder: { type: Number, default: 0 },
@@ -842,8 +844,10 @@ const WorkTypeSchema = new mongoose.Schema({
   departmentId: String,
   workGroupCode: String,
   code: { type: String, unique: true, index: true },
+  name: String,
   nameVi: String,
   nameJa: String,
+  description: String,
   descriptionVi: String,
   descriptionJa: String,
   active: { type: Boolean, default: true },
@@ -864,8 +868,10 @@ const SkillSchema = new mongoose.Schema({
   departmentCodes: [String],
   department: String,
   departmentId: String,
+  name: String,
   nameVi: String,
   nameJa: String,
+  description: String,
   descriptionVi: String,
   descriptionJa: String,
   relatedWorkTypeIds: [String],
@@ -1275,6 +1281,15 @@ function cleanMasterPayload(body, fields) {
   }
   if (body.sortOrder !== undefined) payload.sortOrder = Number(body.sortOrder) || 0;
   if (body.active !== undefined) payload.active = body.active === true || body.active === "true";
+  return payload;
+}
+
+function normalizeLocalizedMasterPayload(payload) {
+  if (!payload || typeof payload !== "object") return payload;
+  if (!payload.name) payload.name = payload.nameVi || payload.nameJa || "";
+  if (!payload.nameVi && payload.name) payload.nameVi = payload.name;
+  if (!payload.description) payload.description = payload.descriptionVi || payload.descriptionJa || "";
+  if (!payload.descriptionVi && payload.description) payload.descriptionVi = payload.description;
   return payload;
 }
 
@@ -3794,8 +3809,8 @@ app.get("/admin/work-master", requireAdmin, async (req, res) => {
 app.post("/admin/departments", requireAdmin, async (req, res) => {
   try {
     const now = new Date();
-    const payload = cleanMasterPayload(req.body || {}, ["code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
-    payload.code = slugifyCode(payload.code || payload.nameVi || payload.nameJa, "department");
+    const payload = normalizeLocalizedMasterPayload(cleanMasterPayload(req.body || {}, ["code", "name", "nameVi", "nameJa", "description", "descriptionVi", "descriptionJa"]));
+    payload.code = slugifyCode(payload.code || payload.name || payload.nameVi || payload.nameJa, "department");
     payload.createdAt = now;
     payload.updatedAt = now;
     const item = await Department.create(payload);
@@ -3809,7 +3824,7 @@ app.put("/admin/departments/:id", requireAdmin, async (req, res) => {
   try {
     const item = await Department.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Department not found" });
-    const payload = cleanMasterPayload(req.body || {}, ["code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
+    const payload = normalizeLocalizedMasterPayload(cleanMasterPayload(req.body || {}, ["code", "name", "nameVi", "nameJa", "description", "descriptionVi", "descriptionJa"]));
     if (payload.code) {
       const nextCode = slugifyCode(payload.code, item.code);
       if (nextCode !== item.code) {
@@ -3973,10 +3988,10 @@ app.delete("/admin/work-groups/:id", requireAdmin, async (req, res) => {
 app.post("/admin/work-types", requireAdmin, async (req, res) => {
   try {
     const now = new Date();
-    const payload = cleanMasterPayload(req.body || {}, ["departmentCode", "workGroupCode", "code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
+    const payload = normalizeLocalizedMasterPayload(cleanMasterPayload(req.body || {}, ["departmentCode", "workGroupCode", "code", "name", "nameVi", "nameJa", "description", "descriptionVi", "descriptionJa"]));
     payload.departmentCode = slugifyCode(payload.departmentCode, "other");
     payload.workGroupCode = payload.workGroupCode ? slugifyCode(payload.workGroupCode, "") : "";
-    payload.code = slugifyCode(payload.code || payload.nameVi || payload.nameJa, "work_type");
+    payload.code = slugifyCode(payload.code || payload.name || payload.nameVi || payload.nameJa, "work_type");
     payload.createdAt = now;
     payload.updatedAt = now;
     const item = await WorkType.create(payload);
@@ -3990,7 +4005,7 @@ app.put("/admin/work-types/:id", requireAdmin, async (req, res) => {
   try {
     const item = await WorkType.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Work type not found" });
-    const payload = cleanMasterPayload(req.body || {}, ["departmentCode", "workGroupCode", "code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
+    const payload = normalizeLocalizedMasterPayload(cleanMasterPayload(req.body || {}, ["departmentCode", "workGroupCode", "code", "name", "nameVi", "nameJa", "description", "descriptionVi", "descriptionJa"]));
     if (payload.departmentCode) payload.departmentCode = slugifyCode(payload.departmentCode, item.departmentCode);
     if (payload.workGroupCode) payload.workGroupCode = slugifyCode(payload.workGroupCode, "");
     if (payload.code) payload.code = slugifyCode(payload.code, item.code);
@@ -4073,8 +4088,8 @@ app.get("/admin/skills", requireAdmin, async (req, res) => {
 app.post("/admin/skills", requireAdmin, async (req, res) => {
   try {
     const now = new Date();
-    const payload = cleanMasterPayload(req.body || {}, ["code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
-    payload.code = slugifyCode(payload.code || payload.nameVi || payload.nameJa, "skill");
+    const payload = normalizeLocalizedMasterPayload(cleanMasterPayload(req.body || {}, ["code", "name", "nameVi", "nameJa", "description", "descriptionVi", "descriptionJa"]));
+    payload.code = slugifyCode(payload.code || payload.name || payload.nameVi || payload.nameJa, "skill");
     payload.createdAt = now;
     payload.updatedAt = now;
     const item = await Skill.create(payload);
@@ -4088,7 +4103,7 @@ app.put("/admin/skills/:id", requireAdmin, async (req, res) => {
   try {
     const item = await Skill.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Skill not found" });
-    const payload = cleanMasterPayload(req.body || {}, ["code", "nameVi", "nameJa", "descriptionVi", "descriptionJa"]);
+    const payload = normalizeLocalizedMasterPayload(cleanMasterPayload(req.body || {}, ["code", "name", "nameVi", "nameJa", "description", "descriptionVi", "descriptionJa"]));
     if (payload.code) payload.code = slugifyCode(payload.code, item.code);
     Object.assign(item, payload, { updatedAt: new Date() });
     await item.save();

@@ -3026,12 +3026,26 @@
   }
 
   function getWorkItemLabel(item) {
-    if (!item) return "-";
+    return getLocalizedText(item, "name", state.lang) || "-";
+  }
+
+  function getLocalizedText(item, fieldBase, language = state.lang) {
+    if (!item) return "";
     if (typeof item === "string") return item;
-    if (state.lang === "ja") {
-      return item.nameJa || item.ja || item.labelJa || item.nameVi || item.vi || item.labelVi || item.name || item.label || item.code || "-";
+    const lang = language === "ja" ? "ja" : "vi";
+    const cap = fieldBase ? fieldBase.charAt(0).toUpperCase() + fieldBase.slice(1) : "";
+    const candidates = fieldBase === "description"
+      ? (lang === "ja"
+        ? [`${fieldBase}Ja`, fieldBase, `${fieldBase}Vi`]
+        : [`${fieldBase}Vi`, fieldBase, `${fieldBase}Ja`])
+      : (lang === "ja"
+        ? [`${fieldBase}Ja`, `label${cap}Ja`, "ja", fieldBase, "label", "title", `${fieldBase}Vi`, `label${cap}Vi`, "vi", "code"]
+        : [`${fieldBase}Vi`, `label${cap}Vi`, "vi", fieldBase, "label", "title", `${fieldBase}Ja`, `label${cap}Ja`, "ja", "code"]);
+    for (const key of candidates) {
+      const value = String(item?.[key] || "").trim();
+      if (value) return value;
     }
-    return item.nameVi || item.vi || item.labelVi || item.nameJa || item.ja || item.labelJa || item.name || item.label || item.code || "-";
+    return "";
   }
 
   function staffWorkChipList(items) {
@@ -3066,7 +3080,7 @@
   function departmentTokenSet() {
     const values = [];
     (state.workMaster?.departments || []).forEach(dept => {
-      values.push(dept.id, dept._id, dept.code, dept.departmentCode, dept.nameVi, dept.nameJa);
+      values.push(dept.id, dept._id, dept.code, dept.departmentCode, dept.name, dept.label, dept.nameVi, dept.nameJa);
     });
     return new Set(values.map(normalizeTag).filter(Boolean));
   }
@@ -3075,7 +3089,7 @@
     const departmentTokens = departmentTokenSet();
     [staff?.departmentCode, staff?.department, staff?.areas].forEach(value => {
       const dept = findDepartmentByCodeOrLabel(value);
-      [value, dept?.code, dept?.nameVi, dept?.nameJa].forEach(token => {
+      [value, dept?.code, dept?.name, dept?.label, dept?.nameVi, dept?.nameJa].forEach(token => {
         const normalized = normalizeTag(token);
         if (normalized) departmentTokens.add(normalized);
       });
@@ -3834,10 +3848,11 @@
   }
 
   function workMasterLabel(item) {
-    if (!item) return "";
-    return state.lang === "vi"
-      ? (item.nameVi || item.nameJa || item.code || "")
-      : (item.nameJa || item.nameVi || item.code || "");
+    return getLocalizedText(item, "name", state.lang);
+  }
+
+  function workMasterDescription(item) {
+    return getLocalizedText(item, "description", state.lang);
   }
 
   function activeMasterItems(type) {
@@ -3860,7 +3875,7 @@
     const normalized = normalizeTag(value);
     if (!normalized) return null;
     return (state.workMaster?.departments || []).find(item => {
-      return [item.code, item.departmentCode, item.id, item._id, item.nameVi, item.nameJa].some(candidate => normalizeTag(candidate) === normalized);
+      return [item.code, item.departmentCode, item.id, item._id, item.name, item.label, item.nameVi, item.nameJa].some(candidate => normalizeTag(candidate) === normalized);
     }) || null;
   }
 
@@ -4008,7 +4023,7 @@
   }
 
   function staffTagDepartmentKey(tag) {
-    const masterType = activeMasterItems("workTypes").find(item => [item.code, item.nameVi, item.nameJa].some(candidate => normalizeTag(candidate) === normalizeTag(tag)));
+    const masterType = activeMasterItems("workTypes").find(item => [item.code, item.name, item.label, item.nameVi, item.nameJa].some(candidate => normalizeTag(candidate) === normalizeTag(tag)));
     if (masterType) return masterType.departmentCode || "other";
     const normalized = normalizeTag(tag);
     const groups = staffWorkTagGroups();
@@ -4074,7 +4089,7 @@
     const normalized = normalizeTag(value);
     if (!normalized) return null;
     return (state.workMaster?.workTypes || []).find(item => {
-      return [item.id, item.code, item.nameVi, item.nameJa].some(candidate => normalizeTag(candidate) === normalized);
+      return [item.id, item.code, item.name, item.label, item.nameVi, item.nameJa].some(candidate => normalizeTag(candidate) === normalized);
     }) || null;
   }
 
@@ -4197,7 +4212,7 @@
     const workTypes = activeMasterItems("workTypes")
       .filter(item => item.departmentCode === departmentCode)
       .filter(item => {
-        const haystack = [item.code, item.nameVi, item.nameJa, item.descriptionVi, item.descriptionJa].join(" ").toLowerCase();
+        const haystack = [item.code, item.name, item.label, item.nameVi, item.nameJa, item.description, item.descriptionVi, item.descriptionJa].join(" ").toLowerCase();
         return !search || haystack.includes(search);
       });
     const selectedCount = selected.length
@@ -4206,7 +4221,7 @@
     const workTypeHtml = workTypes.length ? workTypes.map(item => {
       const key = workTypeKey(item);
       const checked = selectedIds.has(normalizeTag(key)) || selectedIds.has(normalizeTag(item.code));
-      const description = state.lang === "vi" ? item.descriptionVi || item.descriptionJa || "" : item.descriptionJa || item.descriptionVi || "";
+      const description = workMasterDescription(item);
       return `<label class="staff-work-type-option ${checked ? "selected" : ""}">
         <input type="checkbox" data-staff-worktype-item value="${escapeHtml(key)}" data-work-code="${escapeHtml(item.code || key)}" data-work-label="${escapeHtml(workMasterLabel(item))}" data-work-department="${escapeHtml(item.departmentCode || "")}" ${checked ? "checked" : ""}>
         <span><b>${escapeHtml(workMasterLabel(item))}</b>${description ? `<small>${escapeHtml(description)}</small>` : ""}</span>
@@ -5617,7 +5632,7 @@
         [settingText("Loại dữ liệu", "\u30c7\u30fc\u30bf\u7a2e\u5225"), settingsTrashTypeLabel(item.trashKind)],
         [settingText("Tên dữ liệu", "\u540d\u524d"), workMasterLabel(item) || item.code],
         [t("code"), item.code],
-        [settingText("Mô tả", "\u8aac\u660e"), item.descriptionVi || item.descriptionJa],
+        [settingText("Mô tả", "\u8aac\u660e"), workMasterDescription(item)],
         [t("deletedAt"), formatDate(item.deletedAt)],
         [settingText("Người xóa", "\u524a\u9664\u8005"), item.deletedBy || "-"]
       ];
@@ -5818,7 +5833,7 @@
   function renderWorkMasterTable(type) {
     const search = (state.filters.workMasterSearch || "").toLowerCase();
     const rows = visibleMasterItems(type).filter(item => {
-      const text = [item.code, item.nameVi, item.nameJa, item.descriptionVi, item.descriptionJa, item.departmentCode, item.workGroupCode].join(" ").toLowerCase();
+      const text = [item.code, item.name, item.label, item.nameVi, item.nameJa, item.description, item.descriptionVi, item.descriptionJa, item.departmentCode, item.workGroupCode].join(" ").toLowerCase();
       return !search || text.includes(search);
     });
     const departmentByCode = Object.fromEntries(visibleMasterItems("departments").map(item => [item.code, workMasterLabel(item)]));
@@ -5827,8 +5842,8 @@
       <thead><tr><th>${escapeHtml(t("code"))}</th><th>${escapeHtml(t("nameVi"))}</th><th>${escapeHtml(t("nameJa"))}</th><th>${escapeHtml(t("department"))}</th><th>${escapeHtml(t("workGroup"))}</th><th>${escapeHtml(t("sortOrder"))}</th><th>${escapeHtml(t("status"))}</th><th>${escapeHtml(t("action"))}</th></tr></thead>
       <tbody>${rows.length ? rows.map(item => `<tr>
         <td>${escapeHtml(item.code || "-")}</td>
-        <td>${escapeHtml(item.nameVi || "-")}</td>
-        <td>${escapeHtml(item.nameJa || "-")}</td>
+        <td>${escapeHtml(getLocalizedText(item, "name", "vi") || "-")}</td>
+        <td>${escapeHtml(getLocalizedText(item, "name", "ja") || "-")}</td>
         <td>${escapeHtml(departmentByCode[item.departmentCode] || item.departmentCode || "-")}</td>
         <td>${escapeHtml(groupByCode[item.workGroupCode] || item.workGroupCode || "-")}</td>
         <td>${escapeHtml(item.sortOrder ?? 0)}</td>
@@ -6712,7 +6727,7 @@
     ];
     if (meta.kind === "staffMap") return state.staff.slice(0, 5).map(staff => [escapeHtml(staff.name || staff.fullName || "-"), escapeHtml(staff.department || "-"), "-", "-", "active"]);
     if (meta.kind === "workTypes") return (activeMasterItems("workTypes").slice(0, 8).map(item => [escapeHtml(workMasterLabel(item)), "-", escapeHtml(item.departmentCode || "-"), "-", item.active === false ? "inactive" : "active", action]));
-    if (meta.kind === "departments") return (activeMasterItems("departments").slice(0, 8).map(item => [escapeHtml(workMasterLabel(item)), escapeHtml(item.descriptionVi || item.descriptionJa || "-"), item.active === false ? "inactive" : "active", "0", action]));
+    if (meta.kind === "departments") return (activeMasterItems("departments").slice(0, 8).map(item => [escapeHtml(workMasterLabel(item)), escapeHtml(workMasterDescription(item) || "-"), item.active === false ? "inactive" : "active", "0", action]));
     if (meta.kind === "skills") return [["\u96fb\u6c17\u5de5\u4e8b", "-", "active", action], ["\u7167\u660e", "-", "active", action], ["\u898b\u7a4d\u4f5c\u6210", "-", "active", action]];
     return [["Sample", escapeHtml(meta.desc), "layout", action]];
   }
@@ -6723,17 +6738,22 @@
 
   function masterPayloadFromForm(form) {
     const raw = new FormData(form);
-    return {
+    const payload = {
       departmentCode: String(raw.get("departmentCode") || ""),
       workGroupCode: String(raw.get("workGroupCode") || ""),
       code: String(raw.get("code") || "").trim(),
+      name: String(raw.get("name") || "").trim(),
       nameVi: String(raw.get("nameVi") || "").trim(),
       nameJa: String(raw.get("nameJa") || "").trim(),
+      description: String(raw.get("description") || "").trim(),
       descriptionVi: String(raw.get("descriptionVi") || "").trim(),
       descriptionJa: String(raw.get("descriptionJa") || "").trim(),
       sortOrder: Number(raw.get("sortOrder") || 0),
       active: raw.get("active") === "on"
     };
+    if (!payload.name) payload.name = payload.nameVi || payload.nameJa;
+    if (!payload.description) payload.description = payload.descriptionVi || payload.descriptionJa;
+    return payload;
   }
 
   async function saveWorkMasterForm(form) {
@@ -6974,7 +6994,7 @@
   }
 
   function departmentReferenceValues(department) {
-    return [department?.code, department?.nameVi, department?.nameJa, department?.id, department?._id]
+    return [department?.code, department?.name, department?.label, department?.nameVi, department?.nameJa, department?.id, department?._id]
       .map(value => String(value || "").trim())
       .filter(Boolean);
   }
@@ -7105,14 +7125,14 @@
       const actions = `<button class="mini-button" type="button" data-staff-work-edit="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button> <button class="mini-button" type="button" data-staff-work-status="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}" data-master-active="${item.active === false ? "true" : "false"}">${escapeHtml(item.active === false ? t("show") : t("hide"))}</button>${deleteAction}`;
       if (meta.kind === "departments") {
         const relationCounts = departmentRelationCounts(item);
-        return [label, escapeHtml(item.code || "-"), escapeHtml(item.descriptionVi || item.descriptionJa || "-"), renderMasterStatus(item), escapeHtml(relationCounts.staff), actions];
+        return [label, escapeHtml(item.code || "-"), escapeHtml(workMasterDescription(item) || "-"), renderMasterStatus(item), escapeHtml(relationCounts.staff), actions];
       }
       if (meta.kind === "workTypes") {
         const dept = findDepartmentByCodeOrLabel(item.departmentCode);
-        return [label, escapeHtml(item.code || "-"), escapeHtml(dept ? workMasterLabel(dept) : item.departmentCode || "-"), escapeHtml(item.descriptionVi || item.descriptionJa || "-"), renderMasterStatus(item), actions];
+        return [label, escapeHtml(item.code || "-"), escapeHtml(dept ? workMasterLabel(dept) : item.departmentCode || "-"), escapeHtml(workMasterDescription(item) || "-"), renderMasterStatus(item), actions];
       }
       const related = toList(item.relatedWorkTypeIds).map(value => workMasterLabel(findWorkTypeByValue(value)) || value).filter(Boolean).join(", ");
-      return [label, escapeHtml(item.code || "-"), escapeHtml(item.descriptionVi || item.descriptionJa || "-"), escapeHtml(related || "-"), renderMasterStatus(item), actions];
+      return [label, escapeHtml(item.code || "-"), escapeHtml(workMasterDescription(item) || "-"), escapeHtml(related || "-"), renderMasterStatus(item), actions];
     });
     return settingsTable(meta.headers, rows, t("noData"));
   }
@@ -7169,7 +7189,7 @@
           <span>${escapeHtml(settingText("Các trường bổ sung có thể để trống.", "\u8ffd\u52a0\u9805\u76ee\u306f\u7a7a\u6b04\u3067\u3082\u69cb\u3044\u307e\u305b\u3093\u3002"))}</span>
         </div>
         <div class="settings-real-form-grid settings-department-display-grid">
-          <label><span>${escapeHtml(settingText("Tên tiếng Nhật", "\u65e5\u672c\u8a9e\u540d"))}</span><input name="nameJa" value="${masterFormValue(item, "nameJa")}" placeholder="${escapeHtml(settingText("Nếu trống sẽ dùng tên bộ phận", "\u7a7a\u6b04\u306e\u5834\u5408\u306f\u90e8\u9580\u540d\u3092\u4f7f\u7528"))}"></label>
+          <label><span>${escapeHtml(settingText("Tên tiếng Nhật", "\u65e5\u672c\u8a9e\u540d"))}</span><input name="nameJa" data-department-name-alt value="${masterFormValue(item, "nameJa")}" placeholder="${escapeHtml(settingText("Nếu trống sẽ dùng tên bộ phận", "\u7a7a\u6b04\u306e\u5834\u5408\u306f\u90e8\u9580\u540d\u3092\u4f7f\u7528"))}"></label>
           <label><span>${escapeHtml(settingText("Sắp xếp", "\u4e26\u3073\u9806"))}</span><input name="sortOrder" type="number" value="${escapeHtml(item?.sortOrder ?? 0)}"></label>
           <label class="settings-field-full"><span>${escapeHtml(settingText("Mô tả tiếng Việt", "\u30d9\u30c8\u30ca\u30e0\u8a9e\u8aac\u660e"))}</span><textarea name="descriptionVi" rows="2">${masterFormValue(item, "descriptionVi")}</textarea></label>
           <label class="settings-field-full"><span>${escapeHtml(settingText("Mô tả tiếng Nhật", "\u65e5\u672c\u8a9e\u8aac\u660e"))}</span><textarea name="descriptionJa" rows="2">${masterFormValue(item, "descriptionJa")}</textarea></label>
@@ -7217,13 +7237,17 @@
     const payload = {
       departmentCode: String(raw.get("departmentCode") || ""),
       code: String(raw.get("code") || "").trim(),
+      name: String(raw.get("name") || "").trim(),
       nameVi: String(raw.get("nameVi") || "").trim(),
       nameJa: String(raw.get("nameJa") || "").trim(),
+      description: String(raw.get("description") || "").trim(),
       descriptionVi: String(raw.get("descriptionVi") || "").trim(),
       descriptionJa: String(raw.get("descriptionJa") || "").trim(),
       sortOrder: Number(raw.get("sortOrder") || 0),
       active: raw.get("active") === "on"
     };
+    if (!payload.name) payload.name = payload.nameVi || payload.nameJa;
+    if (!payload.description) payload.description = payload.descriptionVi || payload.descriptionJa;
     if (kind === "skills") payload.relatedWorkTypeIds = raw.getAll("relatedWorkTypeIds").map(item => String(item || "").trim()).filter(Boolean);
     return payload;
   }
@@ -7248,7 +7272,7 @@
 
   function validateDepartmentForm(form, payload, id) {
     const errors = {};
-    if (!payload.nameVi) errors.nameVi = settingText("Vui lòng nhập tên bộ phận.", "部門名を入力してください。");
+    if (!payload.name && !payload.nameVi && !payload.nameJa) errors.nameVi = settingText("Vui lòng nhập tên bộ phận.", "部門名を入力してください。");
     if (!payload.code) errors.code = settingText("Vui lòng nhập mã bộ phận.", "部門コードを入力してください。");
     if (payload.code && !/^[a-z0-9_-]+$/.test(payload.code)) {
       errors.code = settingText("Mã bộ phận chỉ dùng chữ thường, số, gạch ngang hoặc gạch dưới.", "部門コードは小文字、数字、ハイフン、アンダースコアのみ使用できます。");
@@ -7270,7 +7294,7 @@
         toast(Object.values(errors)[0]);
         return;
       }
-    } else if (kind !== "staffMap" && (!payload.code || (!payload.nameVi && !payload.nameJa))) {
+    } else if (kind !== "staffMap" && (!payload.code || (!payload.name && !payload.nameVi && !payload.nameJa))) {
       toast(settingText("Tên và mã không được rỗng.", "\u540d\u524d\u3068\u30b3\u30fc\u30c9\u306f\u5fc5\u9808\u3067\u3059\u3002"));
       return;
     }
@@ -8269,7 +8293,7 @@
       if (state.currentView === "settings" && event.target.closest("[data-staff-work-form]")) {
         const form = event.target.closest("[data-staff-work-form]");
         if (form?.dataset.staffWorkForm === "departments") {
-          if (event.target.matches("[data-department-name]")) {
+          if (event.target.matches("[data-department-name], [data-department-name-alt]")) {
             const codeInput = form.querySelector("[data-department-code]");
             if (codeInput && !codeInput.readOnly && !codeInput.value.trim()) codeInput.value = departmentCodeFromName(event.target.value);
           }
