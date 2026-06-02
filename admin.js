@@ -5542,9 +5542,15 @@
     const search = (state.filters.trashSearch || "").toLowerCase();
     const rows = filteredDeletedRowsFor(category, search);
     const counts = Object.fromEntries(trashCategories().map(([key]) => [key, filteredDeletedRowsFor(key, search).length]));
+    const tabs = trashCategories().map(([key, label]) => ({ key, label, count: counts[key] || 0 }));
+    console.log("[TRASH_ACTIVE_TAB]", category);
+    console.log("[TRASH_TABS_RENDER]", tabs);
+    console.log("[TRASH_FETCH_URL]", `/admin/trash?category=${encodeURIComponent(category)}`);
+    console.log("[TRASH_FETCH_RESULT]", { source: "admin-state", category, count: rows.length });
+    console.log("[TRASH_VISIBLE_ITEMS]", rows);
     $("viewRoot").innerHTML = `
       <div class="page-intro"><p>${escapeHtml(t("trashSubtitle"))}</p></div>
-      <div class="request-status-row">
+      <div class="request-status-row trash-status-row">
         ${trashCategories().map(([key, label]) => `<button class="request-status-chip ${category === key ? "active" : ""}" type="button" data-trash-category="${escapeHtml(key)}"><span class="chip-label">${escapeHtml(label)}</span><b class="chip-count">${counts[key] || 0}</b></button>`).join("")}
       </div>
       <div class="crm-filter-bar">
@@ -5559,17 +5565,28 @@
 
   function trashTitle(category) {
     const map = {
-      customers: t("trashCustomers"),
-      requests: t("trashRequests"),
-      quotes: t("trashQuotes"),
-      staff: t("trashStaff"),
-      settings: settingText("Cài đặt hệ thống đã xóa", "\u524a\u9664\u6e08\u307f\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a")
+      customers: settingText("Thùng rác khách hàng", "\u9867\u5ba2\u30b4\u30df\u7bb1"),
+      requests: settingText("Thùng rác yêu cầu", "\u4f9d\u983c\u30b4\u30df\u7bb1"),
+      quotes: settingText("Thùng rác báo giá", "\u898b\u7a4d\u30b4\u30df\u7bb1"),
+      staff: settingText("Thùng rác staff", "\u30b9\u30bf\u30c3\u30d5\u30b4\u30df\u7bb1"),
+      settings: settingText("Thùng rác cài đặt hệ thống", "\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a\u30b4\u30df\u7bb1")
     };
     return map[category] || t("trash");
   }
 
+  function trashEmptyText(category) {
+    const map = {
+      customers: settingText("Chưa có khách hàng nào trong thùng rác.", "\u30b4\u30df\u7bb1\u306b\u9867\u5ba2\u306f\u3042\u308a\u307e\u305b\u3093\u3002"),
+      requests: settingText("Chưa có yêu cầu nào trong thùng rác.", "\u30b4\u30df\u7bb1\u306b\u4f9d\u983c\u306f\u3042\u308a\u307e\u305b\u3093\u3002"),
+      quotes: settingText("Chưa có báo giá nào trong thùng rác.", "\u30b4\u30df\u7bb1\u306b\u898b\u7a4d\u306f\u3042\u308a\u307e\u305b\u3093\u3002"),
+      staff: settingText("Chưa có staff nào trong thùng rác.", "\u30b4\u30df\u7bb1\u306b\u30b9\u30bf\u30c3\u30d5\u306f\u3042\u308a\u307e\u305b\u3093\u3002"),
+      settings: settingText("Chưa có dữ liệu cài đặt hệ thống nào trong thùng rác.", "\u30b4\u30df\u7bb1\u306b\u30b7\u30b9\u30c6\u30e0\u8a2d\u5b9a\u30c7\u30fc\u30bf\u306f\u3042\u308a\u307e\u305b\u3093\u3002")
+    };
+    return map[category] || t("trashEmpty");
+  }
+
   function renderTrashTable(category, rows) {
-    if (!rows.length) return showEmptyState(t("trashEmpty"));
+    if (!rows.length) return showEmptyState(trashEmptyText(category));
     if (category === "customers") {
       return `<div class="table-wrap crm-table-wrap"><table class="data-table crm-table"><thead><tr><th>${t("customerName")}</th><th>${t("phone")}</th><th>${t("email")}</th><th>${t("deletedBeforeStatus")}</th><th>${t("deletedAt")}</th><th>${t("action")}</th></tr></thead><tbody>${rows.map(user => {
         const id = getRowId(user);
@@ -8622,6 +8639,17 @@
 
     bind(document, "click", async event => {
       if (event.defaultPrevented) return;
+      const trashCategoryButton = event.target.closest("[data-trash-category]");
+      if (trashCategoryButton && state.currentView === "trash") {
+        event.preventDefault();
+        event.stopPropagation();
+        const nextCategory = trashCategoryButton.dataset.trashCategory || "customers";
+        console.log("[TRASH_TAB_CLICK]", nextCategory);
+        state.filters.trashCategory = nextCategory;
+        console.log("[TRASH_ACTIVE_TAB]", state.filters.trashCategory);
+        renderTrash();
+        return;
+      }
       if (event.target.closest("[data-close-media-preview]") || event.target.id === "mediaPreviewOverlay") {
         $("mediaPreviewOverlay")?.remove();
         return;
@@ -8855,13 +8883,6 @@
           console.error(error);
           toast(t("failed"));
         }
-        return;
-      }
-
-      const trashCategory = event.target.closest("[data-trash-category]");
-      if (trashCategory) {
-        state.filters.trashCategory = trashCategory.dataset.trashCategory || "customers";
-        renderTrash();
         return;
       }
 

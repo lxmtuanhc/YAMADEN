@@ -357,6 +357,10 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .request-status-chip .chip-count { width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; background: #f1f5f9; color: var(--muted); font-size: 11px; flex: 0 0 auto; }
 .request-status-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .request-status-chip.active .chip-count { background: rgba(255,255,255,.2); color: #fff; }
+.trash-status-row { position: relative; z-index: 2; }
+.request-status-chip[data-trash-category] { cursor: pointer; pointer-events: auto; user-select: none; }
+.request-status-chip[data-trash-category] .chip-label,
+.request-status-chip[data-trash-category] .chip-count { pointer-events: none; }
 .request-filter-bar { display: grid; grid-template-columns: minmax(240px, 1.6fr) minmax(112px, .55fr) repeat(5, minmax(0, 1fr)); gap: 14px; align-items: center; width: 100%; min-width: 0; max-width: 100%; overflow: visible; margin-bottom: 14px; }
 .request-filter-bar > * { min-width: 0; }
 .request-search-input,
