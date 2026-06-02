@@ -222,6 +222,7 @@ export interface QuoteFile {
   name?: string;
   originalName?: string;
   fileName?: string;
+  filename?: string;
   fileUrl?: string;
   downloadUrl?: string;
   url?: string;
@@ -235,6 +236,7 @@ export interface QuoteFile {
   ext?: string;
   sentAt?: string;
   uploadedAt?: string;
+  uploadedBy?: string;
   createdAt?: string;
 }
 

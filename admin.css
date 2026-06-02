@@ -6055,7 +6055,23 @@ body {
 }
 
 .quote-existing-file-row {
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+}
+
+.quote-file-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.quote-file-actions .btn {
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .quote-file-type {

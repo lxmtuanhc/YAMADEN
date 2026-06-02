@@ -59,7 +59,7 @@ export function isSpecialSoftwareFile(file: QuoteFile | DisplayQuoteFile) {
 }
 
 function fileKey(file: DisplayQuoteFile, index: number) {
-  return file.id || file.quoteId || file.displayUrl || file.fileName || file.originalName || String(index);
+  return file.displayUrl || file.fileUrl || file.url || file.downloadUrl || file.fileName || file.originalName || file.id || file.quoteId || String(index);
 }
 
 export function getQuoteFiles(quote?: Quote | null): DisplayQuoteFile[] {
@@ -110,6 +110,15 @@ export function isQuoteSent(quote?: Quote | null) {
 
 export function groupQuotesByRequest(quotes: Quote[]): Quote[] {
   const grouped = new Map<string, Quote>();
+  const uniqueFiles = (files: DisplayQuoteFile[]) => {
+    const seen = new Set<string>();
+    return files.filter((file, index) => {
+      const key = fileKey(file, index);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
   quotes.forEach(quote => {
     const key = quote.requestId || quote.quoteCode || quote.id;
     const existing = grouped.get(key);
@@ -124,7 +133,7 @@ export function groupQuotesByRequest(quotes: Quote[]): Quote[] {
       });
       return;
     }
-    const mergedFiles = [...getQuoteFiles(existing), ...files];
+    const mergedFiles = uniqueFiles([...getQuoteFiles(existing), ...files]);
     grouped.set(key, {
       ...existing,
       quoteFiles: mergedFiles,

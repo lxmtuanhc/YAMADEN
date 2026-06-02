@@ -726,9 +726,18 @@ const QuoteSchema = new mongoose.Schema({
   filePath: String,
   originalName: String,
   fileName: String,
+  filename: String,
+  url: String,
+  downloadUrl: String,
   mimeType: String,
   fileSize: Number,
+  size: Number,
   ext: String,
+  uploadedAt: Date,
+  uploadedBy: String,
+  quoteFiles: [mongoose.Schema.Types.Mixed],
+  quotationFiles: [mongoose.Schema.Types.Mixed],
+  quoteFileCount: { type: Number, default: 0 },
   sentToCustomer: { type: Boolean, default: false },
   visibleToCustomer: { type: Boolean, default: false },
   sentAt: Date,
@@ -3150,10 +3159,16 @@ function absolutePublicUrl(req, url) {
 function publicQuoteFile(file, req) {
   if (!file) return file;
   const item = typeof file.toObject === "function" ? file.toObject() : { ...file };
+  const url = absolutePublicUrl(req, item.fileUrl || item.url || item.secureUrl || item.secure_url || item.downloadUrl || item.pdfUrl || "");
   return {
     ...item,
-    fileUrl: absolutePublicUrl(req, item.fileUrl || item.url || item.secureUrl || item.secure_url || ""),
-    originalName: decodeUploadOriginalName(item.originalName || item.name || item.fileName || "")
+    fileUrl: url,
+    url,
+    downloadUrl: absolutePublicUrl(req, item.downloadUrl || url),
+    originalName: decodeUploadOriginalName(item.originalName || item.name || item.fileName || item.filename || ""),
+    filename: item.filename || item.fileName || "",
+    size: Number(item.size || item.fileSize || 0),
+    fileSize: Number(item.fileSize || item.size || 0)
   };
 }
 
@@ -3164,10 +3179,14 @@ function saveQuoteUploadFile(file, requestNo) {
   const fileName = `${requestNo}-${Date.now()}-${safeBase}${ext}`;
   const filePath = path.join(quoteUploadDir, fileName);
   fs.writeFileSync(filePath, file.buffer);
+  const fileUrl = `/uploads/quote-files/${encodeURIComponent(fileName)}`;
   return {
     fileName,
+    filename: fileName,
     filePath,
-    fileUrl: `/uploads/quote-files/${encodeURIComponent(fileName)}`,
+    fileUrl,
+    url: fileUrl,
+    downloadUrl: fileUrl,
     originalName,
     ext
   };
@@ -3353,13 +3372,35 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddl
     const wasQuoteSent = request.quoteSent === true || Number(request.quoteFileCount || 0) > 0 ||
       (Array.isArray(request.quotationFiles) && request.quotationFiles.length > 0) ||
       (Array.isArray(request.quoteFiles) && request.quoteFiles.length > 0);
-    const quotes = [];
-    const quoteFileRecords = [];
-    for (const [index, file] of uploadFiles.entries()) {
+    const uploadedBy = req.admin?.email || req.admin?.name || "admin";
+    const quoteFileRecords = uploadFiles.map((file, index) => {
       const saved = saveQuoteUploadFile(file, requestNo);
       const quoteId = `${requestNo}-quote-file-${Date.now()}-${index + 1}`;
+      return {
+        quoteId,
+        id: quoteId,
+        requestId: requestNo,
+        fileName: saved.fileName,
+        filename: saved.filename || saved.fileName,
+        originalName: saved.originalName,
+        fileUrl: saved.fileUrl,
+        url: saved.url || saved.fileUrl,
+        downloadUrl: saved.downloadUrl || saved.fileUrl,
+        filePath: saved.filePath,
+        mimeType: file.mimetype,
+        fileSize: file.size,
+        size: file.size,
+        ext: saved.ext,
+        sentAt: now,
+        uploadedAt: now,
+        uploadedBy
+      };
+    });
+    const quotes = [];
+    for (const [index, file] of uploadFiles.entries()) {
+      const savedRecord = quoteFileRecords[index];
       const payload = {
-      id: quoteId,
+      id: savedRecord.id,
       quoteCode: requestNo,
       quoteNo: requestNo,
       quoteNumber: requestNo,
@@ -3392,33 +3433,25 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddl
       sentToCustomer: true,
       visibleToCustomer: true,
       sentAt: now,
-      fileUrl: saved.fileUrl,
-      filePath: saved.filePath,
-      originalName: saved.originalName,
-      fileName: saved.fileName,
+      fileUrl: savedRecord.fileUrl,
+      url: savedRecord.url,
+      downloadUrl: savedRecord.downloadUrl,
+      filePath: savedRecord.filePath,
+      originalName: savedRecord.originalName,
+      fileName: savedRecord.fileName,
+      filename: savedRecord.filename,
       mimeType: file.mimetype,
       fileSize: file.size,
-      ext: saved.ext,
+      size: file.size,
+      ext: savedRecord.ext,
+      quoteFiles: quoteFileRecords,
+      quotationFiles: quoteFileRecords,
+      quoteFileCount: quoteFileRecords.length,
       updatedAt: now
       };
       const quote = new Quote({ ...payload, createdAt: now });
       await quote.save();
       quotes.push(quote);
-      quoteFileRecords.push({
-        quoteId: quote._id,
-        id: quoteId,
-        requestId: requestNo,
-        fileName: saved.fileName,
-        originalName: saved.originalName,
-        fileUrl: saved.fileUrl,
-        filePath: saved.filePath,
-        mimeType: file.mimetype,
-        fileSize: file.size,
-        ext: saved.ext,
-        sentAt: now,
-        uploadedAt: now,
-        uploadedBy: req.admin?.email || req.admin?.name || "admin"
-      });
     }
 
     request.quoteId = quotes[0]?._id || request.quoteId;

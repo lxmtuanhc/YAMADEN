@@ -8,8 +8,8 @@
   const TOKEN_MAX_AGE = 24 * 60 * 60 * 1000;
   const ADMIN_PATH = "/admin.html";
   const QUOTE_MAX_FILE_SIZE = 25 * 1024 * 1024;
-  const QUOTE_MAX_FILES = 3;
-  const QUOTE_ALLOWED_EXTENSIONS = [".pdf", ".xlsx", ".xls", ".docx", ".doc"];
+  const QUOTE_MAX_FILES = 5;
+  const QUOTE_ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".ppt", ".pptx", ".jpg", ".jpeg", ".png", ".webp", ".jww", ".jwc", ".dxf", ".dwg", ".zip"];
 
   const i18n = {
     ja: {
@@ -5003,13 +5003,13 @@
       sendQuote: "Gửi báo giá",
       sentFilesTitle: "Báo giá đã gửi",
       dropTitle: "Kéo thả hoặc chọn file báo giá",
-      dropHint: "Tối đa 3 file. PDF/Excel/Word, tối đa 25MB/file.",
+      dropHint: "Tối đa 5 file. PDF/Word/Excel/PowerPoint/ảnh/JWW/CAD/ZIP, tối đa 25MB/file.",
       resend: "Gửi lại / Cập nhật báo giá",
       noSelectedFile: "Chưa chọn file báo giá.",
-      maxFilesError: "Chỉ có thể gửi tối đa 3 file báo giá.",
+      maxFilesError: "Chỉ có thể gửi tối đa 5 file báo giá.",
       selectFileError: "Vui lòng chọn file báo giá.",
       fileLabel: "File",
-      unsupportedFile: "không được hỗ trợ. Vui lòng chọn PDF, Excel hoặc Word.",
+      unsupportedFile: "không được hỗ trợ. Vui lòng chọn PDF, Word, Excel, PowerPoint, ảnh, JWW/CAD hoặc ZIP.",
       oversizeFile: "vượt quá dung lượng cho phép 25MB."
     };
     const ja = {
@@ -5026,13 +5026,13 @@
       sendQuote: "見積送信",
       sentFilesTitle: "送信済み見積ファイル",
       dropTitle: "見積ファイルをドロップまたは選択",
-      dropHint: "最大3ファイル。PDF/Excel/Word、1ファイル25MBまで。",
+      dropHint: "最大5ファイル。PDF/Word/Excel/PowerPoint/画像/JWW/CAD/ZIP、1ファイル25MBまで。",
       resend: "見積を再送 / 更新",
       noSelectedFile: "ファイル未選択",
-      maxFilesError: "見積ファイルは最大3件まで送信できます。",
+      maxFilesError: "見積ファイルは最大5件まで送信できます。",
       selectFileError: "見積ファイルを選択してください。",
       fileLabel: "ファイル",
-      unsupportedFile: "は対応していません。PDF、Excel、Wordを選択してください。",
+      unsupportedFile: "は対応していません。PDF、Word、Excel、PowerPoint、画像、JWW/CAD、ZIPを選択してください。",
       oversizeFile: "は25MBの上限を超えています。"
     };
     return (state.lang === "vi" ? vi : ja)[key] || key;
@@ -5043,13 +5043,21 @@
     return [
       ...toList(request?.quotationFiles),
       ...toList(request?.quoteFiles)
-    ].filter(file => file && (file.fileUrl || file.pdfUrl))
+    ].filter(file => file && (file.fileUrl || file.url || file.downloadUrl || file.secureUrl || file.secure_url || file.pdfUrl))
       .filter((file, index) => {
-        const key = String(file._id || file.quoteId || file.fileUrl || file.pdfUrl || file.fileName || index);
+        const key = String(file._id || file.quoteId || file.id || file.fileUrl || file.url || file.downloadUrl || file.pdfUrl || file.fileName || file.filename || index);
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
       });
+  }
+
+  function quoteFileUrl(file) {
+    const raw = String(file?.fileUrl || file?.url || file?.downloadUrl || file?.secureUrl || file?.secure_url || file?.pdfUrl || "").trim();
+    if (!raw) return "";
+    if (/^https?:\/\//i.test(raw)) return raw;
+    if (raw.startsWith("/")) return window.location.origin + raw;
+    return window.location.origin + "/" + raw;
   }
 
   function isQuoteSent(request) {
@@ -5180,7 +5188,7 @@
               <section class="quote-work-card">
                 ${quoteInfo.sent ? `<div class="quote-sent-summary"><strong>${escapeHtml(quoteText("sentFilesTitle"))}</strong><span>${escapeHtml(quoteText("sentAt"))}: ${escapeHtml(quoteInfo.sentAt ? formatDateTime(quoteInfo.sentAt) : "-")}</span><span>${escapeHtml(quoteText("quoteFiles"))}: ${escapeHtml(String(quoteInfo.count))}</span>${quoteInfo.sentBy ? `<span>${escapeHtml(quoteText("sentBy"))}: ${escapeHtml(quoteInfo.sentBy)}</span>` : ""}</div>` : ""}
                 <div class="quote-file-dropzone" data-quote-file-dropzone role="button" tabindex="0">
-                  <input class="quote-file-input-hidden" type="file" data-quote-file-input accept=".pdf,.xls,.xlsx,.doc,.docx" multiple>
+                  <input class="quote-file-input-hidden" type="file" data-quote-file-input accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.jww,.jwc,.dxf,.dwg,.zip" multiple>
                   <div class="quote-drop-icon">\u21e7</div>
                   <strong>${escapeHtml(quoteText("dropTitle"))}</strong>
                   <span>${escapeHtml(quoteText("dropHint"))}</span>
@@ -7132,8 +7140,12 @@
   function quoteFileIcon(file) {
     const ext = quoteFileExtension(file);
     if (ext === ".pdf") return "PDF";
-    if (ext === ".xlsx" || ext === ".xls") return "XLS";
+    if (ext === ".xlsx" || ext === ".xls" || ext === ".csv") return "XLS";
     if (ext === ".docx" || ext === ".doc") return "DOC";
+    if (ext === ".ppt" || ext === ".pptx") return "PPT";
+    if ([".jpg", ".jpeg", ".png", ".webp"].includes(ext)) return "IMG";
+    if ([".jww", ".jwc", ".dxf", ".dwg"].includes(ext)) return "CAD";
+    if (ext === ".zip") return "ZIP";
     return "FILE";
   }
 
@@ -7175,13 +7187,14 @@
     return `<div class="quote-existing-file-list">
       <strong>${escapeHtml(quoteText("sentFilesTitle"))}</strong>
       ${files.map(file => {
-        const name = file.originalName || file.fileName || "Quote file";
-        const url = file.fileUrl || file.pdfUrl || "#";
-        return `<a class="quote-existing-file-row" href="${escapeHtml(url)}" target="_blank" rel="noopener">
+        const name = file.originalName || file.fileName || file.filename || "Quote file";
+        const url = quoteFileUrl(file);
+        return `<div class="quote-existing-file-row">
           <span class="quote-file-type">${escapeHtml(quoteFileIcon(file))}</span>
           <span class="quote-file-name">${escapeHtml(name)}</span>
-          <span class="quote-file-size">${escapeHtml(file.fileSize ? quoteFileSizeLabel(file.fileSize) : "")}</span>
-        </a>`;
+          <span class="quote-file-size">${escapeHtml(file.fileSize || file.size ? quoteFileSizeLabel(file.fileSize || file.size) : "")}</span>
+          <span class="quote-file-actions">${url ? `<a class="btn btn-soft" href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(state.lang === "vi" ? "Mở" : "開く")}</a><a class="btn btn-soft" href="${escapeHtml(url)}" download="${escapeHtml(name)}">${escapeHtml(state.lang === "vi" ? "Tải về" : "ダウンロード")}</a>` : `<span class="muted-line">${escapeHtml(state.lang === "vi" ? "Không tìm thấy file" : "ファイルが見つかりません")}</span>`}</span>
+        </div>`;
       }).join("")}
     </div>`;
   }
@@ -7911,7 +7924,7 @@
       const response = await AdminAPI.uploadRequestQuoteFile(quote.requestMongoId, files);
       state.quoteSelectedFile = null;
       state.quoteSelectedFiles = [];
-      const responseQuoteFiles = normalizeList(response.quotes || response.data).filter(file => file.fileUrl || file.pdfUrl);
+      const responseQuoteFiles = normalizeList(response.quotes || response.data).filter(file => file.fileUrl || file.url || file.downloadUrl || file.secureUrl || file.secure_url || file.pdfUrl);
       const updatedRequest = response.request ? {
         ...response.request,
         quoteFiles: getQuoteFiles(response.request).length ? getQuoteFiles(response.request) : responseQuoteFiles,

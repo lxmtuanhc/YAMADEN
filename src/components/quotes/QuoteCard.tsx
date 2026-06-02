@@ -76,8 +76,14 @@ export function getQuoteFiles(item: Quote | null | undefined): QuoteFileLike[] {
   if (!item) return [];
   const source = item as Quote & Record<string, unknown>;
   const files = source.quotationFiles || source.quoteFiles || source.files || [];
-  if (Array.isArray(files)) return files as QuoteFileLike[];
-  return [];
+  if (!Array.isArray(files)) return [];
+  const seen = new Set<string>();
+  return (files as QuoteFileLike[]).filter((file, index) => {
+    const key = String(file.fileUrl || file.url || file.downloadUrl || file.secureUrl || file.secure_url || file.fileName || file.originalName || file.id || index);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export function getRequestCode(item: Quote, labels = quoteLabels("vi")) {

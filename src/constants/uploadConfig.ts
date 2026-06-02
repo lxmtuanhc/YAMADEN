@@ -6,13 +6,13 @@ export const uploadConfig = {
   IMAGE_MAX_SIZE_MB: 10,
   DOCUMENT_MAX_SIZE_MB: 25,
   VIDEO_MAX_SIZE_MB: 100,
-  QUOTE_MAX_FILES: 1,
+  QUOTE_MAX_FILES: 5,
   QUOTE_MAX_FILE_SIZE_MB: 25,
   ALLOWED_IMAGE_EXTENSIONS: [".jpg", ".jpeg", ".png", ".webp"],
   ALLOWED_VIDEO_EXTENSIONS: [".mp4", ".mov"],
-  ALLOWED_DOCUMENT_EXTENSIONS: [".pdf", ".xlsx", ".xls", ".docx", ".doc"],
+  ALLOWED_DOCUMENT_EXTENSIONS: [".pdf", ".xlsx", ".xls", ".csv", ".docx", ".doc", ".ppt", ".pptx"],
   ALLOWED_DRAWING_EXTENSIONS: [".jww", ".jwc", ".dxf", ".dwg"],
-  ALLOWED_QUOTE_EXTENSIONS: [".pdf", ".xlsx", ".xls", ".docx", ".doc"],
+  ALLOWED_QUOTE_EXTENSIONS: [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".ppt", ".pptx", ".jpg", ".jpeg", ".png", ".webp", ".jww", ".jwc", ".dxf", ".dwg", ".zip"],
   BLOCKED_EXTENSIONS: [".exe", ".bat", ".cmd", ".js", ".sh", ".php", ".msi", ".com", ".scr", ".ps1", ".vbs", ".jar"]
 } as const;
 
