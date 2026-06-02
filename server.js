@@ -850,6 +850,7 @@ const WorkTypeSchema = new mongoose.Schema({
   description: String,
   descriptionVi: String,
   descriptionJa: String,
+  keywords: [String],
   active: { type: Boolean, default: true },
   sortOrder: { type: Number, default: 0 },
   protected: { type: Boolean, default: false },
@@ -1279,6 +1280,11 @@ function cleanMasterPayload(body, fields) {
       ? body.relatedWorkTypeIds.map(item => cleanText(item)).filter(Boolean)
       : parseRequestTags(body.relatedWorkTypeIds);
   }
+  if (body.keywords !== undefined) {
+    payload.keywords = Array.isArray(body.keywords)
+      ? body.keywords.map(item => cleanText(item)).filter(Boolean)
+      : parseRequestTags(body.keywords);
+  }
   if (body.sortOrder !== undefined) payload.sortOrder = Number(body.sortOrder) || 0;
   if (body.active !== undefined) payload.active = body.active === true || body.active === "true";
   return payload;
@@ -1302,7 +1308,7 @@ function nonDeletedMasterCondition() {
 }
 
 function masterReferenceValues(item) {
-  return [item?._id, item?.id, item?.code, item?.nameVi, item?.nameJa]
+  return [item?._id, item?.id, item?.code, item?.name, item?.label, item?.nameVi, item?.nameJa]
     .map(value => String(value || "").trim())
     .filter(Boolean);
 }
@@ -1485,6 +1491,7 @@ function masterRelationError(item, counts) {
     message: "Dữ liệu này đang được liên kết với dữ liệu khác, không thể xóa. Vui lòng Ẩn hoặc chuyển dữ liệu liên kết trước khi xóa.",
     data: item,
     relatedCount: totalMasterRelations(counts),
+    relatedMappingCount: counts.relatedSkillCount || 0,
     ...counts
   };
 }
@@ -3988,7 +3995,7 @@ app.delete("/admin/work-groups/:id", requireAdmin, async (req, res) => {
 app.post("/admin/work-types", requireAdmin, async (req, res) => {
   try {
     const now = new Date();
-    const payload = normalizeLocalizedMasterPayload(cleanMasterPayload(req.body || {}, ["departmentCode", "workGroupCode", "code", "name", "nameVi", "nameJa", "description", "descriptionVi", "descriptionJa"]));
+    const payload = normalizeLocalizedMasterPayload(cleanMasterPayload(req.body || {}, ["departmentCode", "workGroupCode", "code", "name", "nameVi", "nameJa", "description", "descriptionVi", "descriptionJa", "keywords"]));
     payload.departmentCode = slugifyCode(payload.departmentCode, "other");
     payload.workGroupCode = payload.workGroupCode ? slugifyCode(payload.workGroupCode, "") : "";
     payload.code = slugifyCode(payload.code || payload.name || payload.nameVi || payload.nameJa, "work_type");
@@ -4005,7 +4012,7 @@ app.put("/admin/work-types/:id", requireAdmin, async (req, res) => {
   try {
     const item = await WorkType.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Work type not found" });
-    const payload = normalizeLocalizedMasterPayload(cleanMasterPayload(req.body || {}, ["departmentCode", "workGroupCode", "code", "name", "nameVi", "nameJa", "description", "descriptionVi", "descriptionJa"]));
+    const payload = normalizeLocalizedMasterPayload(cleanMasterPayload(req.body || {}, ["departmentCode", "workGroupCode", "code", "name", "nameVi", "nameJa", "description", "descriptionVi", "descriptionJa", "keywords"]));
     if (payload.departmentCode) payload.departmentCode = slugifyCode(payload.departmentCode, item.departmentCode);
     if (payload.workGroupCode) payload.workGroupCode = slugifyCode(payload.workGroupCode, "");
     if (payload.code) payload.code = slugifyCode(payload.code, item.code);
@@ -4038,10 +4045,11 @@ app.delete("/admin/work-types/:id", requireAdmin, async (req, res) => {
     const relatedCount = totalMasterRelations(counts);
     const protected = isMasterProtected(item);
     const canDelete = !protected && relatedCount === 0;
-    console.log("[WORK_TYPE_DELETE_CHECK]", {
+    console.log("[WORKTYPE_DELETE_CHECK]", {
       workTypeId: String(item._id || ""),
-      workTypeCode: item.code || "",
+      code: item.code || "",
       ...counts,
+      relatedMappingCount: counts.relatedSkillCount || 0,
       protected,
       canDelete
     });

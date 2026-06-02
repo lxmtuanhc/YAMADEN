@@ -5154,6 +5154,19 @@ body {
   border-bottom: 0;
 }
 
+.settings-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.settings-row-actions .mini-button {
+  min-height: 30px;
+  padding: 0 8px;
+}
+
 .settings-empty-state {
   display: grid;
   place-items: center;

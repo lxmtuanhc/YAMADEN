@@ -4212,7 +4212,7 @@
     const workTypes = activeMasterItems("workTypes")
       .filter(item => item.departmentCode === departmentCode)
       .filter(item => {
-        const haystack = [item.code, item.name, item.label, item.nameVi, item.nameJa, item.description, item.descriptionVi, item.descriptionJa].join(" ").toLowerCase();
+        const haystack = [item.code, item.name, item.label, item.nameVi, item.nameJa, item.description, item.descriptionVi, item.descriptionJa, toList(item.keywords).join(" ")].join(" ").toLowerCase();
         return !search || haystack.includes(search);
       });
     const selectedCount = selected.length
@@ -5833,7 +5833,7 @@
   function renderWorkMasterTable(type) {
     const search = (state.filters.workMasterSearch || "").toLowerCase();
     const rows = visibleMasterItems(type).filter(item => {
-      const text = [item.code, item.name, item.label, item.nameVi, item.nameJa, item.description, item.descriptionVi, item.descriptionJa, item.departmentCode, item.workGroupCode].join(" ").toLowerCase();
+      const text = [item.code, item.name, item.label, item.nameVi, item.nameJa, item.description, item.descriptionVi, item.descriptionJa, toList(item.keywords).join(" "), item.departmentCode, item.workGroupCode].join(" ").toLowerCase();
       return !search || text.includes(search);
     });
     const departmentByCode = Object.fromEntries(visibleMasterItems("departments").map(item => [item.code, workMasterLabel(item)]));
@@ -6748,6 +6748,7 @@
       description: String(raw.get("description") || "").trim(),
       descriptionVi: String(raw.get("descriptionVi") || "").trim(),
       descriptionJa: String(raw.get("descriptionJa") || "").trim(),
+      keywords: toList(raw.get("keywords") || ""),
       sortOrder: Number(raw.get("sortOrder") || 0),
       active: raw.get("active") === "on"
     };
@@ -7121,8 +7122,8 @@
     const rows = visibleMasterItems(type).map(item => {
       const id = item.id;
       const label = escapeHtml(workMasterLabel(item) || item.code || "-");
-      const deleteAction = ` <button class="mini-button danger" type="button" data-staff-work-delete="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>`;
-      const actions = `<button class="mini-button" type="button" data-staff-work-edit="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button> <button class="mini-button" type="button" data-staff-work-status="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}" data-master-active="${item.active === false ? "true" : "false"}">${escapeHtml(item.active === false ? t("show") : t("hide"))}</button>${deleteAction}`;
+      const deleteAction = `<button class="mini-button danger" type="button" data-staff-work-delete="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}">${escapeHtml(t("delete"))}</button>`;
+      const actions = `<div class="settings-row-actions"><button class="mini-button" type="button" data-staff-work-edit="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}">${escapeHtml(t("edit"))}</button><button class="mini-button" type="button" data-staff-work-status="${escapeHtml(meta.kind)}" data-master-id="${escapeHtml(id)}" data-master-active="${item.active === false ? "true" : "false"}">${escapeHtml(item.active === false ? t("show") : t("hide"))}</button>${deleteAction}</div>`;
       if (meta.kind === "departments") {
         const relationCounts = departmentRelationCounts(item);
         return [label, escapeHtml(item.code || "-"), escapeHtml(workMasterDescription(item) || "-"), renderMasterStatus(item), escapeHtml(relationCounts.staff), actions];
@@ -7140,6 +7141,7 @@
   function renderStaffWorkEditForm(kind, item) {
     if (kind === "staffMap") return renderStaffMappingForm(item);
     if (kind === "departments") return renderDepartmentEditForm(item);
+    if (kind === "workTypes") return renderWorkTypeEditForm(item);
     const departments = visibleMasterItems("departments");
     const workTypes = visibleMasterItems("workTypes");
     const isWorkType = kind === "workTypes";
@@ -7160,6 +7162,26 @@
         <label class="overview-toggle ${item?.active === false ? "" : "is-on"}"><input name="active" type="checkbox" ${item?.active === false ? "" : "checked"}><span class="overview-toggle-track" aria-hidden="true"><i></i></span><span>Active</span></label>
       </div>
     </form>`;
+  }
+
+  function workTypeRelationMessage(counts) {
+    const requests = Number(counts?.requests ?? counts?.relatedRequestCount ?? 0);
+    const staff = Number(counts?.staff ?? counts?.relatedStaffCount ?? 0);
+    const mappings = Number(counts?.skills ?? counts?.relatedSkillCount ?? counts?.relatedMappingCount ?? 0);
+    return settingText(
+      `Nội dung công việc này đang được liên kết với dữ liệu khác. Yêu cầu liên kết: ${requests}. Staff liên kết: ${staff}. Mapping liên kết: ${mappings}. Vui lòng ẩn nội dung công việc này hoặc gỡ liên kết trước khi xóa.`,
+      `この業務内容は他のデータに紐づいています。依頼: ${requests}件。スタッフ: ${staff}件。連携: ${mappings}件。削除する前に非表示にするか、関連付けを解除してください。`
+    );
+  }
+
+  function workTypeDeletedMessage() {
+    return settingText("Đã chuyển nội dung công việc vào Thùng rác.", "業務内容をゴミ箱に移動しました。");
+  }
+
+  function workTypeStatusToast(active) {
+    return active
+      ? settingText("Đã hiện nội dung công việc.", "業務内容を表示しました。")
+      : settingText("Đã ẩn nội dung công việc.", "業務内容を非表示にしました。");
   }
 
   function renderDepartmentEditForm(item) {
@@ -7193,6 +7215,43 @@
           <label><span>${escapeHtml(settingText("Sắp xếp", "\u4e26\u3073\u9806"))}</span><input name="sortOrder" type="number" value="${escapeHtml(item?.sortOrder ?? 0)}"></label>
           <label class="settings-field-full"><span>${escapeHtml(settingText("Mô tả tiếng Việt", "\u30d9\u30c8\u30ca\u30e0\u8a9e\u8aac\u660e"))}</span><textarea name="descriptionVi" rows="2">${masterFormValue(item, "descriptionVi")}</textarea></label>
           <label class="settings-field-full"><span>${escapeHtml(settingText("Mô tả tiếng Nhật", "\u65e5\u672c\u8a9e\u8aac\u660e"))}</span><textarea name="descriptionJa" rows="2">${masterFormValue(item, "descriptionJa")}</textarea></label>
+        </div>
+      </section>
+    </form>`;
+  }
+
+  function renderWorkTypeEditForm(item) {
+    const departments = visibleMasterItems("departments");
+    const isActive = item?.active === false ? false : true;
+    const title = item?.id ? settingText("Sửa nội dung công việc", "業務内容を編集") : settingText("Thêm nội dung công việc", "業務内容を追加");
+    return `<form class="settings-real-form settings-department-form" data-staff-work-form="workTypes" data-master-id="${escapeHtml(item?.id || "")}">
+      <h3>${escapeHtml(title)}</h3>
+      <section class="settings-form-section">
+        <div class="settings-form-section-head">
+          <strong>${escapeHtml(settingText("Thông tin cơ bản", "\u57fa\u672c\u60c5\u5831"))}</strong>
+          <span>${escapeHtml(settingText("Tên và mã là thông tin bắt buộc.", "\u540d\u524d\u3068\u30b3\u30fc\u30c9\u306f\u5fc5\u9808\u3067\u3059\u3002"))}</span>
+        </div>
+        <div class="settings-real-form-grid settings-department-basic-grid">
+          <label><span>${escapeHtml(settingText("Tên nội dung công việc", "業務内容名"))} *</span><input name="nameVi" data-worktype-name value="${masterFormValue(item, "nameVi")}" placeholder="${escapeHtml(settingText("VD: Thi công điện", "例: 電気工事"))}"><small class="settings-field-error" data-field-error="nameVi"></small></label>
+          <label><span>${escapeHtml(settingText("Mã công việc", "業務コード"))} *</span><input name="code" data-worktype-code value="${masterFormValue(item, "code")}" placeholder="electrical_work"><small class="settings-field-error" data-field-error="code"></small></label>
+          <label class="settings-field-full"><span>${escapeHtml(settingText("Bộ phận liên quan", "関連部門"))}</span><select name="departmentCode">${masterSelectOptions(departments, item?.departmentCode || "", t("selectDepartment"))}</select></label>
+          <div class="settings-status-row">
+            <span>${escapeHtml(settingText("Trạng thái", "\u72b6\u614b"))}</span>
+            <label class="settings-compact-toggle ${isActive ? "is-on" : ""}"><input name="active" type="checkbox" ${isActive ? "checked" : ""}><span class="overview-toggle-track" aria-hidden="true"><i></i></span><b data-department-active-label>${escapeHtml(isActive ? settingText("Đang sử dụng", "\u4f7f\u7528\u4e2d") : settingText("Tạm ẩn", "\u975e\u8868\u793a"))}</b></label>
+          </div>
+        </div>
+      </section>
+      <section class="settings-form-section">
+        <div class="settings-form-section-head">
+          <strong>${escapeHtml(settingText("Thông tin hiển thị", "\u8868\u793a\u60c5\u5831"))}</strong>
+          <span>${escapeHtml(settingText("Các trường bổ sung có thể để trống.", "\u8ffd\u52a0\u9805\u76ee\u306f\u7a7a\u6b04\u3067\u3082\u69cb\u3044\u307e\u305b\u3093\u3002"))}</span>
+        </div>
+        <div class="settings-real-form-grid settings-department-display-grid">
+          <label><span>${escapeHtml(settingText("Tên tiếng Nhật", "\u65e5\u672c\u8a9e\u540d"))}</span><input name="nameJa" data-worktype-name-alt value="${masterFormValue(item, "nameJa")}" placeholder="${escapeHtml(settingText("Nếu trống sẽ dùng tên công việc", "空欄の場合は業務内容名を使用"))}"></label>
+          <label><span>${escapeHtml(settingText("Sắp xếp", "\u4e26\u3073\u9806"))}</span><input name="sortOrder" type="number" value="${escapeHtml(item?.sortOrder ?? 0)}"></label>
+          <label class="settings-field-full"><span>${escapeHtml(settingText("Mô tả tiếng Việt", "\u30d9\u30c8\u30ca\u30e0\u8a9e\u8aac\u660e"))}</span><textarea name="descriptionVi" rows="2">${masterFormValue(item, "descriptionVi")}</textarea></label>
+          <label class="settings-field-full"><span>${escapeHtml(settingText("Mô tả tiếng Nhật", "\u65e5\u672c\u8a9e\u8aac\u660e"))}</span><textarea name="descriptionJa" rows="2">${masterFormValue(item, "descriptionJa")}</textarea></label>
+          <label class="settings-field-full"><span>${escapeHtml(settingText("Từ khóa", "キーワード"))}</span><input name="keywords" value="${escapeHtml(toList(item?.keywords).join(", "))}" placeholder="${escapeHtml(settingText("VD: điện, chiếu sáng, sửa chữa", "例: 電気, 照明, 修理"))}"></label>
         </div>
       </section>
     </form>`;
@@ -7243,6 +7302,7 @@
       description: String(raw.get("description") || "").trim(),
       descriptionVi: String(raw.get("descriptionVi") || "").trim(),
       descriptionJa: String(raw.get("descriptionJa") || "").trim(),
+      keywords: toList(raw.get("keywords") || ""),
       sortOrder: Number(raw.get("sortOrder") || 0),
       active: raw.get("active") === "on"
     };
@@ -7283,6 +7343,19 @@
     return errors;
   }
 
+  function validateWorkTypeForm(form, payload, id) {
+    const errors = {};
+    if (!payload.name && !payload.nameVi && !payload.nameJa) errors.nameVi = settingText("Vui lòng nhập tên nội dung công việc.", "業務内容名を入力してください。");
+    if (!payload.code) errors.code = settingText("Vui lòng nhập mã công việc.", "業務コードを入力してください。");
+    if (payload.code && !/^[a-z0-9_-]+$/.test(payload.code)) {
+      errors.code = settingText("Mã công việc chỉ dùng chữ thường, số, gạch ngang hoặc gạch dưới.", "業務コードは小文字、数字、ハイフン、アンダースコアのみ使用できます。");
+    }
+    const duplicate = visibleMasterItems("workTypes").find(item => String(item.id) !== String(id || "") && String(item.code || "") === payload.code);
+    if (duplicate) errors.code = settingText("Mã công việc đã tồn tại.", "業務コードはすでに存在します。");
+    setDepartmentFormErrors(form, errors);
+    return errors;
+  }
+
   async function saveSettingsStaffWork(kind) {
     const form = document.querySelector(`[data-staff-work-form="${CSS.escape(kind)}"]`);
     if (!form) return;
@@ -7290,6 +7363,12 @@
     const payload = staffWorkPayloadFromForm(form, kind);
     if (kind === "departments") {
       const errors = validateDepartmentForm(form, payload, id);
+      if (Object.keys(errors).length) {
+        toast(Object.values(errors)[0]);
+        return;
+      }
+    } else if (kind === "workTypes") {
+      const errors = validateWorkTypeForm(form, payload, id);
       if (Object.keys(errors).length) {
         toast(Object.values(errors)[0]);
         return;
@@ -7321,6 +7400,8 @@
       renderSettings();
       if (kind === "departments") {
         toast(id ? settingText("Đã lưu bộ phận.", "\u90e8\u9580\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002") : settingText("Đã thêm bộ phận.", "\u90e8\u9580\u3092\u8ffd\u52a0\u3057\u307e\u3057\u305f\u3002"));
+      } else if (kind === "workTypes") {
+        toast(id ? settingText("Đã lưu nội dung công việc.", "業務内容を保存しました。") : settingText("Đã thêm nội dung công việc.", "業務内容を追加しました。"));
       } else {
         toast(settingText("Đã lưu cài đặt.", "\u8a2d\u5b9a\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002"));
       }
@@ -7329,6 +7410,11 @@
       if (kind === "departments" && (error?.message || "").toLowerCase().includes("duplicate")) {
         setDepartmentFormErrors(form, { code: settingText("Mã bộ phận đã tồn tại.", "\u90e8\u9580\u30b3\u30fc\u30c9\u306f\u3059\u3067\u306b\u5b58\u5728\u3057\u307e\u3059\u3002") });
         toast(settingText("Mã bộ phận đã tồn tại.", "\u90e8\u9580\u30b3\u30fc\u30c9\u306f\u3059\u3067\u306b\u5b58\u5728\u3057\u307e\u3059\u3002"));
+        return;
+      }
+      if (kind === "workTypes" && (error?.message || "").toLowerCase().includes("duplicate")) {
+        setDepartmentFormErrors(form, { code: settingText("Mã công việc đã tồn tại.", "業務コードはすでに存在します。") });
+        toast(settingText("Mã công việc đã tồn tại.", "業務コードはすでに存在します。"));
         return;
       }
       toast(error?.message || settingText("Không thể lưu dữ liệu.", "\u30c7\u30fc\u30bf\u3092\u4fdd\u5b58\u3067\u304d\u307e\u305b\u3093\u3002"));
@@ -7342,7 +7428,7 @@
       if (kind === "skills") await AdminAPI.setSkillStatus(id, active);
       await reloadWorkMaster();
       renderSettings();
-      toast(t("workMasterUpdated"));
+      toast(kind === "workTypes" ? workTypeStatusToast(active) : t("workMasterUpdated"));
     } catch (error) {
       console.error(error);
       toast(error?.message || settingText("Không thể lưu dữ liệu.", "\u30c7\u30fc\u30bf\u3092\u4fdd\u5b58\u3067\u304d\u307e\u305b\u3093\u3002"));
@@ -7436,6 +7522,17 @@
       }
       return;
     }
+    if (kind === "workTypes" && localCounts.total > 0) {
+      const hide = await confirmAction({
+        title: settingText("Không thể xóa nội dung công việc", "業務内容を削除できません"),
+        message: workTypeRelationMessage(localCounts),
+        cancelLabel: settingText("Đóng", "\u9589\u3058\u308b"),
+        confirmLabel: settingText("Ẩn nội dung công việc", "業務内容を非表示"),
+        variant: "warning"
+      });
+      if (hide) await setSettingsStaffWorkStatus(kind, id, false);
+      return;
+    }
     if (kind !== "departments" && localCounts.total > 0) {
       const hide = await confirmAction({
         title: settingText(`Không thể xóa ${name}`, `${name}を削除できません`),
@@ -7448,11 +7545,13 @@
       return;
     }
     const ok = await confirmAction({
-      title: settingText(`Xóa ${name}?`, `${name}を削除しますか？`),
-      message: settingText(
-        `Bạn có chắc muốn xóa ${name} này không? Dữ liệu sẽ được chuyển vào Thùng rác và có thể khôi phục sau.`,
-        `この${name}を削除してもよろしいですか？データはゴミ箱に移動され、後で復元できます。`
-      ),
+      title: kind === "workTypes" ? settingText("Xóa nội dung công việc?", "業務内容を削除しますか？") : settingText(`Xóa ${name}?`, `${name}を削除しますか？`),
+      message: kind === "workTypes"
+        ? settingText("Bạn có chắc muốn xóa nội dung công việc này không? Dữ liệu sẽ được chuyển vào Thùng rác và có thể khôi phục sau.", "この業務内容を削除してもよろしいですか？データはゴミ箱に移動され、後で復元できます。")
+        : settingText(
+          `Bạn có chắc muốn xóa ${name} này không? Dữ liệu sẽ được chuyển vào Thùng rác và có thể khôi phục sau.`,
+          `この${name}を削除してもよろしいですか？データはゴミ箱に移動され、後で復元できます。`
+        ),
       cancelLabel: settingText("Hủy", "キャンセル"),
       confirmLabel: settingText("Xóa", "\u524a\u9664"),
       danger: true
@@ -7464,7 +7563,7 @@
       if (kind === "skills") await AdminAPI.deleteSkill(id);
       await reloadWorkMaster();
       renderSettings();
-      toast(settingsMasterMovedToast(kind));
+      toast(kind === "workTypes" ? workTypeDeletedMessage() : settingsMasterMovedToast(kind));
     } catch (error) {
       console.error(error);
       if (error?.errorCode === "MASTER_PROTECTED" || error?.errorCode === "DEPARTMENT_PROTECTED") {
@@ -7489,10 +7588,10 @@
       }
       if (error?.errorCode === "MASTER_HAS_RELATIONS" || error?.errorCode === "DEPARTMENT_HAS_RELATIONS") {
         const hide = await confirmAction({
-          title: settingText(`Không thể xóa ${name}`, `${name}を削除できません`),
-          message: departmentDeleteRelationMessage(error),
+          title: kind === "workTypes" ? settingText("Không thể xóa nội dung công việc", "業務内容を削除できません") : settingText(`Không thể xóa ${name}`, `${name}を削除できません`),
+          message: kind === "workTypes" ? workTypeRelationMessage(error) : departmentDeleteRelationMessage(error),
           cancelLabel: settingText("Đóng", "\u9589\u3058\u308b"),
-          confirmLabel: settingText("Ẩn", "\u975e\u8868\u793a"),
+          confirmLabel: kind === "workTypes" ? settingText("Ẩn nội dung công việc", "業務内容を非表示") : settingText("Ẩn", "\u975e\u8868\u793a"),
           variant: "warning"
         });
         if (hide) await setSettingsStaffWorkStatus(kind, id, false);
@@ -8298,6 +8397,15 @@
             if (codeInput && !codeInput.readOnly && !codeInput.value.trim()) codeInput.value = departmentCodeFromName(event.target.value);
           }
           if (event.target.matches("[data-department-code]")) {
+            event.target.value = departmentCodeFromName(event.target.value);
+          }
+        }
+        if (form?.dataset.staffWorkForm === "workTypes") {
+          if (event.target.matches("[data-worktype-name], [data-worktype-name-alt]")) {
+            const codeInput = form.querySelector("[data-worktype-code]");
+            if (codeInput && !codeInput.readOnly && !codeInput.value.trim()) codeInput.value = departmentCodeFromName(event.target.value);
+          }
+          if (event.target.matches("[data-worktype-code]")) {
             event.target.value = departmentCodeFromName(event.target.value);
           }
         }
