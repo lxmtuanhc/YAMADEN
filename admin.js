@@ -7119,6 +7119,7 @@
 
   function renderStaffWorkEditForm(kind, item) {
     if (kind === "staffMap") return renderStaffMappingForm(item);
+    if (kind === "departments") return renderDepartmentEditForm(item);
     const departments = visibleMasterItems("departments");
     const workTypes = visibleMasterItems("workTypes");
     const isWorkType = kind === "workTypes";
@@ -7138,6 +7139,42 @@
         ${isSkill ? `<label><span>${escapeHtml(settingText("Work type liên quan", "\u95a2\u9023\u696d\u52d9"))}</span><select name="relatedWorkTypeIds" multiple>${workTypes.map(type => `<option value="${escapeHtml(type.code || type.id)}" ${toList(item?.relatedWorkTypeIds).includes(type.code || type.id) ? "selected" : ""}>${escapeHtml(workMasterLabel(type))}</option>`).join("")}</select></label>` : ""}
         <label class="overview-toggle ${item?.active === false ? "" : "is-on"}"><input name="active" type="checkbox" ${item?.active === false ? "" : "checked"}><span class="overview-toggle-track" aria-hidden="true"><i></i></span><span>Active</span></label>
       </div>
+    </form>`;
+  }
+
+  function renderDepartmentEditForm(item) {
+    const relationCounts = item?.id ? departmentRelationCounts(item) : { total: 0 };
+    const lockCode = Boolean(item?.id && relationCounts.total > 0);
+    const isActive = item?.active === false ? false : true;
+    const title = item?.id ? settingText("Sửa bộ phận", "\u90e8\u9580\u3092\u7de8\u96c6") : settingText("Thêm bộ phận", "\u90e8\u9580\u3092\u8ffd\u52a0");
+    return `<form class="settings-real-form settings-department-form" data-staff-work-form="departments" data-master-id="${escapeHtml(item?.id || "")}">
+      <h3>${escapeHtml(title)}</h3>
+      <section class="settings-form-section">
+        <div class="settings-form-section-head">
+          <strong>${escapeHtml(settingText("Thông tin cơ bản", "\u57fa\u672c\u60c5\u5831"))}</strong>
+          <span>${escapeHtml(settingText("Tên và mã là thông tin bắt buộc.", "\u540d\u524d\u3068\u30b3\u30fc\u30c9\u306f\u5fc5\u9808\u3067\u3059\u3002"))}</span>
+        </div>
+        <div class="settings-real-form-grid settings-department-basic-grid">
+          <label><span>${escapeHtml(settingText("Tên bộ phận", "\u90e8\u9580\u540d"))} *</span><input name="nameVi" data-department-name value="${masterFormValue(item, "nameVi")}" placeholder="${escapeHtml(settingText("VD: Bộ thi công", "\u4f8b: \u65bd\u5de5\u90e8"))}"><small class="settings-field-error" data-field-error="nameVi"></small></label>
+          <label><span>${escapeHtml(settingText("Mã bộ phận", "\u90e8\u9580\u30b3\u30fc\u30c9"))} *</span><input name="code" data-department-code value="${masterFormValue(item, "code")}" placeholder="construction" ${lockCode ? "readonly" : ""}>${lockCode ? `<small class="settings-form-note">${escapeHtml(settingText("Mã bộ phận đang được sử dụng, không thể đổi.", "\u90e8\u9580\u30b3\u30fc\u30c9\u306f\u4f7f\u7528\u4e2d\u306e\u305f\u3081\u5909\u66f4\u3067\u304d\u307e\u305b\u3093\u3002"))}</small>` : ""}<small class="settings-field-error" data-field-error="code"></small></label>
+          <div class="settings-status-row">
+            <span>${escapeHtml(settingText("Trạng thái", "\u72b6\u614b"))}</span>
+            <label class="settings-compact-toggle ${isActive ? "is-on" : ""}"><input name="active" type="checkbox" ${isActive ? "checked" : ""}><span class="overview-toggle-track" aria-hidden="true"><i></i></span><b data-department-active-label>${escapeHtml(isActive ? settingText("Đang sử dụng", "\u4f7f\u7528\u4e2d") : settingText("Tạm ẩn", "\u975e\u8868\u793a"))}</b></label>
+          </div>
+        </div>
+      </section>
+      <section class="settings-form-section">
+        <div class="settings-form-section-head">
+          <strong>${escapeHtml(settingText("Thông tin hiển thị", "\u8868\u793a\u60c5\u5831"))}</strong>
+          <span>${escapeHtml(settingText("Các trường bổ sung có thể để trống.", "\u8ffd\u52a0\u9805\u76ee\u306f\u7a7a\u6b04\u3067\u3082\u69cb\u3044\u307e\u305b\u3093\u3002"))}</span>
+        </div>
+        <div class="settings-real-form-grid settings-department-display-grid">
+          <label><span>${escapeHtml(settingText("Tên tiếng Nhật", "\u65e5\u672c\u8a9e\u540d"))}</span><input name="nameJa" value="${masterFormValue(item, "nameJa")}" placeholder="${escapeHtml(settingText("Nếu trống sẽ dùng tên bộ phận", "\u7a7a\u6b04\u306e\u5834\u5408\u306f\u90e8\u9580\u540d\u3092\u4f7f\u7528"))}"></label>
+          <label><span>${escapeHtml(settingText("Sắp xếp", "\u4e26\u3073\u9806"))}</span><input name="sortOrder" type="number" value="${escapeHtml(item?.sortOrder ?? 0)}"></label>
+          <label class="settings-field-full"><span>${escapeHtml(settingText("Mô tả tiếng Việt", "\u30d9\u30c8\u30ca\u30e0\u8a9e\u8aac\u660e"))}</span><textarea name="descriptionVi" rows="2">${masterFormValue(item, "descriptionVi")}</textarea></label>
+          <label class="settings-field-full"><span>${escapeHtml(settingText("Mô tả tiếng Nhật", "\u65e5\u672c\u8a9e\u8aac\u660e"))}</span><textarea name="descriptionJa" rows="2">${masterFormValue(item, "descriptionJa")}</textarea></label>
+        </div>
+      </section>
     </form>`;
   }
 
@@ -7191,12 +7228,49 @@
     return payload;
   }
 
+  function departmentCodeFromName(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/đ/g, "d")
+      .replace(/[^a-z0-9_-]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+  }
+
+  function setDepartmentFormErrors(form, errors) {
+    form.querySelectorAll("[data-field-error]").forEach(node => {
+      const key = node.dataset.fieldError || "";
+      node.textContent = errors[key] || "";
+      node.closest("label")?.classList.toggle("has-error", Boolean(errors[key]));
+    });
+  }
+
+  function validateDepartmentForm(form, payload, id) {
+    const errors = {};
+    if (!payload.nameVi) errors.nameVi = settingText("Vui lòng nhập tên bộ phận.", "部門名を入力してください。");
+    if (!payload.code) errors.code = settingText("Vui lòng nhập mã bộ phận.", "部門コードを入力してください。");
+    if (payload.code && !/^[a-z0-9_-]+$/.test(payload.code)) {
+      errors.code = settingText("Mã bộ phận chỉ dùng chữ thường, số, gạch ngang hoặc gạch dưới.", "部門コードは小文字、数字、ハイフン、アンダースコアのみ使用できます。");
+    }
+    const duplicate = visibleMasterItems("departments").find(item => String(item.id) !== String(id || "") && String(item.code || "") === payload.code);
+    if (duplicate) errors.code = settingText("Mã bộ phận đã tồn tại.", "部門コードはすでに存在します。");
+    setDepartmentFormErrors(form, errors);
+    return errors;
+  }
+
   async function saveSettingsStaffWork(kind) {
     const form = document.querySelector(`[data-staff-work-form="${CSS.escape(kind)}"]`);
     if (!form) return;
     const id = form.dataset.masterId || "";
     const payload = staffWorkPayloadFromForm(form, kind);
-    if (kind !== "staffMap" && (!payload.code || (!payload.nameVi && !payload.nameJa))) {
+    if (kind === "departments") {
+      const errors = validateDepartmentForm(form, payload, id);
+      if (Object.keys(errors).length) {
+        toast(Object.values(errors)[0]);
+        return;
+      }
+    } else if (kind !== "staffMap" && (!payload.code || (!payload.nameVi && !payload.nameJa))) {
       toast(settingText("Tên và mã không được rỗng.", "\u540d\u524d\u3068\u30b3\u30fc\u30c9\u306f\u5fc5\u9808\u3067\u3059\u3002"));
       return;
     }
@@ -7221,9 +7295,18 @@
       state.settingsMasterEdit = null;
       if (state.settingsDetail) state.settingsDetail.dirty = false;
       renderSettings();
-      toast(settingText("Đã lưu cài đặt.", "\u8a2d\u5b9a\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002"));
+      if (kind === "departments") {
+        toast(id ? settingText("Đã lưu bộ phận.", "\u90e8\u9580\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002") : settingText("Đã thêm bộ phận.", "\u90e8\u9580\u3092\u8ffd\u52a0\u3057\u307e\u3057\u305f\u3002"));
+      } else {
+        toast(settingText("Đã lưu cài đặt.", "\u8a2d\u5b9a\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002"));
+      }
     } catch (error) {
       console.error(error);
+      if (kind === "departments" && (error?.message || "").toLowerCase().includes("duplicate")) {
+        setDepartmentFormErrors(form, { code: settingText("Mã bộ phận đã tồn tại.", "\u90e8\u9580\u30b3\u30fc\u30c9\u306f\u3059\u3067\u306b\u5b58\u5728\u3057\u307e\u3059\u3002") });
+        toast(settingText("Mã bộ phận đã tồn tại.", "\u90e8\u9580\u30b3\u30fc\u30c9\u306f\u3059\u3067\u306b\u5b58\u5728\u3057\u307e\u3059\u3002"));
+        return;
+      }
       toast(error?.message || settingText("Không thể lưu dữ liệu.", "\u30c7\u30fc\u30bf\u3092\u4fdd\u5b58\u3067\u304d\u307e\u305b\u3093\u3002"));
     }
   }
@@ -8080,7 +8163,7 @@
         if (staffWorkAdd) {
           event.preventDefault();
           state.settingsMasterEdit = { kind: staffWorkAdd.dataset.staffWorkAdd || "", id: "" };
-          if (state.settingsDetail) state.settingsDetail.dirty = true;
+          if (state.settingsDetail) state.settingsDetail.dirty = false;
           renderSettings();
           return;
         }
@@ -8088,7 +8171,7 @@
         if (staffWorkEdit) {
           event.preventDefault();
           state.settingsMasterEdit = { kind: staffWorkEdit.dataset.staffWorkEdit || "", id: staffWorkEdit.dataset.masterId || "" };
-          if (state.settingsDetail) state.settingsDetail.dirty = true;
+          if (state.settingsDetail) state.settingsDetail.dirty = false;
           renderSettings();
           return;
         }
@@ -8173,11 +8256,27 @@
         if (state.settingsDetail) state.settingsDetail.dirty = true;
       }
       if (state.currentView === "settings" && event.target.closest("[data-staff-work-form]")) {
+        const compactToggle = event.target.closest(".settings-compact-toggle");
+        if (compactToggle && event.target.type === "checkbox") {
+          compactToggle.classList.toggle("is-on", event.target.checked);
+          const label = compactToggle.querySelector("[data-department-active-label]");
+          if (label) label.textContent = event.target.checked ? settingText("Đang sử dụng", "\u4f7f\u7528\u4e2d") : settingText("Tạm ẩn", "\u975e\u8868\u793a");
+        }
         markSettingsDetailDirty();
       }
     });
     bind($("viewRoot"), "input", event => {
       if (state.currentView === "settings" && event.target.closest("[data-staff-work-form]")) {
+        const form = event.target.closest("[data-staff-work-form]");
+        if (form?.dataset.staffWorkForm === "departments") {
+          if (event.target.matches("[data-department-name]")) {
+            const codeInput = form.querySelector("[data-department-code]");
+            if (codeInput && !codeInput.readOnly && !codeInput.value.trim()) codeInput.value = departmentCodeFromName(event.target.value);
+          }
+          if (event.target.matches("[data-department-code]")) {
+            event.target.value = departmentCodeFromName(event.target.value);
+          }
+        }
         markSettingsDetailDirty();
         return;
       }
