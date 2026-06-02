@@ -263,8 +263,8 @@ export function RequestDetailPage() {
                   ) : (
                     <div className="request-file-preview">
                       <strong>{media.name}</strong>
-                      <span>{language === "vi" ? "File này không thể xem trực tiếp trong app. Vui lòng tải về hoặc mở bằng ứng dụng phù hợp." : "This file cannot be previewed in the app. Please download it."}</span>
-                      <a href={media.url} target="_blank" rel="noreferrer">{language === "vi" ? "Mở / tải file" : "Open / download"}</a>
+                      <span>{language === "vi" ? "File này không thể xem trực tiếp trong app. Vui lòng tải về hoặc mở bằng ứng dụng phù hợp." : "このファイルはアプリ内で直接表示できません。ダウンロードして対応アプリで開いてください。"}</span>
+                      <a href={media.url} target="_blank" rel="noreferrer">{language === "vi" ? "Mở / tải file" : "開く / ダウンロード"}</a>
                     </div>
                   )}
                   <div className="request-media-name">{media.name}</div>

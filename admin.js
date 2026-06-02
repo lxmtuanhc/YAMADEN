@@ -211,7 +211,7 @@
     quoted: "Báo giá",
     ordered: "Đã nhận đơn",
     completed: "Hoàn thành",
-    lost: "Mất đơn"
+    lost: "Không nhận"
   };
 
   const userStatusMap = {
@@ -981,7 +981,7 @@
     quoted: "B\u00e1o gi\u00e1",
     ordered: "\u0110\u00e3 nh\u1eadn \u0111\u01a1n",
     completed: "Ho\u00e0n th\u00e0nh",
-    lost: "M\u1ea5t \u0111\u01a1n"
+    lost: "Kh\u00f4ng nh\u1eadn"
   });
 
   Object.assign(userStatusMap, {
@@ -1421,7 +1421,7 @@
     orderedValue: "Gi\u00e1 tr\u1ecb \u0111\u00e3 nh\u1eadn \u0111\u01a1n",
     quoteStatusDraft: "\u0110ang t\u1ea1o",
     quoteStatusPendingApproval: "Ch\u1edd duy\u1ec7t",
-    quoteStatusSentToCustomer: "\u0110\u00e3 g\u1eedi app",
+    quoteStatusSentToCustomer: "\u0110\u00e3 g\u1eedi b\u00e1o gi\u00e1",
     quoteStatusViewedByCustomer: "Kh\u00e1ch \u0111ang xem",
     quoteStatusChangeRequested: "Y\u00eau c\u1ea7u ch\u1ec9nh s\u1eeda",
     quoteStatusAccepted: "Kh\u00e1ch \u0111\u1ed3ng \u00fd",
@@ -1897,7 +1897,7 @@
       quoted: "B\u00e1o gi\u00e1",
       ordered: "\u0110\u00e3 nh\u1eadn \u0111\u01a1n",
       completed: "Ho\u00e0n th\u00e0nh",
-      lost: "Th\u1ea5t ch\u00fa / Kh\u00f4ng th\u00e0nh"
+      lost: "Kh\u00f4ng nh\u1eadn"
     };
     const cleanLabels = state.lang === "vi" ? cleanLabelsVi : cleanLabelsJa;
     return cleanLabels[normalized] || cleanLabelsJa[normalized] || normalized;
@@ -2725,7 +2725,7 @@
     const attrs = `data-media-preview="${escapeHtml(url)}" data-media-type="${escapeHtml(type)}"`;
     if (type !== "video" && type !== "image") {
       const name = item.originalName || item.fileName || url.split("/").pop() || "File";
-      return `<a class="request-media-item request-file-item" href="${escapeHtml(url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(name)}"><span>${escapeHtml(name)}</span><small>${escapeHtml(state.lang === "vi" ? "File nay khong the xem truc tiep trong app. Vui long tai ve hoac mo bang ung dung phu hop." : "This file cannot be previewed in the app. Please download it.")}</small></a>`;
+      return `<a class="request-media-item request-file-item" href="${escapeHtml(url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(name)}"><span>${escapeHtml(name)}</span><small>${escapeHtml(state.lang === "vi" ? "File này không thể xem trực tiếp trong app. Vui lòng tải về hoặc mở bằng ứng dụng phù hợp." : "このファイルはアプリ内で直接表示できません。ダウンロードして対応アプリで開いてください。")}</small></a>`;
     }
     return `<button class="request-media-item" type="button" ${attrs} aria-label="${escapeHtml(t("media"))} ${index + 1}">${type === "video"
       ? `<video src="${escapeHtml(url)}" controls playsinline></video>`
@@ -4366,7 +4366,7 @@
 
   function renderQuotes() {
     const quoteStages = state.lang === "vi"
-      ? ["Đang tạo", "Chờ duyệt", "Đã gửi", "Đang thương lượng", "Nhận đơn", "Mất đơn"]
+      ? ["Đang tạo", "Chờ duyệt", "Đã gửi", "Đang thương lượng", "Nhận đơn", "Không nhận"]
       : ["作成中", "承認待ち", "送付済み", "交渉中", "受注", "失注"];
     const stages = ["作成中", "承認待ち", "送付済み", "交渉中", "受注", "失注"];
     $("viewRoot").innerHTML = `
@@ -7096,27 +7096,71 @@
     toast(t("savedChanges"));
   }
 
-  async function createQuoteFromRequest(requestId) {
-    if (!requestId) {
-      toast(state.lang === "vi" ? "Kh\u00f4ng t\u00ecm th\u1ea5y ID y\u00eau c\u1ea7u." : "\u4f9d\u983cID\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3002");
+  function quoteOpenConfirmText(key) {
+    const vi = {
+      title: "Chuyển sang báo giá?",
+      message: "Yêu cầu này chưa ở trạng thái Báo giá. Bạn có muốn chuyển sang trạng thái Báo giá và mở màn hình báo giá không?",
+      confirm: "Chuyển sang báo giá",
+      cancel: "Hủy",
+      missing: "Không tìm thấy yêu cầu."
+    };
+    const ja = {
+      title: "見積に変更しますか？",
+      message: "この依頼はまだ見積ステータスではありません。見積ステータスに変更して見積画面を開きますか？",
+      confirm: "見積に変更",
+      cancel: "キャンセル",
+      missing: "依頼が見つかりません。"
+    };
+    return (state.lang === "vi" ? vi : ja)[key] || key;
+  }
+
+  async function openQuoteForRequest(request) {
+    if (!request) {
+      toast(quoteOpenConfirmText("missing"));
       return;
     }
     try {
-      let sourceRequest = state.requests.find(item => [getRowId(item), getRequestDisplayId(item)].some(value => value && String(value) === String(requestId)));
-      if (!sourceRequest) sourceRequest = await AdminAPI.getRequest(requestId);
-      if (normalizeRequestStatus(sourceRequest.status) !== "quoted") {
-        toast(state.lang === "vi" ? "H\u00e3y chuy\u1ec3n y\u00eau c\u1ea7u sang tr\u1ea1ng th\u00e1i B\u00e1o gi\u00e1 tr\u01b0\u1edbc." : "\u5148\u306b\u4f9d\u983c\u3092\u898b\u7a4d\u30b9\u30c6\u30fc\u30bf\u30b9\u306b\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\u3002");
-        return;
+      let sourceRequest = request;
+      const requestId = getRowId(sourceRequest) || getRequestDisplayId(sourceRequest);
+      const quoteAlreadyOpenable = normalizeRequestStatus(sourceRequest.status) === "quoted" || sourceRequest.quoteSent === true || getQuoteFiles(sourceRequest).length > 0;
+      if (!quoteAlreadyOpenable) {
+        const confirmed = await confirmAction({
+          title: quoteOpenConfirmText("title"),
+          message: quoteOpenConfirmText("message"),
+          cancelLabel: quoteOpenConfirmText("cancel"),
+          confirmLabel: quoteOpenConfirmText("confirm"),
+          variant: "warning",
+          icon: "?"
+        });
+        if (!confirmed) return;
+        const response = await AdminAPI.updateRequest(requestId, { status: "quoted", quoteRequested: true });
+        const updated = response?.request || response?.data || response || {};
+        sourceRequest = Object.assign({}, sourceRequest, updated, { status: updated.status || "quoted", quoteRequested: updated.quoteRequested ?? true });
+        const index = state.requests.findIndex(item => [getRowId(item), getRequestDisplayId(item)].some(value => value && String(value) === String(requestId)));
+        if (index >= 0) state.requests[index] = Object.assign({}, state.requests[index], sourceRequest);
       }
       await closeRequestDetail(true);
+      state.currentView = "quotes";
+      state.filters.quoteSendStatus = "all";
       state.quoteWizardStep = 1;
       state.quoteSelectedFile = null;
       state.quoteSelectedFiles = [];
-      renderQuoteDetail(sourceRequest);
+      await renderQuotes();
+      await openRequestQuote(getRowId(sourceRequest) || getRequestDisplayId(sourceRequest) || requestId, 1);
     } catch (error) {
       console.error(error);
       toast(error.message || t("failed"));
     }
+  }
+
+  async function createQuoteFromRequest(requestId) {
+    if (!requestId) {
+      toast(quoteOpenConfirmText("missing"));
+      return;
+    }
+    let sourceRequest = state.requests.find(item => [getRowId(item), getRequestDisplayId(item)].some(value => value && String(value) === String(requestId)));
+    if (!sourceRequest) sourceRequest = await AdminAPI.getRequest(requestId);
+    await openQuoteForRequest(sourceRequest);
   }
 
   function quoteSelectedFiles() {
