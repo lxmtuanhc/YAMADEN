@@ -2324,6 +2324,97 @@ function staffTags(staff) {
   return normalizeTagList(fromArray.concat(fromText)).filter(tag => !departmentTokens.includes(normalizeAssignmentTag(tag)));
 }
 
+function normalizeMatchText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFKC")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function masterTextTokens(item) {
+  return normalizeTagList([
+    item?.code,
+    item?.name,
+    item?.nameVi,
+    item?.nameJa,
+    item?.description,
+    item?.descriptionVi,
+    item?.descriptionJa,
+    ...(Array.isArray(item?.keywords) ? item.keywords : [])
+  ]).map(normalizeMatchText).filter(Boolean);
+}
+
+function mediaTextForAnalysis(mediaFiles) {
+  return (Array.isArray(mediaFiles) ? mediaFiles : [])
+    .map(file => [file?.originalName, file?.type, file?.mimetype, file?.resourceType].filter(Boolean).join(" "))
+    .filter(Boolean)
+    .join(" ");
+}
+
+async function inferWorkContextForRequest(payload = {}) {
+  const requestText = normalizeMatchText([
+    payload.title,
+    payload.content,
+    payload.category,
+    payload.address,
+    mediaTextForAnalysis(payload.mediaFiles),
+    Array.isArray(payload.issueTags) ? payload.issueTags.join(" ") : payload.issueTags,
+    Array.isArray(payload.workTypeIds) ? payload.workTypeIds.join(" ") : payload.workTypeIds
+  ].filter(Boolean).join(" "));
+  const explicitWorkTypeIds = normalizeTagList(payload.workTypeIds);
+  const explicitDepartment = cleanText(payload.departmentCode);
+  const [workTypes, departments] = await Promise.all([
+    WorkType.find({ active: { $ne: false }, isDeleted: { $ne: true }, $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] }).lean(),
+    Department.find({ active: { $ne: false }, isDeleted: { $ne: true }, $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] }).lean()
+  ]);
+
+  const workMatches = workTypes.map(workType => {
+    const keys = masterTextTokens(workType);
+    const score = keys.reduce((sum, key) => {
+      if (!key) return sum;
+      if (explicitWorkTypeIds.includes(String(workType._id)) || explicitWorkTypeIds.includes(workType.code)) return sum + 40;
+      if (requestText.includes(key)) return sum + Math.min(30, Math.max(8, key.length));
+      return sum;
+    }, 0);
+    return { workType, score };
+  }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
+
+  const inferredDepartment = explicitDepartment || workMatches[0]?.workType?.departmentCode || "";
+  const departmentMatches = departments.map(department => {
+    const keys = masterTextTokens(department);
+    const score = keys.reduce((sum, key) => {
+      if (!key) return sum;
+      if (inferredDepartment && department.code === inferredDepartment) return sum + 40;
+      if (requestText.includes(key)) return sum + Math.min(20, Math.max(6, key.length));
+      return sum;
+    }, 0);
+    return { department, score };
+  }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
+
+  const workTypeIds = Array.from(new Set(explicitWorkTypeIds.concat(workMatches.slice(0, 5).flatMap(({ workType }) => [String(workType._id), workType.code].filter(Boolean)))));
+  const issueTags = Array.from(new Set(normalizeTagList(payload.issueTags).concat(workMatches.slice(0, 5).map(({ workType }) => workType.nameJa || workType.nameVi || workType.name || workType.code).filter(Boolean))));
+  return {
+    requestText,
+    workTypeIds,
+    issueTags,
+    departmentCode: inferredDepartment || departmentMatches[0]?.department?.code || "",
+    matchedWorkTypes: workMatches.slice(0, 5).map(({ workType, score }) => ({
+      id: String(workType._id),
+      code: workType.code || "",
+      name: workType.nameJa || workType.nameVi || workType.name || workType.code || "",
+      departmentCode: workType.departmentCode || "",
+      score
+    })),
+    matchedDepartments: departmentMatches.slice(0, 3).map(({ department, score }) => ({
+      code: department.code || "",
+      name: department.nameJa || department.nameVi || department.name || department.code || "",
+      score
+    }))
+  };
+}
+
 function uniqueStaffWorkOptions(staffList) {
   const seen = new Set();
   const options = [];
@@ -2394,7 +2485,7 @@ async function findBestAssigneeForRequest({ issueTags, workTypeIds, departmentCo
   return findBestAssignee(issueTags);
 }
 
-async function buildAssignmentSuggestion({ issueTags, workTypeIds, departmentCode }) {
+async function buildAssignmentSuggestion({ issueTags, workTypeIds, departmentCode, matchedWorkTypes = [], matchedDepartments = [], requestText = "" }) {
   const tags = parseRequestTags(issueTags);
   const ids = normalizeTagList(workTypeIds);
   const department = String(departmentCode || "").trim();
@@ -2424,18 +2515,34 @@ async function buildAssignmentSuggestion({ issueTags, workTypeIds, departmentCod
     const staffTagList = staffTags(staff);
     const workMatches = ids.filter(id => staffWorkTypeIds.includes(id));
     const tagMatches = normalizedTags.filter(tag => staffTagList.includes(tag));
+    const textMatches = staffTagList.filter(tag => requestText && normalizeMatchText(tag) && requestText.includes(normalizeMatchText(tag)));
 
     if (department && staffDept && staffDept === department) {
       score += 30;
       reasons.push(`Bộ phận phù hợp: ${department}`);
     }
+    if (!department && matchedDepartments.length && staffDept && matchedDepartments.some(item => item.code === staffDept)) {
+      score += 20;
+      reasons.push(`Bộ phận khớp theo phân tích nội dung: ${staffDept}`);
+    }
     if (workMatches.length) {
       score += Math.min(30, workMatches.length * 15);
       reasons.push(`Nội dung công việc phù hợp: ${workMatches.join(", ")}`);
     }
+    if (!workMatches.length && matchedWorkTypes.length && staffWorkTypeIds.length) {
+      const inferredWorkMatches = matchedWorkTypes.filter(item => staffWorkTypeIds.includes(item.id) || staffWorkTypeIds.includes(item.code));
+      if (inferredWorkMatches.length) {
+        score += Math.min(30, inferredWorkMatches.length * 15);
+        reasons.push(`Staff mapping khớp nội dung công việc: ${inferredWorkMatches.map(item => item.name || item.code).join(", ")}`);
+      }
+    }
     if (tagMatches.length) {
       score += Math.min(20, tagMatches.length * 10);
       reasons.push(`Tag phù hợp: ${tagMatches.join(", ")}`);
+    }
+    if (textMatches.length) {
+      score += Math.min(20, textMatches.length * 10);
+      reasons.push(`Kỹ năng/tag khớp nội dung yêu cầu: ${textMatches.join(", ")}`);
     }
 
     if (staff.autoAssignEnabled !== false) {
@@ -3336,6 +3443,7 @@ function requestAnalysisText(payload = {}) {
     payload.category,
     payload.content,
     payload.address,
+    mediaTextForAnalysis(payload.mediaFiles),
     Array.isArray(payload.issueTags) ? payload.issueTags.join(" ") : payload.issueTags,
     Array.isArray(payload.workTypeIds) ? payload.workTypeIds.join(" ") : payload.workTypeIds,
     payload.note,
@@ -4636,11 +4744,33 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
     }
 
     const firstMedia = mediaFiles[0] || { url: "", type: "" };
-    const issueTags = parseRequestTags(req.body.issueTags);
-    const workTypeIds = parseRequestTags(req.body.workTypeIds);
-    const departmentCode = cleanText(req.body.departmentCode);
     const overviewSettings = await getOverviewSettings();
     const aiSettings = aiSettingsFromOverview(overviewSettings);
+    const initialIssueTags = parseRequestTags(req.body.issueTags);
+    const initialWorkTypeIds = parseRequestTags(req.body.workTypeIds);
+    const initialDepartmentCode = cleanText(req.body.departmentCode);
+    const inferredWorkContext = aiSettings.aiRequestAnalysisEnabled
+      ? await inferWorkContextForRequest({
+          title: req.body.title || "",
+          category: req.body.category || "",
+          content: req.body.content || "",
+          address: req.body.address || user.address || "",
+          issueTags: initialIssueTags,
+          workTypeIds: initialWorkTypeIds,
+          departmentCode: initialDepartmentCode,
+          mediaFiles
+        })
+      : {
+          issueTags: initialIssueTags,
+          workTypeIds: initialWorkTypeIds,
+          departmentCode: initialDepartmentCode,
+          matchedWorkTypes: [],
+          matchedDepartments: [],
+          requestText: ""
+        };
+    const issueTags = inferredWorkContext.issueTags;
+    const workTypeIds = inferredWorkContext.workTypeIds;
+    const departmentCode = inferredWorkContext.departmentCode;
     const requestAnalysisPayload = {
       title: req.body.title || "",
       category: req.body.category || "",
@@ -4649,6 +4779,7 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
       issueTags,
       workTypeIds,
       departmentCode,
+      mediaFiles,
       contact: req.body.contact || user.contact || ""
     };
     const urgencySuggestion = aiSettings.aiRequestAnalysisEnabled && aiSettings.aiSuggestUrgencyEnabled
@@ -4658,7 +4789,14 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
       ? suggestedDueDateForUrgency(urgencySuggestion.urgency)
       : null;
     const assignmentSuggestion = aiSettings.aiRequestAnalysisEnabled && aiSettings.aiSuggestAssigneeEnabled
-      ? await buildAssignmentSuggestion({ issueTags, workTypeIds, departmentCode })
+      ? await buildAssignmentSuggestion({
+          issueTags,
+          workTypeIds,
+          departmentCode,
+          matchedWorkTypes: inferredWorkContext.matchedWorkTypes,
+          matchedDepartments: inferredWorkContext.matchedDepartments,
+          requestText: inferredWorkContext.requestText
+        })
       : {
           assignmentCandidates: [],
           assignmentConfidence: 0,
@@ -4697,8 +4835,8 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
       issueTags,
       workTypeIds,
       departmentCode,
-      autoTags: [],
-      autoCategory: null,
+      autoTags: inferredWorkContext.matchedWorkTypes?.map(item => item.name || item.code).filter(Boolean) || [],
+      autoCategory: inferredWorkContext.matchedWorkTypes?.[0]?.name || null,
       autoUrgency: urgencySuggestion.urgency || null,
       autoArea: null,
       aiAnalysisEnabled: aiSettings.aiRequestAnalysisEnabled,
