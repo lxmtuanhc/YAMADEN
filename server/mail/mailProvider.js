@@ -1,3 +1,4 @@
+const dns = require("dns");
 const nodemailer = require("nodemailer");
 
 function clean(value) {
@@ -9,8 +10,8 @@ function configuredProvider() {
 }
 
 function smtpConfig() {
-  const smtpUser = process.env.GMAIL_SMTP_USER || process.env.SMTP_USER;
-  const smtpPass = process.env.GMAIL_SMTP_APP_PASSWORD || process.env.SMTP_PASS;
+  const smtpUser = process.env.SMTP_USER || process.env.GMAIL_SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS || process.env.GMAIL_SMTP_APP_PASSWORD;
   const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
   const smtpPort = Number(process.env.SMTP_PORT || 465);
 
@@ -20,12 +21,17 @@ function smtpConfig() {
     smtpHost: clean(smtpHost) || "smtp.gmail.com",
     smtpPort: Number.isFinite(smtpPort) ? smtpPort : 465,
     secure: smtpPort === 465,
-    requireTLS: smtpPort === 587
+    requireTLS: smtpPort === 587,
+    family: 4
   };
 }
 
+function lookupIpv4(hostname, options, callback) {
+  return dns.lookup(hostname, { ...options, family: 4, all: false }, callback);
+}
+
 async function sendGmailSmtpMail({ to, subject, html, text, eventType, requestCode }) {
-  const { smtpUser, smtpPass, smtpHost, smtpPort, secure, requireTLS } = smtpConfig();
+  const { smtpUser, smtpPass, smtpHost, smtpPort, secure, requireTLS, family } = smtpConfig();
   if (!smtpUser || !smtpPass) {
     return {
       status: "skipped",
@@ -43,13 +49,15 @@ async function sendGmailSmtpMail({ to, subject, html, text, eventType, requestCo
     requestCode,
     smtpHost,
     smtpPort,
-    secure
+    secure,
+    family
   });
 
   console.log("[SMTP_CONFIG]", {
     host: smtpHost,
     port: smtpPort,
     secure,
+    family,
     user: smtpUser,
     from: process.env.MAIL_FROM || smtpUser
   });
@@ -59,6 +67,8 @@ async function sendGmailSmtpMail({ to, subject, html, text, eventType, requestCo
     port: smtpPort,
     secure,
     requireTLS,
+    family,
+    lookup: lookupIpv4,
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 15000,
