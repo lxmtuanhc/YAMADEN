@@ -733,6 +733,13 @@ const RequestSchema = new mongoose.Schema({
   autoCategory: { type: String, default: null },
   autoUrgency: { type: String, default: null },
   autoArea: { type: String, default: null },
+  aiAnalysisEnabled: { type: Boolean, default: true },
+  aiSuggestedUrgency: { type: String, default: null },
+  aiSuggestedDueDate: { type: Date, default: null },
+  aiSuggestedStaffId: { type: String, default: null },
+  aiSuggestedStaffName: { type: String, default: null },
+  aiSuggestedDepartmentCode: { type: String, default: null },
+  aiSuggestedReason: { type: String, default: null },
   assignmentCandidates: [mongoose.Schema.Types.Mixed],
   assignmentConfidence: { type: Number, default: null },
   assignmentReason: { type: String, default: null },
@@ -1057,6 +1064,13 @@ const DEFAULT_OVERVIEW_SETTINGS = Object.freeze({
     note: "",
     startDate: "",
     expectedEndDate: ""
+  },
+  aiSettings: {
+    aiRequestAnalysisEnabled: true,
+    aiSuggestUrgencyEnabled: true,
+    aiSuggestAssigneeEnabled: true,
+    aiSuggestDueDateEnabled: true,
+    aiAutoFillProcessingFormEnabled: true
   }
 });
 
@@ -1067,7 +1081,7 @@ function cloneJson(value) {
 function mergeOverviewSettings(value) {
   const incoming = value || {};
   const merged = cloneJson(DEFAULT_OVERVIEW_SETTINGS);
-  ["company", "system", "requestCode", "poc"].forEach(section => {
+  ["company", "system", "requestCode", "poc", "aiSettings"].forEach(section => {
     merged[section] = Object.assign({}, merged[section], incoming[section] || {});
   });
   merged.system.defaultLanguage = ["vi", "ja"].includes(merged.system.defaultLanguage) ? merged.system.defaultLanguage : "vi";
@@ -1077,6 +1091,9 @@ function mergeOverviewSettings(value) {
   merged.requestCode.prefix = String(merged.requestCode.prefix || "YMD").trim().replace(/[^A-Za-z0-9]/g, "") || "YMD";
   merged.requestCode.digits = Math.min(8, Math.max(4, Number(merged.requestCode.digits || 6) || 6));
   merged.requestCode.format = `${merged.requestCode.prefix}-${"x".repeat(merged.requestCode.digits)}`;
+  Object.keys(DEFAULT_OVERVIEW_SETTINGS.aiSettings).forEach(key => {
+    merged.aiSettings[key] = merged.aiSettings[key] !== false;
+  });
   return merged;
 }
 
@@ -2409,16 +2426,21 @@ async function buildAssignmentSuggestion({ issueTags, workTypeIds, departmentCod
     const tagMatches = normalizedTags.filter(tag => staffTagList.includes(tag));
 
     if (department && staffDept && staffDept === department) {
-      score += 25;
+      score += 30;
       reasons.push(`Bộ phận phù hợp: ${department}`);
     }
     if (workMatches.length) {
-      score += Math.min(40, workMatches.length * 20);
+      score += Math.min(30, workMatches.length * 15);
       reasons.push(`Nội dung công việc phù hợp: ${workMatches.join(", ")}`);
     }
     if (tagMatches.length) {
-      score += Math.min(25, tagMatches.length * 10);
+      score += Math.min(20, tagMatches.length * 10);
       reasons.push(`Tag phù hợp: ${tagMatches.join(", ")}`);
+    }
+
+    if (staff.autoAssignEnabled !== false) {
+      score += 10;
+      reasons.push("Staff is active for auto assignment");
     }
 
     if (!score) return null;
@@ -2428,6 +2450,8 @@ async function buildAssignmentSuggestion({ issueTags, workTypeIds, departmentCod
       staffName: staff.name || staff.email || staff.phone || "",
       departmentCode: staff.departmentCode || "",
       score: Math.min(100, score),
+      confidence: Math.min(100, score),
+      reason: reasons.join("; "),
       reasons
     };
   }).filter(Boolean).sort((a, b) => b.score - a.score).slice(0, 3);
@@ -3295,6 +3319,68 @@ function publicQuoteFile(file, req) {
     size: Number(item.size || item.fileSize || 0),
     fileSize: Number(item.fileSize || item.size || 0)
   };
+}
+
+function aiSettingsFromOverview(overview) {
+  const defaults = DEFAULT_OVERVIEW_SETTINGS.aiSettings;
+  const settings = Object.assign({}, defaults, overview?.aiSettings || {});
+  Object.keys(defaults).forEach(key => {
+    settings[key] = settings[key] !== false;
+  });
+  return settings;
+}
+
+function requestAnalysisText(payload = {}) {
+  return [
+    payload.title,
+    payload.category,
+    payload.content,
+    payload.address,
+    Array.isArray(payload.issueTags) ? payload.issueTags.join(" ") : payload.issueTags,
+    Array.isArray(payload.workTypeIds) ? payload.workTypeIds.join(" ") : payload.workTypeIds,
+    payload.note,
+    payload.contact
+  ].filter(Boolean).join(" ").toLowerCase();
+}
+
+function suggestRequestUrgency(payload = {}) {
+  const text = requestAnalysisText(payload);
+  const urgentWords = [
+    "mất điện", "mat dien", "chập điện", "chap dien", "rò điện", "ro dien",
+    "nguy hiểm", "nguy hiem", "không hoạt động", "khong hoat dong",
+    "cần gấp", "can gap", "hôm nay", "hom nay", "khẩn cấp", "khan cap",
+    "緊急", "至急", "急ぎ", "停電", "漏電", "危険", "動かない", "本日中"
+  ];
+  const highWords = ["gấp", "gap", "sớm", "som", "trong ngày", "trong ngay", "早め", "早急", "できるだけ早く"];
+  const lowWords = ["tham khảo", "tham khao", "hỏi", "hoi", "tư vấn", "tu van", "見積だけ", "相談", "参考"];
+  if (urgentWords.some(word => text.includes(word.toLowerCase()))) {
+    return { urgency: "urgent", reason: "AI detected urgent safety/outage keywords in the request." };
+  }
+  if (highWords.some(word => text.includes(word.toLowerCase()))) {
+    return { urgency: "high", reason: "AI detected words that indicate quick handling is preferred." };
+  }
+  if (lowWords.some(word => text.includes(word.toLowerCase()))) {
+    return { urgency: "low", reason: "AI detected consultation/reference wording without immediate handling need." };
+  }
+  return { urgency: "normal", reason: "AI did not detect urgent terms, so normal priority is suggested." };
+}
+
+function suggestedDueDateForUrgency(urgency) {
+  const daysByUrgency = { urgent: 0, high: 1, normal: 3, low: 7 };
+  const due = new Date();
+  due.setHours(18, 0, 0, 0);
+  due.setDate(due.getDate() + (daysByUrgency[urgency] ?? 3));
+  return due;
+}
+
+function pushAssignmentHistory(item, action, note, actor = "ai") {
+  item.assignmentHistory = Array.isArray(item.assignmentHistory) ? item.assignmentHistory : [];
+  item.assignmentHistory.push({
+    time: new Date(),
+    actor,
+    action,
+    note: String(note || "").trim()
+  });
 }
 
 function saveQuoteUploadFile(file, requestNo) {
@@ -4553,7 +4639,35 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
     const issueTags = parseRequestTags(req.body.issueTags);
     const workTypeIds = parseRequestTags(req.body.workTypeIds);
     const departmentCode = cleanText(req.body.departmentCode);
-    const assignmentSuggestion = await buildAssignmentSuggestion({ issueTags, workTypeIds, departmentCode });
+    const overviewSettings = await getOverviewSettings();
+    const aiSettings = aiSettingsFromOverview(overviewSettings);
+    const requestAnalysisPayload = {
+      title: req.body.title || "",
+      category: req.body.category || "",
+      content: req.body.content || "",
+      address: req.body.address || user.address || "",
+      issueTags,
+      workTypeIds,
+      departmentCode,
+      contact: req.body.contact || user.contact || ""
+    };
+    const urgencySuggestion = aiSettings.aiRequestAnalysisEnabled && aiSettings.aiSuggestUrgencyEnabled
+      ? suggestRequestUrgency(requestAnalysisPayload)
+      : { urgency: null, reason: "" };
+    const dueSuggestion = aiSettings.aiRequestAnalysisEnabled && aiSettings.aiSuggestDueDateEnabled && urgencySuggestion.urgency
+      ? suggestedDueDateForUrgency(urgencySuggestion.urgency)
+      : null;
+    const assignmentSuggestion = aiSettings.aiRequestAnalysisEnabled && aiSettings.aiSuggestAssigneeEnabled
+      ? await buildAssignmentSuggestion({ issueTags, workTypeIds, departmentCode })
+      : {
+          assignmentCandidates: [],
+          assignmentConfidence: 0,
+          assignmentReason: aiSettings.aiRequestAnalysisEnabled
+            ? "AI assignee suggestion is disabled in settings."
+            : "AI request analysis is disabled in settings.",
+          assignmentSource: "ai_disabled"
+        };
+    const primaryCandidate = assignmentSuggestion.assignmentCandidates?.[0] || null;
     const timeline = normalizeTimelineEvents([{
       id: "tl-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
       type: "submitted",
@@ -4585,8 +4699,15 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
       departmentCode,
       autoTags: [],
       autoCategory: null,
-      autoUrgency: null,
+      autoUrgency: urgencySuggestion.urgency || null,
       autoArea: null,
+      aiAnalysisEnabled: aiSettings.aiRequestAnalysisEnabled,
+      aiSuggestedUrgency: urgencySuggestion.urgency || null,
+      aiSuggestedDueDate: dueSuggestion,
+      aiSuggestedStaffId: primaryCandidate?.staffId || null,
+      aiSuggestedStaffName: primaryCandidate?.staffName || null,
+      aiSuggestedDepartmentCode: primaryCandidate?.departmentCode || null,
+      aiSuggestedReason: [urgencySuggestion.reason, assignmentSuggestion.assignmentReason].filter(Boolean).join(" "),
       assignmentCandidates: assignmentSuggestion.assignmentCandidates,
       assignmentConfidence: assignmentSuggestion.assignmentConfidence,
       assignmentReason: assignmentSuggestion.assignmentReason,
@@ -4611,10 +4732,22 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
       assignedTo: null,
       responsiblePerson: null,
       status: "untreated",
+      urgency: aiSettings.aiAutoFillProcessingFormEnabled ? urgencySuggestion.urgency || "" : "",
+      dueAt: aiSettings.aiAutoFillProcessingFormEnabled ? dueSuggestion : null,
+      deadline: aiSettings.aiAutoFillProcessingFormEnabled ? dueSuggestion : null,
       adminReply: "",
       timeline,
       createdAt: new Date()
     };
+    if (aiSettings.aiRequestAnalysisEnabled) {
+      pushAssignmentHistory(requestPayload, "AI analyzed request", "AI analyzed request content and metadata.");
+      if (urgencySuggestion.urgency) {
+        pushAssignmentHistory(requestPayload, "AI suggested urgency", urgencySuggestion.reason);
+      }
+      if (assignmentSuggestion.assignmentSource !== "ai_disabled") {
+        pushAssignmentHistory(requestPayload, "AI suggested assignment candidates", assignmentSuggestion.assignmentReason);
+      }
+    }
 
     console.info("[request:create] save payload debug", {
       requestCode,
@@ -4786,7 +4919,7 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
         const source = req.body.assignmentSource === "admin_from_suggestion" ? "admin_from_suggestion" : "manual";
         const score = Number(req.body.assignmentScore || 0);
         const reason = String(req.body.assignmentReason || "").trim();
-        item.assignedBy = "admin";
+        item.assignedBy = source === "admin_from_suggestion" ? "admin_confirmed" : "admin_manual";
         item.assignmentAcceptedAt = now;
         item.assignmentHistory = Array.isArray(item.assignmentHistory) ? item.assignmentHistory : [];
         item.assignmentHistory.push({
@@ -4797,8 +4930,14 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
           score,
           reason,
           assignedAt: now,
-          assignedBy: "admin"
+          assignedBy: item.assignedBy
         });
+        pushAssignmentHistory(
+          item,
+          source === "admin_from_suggestion" ? "Admin applied AI assignment suggestion" : "Admin manually selected assignee",
+          reason || (nextAssigneeName ? `Assignee: ${nextAssigneeName}` : ""),
+          "admin"
+        );
         item.timeline = Array.isArray(item.timeline) ? item.timeline : [];
         item.timeline.push({
           id: "tl-assign-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
@@ -4829,8 +4968,6 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
       item.dueAt = dueAt && !Number.isNaN(dueAt.getTime()) ? dueAt : null;
       item.deadline = item.dueAt;
     }
-    if (req.body.amount !== undefined) item.amount = req.body.amount;
-
     if (req.body.adminReply !== undefined) {
       item.adminReply = req.body.adminReply;
 

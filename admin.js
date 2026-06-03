@@ -2384,6 +2384,13 @@
         note: "",
         startDate: "",
         expectedEndDate: ""
+      },
+      aiSettings: {
+        aiRequestAnalysisEnabled: true,
+        aiSuggestUrgencyEnabled: true,
+        aiSuggestAssigneeEnabled: true,
+        aiSuggestDueDateEnabled: true,
+        aiAutoFillProcessingFormEnabled: true
       }
     };
   }
@@ -2391,7 +2398,7 @@
   function normalizeOverviewSettings(value) {
     const base = defaultOverviewSettings();
     const input = value || {};
-    ["company", "system", "requestCode", "poc"].forEach(section => {
+    ["company", "system", "requestCode", "poc", "aiSettings"].forEach(section => {
       base[section] = Object.assign({}, base[section], input[section] || {});
     });
     base.system.defaultLanguage = ["vi", "ja"].includes(base.system.defaultLanguage) ? base.system.defaultLanguage : "vi";
@@ -2401,6 +2408,9 @@
     base.requestCode.prefix = base.requestCode.prefix || "YMD";
     base.requestCode.digits = Number(base.requestCode.digits || 6);
     base.requestCode.format = base.requestCode.format || `${base.requestCode.prefix}-${"x".repeat(base.requestCode.digits || 6)}`;
+    Object.keys(defaultOverviewSettings().aiSettings).forEach(key => {
+      base.aiSettings[key] = base.aiSettings[key] !== false;
+    });
     return base;
   }
 
@@ -2736,6 +2746,25 @@
     return Array.isArray(request?.assignmentCandidates) ? request.assignmentCandidates.filter(Boolean) : [];
   }
 
+  function currentAiSettings() {
+    return normalizeOverviewSettings(state.overviewSettings).aiSettings || defaultOverviewSettings().aiSettings;
+  }
+
+  function requestAiAutoFillEnabled() {
+    const settings = currentAiSettings();
+    return settings.aiRequestAnalysisEnabled !== false && settings.aiAutoFillProcessingFormEnabled !== false;
+  }
+
+  function requestEditUrgencyValue(request) {
+    if (request?.urgency || request?.priority) return request.urgency || request.priority;
+    return requestAiAutoFillEnabled() ? request?.aiSuggestedUrgency || request?.autoUrgency || "" : "";
+  }
+
+  function requestEditDueDateValue(request) {
+    if (getDeadline(request)) return getDeadline(request);
+    return requestAiAutoFillEnabled() ? request?.aiSuggestedDueDate || "" : "";
+  }
+
   function getAssignmentCandidateStaffId(candidate) {
     return String(candidate?.staffId || candidate?.id || candidate?._id || "");
   }
@@ -2751,15 +2780,29 @@
   }
 
   function renderAssignmentSuggestionPanel(request, candidates, requestId) {
+    const aiSettings = currentAiSettings();
+    if (aiSettings.aiRequestAnalysisEnabled === false) {
+      return `<section class="assign-suggestion"><div><strong>${escapeHtml(state.lang === "vi" ? "Gợi ý phân công" : t("suggestAssignee"))}</strong><p class="note">${escapeHtml(state.lang === "vi" ? "AI phân tích đang tắt trong cài đặt." : "AI分析は設定で無効です。")}</p></div></section>`;
+    }
+    const showUrgency = aiSettings.aiSuggestUrgencyEnabled !== false && (request?.aiSuggestedUrgency || request?.autoUrgency);
+    const showDueDate = aiSettings.aiSuggestDueDateEnabled !== false && request?.aiSuggestedDueDate;
+    const canSuggestAssignee = aiSettings.aiSuggestAssigneeEnabled !== false;
+    const visibleCandidates = canSuggestAssignee ? candidates : [];
     const emptyReason = request?.assignmentReason || (state.lang === "vi"
       ? "Chưa đủ dữ liệu để gợi ý người phụ trách"
       : "担当者を提案するための情報が不足しています");
     const title = state.lang === "vi" ? "Gợi ý phân công" : escapeHtml(t("suggestAssignee"));
-    if (!candidates.length) {
+    const suggestionMeta = [
+      showUrgency ? `${state.lang === "vi" ? "Độ khẩn AI" : "AI緊急度"}: ${request.aiSuggestedUrgency || request.autoUrgency}` : "",
+      showDueDate ? `${state.lang === "vi" ? "Hạn xử lý AI" : "AI期限"}: ${formatDateInput(request.aiSuggestedDueDate)}` : "",
+      request?.aiSuggestedReason && (showUrgency || canSuggestAssignee) ? request.aiSuggestedReason : ""
+    ].filter(Boolean);
+    if (!visibleCandidates.length) {
       return `
         <section class="assign-suggestion">
           <div>
             <strong>${escapeHtml(title)}</strong>
+            ${suggestionMeta.length ? `<p class="note">${escapeHtml(suggestionMeta.join(" · "))}</p>` : ""}
             <p class="note">${escapeHtml(emptyReason)}</p>
           </div>
         </section>
@@ -2769,10 +2812,15 @@
       <section class="assign-suggestion assign-suggestion-list">
         <div class="assign-suggestion-head">
           <strong>${escapeHtml(title)}</strong>
+          ${suggestionMeta.length ? `<p class="note">${escapeHtml(suggestionMeta.join(" · "))}</p>` : ""}
           <p class="note">${escapeHtml(request?.assignmentReason || (state.lang === "vi" ? "Admin chọn một nhân sự phù hợp từ danh sách gợi ý." : "候補から担当者を選択してください。"))}</p>
+          <div class="assign-suggestion-actions">
+            <button class="btn btn-soft" type="button" data-apply-ai-suggestion="${escapeHtml(requestId)}">${escapeHtml(state.lang === "vi" ? "Áp dụng gợi ý AI" : "AI提案を適用")}</button>
+            <button class="btn btn-soft" type="button" data-skip-ai-suggestion>${escapeHtml(state.lang === "vi" ? "Bỏ qua" : "スキップ")}</button>
+          </div>
         </div>
         <div class="assignment-candidate-list">
-          ${candidates.map(candidate => {
+          ${visibleCandidates.map(candidate => {
             const staffId = getAssignmentCandidateStaffId(candidate);
             const name = getAssignmentCandidateName(candidate) || "-";
             const reasons = getAssignmentCandidateReasons(candidate);
@@ -2806,6 +2854,8 @@
     const media = normalizeRequestMedia(request);
     const timeline = Array.isArray(request.timeline) ? request.timeline : [];
     const assignmentCandidates = getAssignmentCandidates(request);
+    const editUrgency = requestEditUrgencyValue(request);
+    const editDueAt = requestEditDueDateValue(request);
     const quoteLinked = Boolean(request.quoteId || request.quoteNo || request.quoteCode);
     const quoteButtonLabel = quoteLinked
       ? (state.lang === "vi" ? "M\u1edf b\u00e1o gi\u00e1" : "\u898b\u7a4d\u3092\u958b\u304f")
@@ -2853,9 +2903,8 @@
               <div class="request-edit-grid">
                 <label class="field"><span>${escapeHtml(t("status"))}</span><select data-request-edit-field="status">${requestStatusOptions(request.status)}</select></label>
                 <label class="field"><span>${escapeHtml(t("assignee"))}</span>${staffSelectHtml(request.assigneeId, "data-request-edit-field=\"assigneeId\"")}</label>
-                <label class="field"><span>${escapeHtml(t("urgency"))}</span><select data-request-edit-field="urgency">${requestUrgencyOptions(request.urgency || request.priority)}</select></label>
-                <label class="field"><span>${escapeHtml(t("dueAt"))}</span><input type="date" data-request-edit-field="dueAt" value="${escapeHtml(formatDateInput(getDeadline(request)))}"></label>
-                <label class="field"><span>${escapeHtml(t("amount"))}</span><input type="text" data-request-edit-field="amount" value="${escapeHtml(request.amount || request.totalAmount || "")}"></label>
+                <label class="field"><span>${escapeHtml(t("urgency"))}</span><select data-request-edit-field="urgency">${requestUrgencyOptions(editUrgency)}</select></label>
+                <label class="field"><span>${escapeHtml(t("dueAt"))}</span><input type="date" data-request-edit-field="dueAt" value="${escapeHtml(formatDateInput(editDueAt))}"></label>
                 <label class="field full"><span>${escapeHtml(t("adminNote"))}</span><textarea data-request-edit-field="adminReply">${escapeHtml(request.adminReply || "")}</textarea></label>
               </div>
               ${renderAssignmentSuggestionPanel(request, assignmentCandidates, id)}
@@ -6530,6 +6579,13 @@
         overviewField("poc", "startDate", settingText("Ngày bắt đầu POC", "POC\u958b\u59cb\u65e5"), { type: "date" }),
         overviewField("poc", "expectedEndDate", settingText("Ngày kết thúc dự kiến", "\u7d42\u4e86\u4e88\u5b9a\u65e5"), { type: "date" }),
         overviewField("poc", "note", settingText("Ghi chú vận hành", "\u904b\u7528\u30e1\u30e2"), { type: "textarea", rows: 4 })
+      ],
+      aiSettings: [
+        overviewField("aiSettings", "aiRequestAnalysisEnabled", settingText("Bật AI phân tích yêu cầu", "AI依頼分析を有効にする"), { type: "checkbox" }),
+        overviewField("aiSettings", "aiSuggestUrgencyEnabled", settingText("AI gợi ý độ khẩn", "AI緊急度提案"), { type: "checkbox" }),
+        overviewField("aiSettings", "aiSuggestAssigneeEnabled", settingText("AI gợi ý người phụ trách", "AI担当者提案"), { type: "checkbox" }),
+        overviewField("aiSettings", "aiSuggestDueDateEnabled", settingText("AI gợi ý hạn xử lý", "AI期限提案"), { type: "checkbox" }),
+        overviewField("aiSettings", "aiAutoFillProcessingFormEnabled", settingText("AI tự điền gợi ý vào form xử lý", "AI提案を処理フォームへ自動入力"), { type: "checkbox" })
       ]
     };
     const groupedFields = {
@@ -6547,6 +6603,9 @@
       poc: [
         overviewFieldGroup(settingText("Thông tin POC", "POC\u60c5\u5831"), groups.poc.slice(0, 4)),
         overviewFieldGroup(settingText("Ghi chú vận hành", "\u904b\u7528\u30e1\u30e2"), groups.poc.slice(4))
+      ],
+      aiSettings: [
+        overviewFieldGroup(settingText("AI設定 / Cài đặt AI", "AI設定"), groups.aiSettings)
       ]
     };
     return `<div class="settings-overview-detail-form">${(groupedFields[section] || groups[section] || []).join("")}</div>`;
@@ -6612,6 +6671,14 @@
   }
 
   function renderSettingsAiAssist() {
+    const aiSettings = currentAiSettings();
+    const aiLines = [
+      `${settingText("Phân tích yêu cầu", "依頼分析")}: ${aiSettings.aiRequestAnalysisEnabled ? "ON" : "OFF"}`,
+      `${settingText("Gợi ý độ khẩn", "緊急度提案")}: ${aiSettings.aiSuggestUrgencyEnabled ? "ON" : "OFF"}`,
+      `${settingText("Gợi ý người phụ trách", "担当者提案")}: ${aiSettings.aiSuggestAssigneeEnabled ? "ON" : "OFF"}`,
+      `${settingText("Gợi ý hạn xử lý", "期限提案")}: ${aiSettings.aiSuggestDueDateEnabled ? "ON" : "OFF"}`,
+      `${settingText("Tự điền form", "フォーム自動入力")}: ${aiSettings.aiAutoFillProcessingFormEnabled ? "ON" : "OFF"}`
+    ];
     const aiWorkTypes = ["\u96fb\u6c17\u5de5\u4e8b", "\u898b\u7a4d", "\u70b9\u691c", "\u56f3\u9762\u78ba\u8a8d", "\u305d\u306e\u4ed6"];
     const skills = ["\u96fb\u6c17\u5de5\u4e8b", "\u7167\u660e", "\u5206\u96fb\u76e4", "\u73fe\u5730\u8abf\u67fb", "\u898b\u7a4d\u4f5c\u6210", "\u56f3\u9762\u78ba\u8a8d"];
     const ruleRows = [
@@ -6623,6 +6690,7 @@
       [settingText("Kh\u1ea9n c\u1ea5p", "\u7dca\u6025\u5ea6"), "5%"]
     ];
     return [
+      overviewSummaryCard("aiSettings", "sparkles", settingText("AI設定 / Cài đặt AI", "AI設定"), aiSettings.aiRequestAnalysisEnabled ? t("inUse") : "OFF", aiLines, settingText("Bật/tắt từng chức năng AI dùng trong phân tích yêu cầu và form xử lý.", "依頼分析と処理フォームで使うAI機能を個別に切り替えます。")),
       settingCard("sparkles", settingText("T\u1ed5ng quan AI", "AI\u6982\u8981"), settingText("AI h\u1ed7 tr\u1ee3 ph\u00e2n t\u00edch y\u00eau c\u1ea7u, ph\u00e2n lo\u1ea1i n\u1ed9i b\u1ed9 v\u00e0 g\u1ee3i \u00fd ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch ban \u0111\u1ea7u. Admin v\u1eabn quy\u1ebft \u0111\u1ecbnh cu\u1ed1i c\u00f9ng.", "AI\u306f\u4f9d\u983c\u3092\u5206\u6790\u3057\u3001\u5185\u90e8\u5206\u985e\u3068\u521d\u671f\u62c5\u5f53\u8005\u3092\u63d0\u6848\u3057\u307e\u3059\u3002\u6700\u7d42\u5224\u65ad\u306f\u7ba1\u7406\u8005\u304c\u884c\u3044\u307e\u3059\u3002"), settingText("Ch\u01b0a k\u00edch ho\u1ea1t / Layout", "\u672a\u6709\u52b9 / Layout"), "is-planned"),
       settingCard("users", settingText("B\u1ed9 ph\u1eadn d\u00f9ng cho AI", "AI\u7528\u90e8\u9580"), [settingText("Li\u00ean k\u1ebft v\u1edbi b\u1ed9 ph\u1eadn t\u1eeb Nh\u00e2n vi\u00ean & c\u00f4ng vi\u1ec7c", "\u30b9\u30bf\u30c3\u30d5\u30fb\u696d\u52d9\u306e\u90e8\u9580\u3068\u9023\u643a"), t("departments") + ": " + activeMasterItems("departments").length], t("linkLater"), "is-planned", settingsButton(settingText("C\u1ea5u h\u00ecnh b\u1ed9 ph\u1eadn", "\u90e8\u9580\u8a2d\u5b9a"))),
       settingCard("clipboard", settingText("Lo\u1ea1i c\u00f4ng vi\u1ec7c", "\u4f5c\u696d\u7a2e\u5225"), "", t("prepareLater"), "is-planned", `${settingsChips(aiWorkTypes)}${settingsButton(settingText("Th\u00eam lo\u1ea1i c\u00f4ng vi\u1ec7c", "\u4f5c\u696d\u7a2e\u5225\u3092\u8ffd\u52a0"))}`),
@@ -6784,6 +6852,12 @@
           overviewSection: "poc",
           title: "POC / vận hành",
           desc: settingText("Theo dõi trạng thái POC, thời gian và ghi chú vận hành.", "POC\u306e\u72b6\u614b\u3001\u671f\u9593\u3001\u904b\u7528\u30e1\u30e2\u3092\u7ba1\u7406\u3057\u307e\u3059\u3002")
+        },
+        aiSettings: {
+          kind: "overview",
+          overviewSection: "aiSettings",
+          title: settingText("AI設定 / Cài đặt AI", "AI設定"),
+          desc: settingText("Bật/tắt từng phần AI phân tích yêu cầu, gợi ý độ khẩn, người phụ trách và hạn xử lý.", "依頼分析、緊急度、担当者、期限提案を個別に有効/無効化します。")
         },
         dataStatus: {
           kind: "overview",
@@ -7064,7 +7138,6 @@
     const staffId = root.querySelector("[data-request-edit-field='assigneeId']")?.value || $("requestStaffSelect")?.value || "";
     const urgency = root.querySelector("[data-request-edit-field='urgency']")?.value || "";
     const dueAt = root.querySelector("[data-request-edit-field='dueAt']")?.value || "";
-    const amount = root.querySelector("[data-request-edit-field='amount']")?.value || "";
     const staff = state.staff.find(item => getRowId(item) === staffId);
     const currentRequest = state.requests.find(item => String(getRowId(item) || getRequestDisplayId(item)) === String(id));
     const previousStaffId = String(currentRequest?.assigneeId || currentRequest?.assignedStaffId || "");
@@ -7074,11 +7147,11 @@
       assigneeId: staff ? getRowId(staff) : "",
       assigneeName: staff ? staff.name || "" : "",
       urgency: urgency === "none" ? "" : urgency,
-      dueAt,
-      amount
+      dueAt
     };
     if (staff && getRowId(staff) !== previousStaffId) {
-      payload.assignmentSource = "manual";
+      const aiStaffIds = [currentRequest?.aiSuggestedStaffId].concat(getAssignmentCandidates(currentRequest).map(getAssignmentCandidateStaffId)).map(String).filter(Boolean);
+      payload.assignmentSource = aiStaffIds.includes(String(getRowId(staff))) ? "admin_from_suggestion" : "manual";
     }
     const response = await AdminAPI.updateRequest(id, payload);
     const updated = response?.data || response;
@@ -7094,6 +7167,31 @@
     closeDrawer();
     renderCurrentView();
     toast(t("savedChanges"));
+  }
+
+  function applyAiSuggestionToRequestForm(requestId, staffId = "") {
+    const detail = $("requestDetailOverlay");
+    if (!detail) return false;
+    const currentRequest = state.requests.find(item => String(getRowId(item) || getRequestDisplayId(item)) === String(requestId));
+    const candidates = getAssignmentCandidates(currentRequest);
+    const selectedStaffId = staffId || currentRequest?.aiSuggestedStaffId || getAssignmentCandidateStaffId(candidates[0]) || "";
+    const settings = currentAiSettings();
+    if (settings.aiSuggestAssigneeEnabled !== false && selectedStaffId) {
+      const select = detail.querySelector("[data-request-edit-field='assigneeId']");
+      if (select) select.value = selectedStaffId;
+    }
+    if (settings.aiSuggestUrgencyEnabled !== false && requestAiAutoFillEnabled()) {
+      const urgency = detail.querySelector("[data-request-edit-field='urgency']");
+      if (urgency && (currentRequest?.aiSuggestedUrgency || currentRequest?.autoUrgency)) {
+        urgency.value = currentRequest.aiSuggestedUrgency || currentRequest.autoUrgency;
+      }
+    }
+    if (settings.aiSuggestDueDateEnabled !== false && requestAiAutoFillEnabled()) {
+      const dueAt = detail.querySelector("[data-request-edit-field='dueAt']");
+      if (dueAt && currentRequest?.aiSuggestedDueDate) dueAt.value = formatDateInput(currentRequest.aiSuggestedDueDate);
+    }
+    setRequestDetailDirty(true);
+    return true;
   }
 
   function quoteOpenConfirmText(key) {
@@ -9185,6 +9283,11 @@
         const requestId = acceptAssignmentCandidate.dataset.acceptAssignmentCandidate;
         const staffId = acceptAssignmentCandidate.dataset.staffId || "";
         const staffName = acceptAssignmentCandidate.dataset.staffName || "";
+        const detail = $("requestDetailOverlay");
+        if (detail && detail.contains(acceptAssignmentCandidate)) {
+          applyAiSuggestionToRequestForm(requestId, staffId);
+          return;
+        }
         try {
           const response = await AdminAPI.updateRequest(requestId, {
             assigneeId: staffId,
@@ -9206,6 +9309,18 @@
           console.error(error);
           toast(t("failed"));
         }
+        return;
+      }
+
+      const applyAiSuggestion = event.target.closest("[data-apply-ai-suggestion]");
+      if (applyAiSuggestion) {
+        applyAiSuggestionToRequestForm(applyAiSuggestion.dataset.applyAiSuggestion);
+        return;
+      }
+
+      if (event.target.closest("[data-skip-ai-suggestion]")) {
+        const panel = event.target.closest(".assign-suggestion");
+        if (panel) panel.hidden = true;
         return;
       }
 
