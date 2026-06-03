@@ -97,7 +97,7 @@ const SLACK_ENABLED = false;
 const ADMIN_URL = process.env.ADMIN_URL || "https://yamaden.onrender.com/admin.html";
 const MAIL_PROVIDER = process.env.MAIL_PROVIDER || "";
 const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
-const ADMIN_NOTIFICATION_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || "lxmtuanhc@gmail.com";
+const ADMIN_NOTIFICATION_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || "";
 const MAIL_FROM = process.env.MAIL_FROM || "";
 
 mongoose.connect(process.env.MONGODB_URI)
@@ -178,6 +178,10 @@ function mailValue(value, fallback = "-") {
   return text || fallback;
 }
 
+function requestStatusForMail(request) {
+  return mailValue(request?.status || request?.quoteStatus || "");
+}
+
 async function sendEmailNotification({ to = ADMIN_NOTIFICATION_EMAIL, subject, text, html, eventType = "", requestCode = "" }) {
   console.log("[MAIL_EVENT_START]", {
     eventType,
@@ -228,6 +232,8 @@ async function requestNotificationContext(request) {
     address: request?.address || user?.address || "",
     title: request?.title || request?.content || request?.category || "",
     content: request?.content || request?.title || request?.category || "",
+    status: requestStatusForMail(request),
+    adminNote: request?.adminReply || request?.note || "",
     hasAttachments: normalizeRequestMediaForMail(request).length > 0
   };
 }
@@ -235,13 +241,13 @@ async function requestNotificationContext(request) {
 function getCustomerEmail(request, user = null) {
   const contact = String(request?.contact || "").trim();
   return String(
-    user?.email ||
     request?.customer?.email ||
     request?.user?.email ||
     request?.customerEmail ||
     request?.contactEmail ||
     request?.email ||
     (contact.includes("@") ? contact : "") ||
+    user?.email ||
     ""
   ).trim();
 }
@@ -269,6 +275,8 @@ function newRequestMailPayload(request, context) {
       `メール: ${mailValue(context.customerEmail)}`,
       `\u4f4f\u6240: ${mailValue(context.address)}`,
       `\u4f9d\u983c\u5185\u5bb9: ${mailValue(truncateText(context.content, 500))}`,
+      `ステータス: ${mailValue(context.status)}`,
+      `備考: ${mailValue(context.adminNote)}`,
       `\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb: ${context.hasAttachments ? "\u3042\u308a" : "\u306a\u3057"}`,
       `\u9001\u4fe1\u65e5\u6642: ${formatMailDate(request?.createdAt || new Date())}`,
       "",
@@ -442,6 +450,13 @@ function notifyCustomerEmail(kind, payload = {}) {
     .then(async () => {
       const context = await requestNotificationContext(payload.request);
       const to = context.customerEmail;
+      if (!to) {
+        console.log("Customer email is empty, skip customer notification email.", {
+          eventType: kind,
+          requestCode: context.requestNo
+        });
+        return { status: "skipped", provider: MAIL_PROVIDER || "resend", reason: "CUSTOMER_EMAIL_EMPTY" };
+      }
       const sendEventMail = data => sendEmailNotification({
         eventType: kind,
         requestCode: context.requestNo,
@@ -459,6 +474,23 @@ function notifyCustomerEmail(kind, payload = {}) {
             `受付日時: ${formatMailDate(payload.request?.contactedAt || payload.request?.firstResponseAt || new Date())}`,
             "",
             "担当者より順次ご連絡いたします。"
+          ].join("\n")
+        });
+      }
+      if (kind === "request_status_updated") {
+        return sendEventMail({
+          to,
+          subject: `【YAMADEN】依頼のステータスが更新されました（${context.requestNo}）`,
+          text: [
+            "依頼のステータスが更新されました。",
+            "",
+            `依頼ID: ${mailValue(context.requestNo)}`,
+            `件名: ${mailValue(context.title)}`,
+            `新しいステータス: ${mailValue(context.status)}`,
+            `管理者メモ: ${mailValue(payload.adminNote || context.adminNote)}`,
+            `更新日時: ${formatMailDate(new Date())}`,
+            "",
+            "アプリを開いて詳細をご確認ください。"
           ].join("\n")
         });
       }
@@ -4722,12 +4754,20 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
     if (item.status === "contacted" && previousStatus !== "contacted" && !item.customerNotifiedAccepted) {
       item.customerNotifiedAccepted = true;
       await item.save();
-      notifyCustomerEmail("request_accepted", { request: item });
+      notifyCustomerEmail("request_accepted", { request: item, adminNote: req.body.adminReply });
     }
     if (item.status === "completed" && previousStatus !== "completed" && !item.customerNotifiedCompleted) {
       item.customerNotifiedCompleted = true;
       await item.save();
-      notifyCustomerEmail("request_completed", { request: item });
+      notifyCustomerEmail("request_completed", { request: item, adminNote: req.body.adminReply });
+    }
+    if (
+      req.body.status &&
+      item.status !== previousStatus &&
+      item.status !== "contacted" &&
+      item.status !== "completed"
+    ) {
+      notifyCustomerEmail("request_status_updated", { request: item, adminNote: req.body.adminReply });
     }
 
     res.json({
