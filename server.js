@@ -11,6 +11,7 @@ const cloudinary = require("cloudinary").v2;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { createQuotationPdf, normalizeQuoteForPdf, quotePdfFileName } = require("./lib/quotationPdf");
+const { sendMail } = require("./server/mail/mailProvider");
 const {
   uploadConfig,
   mb,
@@ -178,48 +179,29 @@ function mailValue(value, fallback = "-") {
 }
 
 async function sendEmailNotification({ to = ADMIN_NOTIFICATION_EMAIL, subject, text }) {
-  const provider = RESEND_API_KEY ? "resend" : MAIL_PROVIDER || "none";
-  console.log("[MAIL_PROVIDER]", provider);
   const recipient = String(to || "").trim();
   if (!recipient) {
     console.log("[MAIL_SKIP] Email not found");
-    return false;
+    return { status: "skipped", provider: MAIL_PROVIDER || "none", reason: "RECIPIENT_NOT_FOUND" };
   }
-  if (!RESEND_API_KEY || provider !== "resend") {
-    console.log("[MAIL_ERROR] Failed to send notification", {
-      reason: "Resend is not configured",
-      MAIL_PROVIDER: provider,
-      MAIL_FROM: Boolean(MAIL_FROM),
-      recipient: Boolean(recipient),
-      RESEND_API_KEY: Boolean(RESEND_API_KEY)
-    });
-    return false;
+
+  const result = await sendMail({ to: recipient, subject, text });
+  const logPayload = {
+    provider: result.provider,
+    status: result.status,
+    reason: result.reason,
+    errorCode: result.errorCode,
+    errorMessage: result.errorMessage,
+    recipient: Boolean(recipient)
+  };
+  if (result.status === "sent") {
+    console.log("[MAIL_SENT] Notification sent", logPayload);
+  } else if (result.status === "skipped") {
+    console.log("[MAIL_SKIP] Notification skipped", logPayload);
+  } else {
+    console.log("[MAIL_ERROR] Failed to send notification", logPayload);
   }
-  if (!MAIL_FROM) {
-    console.log("[MAIL_ERROR] Failed to send notification", {
-      reason: "Mail sender or recipient missing",
-      MAIL_FROM: Boolean(MAIL_FROM),
-      recipient: Boolean(recipient)
-    });
-    return false;
-  }
-  console.log("[MAIL_START] Sending notification");
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ from: MAIL_FROM, to: recipient, subject, text })
-  });
-  if (!response.ok) {
-    let detail = "";
-    try {
-      detail = await response.text();
-    } catch {}
-    throw new Error(`Resend API failed: ${response.status} ${truncateText(detail, 300)}`);
-  }
-  return true;
+  return result;
 }
 
 async function requestNotificationContext(request) {
@@ -244,13 +226,13 @@ async function requestNotificationContext(request) {
 function getCustomerEmail(request, user = null) {
   const contact = String(request?.contact || "").trim();
   return String(
+    user?.email ||
+    request?.customer?.email ||
+    request?.user?.email ||
     request?.customerEmail ||
     request?.contactEmail ||
     request?.email ||
     (contact.includes("@") ? contact : "") ||
-    user?.email ||
-    request?.customer?.email ||
-    request?.user?.email ||
     ""
   ).trim();
 }
@@ -349,8 +331,8 @@ function notifyAdminEmail(kind, payload = {}) {
       }
       return false;
     })
-    .then(sent => {
-      if (sent) console.log("[MAIL_SENT] Notification sent");
+    .then(result => {
+      if (result?.status === "sent") console.log("[MAIL_SENT] Notification sent");
     })
     .catch(error => {
       console.log("[MAIL_ERROR] Failed to send notification", {
@@ -424,8 +406,8 @@ function notifyAdminEmail(kind, payload = {}) {
 
       return false;
     })
-    .then(sent => {
-      if (!sent) return;
+    .then(result => {
+      if (result?.status !== "sent") return;
       const messageByKind = {
         request_created: "New request notification sent",
         legacy_quote_status: "Quote status notification sent",
@@ -445,7 +427,7 @@ function notifyCustomerEmail(kind, payload = {}) {
   Promise.resolve()
     .then(async () => {
       const context = await requestNotificationContext(payload.request);
-      const to = getCustomerEmail(payload.request);
+      const to = context.customerEmail;
       if (kind === "request_accepted") {
         return sendEmailNotification({
           to,
@@ -497,8 +479,8 @@ function notifyCustomerEmail(kind, payload = {}) {
       }
       return false;
     })
-    .then(sent => {
-      if (sent) console.log("[MAIL_SENT] Notification sent");
+    .then(result => {
+      if (result?.status === "sent") console.log("[MAIL_SENT] Notification sent");
     })
     .catch(error => {
       console.log("[MAIL_ERROR] Failed to send notification", {
@@ -2403,7 +2385,7 @@ app.get("/api/admin/settings/overview", requireAdmin, async (req, res) => {
       settings,
       status: {
         database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
-        emailProvider: process.env.RESEND_API_KEY ? "Resend" : "not configured",
+        emailProvider: process.env.MAIL_PROVIDER || (process.env.RESEND_API_KEY ? "Resend" : "not configured"),
         adminNotificationEmailConfigured: Boolean(process.env.ADMIN_NOTIFICATION_EMAIL),
         requestCount,
         customerCount,
