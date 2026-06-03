@@ -19,12 +19,13 @@ function smtpConfig() {
     smtpPass: clean(smtpPass),
     smtpHost: clean(smtpHost) || "smtp.gmail.com",
     smtpPort: Number.isFinite(smtpPort) ? smtpPort : 465,
-    secure: smtpPort === 465
+    secure: smtpPort === 465,
+    requireTLS: smtpPort === 587
   };
 }
 
 async function sendGmailSmtpMail({ to, subject, html, text, eventType, requestCode }) {
-  const { smtpUser, smtpPass, smtpHost, smtpPort, secure } = smtpConfig();
+  const { smtpUser, smtpPass, smtpHost, smtpPort, secure, requireTLS } = smtpConfig();
   if (!smtpUser || !smtpPass) {
     return {
       status: "skipped",
@@ -45,23 +46,79 @@ async function sendGmailSmtpMail({ to, subject, html, text, eventType, requestCo
     secure
   });
 
+  console.log("[SMTP_CONFIG]", {
+    host: smtpHost,
+    port: smtpPort,
+    secure,
+    user: smtpUser,
+    from: process.env.MAIL_FROM || smtpUser
+  });
+
   const transporter = nodemailer.createTransport({
     host: smtpHost,
     port: smtpPort,
     secure,
+    requireTLS,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
     auth: {
       user: smtpUser,
       pass: smtpPass
     }
   });
 
-  const info = await transporter.sendMail({
-    from: process.env.MAIL_FROM || smtpUser,
-    to,
-    subject,
-    html,
-    text: text || subject || ""
-  });
+  try {
+    await transporter.verify();
+    console.log("[SMTP_VERIFY_SUCCESS]", {
+      provider: "gmail_smtp",
+      eventType,
+      requestCode
+    });
+  } catch (err) {
+    console.error("[SMTP_VERIFY_FAILED]", {
+      errorName: err.name || "",
+      errorCode: err.code || err.responseCode || "",
+      errorMessage: err.message || "",
+      response: err.response || ""
+    });
+    return {
+      status: "failed",
+      provider: "gmail_smtp",
+      reason: "SMTP_VERIFY_FAILED",
+      errorCode: err.code || err.responseCode || "",
+      errorMessage: err.message || ""
+    };
+  }
+
+  let info;
+  try {
+    info = await transporter.sendMail({
+      from: process.env.MAIL_FROM || smtpUser,
+      to,
+      subject,
+      html,
+      text: text || subject || ""
+    });
+  } catch (err) {
+    console.log("[MAIL_SEND_FAILED]", {
+      provider: "gmail_smtp",
+      to,
+      eventType,
+      requestCode,
+      errorName: err.name || "",
+      errorCode: err.code || err.responseCode || "",
+      errorMessage: err.message || "",
+      response: err.response || ""
+    });
+    return {
+      status: "failed",
+      provider: "gmail_smtp",
+      reason: "SMTP_SEND_FAILED",
+      errorCode: err.code || err.responseCode || "",
+      errorMessage: err.message || ""
+    };
+  }
 
   console.log("[MAIL_SEND_SUCCESS]", {
     provider: "gmail_smtp",
