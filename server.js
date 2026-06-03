@@ -178,14 +178,23 @@ function mailValue(value, fallback = "-") {
   return text || fallback;
 }
 
-async function sendEmailNotification({ to = ADMIN_NOTIFICATION_EMAIL, subject, text }) {
+async function sendEmailNotification({ to = ADMIN_NOTIFICATION_EMAIL, subject, text, html, eventType = "", requestCode = "" }) {
+  console.log("[MAIL_EVENT_START]", {
+    eventType,
+    requestCode
+  });
   const recipient = String(to || "").trim();
+  console.log("[MAIL_RECIPIENT_RESOLVED]", {
+    eventType,
+    requestCode,
+    to: recipient
+  });
   if (!recipient) {
     console.log("[MAIL_SKIP] Email not found");
     return { status: "skipped", provider: MAIL_PROVIDER || "none", reason: "RECIPIENT_NOT_FOUND" };
   }
 
-  const result = await sendMail({ to: recipient, subject, text });
+  const result = await sendMail({ to: recipient, subject, html, text, eventType, requestCode });
   const logPayload = {
     provider: result.provider,
     status: result.status,
@@ -272,11 +281,16 @@ function notifyAdminEmail(kind, payload = {}) {
   Promise.resolve()
     .then(async () => {
       const context = await requestNotificationContext(payload.request);
+      const sendEventMail = data => sendEmailNotification({
+        eventType: kind,
+        requestCode: context.requestNo,
+        ...data
+      });
       if (kind === "request_created") {
-        return sendEmailNotification(newRequestMailPayload(payload.request, context));
+        return sendEventMail(newRequestMailPayload(payload.request, context));
       }
       if (kind === "quote_requested") {
-        return sendEmailNotification({
+        return sendEventMail({
           to: ADMIN_NOTIFICATION_EMAIL,
           subject: `【YAMADEN】見積依頼が届きました（${context.requestNo}）`,
           text: [
@@ -295,7 +309,7 @@ function notifyAdminEmail(kind, payload = {}) {
         });
       }
       if (kind === "quote_accepted") {
-        return sendEmailNotification({
+        return sendEventMail({
           to: ADMIN_NOTIFICATION_EMAIL,
           subject: `【YAMADEN】見積が承認されました（${context.requestNo}）`,
           text: [
@@ -311,7 +325,7 @@ function notifyAdminEmail(kind, payload = {}) {
         });
       }
       if (kind === "quote_revision_requested") {
-        return sendEmailNotification({
+        return sendEventMail({
           to: ADMIN_NOTIFICATION_EMAIL,
           subject: `【YAMADEN】見積修正依頼が届きました（${context.requestNo}）`,
           text: [
@@ -428,8 +442,13 @@ function notifyCustomerEmail(kind, payload = {}) {
     .then(async () => {
       const context = await requestNotificationContext(payload.request);
       const to = context.customerEmail;
+      const sendEventMail = data => sendEmailNotification({
+        eventType: kind,
+        requestCode: context.requestNo,
+        ...data
+      });
       if (kind === "request_accepted") {
-        return sendEmailNotification({
+        return sendEventMail({
           to,
           subject: `【YAMADEN】ご依頼を受け付けました（${context.requestNo}）`,
           text: [
@@ -445,7 +464,7 @@ function notifyCustomerEmail(kind, payload = {}) {
       }
       if (kind === "quote_sent" || kind === "quote_updated") {
         const isUpdate = kind === "quote_updated";
-        return sendEmailNotification({
+        return sendEventMail({
           to,
           subject: `【YAMADEN】${isUpdate ? "お見積書が更新されました" : "お見積書が届きました"}（${context.requestNo}）`,
           text: [
@@ -463,7 +482,7 @@ function notifyCustomerEmail(kind, payload = {}) {
         });
       }
       if (kind === "request_completed") {
-        return sendEmailNotification({
+        return sendEventMail({
           to,
           subject: `【YAMADEN】対応が完了しました（${context.requestNo}）`,
           text: [

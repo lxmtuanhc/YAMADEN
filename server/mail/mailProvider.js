@@ -23,7 +23,7 @@ function smtpConfig() {
   };
 }
 
-async function sendGmailSmtpMail({ to, subject, html, text }) {
+async function sendGmailSmtpMail({ to, subject, html, text, eventType, requestCode }) {
   const { smtpUser, smtpPass, smtpHost, smtpPort, secure } = smtpConfig();
   if (!smtpUser || !smtpPass) {
     return {
@@ -32,6 +32,18 @@ async function sendGmailSmtpMail({ to, subject, html, text }) {
       reason: "SMTP_AUTH_NOT_CONFIGURED"
     };
   }
+
+  console.log("[MAIL_SEND_ATTEMPT]", {
+    provider: "gmail_smtp",
+    from: process.env.MAIL_FROM || smtpUser,
+    to,
+    subject,
+    eventType,
+    requestCode,
+    smtpHost,
+    smtpPort,
+    secure
+  });
 
   const transporter = nodemailer.createTransport({
     host: smtpHost,
@@ -43,7 +55,7 @@ async function sendGmailSmtpMail({ to, subject, html, text }) {
     }
   });
 
-  await transporter.sendMail({
+  const info = await transporter.sendMail({
     from: process.env.MAIL_FROM || smtpUser,
     to,
     subject,
@@ -51,9 +63,18 @@ async function sendGmailSmtpMail({ to, subject, html, text }) {
     text: text || subject || ""
   });
 
+  console.log("[MAIL_SEND_SUCCESS]", {
+    provider: "gmail_smtp",
+    to,
+    messageId: info?.messageId || "",
+    eventType,
+    requestCode
+  });
+
   return {
     status: "sent",
     provider: "gmail_smtp",
+    messageId: info?.messageId || "",
     reason: ""
   };
 }
@@ -116,7 +137,7 @@ async function sendMail({ to, subject, html, text, eventType, requestCode } = {}
   try {
     let result;
     if (provider === "gmail_smtp") {
-      result = await sendGmailSmtpMail({ to: recipient, subject, html, text });
+      result = await sendGmailSmtpMail({ to: recipient, subject, html, text, eventType, requestCode });
     } else if (provider === "resend") {
       result = await sendResendMail({ to: recipient, subject, html, text });
     } else {
@@ -137,6 +158,18 @@ async function sendMail({ to, subject, html, text, eventType, requestCode } = {}
       requestCode
     };
   } catch (error) {
+    if (provider === "gmail_smtp") {
+      console.log("[MAIL_SEND_FAILED]", {
+        provider: "gmail_smtp",
+        to: recipient,
+        eventType,
+        requestCode,
+        errorName: error.name || "",
+        errorCode: error.code || error.responseCode || "",
+        errorMessage: error.message || "",
+        response: error.response || ""
+      });
+    }
     return {
       status: "failed",
       provider,
