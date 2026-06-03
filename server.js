@@ -517,7 +517,10 @@ function notifyCustomerEmail(kind, payload = {}) {
       const context = await requestNotificationContext(payload.request);
       const to = context.customerEmail;
       if (!to) {
-        console.log("Customer email is empty, skip customer notification email.", {
+        const message = kind === "quote_sent" || kind === "quote_updated"
+          ? "Customer email is empty, skip quote notification email."
+          : "Customer email is empty, skip customer notification email.";
+        console.log(message, {
           eventType: kind,
           requestCode: context.requestNo
         });
@@ -557,6 +560,25 @@ function notifyCustomerEmail(kind, payload = {}) {
             `更新日時: ${formatMailDate(new Date())}`,
             "",
             "アプリを開いて詳細をご確認ください。"
+          ].join("\n")
+        });
+      }
+      if (kind === "quote_sent" || kind === "quote_updated") {
+        const isUpdate = kind === "quote_updated";
+        return sendEventMail({
+          to,
+          subject: `【YAMADEN】${isUpdate ? "お見積書が更新されました" : "お見積書が届きました"}（${context.requestNo}）`,
+          text: [
+            isUpdate ? "お見積書が更新されました。" : "お見積書が届きました。",
+            "",
+            `依頼ID: ${mailValue(context.requestNo)}`,
+            `件名: ${mailValue(context.title)}`,
+            "ステータス: 見積 / Báo giá",
+            `管理者メモ: ${mailValue(payload.adminNote || context.adminNote)}`,
+            `${isUpdate ? "更新日時" : "送信日時"}: ${formatMailDate(payload.request?.quoteUpdatedAt || payload.request?.quoteSentAt || new Date())}`,
+            "",
+            "見積はメールに添付していません。",
+            "アプリの依頼詳細画面を開いて、見積内容をご確認ください。"
           ].join("\n")
         });
       }
@@ -2057,13 +2079,16 @@ function quoteUploadMiddleware(req, res, next) {
 }
 
 function normalizeRequestStatus(status) {
+  const value = String(status || "").trim();
+  const lower = value.toLowerCase();
   if (status === "pending") return "untreated";
   if (status === "received") return "contacted";
   if (status === "waiting_customer") return "estimating";
   if (status === "scheduled") return "ordered";
   if (status === "cancelled") return "lost";
   if (status === "completed") return "completed";
-  return status || "untreated";
+  if (value === "見積" || lower === "báo giá" || lower === "bao gia" || lower === "quote" || lower === "estimate") return "quoted";
+  return value || "untreated";
 }
 
 const REQUEST_STATUS_TIMESTAMPS = {
@@ -3568,7 +3593,8 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddl
     await request.save();
     notifyCustomerEmail(wasQuoteSent ? "quote_updated" : "quote_sent", {
       request,
-      fileCount: quoteFileRecords.length
+      fileCount: quoteFileRecords.length,
+      adminNote: req.body?.adminNote || req.body?.adminReply || req.body?.note || ""
     });
 
     const data = quotes.map(quote => quote.toObject());
@@ -4832,6 +4858,7 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
       req.body.status &&
       item.status !== previousStatus &&
       item.status !== "contacted" &&
+      item.status !== "quoted" &&
       item.status !== "completed"
     ) {
       notifyCustomerEmail("request_status_updated", { request: item, adminNote: req.body.adminReply });
