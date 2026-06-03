@@ -6235,9 +6235,6 @@
         ${Array.isArray(items) ? settingList(items) : `<p class="settings-card-note">${escapeHtml(items || "")}</p>`}
         ${extra || ""}
       </div>
-      <div class="settings-card-footer">
-        <button class="btn btn-soft" type="button" data-settings-detail="${escapeHtml(detailKey)}">${escapeHtml(settingText("Mở chi tiết", "\u8a73\u7d30\u3092\u958b\u304f"))}</button>
-      </div>
     </article>`;
   }
 
@@ -6246,7 +6243,7 @@
   }
 
   function settingsButton(label) {
-    return `<button class="btn btn-soft" type="button" disabled>${escapeHtml(label)}</button>`;
+    return `<span class="settings-card-action-label">${escapeHtml(label)}</span>`;
   }
 
   function settingsChips(items) {
@@ -6342,9 +6339,6 @@
           }).join("")}
         </div>
       </div>
-      <div class="settings-card-footer">
-        <button class="btn btn-soft" type="button" data-settings-detail="${escapeHtml(detailKey)}">${escapeHtml(settingText("Mở chi tiết", "\u8a73\u7d30\u3092\u958b\u304f"))}</button>
-      </div>
     </article>`;
   }
 
@@ -6360,9 +6354,6 @@
       <div class="settings-card-body">
         <p class="settings-card-note settings-summary-description">${escapeHtml(description || "")}</p>
         <div class="settings-summary-body">${summary || ""}</div>
-      </div>
-      <div class="settings-card-footer settings-summary-footer">
-        <button class="btn btn-soft" type="button" data-settings-detail="${escapeHtml(detailKey)}">${escapeHtml(settingText("Mở chi tiết", "\u8a73\u7d30\u3092\u958b\u304f"))}</button>
       </div>
     </article>`;
   }
@@ -6667,9 +6658,6 @@
           ${(metrics || []).slice(0, 2).map(([label, value]) => `<span><b>${escapeHtml(value)}</b><small>${escapeHtml(label)}</small></span>`).join("")}
         </div>
         <div class="settings-staffwork-chip-zone">${settingsChips(chips || [])}</div>
-      </div>
-      <div class="settings-card-footer">
-        <button class="btn btn-soft" type="button" data-settings-detail="${escapeHtml(detailKey)}">${escapeHtml(settingText("Mở chi tiết", "\u8a73\u7d30\u3092\u958b\u304f"))}</button>
       </div>
     </article>`;
   }
@@ -8742,6 +8730,9 @@
       }
       const settingsDetail = event.target.closest("[data-settings-detail]");
       if (settingsDetail && state.currentView === "settings") {
+        if (event.target.closest("button, a, input, select, textarea, label, [data-overview-field], [data-settings-detail-dirty], [data-staff-worktype-item]")) {
+          return;
+        }
         event.preventDefault();
         event.stopPropagation();
         const key = settingsDetail.dataset.settingsDetail;
