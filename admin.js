@@ -6221,21 +6221,29 @@
     return `<ul class="settings-detail-list">${list.map(item => `<li>${escapeHtml(item)}</li>`).join("")}${more > 0 ? `<li>+${more}</li>` : ""}</ul>`;
   }
 
-  function settingCard(icon, title, items, status, tone, extra) {
-    const detailKey = `${state.settingsTab || "overview"}:${title}`;
-    return `<article class="settings-shell-card" data-settings-detail="${escapeHtml(detailKey)}" tabindex="0" role="button">
+  function settingsCardFrame({ detailKey, icon, title, status, tone, body, extraClass = "" }) {
+    return `<article class="settings-shell-card ${escapeHtml(extraClass)}" data-settings-detail="${escapeHtml(detailKey)}" tabindex="0" role="button">
       <div class="settings-card-head">
         <span class="settings-card-icon">${settingsIcon(icon)}</span>
-        <div>
+        <div class="settings-card-titleblock">
           <h3>${escapeHtml(title)}</h3>
-          ${status ? settingsBadge(status, tone) : ""}
+          ${status ? settingsBadge(status, tone || "") : ""}
         </div>
       </div>
-      <div class="settings-card-body">
-        ${Array.isArray(items) ? settingList(items) : `<p class="settings-card-note">${escapeHtml(items || "")}</p>`}
-        ${extra || ""}
-      </div>
+      <div class="settings-card-body">${body || ""}</div>
     </article>`;
+  }
+
+  function settingCard(icon, title, items, status, tone, extra) {
+    const detailKey = `${state.settingsTab || "overview"}:${title}`;
+    return settingsCardFrame({
+      detailKey,
+      icon,
+      title,
+      status,
+      tone,
+      body: `${Array.isArray(items) ? settingList(items) : `<p class="settings-card-note">${escapeHtml(items || "")}</p>`}${extra || ""}`
+    });
   }
 
   function settingText(vi, ja) {
@@ -6317,45 +6325,17 @@
     return `<label class="overview-field"><span>${escapeHtml(label)}</span>${control}${error ? `<small class="overview-error">${escapeHtml(error)}</small>` : ""}</label>`;
   }
 
-  function overviewSummaryCard(section, icon, title, status, lines, description) {
-    const detailKey = `overview:${section}`;
-    return `<article class="settings-shell-card" data-settings-detail="${escapeHtml(detailKey)}" tabindex="0" role="button">
-      <div class="settings-card-head">
-        <span class="settings-card-icon">${settingsIcon(icon)}</span>
-        <div>
-          <h3>${escapeHtml(title)}</h3>
-          ${status ? settingsBadge(status, section === "dataStatus" ? "is-planned" : "is-live") : ""}
-        </div>
-      </div>
-      <div class="settings-card-body">
-        ${description ? `<p class="settings-card-note">${escapeHtml(description)}</p>` : ""}
-        <div class="settings-overview-summary-list">
-          ${(lines || []).map(line => {
-            const text = String(line || "-");
-            const parts = text.includes(":") ? text.split(/:(.*)/s) : null;
-            return parts && parts[1] !== undefined
-              ? `<div class="settings-overview-summary-row"><span>${escapeHtml(parts[0])}</span><strong>${escapeHtml(parts[1].trim() || "-")}</strong></div>`
-              : `<div class="settings-overview-summary-value">${escapeHtml(text)}</div>`;
-          }).join("")}
-        </div>
-      </div>
-    </article>`;
-  }
-
   function settingsSummaryCard({ detailKey, icon, title, status, tone, description, summary, extraClass = "" }) {
-    return `<article class="settings-shell-card settings-summary-card ${escapeHtml(extraClass)}" data-settings-detail="${escapeHtml(detailKey)}" tabindex="0" role="button">
-      <div class="settings-card-head">
-        <span class="settings-card-icon">${settingsIcon(icon)}</span>
-        <div>
-          <h3>${escapeHtml(title)}</h3>
-          ${status ? settingsBadge(status, tone || "") : ""}
-        </div>
-      </div>
-      <div class="settings-card-body">
-        <p class="settings-card-note settings-summary-description">${escapeHtml(description || "")}</p>
-        <div class="settings-summary-body">${summary || ""}</div>
-      </div>
-    </article>`;
+    return settingsCardFrame({
+      detailKey,
+      icon,
+      title,
+      status,
+      tone,
+      extraClass: `settings-summary-card ${extraClass}`,
+      body: `<p class="settings-card-note settings-summary-description">${escapeHtml(description || "")}</p>
+        <div class="settings-summary-body">${summary || ""}</div>`
+    });
   }
 
   function overviewSummaryCard(section, icon, title, status, lines, description) {
@@ -6641,25 +6621,6 @@
       staffWorkSummaryCard("palette", settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText("Danh m\u1ee5c k\u1ef9 n\u0103ng d\u00f9ng cho staff v\u00e0 AI matching.", "\u30b9\u30bf\u30c3\u30d5\u3068AI\u30de\u30c3\u30c1\u30f3\u30b0\u7528\u306e\u30b9\u30ad\u30eb\u4e00\u89a7\u3067\u3059\u3002"), skills.length ? t("inUse") : t("prepareLater"), skills.length ? "is-live" : "is-planned", [[settingText("T\u1ed5ng k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u6570"), skills.length], [settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), skills.length ? t("inUse") : t("prepareLater")]], skills.map(workMasterLabel), "staffWork:" + settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb")),
       staffWorkSummaryCard("shield", "Staff mapping", settingText("Li\u00ean k\u1ebft staff v\u1edbi b\u1ed9 ph\u1eadn, n\u1ed9i dung c\u00f4ng vi\u1ec7c, k\u1ef9 n\u0103ng.", "\u30b9\u30bf\u30c3\u30d5\u3092\u90e8\u9580\u30fb\u696d\u52d9\u5185\u5bb9\u30fb\u30b9\u30ad\u30eb\u3068\u7d10\u3065\u3051\u307e\u3059\u3002"), mappedStaff ? t("inUse") : t("linkLater"), mappedStaff ? "is-live" : "is-planned", [[t("staffCount"), staffCount], [settingText("Đã mapping", "\u9023\u643a\u6e08\u307f"), mappedStaff]], [], "staffWork:Staff mapping")
     ].join("");
-  }
-
-  function staffWorkSummaryCard(icon, title, description, status, tone, metrics, chips, detailKey) {
-    return `<article class="settings-shell-card settings-staffwork-card" data-settings-detail="${escapeHtml(detailKey)}" tabindex="0" role="button">
-      <div class="settings-card-head">
-        <span class="settings-card-icon">${settingsIcon(icon)}</span>
-        <div>
-          <h3>${escapeHtml(title)}</h3>
-          ${status ? settingsBadge(status, tone) : ""}
-        </div>
-      </div>
-      <div class="settings-card-body">
-        <p class="settings-card-note settings-staffwork-description">${escapeHtml(description || "")}</p>
-        <div class="settings-staffwork-summary">
-          ${(metrics || []).slice(0, 2).map(([label, value]) => `<span><b>${escapeHtml(value)}</b><small>${escapeHtml(label)}</small></span>`).join("")}
-        </div>
-        <div class="settings-staffwork-chip-zone">${settingsChips(chips || [])}</div>
-      </div>
-    </article>`;
   }
 
   function staffWorkSummaryCard(icon, title, description, status, tone, metrics, chips, detailKey) {
