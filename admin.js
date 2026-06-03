@@ -6348,8 +6348,8 @@
     </article>`;
   }
 
-  function settingsSummaryCard({ detailKey, icon, title, status, tone, description, summary }) {
-    return `<article class="settings-shell-card settings-summary-card" data-settings-detail="${escapeHtml(detailKey)}" tabindex="0" role="button">
+  function settingsSummaryCard({ detailKey, icon, title, status, tone, description, summary, extraClass = "" }) {
+    return `<article class="settings-shell-card settings-summary-card ${escapeHtml(extraClass)}" data-settings-detail="${escapeHtml(detailKey)}" tabindex="0" role="button">
       <div class="settings-card-head">
         <span class="settings-card-icon">${settingsIcon(icon)}</span>
         <div>
@@ -6378,7 +6378,19 @@
           : `<p>${escapeHtml(text)}</p>`;
       }).join("")}
     </div>`;
-    return settingsSummaryCard({ detailKey, icon, title, status, tone: section === "dataStatus" ? "is-planned" : "is-live", description, summary });
+    const tone = section === "dataStatus" || /OFF|\u0110\u00e3 t\u1eaft|\u7121\u52b9/.test(String(status || ""))
+      ? "is-planned"
+      : "is-live";
+    return settingsSummaryCard({
+      detailKey,
+      icon,
+      title,
+      status,
+      tone,
+      description,
+      summary,
+      extraClass: `settings-summary-card-${section}`
+    });
   }
 
   function overviewFieldGroup(title, fields) {
@@ -6672,6 +6684,19 @@
 
   function renderSettingsAiAssist() {
     const aiSettings = currentAiSettings();
+    const activeDepartments = activeMasterItems("departments");
+    const activeWorkTypes = activeMasterItems("workTypes");
+    const mappedStaff = (state.staff || []).filter(staff => {
+      const hasDepartment = Boolean(compactText(staff?.departmentCode || staff?.department || staff?.departmentName, ""));
+      const hasWorkTypes = toList(staff?.workTypeIds || staff?.workTypes || staff?.workTags).length > 0;
+      return hasDepartment || hasWorkTypes;
+    });
+    const aiEnabled = aiSettings.aiRequestAnalysisEnabled !== false;
+    const aiStatus = aiEnabled ? t("inUse") : settingText("Đã tắt", "\u7121\u52b9");
+    const aiStatusTone = aiEnabled ? "is-live" : "is-planned";
+    const aiDataLinked = activeDepartments.length > 0 || activeWorkTypes.length > 0 || mappedStaff.length > 0;
+    const aiDataStatus = aiDataLinked ? settingText("Đã liên kết", "\u9023\u643a\u6e08\u307f") : t("linkLater");
+    const aiDataTone = aiDataLinked ? "is-live" : "is-planned";
     const aiLines = [
       `${settingText("Phân tích yêu cầu", "依頼分析")}: ${aiSettings.aiRequestAnalysisEnabled ? "ON" : "OFF"}`,
       `${settingText("Gợi ý độ khẩn", "緊急度提案")}: ${aiSettings.aiSuggestUrgencyEnabled ? "ON" : "OFF"}`,
@@ -6690,9 +6715,9 @@
       [settingText("Kh\u1ea9n c\u1ea5p", "\u7dca\u6025\u5ea6"), "5%"]
     ];
     return [
-      overviewSummaryCard("aiSettings", "sparkles", settingText("AI設定 / Cài đặt AI", "AI設定"), aiSettings.aiRequestAnalysisEnabled ? t("inUse") : "OFF", aiLines, settingText("Bật/tắt từng chức năng AI dùng trong phân tích yêu cầu và form xử lý.", "依頼分析と処理フォームで使うAI機能を個別に切り替えます。")),
-      settingCard("sparkles", settingText("T\u1ed5ng quan AI", "AI\u6982\u8981"), settingText("AI h\u1ed7 tr\u1ee3 ph\u00e2n t\u00edch y\u00eau c\u1ea7u, ph\u00e2n lo\u1ea1i n\u1ed9i b\u1ed9 v\u00e0 g\u1ee3i \u00fd ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch ban \u0111\u1ea7u. Admin v\u1eabn quy\u1ebft \u0111\u1ecbnh cu\u1ed1i c\u00f9ng.", "AI\u306f\u4f9d\u983c\u3092\u5206\u6790\u3057\u3001\u5185\u90e8\u5206\u985e\u3068\u521d\u671f\u62c5\u5f53\u8005\u3092\u63d0\u6848\u3057\u307e\u3059\u3002\u6700\u7d42\u5224\u65ad\u306f\u7ba1\u7406\u8005\u304c\u884c\u3044\u307e\u3059\u3002"), settingText("Ch\u01b0a k\u00edch ho\u1ea1t / Layout", "\u672a\u6709\u52b9 / Layout"), "is-planned"),
-      settingCard("users", settingText("B\u1ed9 ph\u1eadn d\u00f9ng cho AI", "AI\u7528\u90e8\u9580"), [settingText("Li\u00ean k\u1ebft v\u1edbi b\u1ed9 ph\u1eadn t\u1eeb Nh\u00e2n vi\u00ean & c\u00f4ng vi\u1ec7c", "\u30b9\u30bf\u30c3\u30d5\u30fb\u696d\u52d9\u306e\u90e8\u9580\u3068\u9023\u643a"), t("departments") + ": " + activeMasterItems("departments").length], t("linkLater"), "is-planned", settingsButton(settingText("C\u1ea5u h\u00ecnh b\u1ed9 ph\u1eadn", "\u90e8\u9580\u8a2d\u5b9a"))),
+      overviewSummaryCard("aiSettings", "sparkles", settingText("AI設定 / Cài đặt AI", "AI設定"), aiStatus, aiLines, settingText("Bật/tắt từng chức năng AI dùng trong phân tích yêu cầu và form xử lý.", "依頼分析と処理フォームで使うAI機能を個別に切り替えます。")),
+      settingCard("sparkles", settingText("T\u1ed5ng quan AI", "AI\u6982\u8981"), settingText("AI h\u1ed7 tr\u1ee3 ph\u00e2n t\u00edch y\u00eau c\u1ea7u, ph\u00e2n lo\u1ea1i n\u1ed9i b\u1ed9 v\u00e0 g\u1ee3i \u00fd ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch ban \u0111\u1ea7u. Admin v\u1eabn quy\u1ebft \u0111\u1ecbnh cu\u1ed1i c\u00f9ng.", "AI\u306f\u4f9d\u983c\u3092\u5206\u6790\u3057\u3001\u5185\u90e8\u5206\u985e\u3068\u521d\u671f\u62c5\u5f53\u8005\u3092\u63d0\u6848\u3057\u307e\u3059\u3002\u6700\u7d42\u5224\u65ad\u306f\u7ba1\u7406\u8005\u304c\u884c\u3044\u307e\u3059\u3002"), aiStatus, aiStatusTone),
+      settingCard("users", settingText("B\u1ed9 ph\u1eadn d\u00f9ng cho AI", "AI\u7528\u90e8\u9580"), [settingText("Li\u00ean k\u1ebft v\u1edbi b\u1ed9 ph\u1eadn, n\u1ed9i dung c\u00f4ng vi\u1ec7c v\u00e0 Staff mapping", "\u90e8\u9580\u30fb\u696d\u52d9\u5185\u5bb9\u30fbStaff mapping\u3068\u9023\u643a"), t("departments") + ": " + activeDepartments.length, t("workTypes") + ": " + activeWorkTypes.length, "Staff mapping: " + mappedStaff.length], aiDataStatus, aiDataTone, settingsButton(settingText("C\u1ea5u h\u00ecnh b\u1ed9 ph\u1eadn", "\u90e8\u9580\u8a2d\u5b9a"))),
       settingCard("clipboard", settingText("Lo\u1ea1i c\u00f4ng vi\u1ec7c", "\u4f5c\u696d\u7a2e\u5225"), "", t("prepareLater"), "is-planned", `${settingsChips(aiWorkTypes)}${settingsButton(settingText("Th\u00eam lo\u1ea1i c\u00f4ng vi\u1ec7c", "\u4f5c\u696d\u7a2e\u5225\u3092\u8ffd\u52a0"))}`),
       settingCard("palette", settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), "", t("prepareLater"), "is-planned", `${settingsChips(skills)}${settingsButton(settingText("Th\u00eam k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u3092\u8ffd\u52a0"))}`),
       settingCard("shield", settingText("Lu\u1eadt ph\u00e2n c\u00f4ng", "\u5272\u308a\u5f53\u3066\u30eb\u30fc\u30eb"), "", t("prepareLater"), "is-planned", `${settingsTable([settingText("Y\u1ebfu t\u1ed1", "\u8981\u7d20"), settingText("Tr\u1ecdng s\u1ed1", "\u91cd\u307f")], ruleRows.map(row => [escapeHtml(row[0]), escapeHtml(row[1])]))}<div class="settings-thresholds"><span>${escapeHtml(settingText("T\u1ef1 g\u00e1n", "\u81ea\u52d5\u5272\u5f53"))}: <b>85%</b></span><span>${escapeHtml(settingText("Ch\u1ec9 g\u1ee3i \u00fd", "\u63d0\u6848\u306e\u307f"))}: <b>60%</b></span></div>${settingsButton(settingText("Ch\u1ec9nh lu\u1eadt ph\u00e2n c\u00f4ng", "\u5272\u308a\u5f53\u3066\u30eb\u30fc\u30eb\u8abf\u6574"))}`),

@@ -4777,10 +4777,12 @@ body {
 
 .settings-summary-card {
   min-height: 320px;
+  height: auto;
   padding: 24px 22px 30px;
 }
 
 .settings-summary-card .settings-card-body {
+  min-height: auto;
   overflow: visible;
 }
 
@@ -4795,7 +4797,7 @@ body {
 }
 
 .settings-summary-body {
-  min-height: 104px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -4840,7 +4842,7 @@ body {
 }
 
 .settings-summary-rows {
-  min-height: 104px;
+  min-height: 0;
   display: grid;
   align-content: start;
   gap: 10px;
@@ -4870,6 +4872,34 @@ body {
   font-weight: 900;
   line-height: 1.45;
   overflow-wrap: anywhere;
+}
+
+.settings-summary-card-aiSettings {
+  min-height: 380px;
+}
+
+.settings-summary-card-aiSettings .settings-summary-description {
+  min-height: 0;
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+
+.settings-summary-card-aiSettings .settings-card-body,
+.settings-summary-card-aiSettings .settings-summary-body,
+.settings-summary-card-aiSettings .settings-summary-rows {
+  gap: 14px;
+}
+
+.settings-summary-card-aiSettings .settings-summary-rows div {
+  min-height: 34px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.settings-summary-card-aiSettings .settings-card-footer {
+  margin-top: auto;
+  padding-top: 20px;
 }
 
 .settings-summary-chips {
