@@ -219,16 +219,14 @@ async function sendEmailNotification({ to = ADMIN_NOTIFICATION_EMAIL, subject, t
 
 async function requestNotificationContext(request) {
   const requestNo = getRequestDisplayId(request) || request?.requestCode || request?.id || "";
-  let user = null;
-  if (request?.userId && mongoose.Types.ObjectId.isValid(String(request.userId))) {
-    user = await User.findById(request.userId).lean().catch(() => null);
-  }
+  const emailResult = await getCustomerNotificationEmail(request);
+  const user = emailResult.user;
   return {
     requestNo,
     customerName: request?.name || user?.name || "",
     companyName: user?.company || user?.companyName || user?.projectName || "",
     phone: request?.phone || user?.phone || "",
-    customerEmail: getCustomerEmail(request, user),
+    customerEmail: emailResult.email,
     address: request?.address || user?.address || "",
     title: request?.title || request?.content || request?.category || "",
     content: request?.content || request?.title || request?.category || "",
@@ -238,7 +236,34 @@ async function requestNotificationContext(request) {
   };
 }
 
-function getCustomerEmail(request, user = null) {
+function getCustomerProfileIds(request) {
+  const ids = [
+    request?.customerId,
+    request?.userId,
+    request?.customer?._id,
+    request?.customer?.id,
+    request?.user?._id,
+    request?.user?.id
+  ].map(id => String(id || "").trim()).filter(Boolean);
+  return [...new Set(ids)];
+}
+
+async function findCustomerProfileForRequest(request) {
+  const profileIds = getCustomerProfileIds(request).filter(id => mongoose.Types.ObjectId.isValid(id));
+  for (const profileId of profileIds) {
+    const user = await User.findById(profileId).lean().catch(error => {
+      console.log("[CUSTOMER_EMAIL_PROFILE_LOOKUP_FAILED]", {
+        customerId: profileId,
+        message: error.message
+      });
+      return null;
+    });
+    if (user) return { found: true, user };
+  }
+  return { found: false, user: null };
+}
+
+function getCustomerSnapshotEmail(request) {
   const contact = String(request?.contact || "").trim();
   return String(
     request?.customer?.email ||
@@ -247,9 +272,50 @@ function getCustomerEmail(request, user = null) {
     request?.contactEmail ||
     request?.email ||
     (contact.includes("@") ? contact : "") ||
-    user?.email ||
     ""
   ).trim();
+}
+
+function getCustomerEmail(request, user = null) {
+  return String(user?.email || getCustomerSnapshotEmail(request)).trim();
+}
+
+async function getCustomerNotificationEmail(request) {
+  const profile = await findCustomerProfileForRequest(request);
+  if (profile.found) {
+    return {
+      email: String(profile.user?.email || "").trim(),
+      source: "user_profile",
+      user: profile.user
+    };
+  }
+  const email = getCustomerSnapshotEmail(request);
+  return {
+    email,
+    source: email ? "request_snapshot" : "not_found",
+    user: null
+  };
+}
+
+async function publicRequestWithLatestCustomerEmail(request) {
+  const item = typeof request?.toObject === "function" ? request.toObject() : { ...(request || {}) };
+  const emailResult = await getCustomerNotificationEmail(item);
+  if (emailResult.source === "user_profile" || emailResult.email) {
+    const customer = item.customer && typeof item.customer === "object" ? item.customer : {};
+    const user = item.user && typeof item.user === "object" ? item.user : {};
+    item.latestCustomerEmail = emailResult.email;
+    item.customerEmailSource = emailResult.source;
+    item.email = emailResult.email;
+    item.customerEmail = emailResult.email;
+    item.contactEmail = emailResult.email;
+    item.customer = { ...customer, email: emailResult.email };
+    item.user = { ...user, email: emailResult.email };
+  }
+  return item;
+}
+
+async function publicRequestsWithLatestCustomerEmail(requests) {
+  return Promise.all((requests || []).map(publicRequestWithLatestCustomerEmail));
 }
 
 function normalizeRequestMediaForMail(request) {
@@ -3050,7 +3116,7 @@ app.get("/admin/users", requireAdmin, async (req, res) => {
 app.get("/admin/users/:id/requests", requireAdmin, async (req, res) => {
   try {
     const requests = await Request.find({ userId: req.params.id }).sort({ createdAt: -1 });
-    res.json(requests);
+    res.json(await publicRequestsWithLatestCustomerEmail(requests));
   } catch (error) {
     res.status(500).json({
       message: "Read failed",
@@ -3125,6 +3191,7 @@ app.get("/admin/quote-requests", requireAdmin, async (req, res) => {
         quoteSentBy: request.quoteSentBy || ""
       };
     });
+    data = await publicRequestsWithLatestCustomerEmail(data);
     if (search) {
       data = data.filter(item => [
         item.requestNo,
@@ -3505,7 +3572,7 @@ app.post("/admin/requests/:requestId/quote-file", requireAdmin, quoteUploadMiddl
     });
 
     const data = quotes.map(quote => quote.toObject());
-    res.json({ ok: true, quote: data[0] || null, quotes: data, data, request: request.toObject() });
+    res.json({ ok: true, quote: data[0] || null, quotes: data, data, request: await publicRequestWithLatestCustomerEmail(request) });
   } catch (error) {
     console.error("Quote file upload failed:", error);
     res.status(500).json({ ok: false, message: error.message || "Quote file upload failed" });
@@ -3525,7 +3592,7 @@ app.post("/admin/requests/:requestId/create-quote", requireAdmin, async (req, re
           existingQuote.requestId = requestDisplayId;
           await existingQuote.save();
         }
-        return res.json({ ok: true, quote: existingQuote.toObject(), request: request.toObject(), reused: true });
+        return res.json({ ok: true, quote: existingQuote.toObject(), request: await publicRequestWithLatestCustomerEmail(request), reused: true });
       }
     }
 
@@ -3599,7 +3666,7 @@ app.post("/admin/requests/:requestId/create-quote", requireAdmin, async (req, re
     if (typeof request.status === "string") request.status = "quoted";
     await request.save();
 
-    res.json({ ok: true, quote: quote.toObject(), request: request.toObject(), reused: false });
+    res.json({ ok: true, quote: quote.toObject(), request: await publicRequestWithLatestCustomerEmail(request), reused: false });
   } catch (error) {
     console.error("Create quote from request error:", error);
     res.status(500).json({ ok: false, message: "Create quote from request failed", error: error.message });
@@ -4607,7 +4674,7 @@ app.get("/requests", requireAdmin, async (req, res) => {
         await request.save();
       }
     }
-    res.json(requests);
+    res.json(await publicRequestsWithLatestCustomerEmail(requests));
   } catch (error) {
     res.status(500).json({
       message: "Read failed",
@@ -4629,7 +4696,7 @@ app.get("/request/:id", async (req, res) => {
       await item.save();
     }
 
-    res.json(item);
+    res.json(await publicRequestWithLatestCustomerEmail(item));
 
   } catch (error) {
     res.status(500).json({
@@ -4772,7 +4839,7 @@ app.put("/request/:id", requireAdmin, async (req, res) => {
 
     res.json({
       message: "Updated",
-      data: item
+      data: await publicRequestWithLatestCustomerEmail(item)
     });
 
   } catch (error) {
