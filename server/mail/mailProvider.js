@@ -1,153 +1,25 @@
-const dns = require("dns");
-const nodemailer = require("nodemailer");
-
 function clean(value) {
   return String(value || "").trim();
 }
 
 function configuredProvider() {
-  return clean(process.env.MAIL_PROVIDER || (process.env.RESEND_API_KEY ? "resend" : "none")).toLowerCase();
+  return clean(process.env.MAIL_PROVIDER || "resend").toLowerCase();
 }
 
-function smtpConfig() {
-  const smtpUser = process.env.SMTP_USER || process.env.GMAIL_SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS || process.env.GMAIL_SMTP_APP_PASSWORD;
-  const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
-  const smtpPort = Number(process.env.SMTP_PORT || 465);
-
-  return {
-    smtpUser: clean(smtpUser),
-    smtpPass: clean(smtpPass),
-    smtpHost: clean(smtpHost) || "smtp.gmail.com",
-    smtpPort: Number.isFinite(smtpPort) ? smtpPort : 465,
-    secure: smtpPort === 465,
-    requireTLS: smtpPort === 587,
-    family: 4
-  };
-}
-
-function lookupIpv4(hostname, options, callback) {
-  return dns.lookup(hostname, { ...options, family: 4, all: false }, callback);
-}
-
-async function sendGmailSmtpMail({ to, subject, html, text, eventType, requestCode }) {
-  const { smtpUser, smtpPass, smtpHost, smtpPort, secure, requireTLS, family } = smtpConfig();
-  if (!smtpUser || !smtpPass) {
-    return {
-      status: "skipped",
-      provider: "gmail_smtp",
-      reason: "SMTP_AUTH_NOT_CONFIGURED"
-    };
-  }
+async function sendResendMail({ to, subject, html, text, eventType, requestCode }) {
+  const from = clean(process.env.MAIL_FROM);
+  const apiKey = clean(process.env.RESEND_API_KEY);
 
   console.log("[MAIL_SEND_ATTEMPT]", {
-    provider: "gmail_smtp",
-    from: process.env.MAIL_FROM || smtpUser,
+    provider: "resend",
+    from,
     to,
     subject,
-    eventType,
-    requestCode,
-    smtpHost,
-    smtpPort,
-    secure,
-    family
-  });
-
-  console.log("[SMTP_CONFIG]", {
-    host: smtpHost,
-    port: smtpPort,
-    secure,
-    family,
-    user: smtpUser,
-    from: process.env.MAIL_FROM || smtpUser
-  });
-
-  const transporter = nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure,
-    requireTLS,
-    family,
-    lookup: lookupIpv4,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-    auth: {
-      user: smtpUser,
-      pass: smtpPass
-    }
-  });
-
-  try {
-    await transporter.verify();
-    console.log("[SMTP_VERIFY_SUCCESS]", {
-      provider: "gmail_smtp",
-      eventType,
-      requestCode
-    });
-  } catch (err) {
-    console.error("[SMTP_VERIFY_FAILED]", {
-      errorName: err.name || "",
-      errorCode: err.code || err.responseCode || "",
-      errorMessage: err.message || "",
-      response: err.response || ""
-    });
-    return {
-      status: "failed",
-      provider: "gmail_smtp",
-      reason: "SMTP_VERIFY_FAILED",
-      errorCode: err.code || err.responseCode || "",
-      errorMessage: err.message || ""
-    };
-  }
-
-  let info;
-  try {
-    info = await transporter.sendMail({
-      from: process.env.MAIL_FROM || smtpUser,
-      to,
-      subject,
-      html,
-      text: text || subject || ""
-    });
-  } catch (err) {
-    console.log("[MAIL_SEND_FAILED]", {
-      provider: "gmail_smtp",
-      to,
-      eventType,
-      requestCode,
-      errorName: err.name || "",
-      errorCode: err.code || err.responseCode || "",
-      errorMessage: err.message || "",
-      response: err.response || ""
-    });
-    return {
-      status: "failed",
-      provider: "gmail_smtp",
-      reason: "SMTP_SEND_FAILED",
-      errorCode: err.code || err.responseCode || "",
-      errorMessage: err.message || ""
-    };
-  }
-
-  console.log("[MAIL_SEND_SUCCESS]", {
-    provider: "gmail_smtp",
-    to,
-    messageId: info?.messageId || "",
     eventType,
     requestCode
   });
 
-  return {
-    status: "sent",
-    provider: "gmail_smtp",
-    messageId: info?.messageId || "",
-    reason: ""
-  };
-}
-
-async function sendResendMail({ to, subject, html, text }) {
-  if (!process.env.RESEND_API_KEY || !process.env.MAIL_FROM) {
+  if (!apiKey || !from) {
     return {
       status: "skipped",
       provider: "resend",
@@ -158,11 +30,11 @@ async function sendResendMail({ to, subject, html, text }) {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      from: process.env.MAIL_FROM,
+      from,
       to,
       subject,
       html,
@@ -181,6 +53,13 @@ async function sendResendMail({ to, subject, html, text }) {
     };
   }
 
+  console.log("[MAIL_SEND_SUCCESS]", {
+    provider: "resend",
+    to,
+    eventType,
+    requestCode
+  });
+
   return {
     status: "sent",
     provider: "resend",
@@ -191,28 +70,46 @@ async function sendResendMail({ to, subject, html, text }) {
 async function sendMail({ to, subject, html, text, eventType, requestCode } = {}) {
   const provider = configuredProvider();
   const recipient = clean(to);
-  console.log("[MAIL_PROVIDER]", provider || "none");
+  console.log("[MAIL_PROVIDER]", provider || "resend");
 
   if (!recipient) {
     return {
       status: "skipped",
       provider,
-      reason: "RECIPIENT_NOT_FOUND"
+      reason: "RECIPIENT_NOT_FOUND",
+      eventType,
+      requestCode
     };
   }
 
   try {
-    let result;
-    if (provider === "gmail_smtp") {
-      result = await sendGmailSmtpMail({ to: recipient, subject, html, text, eventType, requestCode });
-    } else if (provider === "resend") {
-      result = await sendResendMail({ to: recipient, subject, html, text });
-    } else {
-      result = {
+    if (provider !== "resend") {
+      return {
         status: "skipped",
-        provider: provider || "none",
-        reason: "MAIL_PROVIDER_NOT_CONFIGURED"
+        provider,
+        reason: "MAIL_PROVIDER_NOT_SUPPORTED",
+        eventType,
+        requestCode
       };
+    }
+
+    const result = await sendResendMail({
+      to: recipient,
+      subject,
+      html,
+      text,
+      eventType,
+      requestCode
+    });
+
+    if (result.status === "failed") {
+      console.log("[MAIL_SEND_FAILED]", {
+        provider: "resend",
+        to: recipient,
+        eventType,
+        requestCode,
+        errorMessage: result.errorMessage || result.reason || ""
+      });
     }
 
     return {
@@ -225,24 +122,19 @@ async function sendMail({ to, subject, html, text, eventType, requestCode } = {}
       requestCode
     };
   } catch (error) {
-    if (provider === "gmail_smtp") {
-      console.log("[MAIL_SEND_FAILED]", {
-        provider: "gmail_smtp",
-        to: recipient,
-        eventType,
-        requestCode,
-        errorName: error.name || "",
-        errorCode: error.code || error.responseCode || "",
-        errorMessage: error.message || "",
-        response: error.response || ""
-      });
-    }
+    console.log("[MAIL_SEND_FAILED]", {
+      provider: "resend",
+      to: recipient,
+      eventType,
+      requestCode,
+      errorMessage: error.message || ""
+    });
     return {
       status: "failed",
-      provider,
-      reason: provider === "gmail_smtp" ? "SMTP_SEND_FAILED" : "MAIL_SEND_FAILED",
-      errorCode: error.code || error.responseCode || "",
-      errorMessage: error.message,
+      provider: "resend",
+      reason: "RESEND_SEND_FAILED",
+      errorCode: error.code || "",
+      errorMessage: error.message || "",
       eventType,
       requestCode
     };
