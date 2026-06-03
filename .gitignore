@@ -7,3 +7,4 @@ requests.json
 .codex-edge-audit*/
 .edge-profile3/
 tmp/
+server/ai/
