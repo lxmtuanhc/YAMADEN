@@ -8841,6 +8841,19 @@
     });
   }
 
+  function appointmentFilterStatuses() {
+    return ["all", "pending", "confirmed", "rescheduled", "completed", "cancelled"];
+  }
+
+  function renderAppointmentFilterChips() {
+    const items = state.appointments || [];
+    return appointmentFilterStatuses().map(status => {
+      const count = status === "all" ? items.length : items.filter(item => normalizeAppointmentStatusValue(item.status) === status).length;
+      const label = status === "all" ? t("all") : appointmentStatusLabel(status);
+      return `<button class="request-status-chip appointment-status-chip ${state.filters.appointmentStatus === status ? "active" : ""}" type="button" data-appointment-status-filter="${escapeHtml(status)}"><span class="chip-label">${escapeHtml(label)}</span><b class="chip-count">${count}</b></button>`;
+    }).join("");
+  }
+
   function renderAppointmentRow(item) {
     const id = appointmentId(item);
     return `<tr>
@@ -8862,12 +8875,13 @@
     const filtered = filterAppointments(state.appointments);
     $("viewRoot").innerHTML = `
       <div class="page-intro"><p>${escapeHtml(t("appointmentSubtitle"))}</p></div>
-      <div class="request-filter-bar">
+      <div class="request-filter-bar appointment-filter-bar">
         <input id="appointmentSearch" class="request-search-input" value="${escapeHtml(state.filters.appointmentSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "Tìm mã yêu cầu, khách, công trình, kỹ thuật viên" : "依頼ID・顧客・工事名・技術者を検索")}" />
-        <select class="request-filter-select" data-appointment-status>
-          ${["all", "pending", "confirmed", "rescheduled", "completed", "cancelled"].map(status => `<option value="${escapeHtml(status)}" ${state.filters.appointmentStatus === status ? "selected" : ""}>${escapeHtml(status === "all" ? t("all") : appointmentStatusLabel(status))}</option>`).join("")}
-        </select>
         <button class="request-search-btn" type="button" data-appointment-search>${escapeHtml(t("searchButton"))}</button>
+        <button class="btn btn-soft appointment-refresh-btn" type="button" data-appointment-refresh>${escapeHtml(t("refresh"))}</button>
+      </div>
+      <div class="request-status-row appointment-status-row">
+        ${renderAppointmentFilterChips()}
       </div>
       <div class="table-wrap request-table-wrap">
         <table class="data-table request-table">
@@ -9305,12 +9319,6 @@
         renderQuotes();
         return;
       }
-      const appointmentStatus = event.target.closest("[data-appointment-status]");
-      if (appointmentStatus) {
-        state.filters.appointmentStatus = appointmentStatus.value || "all";
-        renderAppointments();
-        return;
-      }
       const select = event.target.closest("[data-request-status]");
       if (!select || $("drawer").classList.contains("open")) return;
       try {
@@ -9353,9 +9361,23 @@
       if (appointmentSearchButton) {
         state.filters.appointmentSearch = $("appointmentSearch")?.value || "";
         state.appointments = normalizeList(await AdminAPI.getAppointments({
-          status: state.filters.appointmentStatus,
           search: state.filters.appointmentSearch
         }));
+        renderAppointments();
+        return;
+      }
+      const appointmentRefreshButton = event.target.closest("[data-appointment-refresh]");
+      if (appointmentRefreshButton) {
+        state.filters.appointmentSearch = $("appointmentSearch")?.value || state.filters.appointmentSearch || "";
+        state.appointments = normalizeList(await AdminAPI.getAppointments({
+          search: state.filters.appointmentSearch
+        }));
+        renderAppointments();
+        return;
+      }
+      const appointmentStatusFilter = event.target.closest("[data-appointment-status-filter]");
+      if (appointmentStatusFilter) {
+        state.filters.appointmentStatus = appointmentStatusFilter.dataset.appointmentStatusFilter || "all";
         renderAppointments();
         return;
       }

@@ -375,6 +375,11 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .request-status-chip .chip-count { width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; background: #f1f5f9; color: var(--muted); font-size: 11px; flex: 0 0 auto; }
 .request-status-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .request-status-chip.active .chip-count { background: rgba(255,255,255,.2); color: #fff; }
+.appointment-status-row { display: flex; align-items: center; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.appointment-status-chip { width: auto; min-width: max-content; height: 44px; display: inline-flex; flex: 0 0 auto; padding: 0 14px; overflow: visible; cursor: pointer; }
+.appointment-status-chip .chip-label { overflow: visible; text-overflow: clip; white-space: nowrap; }
+.appointment-filter-bar { grid-template-columns: minmax(260px, 1fr) minmax(112px, 150px) minmax(112px, 150px); }
+.appointment-refresh-btn { height: var(--request-control-height); border-radius: 16px; font-weight: 900; white-space: nowrap; }
 .trash-status-row { position: relative; z-index: 2; }
 .request-status-chip[data-trash-category] { cursor: pointer; pointer-events: auto; user-select: none; }
 .request-status-chip[data-trash-category] .chip-label,
@@ -408,17 +413,23 @@ h1 { margin-bottom: 0; font-size: 28px; }
 
 @media (max-width: 1280px) {
   .request-filter-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .appointment-filter-bar { grid-template-columns: minmax(220px, 1fr) minmax(112px, 140px) minmax(112px, 140px); }
   .request-search-input { grid-column: span 2; }
+  .appointment-filter-bar .request-search-input { grid-column: auto; }
   .request-search-btn { grid-column: span 1; }
   .request-status-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .appointment-status-row { display: flex; }
 }
 
 @media (max-width: 768px) {
   .request-filter-bar { grid-template-columns: 1fr; }
+  .appointment-filter-bar { grid-template-columns: 1fr; }
   .request-search-input,
   .request-search-btn,
   .request-filter-select { grid-column: auto; width: 100%; }
+  .appointment-refresh-btn { width: 100%; }
   .request-status-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .appointment-status-row { display: flex; }
 }
 
 .request-table-wrap { max-height: calc(100dvh - 310px); }
