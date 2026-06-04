@@ -4,6 +4,7 @@ import { APP_STORAGE_KEY } from "../constants/storageKeys";
 import { initialQuotes, initialRequests, initialSchedules } from "../data/mockData";
 import { authService, isAuthRejected } from "../services/authService";
 import type { Language, Quote, QuoteStatus, RequestStatus, Schedule, SupportRequest, User, UserStatus } from "../types";
+import { getInitialLanguage, saveLanguage } from "../utils/language";
 
 type ProfileInput = Pick<User, "name" | "email" | "phone" | "address" | "projectName" | "accountType" | "companyName" | "contactPerson">;
 type ProfileUpdateInput = Partial<Pick<User, "name" | "email" | "address" | "projectName" | "companyName" | "contactPerson" | "companyAddress" | "taxId" | "constructionType" | "note" | "notificationsEnabled">>;
@@ -90,14 +91,17 @@ function authStatusForUser(user: User): UserStatus {
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
-      language: "vi",
+      language: getInitialLanguage(),
       user: null,
       users: [],
       authStatus: "notLoggedIn",
       requests: initialRequests,
       quotes: initialQuotes,
       schedules: initialSchedules,
-      setLanguage: language => set({ language }),
+      setLanguage: language => {
+        saveLanguage(language);
+        set({ language });
+      },
       initializeAuth: async () => {
         if (!authService.hasToken()) {
           set({ user: null, authStatus: "notLoggedIn" });
@@ -158,6 +162,14 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: APP_STORAGE_KEY,
+      merge: (persisted, current) => {
+        const state = (persisted && typeof persisted === "object" ? persisted : {}) as Partial<AppStateSnapshot>;
+        return {
+          ...current,
+          ...state,
+          language: getInitialLanguage()
+        };
+      },
       partialize: state => stripSecretFields({
         language: state.language,
         user: state.user,

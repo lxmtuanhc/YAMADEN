@@ -10,6 +10,28 @@
   const QUOTE_MAX_FILE_SIZE = 25 * 1024 * 1024;
   const QUOTE_MAX_FILES = 5;
   const QUOTE_ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".ppt", ".pptx", ".jpg", ".jpeg", ".png", ".webp", ".jww", ".jwc", ".dxf", ".dwg", ".zip"];
+  const LANGUAGE_STORAGE_KEY = "yamaden_language";
+  const LEGACY_LANGUAGE_STORAGE_KEY = "language";
+
+  function isLanguage(value) {
+    return value === "vi" || value === "ja";
+  }
+
+  function saveLanguage(language) {
+    if (!isLanguage(language)) return;
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+    localStorage.setItem(LEGACY_LANGUAGE_STORAGE_KEY, language);
+  }
+
+  function getInitialLanguage() {
+    const urlLang = new URLSearchParams(window.location.search).get("lang");
+    if (isLanguage(urlLang)) {
+      saveLanguage(urlLang);
+      return urlLang;
+    }
+    const savedLang = localStorage.getItem(LANGUAGE_STORAGE_KEY) || localStorage.getItem(LEGACY_LANGUAGE_STORAGE_KEY);
+    return isLanguage(savedLang) ? savedLang : "ja";
+  }
 
   const i18n = {
     ja: {
@@ -1616,7 +1638,7 @@
     overviewSettingsEditing: {},
     overviewSettingsErrors: {},
     settingsMasterEdit: null,
-    lang: localStorage.getItem("language") || "ja"
+    lang: getInitialLanguage()
   };
 
   window.AdminV2State = state;
@@ -7741,7 +7763,7 @@
         <label><span>${escapeHtml(t("descriptionJa"))}</span><textarea name="descriptionJa" rows="2">${masterFormValue(item, "descriptionJa")}</textarea></label>
         <label><span>${escapeHtml(t("sortOrder"))}</span><input name="sortOrder" type="number" value="${escapeHtml(item?.sortOrder ?? 0)}"></label>
         ${isSkill ? `<label><span>${escapeHtml(settingText("Work type liên quan", "\u95a2\u9023\u696d\u52d9"))}</span><select name="relatedWorkTypeIds" multiple>${workTypes.map(type => `<option value="${escapeHtml(type.code || type.id)}" ${toList(item?.relatedWorkTypeIds).includes(type.code || type.id) ? "selected" : ""}>${escapeHtml(workMasterLabel(type))}</option>`).join("")}</select></label>` : ""}
-        <label class="overview-toggle ${item?.active === false ? "" : "is-on"}"><input name="active" type="checkbox" ${item?.active === false ? "" : "checked"}><span class="overview-toggle-track" aria-hidden="true"><i></i></span><span>Active</span></label>
+        <label class="overview-toggle ${item?.active === false ? "" : "is-on"}"><input name="active" type="checkbox" ${item?.active === false ? "" : "checked"}><span class="overview-toggle-track" aria-hidden="true"><i></i></span><span>${escapeHtml(item?.active === false ? settingText("Tạm ẩn", "非表示") : settingText("Đang sử dụng", "使用中"))}</span></label>
       </div>
     </form>`;
   }
@@ -7848,7 +7870,7 @@
       <div class="settings-real-form-grid">
         <label><span>${escapeHtml(t("department"))}</span><select name="departmentCode">${masterSelectOptions(visibleMasterItems("departments"), departmentCode, t("selectDepartment"))}</select></label>
         <label><span>${escapeHtml(settingText("Kỹ năng", "\u30b9\u30ad\u30eb"))}</span><input name="skills" value="${escapeHtml(skillText)}" placeholder="${escapeHtml(settingText("VD: 電気工事, 見積作成", "\u4f8b: \u96fb\u6c17\u5de5\u4e8b, \u898b\u7a4d\u4f5c\u6210"))}"></label>
-        <label><span>${escapeHtml(settingText("Tự động gợi ý", "\u81ea\u52d5\u63d0\u6848"))}</span><select name="autoAssignEnabled"><option value="true" ${staff?.autoAssignEnabled === false ? "" : "selected"}>Active</option><option value="false" ${staff?.autoAssignEnabled === false ? "selected" : ""}>Inactive</option></select></label>
+        <label><span>${escapeHtml(settingText("Tự động gợi ý", "\u81ea\u52d5\u63d0\u6848"))}</span><select name="autoAssignEnabled"><option value="true" ${staff?.autoAssignEnabled === false ? "" : "selected"}>${escapeHtml(settingText("Đang bật", "有効"))}</option><option value="false" ${staff?.autoAssignEnabled === false ? "selected" : ""}>${escapeHtml(settingText("Đã tắt", "無効"))}</option></select></label>
       </div>
       <div class="settings-checkbox-grid">
         ${visibleMasterItems("workTypes").map(type => {
@@ -9024,7 +9046,7 @@
     bind($("languageSelect"), "change", event => {
       hideSidebarTooltip();
       state.lang = event.target.value === "vi" ? "vi" : "ja";
-      localStorage.setItem("language", state.lang);
+      saveLanguage(state.lang);
       renderCurrentView();
     });
     bind($("viewRoot"), "click", event => {

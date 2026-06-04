@@ -270,7 +270,7 @@ export function RequestDetailPage() {
                     </div>
                   )}
                   <div className="request-media-name">{media.name}</div>
-                  <div className="request-file-meta">{requestFileMeta(media, language)}</div>
+                  <div className="request-file-meta">{requestFileMetaI18n(media, language)}</div>
                   <div className="request-file-actions">
                     <a href={media.url} target="_blank" rel="noreferrer">
                       <ExternalLink size={15} />
@@ -453,6 +453,9 @@ function requestTimelineItems(request: SupportRequest): DetailTimelineItem[] {
 
 function timelineLabelKey(message: string | undefined, status: string): TranslationKey {
   const key = String(message || "").trim();
+  if (key === "assignee_changed" || key === "assignment_assigned") {
+    return "assignment_assigned";
+  }
   if (key === "request.timelineQuoteApproved" || key === "request.timelineQuoteRevision") {
     return key;
   }
@@ -513,22 +516,72 @@ function formatTimelineDate(value: string, language: "vi" | "ja") {
 }
 
 function visibleTimelineNote(item: DetailTimelineItem, statusLabel: string, language: "vi" | "ja") {
-  const assignment = assignmentNameFromTimeline(item);
-  if (assignment) return assignmentMessage(assignment, language);
+  const assignment = assignmentNameFromTimelineI18n(item);
+  if (assignment) return assignmentMessageI18n(assignment, language);
   const value = item.note.trim();
   if (!value) return "";
   const normalizedNote = value.toLowerCase();
   const normalizedStatus = statusLabel.trim().toLowerCase();
   if (normalizedNote === normalizedStatus) return "";
-  const localized = localizedLegacyTimelineMessage(value, language);
+  const localized = localizedLegacyTimelineMessageI18n(value, language);
   if (localized) return localized;
   return value;
 }
 
 function localizedAdminReply(reply: string, timelineItems: DetailTimelineItem[], language: "vi" | "ja") {
-  const assignment = assignmentNameFromLegacyText(reply) || timelineItems.map(assignmentNameFromTimeline).find(Boolean);
-  if (assignment) return assignmentMessage(assignment, language);
-  return localizedLegacyTimelineMessage(reply, language) || reply.trim();
+  const assignment = assignmentNameFromLegacyTextI18n(reply) || timelineItems.map(assignmentNameFromTimelineI18n).find(Boolean);
+  if (assignment) return assignmentMessageI18n(assignment, language);
+  return localizedLegacyTimelineMessageI18n(reply, language) || reply.trim();
+}
+
+function assignmentNameFromTimelineI18n(item: DetailTimelineItem) {
+  return assignmentNameFromLegacyTextI18n(item.note) || assignmentNameFromLegacyTextI18n(item.message) || cleanText(item.staffName);
+}
+
+function assignmentNameFromLegacyTextI18n(value: string) {
+  const text = cleanText(value);
+  if (!text) return "";
+  const patterns = [
+    /^Phân công phụ trách\s*:\s*(.+)$/i,
+    /^Phân công phụ trách\s+(.+)$/i,
+    /^担当者を割り当てました[：:\s]*(.+)$/i,
+    /^assignment[_.]assigned[：:\s]*(.*)$/i,
+    /^assignee_changed[：:\s]*(.*)$/i
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) return cleanText(match[1]);
+  }
+  return "";
+}
+
+function assignmentMessageI18n(staffName: string, language: "vi" | "ja") {
+  return language === "ja"
+    ? `担当者を割り当てました：${staffName}`
+    : `Phân công phụ trách: ${staffName}`;
+}
+
+function localizedLegacyTimelineMessageI18n(value: string, language: "vi" | "ja") {
+  const text = cleanText(value);
+  if (!text) return "";
+  const normalized = text.toLowerCase();
+  const messages: Record<string, { vi: string; ja: string }> = {
+    "đã gửi yêu cầu": { vi: "Đã gửi yêu cầu", ja: "依頼送信済み" },
+    "request.timelinesubmitted": { vi: "Đã gửi yêu cầu", ja: "依頼送信済み" },
+    "đã tiếp nhận": { vi: "Đã tiếp nhận", ja: "受付済み" },
+    "request.timelinereceived": { vi: "Đã tiếp nhận", ja: "受付済み" },
+    "chưa xử lý": { vi: "Chưa xử lý", ja: "未対応" },
+    "request.timelineuntreated": { vi: "Chưa xử lý", ja: "未対応" },
+    "đã gửi báo giá": { vi: "Đã gửi báo giá", ja: "見積送信済み" },
+    "request.timelinequoted": { vi: "Đã gửi báo giá", ja: "見積送信済み" },
+    "đã hoàn thành": { vi: "Đã hoàn thành", ja: "対応完了" },
+    "request.timelinecompleted": { vi: "Đã hoàn thành", ja: "対応完了" },
+    "khách yêu cầu chỉnh sửa báo giá": { vi: "Khách yêu cầu chỉnh sửa báo giá", ja: "見積修正依頼" },
+    "request.timelinequoterevision": { vi: "Khách yêu cầu chỉnh sửa báo giá", ja: "見積修正依頼" },
+    "khách đã chấp nhận báo giá": { vi: "Khách đã chấp nhận báo giá", ja: "見積承認済み" },
+    "request.timelinequoteapproved": { vi: "Khách đã chấp nhận báo giá", ja: "見積承認済み" }
+  };
+  return messages[normalized]?.[language] || "";
 }
 
 function assignmentNameFromTimeline(item: DetailTimelineItem) {
@@ -840,6 +893,35 @@ function isVideoMedia(media: RequestMediaFile) {
 
 function isImageMedia(media: RequestMediaFile) {
   return requestFileKind(media) === "image";
+}
+
+function requestFileMetaI18n(media: RequestMediaFile, language: "vi" | "ja") {
+  const labels = {
+    vi: {
+      image: "Hình ảnh",
+      video: "Video",
+      pdf: "PDF",
+      document: "Word/Tài liệu",
+      spreadsheet: "Excel/Bảng tính",
+      presentation: "PowerPoint",
+      cad: "CAD/JWW",
+      archive: "ZIP",
+      other: "Tệp"
+    },
+    ja: {
+      image: "画像",
+      video: "動画",
+      pdf: "PDF",
+      document: "Word/文書",
+      spreadsheet: "Excel/表計算",
+      presentation: "PowerPoint",
+      cad: "CAD/JWW",
+      archive: "ZIP",
+      other: "ファイル"
+    }
+  };
+  const kind = requestFileKind(media);
+  return [labels[language][kind] || labels[language].other, formatRequestFileSize(media.size)].filter(Boolean).join(" · ");
 }
 
 function requestFileMeta(media: RequestMediaFile, language: "vi" | "ja") {

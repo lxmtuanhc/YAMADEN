@@ -5,6 +5,7 @@ import { createRequestId, todayLabel } from "../utils/format";
 import { REQUEST_TIMELINE_MESSAGE_KEYS } from "../constants/requestStatus";
 import { APP_STORAGE_KEY } from "../constants/storageKeys";
 import { uploadConfig } from "../constants/uploadConfig";
+import { getInitialLanguage } from "../utils/language";
 import { normalizeRequestFile, normalizeRequestFiles, requestFileKind, requestFileUrl } from "../utils/requestFiles";
 import { getUserToken } from "./authService";
 
@@ -728,7 +729,7 @@ export const requestService = {
 
   async getIssueOptions(): Promise<string[]> {
     const master = await this.getWorkMaster();
-    const locale = localStorage.getItem("language") === "vi" ? "vi" : "ja";
+    const locale = getInitialLanguage();
     return master.workTypes
       .map(item => locale === "vi" ? item.nameVi || item.nameJa || item.code : item.nameJa || item.nameVi || item.code)
       .map(item => String(item || "").trim())
