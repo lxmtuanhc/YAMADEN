@@ -273,6 +273,8 @@ h1 { margin-bottom: 0; font-size: 28px; }
   color: #0f172a;
   text-decoration: none;
   cursor: pointer;
+  aspect-ratio: auto;
+  min-height: 150px;
 }
 .request-file-item span,
 .request-file-item small {
@@ -284,6 +286,22 @@ h1 { margin-bottom: 0; font-size: 28px; }
   font-size: 12px;
   line-height: 1.4;
   font-weight: 750;
+}
+.request-file-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.request-file-actions a {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 7px 10px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 900;
+  text-decoration: none;
 }
 .request-detail-footer { flex: 0 0 auto; display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 16px 20px; border-top: 1px solid #e2e8f0; background: #fff; }
 .request-unsaved-note { margin-right: auto; color: #d97706; font-weight: 900; }

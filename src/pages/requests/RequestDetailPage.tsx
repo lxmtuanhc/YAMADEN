@@ -1,4 +1,4 @@
-import { ChevronRight, MessageCircle, RefreshCw, Trash2, X } from "lucide-react";
+import { ChevronRight, Download, ExternalLink, MessageCircle, RefreshCw, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { ActionConfirmModal } from "../../components/ActionConfirmModal";
@@ -16,6 +16,7 @@ import { requestService } from "../../services/requestService";
 import { scheduleService } from "../../services/scheduleService";
 import type { AssigneeRequestHistoryItem, Quote, RequestAssignee, RequestMediaFile, Schedule, StaffProfile, SupportRequest, TimelineEvent } from "../../types";
 import { groupQuotesByRequest } from "../../utils/quoteFiles";
+import { formatRequestFileSize, normalizeRequestFiles, requestFileKind, requestFileName, requestFileUrl } from "../../utils/requestFiles";
 import { categoryOptions } from "./requestHelpers";
 import { REQUEST_STATUS_LABEL_KEYS, REQUEST_TIMELINE_MESSAGE_KEYS } from "../../constants/requestStatus";
 
@@ -251,7 +252,7 @@ export function RequestDetailPage() {
       </Card>
 
       <Card>
-        <h2 className="section-title">{t("request.images")}</h2>
+        <h2 className="section-title">{t("request.attachments")}</h2>
         <div className="request-media-grid">
           {mediaItems.length
             ? mediaItems.map(media => (
@@ -268,6 +269,17 @@ export function RequestDetailPage() {
                     </div>
                   )}
                   <div className="request-media-name">{media.name}</div>
+                  <div className="request-file-meta">{requestFileMeta(media, language)}</div>
+                  <div className="request-file-actions">
+                    <a href={media.url} target="_blank" rel="noreferrer">
+                      <ExternalLink size={15} />
+                      {t("request.openFile")}
+                    </a>
+                    <a href={media.downloadUrl || media.url} download={media.name}>
+                      <Download size={15} />
+                      {t("request.downloadFile")}
+                    </a>
+                  </div>
                 </div>
               ))
             : <div className="muted-line">{t("request.mediaEmpty")}</div>}
@@ -808,50 +820,54 @@ function AssigneeChipSection({
 }
 
 function requestMediaItems(request: SupportRequest): DetailMedia[] {
-  const source = request.mediaFiles?.length
-    ? request.mediaFiles
-    : request.mediaUrl
-      ? [{ url: request.mediaUrl, type: request.mediaType }]
-      : request.image
-        ? [{ url: request.image, type: "image" }]
-        : request.images.map(url => ({ url, type: mediaTypeFromUrl(url) }));
-
-  return source
+  return normalizeRequestFiles(request)
     .map(item => {
-      const url = item.secureUrl || item.url || "";
+      const url = requestFileUrl(item);
       if (!url) return null;
       return {
         ...item,
         url,
-        name: item.originalName || mediaNameFromUrl(url)
+        name: requestFileName(item)
       };
     })
     .filter((item): item is DetailMedia => Boolean(item));
 }
 
 function isVideoMedia(media: RequestMediaFile) {
-  const value = `${media.resourceType || ""} ${media.type || ""} ${media.mimetype || ""} ${media.url || ""}`;
-  return /video|\.mp4|\.mov|\.webm|\.m4v/i.test(value);
+  return requestFileKind(media) === "video";
 }
 
 function isImageMedia(media: RequestMediaFile) {
-  const value = `${media.resourceType || ""} ${media.type || ""} ${media.mimetype || ""} ${media.url || ""}`;
-  return /image|\.jpg|\.jpeg|\.png|\.webp/i.test(value);
+  return requestFileKind(media) === "image";
 }
 
-function mediaTypeFromUrl(url: string) {
-  if (/(\.mp4|\.mov|\.webm|\.m4v)(\?|$)/i.test(url)) return "video";
-  if (/(\.jpg|\.jpeg|\.png|\.webp)(\?|$)/i.test(url)) return "image";
-  return "file";
-}
-
-function mediaNameFromUrl(url: string) {
-  try {
-    const pathname = new URL(url).pathname;
-    return decodeURIComponent(pathname.split("/").pop() || "media");
-  } catch {
-    return url.split("/").pop() || "media";
-  }
+function requestFileMeta(media: RequestMediaFile, language: "vi" | "ja") {
+  const labels = {
+    vi: {
+      image: "Hình ảnh",
+      video: "Video",
+      pdf: "PDF",
+      document: "Word/Tài liệu",
+      spreadsheet: "Excel/Bảng tính",
+      presentation: "PowerPoint",
+      cad: "CAD/JWW",
+      archive: "ZIP",
+      other: "Tệp"
+    },
+    ja: {
+      image: "画像",
+      video: "動画",
+      pdf: "PDF",
+      document: "Word/文書",
+      spreadsheet: "Excel/表計算",
+      presentation: "PowerPoint",
+      cad: "CAD/JWW",
+      archive: "ZIP",
+      other: "ファイル"
+    }
+  };
+  const kind = requestFileKind(media);
+  return [labels[language][kind] || labels[language].other, formatRequestFileSize(media.size)].filter(Boolean).join(" · ");
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {

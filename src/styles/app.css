@@ -1092,7 +1092,7 @@ p {
 
 .request-media-name {
   min-width: 0;
-  padding: 6px 8px;
+  padding: 6px 8px 2px;
   color: #475569;
   font-size: 12px;
   font-weight: 850;
@@ -1100,6 +1100,15 @@ p {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.request-file-meta {
+  min-width: 0;
+  padding: 0 8px 6px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
 }
 
 .request-file-preview {
@@ -1134,6 +1143,28 @@ p {
   color: #2563eb;
   font-size: 12px;
   font-weight: 900;
+}
+
+.request-file-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 8px 8px;
+}
+
+.request-file-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 6px 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
 }
 
 .request-detail-actions {

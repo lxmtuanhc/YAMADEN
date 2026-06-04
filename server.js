@@ -17,6 +17,7 @@ const {
   mb,
   customerFileKind,
   customerFileLimitBytes,
+  extensionOf,
   isCustomerFileAllowed,
   isQuoteFileAllowed
 } = require("./uploadConfig");
@@ -665,14 +666,21 @@ function notifySlack(text) {
 }
 
 const MediaFileSchema = new mongoose.Schema({
+  id: String,
   url: String,
   secureUrl: String,
+  downloadUrl: String,
   publicId: String,
   resourceType: String,
   format: String,
+  filename: String,
   originalName: String,
+  mimeType: String,
   mimetype: String,
+  ext: String,
   size: Number,
+  kind: String,
+  uploadedAt: Date,
   type: { type: String }
 }, { _id: false });
 
@@ -2004,6 +2012,26 @@ function uploadResourceTypeForFile(file) {
   if (kind === "image") return "image";
   if (kind === "video") return "video";
   return "raw";
+}
+
+function requestFileKind(file, uploadResult = {}) {
+  const mimetype = String(file?.mimetype || uploadResult?.mime_type || "").toLowerCase();
+  const ext = extensionOf(file?.originalname || uploadResult?.original_filename || uploadResult?.secure_url || "").replace(/^\./, "");
+  if (mimetype.startsWith("image/") || uploadResult.resource_type === "image" || ["jpg", "jpeg", "png", "webp"].includes(ext)) return "image";
+  if (mimetype.startsWith("video/") || uploadResult.resource_type === "video" || ["mp4", "mov", "quicktime"].includes(ext)) return "video";
+  if (mimetype === "application/pdf" || ext === "pdf") return "pdf";
+  if (["doc", "docx"].includes(ext) || mimetype.includes("word") || mimetype.includes("document")) return "document";
+  if (["xls", "xlsx", "csv"].includes(ext) || mimetype.includes("spreadsheet") || mimetype.includes("excel") || mimetype.includes("csv")) return "spreadsheet";
+  if (["ppt", "pptx"].includes(ext) || mimetype.includes("presentation") || mimetype.includes("powerpoint")) return "presentation";
+  if (["jww", "jwc", "dxf", "dwg"].includes(ext)) return "cad";
+  if (ext === "zip" || mimetype.includes("zip")) return "archive";
+  return "other";
+}
+
+function requestFileExt(file, uploadResult = {}) {
+  const ext = extensionOf(file?.originalname || "").replace(/^\./, "");
+  if (ext) return ext;
+  return String(uploadResult?.format || "").toLowerCase();
 }
 
 function validateCustomerUploadFiles(files) {
@@ -4709,22 +4737,27 @@ app.post("/request", requireUser, requestUploadMiddleware, async (req, res) => {
             hasBuffer: Boolean(file.buffer)
           });
           const uploadResult = await uploadMediaToCloudinary(file.buffer, uploadResourceTypeForFile(file));
-          const type = uploadResult.resource_type === "video" || (file.mimetype || "").startsWith("video/")
-            ? "video"
-            : uploadResult.resource_type === "image" || (file.mimetype || "").startsWith("image/")
-              ? "image"
-              : "file";
+          const ext = requestFileExt(file, uploadResult);
+          const kind = requestFileKind(file, uploadResult);
+          const secureUrl = uploadResult.secure_url || uploadResult.url || "";
 
           return {
-            url: uploadResult.secure_url,
-            secureUrl: uploadResult.secure_url,
+            id: uploadResult.public_id || `${requestCode}-${file.originalname}`,
+            url: secureUrl,
+            secureUrl,
+            downloadUrl: secureUrl,
             publicId: uploadResult.public_id,
             resourceType: uploadResult.resource_type,
             format: uploadResult.format,
+            filename: file.originalname,
             originalName: file.originalname,
+            mimeType: file.mimetype,
             mimetype: file.mimetype,
+            ext,
             size: file.size,
-            type
+            kind,
+            uploadedAt: new Date(),
+            type: kind
           };
 
         } catch (uploadError) {

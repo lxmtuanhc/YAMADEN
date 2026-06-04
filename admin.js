@@ -46,7 +46,7 @@
       close: "閉じる",
       adminReply: "管理者返信",
       issueTags: "依頼タグ",
-      media: "メディア",
+      media: "添付ファイル",
       timeline: "タイムライン",
       updateStatus: "ステータス更新",
       assignStaff: "担当者を設定",
@@ -78,10 +78,10 @@
       quoteDeadline: "見積期限が近い案件",
       sessionExpired: "セッションが切れました。再ログインしてください。",
       loading: "読み込み中...",
-      mediaFilter: "メディア",
-      hasMedia: "メディアあり",
-      noMedia: "メディアなし",
-      mediaCount: "メディア",
+      mediaFilter: "添付ファイル",
+      hasMedia: "添付あり",
+      noMedia: "添付なし",
+      mediaCount: "添付ファイル",
       quoteRequested: "見積希望",
       suggestAssignee: "担当者を提案",
       applyAssignee: "この担当者に決定",
@@ -136,7 +136,7 @@
       close: "Đóng",
       adminReply: "Phản hồi admin",
       issueTags: "Tag yêu cầu",
-      media: "Media",
+      media: "Tệp đính kèm",
       timeline: "Timeline",
       updateStatus: "Cập nhật trạng thái",
       assignStaff: "Gán staff",
@@ -168,10 +168,10 @@
       quoteDeadline: "Báo giá gần hết hạn",
       sessionExpired: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
       loading: "Đang tải...",
-      mediaFilter: "Media",
-      hasMedia: "Có media",
-      noMedia: "Không media",
-      mediaCount: "Media",
+      mediaFilter: "Tệp đính kèm",
+      hasMedia: "Có tệp",
+      noMedia: "Không có tệp",
+      mediaCount: "Tệp đính kèm",
       quoteRequested: "Muốn báo giá",
       suggestAssignee: "Đề xuất phụ trách",
       applyAssignee: "Xác nhận gán",
@@ -293,7 +293,7 @@
     overdueFirst: "\u671f\u9650\u8d85\u904e\u512a\u5148",
     urgency: "\u7dca\u6025\u5ea6",
     unjudged: "\u672a\u5224\u5b9a",
-    media: "\u30e1\u30c7\u30a3\u30a2",
+    media: "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb",
     searchButton: "\u691c\u7d22",
     departmentFilter: "\u90e8\u9580",
     allRequestDepartments: "\u3059\u3079\u3066\u306e\u90e8\u9580",
@@ -594,7 +594,7 @@
     closeWithoutSave: "\u4fdd\u5b58\u305b\u305a\u306b\u9589\u3058\u308b",
     savedChanges: "\u5909\u66f4\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002",
     saveChangesFailed: "\u5909\u66f4\u3092\u4fdd\u5b58\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002\u3082\u3046\u4e00\u5ea6\u304a\u8a66\u3057\u304f\u3060\u3055\u3044\u3002",
-    noMediaDetail: "\u30e1\u30c7\u30a3\u30a2\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
+    noMediaDetail: "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
     staffBasicInfo: "\u57fa\u672c\u60c5\u5831",
     staffDepartmentRole: "\u90e8\u9580\u30fb\u5f79\u5272",
     staffSkillsWork: "\u30b9\u30ad\u30eb\u30fb\u5bfe\u5fdc\u53ef\u80fd\u696d\u52d9",
@@ -742,7 +742,7 @@
     closeWithoutSave: "\u0110\u00f3ng kh\u00f4ng l\u01b0u",
     savedChanges: "\u0110\u00e3 l\u01b0u thay \u0111\u1ed5i.",
     saveChangesFailed: "Kh\u00f4ng th\u1ec3 l\u01b0u thay \u0111\u1ed5i. Vui l\u00f2ng th\u1eed l\u1ea1i.",
-    noMediaDetail: "Kh\u00f4ng c\u00f3 media.",
+    noMediaDetail: "Kh\u00f4ng c\u00f3 t\u1ec7p \u0111\u00ednh k\u00e8m.",
     staffBasicInfo: "Th\u00f4ng tin c\u01a1 b\u1ea3n",
     staffDepartmentRole: "B\u1ed9 ph\u1eadn & vai tr\u00f2",
     staffSkillsWork: "K\u1ef9 n\u0103ng / c\u00f4ng vi\u1ec7c c\u00f3 th\u1ec3 nh\u1eadn",
@@ -1029,8 +1029,8 @@
     status: "\u30b9\u30c6\u30fc\u30bf\u30b9",
     elapsed: "\u7d4c\u904e\u6642\u9593",
     deadline: "\u5bfe\u5fdc\u671f\u9650",
-    mediaFilter: "\u30e1\u30c7\u30a3\u30a2",
-    mediaCount: "\u30e1\u30c7\u30a3\u30a2",
+    mediaFilter: "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb",
+    mediaCount: "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30eb",
     amount: "\u91d1\u984d",
     action: "\u64cd\u4f5c",
     departmentFilter: "\u90e8\u9580",
@@ -1047,8 +1047,8 @@
     newest: "\u65b0\u3057\u3044\u9806",
     oldest: "\u53e4\u3044\u9806",
     overdueFirst: "\u671f\u9650\u8d85\u904e\u512a\u5148",
-    hasMedia: "\u30e1\u30c7\u30a3\u30a2\u3042\u308a",
-    noMedia: "\u30e1\u30c7\u30a3\u30a2\u306a\u3057",
+    hasMedia: "\u6dfb\u4ed8\u3042\u308a",
+    noMedia: "\u6dfb\u4ed8\u306a\u3057",
     unjudged: "\u672a\u5224\u5b9a",
     urgencyUrgent: "\u7dca\u6025",
     urgencyHigh: "\u9ad8",
@@ -1076,8 +1076,8 @@
     status: "Tr\u1ea1ng th\u00e1i",
     elapsed: "Th\u1eddi gian ch\u1edd",
     deadline: "H\u1ea1n x\u1eed l\u00fd",
-    mediaFilter: "Media",
-    mediaCount: "Media",
+    mediaFilter: "T\u1ec7p \u0111\u00ednh k\u00e8m",
+    mediaCount: "T\u1ec7p \u0111\u00ednh k\u00e8m",
     amount: "S\u1ed1 ti\u1ec1n",
     action: "Thao t\u00e1c",
     departmentFilter: "B\u1ed9 ph\u1eadn",
@@ -1094,8 +1094,8 @@
     newest: "M\u1edbi nh\u1ea5t",
     oldest: "C\u0169 nh\u1ea5t",
     overdueFirst: "Qu\u00e1 h\u1ea1n tr\u01b0\u1edbc",
-    hasMedia: "C\u00f3 media",
-    noMedia: "Kh\u00f4ng media",
+    hasMedia: "C\u00f3 t\u1ec7p",
+    noMedia: "Kh\u00f4ng c\u00f3 t\u1ec7p",
     unjudged: "Ch\u01b0a \u0111\u00e1nh gi\u00e1",
     urgencyUrgent: "Kh\u1ea9n c\u1ea5p",
     urgencyHigh: "Cao",
@@ -2731,11 +2731,25 @@
 
   function renderRequestMediaItem(item, index) {
     const url = item.secureUrl || item.url;
-    const type = item.type || item.resourceType || (/(\.mp4|\.mov|\.webm|\.m4v)(\?|$)/i.test(url) ? "video" : /(\.jpg|\.jpeg|\.png|\.webp)(\?|$)/i.test(url) ? "image" : "file");
+    const type = item.kind || item.type || item.resourceType || guessRequestFileKind(item);
+    const name = requestFileName(item);
+    const downloadUrl = item.downloadUrl || url;
+    const meta = [requestFileKindLabel(type), requestFileSizeLabel(item.size)].filter(Boolean).join(" · ");
     const attrs = `data-media-preview="${escapeHtml(url)}" data-media-type="${escapeHtml(type)}"`;
     if (type !== "video" && type !== "image") {
-      const name = item.originalName || item.fileName || url.split("/").pop() || "File";
-      return `<a class="request-media-item request-file-item" href="${escapeHtml(url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(name)}"><span>${escapeHtml(name)}</span><small>${escapeHtml(state.lang === "vi" ? "File này không thể xem trực tiếp trong app. Vui lòng tải về hoặc mở bằng ứng dụng phù hợp." : "このファイルはアプリ内で直接表示できません。ダウンロードして対応アプリで開いてください。")}</small></a>`;
+      const needsApp = type === "cad" || type === "archive";
+      const note = needsApp
+        ? (state.lang === "vi" ? "File này cần ứng dụng phù hợp để mở." : "このファイルを開くには対応アプリが必要です。")
+        : (state.lang === "vi" ? "Mở hoặc tải xuống để xem chi tiết." : "開く、またはダウンロードして確認してください。");
+      return `<div class="request-media-item request-file-item" aria-label="${escapeHtml(name)}">
+        <span>${escapeHtml(name)}</span>
+        <small>${escapeHtml(meta)}</small>
+        <small>${escapeHtml(note)}</small>
+        <div class="request-file-actions">
+          <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(state.lang === "vi" ? "Mở" : "開く")}</a>
+          <a href="${escapeHtml(downloadUrl)}" download="${escapeHtml(name)}">${escapeHtml(state.lang === "vi" ? "Tải xuống" : "ダウンロード")}</a>
+        </div>
+      </div>`;
     }
     return `<button class="request-media-item" type="button" ${attrs} aria-label="${escapeHtml(t("media"))} ${index + 1}">${type === "video"
       ? `<video src="${escapeHtml(url)}" controls playsinline></video>`
@@ -2945,12 +2959,64 @@
   }
 
   function guessMediaType(url) {
-    const clean = String(url || "").split("?")[0].toLowerCase();
-    if (/\.(mp4|mov|webm|m4v|avi)$/i.test(clean)) return "video";
-    if (/\.(jpg|jpeg|png|gif|webp|heic|heif|bmp)$/i.test(clean)) return "image";
-    if (clean.includes("/video/upload/")) return "video";
-    if (clean.includes("/image/upload/")) return "image";
-    return "image";
+    return guessRequestFileKind({ url });
+  }
+
+  function requestFileExtension(value) {
+    const clean = String(value || "").split("?")[0].split("#")[0].toLowerCase();
+    const match = clean.match(/\.([a-z0-9]+)$/i);
+    return match ? match[1] : "";
+  }
+
+  function requestFileName(item, fallback = "File") {
+    const url = item?.url || item?.secureUrl || item?.secure_url || item?.downloadUrl || "";
+    const directName = item?.originalName || item?.filename || item?.fileName || item?.name;
+    if (directName) return String(directName);
+    try {
+      const pathname = new URL(url).pathname;
+      return decodeURIComponent(pathname.split("/").pop() || fallback);
+    } catch {
+      return String(url || "").split("/").pop() || fallback;
+    }
+  }
+
+  function guessRequestFileKind(item) {
+    const explicit = String(item?.kind || item?.type || item?.mediaType || "").toLowerCase();
+    if (["image", "video", "pdf", "document", "spreadsheet", "presentation", "cad", "archive", "other"].includes(explicit)) return explicit;
+    const mime = String(item?.mimeType || item?.mimetype || "").toLowerCase();
+    if (mime.startsWith("image/")) return "image";
+    if (mime.startsWith("video/")) return "video";
+    if (mime === "application/pdf") return "pdf";
+    if (mime.includes("word") || mime.includes("document")) return "document";
+    if (mime.includes("spreadsheet") || mime.includes("excel") || mime.includes("csv")) return "spreadsheet";
+    if (mime.includes("presentation") || mime.includes("powerpoint")) return "presentation";
+    if (mime.includes("zip")) return "archive";
+    const url = item?.url || item?.secureUrl || item?.secure_url || item?.downloadUrl || "";
+    const ext = String(item?.ext || requestFileExtension(item?.originalName || item?.filename || item?.fileName || item?.name || url)).replace(/^\./, "").toLowerCase();
+    if (["jpg", "jpeg", "png", "webp"].includes(ext) || String(url).includes("/image/upload/")) return "image";
+    if (["mp4", "mov", "webm", "m4v"].includes(ext) || String(url).includes("/video/upload/")) return "video";
+    if (ext === "pdf") return "pdf";
+    if (["doc", "docx"].includes(ext)) return "document";
+    if (["xls", "xlsx", "csv"].includes(ext)) return "spreadsheet";
+    if (["ppt", "pptx"].includes(ext)) return "presentation";
+    if (["jww", "jwc", "dxf", "dwg"].includes(ext)) return "cad";
+    if (ext === "zip") return "archive";
+    return "other";
+  }
+
+  function requestFileKindLabel(kind) {
+    const labels = state.lang === "vi"
+      ? { image: "H\u00ecnh \u1ea3nh", video: "Video", pdf: "PDF", document: "Word/T\u00e0i li\u1ec7u", spreadsheet: "Excel/B\u1ea3ng t\u00ednh", presentation: "PowerPoint", cad: "CAD/JWW", archive: "ZIP", other: "T\u1ec7p" }
+      : { image: "\u753b\u50cf", video: "\u52d5\u753b", pdf: "PDF", document: "Word/\u6587\u66f8", spreadsheet: "Excel/\u8868\u8a08\u7b97", presentation: "PowerPoint", cad: "CAD/JWW", archive: "ZIP", other: "\u30d5\u30a1\u30a4\u30eb" };
+    return labels[kind] || labels.other;
+  }
+
+  function requestFileSizeLabel(size) {
+    const value = Number(size || 0);
+    if (!value) return "";
+    if (value >= 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(value >= 10 * 1024 * 1024 ? 0 : 1)}MB`;
+    if (value >= 1024) return `${Math.max(1, Math.round(value / 1024))}KB`;
+    return `${value}B`;
   }
 
   function normalizeMediaUrl(url) {
@@ -2971,7 +3037,9 @@
       seen.add(key);
       result.push(Object.assign({}, item, {
         url: item.url,
-        type: item.type || guessMediaType(item.url)
+        type: item.type || guessRequestFileKind(item),
+        kind: item.kind || guessRequestFileKind(item),
+        downloadUrl: item.downloadUrl || item.url
       }));
     }
     return result;
@@ -2986,11 +3054,21 @@
           raw.push({ url: item, type: guessMediaType(item), source: "mediaFiles" });
           return;
         }
-        const url = item.url || item.secureUrl || item.secure_url || item.path || item.src;
+        const url = item.url || item.secureUrl || item.secure_url || item.downloadUrl || item.path || item.src;
         if (!url) return;
         raw.push({
+          id: item.id || item.publicId || url,
           url,
-          type: item.type || item.mediaType || guessMediaType(url),
+          secureUrl: item.secureUrl || item.secure_url || url,
+          downloadUrl: item.downloadUrl || url,
+          originalName: item.originalName || item.filename || item.fileName || item.name || requestFileName({ url }),
+          filename: item.filename || item.fileName || item.originalName || requestFileName({ url }),
+          mimeType: item.mimeType || item.mimetype || "",
+          mimetype: item.mimetype || item.mimeType || "",
+          ext: item.ext || requestFileExtension(item.originalName || item.filename || item.fileName || url),
+          size: item.size || item.fileSize || 0,
+          kind: guessRequestFileKind(item),
+          type: guessRequestFileKind(item),
           source: "mediaFiles"
         });
       });
@@ -3009,11 +3087,16 @@
     if (Array.isArray(request?.attachments)) {
       request.attachments.forEach(item => {
         if (!item) return;
-        const url = typeof item === "string" ? item : (item.url || item.secureUrl || item.secure_url || item.path || item.src);
+        const url = typeof item === "string" ? item : (item.url || item.secureUrl || item.secure_url || item.downloadUrl || item.path || item.src);
         if (!url) return;
         raw.push({
           url,
-          type: typeof item === "string" ? guessMediaType(url) : (item.type || item.mediaType || guessMediaType(url)),
+          downloadUrl: typeof item === "string" ? url : (item.downloadUrl || url),
+          originalName: typeof item === "string" ? requestFileName({ url }) : (item.originalName || item.filename || item.fileName || item.name || requestFileName({ url })),
+          mimeType: typeof item === "string" ? "" : (item.mimeType || item.mimetype || ""),
+          ext: requestFileExtension(typeof item === "string" ? url : (item.originalName || item.filename || item.fileName || url)),
+          kind: typeof item === "string" ? guessRequestFileKind({ url }) : guessRequestFileKind(item),
+          type: typeof item === "string" ? guessRequestFileKind({ url }) : guessRequestFileKind(item),
           source: "attachments"
         });
       });
@@ -3021,11 +3104,16 @@
     if (Array.isArray(request?.files)) {
       request.files.forEach(item => {
         if (!item) return;
-        const url = typeof item === "string" ? item : (item.url || item.secureUrl || item.secure_url || item.path || item.src);
+        const url = typeof item === "string" ? item : (item.url || item.secureUrl || item.secure_url || item.downloadUrl || item.path || item.src);
         if (!url) return;
         raw.push({
           url,
-          type: typeof item === "string" ? guessMediaType(url) : (item.type || item.mediaType || guessMediaType(url)),
+          downloadUrl: typeof item === "string" ? url : (item.downloadUrl || url),
+          originalName: typeof item === "string" ? requestFileName({ url }) : (item.originalName || item.filename || item.fileName || item.name || requestFileName({ url })),
+          mimeType: typeof item === "string" ? "" : (item.mimeType || item.mimetype || ""),
+          ext: requestFileExtension(typeof item === "string" ? url : (item.originalName || item.filename || item.fileName || url)),
+          kind: typeof item === "string" ? guessRequestFileKind({ url }) : guessRequestFileKind(item),
+          type: typeof item === "string" ? guessRequestFileKind({ url }) : guessRequestFileKind(item),
           source: "files"
         });
       });
@@ -3039,10 +3127,11 @@
 
   function renderMedia(item) {
     const url = item.secureUrl || item.url;
-    const type = item.type || item.resourceType || guessMediaType(url);
-    return type === "video"
-      ? `<video src="${escapeHtml(url)}" controls playsinline></video>`
-      : `<img src="${escapeHtml(url)}" alt="">`;
+    const type = item.kind || item.type || item.resourceType || guessRequestFileKind(item);
+    if (type === "video") return `<video src="${escapeHtml(url)}" controls playsinline></video>`;
+    if (type === "image") return `<img src="${escapeHtml(url)}" alt="">`;
+    const name = requestFileName(item);
+    return `<a class="request-file-item" href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(name)}</a>`;
   }
 
   function staffSelectHtml(selectedId, attrs = "") {

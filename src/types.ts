@@ -134,16 +134,40 @@ export interface StaffProfile {
   introduction?: string;
 }
 
+export type RequestFileKind =
+  | "image"
+  | "video"
+  | "pdf"
+  | "document"
+  | "spreadsheet"
+  | "presentation"
+  | "cad"
+  | "archive"
+  | "other";
+
 export interface RequestMediaFile {
+  id?: string;
   url?: string;
   secureUrl?: string;
+  secure_url?: string;
+  downloadUrl?: string;
   publicId?: string;
   resourceType?: string;
   format?: string;
+  filename?: string;
+  fileName?: string;
+  name?: string;
   originalName?: string;
+  mimeType?: string;
   mimetype?: string;
+  ext?: string;
   size?: number;
+  kind?: RequestFileKind;
   type?: string;
+  mediaType?: string;
+  path?: string;
+  source?: string;
+  uploadedAt?: string;
 }
 
 export interface Request {
@@ -160,6 +184,8 @@ export interface Request {
   mediaUrl?: string;
   mediaType?: string;
   mediaFiles?: RequestMediaFile[];
+  attachments?: Array<RequestMediaFile | string>;
+  files?: Array<RequestMediaFile | string>;
   timeline: TimelineEvent[];
   datetime?: string;
   projectName?: string;

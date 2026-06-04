@@ -12,6 +12,7 @@ const uploadConfig = {
   ALLOWED_VIDEO_EXTENSIONS: [".mp4", ".mov"],
   ALLOWED_DOCUMENT_EXTENSIONS: [".pdf", ".xlsx", ".xls", ".csv", ".docx", ".doc", ".ppt", ".pptx"],
   ALLOWED_DRAWING_EXTENSIONS: [".jww", ".jwc", ".dxf", ".dwg"],
+  ALLOWED_ARCHIVE_EXTENSIONS: [".zip"],
   ALLOWED_QUOTE_EXTENSIONS: [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".ppt", ".pptx", ".jpg", ".jpeg", ".png", ".webp", ".jww", ".jwc", ".dxf", ".dwg", ".zip"],
   BLOCKED_EXTENSIONS: [".exe", ".bat", ".cmd", ".js", ".sh", ".php", ".msi", ".com", ".scr", ".ps1", ".vbs", ".jar"]
 };
@@ -32,6 +33,7 @@ function customerFileKind(file) {
   if (uploadConfig.ALLOWED_VIDEO_EXTENSIONS.includes(ext)) return "video";
   if (uploadConfig.ALLOWED_DOCUMENT_EXTENSIONS.includes(ext)) return "document";
   if (uploadConfig.ALLOWED_DRAWING_EXTENSIONS.includes(ext)) return "drawing";
+  if (uploadConfig.ALLOWED_ARCHIVE_EXTENSIONS.includes(ext)) return "archive";
   return "";
 }
 
@@ -39,7 +41,7 @@ function customerFileLimitBytes(file) {
   const kind = customerFileKind(file);
   if (kind === "video") return mb(uploadConfig.VIDEO_MAX_SIZE_MB);
   if (kind === "image") return mb(uploadConfig.IMAGE_MAX_SIZE_MB);
-  if (kind === "document" || kind === "drawing") return mb(uploadConfig.DOCUMENT_MAX_SIZE_MB);
+  if (kind === "document" || kind === "drawing" || kind === "archive") return mb(uploadConfig.DOCUMENT_MAX_SIZE_MB);
   return 0;
 }
 

@@ -15,7 +15,8 @@ const customerAccept = [
   ...uploadConfig.ALLOWED_IMAGE_EXTENSIONS,
   ...uploadConfig.ALLOWED_VIDEO_EXTENSIONS,
   ...uploadConfig.ALLOWED_DOCUMENT_EXTENSIONS,
-  ...uploadConfig.ALLOWED_DRAWING_EXTENSIONS
+  ...uploadConfig.ALLOWED_DRAWING_EXTENSIONS,
+  ...uploadConfig.ALLOWED_ARCHIVE_EXTENSIONS
 ].join(",");
 
 function fileKey(file: File) {
@@ -248,12 +249,12 @@ export function RequestCreatePage() {
             <span>
               {selectedMediaFiles.length
                 ? (language === "vi" ? `Đã chọn ${selectedMediaFiles.length} file` : `${selectedMediaFiles.length}件のファイルを選択済み`)
-                : (language === "vi" ? "Chọn ảnh/video/tài liệu hoặc kéo thả vào đây" : "画像・動画・書類を選択してください")}
+                : (language === "vi" ? "Chọn tệp đính kèm hoặc kéo thả vào đây" : "添付ファイルを選択してください")}
             </span>
             <span className="upload-limit-text">
               {language === "vi"
-                ? "Có thể gửi ảnh, video, PDF, Excel, Word, JWW/DXF. Tối đa 12 file. Ảnh 10MB/file, tài liệu 25MB/file, video 100MB/file."
-                : "画像、動画、PDF、Excel、Word、JWW/DXFを添付できます。最大12件。画像10MB、書類25MB、動画100MBまで。"}
+                ? "Có thể gửi ảnh, video, PDF, Excel, Word, PowerPoint, CAD/JWW/DXF/DWG, ZIP. Tối đa 12 file. Ảnh 10MB/file, tài liệu 25MB/file, video 100MB/file."
+                : "画像、動画、PDF、Excel、Word、PowerPoint、CAD/JWW/DXF/DWG、ZIPを添付できます。最大12件。画像10MB、書類25MB、動画100MBまで。"}
             </span>
             <button className="media-picker-button" type="button" onClick={() => mediaInputRef.current?.click()}>
               {t("request.chooseMedia")}
