@@ -4748,7 +4748,6 @@ body {
   min-width: 0;
   align-content: start;
   align-items: stretch;
-  grid-auto-rows: minmax(320px, auto);
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0 4px 14px 0;
@@ -4776,10 +4775,6 @@ body {
   border-color: #bfdbfe;
   box-shadow: 0 16px 36px rgba(37, 99, 235, .10);
   transform: translateY(-1px);
-}
-
-.settings-content-grid > .settings-shell-card {
-  height: 100%;
 }
 
 .settings-summary-card {
@@ -4876,8 +4871,15 @@ body {
 }
 
 .settings-summary-card-aiSettings .settings-summary-rows div {
-  grid-template-columns: minmax(150px, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 16px;
   align-items: center;
+}
+
+.settings-summary-card-aiSettings .settings-summary-rows strong {
+  justify-self: end;
+  padding-right: 8px;
+  white-space: nowrap;
 }
 
 .settings-summary-chips {
