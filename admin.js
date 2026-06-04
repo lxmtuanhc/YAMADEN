@@ -6215,10 +6215,16 @@
     return `<span class="settings-badge ${tone || ""}">${escapeHtml(label)}</span>`;
   }
 
-  function settingList(items) {
-    const list = (items || []).slice(0, 4);
-    const more = (items || []).length - list.length;
-    return `<ul class="settings-detail-list">${list.map(item => `<li>${escapeHtml(item)}</li>`).join("")}${more > 0 ? `<li>+${more}</li>` : ""}</ul>`;
+  function settingsSummaryRows(lines) {
+    return `<div class="settings-summary-rows">
+      ${(lines || []).map(line => {
+        const text = String(line || "-");
+        const parts = text.includes(":") ? text.split(/:(.*)/s) : null;
+        return parts && parts[1] !== undefined
+          ? `<div><span>${escapeHtml(parts[0])}</span><strong>${escapeHtml(parts[1].trim() || "-")}</strong></div>`
+          : `<p>${escapeHtml(text)}</p>`;
+      }).join("")}
+    </div>`;
   }
 
   function settingsCardFrame({ detailKey, icon, title, status, tone, body, extraClass = "" }) {
@@ -6236,13 +6242,16 @@
 
   function settingCard(icon, title, items, status, tone, extra) {
     const detailKey = `${state.settingsTab || "overview"}:${title}`;
-    return settingsCardFrame({
+    const description = Array.isArray(items) ? "" : String(items || "");
+    const summary = `${Array.isArray(items) ? settingsSummaryRows(items) : ""}${extra || ""}`;
+    return settingsSummaryCard({
       detailKey,
       icon,
       title,
       status,
       tone,
-      body: `${Array.isArray(items) ? settingList(items) : `<p class="settings-card-note">${escapeHtml(items || "")}</p>`}${extra || ""}`
+      description,
+      summary
     });
   }
 
@@ -6333,22 +6342,14 @@
       status,
       tone,
       extraClass: `settings-summary-card ${extraClass}`,
-      body: `<p class="settings-card-note settings-summary-description">${escapeHtml(description || "")}</p>
+      body: `${description ? `<p class="settings-card-note settings-summary-description">${escapeHtml(description)}</p>` : ""}
         <div class="settings-summary-body">${summary || ""}</div>`
     });
   }
 
   function overviewSummaryCard(section, icon, title, status, lines, description) {
     const detailKey = `overview:${section}`;
-    const summary = `<div class="settings-summary-rows">
-      ${(lines || []).map(line => {
-        const text = String(line || "-");
-        const parts = text.includes(":") ? text.split(/:(.*)/s) : null;
-        return parts && parts[1] !== undefined
-          ? `<div><span>${escapeHtml(parts[0])}</span><strong>${escapeHtml(parts[1].trim() || "-")}</strong></div>`
-          : `<p>${escapeHtml(text)}</p>`;
-      }).join("")}
-    </div>`;
+    const summary = settingsSummaryRows(lines);
     const tone = section === "dataStatus" || /OFF|\u0110\u00e3 t\u1eaft|\u7121\u52b9/.test(String(status || ""))
       ? "is-planned"
       : "is-live";

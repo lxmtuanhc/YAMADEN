@@ -4875,28 +4875,9 @@ body {
   overflow-wrap: anywhere;
 }
 
-.settings-summary-card-aiSettings {
-  min-height: 380px;
-}
-
-.settings-summary-card-aiSettings .settings-summary-description {
-  min-height: 0;
-  display: block;
-  overflow: visible;
-  -webkit-line-clamp: unset;
-}
-
-.settings-summary-card-aiSettings .settings-card-body,
-.settings-summary-card-aiSettings .settings-summary-body,
-.settings-summary-card-aiSettings .settings-summary-rows {
-  gap: 14px;
-}
-
 .settings-summary-card-aiSettings .settings-summary-rows div {
   grid-template-columns: minmax(150px, 1fr) auto;
-  min-height: 34px;
   align-items: center;
-  padding: 4px 0;
 }
 
 .settings-summary-chips {
