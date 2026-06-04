@@ -3096,6 +3096,84 @@ textarea {
   white-space: nowrap;
 }
 
+.schedule-choice-page .page-header p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.schedule-choice-card {
+  display: grid;
+  gap: 16px;
+}
+
+.schedule-slot-choice {
+  display: grid;
+  gap: 10px;
+}
+
+.schedule-slot-choice h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.schedule-slot-card {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto 24px;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-align: left;
+  font-weight: 900;
+}
+
+.schedule-slot-card strong {
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.schedule-slot-card.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, .12);
+}
+
+.schedule-slot-card:disabled {
+  opacity: .58;
+}
+
+.schedule-selected-box {
+  border: 1px solid #bfdbfe;
+  border-radius: 16px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.schedule-selected-box b,
+.schedule-selected-box span {
+  display: block;
+}
+
+@media (max-width: 560px) {
+  .schedule-slot-card {
+    grid-template-columns: 24px minmax(0, 1fr) 24px;
+  }
+
+  .schedule-slot-card strong {
+    grid-column: 2 / -1;
+  }
+}
+
 .quote-file-card {
   cursor: default;
 }

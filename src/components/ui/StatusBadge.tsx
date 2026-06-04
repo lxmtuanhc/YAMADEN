@@ -35,13 +35,17 @@ const quoteStatusKeys: Record<QuoteStatus, TranslationKey> = {
 };
 
 const scheduleStatusKeys: Record<ScheduleStatus, TranslationKey> = {
+  draft: "schedule.statusDraft",
+  sent_to_customer: "schedule.statusSentToCustomer",
+  customer_selected: "schedule.statusCustomerSelected",
   pending: "schedule.statusPending",
   confirmed: "schedule.statusConfirmed",
   rescheduled: "schedule.statusRescheduled",
   upcoming: "schedule.statusUpcoming",
   in_progress: "schedule.statusInProgress",
   completed: "schedule.statusCompleted",
-  cancelled: "schedule.statusCancelled"
+  cancelled: "schedule.statusCancelled",
+  expired: "schedule.statusExpired"
 };
 
 export function StatusBadge({ status }: { status: Status }) {

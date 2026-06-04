@@ -1084,6 +1084,14 @@ const AppointmentHistorySchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }, { _id: false });
 
+const AppointmentSlotSchema = new mongoose.Schema({
+  slotId: String,
+  date: String,
+  startTime: String,
+  endTime: String,
+  status: { type: String, default: "available" }
+}, { _id: false });
+
 const AppointmentSchema = new mongoose.Schema({
   id: { type: String, index: true },
   appointmentCode: { type: String, index: true },
@@ -1093,6 +1101,8 @@ const AppointmentSchema = new mongoose.Schema({
   customerName: String,
   customerPhone: String,
   customerEmail: String,
+  assigneeId: String,
+  assigneeName: String,
   projectName: String,
   address: String,
   appointmentDate: String,
@@ -1101,6 +1111,16 @@ const AppointmentSchema = new mongoose.Schema({
   timeEnd: String,
   technicianName: String,
   technicianId: String,
+  slots: [AppointmentSlotSchema],
+  selectedSlotId: String,
+  selectedDate: String,
+  selectedStartTime: String,
+  selectedEndTime: String,
+  sentAt: Date,
+  selectedAt: Date,
+  confirmedAt: Date,
+  completedAt: Date,
+  cancelledAt: Date,
   status: { type: String, default: "pending", index: true },
   customerNote: String,
   adminNote: String,
@@ -2073,11 +2093,11 @@ async function ensureRequestCode(item) {
 
 function normalizeAppointmentStatus(value) {
   const status = String(value || "").trim().toLowerCase();
-  if (["pending", "confirmed", "rescheduled", "completed", "cancelled"].includes(status)) return status;
-  if (status === "upcoming") return "pending";
+  if (["draft", "sent_to_customer", "customer_selected", "confirmed", "completed", "cancelled", "expired"].includes(status)) return status;
+  if (status === "pending" || status === "rescheduled" || status === "upcoming") return "sent_to_customer";
   if (status === "in_progress") return "confirmed";
   if (status === "canceled") return "cancelled";
-  return "pending";
+  return "draft";
 }
 
 async function generateAppointmentCode() {
@@ -2105,6 +2125,17 @@ function appointmentIdQuery(id) {
 function appointmentPublic(item) {
   const data = typeof item?.toObject === "function" ? item.toObject() : { ...(item || {}) };
   const appointmentDate = data.appointmentDate || data.date || "";
+  const slots = Array.isArray(data.slots) && data.slots.length
+    ? data.slots
+    : appointmentDate
+      ? [{
+          slotId: "legacy-slot-1",
+          date: appointmentDate,
+          startTime: data.timeStart || data.time || "",
+          endTime: data.timeEnd || "",
+          status: data.selectedSlotId ? "selected" : "available"
+        }]
+      : [];
   return {
     ...data,
     id: String(data.id || data.appointmentCode || data._id || ""),
@@ -2112,8 +2143,9 @@ function appointmentPublic(item) {
     appointmentDate,
     date: appointmentDate,
     status: normalizeAppointmentStatus(data.status),
+    slots,
     technician: data.technicianName || data.technician || "",
-    time: [data.timeStart, data.timeEnd].filter(Boolean).join(" - "),
+    time: [data.selectedStartTime || data.timeStart, data.selectedEndTime || data.timeEnd].filter(Boolean).join(" - "),
     createdAt: data.createdAt,
     updatedAt: data.updatedAt
   };
@@ -2123,6 +2155,49 @@ function pushAppointmentHistory(item, type, message, actor = "admin") {
   item.history = Array.isArray(item.history) ? item.history : [];
   item.history.push({ type, message, actor, createdAt: new Date() });
   item.updatedAt = new Date();
+}
+
+function appointmentSlotId(index = 0) {
+  return "slot-" + Date.now() + "-" + String(index + 1);
+}
+
+function normalizeAppointmentSlots(slots = []) {
+  return (Array.isArray(slots) ? slots : [])
+    .map((slot, index) => ({
+      slotId: String(slot?.slotId || appointmentSlotId(index)),
+      date: String(slot?.date || "").trim(),
+      startTime: String(slot?.startTime || slot?.timeStart || "").trim(),
+      endTime: String(slot?.endTime || slot?.timeEnd || "").trim(),
+      status: ["available", "selected", "unavailable"].includes(String(slot?.status || "")) ? String(slot.status) : "available"
+    }))
+    .filter(slot => slot.date && slot.startTime && slot.endTime);
+}
+
+function appointmentSlotKey(slot) {
+  return `${slot.date} ${slot.startTime}-${slot.endTime}`;
+}
+
+function validateAppointmentSlots(slots) {
+  if (!slots.length) return "At least one appointment slot is required";
+  const seen = new Set();
+  for (const slot of slots) {
+    if (slot.startTime >= slot.endTime) return "Appointment slot start time must be before end time";
+    const key = appointmentSlotKey(slot);
+    if (seen.has(key)) return "Duplicate appointment slot";
+    seen.add(key);
+  }
+  return "";
+}
+
+function applySelectedAppointmentSlot(item, slot) {
+  item.selectedSlotId = slot.slotId;
+  item.selectedDate = slot.date;
+  item.selectedStartTime = slot.startTime;
+  item.selectedEndTime = slot.endTime;
+  item.appointmentDate = slot.date;
+  item.date = slot.date;
+  item.timeStart = slot.startTime;
+  item.timeEnd = slot.endTime;
 }
 
 function uploadMediaToCloudinary(fileBuffer, resourceType = "auto") {
@@ -3229,45 +3304,7 @@ app.delete("/api/customer/requests/:id/permanent", requireUser, async (req, res)
 });
 
 app.post("/api/appointments", requireUser, async (req, res) => {
-  try {
-    const requestId = String(req.body?.requestId || req.body?.requestCode || "").trim();
-    if (!requestId) return res.status(400).json({ message: "Request is required" });
-    const request = await Request.findOne(customerItemQuery(requestId, req.user.userId));
-    if (!request) return res.status(404).json({ message: "Request not found" });
-    const appointmentDate = String(req.body?.appointmentDate || req.body?.date || "").trim();
-    const time = String(req.body?.appointmentTime || req.body?.time || req.body?.timeStart || "").trim();
-    const projectName = String(req.body?.projectName || request.projectName || request.address || request.title || "").trim();
-    if (!appointmentDate || !time || !projectName) return res.status(400).json({ message: "Appointment date, time and project are required" });
-    const user = await User.findById(req.user.userId).lean().catch(() => null);
-    const code = await generateAppointmentCode();
-    const appointment = new Appointment({
-      id: code,
-      appointmentCode: code,
-      requestId: String(request.id || request._id || request.requestCode || ""),
-      requestCode: request.requestCode || request.requestId || request.id || "",
-      customerId: String(req.user.userId),
-      customerName: request.name || user?.name || "",
-      customerPhone: request.phone || user?.phone || "",
-      customerEmail: user?.email || request.email || "",
-      projectName,
-      address: req.body?.address || request.address || "",
-      appointmentDate,
-      date: appointmentDate,
-      timeStart: time,
-      timeEnd: String(req.body?.timeEnd || "").trim(),
-      technicianName: String(req.body?.technician || req.body?.technicianName || "").trim(),
-      technicianId: String(req.body?.technicianId || "").trim(),
-      status: "pending",
-      customerNote: String(req.body?.customerNote || req.body?.note || "").trim(),
-      createdBy: "customer",
-      history: [{ type: "created", message: "Appointment created by customer", actor: "customer", createdAt: new Date() }]
-    });
-    await appointment.save();
-    notifyAdminEmail("appointment_created", { request, appointment });
-    res.status(201).json({ data: appointmentPublic(appointment), message: "Appointment created" });
-  } catch (error) {
-    res.status(500).json({ message: "Appointment create failed", error: error.message });
-  }
+  res.status(405).json({ message: "Appointments are proposed by admin. Please select a proposed slot." });
 });
 
 app.get("/api/appointments/my", requireUser, async (req, res) => {
@@ -3287,6 +3324,32 @@ app.get("/api/appointments/:id", requireUser, async (req, res) => {
     res.json({ data: appointmentPublic(item) });
   } catch (error) {
     res.status(500).json({ message: "Appointment load failed", error: error.message });
+  }
+});
+
+app.post("/api/appointments/:id/select-slot", requireUser, async (req, res) => {
+  try {
+    const item = await Appointment.findOne({ $and: [appointmentIdQuery(req.params.id), { customerId: String(req.user.userId) }] });
+    if (!item) return res.status(404).json({ message: "Not found" });
+    if (!["sent_to_customer", "customer_selected"].includes(normalizeAppointmentStatus(item.status))) {
+      return res.status(400).json({ message: "Appointment is not selectable" });
+    }
+    const slotId = String(req.body?.slotId || "").trim();
+    const slots = normalizeAppointmentSlots(item.slots);
+    const selectedSlot = slots.find(slot => slot.slotId === slotId);
+    if (!selectedSlot) return res.status(404).json({ message: "Slot not found" });
+    if (selectedSlot.status !== "available" && selectedSlot.status !== "selected") return res.status(400).json({ message: "Slot is unavailable" });
+    item.slots = slots.map(slot => ({ ...slot, status: slot.slotId === slotId ? "selected" : "available" }));
+    applySelectedAppointmentSlot(item, selectedSlot);
+    item.status = "customer_selected";
+    item.selectedAt = new Date();
+    pushAppointmentHistory(item, "appointment_slot_selected", "Customer selected appointment slot", "customer");
+    await item.save();
+    const request = await findRequestByAnyId(item.requestCode || item.requestId);
+    if (request) notifyAdminEmail("appointment_slot_selected", { request, appointment: item });
+    res.json({ data: appointmentPublic(item), message: "Appointment slot selected" });
+  } catch (error) {
+    res.status(500).json({ message: "Appointment slot select failed", error: error.message });
   }
 });
 
@@ -5233,6 +5296,51 @@ app.get("/api/admin/appointments", requireAdmin, async (req, res) => {
   }
 });
 
+app.post("/api/admin/appointments/proposals", requireAdmin, async (req, res) => {
+  try {
+    const requestId = String(req.body?.requestId || req.body?.requestCode || "").trim();
+    if (!requestId) return res.status(400).json({ message: "Request is required" });
+    const request = await findRequestByAnyId(requestId);
+    if (!request) return res.status(404).json({ message: "Request not found" });
+    const slots = normalizeAppointmentSlots(req.body?.slots);
+    const slotError = validateAppointmentSlots(slots);
+    if (slotError) return res.status(400).json({ message: slotError });
+    const code = await generateAppointmentCode();
+    const status = req.body?.sendNow === false ? "draft" : "sent_to_customer";
+    const appointment = new Appointment({
+      id: code,
+      appointmentCode: code,
+      requestId: String(request.id || request._id || request.requestCode || ""),
+      requestCode: request.requestCode || request.requestId || request.id || "",
+      customerId: String(request.userId || request.customerId || ""),
+      customerName: request.name || request.customerName || request.contactPerson || "",
+      customerPhone: request.phone || request.customerPhone || "",
+      customerEmail: request.email || request.customerEmail || "",
+      assigneeId: String(req.body?.assigneeId || request.assigneeId || ""),
+      assigneeName: String(req.body?.assigneeName || request.assigneeName || request.staffName || ""),
+      projectName: String(req.body?.projectName || request.projectName || request.title || request.address || ""),
+      address: String(req.body?.address || request.address || ""),
+      technicianName: String(req.body?.technicianName || req.body?.assigneeName || request.assigneeName || ""),
+      technicianId: String(req.body?.technicianId || req.body?.assigneeId || request.assigneeId || ""),
+      slots,
+      status,
+      customerNote: String(req.body?.customerNote || "").trim(),
+      adminNote: String(req.body?.adminNote || req.body?.note || "").trim(),
+      createdBy: "admin",
+      sentAt: status === "sent_to_customer" ? new Date() : null,
+      history: [
+        { type: "appointment_proposal_created", message: "Admin created appointment proposal", actor: "admin", createdAt: new Date() },
+        ...(status === "sent_to_customer" ? [{ type: "appointment_proposed", message: "Admin sent appointment proposal to customer", actor: "admin", createdAt: new Date() }] : [])
+      ]
+    });
+    await appointment.save();
+    if (status === "sent_to_customer") notifyCustomerEmail("appointment_proposed", { request, appointment, adminNote: appointment.adminNote });
+    res.status(201).json({ data: appointmentPublic(appointment), message: "Appointment proposal created" });
+  } catch (error) {
+    res.status(500).json({ message: "Appointment proposal create failed", error: error.message });
+  }
+});
+
 app.get("/api/admin/appointments/:id", requireAdmin, async (req, res) => {
   try {
     const item = await Appointment.findOne(appointmentIdQuery(req.params.id));
@@ -5259,18 +5367,38 @@ async function updateAppointmentByAdmin(req, res, actionStatus = "") {
     if (req.body?.technicianName !== undefined || req.body?.technician !== undefined) item.technicianName = String(req.body.technicianName || req.body.technician || "").trim();
     if (req.body?.technicianId !== undefined) item.technicianId = String(req.body.technicianId || "").trim();
     if (req.body?.adminNote !== undefined || req.body?.note !== undefined) item.adminNote = String(req.body.adminNote || req.body.note || "").trim();
+    if (req.body?.customerNote !== undefined) item.customerNote = String(req.body.customerNote || "").trim();
     if (req.body?.projectName !== undefined) item.projectName = String(req.body.projectName || "").trim();
     if (req.body?.address !== undefined) item.address = String(req.body.address || "").trim();
+    if (req.body?.assigneeName !== undefined) {
+      item.assigneeName = String(req.body.assigneeName || "").trim();
+      item.technicianName = item.assigneeName;
+    }
+    if (req.body?.assigneeId !== undefined) {
+      item.assigneeId = String(req.body.assigneeId || "").trim();
+      item.technicianId = item.assigneeId;
+    }
+    if (req.body?.slots !== undefined) {
+      const slots = normalizeAppointmentSlots(req.body.slots);
+      const slotError = validateAppointmentSlots(slots);
+      if (slotError) return res.status(400).json({ message: slotError });
+      item.slots = slots.map(slot => ({ ...slot, status: slot.slotId === item.selectedSlotId ? "selected" : slot.status }));
+    }
     if (actionStatus || req.body?.status) item.status = normalizeAppointmentStatus(actionStatus || req.body.status);
+    if (item.status === "sent_to_customer" && !item.sentAt) item.sentAt = new Date();
+    if (item.status === "confirmed" && !item.confirmedAt) item.confirmedAt = new Date();
+    if (item.status === "completed" && !item.completedAt) item.completedAt = new Date();
+    if (item.status === "cancelled" && !item.cancelledAt) item.cancelledAt = new Date();
     const action = actionStatus || (previousStatus !== item.status ? item.status : "updated");
     pushAppointmentHistory(item, action, `Appointment ${action}`, "admin");
     await item.save();
     const request = await findRequestByAnyId(item.requestCode || item.requestId);
     if (request) {
       const eventByStatus = {
+        sent_to_customer: "appointment_proposed",
         confirmed: "appointment_confirmed",
-        rescheduled: "appointment_rescheduled",
-        cancelled: "appointment_cancelled"
+        cancelled: "appointment_cancelled",
+        completed: "appointment_completed"
       };
       const eventType = eventByStatus[item.status];
       if (eventType) notifyCustomerEmail(eventType, { request, appointment: item, adminNote: item.adminNote });
@@ -5282,6 +5410,7 @@ async function updateAppointmentByAdmin(req, res, actionStatus = "") {
 }
 
 app.patch("/api/admin/appointments/:id", requireAdmin, (req, res) => updateAppointmentByAdmin(req, res));
+app.post("/api/admin/appointments/:id/send", requireAdmin, (req, res) => updateAppointmentByAdmin(req, res, "sent_to_customer"));
 app.post("/api/admin/appointments/:id/confirm", requireAdmin, (req, res) => updateAppointmentByAdmin(req, res, "confirmed"));
 app.post("/api/admin/appointments/:id/reschedule", requireAdmin, (req, res) => updateAppointmentByAdmin(req, res, "rescheduled"));
 app.post("/api/admin/appointments/:id/cancel", requireAdmin, (req, res) => updateAppointmentByAdmin(req, res, "cancelled"));

@@ -29,16 +29,22 @@ function createScheduleId(): string {
 }
 
 function normalizeStatus(status?: string): ScheduleStatus {
-  if (status === "pending" || status === "confirmed" || status === "rescheduled" || status === "completed" || status === "cancelled") return status;
+  if (status === "draft" || status === "sent_to_customer" || status === "customer_selected" || status === "confirmed" || status === "completed" || status === "cancelled" || status === "expired") return status;
+  if (status === "pending" || status === "rescheduled" || status === "upcoming") return "sent_to_customer";
   if (status === "on_the_way") return "in_progress";
-  if (status === "in_progress" || status === "upcoming") return status;
-  return "pending";
+  if (status === "in_progress") return status;
+  return "draft";
 }
 
 function normalizeSchedule(schedule: Schedule): Schedule {
   const seed = scheduleSeedById.get(schedule.id);
   const appointmentDate = schedule.appointmentDate || schedule.date || seed?.date || "";
   const time = schedule.time || [schedule.timeStart, schedule.timeEnd].filter(Boolean).join(" - ");
+  const slots = Array.isArray(schedule.slots) && schedule.slots.length
+    ? schedule.slots
+    : appointmentDate
+      ? [{ slotId: "legacy-slot-1", date: appointmentDate, startTime: schedule.timeStart || schedule.time || "", endTime: schedule.timeEnd || "", status: "available" as const }]
+      : [];
   return {
     ...schedule,
     id: String(schedule.id || schedule.appointmentCode || ""),
@@ -50,6 +56,11 @@ function normalizeSchedule(schedule: Schedule): Schedule {
     time: time || seed?.time || "",
     timeStart: schedule.timeStart || schedule.time || seed?.time || "",
     timeEnd: schedule.timeEnd || "",
+    slots,
+    selectedSlotId: schedule.selectedSlotId || slots.find(slot => slot.status === "selected")?.slotId || "",
+    selectedDate: schedule.selectedDate || "",
+    selectedStartTime: schedule.selectedStartTime || "",
+    selectedEndTime: schedule.selectedEndTime || "",
     technician: schedule.technician || schedule.technicianName || seed?.technician || "",
     technicianName: schedule.technicianName || schedule.technician || seed?.technician || "",
     projectName: schedule.projectName || seed?.projectName || "",
@@ -74,6 +85,16 @@ function scheduleFromBackend(item: any): Schedule {
     time: item.time || [item.timeStart, item.timeEnd].filter(Boolean).join(" - "),
     timeStart: item.timeStart || item.time || "",
     timeEnd: item.timeEnd || "",
+    slots: Array.isArray(item.slots) ? item.slots : [],
+    selectedSlotId: item.selectedSlotId || "",
+    selectedDate: item.selectedDate || "",
+    selectedStartTime: item.selectedStartTime || "",
+    selectedEndTime: item.selectedEndTime || "",
+    sentAt: item.sentAt || "",
+    selectedAt: item.selectedAt || "",
+    confirmedAt: item.confirmedAt || "",
+    completedAt: item.completedAt || "",
+    cancelledAt: item.cancelledAt || "",
     technician: item.technician || item.technicianName || "",
     technicianName: item.technicianName || item.technician || "",
     technicianId: item.technicianId || "",
@@ -129,6 +150,16 @@ async function createBackendSchedule(input: CreateScheduleInput): Promise<Schedu
       projectName: input.projectName,
       customerNote: input.customerNote || ""
     })
+  });
+  if (!payload) return null;
+  return scheduleFromBackend(payload.data || payload);
+}
+
+async function selectBackendScheduleSlot(id: string, slotId: string): Promise<Schedule | null> {
+  const payload = await backendJson(`/api/appointments/${encodeURIComponent(id)}/select-slot`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slotId })
   });
   if (!payload) return null;
   return scheduleFromBackend(payload.data || payload);
@@ -232,6 +263,14 @@ export const scheduleService = {
     commitSchedules(schedules.map(schedule => (schedule.id === id ? updated : schedule)));
     await addScheduleTimeline(updated.requestId, updated.status, input.status || "updated");
     return updated;
+  },
+
+  async selectSlot(id: string, slotId: string): Promise<Schedule> {
+    await delay();
+    const backend = await selectBackendScheduleSlot(id, slotId);
+    if (!backend) throw new Error("Appointment slot select failed");
+    commitSchedules(readSchedules().map(schedule => (schedule.id === id ? backend : schedule)));
+    return backend;
   },
 
   async cancelSchedule(id: string): Promise<Schedule> {

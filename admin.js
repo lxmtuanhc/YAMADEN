@@ -1751,6 +1751,13 @@
     getAppointment(id) {
       return requestJson("/api/admin/appointments/" + encodeURIComponent(id));
     },
+    createAppointmentProposal(payload) {
+      return requestJson("/api/admin/appointments/proposals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload || {})
+      });
+    },
     updateAppointment(id, payload) {
       return requestJson("/api/admin/appointments/" + encodeURIComponent(id), {
         method: "PATCH",
@@ -1760,6 +1767,9 @@
     },
     confirmAppointment(id, payload) {
       return requestJson("/api/admin/appointments/" + encodeURIComponent(id) + "/confirm", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
+    },
+    sendAppointment(id, payload) {
+      return requestJson("/api/admin/appointments/" + encodeURIComponent(id) + "/send", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
     },
     rescheduleAppointment(id, payload) {
       return requestJson("/api/admin/appointments/" + encodeURIComponent(id) + "/reschedule", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
@@ -3047,7 +3057,10 @@
           </section>
           <section class="request-detail-media">
             <div class="request-detail-section-head"><h3>${escapeHtml(t("relatedAppointments"))}</h3><span class="note">${relatedAppointments.length}</span></div>
-            ${relatedAppointments.length ? `<div class="mini-list">${relatedAppointments.slice(0, 3).map(item => `<button class="mini-list-item" type="button" data-appointment-detail="${escapeHtml(appointmentId(item))}"><div><strong>${escapeHtml(appointmentDateText(item) || "-")} ${escapeHtml(appointmentTimeText(item) || "")}</strong><span>${escapeHtml(appointmentStatusLabel(item.status))} · ${escapeHtml(item.technicianName || item.technician || "-")}</span></div></button>`).join("")}</div>` : `<div class="empty-state">${escapeHtml(t("noData"))}</div>`}
+            ${relatedAppointments.length ? `<div class="mini-list">${relatedAppointments.slice(0, 3).map(item => {
+              const selected = appointmentSelectedSlot(item);
+              return `<button class="mini-list-item" type="button" data-appointment-detail="${escapeHtml(appointmentId(item))}"><div><strong>${escapeHtml(appointmentStatusLabel(item.status))}</strong><span>${escapeHtml(appointmentText("Số slot", "候補数"))}: ${appointmentSlots(item).length}${selected ? ` · ${escapeHtml(appointmentSlotText(selected))}` : ""}</span></div></button>`;
+            }).join("")}</div>` : `<div class="empty-state">${escapeHtml(appointmentText("Chưa có lịch hẹn", "予約はまだありません"))}<div style="margin-top:10px"><button class="btn btn-soft" type="button" data-open-appointment-proposal="${escapeHtml(getRequestDisplayId(request) || getRowId(request))}">${escapeHtml(appointmentText("Tạo đề xuất lịch", "予約候補を作成"))}</button></div></div>`}
           </section>
         </div>
         <footer class="request-detail-footer">
@@ -8809,20 +8822,26 @@
 
   function appointmentStatusLabel(status) {
     const labels = {
-      pending: t("appointmentPending"),
+      draft: appointmentText("Nháp", "下書き"),
+      sent_to_customer: appointmentText("Chờ khách chọn", "お客様の選択待ち"),
+      customer_selected: appointmentText("Khách đã chọn", "お客様が選択済み"),
       confirmed: t("appointmentConfirmed"),
-      rescheduled: t("appointmentRescheduled"),
       completed: t("appointmentCompleted"),
-      cancelled: t("appointmentCancelled")
+      cancelled: t("appointmentCancelled"),
+      expired: appointmentText("Hết hạn", "期限切れ")
     };
-    return labels[normalizeAppointmentStatusValue(status)] || labels.pending;
+    return labels[normalizeAppointmentStatusValue(status)] || labels.draft;
   }
 
   function normalizeAppointmentStatusValue(status) {
     const value = String(status || "").trim().toLowerCase();
-    if (["pending", "confirmed", "rescheduled", "completed", "cancelled"].includes(value)) return value;
-    if (value === "upcoming") return "pending";
-    return "pending";
+    if (["draft", "sent_to_customer", "customer_selected", "confirmed", "completed", "cancelled", "expired"].includes(value)) return value;
+    if (value === "pending" || value === "rescheduled" || value === "upcoming") return "sent_to_customer";
+    return "draft";
+  }
+
+  function appointmentText(vi, ja) {
+    return state.lang === "vi" ? vi : ja;
   }
 
   function appointmentId(item) {
@@ -8839,6 +8858,23 @@
 
   function appointmentTimeText(item) {
     return String(item?.time || [item?.timeStart, item?.timeEnd].filter(Boolean).join(" - ") || item?.timeStart || "");
+  }
+
+  function appointmentSlots(item) {
+    return Array.isArray(item?.slots) && item.slots.length
+      ? item.slots
+      : appointmentDateText(item)
+        ? [{ slotId: "legacy-slot-1", date: appointmentDateText(item), startTime: item?.timeStart || item?.time || "", endTime: item?.timeEnd || "", status: "available" }]
+        : [];
+  }
+
+  function appointmentSlotText(slot) {
+    return `${slot?.date || "-"} ${slot?.startTime || ""}${slot?.endTime ? " - " + slot.endTime : ""}`.trim();
+  }
+
+  function appointmentSelectedSlot(item) {
+    const slots = appointmentSlots(item);
+    return slots.find(slot => slot.slotId === item?.selectedSlotId || slot.status === "selected") || null;
   }
 
   function filterAppointments(items) {
@@ -8864,7 +8900,7 @@
   }
 
   function appointmentFilterStatuses() {
-    return ["all", "pending", "confirmed", "rescheduled", "completed", "cancelled"];
+    return ["all", "sent_to_customer", "customer_selected", "confirmed", "completed", "cancelled"];
   }
 
   function renderAppointmentFilterChips() {
@@ -8893,23 +8929,60 @@
     </tr>`;
   }
 
+  function renderAppointmentCard(item) {
+    const id = appointmentId(item);
+    const slots = appointmentSlots(item);
+    const selected = appointmentSelectedSlot(item);
+    return `<article class="appointment-card" data-appointment-detail="${escapeHtml(id)}">
+      <div class="appointment-card-main">
+        <div class="appointment-card-head">
+          <div>
+            <strong class="appointment-code">${escapeHtml(item.appointmentCode || id)}</strong>
+            <span>${escapeHtml(appointmentRequestId(item) || "-")}</span>
+          </div>
+          <span class="status-badge status-${escapeHtml(normalizeAppointmentStatusValue(item.status))}">${escapeHtml(appointmentStatusLabel(item.status))}</span>
+        </div>
+        <div class="appointment-card-grid">
+          ${infoItem(appointmentText("Khách hàng", "顧客"), item.customerName)}
+          ${infoItem(appointmentText("Người phụ trách", "担当者"), item.assigneeName || item.technicianName || item.technician)}
+          ${infoItem(appointmentText("Công trình", "工事名"), item.projectName || item.address)}
+          ${infoItem(appointmentText("Số khung giờ đề xuất", "候補数"), String(slots.length))}
+        </div>
+        <div class="appointment-slot-list">
+          <b>${escapeHtml(appointmentText("Khung giờ đề xuất", "候補日時"))}</b>
+          ${slots.length ? slots.map(slot => `<span class="${selected?.slotId === slot.slotId ? "is-selected" : ""}">${escapeHtml(appointmentSlotText(slot))}</span>`).join("") : `<em>${escapeHtml(t("noData"))}</em>`}
+        </div>
+        ${selected ? `<div class="appointment-selected-box"><b>${escapeHtml(appointmentText("Khách đã chọn", "お客様が選択済み"))}</b><span>${escapeHtml(appointmentSlotText(selected))}</span></div>` : ""}
+      </div>
+      <div class="appointment-card-actions">
+        <button class="btn btn-soft" type="button" data-appointment-detail="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
+        ${normalizeAppointmentStatusValue(item.status) === "draft" ? `<button class="btn btn-soft" type="button" data-appointment-action="send" data-appointment-id="${escapeHtml(id)}">${escapeHtml(appointmentText("Gửi cho khách", "お客様へ送信"))}</button>` : ""}
+        ${!["cancelled", "completed"].includes(normalizeAppointmentStatusValue(item.status)) ? `<button class="btn btn-danger" type="button" data-appointment-action="cancelled" data-appointment-id="${escapeHtml(id)}">${escapeHtml(t("appointmentCancel"))}</button>` : ""}
+      </div>
+    </article>`;
+  }
+
   function renderAppointments() {
     const filtered = filterAppointments(state.appointments);
     $("viewRoot").innerHTML = `
-      <div class="page-intro"><p>${escapeHtml(t("appointmentSubtitle"))}</p></div>
+      <div class="appointment-page-head">
+        <div>
+          <p class="eyebrow">${escapeHtml(appointmentText("LỊCH HẸN", "予約"))}</p>
+          <h1>${escapeHtml(t("appointments"))}</h1>
+          <p>${escapeHtml(appointmentText("Quản lý lịch hẹn và thời gian khách chọn.", "予約とお客様が選択した日時を管理します。"))}</p>
+        </div>
+        <button class="primary-button appointment-create-main" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo đề xuất lịch", "予約候補を作成"))}</button>
+      </div>
       <div class="request-filter-bar appointment-filter-bar">
         <input id="appointmentSearch" class="request-search-input" value="${escapeHtml(state.filters.appointmentSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "Tìm mã yêu cầu, khách, công trình, kỹ thuật viên" : "依頼ID・顧客・工事名・技術者を検索")}" />
         <button class="request-search-btn" type="button" data-appointment-search>${escapeHtml(t("searchButton"))}</button>
-        <button class="btn btn-soft appointment-refresh-btn" type="button" data-appointment-refresh>${escapeHtml(t("refresh"))}</button>
+        <button class="primary-button appointment-create-inline" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo đề xuất lịch", "予約候補を作成"))}</button>
       </div>
       <div class="request-status-row appointment-status-row">
         ${renderAppointmentFilterChips()}
       </div>
-      <div class="table-wrap request-table-wrap">
-        <table class="data-table request-table">
-          <thead><tr><th>${escapeHtml(t("appointmentCode"))}</th><th>${escapeHtml(t("appointmentRequest"))}</th><th>${escapeHtml(t("customer"))}</th><th>${escapeHtml(t("appointmentProject"))}</th><th>${escapeHtml(t("appointmentDate"))}</th><th>${escapeHtml(t("appointmentTime"))}</th><th>${escapeHtml(t("technician"))}</th><th>${escapeHtml(t("status"))}</th><th>${escapeHtml(t("createdAt"))}</th><th>${escapeHtml(state.lang === "vi" ? "Người tạo" : "作成者")}</th><th>${escapeHtml(t("action"))}</th></tr></thead>
-          <tbody>${state.loading.appointments ? `<tr><td colspan="11">${escapeHtml(t("loading"))}</td></tr>` : filtered.length ? filtered.map(renderAppointmentRow).join("") : `<tr><td colspan="11">${showEmptyState(t("noData"))}</td></tr>`}</tbody>
-        </table>
+      <div class="appointment-card-list">
+        ${state.loading.appointments ? `<div class="empty-state">${escapeHtml(t("loading"))}</div>` : filtered.length ? filtered.map(renderAppointmentCard).join("") : showEmptyState(t("noData"))}
       </div>
     `;
   }
@@ -8949,9 +9022,11 @@
               ${infoItem(t("createdAt"), formatDateTime(item.createdAt))}
               <div class="info-item wide"><b>${escapeHtml(t("appointmentCustomerNote"))}</b><span>${escapeHtml(item.customerNote || "-")}</span></div>
             </div>
+            <div class="appointment-slot-list">
+              <b>${escapeHtml(appointmentText("Khung giờ đề xuất", "候補日時"))}</b>
+              ${appointmentSlots(item).map(slot => `<span class="${appointmentSelectedSlot(item)?.slotId === slot.slotId ? "is-selected" : ""}">${escapeHtml(appointmentSlotText(slot))}</span>`).join("") || `<em>${escapeHtml(t("noData"))}</em>`}
+            </div>
             <div class="request-edit-grid">
-              <label class="field"><span>${escapeHtml(t("appointmentDate"))}</span><input data-appointment-field="appointmentDate" value="${escapeHtml(appointmentDateText(item) || "")}"></label>
-              <label class="field"><span>${escapeHtml(t("appointmentTime"))}</span><input data-appointment-field="timeStart" value="${escapeHtml(item.timeStart || item.time || "")}"></label>
               <label class="field"><span>${escapeHtml(t("technician"))}</span><input data-appointment-field="technicianName" value="${escapeHtml(item.technicianName || item.technician || "")}"></label>
               <label class="field full"><span>${escapeHtml(t("appointmentAdminNote"))}</span><textarea data-appointment-field="adminNote">${escapeHtml(item.adminNote || "")}</textarea></label>
             </div>
@@ -8962,8 +9037,8 @@
           </section>
         </div>
         <footer class="request-detail-footer">
+          <button class="btn btn-soft" type="button" data-appointment-action="send" data-appointment-id="${escapeHtml(id)}">${escapeHtml(appointmentText("Gửi cho khách", "お客様へ送信"))}</button>
           <button class="btn btn-soft" type="button" data-appointment-action="confirmed" data-appointment-id="${escapeHtml(id)}">${escapeHtml(t("appointmentConfirm"))}</button>
-          <button class="btn btn-soft" type="button" data-appointment-action="rescheduled" data-appointment-id="${escapeHtml(id)}">${escapeHtml(t("appointmentReschedule"))}</button>
           <button class="btn btn-soft" type="button" data-appointment-action="completed" data-appointment-id="${escapeHtml(id)}">${escapeHtml(t("appointmentComplete"))}</button>
           <button class="ghost-button" type="button" data-close-appointment-detail>${escapeHtml(t("close"))}</button>
           <button class="primary-button" type="button" data-appointment-save="${escapeHtml(id)}">${escapeHtml(t("save"))}</button>
@@ -8972,6 +9047,96 @@
       </article>
     `;
     document.body.appendChild(overlay);
+  }
+
+  function renderAppointmentProposalModal(requestId = "") {
+    const overlay = document.createElement("div");
+    overlay.className = "request-detail-overlay";
+    overlay.id = "appointmentProposalOverlay";
+    const requestOptions = state.requests
+      .filter(request => !isSoftDeleted(request))
+      .map(request => {
+        const id = getRequestDisplayId(request) || getRowId(request);
+        const selected = requestId && (requestId === id || requestId === getRowId(request));
+        return `<option value="${escapeHtml(id || "")}" ${selected ? "selected" : ""}>${escapeHtml(id || "-")} - ${escapeHtml(request.title || getCustomerName(request) || "")}</option>`;
+      }).join("");
+    const staffOptions = state.staff.map(staff => `<option value="${escapeHtml(getRowId(staff) || staff.name || "")}">${escapeHtml(staff.name || "-")}</option>`).join("");
+    overlay.innerHTML = `
+      <article class="request-detail-modal appointment-proposal-modal" role="dialog" aria-modal="true">
+        <header class="request-detail-header">
+          <div>
+            <p class="eyebrow">${escapeHtml(appointmentText("LỊCH HẸN", "予約"))}</p>
+            <h2>${escapeHtml(appointmentText("Tạo đề xuất lịch", "予約候補を作成"))}</h2>
+            <p class="note">${escapeHtml(appointmentText("Chọn yêu cầu và nhập các khung giờ có thể hẹn khách.", "依頼を選択し、お客様に提示する候補日時を入力します。"))}</p>
+          </div>
+          <button class="close-button" type="button" data-close-appointment-proposal>&times;</button>
+        </header>
+        <div class="request-detail-body">
+          <section class="request-detail-info">
+            <div class="request-edit-grid">
+              <label class="field full"><span>${escapeHtml(t("appointmentRequest"))}</span><select data-proposal-field="requestId"><option value="">${escapeHtml(appointmentText("Chọn yêu cầu", "依頼を選択"))}</option>${requestOptions}</select></label>
+              <label class="field"><span>${escapeHtml(t("customer"))}</span><input data-proposal-preview="customer" readonly></label>
+              <label class="field"><span>${escapeHtml(t("phone"))}</span><input data-proposal-preview="phone" readonly></label>
+              <label class="field full"><span>${escapeHtml(t("address"))}</span><input data-proposal-preview="address" readonly></label>
+              <label class="field full"><span>${escapeHtml(appointmentText("Người phụ trách", "担当者"))}</span><select data-proposal-field="assigneeId"><option value="">${escapeHtml(t("assignee"))}</option>${staffOptions}</select></label>
+              <label class="field full"><span>${escapeHtml(appointmentText("Ghi chú gửi khách", "YAMADENからのメモ"))}</span><textarea data-proposal-field="customerNote" placeholder="${escapeHtml(appointmentText("Vui lòng chọn một trong các khung giờ bên dưới để YAMADEN đến kiểm tra.", "下記の候補日時からご都合のよい時間を選択してください。"))}"></textarea></label>
+            </div>
+            <h3>${escapeHtml(appointmentText("Khung giờ đề xuất", "候補日時"))}</h3>
+            <div class="appointment-slot-editor">
+              ${[0, 1, 2].map(index => `<div class="appointment-slot-edit" data-proposal-slot>
+                <b>${escapeHtml(appointmentText("Khung giờ", "候補"))} ${index + 1}</b>
+                <label><span>${escapeHtml(t("appointmentDate"))}</span><input type="date" data-slot-field="date"></label>
+                <label><span>${escapeHtml(appointmentText("Giờ bắt đầu", "開始時間"))}</span><input type="time" data-slot-field="startTime"></label>
+                <label><span>${escapeHtml(appointmentText("Giờ kết thúc", "終了時間"))}</span><input type="time" data-slot-field="endTime"></label>
+              </div>`).join("")}
+            </div>
+            <div class="form-error" data-proposal-error hidden></div>
+          </section>
+        </div>
+        <footer class="request-detail-footer">
+          <button class="ghost-button" type="button" data-close-appointment-proposal>${escapeHtml(t("cancel"))}</button>
+          <button class="btn btn-soft" type="button" data-save-appointment-proposal="draft">${escapeHtml(appointmentText("Lưu nháp", "下書き保存"))}</button>
+          <button class="primary-button" type="button" data-save-appointment-proposal="send">${escapeHtml(appointmentText("Gửi cho khách", "お客様へ送信"))}</button>
+        </footer>
+      </article>`;
+    document.body.appendChild(overlay);
+    updateAppointmentProposalPreview();
+  }
+
+  function updateAppointmentProposalPreview() {
+    const overlay = $("appointmentProposalOverlay");
+    if (!overlay) return;
+    const requestId = overlay.querySelector("[data-proposal-field='requestId']")?.value || "";
+    const request = state.requests.find(item => [getRowId(item), getRequestDisplayId(item), item.requestCode, item.requestId].map(String).includes(requestId));
+    const setValue = (name, value) => {
+      const field = overlay.querySelector(`[data-proposal-preview='${name}']`);
+      if (field) field.value = value || "";
+    };
+    setValue("customer", request ? getCustomerName(request) : "");
+    setValue("phone", request?.phone || request?.customerPhone || "");
+    setValue("address", request ? getRequestAddress(request) : "");
+  }
+
+  function collectAppointmentProposalPayload(sendNow = true) {
+    const overlay = $("appointmentProposalOverlay");
+    const requestId = overlay?.querySelector("[data-proposal-field='requestId']")?.value || "";
+    const assigneeId = overlay?.querySelector("[data-proposal-field='assigneeId']")?.value || "";
+    const staff = state.staff.find(item => String(getRowId(item) || item.name || "") === assigneeId);
+    const slots = Array.from(overlay?.querySelectorAll("[data-proposal-slot]") || []).map((row, index) => ({
+      slotId: `slot-${Date.now()}-${index + 1}`,
+      date: row.querySelector("[data-slot-field='date']")?.value || "",
+      startTime: row.querySelector("[data-slot-field='startTime']")?.value || "",
+      endTime: row.querySelector("[data-slot-field='endTime']")?.value || "",
+      status: "available"
+    })).filter(slot => slot.date && slot.startTime && slot.endTime);
+    return {
+      requestId,
+      assigneeId,
+      assigneeName: staff?.name || "",
+      customerNote: overlay?.querySelector("[data-proposal-field='customerNote']")?.value || "",
+      slots,
+      sendNow
+    };
   }
 
   function collectAppointmentPayload() {
@@ -9341,6 +9506,10 @@
         renderQuotes();
         return;
       }
+      if (event.target.closest("[data-proposal-field='requestId']")) {
+        updateAppointmentProposalPreview();
+        return;
+      }
       const select = event.target.closest("[data-request-status]");
       if (!select || $("drawer").classList.contains("open")) return;
       try {
@@ -9379,6 +9548,34 @@
         $("appointmentDetailOverlay")?.remove();
         return;
       }
+      if (event.target.closest("[data-close-appointment-proposal]") || event.target.id === "appointmentProposalOverlay") {
+        $("appointmentProposalOverlay")?.remove();
+        return;
+      }
+      const openAppointmentProposal = event.target.closest("[data-open-appointment-proposal]");
+      if (openAppointmentProposal) {
+        renderAppointmentProposalModal(openAppointmentProposal.dataset.openAppointmentProposal || "");
+        return;
+      }
+      const saveAppointmentProposal = event.target.closest("[data-save-appointment-proposal]");
+      if (saveAppointmentProposal) {
+        const sendNow = saveAppointmentProposal.dataset.saveAppointmentProposal !== "draft";
+        const payload = collectAppointmentProposalPayload(sendNow);
+        const errorBox = $("appointmentProposalOverlay")?.querySelector("[data-proposal-error]");
+        if (!payload.requestId || !payload.slots.length) {
+          if (errorBox) {
+            errorBox.hidden = false;
+            errorBox.textContent = appointmentText("Vui lòng chọn yêu cầu và nhập ít nhất 1 khung giờ.", "依頼を選択し、候補日時を1件以上入力してください。");
+          }
+          return;
+        }
+        const response = await AdminAPI.createAppointmentProposal(payload);
+        upsertAppointment(response);
+        $("appointmentProposalOverlay")?.remove();
+        renderAppointments();
+        toast(t("saved"));
+        return;
+      }
       const appointmentSearchButton = event.target.closest("[data-appointment-search]");
       if (appointmentSearchButton) {
         state.filters.appointmentSearch = $("appointmentSearch")?.value || "";
@@ -9403,6 +9600,25 @@
         renderAppointments();
         return;
       }
+      const appointmentActionButton = event.target.closest("[data-appointment-action]");
+      if (appointmentActionButton) {
+        const id = appointmentActionButton.dataset.appointmentId;
+        const action = appointmentActionButton.dataset.appointmentAction;
+        const payload = collectAppointmentPayload();
+        const api = action === "send"
+          ? AdminAPI.sendAppointment
+          : action === "confirmed"
+            ? AdminAPI.confirmAppointment
+            : action === "cancelled"
+              ? AdminAPI.cancelAppointment
+              : AdminAPI.completeAppointment;
+        const response = await api.call(AdminAPI, id, payload);
+        upsertAppointment(response);
+        $("appointmentDetailOverlay")?.remove();
+        renderAppointments();
+        toast(t("saved"));
+        return;
+      }
       const appointmentDetailButton = event.target.closest("[data-appointment-detail]");
       if (appointmentDetailButton) {
         const id = appointmentDetailButton.dataset.appointmentDetail;
@@ -9414,25 +9630,6 @@
       const appointmentSaveButton = event.target.closest("[data-appointment-save]");
       if (appointmentSaveButton) {
         const response = await AdminAPI.updateAppointment(appointmentSaveButton.dataset.appointmentSave, collectAppointmentPayload());
-        upsertAppointment(response);
-        $("appointmentDetailOverlay")?.remove();
-        renderCurrentView();
-        toast(t("saved"));
-        return;
-      }
-      const appointmentActionButton = event.target.closest("[data-appointment-action]");
-      if (appointmentActionButton) {
-        const id = appointmentActionButton.dataset.appointmentId;
-        const action = appointmentActionButton.dataset.appointmentAction;
-        const payload = collectAppointmentPayload();
-        const api = action === "confirmed"
-          ? AdminAPI.confirmAppointment
-          : action === "rescheduled"
-            ? AdminAPI.rescheduleAppointment
-            : action === "cancelled"
-              ? AdminAPI.cancelAppointment
-              : AdminAPI.completeAppointment;
-        const response = await api.call(AdminAPI, id, payload);
         upsertAppointment(response);
         $("appointmentDetailOverlay")?.remove();
         renderCurrentView();
