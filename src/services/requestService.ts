@@ -229,11 +229,11 @@ function backendTimeline(item: any, status: RequestStatus, createdAt: string): T
         id: String(event?.id || `tl-${eventStatus}-${event?.createdAt || Date.now()}`),
         type: eventStatus as TimelineEvent["type"],
         status: eventStatus as TimelineEvent["type"],
-        message: timelineMessageForStatus(eventStatus),
+        message: event?.message || timelineMessageForStatus(eventStatus),
         note: event?.note || "",
         actor: event?.actor || "",
         actorName: event?.actorName || "",
-        staffName: event?.staffName || "",
+        staffName: event?.staffName || event?.assigneeName || "",
         createdAt: event?.createdAt ? new Date(event.createdAt).toLocaleString() : createdAt
       };
     }));

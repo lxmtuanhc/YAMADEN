@@ -314,7 +314,7 @@ export function RequestDetailPage() {
         <div className="timeline request-timeline-list">
           {timelineItems.map(item => {
             const statusLabel = t(item.labelKey);
-            const note = visibleTimelineNote(item.note, statusLabel);
+            const note = visibleTimelineNote(item, statusLabel, language);
             return (
               <div className="timeline-item done request-timeline-item" key={item.id}>
                 <div className="timeline-dot request-timeline-dot">{null}</div>
@@ -332,7 +332,7 @@ export function RequestDetailPage() {
       <Card>
         <h2 className="section-title">{t("request.adminReplyTitle")}</h2>
         <div className="admin-reply-box">
-          {request.adminReply?.trim() || t("request.adminReplyEmpty")}
+          {localizedAdminReply(request.adminReply || "", timelineItems, language) || t("request.adminReplyEmpty")}
         </div>
       </Card>
 
@@ -372,6 +372,8 @@ type DetailTimelineItem = {
   createdAt: string;
   note: string;
   actorName: string;
+  message: string;
+  staffName: string;
 };
 
 type SafeAssignee = {
@@ -404,10 +406,12 @@ function requestTimelineItems(request: SupportRequest): DetailTimelineItem[] {
       return {
         id: event.id || `tl-${status}-${event.createdAt || request.createdAt}`,
         status,
-        labelKey: REQUEST_TIMELINE_MESSAGE_KEYS[status] || REQUEST_STATUS_LABEL_KEYS[status],
+        labelKey: timelineLabelKey(event.message, status),
         createdAt: event.createdAt || request.createdAt,
         note: event.note || "",
-        actorName: timelineActorName(event)
+        actorName: timelineActorName(event),
+        message: event.message || "",
+        staffName: event.staffName || ""
       };
     })
     .sort((left, right) => dateValue(left.createdAt) - dateValue(right.createdAt))
@@ -422,14 +426,24 @@ function requestTimelineItems(request: SupportRequest): DetailTimelineItem[] {
   if (!byStatus.has(currentStatus)) {
     byStatus.set(currentStatus, {
       id: `status-${currentStatus}`,
-      labelKey: REQUEST_TIMELINE_MESSAGE_KEYS[currentStatus] || REQUEST_STATUS_LABEL_KEYS[currentStatus],
+      labelKey: timelineLabelKey("", currentStatus),
       createdAt: request.createdAt,
       note: "",
-      actorName: ""
+      actorName: "",
+      message: "",
+      staffName: ""
     });
   }
 
   return Array.from(byStatus.values()).sort((left, right) => dateValue(left.createdAt) - dateValue(right.createdAt));
+}
+
+function timelineLabelKey(message: string | undefined, status: string): TranslationKey {
+  const key = String(message || "").trim();
+  if (key === "request.timelineQuoteApproved" || key === "request.timelineQuoteRevision") {
+    return key;
+  }
+  return REQUEST_TIMELINE_MESSAGE_KEYS[status as keyof typeof REQUEST_TIMELINE_MESSAGE_KEYS] || REQUEST_STATUS_LABEL_KEYS[status as keyof typeof REQUEST_STATUS_LABEL_KEYS];
 }
 
 function normalizeTimelineStatus(status: string, currentStatus?: string) {
@@ -485,13 +499,72 @@ function formatTimelineDate(value: string, language: "vi" | "ja") {
     : `${hour}:${minute}:${second} ${day}/${month}/${year}`;
 }
 
-function visibleTimelineNote(note: string, statusLabel: string) {
-  const value = note.trim();
+function visibleTimelineNote(item: DetailTimelineItem, statusLabel: string, language: "vi" | "ja") {
+  const assignment = assignmentNameFromTimeline(item);
+  if (assignment) return assignmentMessage(assignment, language);
+  const value = item.note.trim();
   if (!value) return "";
   const normalizedNote = value.toLowerCase();
   const normalizedStatus = statusLabel.trim().toLowerCase();
   if (normalizedNote === normalizedStatus) return "";
+  const localized = localizedLegacyTimelineMessage(value, language);
+  if (localized) return localized;
   return value;
+}
+
+function localizedAdminReply(reply: string, timelineItems: DetailTimelineItem[], language: "vi" | "ja") {
+  const assignment = assignmentNameFromLegacyText(reply) || timelineItems.map(assignmentNameFromTimeline).find(Boolean);
+  if (assignment) return assignmentMessage(assignment, language);
+  return localizedLegacyTimelineMessage(reply, language) || reply.trim();
+}
+
+function assignmentNameFromTimeline(item: DetailTimelineItem) {
+  return assignmentNameFromLegacyText(item.note) || assignmentNameFromLegacyText(item.message) || cleanText(item.staffName);
+}
+
+function assignmentNameFromLegacyText(value: string) {
+  const text = cleanText(value);
+  if (!text) return "";
+  const patterns = [
+    /^Phân công phụ trách\s*:\s*(.+)$/i,
+    /^Phân công phụ trách\s+(.+)$/i,
+    /^担当者を割り当てました[:：]\s*(.+)$/i,
+    /^assignment\.assigned[:：]?\s*(.*)$/i
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) return cleanText(match[1]);
+  }
+  return "";
+}
+
+function assignmentMessage(staffName: string, language: "vi" | "ja") {
+  return language === "ja"
+    ? `担当者を割り当てました：${staffName}`
+    : `Phân công phụ trách: ${staffName}`;
+}
+
+function localizedLegacyTimelineMessage(value: string, language: "vi" | "ja") {
+  const text = cleanText(value);
+  if (!text) return "";
+  const normalized = text.toLowerCase();
+  const messages: Record<string, { vi: string; ja: string }> = {
+    "đã gửi yêu cầu": { vi: "Đã gửi yêu cầu", ja: "依頼送信済み" },
+    "request.timelinesubmitted": { vi: "Đã gửi yêu cầu", ja: "依頼送信済み" },
+    "đã tiếp nhận": { vi: "Đã tiếp nhận", ja: "受付済み" },
+    "request.timelinereceived": { vi: "Đã tiếp nhận", ja: "受付済み" },
+    "chưa xử lý": { vi: "Chưa xử lý", ja: "未対応" },
+    "request.timelineuntreated": { vi: "Chưa xử lý", ja: "未対応" },
+    "đã gửi báo giá": { vi: "Đã gửi báo giá", ja: "見積送信済み" },
+    "request.timelinequoted": { vi: "Đã gửi báo giá", ja: "見積送信済み" },
+    "đã hoàn thành": { vi: "Đã hoàn thành", ja: "対応完了" },
+    "request.timelinecompleted": { vi: "Đã hoàn thành", ja: "対応完了" },
+    "khách yêu cầu chỉnh sửa báo giá": { vi: "Khách yêu cầu chỉnh sửa báo giá", ja: "見積修正依頼" },
+    "request.timelinequoterevision": { vi: "Khách yêu cầu chỉnh sửa báo giá", ja: "見積修正依頼" },
+    "khách đã chấp nhận báo giá": { vi: "Khách đã chấp nhận báo giá", ja: "見積承認済み" },
+    "request.timelinequoteapproved": { vi: "Khách đã chấp nhận báo giá", ja: "見積承認済み" }
+  };
+  return messages[normalized]?.[language] || "";
 }
 
 function requestAssignee(request: SupportRequest, profile?: StaffProfile | null): SafeAssignee | null {
