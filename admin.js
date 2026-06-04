@@ -3025,7 +3025,7 @@
           </section>
           <section class="request-detail-media">
             <div class="request-detail-section-head"><h3>${escapeHtml(t("relatedAppointments"))}</h3><span class="note">${relatedAppointments.length}</span></div>
-            ${relatedAppointments.length ? `<div class="mini-list">${relatedAppointments.slice(0, 3).map(item => `<button class="mini-list-item" type="button" data-appointment-detail="${escapeHtml(appointmentId(item))}"><div><strong>${escapeHtml(item.date || "-")} ${escapeHtml(appointmentTimeText(item) || "")}</strong><span>${escapeHtml(appointmentStatusLabel(item.status))} · ${escapeHtml(item.technicianName || item.technician || "-")}</span></div></button>`).join("")}</div>` : `<div class="empty-state">${escapeHtml(t("noData"))}</div>`}
+            ${relatedAppointments.length ? `<div class="mini-list">${relatedAppointments.slice(0, 3).map(item => `<button class="mini-list-item" type="button" data-appointment-detail="${escapeHtml(appointmentId(item))}"><div><strong>${escapeHtml(appointmentDateText(item) || "-")} ${escapeHtml(appointmentTimeText(item) || "")}</strong><span>${escapeHtml(appointmentStatusLabel(item.status))} · ${escapeHtml(item.technicianName || item.technician || "-")}</span></div></button>`).join("")}</div>` : `<div class="empty-state">${escapeHtml(t("noData"))}</div>`}
           </section>
         </div>
         <footer class="request-detail-footer">
@@ -8811,6 +8811,10 @@
     return String(item?.requestCode || item?.requestId || "");
   }
 
+  function appointmentDateText(item) {
+    return String(item?.appointmentDate || item?.date || "");
+  }
+
   function appointmentTimeText(item) {
     return String(item?.time || [item?.timeStart, item?.timeEnd].filter(Boolean).join(" - ") || item?.timeStart || "");
   }
@@ -8844,7 +8848,7 @@
       <td>${escapeHtml(appointmentRequestId(item) || "-")}</td>
       <td>${escapeHtml(item.customerName || "-")}</td>
       <td>${escapeHtml(item.projectName || item.address || "-")}</td>
-      <td>${escapeHtml(item.date || "-")}</td>
+      <td>${escapeHtml(appointmentDateText(item) || "-")}</td>
       <td>${escapeHtml(appointmentTimeText(item) || "-")}</td>
       <td>${escapeHtml(item.technicianName || item.technician || "-")}</td>
       <td><span class="status-badge status-${escapeHtml(normalizeAppointmentStatusValue(item.status))}">${escapeHtml(appointmentStatusLabel(item.status))}</span></td>
@@ -8901,7 +8905,7 @@
               ${infoItem(t("phone"), item.customerPhone)}
               ${infoItem(t("email"), item.customerEmail)}
               ${infoItem(t("appointmentProject"), item.projectName || item.address)}
-              ${infoItem(t("appointmentDate"), item.date)}
+              ${infoItem(t("appointmentDate"), appointmentDateText(item))}
               ${infoItem(t("appointmentTime"), appointmentTimeText(item))}
               ${infoItem(t("technician"), item.technicianName || item.technician)}
               ${infoItem(t("assignee"), item.assigneeName || "-")}
@@ -8910,7 +8914,7 @@
               <div class="info-item wide"><b>${escapeHtml(t("appointmentCustomerNote"))}</b><span>${escapeHtml(item.customerNote || "-")}</span></div>
             </div>
             <div class="request-edit-grid">
-              <label class="field"><span>${escapeHtml(t("appointmentDate"))}</span><input data-appointment-field="date" value="${escapeHtml(item.date || "")}"></label>
+              <label class="field"><span>${escapeHtml(t("appointmentDate"))}</span><input data-appointment-field="appointmentDate" value="${escapeHtml(appointmentDateText(item) || "")}"></label>
               <label class="field"><span>${escapeHtml(t("appointmentTime"))}</span><input data-appointment-field="timeStart" value="${escapeHtml(item.timeStart || item.time || "")}"></label>
               <label class="field"><span>${escapeHtml(t("technician"))}</span><input data-appointment-field="technicianName" value="${escapeHtml(item.technicianName || item.technician || "")}"></label>
               <label class="field full"><span>${escapeHtml(t("appointmentAdminNote"))}</span><textarea data-appointment-field="adminNote">${escapeHtml(item.adminNote || "")}</textarea></label>

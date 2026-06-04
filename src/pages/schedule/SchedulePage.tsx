@@ -97,7 +97,7 @@ export function SchedulePage() {
 
   async function submitSchedule(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!form.requestId || !form.date || !form.time || !form.technician || !form.projectName) {
+    if (!form.requestId || !form.date || !form.time || !form.projectName) {
       setError(t("common.required"));
       return;
     }

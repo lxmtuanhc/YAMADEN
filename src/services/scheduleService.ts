@@ -37,6 +37,7 @@ function normalizeStatus(status?: string): ScheduleStatus {
 
 function normalizeSchedule(schedule: Schedule): Schedule {
   const seed = scheduleSeedById.get(schedule.id);
+  const appointmentDate = schedule.appointmentDate || schedule.date || seed?.date || "";
   const time = schedule.time || [schedule.timeStart, schedule.timeEnd].filter(Boolean).join(" - ");
   return {
     ...schedule,
@@ -44,7 +45,8 @@ function normalizeSchedule(schedule: Schedule): Schedule {
     appointmentCode: schedule.appointmentCode || schedule.id,
     requestId: schedule.requestId || seed?.requestId || "",
     requestCode: schedule.requestCode || "",
-    date: schedule.date || seed?.date || "",
+    appointmentDate,
+    date: appointmentDate,
     time: time || seed?.time || "",
     timeStart: schedule.timeStart || schedule.time || seed?.time || "",
     timeEnd: schedule.timeEnd || "",
@@ -56,6 +58,7 @@ function normalizeSchedule(schedule: Schedule): Schedule {
 }
 
 function scheduleFromBackend(item: any): Schedule {
+  const appointmentDate = item.appointmentDate || item.date || "";
   return normalizeSchedule({
     id: String(item.id || item.appointmentCode || item._id || ""),
     appointmentCode: item.appointmentCode || item.id || "",
@@ -66,7 +69,8 @@ function scheduleFromBackend(item: any): Schedule {
     customerEmail: item.customerEmail || "",
     projectName: item.projectName || item.address || "",
     address: item.address || "",
-    date: item.date || "",
+    appointmentDate,
+    date: appointmentDate,
     time: item.time || [item.timeStart, item.timeEnd].filter(Boolean).join(" - "),
     timeStart: item.timeStart || item.time || "",
     timeEnd: item.timeEnd || "",
@@ -117,7 +121,9 @@ async function createBackendSchedule(input: CreateScheduleInput): Promise<Schedu
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       requestId: input.requestId,
+      appointmentDate: input.date,
       date: input.date,
+      appointmentTime: input.time,
       time: input.time,
       technicianName: input.technician,
       projectName: input.projectName,

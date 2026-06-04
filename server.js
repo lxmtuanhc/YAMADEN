@@ -1095,6 +1095,7 @@ const AppointmentSchema = new mongoose.Schema({
   customerEmail: String,
   projectName: String,
   address: String,
+  appointmentDate: String,
   date: String,
   timeStart: String,
   timeEnd: String,
@@ -2081,11 +2082,11 @@ function normalizeAppointmentStatus(value) {
 
 async function generateAppointmentCode() {
   for (let attempt = 0; attempt < 8; attempt += 1) {
-    const code = "AP-" + new Date().getFullYear() + "-" + String(Math.floor(1000 + Math.random() * 9000));
+    const code = "APT-" + String(Math.floor(10000 + Math.random() * 90000));
     const exists = await Appointment.exists({ appointmentCode: code });
     if (!exists) return code;
   }
-  return "AP-" + Date.now();
+  return "APT-" + String(Date.now()).slice(-5);
 }
 
 function appointmentIdQuery(id) {
@@ -2103,10 +2104,13 @@ function appointmentIdQuery(id) {
 
 function appointmentPublic(item) {
   const data = typeof item?.toObject === "function" ? item.toObject() : { ...(item || {}) };
+  const appointmentDate = data.appointmentDate || data.date || "";
   return {
     ...data,
     id: String(data.id || data.appointmentCode || data._id || ""),
     appointmentCode: data.appointmentCode || data.id || "",
+    appointmentDate,
+    date: appointmentDate,
     status: normalizeAppointmentStatus(data.status),
     technician: data.technicianName || data.technician || "",
     time: [data.timeStart, data.timeEnd].filter(Boolean).join(" - "),
@@ -3230,10 +3234,10 @@ app.post("/api/appointments", requireUser, async (req, res) => {
     if (!requestId) return res.status(400).json({ message: "Request is required" });
     const request = await Request.findOne(customerItemQuery(requestId, req.user.userId));
     if (!request) return res.status(404).json({ message: "Request not found" });
-    const date = String(req.body?.date || "").trim();
-    const time = String(req.body?.time || req.body?.timeStart || "").trim();
+    const appointmentDate = String(req.body?.appointmentDate || req.body?.date || "").trim();
+    const time = String(req.body?.appointmentTime || req.body?.time || req.body?.timeStart || "").trim();
     const projectName = String(req.body?.projectName || request.projectName || request.address || request.title || "").trim();
-    if (!date || !time || !projectName) return res.status(400).json({ message: "Appointment date, time and project are required" });
+    if (!appointmentDate || !time || !projectName) return res.status(400).json({ message: "Appointment date, time and project are required" });
     const user = await User.findById(req.user.userId).lean().catch(() => null);
     const code = await generateAppointmentCode();
     const appointment = new Appointment({
@@ -3244,10 +3248,11 @@ app.post("/api/appointments", requireUser, async (req, res) => {
       customerId: String(req.user.userId),
       customerName: request.name || user?.name || "",
       customerPhone: request.phone || user?.phone || "",
-      customerEmail: request.email || user?.email || "",
+      customerEmail: user?.email || request.email || "",
       projectName,
       address: req.body?.address || request.address || "",
-      date,
+      appointmentDate,
+      date: appointmentDate,
       timeStart: time,
       timeEnd: String(req.body?.timeEnd || "").trim(),
       technicianName: String(req.body?.technician || req.body?.technicianName || "").trim(),
@@ -5220,7 +5225,7 @@ app.get("/api/admin/appointments", requireAdmin, async (req, res) => {
         { technicianName: new RegExp(search, "i") }
       ];
     }
-    const items = await Appointment.find(query).sort({ date: 1, timeStart: 1, createdAt: -1 });
+    const items = await Appointment.find(query).sort({ appointmentDate: 1, date: 1, timeStart: 1, createdAt: -1 });
     res.set("Cache-Control", "no-store");
     res.json({ data: items.map(appointmentPublic) });
   } catch (error) {
@@ -5243,8 +5248,12 @@ async function updateAppointmentByAdmin(req, res, actionStatus = "") {
     const item = await Appointment.findOne(appointmentIdQuery(req.params.id));
     if (!item) return res.status(404).json({ message: "Not found" });
     const previousStatus = item.status;
-    if (req.body?.date !== undefined) item.date = String(req.body.date || "").trim();
-    if (req.body?.time !== undefined) item.timeStart = String(req.body.time || "").trim();
+    if (req.body?.appointmentDate !== undefined || req.body?.date !== undefined) {
+      const appointmentDate = String(req.body.appointmentDate || req.body.date || "").trim();
+      item.appointmentDate = appointmentDate;
+      item.date = appointmentDate;
+    }
+    if (req.body?.appointmentTime !== undefined || req.body?.time !== undefined) item.timeStart = String(req.body.appointmentTime || req.body.time || "").trim();
     if (req.body?.timeStart !== undefined) item.timeStart = String(req.body.timeStart || "").trim();
     if (req.body?.timeEnd !== undefined) item.timeEnd = String(req.body.timeEnd || "").trim();
     if (req.body?.technicianName !== undefined || req.body?.technician !== undefined) item.technicianName = String(req.body.technicianName || req.body.technician || "").trim();

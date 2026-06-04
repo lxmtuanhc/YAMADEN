@@ -338,6 +338,7 @@ export interface Schedule {
   customerName?: string;
   customerPhone?: string;
   customerEmail?: string;
+  appointmentDate?: string;
   date: string;
   time: string;
   timeStart?: string;
