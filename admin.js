@@ -6679,19 +6679,18 @@
     const staffCount = state.staff.filter(staff => String(staff.status || "active") !== "deleted" && !staff.deletedAt).length;
     const mappedStaff = state.staff.filter(staff => staffDepartmentCodeForStaff(staff) || toList(staff.workTypeIds).length || toList(staff.workTags).length || compactText(staff.skills, "")).length;
     return [
-      staffWorkSummaryCard("users", t("department"), t("departmentsCardDesc"), t("inUse"), "is-live", [[t("totalDepartments"), departments.length], [t("currentlyUsed"), departments.filter(item => item.active !== false).length]], departments.map(workMasterLabel), "staffWork:" + t("department")),
-      staffWorkSummaryCard("clipboard", t("workTypes"), t("workTypesDesc"), types.length ? t("inUse") : t("linkLater"), types.length ? "is-live" : "is-planned", [[t("workTypes"), types.length], [t("workMasterLinked"), types.length ? settingText("Đã liên kết", "\u9023\u643a\u6e08\u307f") : "-"]], types.map(workMasterLabel), "staffWork:" + t("workTypes")),
-      staffWorkSummaryCard("palette", settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText(`Danh mục kỹ năng dùng cho staff và ${getLocalizedLabel("aiAssignmentSupport", "vi")}.`, "\u30b9\u30bf\u30c3\u30d5\u3068AI\u30de\u30c3\u30c1\u30f3\u30b0\u7528\u306e\u30b9\u30ad\u30eb\u4e00\u89a7\u3067\u3059\u3002"), skills.length ? t("inUse") : t("prepareLater"), skills.length ? "is-live" : "is-planned", [[settingText("T\u1ed5ng k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u6570"), skills.length], [settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), skills.length ? t("inUse") : t("prepareLater")]], skills.map(workMasterLabel), "staffWork:" + settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb")),
-      staffWorkSummaryCard("shield", getLocalizedLabel("staffMapping"), settingText("Li\u00ean k\u1ebft staff v\u1edbi b\u1ed9 ph\u1eadn, n\u1ed9i dung c\u00f4ng vi\u1ec7c, k\u1ef9 n\u0103ng.", "\u30b9\u30bf\u30c3\u30d5\u3092\u90e8\u9580\u30fb\u696d\u52d9\u5185\u5bb9\u30fb\u30b9\u30ad\u30eb\u3068\u7d10\u3065\u3051\u307e\u3059\u3002"), mappedStaff ? t("inUse") : t("linkLater"), mappedStaff ? "is-live" : "is-planned", [[t("staffCount"), staffCount], [getLocalizedLabel("linked"), mappedStaff]], [], "staffWork:" + getLocalizedLabel("staffMapping"))
+      settingsOverviewMetricCard("users", t("department"), t("departmentsCardDesc"), t("inUse"), "is-live", [[t("totalDepartments"), departments.length], [t("currentlyUsed"), departments.filter(item => item.active !== false).length]], "staffWork:" + t("department")),
+      settingsOverviewMetricCard("clipboard", t("workTypes"), t("workTypesDesc"), types.length ? t("inUse") : t("linkLater"), types.length ? "is-live" : "is-planned", [[t("workTypes"), types.length], [t("workMasterLinked"), types.length ? getLocalizedLabel("linked") : "-"]], "staffWork:" + t("workTypes")),
+      settingsOverviewMetricCard("palette", settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText(`Danh mục kỹ năng dùng cho staff và ${getLocalizedLabel("aiAssignmentSupport", "vi")}.`, "\u30b9\u30bf\u30c3\u30d5\u3068AI\u30de\u30c3\u30c1\u30f3\u30b0\u7528\u306e\u30b9\u30ad\u30eb\u4e00\u89a7\u3067\u3059\u3002"), skills.length ? t("inUse") : t("prepareLater"), skills.length ? "is-live" : "is-planned", [[settingText("T\u1ed5ng k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u6570"), skills.length], [settingText("Tr\u1ea1ng th\u00e1i", "\u30b9\u30c6\u30fc\u30bf\u30b9"), skills.length ? t("inUse") : t("prepareLater")]], "staffWork:" + settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb")),
+      settingsOverviewMetricCard("shield", getLocalizedLabel("staffMapping"), settingText("Li\u00ean k\u1ebft staff v\u1edbi b\u1ed9 ph\u1eadn, n\u1ed9i dung c\u00f4ng vi\u1ec7c, k\u1ef9 n\u0103ng.", "\u30b9\u30bf\u30c3\u30d5\u3092\u90e8\u9580\u30fb\u696d\u52d9\u5185\u5bb9\u30fb\u30b9\u30ad\u30eb\u3068\u7d10\u3065\u3051\u307e\u3059\u3002"), mappedStaff ? t("inUse") : t("linkLater"), mappedStaff ? "is-live" : "is-planned", [[t("staffCount"), staffCount], [getLocalizedLabel("linked"), mappedStaff]], "staffWork:" + getLocalizedLabel("staffMapping"))
     ].join("");
   }
 
-  function staffWorkSummaryCard(icon, title, description, status, tone, metrics, chips, detailKey) {
+  function settingsOverviewMetricCard(icon, title, description, status, tone, metrics, detailKey) {
     const stats = `<div class="settings-summary-stats">
       ${(metrics || []).slice(0, 2).map(([label, value]) => `<span><b>${escapeHtml(value)}</b><small>${escapeHtml(label)}</small></span>`).join("")}
     </div>`;
-    const chipHtml = (chips || []).length ? `<div class="settings-summary-chips">${settingsChips(chips || [])}</div>` : `<div class="settings-summary-chips is-empty"></div>`;
-    return settingsSummaryCard({ detailKey, icon, title, status, tone, description, summary: stats + chipHtml });
+    return settingsSummaryCard({ detailKey, icon, title, status, tone, description, summary: stats });
   }
 
   function renderSettingsAiAssist() {
@@ -6709,40 +6708,23 @@
     const aiDataLinked = activeDepartments.length > 0 || activeWorkTypes.length > 0 || mappedStaff.length > 0;
     const aiDataStatus = aiDataLinked ? settingText("Đã liên kết", "\u9023\u643a\u6e08\u307f") : t("linkLater");
     const aiDataTone = aiDataLinked ? "is-live" : "is-planned";
-    const aiLines = [
-      `${settingText("Phân tích yêu cầu", "依頼分析")}: ${aiSettings.aiRequestAnalysisEnabled ? "ON" : "OFF"}`,
-      `${settingText("Gợi ý độ khẩn", "緊急度提案")}: ${aiSettings.aiSuggestUrgencyEnabled ? "ON" : "OFF"}`,
-      `${settingText("Gợi ý người phụ trách", "担当者提案")}: ${aiSettings.aiSuggestAssigneeEnabled ? "ON" : "OFF"}`,
-      `${settingText("Gợi ý hạn xử lý", "期限提案")}: ${aiSettings.aiSuggestDueDateEnabled ? "ON" : "OFF"}`,
-      `${settingText("Tự điền form", "フォーム自動入力")}: ${aiSettings.aiAutoFillProcessingFormEnabled ? "ON" : "OFF"}`
+    const aiFeatureFlags = [
+      aiSettings.aiRequestAnalysisEnabled,
+      aiSettings.aiSuggestUrgencyEnabled,
+      aiSettings.aiSuggestAssigneeEnabled,
+      aiSettings.aiSuggestDueDateEnabled,
+      aiSettings.aiAutoFillProcessingFormEnabled
     ];
-    const aiWorkTypes = ["electricalWork", "quote", "inspection", "drawingCheck", "other"].map(getLocalizedLabel);
-    const skills = ["electricalWork", "lighting", "distributionBoard", "siteSurvey", "quoteCreation", "drawingCheck"].map(getLocalizedLabel);
-    const ruleRows = [
-      ["\u30b9\u30ad\u30eb / K\u1ef9 n\u0103ng", "40%"],
-      ["\u90e8\u9580 / B\u1ed9 ph\u1eadn", "15%"],
-      ["\u30a8\u30ea\u30a2 / Khu v\u1ef1c", "15%"],
-      [settingText("Kh\u1ed1i l\u01b0\u1ee3ng c\u00f4ng vi\u1ec7c", "\u7a3c\u50cd\u72b6\u6cc1"), "15%"],
-      [settingText("L\u1ecbch s\u1eed x\u1eed l\u00fd", "\u5bfe\u5fdc\u5c65\u6b74"), "10%"],
-      [settingText("Kh\u1ea9n c\u1ea5p", "\u7dca\u6025\u5ea6"), "5%"]
-    ];
+    const enabledAiFeatures = aiFeatureFlags.filter(Boolean).length;
     return [
-      settingsSummaryCard({
-        detailKey: "overview:aiSettings",
-        icon: "sparkles",
-        title: getLocalizedLabel("aiSettings"),
-        status: aiStatus,
-        tone: aiStatusTone,
-        description: settingText("Bật/tắt từng chức năng AI dùng trong phân tích yêu cầu và form xử lý.", "依頼分析と処理フォームで使うAI機能を個別に切り替えます。"),
-        summary: settingsSummaryRows(aiLines, { mode: "toggle" })
-      }),
-      settingCard("sparkles", getLocalizedLabel("aiOverview"), settingText("AI h\u1ed7 tr\u1ee3 ph\u00e2n t\u00edch y\u00eau c\u1ea7u, ph\u00e2n lo\u1ea1i n\u1ed9i b\u1ed9 v\u00e0 g\u1ee3i \u00fd ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch ban \u0111\u1ea7u. Admin v\u1eabn quy\u1ebft \u0111\u1ecbnh cu\u1ed1i c\u00f9ng.", "AI\u306f\u4f9d\u983c\u3092\u5206\u6790\u3057\u3001\u5185\u90e8\u5206\u985e\u3068\u521d\u671f\u62c5\u5f53\u8005\u3092\u63d0\u6848\u3057\u307e\u3059\u3002\u6700\u7d42\u5224\u65ad\u306f\u7ba1\u7406\u8005\u304c\u884c\u3044\u307e\u3059\u3002"), aiStatus, aiStatusTone),
-      settingCard("users", getLocalizedLabel("aiDepartmentData"), [settingText(`Liên kết với bộ phận, nội dung công việc và ${getLocalizedLabel("staffMapping", "vi")}`, "\u90e8\u9580\u30fb\u696d\u52d9\u5185\u5bb9\u30fb\u30b9\u30bf\u30c3\u30d5\u9023\u643a\u3068\u9023\u643a"), t("departments") + ": " + activeDepartments.length, t("workTypes") + ": " + activeWorkTypes.length, getLocalizedLabel("staffMapping") + ": " + mappedStaff.length], aiDataStatus, aiDataTone, settingsButton(settingText("C\u1ea5u h\u00ecnh b\u1ed9 ph\u1eadn", "\u90e8\u9580\u8a2d\u5b9a"))),
-      settingCard("clipboard", getLocalizedLabel("workCategory"), "", t("prepareLater"), "is-planned", `${settingsChips(aiWorkTypes)}${settingsButton(settingText("Th\u00eam lo\u1ea1i c\u00f4ng vi\u1ec7c", "\u4f5c\u696d\u7a2e\u5225\u3092\u8ffd\u52a0"))}`),
-      settingCard("palette", settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), "", t("prepareLater"), "is-planned", `${settingsChips(skills)}${settingsButton(settingText("Th\u00eam k\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb\u3092\u8ffd\u52a0"))}`),
-      settingCard("shield", settingText("Lu\u1eadt ph\u00e2n c\u00f4ng", "\u5272\u308a\u5f53\u3066\u30eb\u30fc\u30eb"), "", t("prepareLater"), "is-planned", `${settingsTable([settingText("Y\u1ebfu t\u1ed1", "\u8981\u7d20"), settingText("Tr\u1ecdng s\u1ed1", "\u91cd\u307f")], ruleRows.map(row => [escapeHtml(row[0]), escapeHtml(row[1])]))}<div class="settings-thresholds"><span>${escapeHtml(settingText("T\u1ef1 g\u00e1n", "\u81ea\u52d5\u5272\u5f53"))}: <b>85%</b></span><span>${escapeHtml(settingText("Ch\u1ec9 g\u1ee3i \u00fd", "\u63d0\u6848\u306e\u307f"))}: <b>60%</b></span></div>${settingsButton(settingText("Ch\u1ec9nh lu\u1eadt ph\u00e2n c\u00f4ng", "\u5272\u308a\u5f53\u3066\u30eb\u30fc\u30eb\u8abf\u6574"))}`),
-      settingCard("database", settingText("Y\u00eau c\u1ea7u ch\u01b0a ph\u00e2n lo\u1ea1i", "\u672a\u5206\u985e\u4f9d\u983c"), "", t("prepareLater"), "is-planned", settingsTable(["ID", settingText("Ti\u00eau \u0111\u1ec1", "\u30bf\u30a4\u30c8\u30eb"), "AI confidence", settingText("L\u00fd do", "\u7406\u7531"), settingText("Thao t\u00e1c", "\u64cd\u4f5c")], [], settingText("Hi\u1ec7n ch\u01b0a c\u00f3 y\u00eau c\u1ea7u ch\u01b0a ph\u00e2n lo\u1ea1i.", "\u73fe\u5728\u3001\u672a\u5206\u985e\u306e\u4f9d\u983c\u306f\u3042\u308a\u307e\u305b\u3093\u3002"))),
-      settingCard("database", settingText("L\u1ecbch s\u1eed AI \u0111\u1ec1 xu\u1ea5t", "AI\u63d0\u6848\u5c65\u6b74"), "", t("prepareLater"), "is-planned", settingsTable(["Request ID", settingText("AI \u0111\u1ec1 xu\u1ea5t", "AI\u63d0\u6848"), settingText("Ng\u01b0\u1eddi ph\u1ee5 tr\u00e1ch cu\u1ed1i", "\u6700\u7d42\u62c5\u5f53\u8005"), "Confidence", settingText("Admin c\u00f3 \u0111\u1ed5i kh\u00f4ng", "\u7ba1\u7406\u8005\u5909\u66f4"), settingText("Ng\u00e0y t\u1ea1o", "\u4f5c\u6210\u65e5")], [], t("noData")))
+      settingsOverviewMetricCard("sparkles", getLocalizedLabel("aiSettings"), settingText("Bật/tắt các chức năng AI dùng trong phân tích yêu cầu.", "依頼分析で使うAI機能を切り替えます。"), aiStatus, aiStatusTone, [[settingText("Tính năng AI", "AI機能"), `${enabledAiFeatures}/${aiFeatureFlags.length}`], [settingText("Tự điền form", "フォーム自動入力"), aiSettings.aiAutoFillProcessingFormEnabled ? "ON" : "OFF"]], "overview:aiSettings"),
+      settingsOverviewMetricCard("sparkles", getLocalizedLabel("aiOverview"), settingText("AI hỗ trợ phân tích yêu cầu và gợi ý người phụ trách.", "AIが依頼分析と担当者提案を支援します。"), aiStatus, aiStatusTone, [[settingText("Phân tích", "分析"), aiSettings.aiRequestAnalysisEnabled ? "ON" : "OFF"], [settingText("Gợi ý phụ trách", "担当者提案"), aiSettings.aiSuggestAssigneeEnabled ? "ON" : "OFF"]], "aiAssist:" + getLocalizedLabel("aiOverview")),
+      settingsOverviewMetricCard("users", getLocalizedLabel("aiDepartmentData"), settingText(`Liên kết bộ phận, nội dung công việc và ${getLocalizedLabel("staffMapping", "vi")}.`, "\u90e8\u9580\u30fb\u696d\u52d9\u5185\u5bb9\u30fb\u30b9\u30bf\u30c3\u30d5\u9023\u643a\u3092\u5229\u7528\u3057\u307e\u3059\u3002"), aiDataStatus, aiDataTone, [[t("departments"), activeDepartments.length], [getLocalizedLabel("staffMapping"), mappedStaff.length]], "aiAssist:" + getLocalizedLabel("aiDepartmentData")),
+      settingsOverviewMetricCard("clipboard", getLocalizedLabel("workCategory"), settingText("Loại công việc dùng cho phân loại và gợi ý AI.", "\u5206\u985e\u3068AI\u63d0\u6848\u306b\u4f7f\u3046\u4f5c\u696d\u7a2e\u5225\u3067\u3059\u3002"), t("prepareLater"), "is-planned", [[getLocalizedLabel("workCategory"), 5], [settingText("Trạng thái", "\u30b9\u30c6\u30fc\u30bf\u30b9"), t("prepareLater")]], "aiAssist:" + getLocalizedLabel("workCategory")),
+      settingsOverviewMetricCard("palette", settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb"), settingText("Kỹ năng sẽ dùng thêm khi dữ liệu sẵn sàng.", "\u30c7\u30fc\u30bf\u6e96\u5099\u5f8c\u306b\u30b9\u30ad\u30eb\u3092\u5229\u7528\u3057\u307e\u3059\u3002"), t("prepareLater"), "is-planned", [[settingText("Kỹ năng mẫu", "\u30b5\u30f3\u30d7\u30eb\u30b9\u30ad\u30eb"), 6], [settingText("Trạng thái", "\u30b9\u30c6\u30fc\u30bf\u30b9"), t("prepareLater")]], "aiAssist:" + settingText("K\u1ef9 n\u0103ng", "\u30b9\u30ad\u30eb")),
+      settingsOverviewMetricCard("shield", settingText("Lu\u1eadt ph\u00e2n c\u00f4ng", "\u5272\u308a\u5f53\u3066\u30eb\u30fc\u30eb"), settingText("Ngưỡng và trọng số cho gợi ý phân công.", "\u5272\u308a\u5f53\u3066\u63d0\u6848\u306e\u91cd\u307f\u3068\u95be\u5024\u3067\u3059\u3002"), t("prepareLater"), "is-planned", [[settingText("Tự gán", "\u81ea\u52d5\u5272\u5f53"), "85%"], [settingText("Chỉ gợi ý", "\u63d0\u6848\u306e\u307f"), "60%"]], "aiAssist:" + settingText("Lu\u1eadt ph\u00e2n c\u00f4ng", "\u5272\u308a\u5f53\u3066\u30eb\u30fc\u30eb")),
+      settingsOverviewMetricCard("database", settingText("Y\u00eau c\u1ea7u ch\u01b0a ph\u00e2n lo\u1ea1i", "\u672a\u5206\u985e\u4f9d\u983c"), settingText("Theo dõi yêu cầu cần kiểm tra phân loại AI.", "\u5206\u985e\u78ba\u8a8d\u304c\u5fc5\u8981\u306a\u4f9d\u983c\u3092\u78ba\u8a8d\u3057\u307e\u3059\u3002"), t("prepareLater"), "is-planned", [["Request", 0], ["AI confidence", "-"]], "aiAssist:" + settingText("Y\u00eau c\u1ea7u ch\u01b0a ph\u00e2n lo\u1ea1i", "\u672a\u5206\u985e\u4f9d\u983c")),
+      settingsOverviewMetricCard("database", settingText("L\u1ecbch s\u1eed AI \u0111\u1ec1 xu\u1ea5t", "AI\u63d0\u6848\u5c65\u6b74"), settingText("Lưu lịch sử gợi ý AI và quyết định của admin.", "AI\u63d0\u6848\u3068\u7ba1\u7406\u8005\u5224\u65ad\u306e\u5c65\u6b74\u3067\u3059\u3002"), t("prepareLater"), "is-planned", [[settingText("Lịch sử", "\u5c65\u6b74"), 0], ["Confidence", "-"]], "aiAssist:" + settingText("L\u1ecbch s\u1eed AI \u0111\u1ec1 xu\u1ea5t", "AI\u63d0\u6848\u5c65\u6b74"))
     ].join("");
   }
 
