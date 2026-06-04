@@ -18,6 +18,7 @@
       customers: "顧客管理",
       staff: "スタッフ管理",
       quotes: "見積・提案",
+      appointments: "予約",
       notifications: "通知",
       settings: "設定",
       search: "検索...",
@@ -108,6 +109,7 @@
       customers: "Quản lý khách hàng",
       staff: "Quản lý staff",
       quotes: "Báo giá",
+      appointments: "Lịch hẹn",
       notifications: "Thông báo",
       settings: "Cài đặt",
       search: "Tìm kiếm...",
@@ -253,6 +255,27 @@
     customers: "\u9867\u5ba2\u7ba1\u7406",
     staff: "\u30b9\u30bf\u30c3\u30d5\u7ba1\u7406",
     quotes: "\u898b\u7a4d\u30fb\u63d0\u6848",
+    appointments: "\u4e88\u7d04",
+    appointmentSubtitle: "\u9867\u5ba2\u304c\u4f5c\u6210\u3057\u305f\u4e88\u7d04\u3092\u78ba\u8a8d\u30fb\u5909\u66f4\u30fb\u7ba1\u7406\u3057\u307e\u3059\u3002",
+    appointmentCode: "\u4e88\u7d04ID",
+    appointmentRequest: "\u4f9d\u983cID",
+    appointmentProject: "\u5de5\u4e8b\u540d",
+    appointmentDate: "\u4e88\u7d04\u65e5",
+    appointmentTime: "\u4e88\u7d04\u6642\u9593",
+    technician: "\u6280\u8853\u8005",
+    appointmentPending: "\u78ba\u8a8d\u5f85\u3061",
+    appointmentConfirmed: "\u78ba\u5b9a",
+    appointmentRescheduled: "\u65e5\u7a0b\u5909\u66f4",
+    appointmentCompleted: "\u5b8c\u4e86",
+    appointmentCancelled: "\u30ad\u30e3\u30f3\u30bb\u30eb",
+    appointmentConfirm: "\u4e88\u7d04\u3092\u78ba\u5b9a",
+    appointmentReschedule: "\u65e5\u7a0b\u5909\u66f4",
+    appointmentCancel: "\u30ad\u30e3\u30f3\u30bb\u30eb",
+    appointmentComplete: "\u5b8c\u4e86",
+    appointmentDetail: "\u4e88\u7d04\u8a73\u7d30",
+    appointmentCustomerNote: "\u9867\u5ba2\u30e1\u30e2",
+    appointmentAdminNote: "\u7ba1\u7406\u8005\u30e1\u30e2",
+    relatedAppointments: "\u95a2\u9023\u4e88\u7d04",
     notifications: "\u901a\u77e5",
     settings: "\u8a2d\u5b9a",
     search: "\u691c\u7d22...",
@@ -315,6 +338,27 @@
     customers: "Qu\u1ea3n l\u00fd kh\u00e1ch h\u00e0ng",
     staff: "Qu\u1ea3n l\u00fd staff",
     quotes: "B\u00e1o gi\u00e1",
+    appointments: "L\u1ecbch h\u1eb9n",
+    appointmentSubtitle: "Qu\u1ea3n l\u00fd l\u1ecbch h\u1eb9n kh\u00e1ch t\u1ea1o trong app.",
+    appointmentCode: "M\u00e3 l\u1ecbch h\u1eb9n",
+    appointmentRequest: "M\u00e3 y\u00eau c\u1ea7u",
+    appointmentProject: "C\u00f4ng tr\u00ecnh",
+    appointmentDate: "Ng\u00e0y h\u1eb9n",
+    appointmentTime: "Gi\u1edd h\u1eb9n",
+    technician: "K\u1ef9 thu\u1eadt vi\u00ean",
+    appointmentPending: "Ch\u1edd x\u00e1c nh\u1eadn",
+    appointmentConfirmed: "\u0110\u00e3 x\u00e1c nh\u1eadn",
+    appointmentRescheduled: "\u0110\u1ed5i l\u1ecbch",
+    appointmentCompleted: "Ho\u00e0n th\u00e0nh",
+    appointmentCancelled: "\u0110\u00e3 h\u1ee7y",
+    appointmentConfirm: "X\u00e1c nh\u1eadn l\u1ecbch",
+    appointmentReschedule: "\u0110\u1ed5i l\u1ecbch",
+    appointmentCancel: "H\u1ee7y l\u1ecbch",
+    appointmentComplete: "Ho\u00e0n th\u00e0nh",
+    appointmentDetail: "Chi ti\u1ebft l\u1ecbch h\u1eb9n",
+    appointmentCustomerNote: "Ghi ch\u00fa kh\u00e1ch",
+    appointmentAdminNote: "Ghi ch\u00fa admin",
+    relatedAppointments: "L\u1ecbch h\u1eb9n li\u00ean quan",
     notifications: "Th\u00f4ng b\u00e1o",
     settings: "C\u00e0i \u0111\u1eb7t",
     search: "T\u00ecm ki\u1ebfm...",
@@ -1006,6 +1050,7 @@
     ["customers", "customers", "◉"],
     ["staff", "staff", "♙"],
     ["quotes", "quotes", "▣"],
+    ["appointments", "appointments", "◷"],
     ["notifications", "notifications", "⌁"],
     ["trash", "trash", "♻"],
     ["settings", "settings", "⚙"]
@@ -1531,6 +1576,7 @@
     users: [],
     staff: [],
     quotes: [],
+    appointments: [],
     workMaster: { departments: [], workGroups: [], workTypes: [], skills: [] },
     selectedRequest: null,
     selectedUser: null,
@@ -1545,6 +1591,7 @@
       users: false,
       staff: false,
       quotes: false,
+      appointments: false,
       workMaster: false
     },
     filters: {
@@ -1558,7 +1605,9 @@
       requestViewMode: "table",
       trashCategory: "customers",
       trashSubcategory: "all",
-      trashSearch: ""
+      trashSearch: "",
+      appointmentStatus: "all",
+      appointmentSearch: ""
     },
     settingsTab: "overview",
     overviewSettings: null,
@@ -1669,6 +1718,35 @@
     },
     restoreQuote(id) {
       return requestJson("/admin/quotes/" + encodeURIComponent(id) + "/restore", { method: "PATCH" });
+    },
+    getAppointments(params) {
+      const query = new URLSearchParams();
+      Object.entries(params || {}).forEach(([key, value]) => {
+        if (value != null && value !== "" && value !== "all") query.set(key, value);
+      });
+      return requestJson("/api/admin/appointments" + (query.toString() ? "?" + query.toString() : ""));
+    },
+    getAppointment(id) {
+      return requestJson("/api/admin/appointments/" + encodeURIComponent(id));
+    },
+    updateAppointment(id, payload) {
+      return requestJson("/api/admin/appointments/" + encodeURIComponent(id), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload || {})
+      });
+    },
+    confirmAppointment(id, payload) {
+      return requestJson("/api/admin/appointments/" + encodeURIComponent(id) + "/confirm", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
+    },
+    rescheduleAppointment(id, payload) {
+      return requestJson("/api/admin/appointments/" + encodeURIComponent(id) + "/reschedule", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
+    },
+    cancelAppointment(id, payload) {
+      return requestJson("/api/admin/appointments/" + encodeURIComponent(id) + "/cancel", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
+    },
+    completeAppointment(id, payload) {
+      return requestJson("/api/admin/appointments/" + encodeURIComponent(id) + "/complete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
     },
     async getUsers() {
       try {
@@ -2265,6 +2343,7 @@
       customers: `<svg ${attrs}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
       staff: `<svg ${attrs}><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10"/><path d="M8 13h3"/><path d="M8 17h8"/></svg>`,
       quotes: `<svg ${attrs}><path d="M7 3h10a2 2 0 0 1 2 2v16l-3-2-3 2-3-2-3 2-2-1.33V5a2 2 0 0 1 2-2z"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>`,
+      appointments: `<svg ${attrs}><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/><path d="M8 14h4M8 18h7"/></svg>`,
       notifications: `<svg ${attrs}><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>`,
       trash: `<svg ${attrs}><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 15H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>`,
       settings: `<svg ${attrs}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a7.8 7.8 0 0 0 .1-1l2-1.2-2-3.5-2.3 1a7.6 7.6 0 0 0-1.7-1L15.2 7h-4.4l-.3 2.3a7.6 7.6 0 0 0-1.7 1l-2.3-1-2 3.5 2 1.2a7.8 7.8 0 0 0 .1 2l-2 1.2 2 3.5 2.3-1a7.6 7.6 0 0 0 1.7 1l.3 2.3h4.4l.3-2.3a7.6 7.6 0 0 0 1.7-1l2.3 1 2-3.5-2.2-1.2z"/></svg>`
@@ -2279,6 +2358,7 @@
       customers: "\u9867\u5ba2\u7ba1\u7406",
       staff: "\u30b9\u30bf\u30c3\u30d5\u7ba1\u7406",
       quotes: "\u898b\u7a4d\u30fb\u63d0\u6848",
+      appointments: "\u4e88\u7d04",
       notifications: "\u901a\u77e5",
       trash: "\u30b4\u30df\u7bb1",
       settings: "\u8a2d\u5b9a"
@@ -2289,6 +2369,7 @@
       customers: "Kh\u00e1ch h\u00e0ng",
       staff: "Staff",
       quotes: "B\u00e1o gi\u00e1",
+      appointments: "L\u1ecbch h\u1eb9n",
       notifications: "Th\u00f4ng b\u00e1o",
       trash: "Th\u00f9ng r\u00e1c",
       settings: "C\u00e0i \u0111\u1eb7t"
@@ -2302,11 +2383,13 @@
     state.loading.staff = true;
     state.errors = {};
     state.loading.quotes = true;
-    const [requests, users, staff, quotes, workMaster, overviewSettings] = await Promise.allSettled([
+    state.loading.appointments = true;
+    const [requests, users, staff, quotes, appointments, workMaster, overviewSettings] = await Promise.allSettled([
       AdminAPI.getRequests(),
       AdminAPI.getUsers(),
       AdminAPI.getStaff(),
       AdminAPI.getQuotes(),
+      AdminAPI.getAppointments({}),
       AdminAPI.getWorkMaster(),
       AdminAPI.getOverviewSettings()
     ]);
@@ -2314,6 +2397,7 @@
     state.users = users.status === "fulfilled" ? normalizeList(users.value) : [];
     state.staff = staff.status === "fulfilled" ? normalizeList(staff.value) : [];
     state.quotes = quotes.status === "fulfilled" ? normalizeList(quotes.value) : [];
+    state.appointments = appointments.status === "fulfilled" ? normalizeList(appointments.value) : [];
     state.workMaster = workMaster.status === "fulfilled" ? normalizeWorkMaster(workMaster.value) : { departments: [], workGroups: [], workTypes: [], skills: [] };
     if (overviewSettings.status === "fulfilled") {
       state.overviewSettings = normalizeOverviewSettings(overviewSettings.value?.settings || overviewSettings.value);
@@ -2326,12 +2410,14 @@
     state.errors.users = users.status === "rejected" ? users.reason?.message || "failed" : "";
     state.errors.staff = staff.status === "rejected" ? staff.reason?.message || "failed" : "";
     state.errors.quotes = quotes.status === "rejected" ? quotes.reason?.message || "failed" : "";
+    state.errors.appointments = appointments.status === "rejected" ? appointments.reason?.message || "failed" : "";
     state.errors.workMaster = workMaster.status === "rejected" ? workMaster.reason?.message || "failed" : "";
     state.errors.overviewSettings = overviewSettings.status === "rejected" ? overviewSettings.reason?.message || "failed" : "";
     state.loading.requests = false;
     state.loading.users = false;
     state.loading.staff = false;
     state.loading.quotes = false;
+    state.loading.appointments = false;
   }
 
   function normalizeList(payload) {
@@ -2426,6 +2512,7 @@
       customers: renderCustomers,
       staff: renderStaff,
       quotes: renderQuotes,
+      appointments: renderAppointments,
       trash: renderTrash,
       notifications: renderNotifications,
       settings: renderSettings
@@ -2866,6 +2953,10 @@
   function renderRequestDetail(request) {
     const id = getRowId(request);
     const media = normalizeRequestMedia(request);
+    const relatedAppointments = state.appointments.filter(item => {
+      const keys = [item.requestId, item.requestCode].map(value => String(value || ""));
+      return keys.includes(String(id)) || keys.includes(String(request.requestCode || "")) || keys.includes(String(request.id || ""));
+    });
     const timeline = Array.isArray(request.timeline) ? request.timeline : [];
     const assignmentCandidates = getAssignmentCandidates(request);
     const editUrgency = requestEditUrgencyValue(request);
@@ -2931,6 +3022,10 @@
           <section class="request-detail-media">
             <div class="request-detail-section-head"><h3>${escapeHtml(t("media"))}</h3><span class="note">${media.length}</span></div>
             ${media.length ? `<div class="request-media-grid">${media.map(renderRequestMediaItem).join("")}</div>` : `<div class="empty-state">${escapeHtml(t("noMediaDetail"))}</div>`}
+          </section>
+          <section class="request-detail-media">
+            <div class="request-detail-section-head"><h3>${escapeHtml(t("relatedAppointments"))}</h3><span class="note">${relatedAppointments.length}</span></div>
+            ${relatedAppointments.length ? `<div class="mini-list">${relatedAppointments.slice(0, 3).map(item => `<button class="mini-list-item" type="button" data-appointment-detail="${escapeHtml(appointmentId(item))}"><div><strong>${escapeHtml(item.date || "-")} ${escapeHtml(appointmentTimeText(item) || "")}</strong><span>${escapeHtml(appointmentStatusLabel(item.status))} · ${escapeHtml(item.technicianName || item.technician || "-")}</span></div></button>`).join("")}</div>` : `<div class="empty-state">${escapeHtml(t("noData"))}</div>`}
           </section>
         </div>
         <footer class="request-detail-footer">
@@ -8690,6 +8785,171 @@
     applyStaffTagFilter();
   }
 
+  function appointmentStatusLabel(status) {
+    const labels = {
+      pending: t("appointmentPending"),
+      confirmed: t("appointmentConfirmed"),
+      rescheduled: t("appointmentRescheduled"),
+      completed: t("appointmentCompleted"),
+      cancelled: t("appointmentCancelled")
+    };
+    return labels[normalizeAppointmentStatusValue(status)] || labels.pending;
+  }
+
+  function normalizeAppointmentStatusValue(status) {
+    const value = String(status || "").trim().toLowerCase();
+    if (["pending", "confirmed", "rescheduled", "completed", "cancelled"].includes(value)) return value;
+    if (value === "upcoming") return "pending";
+    return "pending";
+  }
+
+  function appointmentId(item) {
+    return String(item?.id || item?.appointmentCode || item?._id || "");
+  }
+
+  function appointmentRequestId(item) {
+    return String(item?.requestCode || item?.requestId || "");
+  }
+
+  function appointmentTimeText(item) {
+    return String(item?.time || [item?.timeStart, item?.timeEnd].filter(Boolean).join(" - ") || item?.timeStart || "");
+  }
+
+  function filterAppointments(items) {
+    const status = state.filters.appointmentStatus || "all";
+    const search = String(state.filters.appointmentSearch || "").toLowerCase().trim();
+    return (items || []).filter(item => {
+      const statusOk = status === "all" || normalizeAppointmentStatusValue(item.status) === status;
+      const text = [
+        item.appointmentCode,
+        item.id,
+        item.requestCode,
+        item.requestId,
+        item.customerName,
+        item.customerPhone,
+        item.customerEmail,
+        item.projectName,
+        item.address,
+        item.technicianName,
+        item.technician
+      ].join(" ").toLowerCase();
+      return statusOk && (!search || text.includes(search));
+    });
+  }
+
+  function renderAppointmentRow(item) {
+    const id = appointmentId(item);
+    return `<tr>
+      <td><strong>${escapeHtml(item.appointmentCode || id)}</strong></td>
+      <td>${escapeHtml(appointmentRequestId(item) || "-")}</td>
+      <td>${escapeHtml(item.customerName || "-")}</td>
+      <td>${escapeHtml(item.projectName || item.address || "-")}</td>
+      <td>${escapeHtml(item.date || "-")}</td>
+      <td>${escapeHtml(appointmentTimeText(item) || "-")}</td>
+      <td>${escapeHtml(item.technicianName || item.technician || "-")}</td>
+      <td><span class="status-badge status-${escapeHtml(normalizeAppointmentStatusValue(item.status))}">${escapeHtml(appointmentStatusLabel(item.status))}</span></td>
+      <td>${escapeHtml(formatDateTime(item.createdAt))}</td>
+      <td>${escapeHtml(item.createdBy || "-")}</td>
+      <td><button class="btn btn-soft" type="button" data-appointment-detail="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button></td>
+    </tr>`;
+  }
+
+  function renderAppointments() {
+    const filtered = filterAppointments(state.appointments);
+    $("viewRoot").innerHTML = `
+      <div class="page-intro"><p>${escapeHtml(t("appointmentSubtitle"))}</p></div>
+      <div class="request-filter-bar">
+        <input id="appointmentSearch" class="request-search-input" value="${escapeHtml(state.filters.appointmentSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "Tìm mã yêu cầu, khách, công trình, kỹ thuật viên" : "依頼ID・顧客・工事名・技術者を検索")}" />
+        <select class="request-filter-select" data-appointment-status>
+          ${["all", "pending", "confirmed", "rescheduled", "completed", "cancelled"].map(status => `<option value="${escapeHtml(status)}" ${state.filters.appointmentStatus === status ? "selected" : ""}>${escapeHtml(status === "all" ? t("all") : appointmentStatusLabel(status))}</option>`).join("")}
+        </select>
+        <button class="request-search-btn" type="button" data-appointment-search>${escapeHtml(t("searchButton"))}</button>
+      </div>
+      <div class="table-wrap request-table-wrap">
+        <table class="data-table request-table">
+          <thead><tr><th>${escapeHtml(t("appointmentCode"))}</th><th>${escapeHtml(t("appointmentRequest"))}</th><th>${escapeHtml(t("customer"))}</th><th>${escapeHtml(t("appointmentProject"))}</th><th>${escapeHtml(t("appointmentDate"))}</th><th>${escapeHtml(t("appointmentTime"))}</th><th>${escapeHtml(t("technician"))}</th><th>${escapeHtml(t("status"))}</th><th>${escapeHtml(t("createdAt"))}</th><th>${escapeHtml(state.lang === "vi" ? "Người tạo" : "作成者")}</th><th>${escapeHtml(t("action"))}</th></tr></thead>
+          <tbody>${state.loading.appointments ? `<tr><td colspan="11">${escapeHtml(t("loading"))}</td></tr>` : filtered.length ? filtered.map(renderAppointmentRow).join("") : `<tr><td colspan="11">${showEmptyState(t("noData"))}</td></tr>`}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function renderAppointmentDetail(item) {
+    const id = appointmentId(item);
+    const overlay = document.createElement("div");
+    overlay.className = "request-detail-overlay";
+    overlay.id = "appointmentDetailOverlay";
+    overlay.innerHTML = `
+      <article class="request-detail-modal appointment-detail-modal" role="dialog" aria-modal="true">
+        <header class="request-detail-header">
+          <div>
+            <p class="eyebrow">${escapeHtml(t("appointmentDetail"))}</p>
+            <h2>${escapeHtml(item.appointmentCode || id)}</h2>
+            <p class="note">${escapeHtml(appointmentRequestId(item) || "-")} · ${escapeHtml(item.customerName || "-")}</p>
+          </div>
+          <div class="request-detail-header-actions">
+            <span class="status-badge status-${escapeHtml(normalizeAppointmentStatusValue(item.status))}">${escapeHtml(appointmentStatusLabel(item.status))}</span>
+            <button class="close-button" type="button" data-close-appointment-detail>&times;</button>
+          </div>
+        </header>
+        <div class="request-detail-body">
+          <section class="request-detail-info">
+            <div class="request-info-grid">
+              ${infoItem(t("appointmentCode"), item.appointmentCode || id)}
+              ${infoItem(t("appointmentRequest"), appointmentRequestId(item))}
+              ${infoItem(t("customer"), item.customerName)}
+              ${infoItem(t("phone"), item.customerPhone)}
+              ${infoItem(t("email"), item.customerEmail)}
+              ${infoItem(t("appointmentProject"), item.projectName || item.address)}
+              ${infoItem(t("appointmentDate"), item.date)}
+              ${infoItem(t("appointmentTime"), appointmentTimeText(item))}
+              ${infoItem(t("technician"), item.technicianName || item.technician)}
+              ${infoItem(t("assignee"), item.assigneeName || "-")}
+              ${infoItem(t("status"), appointmentStatusLabel(item.status))}
+              ${infoItem(t("createdAt"), formatDateTime(item.createdAt))}
+              <div class="info-item wide"><b>${escapeHtml(t("appointmentCustomerNote"))}</b><span>${escapeHtml(item.customerNote || "-")}</span></div>
+            </div>
+            <div class="request-edit-grid">
+              <label class="field"><span>${escapeHtml(t("appointmentDate"))}</span><input data-appointment-field="date" value="${escapeHtml(item.date || "")}"></label>
+              <label class="field"><span>${escapeHtml(t("appointmentTime"))}</span><input data-appointment-field="timeStart" value="${escapeHtml(item.timeStart || item.time || "")}"></label>
+              <label class="field"><span>${escapeHtml(t("technician"))}</span><input data-appointment-field="technicianName" value="${escapeHtml(item.technicianName || item.technician || "")}"></label>
+              <label class="field full"><span>${escapeHtml(t("appointmentAdminNote"))}</span><textarea data-appointment-field="adminNote">${escapeHtml(item.adminNote || "")}</textarea></label>
+            </div>
+            <section>
+              <h3>${escapeHtml(t("timeline"))}</h3>
+              <div class="timeline">${Array.isArray(item.history) && item.history.length ? item.history.map(history => `<div class="timeline-item"><strong>${escapeHtml(history.type || "-")}</strong><div class="subtext">${escapeHtml(formatDate(history.createdAt))}</div><div>${escapeHtml(history.message || "")}</div></div>`).join("") : emptyHtml()}</div>
+            </section>
+          </section>
+        </div>
+        <footer class="request-detail-footer">
+          <button class="btn btn-soft" type="button" data-appointment-action="confirmed" data-appointment-id="${escapeHtml(id)}">${escapeHtml(t("appointmentConfirm"))}</button>
+          <button class="btn btn-soft" type="button" data-appointment-action="rescheduled" data-appointment-id="${escapeHtml(id)}">${escapeHtml(t("appointmentReschedule"))}</button>
+          <button class="btn btn-soft" type="button" data-appointment-action="completed" data-appointment-id="${escapeHtml(id)}">${escapeHtml(t("appointmentComplete"))}</button>
+          <button class="ghost-button" type="button" data-close-appointment-detail>${escapeHtml(t("close"))}</button>
+          <button class="primary-button" type="button" data-appointment-save="${escapeHtml(id)}">${escapeHtml(t("save"))}</button>
+          <button class="btn btn-danger" type="button" data-appointment-action="cancelled" data-appointment-id="${escapeHtml(id)}">${escapeHtml(t("appointmentCancel"))}</button>
+        </footer>
+      </article>
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  function collectAppointmentPayload() {
+    const payload = {};
+    document.querySelectorAll("[data-appointment-field]").forEach(field => {
+      payload[field.dataset.appointmentField] = field.value || "";
+    });
+    return payload;
+  }
+
+  function upsertAppointment(item) {
+    const normalized = item?.data || item;
+    const id = appointmentId(normalized);
+    state.appointments = state.appointments.some(existing => appointmentId(existing) === id)
+      ? state.appointments.map(existing => appointmentId(existing) === id ? normalized : existing)
+      : [normalized, ...state.appointments];
+  }
+
   function bindEvents() {
     console.log("[admin-v2] binding events");
     const savedSidebarState = localStorage.getItem("adminV2SidebarCollapsed");
@@ -9041,6 +9301,12 @@
         renderQuotes();
         return;
       }
+      const appointmentStatus = event.target.closest("[data-appointment-status]");
+      if (appointmentStatus) {
+        state.filters.appointmentStatus = appointmentStatus.value || "all";
+        renderAppointments();
+        return;
+      }
       const select = event.target.closest("[data-request-status]");
       if (!select || $("drawer").classList.contains("open")) return;
       try {
@@ -9075,6 +9341,56 @@
 
     bind(document, "click", async event => {
       if (event.defaultPrevented) return;
+      if (event.target.closest("[data-close-appointment-detail]") || event.target.id === "appointmentDetailOverlay") {
+        $("appointmentDetailOverlay")?.remove();
+        return;
+      }
+      const appointmentSearchButton = event.target.closest("[data-appointment-search]");
+      if (appointmentSearchButton) {
+        state.filters.appointmentSearch = $("appointmentSearch")?.value || "";
+        state.appointments = normalizeList(await AdminAPI.getAppointments({
+          status: state.filters.appointmentStatus,
+          search: state.filters.appointmentSearch
+        }));
+        renderAppointments();
+        return;
+      }
+      const appointmentDetailButton = event.target.closest("[data-appointment-detail]");
+      if (appointmentDetailButton) {
+        const id = appointmentDetailButton.dataset.appointmentDetail;
+        let item = state.appointments.find(appointment => appointmentId(appointment) === id);
+        if (!item) item = (await AdminAPI.getAppointment(id)).data;
+        renderAppointmentDetail(item);
+        return;
+      }
+      const appointmentSaveButton = event.target.closest("[data-appointment-save]");
+      if (appointmentSaveButton) {
+        const response = await AdminAPI.updateAppointment(appointmentSaveButton.dataset.appointmentSave, collectAppointmentPayload());
+        upsertAppointment(response);
+        $("appointmentDetailOverlay")?.remove();
+        renderCurrentView();
+        toast(t("saved"));
+        return;
+      }
+      const appointmentActionButton = event.target.closest("[data-appointment-action]");
+      if (appointmentActionButton) {
+        const id = appointmentActionButton.dataset.appointmentId;
+        const action = appointmentActionButton.dataset.appointmentAction;
+        const payload = collectAppointmentPayload();
+        const api = action === "confirmed"
+          ? AdminAPI.confirmAppointment
+          : action === "rescheduled"
+            ? AdminAPI.rescheduleAppointment
+            : action === "cancelled"
+              ? AdminAPI.cancelAppointment
+              : AdminAPI.completeAppointment;
+        const response = await api.call(AdminAPI, id, payload);
+        upsertAppointment(response);
+        $("appointmentDetailOverlay")?.remove();
+        renderCurrentView();
+        toast(t("saved"));
+        return;
+      }
       const trashCategoryButton = event.target.closest("[data-trash-category]");
       if (trashCategoryButton && state.currentView === "trash") {
         event.preventDefault();
@@ -9701,6 +10017,10 @@
       }
       if (event.target.id === "requestSearch") {
         state.filters.search = event.target.value || "";
+      }
+      if (event.target.id === "appointmentSearch") {
+        state.filters.appointmentSearch = event.target.value || "";
+        renderAppointments();
       }
       const customerFilter = event.target.closest("[data-customer-filter]");
       if (customerFilter) {

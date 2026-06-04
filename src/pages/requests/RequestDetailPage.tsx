@@ -19,6 +19,7 @@ import { groupQuotesByRequest } from "../../utils/quoteFiles";
 import { formatRequestFileSize, normalizeRequestFiles, requestFileKind, requestFileName, requestFileUrl } from "../../utils/requestFiles";
 import { categoryOptions } from "./requestHelpers";
 import { REQUEST_STATUS_LABEL_KEYS, REQUEST_TIMELINE_MESSAGE_KEYS } from "../../constants/requestStatus";
+import { SCHEDULE_STATUS_LABEL_KEYS } from "../../constants/scheduleStatus";
 
 export function RequestDetailPage() {
   const { id } = useParams();
@@ -308,7 +309,7 @@ export function RequestDetailPage() {
               <div className="info-grid" key={schedule.id}>
                 <div className="list-row">
                   <span className="list-id">{schedule.id}</span>
-                  <StatusBadge status={schedule.status} />
+                  <span className={`status-badge status-${schedule.status}`}>{t(SCHEDULE_STATUS_LABEL_KEYS[schedule.status])}</span>
                 </div>
                 <InfoRow label={t("schedule.date")} value={schedule.date} />
                 <InfoRow label={t("schedule.time")} value={schedule.time} />

@@ -8,7 +8,6 @@ import { Card } from "../../components/ui/Card";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { ErrorState } from "../../components/ui/ErrorState";
 import { LoadingState } from "../../components/ui/LoadingState";
-import { StatusBadge } from "../../components/ui/StatusBadge";
 import { SCHEDULE_FILTERS, SCHEDULE_STATUS_LABEL_KEYS, SCHEDULE_STATUSES } from "../../constants/scheduleStatus";
 import { useTranslation } from "../../hooks/useTranslation";
 import { requestService } from "../../services/requestService";
@@ -32,7 +31,7 @@ const emptyForm: ScheduleForm = {
   time: "",
   technician: "",
   projectName: "",
-  status: "upcoming"
+  status: "pending"
 };
 
 export function SchedulePage() {
@@ -232,7 +231,7 @@ export function SchedulePage() {
               <Card key={schedule.id}>
                 <div className="list-row">
                   <span className="list-id">{schedule.id}</span>
-                  <StatusBadge status={schedule.status} />
+                  <ScheduleStatusBadge status={schedule.status} />
                 </div>
                 <div className="info-grid">
                   <InfoRow label={t("request.id")} value={schedule.requestId} />
@@ -245,7 +244,7 @@ export function SchedulePage() {
                   <Button type="button" variant="outline" icon={<Edit3 size={16} />} onClick={() => startEdit(schedule)}>
                     {t("schedule.edit")}
                   </Button>
-                  {schedule.status === "upcoming" ? (
+                  {(schedule.status === "pending" || schedule.status === "confirmed" || schedule.status === "rescheduled" || schedule.status === "upcoming") ? (
                     <Button
                       type="button"
                       variant="outline"
@@ -290,4 +289,9 @@ function InfoRow({ label, value }: { label: string; value: string }) {
       <strong>{value}</strong>
     </div>
   );
+}
+
+function ScheduleStatusBadge({ status }: { status: ScheduleStatus }) {
+  const { t } = useTranslation();
+  return <span className={`status-badge status-${status}`}>{t(SCHEDULE_STATUS_LABEL_KEYS[status])}</span>;
 }

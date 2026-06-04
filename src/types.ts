@@ -35,7 +35,7 @@ export type QuoteStatus =
   | "rejected"
   | "expired";
 
-export type ScheduleStatus = "upcoming" | "in_progress" | "completed" | "cancelled";
+export type ScheduleStatus = "pending" | "confirmed" | "rescheduled" | "upcoming" | "in_progress" | "completed" | "cancelled";
 
 export interface User {
   id: string;
@@ -332,10 +332,26 @@ export interface Quote {
 
 export interface Schedule {
   id: string;
+  appointmentCode?: string;
   requestId: string;
+  requestCode?: string;
+  customerName?: string;
+  customerPhone?: string;
+  customerEmail?: string;
   date: string;
   time: string;
+  timeStart?: string;
+  timeEnd?: string;
   technician: string;
+  technicianName?: string;
+  technicianId?: string;
   projectName: string;
+  address?: string;
   status: ScheduleStatus;
+  customerNote?: string;
+  adminNote?: string;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  history?: Array<{ type?: string; message?: string; actor?: string; createdAt?: string }>;
 }

@@ -418,6 +418,27 @@ function notifyAdminEmail(kind, payload = {}) {
           ].join("\n")
         });
       }
+      if (kind === "appointment_created") {
+        return sendEventMail({
+          to: ADMIN_NOTIFICATION_EMAIL,
+          subject: `【YAMADEN】新しい予約が作成されました（${context.requestNo}）`,
+          text: [
+            "新しい予約が作成されました。",
+            "",
+            `依頼ID: ${mailValue(context.requestNo)}`,
+            `予約ID: ${mailValue(payload.appointment?.appointmentCode || payload.appointment?.id)}`,
+            `お客様名: ${mailValue(context.customerName)}`,
+            `電話番号: ${mailValue(context.phone)}`,
+            `メール: ${mailValue(context.customerEmail)}`,
+            `工事名: ${mailValue(payload.appointment?.projectName || context.title)}`,
+            `予約日: ${mailValue(payload.appointment?.date)}`,
+            `予約時間: ${mailValue(payload.appointment?.timeStart || payload.appointment?.time)}`,
+            `お客様メモ: ${mailValue(payload.appointment?.customerNote)}`,
+            "",
+            "管理画面で予約を確認してください。"
+          ].join("\n")
+        });
+      }
       return false;
     })
     .then(result => {
@@ -614,6 +635,29 @@ function notifyCustomerEmail(kind, payload = {}) {
             `完了日時: ${formatMailDate(payload.request?.completedAt || new Date())}`,
             "",
             "詳細はアプリの依頼詳細画面からご確認ください。"
+          ].join("\n")
+        });
+      }
+      if (["appointment_confirmed", "appointment_rescheduled", "appointment_cancelled"].includes(kind)) {
+        const label = kind === "appointment_confirmed"
+          ? "予約が確定しました。"
+          : kind === "appointment_rescheduled"
+            ? "予約日時が変更されました。"
+            : "予約がキャンセルされました。";
+        return sendEventMail({
+          to,
+          subject: `【YAMADEN】${label.replace("。", "")}（${context.requestNo}）`,
+          text: [
+            label,
+            "",
+            `依頼ID: ${mailValue(context.requestNo)}`,
+            `工事名: ${mailValue(payload.appointment?.projectName || context.title)}`,
+            `予約日: ${mailValue(payload.appointment?.date)}`,
+            `予約時間: ${mailValue(payload.appointment?.timeStart || payload.appointment?.time)}`,
+            `技術者: ${mailValue(payload.appointment?.technicianName || payload.appointment?.technician)}`,
+            `管理者メモ: ${mailValue(payload.adminNote || payload.appointment?.adminNote)}`,
+            "",
+            "アプリで予約の詳細をご確認ください。"
           ].join("\n")
         });
       }
@@ -1033,6 +1077,38 @@ const SkillSchema = new mongoose.Schema({
   updatedAt: Date
 });
 
+const AppointmentHistorySchema = new mongoose.Schema({
+  type: String,
+  message: String,
+  actor: String,
+  createdAt: { type: Date, default: Date.now }
+}, { _id: false });
+
+const AppointmentSchema = new mongoose.Schema({
+  id: { type: String, index: true },
+  appointmentCode: { type: String, index: true },
+  requestId: { type: String, index: true },
+  requestCode: { type: String, index: true },
+  customerId: { type: String, index: true },
+  customerName: String,
+  customerPhone: String,
+  customerEmail: String,
+  projectName: String,
+  address: String,
+  date: String,
+  timeStart: String,
+  timeEnd: String,
+  technicianName: String,
+  technicianId: String,
+  status: { type: String, default: "pending", index: true },
+  customerNote: String,
+  adminNote: String,
+  createdBy: { type: String, default: "customer" },
+  history: [AppointmentHistorySchema],
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
 const Request = mongoose.model("Request", RequestSchema);
 const Quote = mongoose.model("Quote", QuoteSchema);
 const User = mongoose.model("User", UserSchema);
@@ -1041,6 +1117,7 @@ const Department = mongoose.model("Department", DepartmentSchema);
 const WorkGroup = mongoose.model("WorkGroup", WorkGroupSchema);
 const WorkType = mongoose.model("WorkType", WorkTypeSchema);
 const Skill = mongoose.model("Skill", SkillSchema);
+const Appointment = mongoose.model("Appointment", AppointmentSchema);
 const AppSetting = mongoose.model("AppSetting", AppSettingSchema);
 
 const DEFAULT_OVERVIEW_SETTINGS = Object.freeze({
@@ -1991,6 +2068,57 @@ async function ensureRequestCode(item) {
   item.requestCode = code;
   item.requestId = code;
   return code;
+}
+
+function normalizeAppointmentStatus(value) {
+  const status = String(value || "").trim().toLowerCase();
+  if (["pending", "confirmed", "rescheduled", "completed", "cancelled"].includes(status)) return status;
+  if (status === "upcoming") return "pending";
+  if (status === "in_progress") return "confirmed";
+  if (status === "canceled") return "cancelled";
+  return "pending";
+}
+
+async function generateAppointmentCode() {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const code = "AP-" + new Date().getFullYear() + "-" + String(Math.floor(1000 + Math.random() * 9000));
+    const exists = await Appointment.exists({ appointmentCode: code });
+    if (!exists) return code;
+  }
+  return "AP-" + Date.now();
+}
+
+function appointmentIdQuery(id) {
+  const query = {
+    $or: [
+      { id },
+      { appointmentCode: id },
+      { requestId: id },
+      { requestCode: id }
+    ]
+  };
+  if (mongoose.Types.ObjectId.isValid(id)) query.$or.push({ _id: id });
+  return query;
+}
+
+function appointmentPublic(item) {
+  const data = typeof item?.toObject === "function" ? item.toObject() : { ...(item || {}) };
+  return {
+    ...data,
+    id: String(data.id || data.appointmentCode || data._id || ""),
+    appointmentCode: data.appointmentCode || data.id || "",
+    status: normalizeAppointmentStatus(data.status),
+    technician: data.technicianName || data.technician || "",
+    time: [data.timeStart, data.timeEnd].filter(Boolean).join(" - "),
+    createdAt: data.createdAt,
+    updatedAt: data.updatedAt
+  };
+}
+
+function pushAppointmentHistory(item, type, message, actor = "admin") {
+  item.history = Array.isArray(item.history) ? item.history : [];
+  item.history.push({ type, message, actor, createdAt: new Date() });
+  item.updatedAt = new Date();
 }
 
 function uploadMediaToCloudinary(fileBuffer, resourceType = "auto") {
@@ -3093,6 +3221,67 @@ app.delete("/api/customer/requests/:id/permanent", requireUser, async (req, res)
     res.json({ data: { success: true }, message: "Permanently deleted" });
   } catch (error) {
     res.status(500).json({ message: "Permanent delete failed", error: error.message });
+  }
+});
+
+app.post("/api/appointments", requireUser, async (req, res) => {
+  try {
+    const requestId = String(req.body?.requestId || req.body?.requestCode || "").trim();
+    if (!requestId) return res.status(400).json({ message: "Request is required" });
+    const request = await Request.findOne(customerItemQuery(requestId, req.user.userId));
+    if (!request) return res.status(404).json({ message: "Request not found" });
+    const date = String(req.body?.date || "").trim();
+    const time = String(req.body?.time || req.body?.timeStart || "").trim();
+    const projectName = String(req.body?.projectName || request.projectName || request.address || request.title || "").trim();
+    if (!date || !time || !projectName) return res.status(400).json({ message: "Appointment date, time and project are required" });
+    const user = await User.findById(req.user.userId).lean().catch(() => null);
+    const code = await generateAppointmentCode();
+    const appointment = new Appointment({
+      id: code,
+      appointmentCode: code,
+      requestId: String(request.id || request._id || request.requestCode || ""),
+      requestCode: request.requestCode || request.requestId || request.id || "",
+      customerId: String(req.user.userId),
+      customerName: request.name || user?.name || "",
+      customerPhone: request.phone || user?.phone || "",
+      customerEmail: request.email || user?.email || "",
+      projectName,
+      address: req.body?.address || request.address || "",
+      date,
+      timeStart: time,
+      timeEnd: String(req.body?.timeEnd || "").trim(),
+      technicianName: String(req.body?.technician || req.body?.technicianName || "").trim(),
+      technicianId: String(req.body?.technicianId || "").trim(),
+      status: "pending",
+      customerNote: String(req.body?.customerNote || req.body?.note || "").trim(),
+      createdBy: "customer",
+      history: [{ type: "created", message: "Appointment created by customer", actor: "customer", createdAt: new Date() }]
+    });
+    await appointment.save();
+    notifyAdminEmail("appointment_created", { request, appointment });
+    res.status(201).json({ data: appointmentPublic(appointment), message: "Appointment created" });
+  } catch (error) {
+    res.status(500).json({ message: "Appointment create failed", error: error.message });
+  }
+});
+
+app.get("/api/appointments/my", requireUser, async (req, res) => {
+  try {
+    const items = await Appointment.find({ customerId: String(req.user.userId) }).sort({ createdAt: -1 });
+    res.set("Cache-Control", "no-store");
+    res.json({ data: items.map(appointmentPublic) });
+  } catch (error) {
+    res.status(500).json({ message: "Appointments load failed", error: error.message });
+  }
+});
+
+app.get("/api/appointments/:id", requireUser, async (req, res) => {
+  try {
+    const item = await Appointment.findOne({ $and: [appointmentIdQuery(req.params.id), { customerId: String(req.user.userId) }] });
+    if (!item) return res.status(404).json({ message: "Not found" });
+    res.json({ data: appointmentPublic(item) });
+  } catch (error) {
+    res.status(500).json({ message: "Appointment load failed", error: error.message });
   }
 });
 
@@ -5014,6 +5203,80 @@ app.get("/requests", requireAdmin, async (req, res) => {
     });
   }
 });
+
+app.get("/api/admin/appointments", requireAdmin, async (req, res) => {
+  try {
+    const status = normalizeAppointmentStatus(req.query.status);
+    const search = String(req.query.search || "").trim();
+    const query = {};
+    if (req.query.status && String(req.query.status) !== "all") query.status = status;
+    if (search) {
+      query.$or = [
+        { appointmentCode: new RegExp(search, "i") },
+        { requestCode: new RegExp(search, "i") },
+        { customerName: new RegExp(search, "i") },
+        { customerPhone: new RegExp(search, "i") },
+        { projectName: new RegExp(search, "i") },
+        { technicianName: new RegExp(search, "i") }
+      ];
+    }
+    const items = await Appointment.find(query).sort({ date: 1, timeStart: 1, createdAt: -1 });
+    res.set("Cache-Control", "no-store");
+    res.json({ data: items.map(appointmentPublic) });
+  } catch (error) {
+    res.status(500).json({ message: "Appointments load failed", error: error.message });
+  }
+});
+
+app.get("/api/admin/appointments/:id", requireAdmin, async (req, res) => {
+  try {
+    const item = await Appointment.findOne(appointmentIdQuery(req.params.id));
+    if (!item) return res.status(404).json({ message: "Not found" });
+    res.json({ data: appointmentPublic(item) });
+  } catch (error) {
+    res.status(500).json({ message: "Appointment load failed", error: error.message });
+  }
+});
+
+async function updateAppointmentByAdmin(req, res, actionStatus = "") {
+  try {
+    const item = await Appointment.findOne(appointmentIdQuery(req.params.id));
+    if (!item) return res.status(404).json({ message: "Not found" });
+    const previousStatus = item.status;
+    if (req.body?.date !== undefined) item.date = String(req.body.date || "").trim();
+    if (req.body?.time !== undefined) item.timeStart = String(req.body.time || "").trim();
+    if (req.body?.timeStart !== undefined) item.timeStart = String(req.body.timeStart || "").trim();
+    if (req.body?.timeEnd !== undefined) item.timeEnd = String(req.body.timeEnd || "").trim();
+    if (req.body?.technicianName !== undefined || req.body?.technician !== undefined) item.technicianName = String(req.body.technicianName || req.body.technician || "").trim();
+    if (req.body?.technicianId !== undefined) item.technicianId = String(req.body.technicianId || "").trim();
+    if (req.body?.adminNote !== undefined || req.body?.note !== undefined) item.adminNote = String(req.body.adminNote || req.body.note || "").trim();
+    if (req.body?.projectName !== undefined) item.projectName = String(req.body.projectName || "").trim();
+    if (req.body?.address !== undefined) item.address = String(req.body.address || "").trim();
+    if (actionStatus || req.body?.status) item.status = normalizeAppointmentStatus(actionStatus || req.body.status);
+    const action = actionStatus || (previousStatus !== item.status ? item.status : "updated");
+    pushAppointmentHistory(item, action, `Appointment ${action}`, "admin");
+    await item.save();
+    const request = await findRequestByAnyId(item.requestCode || item.requestId);
+    if (request) {
+      const eventByStatus = {
+        confirmed: "appointment_confirmed",
+        rescheduled: "appointment_rescheduled",
+        cancelled: "appointment_cancelled"
+      };
+      const eventType = eventByStatus[item.status];
+      if (eventType) notifyCustomerEmail(eventType, { request, appointment: item, adminNote: item.adminNote });
+    }
+    res.json({ data: appointmentPublic(item), message: "Appointment updated" });
+  } catch (error) {
+    res.status(500).json({ message: "Appointment update failed", error: error.message });
+  }
+}
+
+app.patch("/api/admin/appointments/:id", requireAdmin, (req, res) => updateAppointmentByAdmin(req, res));
+app.post("/api/admin/appointments/:id/confirm", requireAdmin, (req, res) => updateAppointmentByAdmin(req, res, "confirmed"));
+app.post("/api/admin/appointments/:id/reschedule", requireAdmin, (req, res) => updateAppointmentByAdmin(req, res, "rescheduled"));
+app.post("/api/admin/appointments/:id/cancel", requireAdmin, (req, res) => updateAppointmentByAdmin(req, res, "cancelled"));
+app.post("/api/admin/appointments/:id/complete", requireAdmin, (req, res) => updateAppointmentByAdmin(req, res, "completed"));
 
 app.get("/request/:id", async (req, res) => {
   try {

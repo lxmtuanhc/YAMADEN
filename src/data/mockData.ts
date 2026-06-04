@@ -93,6 +93,6 @@ export const initialSchedules: Schedule[] = [
     time: "09:00 - 11:00",
     technician: "Kobayashi Taro",
     projectName: "Toa nha van phong YAMADA",
-    status: "upcoming"
+    status: "pending"
   }
 ];

@@ -3,6 +3,7 @@ import { APP_STORAGE_KEY } from "../constants/storageKeys";
 import { initialSchedules } from "../data/mockData";
 import { useAppStore } from "../stores/appStore";
 import type { Schedule, ScheduleStatus } from "../types";
+import { getUserToken } from "./authService";
 import { requestService } from "./requestService";
 
 export interface CreateScheduleInput {
@@ -12,9 +13,10 @@ export interface CreateScheduleInput {
   technician: string;
   projectName: string;
   status?: ScheduleStatus;
+  customerNote?: string;
 }
 
-export type UpdateScheduleInput = Partial<Pick<Schedule, "date" | "time" | "technician" | "projectName" | "status">>;
+export type UpdateScheduleInput = Partial<Pick<Schedule, "date" | "time" | "technician" | "projectName" | "status" | "customerNote">>;
 
 const scheduleSeedById = new Map(initialSchedules.map(schedule => [schedule.id, schedule]));
 
@@ -27,23 +29,103 @@ function createScheduleId(): string {
 }
 
 function normalizeStatus(status?: string): ScheduleStatus {
-  if (status === "confirmed") return "upcoming";
+  if (status === "pending" || status === "confirmed" || status === "rescheduled" || status === "completed" || status === "cancelled") return status;
   if (status === "on_the_way") return "in_progress";
-  if (status === "in_progress" || status === "completed" || status === "cancelled") return status;
-  return "upcoming";
+  if (status === "in_progress" || status === "upcoming") return status;
+  return "pending";
 }
 
 function normalizeSchedule(schedule: Schedule): Schedule {
   const seed = scheduleSeedById.get(schedule.id);
+  const time = schedule.time || [schedule.timeStart, schedule.timeEnd].filter(Boolean).join(" - ");
   return {
     ...schedule,
+    id: String(schedule.id || schedule.appointmentCode || ""),
+    appointmentCode: schedule.appointmentCode || schedule.id,
     requestId: schedule.requestId || seed?.requestId || "",
+    requestCode: schedule.requestCode || "",
     date: schedule.date || seed?.date || "",
-    time: schedule.time || seed?.time || "",
-    technician: schedule.technician || seed?.technician || "",
+    time: time || seed?.time || "",
+    timeStart: schedule.timeStart || schedule.time || seed?.time || "",
+    timeEnd: schedule.timeEnd || "",
+    technician: schedule.technician || schedule.technicianName || seed?.technician || "",
+    technicianName: schedule.technicianName || schedule.technician || seed?.technician || "",
     projectName: schedule.projectName || seed?.projectName || "",
     status: normalizeStatus(schedule.status)
   };
+}
+
+function scheduleFromBackend(item: any): Schedule {
+  return normalizeSchedule({
+    id: String(item.id || item.appointmentCode || item._id || ""),
+    appointmentCode: item.appointmentCode || item.id || "",
+    requestId: String(item.requestId || item.requestCode || ""),
+    requestCode: item.requestCode || "",
+    customerName: item.customerName || "",
+    customerPhone: item.customerPhone || "",
+    customerEmail: item.customerEmail || "",
+    projectName: item.projectName || item.address || "",
+    address: item.address || "",
+    date: item.date || "",
+    time: item.time || [item.timeStart, item.timeEnd].filter(Boolean).join(" - "),
+    timeStart: item.timeStart || item.time || "",
+    timeEnd: item.timeEnd || "",
+    technician: item.technician || item.technicianName || "",
+    technicianName: item.technicianName || item.technician || "",
+    technicianId: item.technicianId || "",
+    status: normalizeStatus(item.status),
+    customerNote: item.customerNote || "",
+    adminNote: item.adminNote || "",
+    createdBy: item.createdBy || "",
+    createdAt: item.createdAt || "",
+    updatedAt: item.updatedAt || "",
+    history: Array.isArray(item.history) ? item.history : []
+  });
+}
+
+async function backendJson(url: string, options?: RequestInit) {
+  const token = getUserToken();
+  if (!token) return null;
+  const response = await fetch(url, {
+    cache: "no-store",
+    ...options,
+    headers: {
+      ...(options?.headers || {}),
+      Authorization: `Bearer ${token}`
+    }
+  });
+  if (!response.ok) throw new Error("Appointment API failed");
+  return response.json();
+}
+
+async function fetchBackendSchedules(): Promise<Schedule[] | null> {
+  const payload = await backendJson("/api/appointments/my");
+  if (!payload) return null;
+  const items = Array.isArray(payload.data) ? payload.data : Array.isArray(payload) ? payload : [];
+  return items.map(scheduleFromBackend);
+}
+
+async function fetchBackendSchedule(id: string): Promise<Schedule | null> {
+  const payload = await backendJson(`/api/appointments/${encodeURIComponent(id)}`);
+  if (!payload) return null;
+  return scheduleFromBackend(payload.data || payload);
+}
+
+async function createBackendSchedule(input: CreateScheduleInput): Promise<Schedule | null> {
+  const payload = await backendJson("/api/appointments", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      requestId: input.requestId,
+      date: input.date,
+      time: input.time,
+      technicianName: input.technician,
+      projectName: input.projectName,
+      customerNote: input.customerNote || ""
+    })
+  });
+  if (!payload) return null;
+  return scheduleFromBackend(payload.data || payload);
 }
 
 function readSchedules(): Schedule[] {
@@ -75,6 +157,15 @@ async function addScheduleTimeline(requestId: string, status: ScheduleStatus, ev
 export const scheduleService = {
   async getSchedules(): Promise<Schedule[]> {
     await delay();
+    try {
+      const backend = await fetchBackendSchedules();
+      if (backend) {
+        commitSchedules(backend);
+        return backend;
+      }
+    } catch (error) {
+      console.warn("Unable to load appointments from backend", error);
+    }
     const schedules = readSchedules();
     commitSchedules(schedules);
     return schedules;
@@ -82,14 +173,29 @@ export const scheduleService = {
 
   async getScheduleById(id: string): Promise<Schedule | null> {
     await delay();
+    try {
+      const backend = await fetchBackendSchedule(id);
+      if (backend) return backend;
+    } catch (error) {
+      console.warn("Unable to load appointment from backend", error);
+    }
     return readSchedules().find(schedule => schedule.id === id) || null;
   },
 
   async getSchedulesByRequestId(requestId: string): Promise<Schedule[]> {
     await delay();
+    try {
+      const backend = await fetchBackendSchedules();
+      if (backend) {
+        commitSchedules(backend);
+        return backend.filter(schedule => schedule.requestId === requestId || schedule.requestCode === requestId);
+      }
+    } catch (error) {
+      console.warn("Unable to load request appointments from backend", error);
+    }
     const schedules = readSchedules();
     commitSchedules(schedules);
-    return schedules.filter(schedule => schedule.requestId === requestId);
+    return schedules.filter(schedule => schedule.requestId === requestId || schedule.requestCode === requestId);
   },
 
   async createSchedule(input: CreateScheduleInput): Promise<Schedule> {
@@ -97,19 +203,17 @@ export const scheduleService = {
     const request = await requestService.getRequestById(input.requestId);
     if (!request) throw new Error("Request not found");
 
-    const schedule: Schedule = {
-      id: createScheduleId(),
-      requestId: input.requestId,
-      date: input.date,
-      time: input.time,
-      technician: input.technician,
-      projectName: input.projectName || request.projectName || request.title,
-      status: input.status || "upcoming"
-    };
-
-    commitSchedules([schedule, ...readSchedules()]);
-    await addScheduleTimeline(schedule.requestId, schedule.status, "created");
-    return schedule;
+    try {
+      const backend = await createBackendSchedule(input);
+      if (backend) {
+        commitSchedules([backend, ...readSchedules().filter(schedule => schedule.id !== backend.id)]);
+        return backend;
+      }
+    } catch (error) {
+      console.warn("Unable to create appointment in backend", error);
+      throw error;
+    }
+    throw new Error("Appointment create failed");
   },
 
   async updateSchedule(id: string, input: UpdateScheduleInput): Promise<Schedule> {

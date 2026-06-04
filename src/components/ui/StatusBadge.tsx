@@ -35,6 +35,9 @@ const quoteStatusKeys: Record<QuoteStatus, TranslationKey> = {
 };
 
 const scheduleStatusKeys: Record<ScheduleStatus, TranslationKey> = {
+  pending: "schedule.statusPending",
+  confirmed: "schedule.statusConfirmed",
+  rescheduled: "schedule.statusRescheduled",
   upcoming: "schedule.statusUpcoming",
   in_progress: "schedule.statusInProgress",
   completed: "schedule.statusCompleted",
