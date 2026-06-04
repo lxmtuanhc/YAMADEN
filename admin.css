@@ -4796,6 +4796,7 @@ body {
 
 .settings-summary-body {
   min-height: 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -4805,7 +4806,7 @@ body {
 .settings-summary-stats {
   min-height: 82px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
   gap: 12px;
 }
 
@@ -4870,19 +4871,20 @@ body {
   overflow-wrap: anywhere;
 }
 
-.settings-summary-card-aiSettings .settings-summary-rows div {
+.settings-summary-toggle-rows div {
   grid-template-columns: minmax(0, 1fr) auto;
   column-gap: 16px;
   align-items: center;
 }
 
-.settings-summary-card-aiSettings .settings-summary-rows strong {
+.settings-summary-toggle-rows strong {
   justify-self: end;
   padding-right: 8px;
   white-space: nowrap;
 }
 
 .settings-summary-chips {
+  min-width: 0;
   min-height: 30px;
   overflow: visible;
 }
@@ -4893,56 +4895,12 @@ body {
 
 .settings-card-body {
   flex: 1 1 auto;
+  min-width: 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
   overflow: visible;
-}
-
-.settings-card-body .settings-overview-summary-list {
-  overflow: visible;
-}
-
-.settings-overview-summary-list {
-  display: grid;
-  gap: 10px;
-  margin-top: 2px;
-}
-
-.settings-overview-summary-row,
-.settings-overview-summary-value {
-  min-height: 28px;
-  display: grid;
-  align-items: start;
-  gap: 4px;
-  color: #334155;
-  line-height: 1.55;
-  overflow: visible;
-}
-
-.settings-overview-summary-row {
-  grid-template-columns: minmax(88px, .38fr) minmax(0, 1fr);
-}
-
-.settings-overview-summary-row span {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
-  line-height: 1.55;
-}
-
-.settings-overview-summary-row strong,
-.settings-overview-summary-value {
-  min-width: 0;
-  font-size: 14px;
-  font-weight: 900;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-.settings-overview-summary-value {
-  padding: 0;
 }
 
 .settings-card-body .settings-flow-list {
@@ -4954,56 +4912,6 @@ body {
   max-height: none;
   overflow-x: auto;
   overflow-y: visible;
-}
-
-.settings-staffwork-card {
-  min-height: 320px;
-}
-
-.settings-staffwork-description {
-  min-height: 44px;
-  overflow-wrap: anywhere;
-}
-
-.settings-staffwork-summary {
-  min-height: 82px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.settings-staffwork-summary span {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  min-width: 0;
-  padding: 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  background: #f8fafc;
-}
-
-.settings-staffwork-summary b {
-  color: #0f172a;
-  font-size: 21px;
-  line-height: 1;
-  font-weight: 950;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.settings-staffwork-summary small {
-  color: #64748b;
-  font-size: 11px;
-  line-height: 1.25;
-  font-weight: 900;
-}
-
-.settings-staffwork-chip-zone {
-  min-height: 42px;
-  overflow: visible;
 }
 
 .mini-button.danger {
@@ -5062,28 +4970,6 @@ body {
   color: #b45309;
 }
 
-.settings-detail-list {
-  display: grid;
-  gap: 12px;
-  margin: 0 0 4px;
-  padding: 0;
-  list-style: none;
-}
-
-.settings-detail-list li {
-  min-height: 42px;
-  display: flex;
-  align-items: center;
-  padding: 11px 14px;
-  border: 1px solid #edf2f7;
-  border-radius: 10px;
-  background: #f8fafc;
-  color: #334155;
-  font-weight: 800;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
-}
-
 .settings-card-note {
   margin: 0 0 4px;
   color: #475569;
@@ -5091,35 +4977,9 @@ body {
   font-weight: 750;
 }
 
-.settings-metrics {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.settings-metrics span {
-  min-width: 0;
-  display: grid;
-  gap: 5px;
-  padding: 13px;
-  border: 1px solid #edf2f7;
-  border-radius: 12px;
-  background: #f8fafc;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 850;
-}
-
-.settings-metrics b {
-  min-width: 0;
-  color: var(--text);
-  font-size: 24px;
-  line-height: 1;
-  overflow-wrap: anywhere;
-}
-
 .settings-chip-list,
 .settings-status-preview {
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 9px;
@@ -5141,6 +5001,7 @@ body {
 }
 
 .settings-card-action-label {
+  box-sizing: border-box;
   width: fit-content;
   max-width: 100%;
   min-height: 34px;
