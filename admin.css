@@ -668,10 +668,6 @@ body {
   background: var(--bg);
 }
 
-html {
-  scrollbar-gutter: stable;
-}
-
 .admin-v2 {
   display: block;
   min-height: 100dvh;
@@ -736,9 +732,8 @@ html {
   width: 100%;
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
-  scrollbar-gutter: stable;
 }
 
 .brand {
@@ -4705,7 +4700,7 @@ body {
   height: calc(100dvh - var(--topbar-height));
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
   padding: 24px;
 }
@@ -6112,7 +6107,7 @@ body {
 
   .admin-v2[data-view="settings"] .content {
     height: calc(100dvh - var(--topbar-height));
-    overflow-y: auto;
+    overflow-y: scroll;
     overflow-x: hidden;
   }
 
