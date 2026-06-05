@@ -2353,12 +2353,10 @@
     $("languageSelect").value = state.lang;
     $("logoutButton").textContent = t("logout");
     $("refreshButton").textContent = t("refresh");
-    $("refreshButton").style.display = ["quotes", "appointments"].includes(state.currentView) ? "none" : "";
+    $("refreshButton").style.display = state.currentView === "quotes" ? "none" : "";
     const headerExtra = $("viewHeaderExtraActions");
     if (headerExtra) {
-      headerExtra.innerHTML = state.currentView === "appointments"
-        ? `<button class="primary-button admin-list-primary-action" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</button>`
-        : "";
+      headerExtra.innerHTML = "";
     }
     const renderNavItem = ([view, labelKey, icon]) => `
       <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}" data-tooltip="${escapeHtml(navLabel(view, labelKey))}" aria-label="${escapeHtml(navLabel(view, labelKey))}">
@@ -8965,7 +8963,7 @@
       filterBar: `<div class="request-filter-bar appointment-filter-bar">
         <input id="appointmentSearch" class="request-search-input" value="${escapeHtml(state.filters.appointmentSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "Tìm mã yêu cầu, khách, công trình, kỹ thuật viên..." : "依頼ID・顧客・工事名・技術者を検索...")}" />
         <button class="request-search-btn" type="button" data-appointment-search>${escapeHtml(t("searchButton"))}</button>
-        <button class="btn btn-soft appointment-refresh-btn" type="button" data-appointment-refresh>${escapeHtml(t("refresh"))}</button>
+        <button class="primary-button admin-list-primary-action" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</button>
       </div>`,
       children: `<section class="appointment-list-panel">
         <div class="appointment-list-head">
@@ -9653,15 +9651,6 @@
       const appointmentSearchButton = event.target.closest("[data-appointment-search]");
       if (appointmentSearchButton) {
         state.filters.appointmentSearch = $("appointmentSearch")?.value || "";
-        state.appointments = normalizeList(await AdminAPI.getAppointments({
-          search: state.filters.appointmentSearch
-        }));
-        renderAppointments();
-        return;
-      }
-      const appointmentRefreshButton = event.target.closest("[data-appointment-refresh]");
-      if (appointmentRefreshButton) {
-        state.filters.appointmentSearch = $("appointmentSearch")?.value || state.filters.appointmentSearch || "";
         state.appointments = normalizeList(await AdminAPI.getAppointments({
           search: state.filters.appointmentSearch
         }));

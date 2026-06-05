@@ -81,7 +81,8 @@ button { cursor: pointer; }
 .admin-profile span { color: var(--muted); font-size: 12px; font-weight: 700; }
 .logout-button, .refresh-button, .primary-button, .ghost-button, .danger-button { border: 0; border-radius: 10px; min-height: 40px; padding: 0 14px; font-weight: 900; }
 .logout-button, .danger-button { background: #fee2e2; color: #b91c1c; }
-.refresh-button, .primary-button { background: var(--blue); color: #fff; }
+.primary-button { background: var(--blue); color: #fff; }
+.refresh-button { border: 1px solid #dbe3ef; background: #fff; color: #1d4ed8; }
 .refresh-button { width: 112px; min-width: 112px; max-width: 112px; height: 52px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ghost-button { background: #eef2f7; color: var(--text); }
 .ghost-button:disabled, .primary-button:disabled { opacity: .48; cursor: not-allowed; }
@@ -387,8 +388,7 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .appointment-filter-bar { grid-template-columns: minmax(320px, 1fr) minmax(112px, 150px) minmax(112px, 140px); margin-bottom: 0; }
 .appointment-filter-bar .request-search-input,
 .appointment-filter-bar .request-search-btn,
-.appointment-refresh-btn { height: 48px; border-radius: 14px; }
-.appointment-refresh-btn { width: 100%; font-weight: 900; white-space: nowrap; }
+.appointment-filter-bar .admin-list-primary-action { height: 48px; border-radius: 14px; }
 .appointment-status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 0; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
 .appointment-status-chip { width: auto; min-width: max-content; height: 38px; display: inline-flex; flex: 0 0 auto; gap: 7px; padding: 0 12px; border-radius: 999px; overflow: visible; cursor: pointer; font-size: 13px; }
 .appointment-status-chip .chip-label { overflow: visible; text-overflow: clip; white-space: nowrap; }
@@ -470,7 +470,6 @@ h1 { margin-bottom: 0; font-size: 28px; }
   .request-search-input,
   .request-search-btn,
   .request-filter-select { grid-column: auto; width: 100%; }
-  .appointment-refresh-btn { width: 100%; }
   .request-status-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .appointment-status-row { display: flex; }
   .appointment-list-panel { padding: 16px; }
@@ -851,11 +850,17 @@ body {
   border: 1px solid #ffe4e6;
 }
 
-.refresh-button,
 .primary-button,
 .btn-primary {
   background: linear-gradient(135deg, var(--primary), var(--primary-2));
   box-shadow: 0 14px 28px rgba(37, 99, 235, .22);
+}
+
+.refresh-button {
+  background: #fff;
+  color: #1d4ed8;
+  border: 1px solid var(--border);
+  box-shadow: none;
 }
 
 .btn-soft,
