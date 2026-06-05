@@ -2729,6 +2729,34 @@
     results.innerHTML = renderRequestResultsHtml(sortRequests(filterRequests(state.requests)));
   }
 
+  function renderAdminListPageLayout({
+    className = "",
+    sectionLabel = "",
+    title = "",
+    subtitle = "",
+    primaryAction = "",
+    secondaryActions = "",
+    actionBar = "",
+    statusTabs = "",
+    filterBar = "",
+    children = ""
+  } = {}) {
+    return `<section class="admin-list-page ${escapeHtml(className)}">
+      <header class="admin-list-page-head">
+        <div>
+          ${sectionLabel ? `<p class="eyebrow">${escapeHtml(sectionLabel)}</p>` : ""}
+          ${title ? `<h1>${escapeHtml(title)}</h1>` : ""}
+          ${subtitle ? `<p>${escapeHtml(subtitle)}</p>` : ""}
+        </div>
+        ${(primaryAction || secondaryActions) ? `<div class="admin-list-page-actions">${secondaryActions}${primaryAction}</div>` : ""}
+      </header>
+      ${actionBar ? `<div class="admin-list-action-bar">${actionBar}</div>` : ""}
+      ${statusTabs ? `<div class="admin-list-status-row">${statusTabs}</div>` : ""}
+      ${filterBar ? `<div class="admin-list-filter-row">${filterBar}</div>` : ""}
+      <div class="admin-list-content">${children}</div>
+    </section>`;
+  }
+
   function renderRequests() {
     const filtered = sortRequests(filterRequests(state.requests));
     if (state.loading.requests) {
@@ -2739,22 +2767,23 @@
       $("viewRoot").innerHTML = showErrorState(t("loadRequestsError"));
       return;
     }
-    $("viewRoot").innerHTML = `
-      <div class="page-intro">
-        <p>${escapeHtml(t("requestSubtitle"))}</p>
-      </div>
-      <div class="request-command-bar demo-actions">
+    $("viewRoot").innerHTML = renderAdminListPageLayout({
+      className: "request-list-page",
+      sectionLabel: state.lang === "vi" ? "YÊU CẦU" : "依頼",
+      title: t("requests"),
+      subtitle: t("requestSubtitle"),
+      actionBar: `
         <button class="btn btn-soft request-action-btn export" disabled>${escapeHtml(t("export"))}</button>
         <button class="btn btn-primary request-action-btn create" disabled>+ ${escapeHtml(t("newRequest"))}</button>
         <div class="segmented request-view-toggle">
           <button class="request-action-btn ${state.filters.requestViewMode === "table" ? "active" : ""}" type="button" data-view-mode="table">${escapeHtml(t("tableFormat"))}</button>
           <button class="request-action-btn ${state.filters.requestViewMode === "kanban" ? "active" : ""}" type="button" data-view-mode="kanban">${escapeHtml(t("kanbanView"))}</button>
         </div>
-      </div>
-      <div class="request-status-row">
+      `,
+      statusTabs: `<div class="request-status-row">
         ${renderRequestFilterChips()}
-      </div>
-      <div class="request-filter-bar">
+      </div>`,
+      filterBar: `<div class="request-filter-bar">
         <input id="requestSearch" class="request-search-input" value="${escapeHtml(state.filters.search)}" placeholder="${escapeHtml(t("search"))}" />
         <button class="request-search-btn" type="button" data-request-search>${escapeHtml(t("searchButton"))}</button>
         <select class="request-filter-select" data-filter-select="department" aria-label="${escapeHtml(t("departmentFilter"))}">
@@ -2778,11 +2807,11 @@
           <option value="deadline" ${state.filters.sort === "deadline" ? "selected" : ""}>${escapeHtml(t("deadline"))}</option>
           <option value="overdue" ${state.filters.sort === "overdue" ? "selected" : ""}>${escapeHtml(t("overdueFirst"))}</option>
         </select>
-      </div>
-      <div id="requestResults">
+      </div>`,
+      children: `<div id="requestResults">
         ${renderRequestResultsHtml(filtered)}
-      </div>
-    `;
+      </div>`
+    });
   }
 
   function renderRequestRow(item) {
@@ -8929,25 +8958,21 @@
   function renderAppointments() {
     const filtered = filterAppointments(state.appointments);
     const totalText = appointmentText(`${filtered.length} lịch hẹn`, `${filtered.length}件`);
-    $("viewRoot").innerHTML = `
-      <section class="appointment-page">
-      <header class="appointment-page-head">
-        <div>
-          <p class="eyebrow">${escapeHtml(appointmentText("LỊCH HẸN", "予約"))}</p>
-          <h1>${escapeHtml(t("appointments"))}</h1>
-          <p>${escapeHtml(appointmentText("Admin tạo các khung giờ hẹn để khách chọn và theo dõi kết quả tại đây.", "管理者が候補日時を作成し、お客様の選択状況をここで確認します。"))}</p>
-        </div>
-        <button class="primary-button appointment-create-button" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</button>
-      </header>
-      <div class="request-filter-bar appointment-filter-bar">
+    $("viewRoot").innerHTML = renderAdminListPageLayout({
+      className: "appointment-list-page",
+      sectionLabel: appointmentText("LỊCH HẸN", "予約"),
+      title: t("appointments"),
+      subtitle: appointmentText("Admin tạo các khung giờ hẹn để khách chọn và theo dõi kết quả tại đây.", "管理者が候補日時を作成し、お客様の選択状況をここで確認します。"),
+      primaryAction: `<button class="primary-button admin-list-primary-action" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</button>`,
+      statusTabs: `<div class="request-status-row appointment-status-row">
+        ${renderAppointmentFilterChips()}
+      </div>`,
+      filterBar: `<div class="request-filter-bar appointment-filter-bar">
         <input id="appointmentSearch" class="request-search-input" value="${escapeHtml(state.filters.appointmentSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "Tìm mã yêu cầu, khách, công trình, kỹ thuật viên..." : "依頼ID・顧客・工事名・技術者を検索...")}" />
         <button class="request-search-btn" type="button" data-appointment-search>${escapeHtml(t("searchButton"))}</button>
         <button class="btn btn-soft appointment-refresh-btn" type="button" data-appointment-refresh>${escapeHtml(t("refresh"))}</button>
-      </div>
-      <div class="request-status-row appointment-status-row">
-        ${renderAppointmentFilterChips()}
-      </div>
-      <section class="appointment-list-panel">
+      </div>`,
+      children: `<section class="appointment-list-panel">
         <div class="appointment-list-head">
           <h2>${escapeHtml(appointmentText("Danh sách lịch hẹn", "予約一覧"))}</h2>
           <span>${escapeHtml(totalText)}</span>
@@ -8973,9 +8998,8 @@
             </table>
           </div>
         ` : renderAppointmentEmptyState()}
-      </section>
-      </section>
-    `;
+      </section>`
+    });
   }
 
   function renderAppointmentDetail(item) {

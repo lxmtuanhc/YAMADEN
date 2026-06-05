@@ -366,7 +366,17 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .ai-item b { border-radius: 999px; background: #e0f2fe; color: #0369a1; padding: 4px 8px; font-size: 11px; }
 .quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 
-.request-command-bar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px; min-width: 0; }
+.request-command-bar,
+.admin-list-action-bar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px; min-width: 0; }
+.admin-list-page { display: grid; gap: 16px; }
+.admin-list-page-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: start; }
+.admin-list-page-head h1 { margin: 2px 0 7px; color: #0f172a; font-size: 30px; line-height: 1.15; font-weight: 950; }
+.admin-list-page-head p:not(.eyebrow) { max-width: 720px; margin: 0; color: #475569; font-weight: 800; line-height: 1.55; }
+.admin-list-page-actions { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+.admin-list-primary-action { min-height: 48px; padding: 0 18px; align-self: start; white-space: nowrap; border-radius: 14px; box-shadow: 0 12px 26px rgba(37, 99, 235, .22); }
+.admin-list-status-row,
+.admin-list-filter-row,
+.admin-list-content { min-width: 0; }
 .segmented { display: inline-flex; padding: 4px; border-radius: 12px; background: #e2e8f0; gap: 4px; min-width: 0; }
 .segmented button { border: 0; border-radius: 9px; padding: 8px 12px; background: transparent; font-weight: 900; color: var(--muted); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-sizing: border-box; }
 .segmented button.active { background: #fff; color: var(--primary); box-shadow: 0 6px 16px rgba(15, 23, 42, .08); }
@@ -376,11 +386,6 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .request-status-chip .chip-count { width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; background: #f1f5f9; color: var(--muted); font-size: 11px; flex: 0 0 auto; }
 .request-status-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .request-status-chip.active .chip-count { background: rgba(255,255,255,.2); color: #fff; }
-.appointment-page { display: grid; gap: 16px; }
-.appointment-page-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: start; }
-.appointment-page-head h1 { margin: 2px 0 7px; color: #0f172a; font-size: 30px; line-height: 1.15; font-weight: 950; }
-.appointment-page-head p:not(.eyebrow) { max-width: 720px; margin: 0; color: #475569; font-weight: 800; line-height: 1.55; }
-.appointment-create-button { min-height: 48px; padding: 0 18px; align-self: start; white-space: nowrap; border-radius: 14px; box-shadow: 0 12px 26px rgba(37, 99, 235, .22); }
 .appointment-filter-bar { grid-template-columns: minmax(320px, 1fr) minmax(112px, 150px) minmax(112px, 140px); margin-bottom: 0; }
 .appointment-filter-bar .request-search-input,
 .appointment-filter-bar .request-search-btn,
@@ -458,7 +463,7 @@ h1 { margin-bottom: 0; font-size: 28px; }
   .request-search-btn { grid-column: span 1; }
   .request-status-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .appointment-status-row { display: flex; }
-  .appointment-page-head { grid-template-columns: 1fr; }
+  .admin-list-page-head { grid-template-columns: 1fr; }
   .appointment-slot-edit { grid-template-columns: 1fr; }
 }
 
@@ -473,6 +478,8 @@ h1 { margin-bottom: 0; font-size: 28px; }
   .appointment-status-row { display: flex; }
   .appointment-list-panel { padding: 16px; }
   .appointment-list-head { align-items: flex-start; flex-direction: column; }
+  .admin-list-page-actions,
+  .admin-list-primary-action { width: 100%; }
 }
 
 .request-table-wrap { max-height: calc(100dvh - 310px); }
