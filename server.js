@@ -3973,6 +3973,20 @@ app.post("/admin/quotes", requireAdmin, async (req, res) => {
       if (quote) break;
     }
     const payload = normalizeQuotePayloadForDb(body);
+    const linkedRequest = payload.requestId ? await findRequestByAnyId(payload.requestId) : null;
+    const wasQuoteSent = Boolean(linkedRequest?.quoteSent || linkedRequest?.quoteStatus === "sent");
+    if (linkedRequest) {
+      payload.userId = payload.userId || (linkedRequest.userId ? String(linkedRequest.userId) : "");
+      payload.customerId = payload.customerId || payload.userId;
+      payload.customerName = payload.customerName || linkedRequest.name || "";
+      payload.name = payload.name || payload.customerName;
+      payload.customerPhone = payload.customerPhone || linkedRequest.phone || "";
+      payload.phone = payload.phone || payload.customerPhone;
+      payload.customerEmail = payload.customerEmail || linkedRequest.email || linkedRequest.contact || "";
+      payload.email = payload.email || payload.customerEmail;
+      payload.customerAddress = payload.customerAddress || linkedRequest.address || "";
+      payload.address = payload.address || payload.customerAddress;
+    }
     if (!quote) {
       quote = new Quote({ ...payload, createdAt: body.createdAt || new Date() });
     } else {
@@ -3980,6 +3994,25 @@ app.post("/admin/quotes", requireAdmin, async (req, res) => {
       if (!quote.createdAt) quote.createdAt = body.createdAt || new Date();
     }
     await quote.save();
+    const isSentToCustomer = ["sent_to_customer", "sent", "approved"].includes(String(quote.status || "").toLowerCase()) || quote.sentToCustomer === true;
+    if (linkedRequest && isSentToCustomer) {
+      const now = new Date();
+      linkedRequest.quoteId = quote._id;
+      linkedRequest.quoteRequested = true;
+      linkedRequest.quotedAt = linkedRequest.quotedAt || now;
+      linkedRequest.quoteSent = true;
+      linkedRequest.quoteSentAt = linkedRequest.quoteSentAt || now;
+      if (wasQuoteSent) linkedRequest.quoteUpdatedAt = now;
+      linkedRequest.quoteStatus = "sent";
+      linkedRequest.quoteFileCount = Array.isArray(quote.quoteFiles) ? quote.quoteFiles.length : Number(linkedRequest.quoteFileCount || 0);
+      linkedRequest.quoteSentBy = req.admin?.email || req.admin?.name || "admin";
+      await linkedRequest.save();
+      notifyCustomerEmail(wasQuoteSent ? "quote_updated" : "quote_sent", {
+        request: linkedRequest,
+        quote,
+        adminNote: quote.customerNote || quote.note || ""
+      });
+    }
     res.json({ ok: true, quote: quote.toObject() });
   } catch (error) {
     console.error("Quote save failed:", error);

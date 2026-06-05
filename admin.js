@@ -1386,9 +1386,9 @@
     pdfPreview: "PDF\u30d7\u30ec\u30d3\u30e5\u30fc",
     quoteDetailTitle: "\u898b\u7a4d\u8a73\u7d30",
     noQuotes: "\u898b\u7a4d\u306f\u307e\u3060\u3042\u308a\u307e\u305b\u3093",
-    quoteMockNote: "\u30ec\u30a4\u30a2\u30a6\u30c8\u8a66\u9a13\u4e2d\uff1aMongoDB\u4fdd\u5b58\u30fbPDF\u4f5c\u6210\u306f\u672a\u63a5\u7d9a\u3067\u3059\u3002",
-    quoteSentMock: "\u898b\u7a4d\u3092\u9867\u5ba2\u30a2\u30d7\u30ea\u3078\u9001\u4fe1\u3057\u307e\u3057\u305f\u3002",
-    quoteSavedMock: "\u898b\u7a4d\u306e\u4e0b\u66f8\u304d\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002",
+    quoteMockNote: "\u898b\u7a4d\u5185\u5bb9\u306fMongoDB\u306b\u4fdd\u5b58\u3055\u308c\u307e\u3059\u3002",
+    quoteSentSaved: "\u898b\u7a4d\u3092\u9867\u5ba2\u30a2\u30d7\u30ea\u3078\u9001\u4fe1\u3057\u307e\u3057\u305f\u3002",
+    quoteDraftSaved: "\u898b\u7a4d\u306e\u4e0b\u66f8\u304d\u3092\u4fdd\u5b58\u3057\u307e\u3057\u305f\u3002",
     quoteMissingCustomerSend: "\u9867\u5ba2\u3092\u9078\u629e\u3057\u3066\u304b\u3089\u9867\u5ba2\u30a2\u30d7\u30ea\u3078\u9001\u4fe1\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
     quoteMissingItemsSend: "\u898b\u7a4d\u9805\u76ee\u30921\u3064\u4ee5\u4e0a\u8ffd\u52a0\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
     quoteDraftRequired: "\u5de5\u4e8b\u540d\u307e\u305f\u306f\u898b\u7a4d\u9805\u76ee\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
@@ -1499,9 +1499,9 @@
     pdfPreview: "Xem tr\u01b0\u1edbc PDF",
     quoteDetailTitle: "Chi ti\u1ebft b\u00e1o gi\u00e1",
     noQuotes: "Ch\u01b0a c\u00f3 b\u00e1o gi\u00e1 n\u00e0o",
-    quoteMockNote: "Ch\u1ebf \u0111\u1ed9 layout th\u1eed nghi\u1ec7m: ch\u01b0a l\u01b0u MongoDB, ch\u01b0a t\u1ea1o PDF.",
-    quoteSentMock: "B\u00e1o gi\u00e1 \u0111\u00e3 \u0111\u01b0\u1ee3c g\u1eedi l\u00ean app kh\u00e1ch h\u00e0ng.",
-    quoteSavedMock: "\u0110\u00e3 l\u01b0u nh\u00e1p b\u00e1o gi\u00e1.",
+    quoteMockNote: "N\u1ed9i dung b\u00e1o gi\u00e1 s\u1ebd \u0111\u01b0\u1ee3c l\u01b0u v\u00e0o MongoDB.",
+    quoteSentSaved: "B\u00e1o gi\u00e1 \u0111\u00e3 \u0111\u01b0\u1ee3c g\u1eedi l\u00ean app kh\u00e1ch h\u00e0ng.",
+    quoteDraftSaved: "\u0110\u00e3 l\u01b0u nh\u00e1p b\u00e1o gi\u00e1.",
     quoteMissingCustomerSend: "Vui l\u00f2ng ch\u1ecdn kh\u00e1ch h\u00e0ng tr\u01b0\u1edbc khi g\u1eedi b\u00e1o gi\u00e1 l\u00ean app.",
     quoteMissingItemsSend: "Vui l\u00f2ng th\u00eam \u00edt nh\u1ea5t m\u1ed9t h\u1ea1ng m\u1ee5c b\u00e1o gi\u00e1.",
     quoteDraftRequired: "Vui l\u00f2ng nh\u1eadp t\u00ean c\u00f4ng tr\u00ecnh ho\u1eb7c h\u1ea1ng m\u1ee5c b\u00e1o gi\u00e1.",
@@ -4977,17 +4977,11 @@
     return [...byId.values()].filter(item => !item.isDeleted && !item.deletedAt);
   }
 
-  function persistMockQuote(quote) {
+  function upsertQuoteInState(quote) {
     const normalized = normalizeQuote(quote);
     const quotes = quoteRows();
     const next = [normalized, ...quotes.filter(item => String(item._id || "") !== String(normalized._id || "___new_quote") && String(item.id) !== String(normalized.id) && String(item.quoteNo) !== String(normalized.quoteNo))];
     state.quotes = next;
-    writeCustomerAppQuotes(next.map(item => ({
-      ...item,
-      status: quoteCustomerAppStatus(item.status),
-      quoteCode: item.quoteNo,
-      items: item.items.map(row => ({ ...row, amount: quoteItemAmount(row) }))
-    })));
     return normalized;
   }
 
@@ -5692,7 +5686,7 @@
     if (!savedQuote?._id) return null;
     window.currentQuoteDetail = savedQuote;
     state.selectedQuoteId = savedQuote._id;
-    persistMockQuote(savedQuote);
+    upsertQuoteInState(savedQuote);
     const form = document.querySelector("[data-quote-form]");
     if (form) {
       const idInput = form.querySelector("[name='_id']");
@@ -9929,14 +9923,24 @@
             }
             quote.status = "draft";
           }
-          const saved = persistMockQuote(quote);
-          if (!saved) {
+          const savedPayload = await AdminAPI.saveQuote({
+            ...quote,
+            quoteCode: quote.quoteNo || quote.quoteCode,
+            code: quote.code || quote.quoteNo || quote.quoteCode,
+            items: quote.items.map(item => ({ ...item, amount: quoteItemAmount(item) }))
+          });
+          const saved = normalizeQuote(savedPayload?.quote || savedPayload?.data || savedPayload);
+          if (!saved?._id) {
             toast(t("failed"));
             return;
           }
+          upsertQuoteInState(saved);
+          window.currentQuoteDetail = saved;
+          state.selectedQuoteId = saved._id || saved.id || saved.quoteNo;
           closeDrawer();
+          state.quotes = normalizeList(await AdminAPI.getQuotes());
           renderQuotes();
-          toast(quoteSave.matches("[data-quote-send]") ? t("quoteSentMock") : t("quoteSavedMock"));
+          toast(quoteSave.matches("[data-quote-send]") ? t("quoteSentSaved") : t("quoteDraftSaved"));
         } catch (error) {
           console.error(error);
           toast(t("failed"));
