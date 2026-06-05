@@ -2353,11 +2353,7 @@
     $("languageSelect").value = state.lang;
     $("logoutButton").textContent = t("logout");
     $("refreshButton").textContent = t("refresh");
-    $("refreshButton").style.display = state.currentView === "quotes" ? "none" : "";
-    const headerExtra = $("viewHeaderExtraActions");
-    if (headerExtra) {
-      headerExtra.innerHTML = "";
-    }
+    $("refreshButton").style.display = "";
     const renderNavItem = ([view, labelKey, icon]) => `
       <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}" data-tooltip="${escapeHtml(navLabel(view, labelKey))}" aria-label="${escapeHtml(navLabel(view, labelKey))}">
         <span class="nav-icon">${navIcon(view, icon)}</span>
@@ -2595,7 +2591,6 @@
         </div>
         <div class="dashboard-actions">
           <span class="date-pill">${escapeHtml(todayLabel)} · ${escapeHtml(new Date().toLocaleDateString(state.lang === "ja" ? "ja-JP" : "vi-VN"))}</span>
-          <button class="refresh-button" type="button" data-retry>${escapeHtml(t("refresh"))}</button>
         </div>
       </header>
       <div class="kpi-grid dashboard-kpis">
@@ -5278,7 +5273,6 @@
         <div class="quote-send-tabs" role="tablist">
           ${["all", "not_sent", "sent"].map(value => `<button class="quote-send-tab ${activeSendStatus === value ? "is-active" : ""}" type="button" data-quote-send-filter="${escapeHtml(value)}">${escapeHtml(quoteText(value === "all" ? "all" : value === "sent" ? "sentShort" : "notSentShort"))} (${escapeHtml(String(counts[value] || 0))})</button>`).join("")}
         </div>
-        <button class="btn btn-soft quote-filter-refresh" type="button" data-quote-refresh>${escapeHtml(t("refresh"))}</button>
       </div>
       <section class="section-card">
         <div class="panel-body quote-board-body">
@@ -8442,14 +8436,6 @@
       return true;
     }
 
-    const quoteRefresh = event.target.closest("[data-quote-refresh]");
-    if (quoteRefresh) {
-      event.preventDefault();
-      event.stopPropagation();
-      refreshQuoteLayoutData();
-      return true;
-    }
-
     const quoteCsv = event.target.closest("[data-quote-csv]");
     if (quoteCsv) {
       event.preventDefault();
@@ -9833,11 +9819,6 @@
 
       if (event.target.closest("[data-retry]")) {
         refreshData();
-        return;
-      }
-
-      if (event.target.closest("[data-quote-refresh]")) {
-        refreshQuoteLayoutData();
         return;
       }
 
