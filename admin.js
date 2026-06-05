@@ -2354,6 +2354,12 @@
     $("logoutButton").textContent = t("logout");
     $("refreshButton").textContent = t("refresh");
     $("refreshButton").style.display = ["quotes", "appointments"].includes(state.currentView) ? "none" : "";
+    const headerExtra = $("viewHeaderExtraActions");
+    if (headerExtra) {
+      headerExtra.innerHTML = state.currentView === "appointments"
+        ? `<button class="primary-button admin-list-primary-action" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</button>`
+        : "";
+    }
     const renderNavItem = ([view, labelKey, icon]) => `
       <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}" data-tooltip="${escapeHtml(navLabel(view, labelKey))}" aria-label="${escapeHtml(navLabel(view, labelKey))}">
         <span class="nav-icon">${navIcon(view, icon)}</span>
@@ -2365,6 +2371,15 @@
     $("sideNavBottom").innerHTML = views.filter(([view]) => view === "settings").map(renderNavItem).join("");
     $("viewTitle").textContent = t(state.currentView);
     $("viewEyebrow").textContent = state.currentView === "dashboard" ? "YAMADEN ADMIN" : t(state.currentView).toUpperCase();
+    const subtitleByView = {
+      requests: t("requestSubtitle"),
+      appointments: appointmentText("Admin tạo các khung giờ hẹn để khách chọn và theo dõi kết quả tại đây.", "管理者が候補日時を作成し、お客様の選択状況をここで確認します。")
+    };
+    const subtitle = subtitleByView[state.currentView] || "";
+    if ($("viewSubtitle")) {
+      $("viewSubtitle").textContent = subtitle;
+      $("viewSubtitle").hidden = !subtitle;
+    }
   }
 
   function navIcon(view, fallback) {
@@ -2731,25 +2746,12 @@
 
   function renderAdminListPageLayout({
     className = "",
-    sectionLabel = "",
-    title = "",
-    subtitle = "",
-    primaryAction = "",
-    secondaryActions = "",
     actionBar = "",
     statusTabs = "",
     filterBar = "",
     children = ""
   } = {}) {
     return `<section class="admin-list-page ${escapeHtml(className)}">
-      <header class="admin-list-page-head">
-        <div>
-          ${sectionLabel ? `<p class="eyebrow">${escapeHtml(sectionLabel)}</p>` : ""}
-          ${title ? `<h1>${escapeHtml(title)}</h1>` : ""}
-          ${subtitle ? `<p>${escapeHtml(subtitle)}</p>` : ""}
-        </div>
-        ${(primaryAction || secondaryActions) ? `<div class="admin-list-page-actions">${secondaryActions}${primaryAction}</div>` : ""}
-      </header>
       ${actionBar ? `<div class="admin-list-action-bar">${actionBar}</div>` : ""}
       ${statusTabs ? `<div class="admin-list-status-row">${statusTabs}</div>` : ""}
       ${filterBar ? `<div class="admin-list-filter-row">${filterBar}</div>` : ""}
@@ -2769,9 +2771,6 @@
     }
     $("viewRoot").innerHTML = renderAdminListPageLayout({
       className: "request-list-page",
-      sectionLabel: state.lang === "vi" ? "YÊU CẦU" : "依頼",
-      title: t("requests"),
-      subtitle: t("requestSubtitle"),
       actionBar: `
         <button class="btn btn-soft request-action-btn export" disabled>${escapeHtml(t("export"))}</button>
         <button class="btn btn-primary request-action-btn create" disabled>+ ${escapeHtml(t("newRequest"))}</button>
@@ -8960,10 +8959,6 @@
     const totalText = appointmentText(`${filtered.length} lịch hẹn`, `${filtered.length}件`);
     $("viewRoot").innerHTML = renderAdminListPageLayout({
       className: "appointment-list-page",
-      sectionLabel: appointmentText("LỊCH HẸN", "予約"),
-      title: t("appointments"),
-      subtitle: appointmentText("Admin tạo các khung giờ hẹn để khách chọn và theo dõi kết quả tại đây.", "管理者が候補日時を作成し、お客様の選択状況をここで確認します。"),
-      primaryAction: `<button class="primary-button admin-list-primary-action" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</button>`,
       statusTabs: `<div class="request-status-row appointment-status-row">
         ${renderAppointmentFilterChips()}
       </div>`,

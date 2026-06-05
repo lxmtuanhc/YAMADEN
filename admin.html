@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="/assets/icon-admin-192.png" />
   <link rel="apple-touch-icon" href="/assets/icon-admin-192.png" />
   <link rel="manifest" href="/data/admin-manifest.json" />
-  <link rel="stylesheet" href="/admin.css?v=20260604-settings-card-overflow" />
+  <link rel="stylesheet" href="/admin.css?v=20260605-appointment-layout" />
 </head>
 <body>
   <div class="admin-v2 admin-shell app-shell" id="appShell">
@@ -73,8 +73,12 @@
           <div>
             <p class="eyebrow" id="viewEyebrow">YAMADEN ADMIN</p>
             <h1 id="viewTitle">ダッシュボード</h1>
+            <p class="view-subtitle" id="viewSubtitle"></p>
           </div>
-          <button class="refresh-button" id="refreshButton" type="button">更新</button>
+          <div class="view-header-actions" id="viewHeaderActions">
+            <button class="refresh-button" id="refreshButton" type="button">更新</button>
+            <span id="viewHeaderExtraActions"></span>
+          </div>
         </div>
         <div class="view" id="viewRoot"></div>
       </section>
@@ -85,6 +89,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="sidebar-tooltip" id="sidebarTooltip" role="tooltip" aria-hidden="true"></div>
 
-  <script src="/admin.js?v=20260528-status-dedupe" defer></script>
+  <script src="/admin.js?v=20260605-appointment-layout" defer></script>
 </body>
 </html>
