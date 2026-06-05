@@ -3143,6 +3143,16 @@ textarea {
   box-shadow: 0 10px 24px rgba(37, 99, 235, .12);
 }
 
+.schedule-slot-card.rejected {
+  border-color: var(--line);
+  background: #f8fafc;
+  color: var(--muted);
+}
+
+.schedule-slot-card.rejected strong {
+  color: var(--muted);
+}
+
 .schedule-slot-card:disabled {
   opacity: .58;
 }

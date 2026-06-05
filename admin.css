@@ -378,12 +378,11 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .appointment-status-row { display: flex; align-items: center; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
 .appointment-status-chip { width: auto; min-width: max-content; height: 44px; display: inline-flex; flex: 0 0 auto; padding: 0 14px; overflow: visible; cursor: pointer; }
 .appointment-status-chip .chip-label { overflow: visible; text-overflow: clip; white-space: nowrap; }
-.appointment-filter-bar { grid-template-columns: minmax(260px, 1fr) minmax(112px, 150px) minmax(112px, 150px); }
+.appointment-filter-bar { grid-template-columns: minmax(260px, 1fr) minmax(112px, 150px) minmax(140px, 170px) minmax(112px, 140px); }
 .appointment-refresh-btn { height: var(--request-control-height); border-radius: 16px; font-weight: 900; white-space: nowrap; }
 .appointment-page-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
 .appointment-page-head h1 { margin: 2px 0 6px; }
 .appointment-page-head p { margin: 0; color: var(--muted); font-weight: 800; }
-.appointment-create-main,
 .appointment-create-inline { white-space: nowrap; }
 .appointment-card-list { display: grid; gap: 12px; }
 .appointment-card { border: 1px solid var(--border); border-radius: 18px; background: #fff; padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; box-shadow: 0 14px 34px rgba(15,23,42,.06); cursor: pointer; }
@@ -397,13 +396,15 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .appointment-slot-list span { border-radius: 999px; background: #fff; border: 1px solid #dbe3ef; padding: 7px 10px; font-weight: 900; }
 .appointment-slot-list span.is-selected,
 .appointment-selected-box { border-color: #bfdbfe; background: #eff6ff; color: #1d4ed8; }
+.appointment-slot-list span.is-unselected { border-color: #e2e8f0; background: #f1f5f9; color: #64748b; }
 .appointment-selected-box { margin-top: 10px; border: 1px solid #bfdbfe; border-radius: 14px; padding: 12px; display: grid; gap: 4px; font-weight: 900; }
 .appointment-card-actions { display: flex; flex-direction: column; gap: 8px; align-self: stretch; min-width: 130px; }
 .appointment-slot-editor { display: grid; gap: 10px; }
-.appointment-slot-edit { border: 1px solid #e2e8f0; border-radius: 14px; background: #f8fafc; padding: 12px; display: grid; grid-template-columns: 120px repeat(3, minmax(0, 1fr)); gap: 10px; align-items: end; }
+.appointment-slot-edit { border: 1px solid #e2e8f0; border-radius: 14px; background: #f8fafc; padding: 12px; display: grid; grid-template-columns: 120px repeat(3, minmax(0, 1fr)) auto; gap: 10px; align-items: end; }
 .appointment-slot-edit b { align-self: center; }
 .appointment-slot-edit label { display: grid; gap: 5px; font-weight: 900; color: var(--muted); }
 .appointment-slot-edit input { height: 42px; border: 1px solid #dbe3ef; border-radius: 10px; padding: 0 10px; font-weight: 900; }
+.appointment-slot-remove { height: 42px; align-self: end; white-space: nowrap; }
 .appointment-proposal-modal { width: min(980px, 96vw); }
 .trash-status-row { position: relative; z-index: 2; }
 .request-status-chip[data-trash-category] { cursor: pointer; pointer-events: auto; user-select: none; }
@@ -438,7 +439,7 @@ h1 { margin-bottom: 0; font-size: 28px; }
 
 @media (max-width: 1280px) {
   .request-filter-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .appointment-filter-bar { grid-template-columns: minmax(220px, 1fr) minmax(112px, 140px) minmax(112px, 140px); }
+  .appointment-filter-bar { grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(112px, 150px)); }
   .request-search-input { grid-column: span 2; }
   .appointment-filter-bar .request-search-input { grid-column: auto; }
   .request-search-btn { grid-column: span 1; }
@@ -490,6 +491,7 @@ h1 { margin-bottom: 0; font-size: 28px; }
 .status-lost { background: #e2e8f0; color: #475569; }
 .status-draft { background: #e0f2fe; color: #0369a1; }
 .status-pending_approval { background: #fef3c7; color: #b45309; }
+.status-pending_selection { background: #dbeafe; color: #1d4ed8; }
 .status-sent_to_customer { background: #dbeafe; color: #1d4ed8; }
 .status-viewed_by_customer { background: #cffafe; color: #0e7490; }
 .status-change_requested { background: #ffedd5; color: #c2410c; }

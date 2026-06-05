@@ -36,6 +36,7 @@ const quoteStatusKeys: Record<QuoteStatus, TranslationKey> = {
 
 const scheduleStatusKeys: Record<ScheduleStatus, TranslationKey> = {
   draft: "schedule.statusDraft",
+  pending_selection: "schedule.statusPendingSelection",
   sent_to_customer: "schedule.statusSentToCustomer",
   customer_selected: "schedule.statusCustomerSelected",
   pending: "schedule.statusPending",

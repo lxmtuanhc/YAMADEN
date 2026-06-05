@@ -83,7 +83,7 @@ export function SchedulePage() {
         {!isLoading ? filteredSchedules.map(schedule => {
           const slots = schedule.slots || [];
           const selected = selectedScheduleSlot(schedule);
-          const canChoose = schedule.status === "sent_to_customer";
+          const canChoose = schedule.status === "pending_selection";
           return (
             <Card className="schedule-choice-card" key={schedule.id}>
               <div className="list-row">
@@ -111,15 +111,16 @@ export function SchedulePage() {
                 </div>
               ) : null}
 
-              {!selected ? (
+              {slots.length ? (
                 <div className="schedule-slot-choice">
                   <h3>{t("schedule.proposedSlots")}</h3>
                   {slots.map(slot => {
-                    const active = selectedSlots[schedule.id] === slot.slotId;
+                    const active = selected ? selected.slotId === slot.slotId : selectedSlots[schedule.id] === slot.slotId;
+                    const rejected = Boolean(selected && selected.slotId !== slot.slotId);
                     return (
                       <button
-                        className={`schedule-slot-card${active ? " active" : ""}`}
-                        disabled={!canChoose || slot.status === "unavailable"}
+                        className={`schedule-slot-card${active ? " active" : ""}${rejected ? " rejected" : ""}`}
+                        disabled={!canChoose || Boolean(selected) || slot.status === "unavailable"}
                         key={slot.slotId}
                         type="button"
                         onClick={() => setSelectedSlots(current => ({ ...current, [schedule.id]: slot.slotId }))}

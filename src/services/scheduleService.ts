@@ -29,8 +29,8 @@ function createScheduleId(): string {
 }
 
 function normalizeStatus(status?: string): ScheduleStatus {
-  if (status === "draft" || status === "sent_to_customer" || status === "customer_selected" || status === "confirmed" || status === "completed" || status === "cancelled" || status === "expired") return status;
-  if (status === "pending" || status === "rescheduled" || status === "upcoming") return "sent_to_customer";
+  if (status === "draft" || status === "pending_selection" || status === "customer_selected" || status === "confirmed" || status === "completed" || status === "cancelled" || status === "expired") return status;
+  if (status === "sent_to_customer" || status === "pending" || status === "rescheduled" || status === "upcoming") return "pending_selection";
   if (status === "on_the_way") return "in_progress";
   if (status === "in_progress") return status;
   return "draft";

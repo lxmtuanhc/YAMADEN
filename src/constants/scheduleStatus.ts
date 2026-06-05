@@ -1,12 +1,13 @@
 import type { TranslationKey } from "../i18n";
 import type { RequestStatus, ScheduleStatus } from "../types";
 
-export const SCHEDULE_STATUSES: ScheduleStatus[] = ["sent_to_customer", "customer_selected", "confirmed", "completed", "cancelled"];
+export const SCHEDULE_STATUSES: ScheduleStatus[] = ["pending_selection", "customer_selected", "confirmed", "completed", "cancelled"];
 
 export const SCHEDULE_STATUS_LABEL_KEYS: Record<ScheduleStatus, TranslationKey> = {
   upcoming: "schedule.statusUpcoming",
   pending: "schedule.statusPending",
   draft: "schedule.statusDraft",
+  pending_selection: "schedule.statusPendingSelection",
   sent_to_customer: "schedule.statusSentToCustomer",
   customer_selected: "schedule.statusCustomerSelected",
   confirmed: "schedule.statusConfirmed",
@@ -19,7 +20,7 @@ export const SCHEDULE_STATUS_LABEL_KEYS: Record<ScheduleStatus, TranslationKey> 
 
 export const SCHEDULE_FILTERS: Array<{ id: ScheduleStatus | "all"; key: TranslationKey }> = [
   { id: "all", key: "status.all" },
-  { id: "sent_to_customer", key: "schedule.statusSentToCustomer" },
+  { id: "pending_selection", key: "schedule.statusPendingSelection" },
   { id: "customer_selected", key: "schedule.statusCustomerSelected" },
   { id: "confirmed", key: "schedule.statusConfirmed" },
   { id: "completed", key: "schedule.statusCompleted" },
@@ -30,6 +31,7 @@ export const SCHEDULE_REQUEST_STATUS_BY_STATUS: Record<ScheduleStatus, RequestSt
   upcoming: "scheduled",
   pending: "scheduled",
   draft: "scheduled",
+  pending_selection: "scheduled",
   sent_to_customer: "scheduled",
   customer_selected: "scheduled",
   confirmed: "scheduled",
@@ -46,6 +48,7 @@ export const SCHEDULE_TIMELINE_MESSAGE_KEYS: Record<ScheduleStatus | "created" |
   upcoming: "request.timelineScheduleUpdated",
   pending: "request.timelineScheduleCreated",
   draft: "request.timelineScheduleCreated",
+  pending_selection: "request.timelineScheduleCreated",
   sent_to_customer: "request.timelineScheduleCreated",
   customer_selected: "request.timelineScheduleUpdated",
   confirmed: "request.timelineScheduleUpdated",

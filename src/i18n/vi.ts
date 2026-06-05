@@ -216,6 +216,7 @@ export const vi = {
   "schedule.proposal": "Đề xuất lịch",
   "schedule.createProposal": "Tạo đề xuất lịch",
   "schedule.statusDraft": "Nháp",
+  "schedule.statusPendingSelection": "Chờ khách chọn",
   "schedule.statusSentToCustomer": "Chờ khách chọn",
   "schedule.statusCustomerSelected": "Khách đã chọn",
   "schedule.proposedSlots": "Khung giờ đề xuất",

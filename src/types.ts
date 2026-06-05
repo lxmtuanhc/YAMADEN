@@ -35,7 +35,7 @@ export type QuoteStatus =
   | "rejected"
   | "expired";
 
-export type ScheduleStatus = "draft" | "sent_to_customer" | "customer_selected" | "confirmed" | "completed" | "cancelled" | "expired" | "pending" | "rescheduled" | "upcoming" | "in_progress";
+export type ScheduleStatus = "draft" | "pending_selection" | "sent_to_customer" | "customer_selected" | "confirmed" | "completed" | "cancelled" | "expired" | "pending" | "rescheduled" | "upcoming" | "in_progress";
 
 export interface User {
   id: string;

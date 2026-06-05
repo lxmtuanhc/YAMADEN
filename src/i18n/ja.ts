@@ -216,6 +216,7 @@ export const ja = {
   "schedule.proposal": "予約候補",
   "schedule.createProposal": "予約候補を作成",
   "schedule.statusDraft": "下書き",
+  "schedule.statusPendingSelection": "お客様の選択待ち",
   "schedule.statusSentToCustomer": "お客様の選択待ち",
   "schedule.statusCustomerSelected": "お客様が選択済み",
   "schedule.proposedSlots": "候補日時",

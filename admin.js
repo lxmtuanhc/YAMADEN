@@ -3055,17 +3055,12 @@
             <div class="request-detail-section-head"><h3>${escapeHtml(t("media"))}</h3><span class="note">${media.length}</span></div>
             ${media.length ? `<div class="request-media-grid">${media.map(renderRequestMediaItem).join("")}</div>` : `<div class="empty-state">${escapeHtml(t("noMediaDetail"))}</div>`}
           </section>
-          <section class="request-detail-media">
-            <div class="request-detail-section-head"><h3>${escapeHtml(t("relatedAppointments"))}</h3><span class="note">${relatedAppointments.length}</span></div>
-            ${relatedAppointments.length ? `<div class="mini-list">${relatedAppointments.slice(0, 3).map(item => {
-              const selected = appointmentSelectedSlot(item);
-              return `<button class="mini-list-item" type="button" data-appointment-detail="${escapeHtml(appointmentId(item))}"><div><strong>${escapeHtml(appointmentStatusLabel(item.status))}</strong><span>${escapeHtml(appointmentText("Số slot", "候補数"))}: ${appointmentSlots(item).length}${selected ? ` · ${escapeHtml(appointmentSlotText(selected))}` : ""}</span></div></button>`;
-            }).join("")}</div>` : `<div class="empty-state">${escapeHtml(appointmentText("Chưa có lịch hẹn", "予約はまだありません"))}<div style="margin-top:10px"><button class="btn btn-soft" type="button" data-open-appointment-proposal="${escapeHtml(getRequestDisplayId(request) || getRowId(request))}">${escapeHtml(appointmentText("Tạo đề xuất lịch", "予約候補を作成"))}</button></div></div>`}
-          </section>
         </div>
         <footer class="request-detail-footer">
           <span class="request-unsaved-note" data-unsaved-note hidden>${escapeHtml(t("unsavedChanges"))}</span>
           <button class="btn btn-soft" type="button" data-create-quote-from-request="${escapeHtml(id)}">${escapeHtml(quoteButtonLabel)}</button>
+          <button class="btn btn-soft" type="button" data-open-appointment-proposal="${escapeHtml(getRequestDisplayId(request) || getRowId(request))}">${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</button>
+          ${relatedAppointments.length ? `<button class="btn btn-soft" type="button" data-appointment-detail="${escapeHtml(appointmentId(relatedAppointments[0]))}">${escapeHtml(appointmentText("Xem lịch hẹn", "予約を見る"))}</button>` : ""}
           <button class="ghost-button" type="button" data-close-request-detail>${escapeHtml(t("close"))}</button>
           <button class="primary-button" type="button" data-save-request="${escapeHtml(id)}" disabled>${escapeHtml(t("saveChanges"))}</button>
         </footer>
@@ -8823,7 +8818,7 @@
   function appointmentStatusLabel(status) {
     const labels = {
       draft: appointmentText("Nháp", "下書き"),
-      sent_to_customer: appointmentText("Chờ khách chọn", "お客様の選択待ち"),
+      pending_selection: appointmentText("Chờ khách chọn", "お客様の選択待ち"),
       customer_selected: appointmentText("Khách đã chọn", "お客様が選択済み"),
       confirmed: t("appointmentConfirmed"),
       completed: t("appointmentCompleted"),
@@ -8835,8 +8830,8 @@
 
   function normalizeAppointmentStatusValue(status) {
     const value = String(status || "").trim().toLowerCase();
-    if (["draft", "sent_to_customer", "customer_selected", "confirmed", "completed", "cancelled", "expired"].includes(value)) return value;
-    if (value === "pending" || value === "rescheduled" || value === "upcoming") return "sent_to_customer";
+    if (["draft", "pending_selection", "customer_selected", "confirmed", "completed", "cancelled", "expired"].includes(value)) return value;
+    if (value === "sent_to_customer" || value === "pending" || value === "rescheduled" || value === "upcoming") return "pending_selection";
     return "draft";
   }
 
@@ -8900,7 +8895,7 @@
   }
 
   function appointmentFilterStatuses() {
-    return ["all", "sent_to_customer", "customer_selected", "confirmed", "completed", "cancelled"];
+    return ["all", "pending_selection", "customer_selected", "confirmed", "completed", "cancelled"];
   }
 
   function renderAppointmentFilterChips() {
@@ -8950,7 +8945,7 @@
         </div>
         <div class="appointment-slot-list">
           <b>${escapeHtml(appointmentText("Khung giờ đề xuất", "候補日時"))}</b>
-          ${slots.length ? slots.map(slot => `<span class="${selected?.slotId === slot.slotId ? "is-selected" : ""}">${escapeHtml(appointmentSlotText(slot))}</span>`).join("") : `<em>${escapeHtml(t("noData"))}</em>`}
+          ${slots.length ? slots.map(slot => `<span class="${selected?.slotId === slot.slotId ? "is-selected" : selected ? "is-unselected" : ""}">${escapeHtml(appointmentSlotText(slot))}</span>`).join("") : `<em>${escapeHtml(t("noData"))}</em>`}
         </div>
         ${selected ? `<div class="appointment-selected-box"><b>${escapeHtml(appointmentText("Khách đã chọn", "お客様が選択済み"))}</b><span>${escapeHtml(appointmentSlotText(selected))}</span></div>` : ""}
       </div>
@@ -8967,16 +8962,15 @@
     $("viewRoot").innerHTML = `
       <div class="appointment-page-head">
         <div>
-          <p class="eyebrow">${escapeHtml(appointmentText("LỊCH HẸN", "予約"))}</p>
           <h1>${escapeHtml(t("appointments"))}</h1>
-          <p>${escapeHtml(appointmentText("Quản lý lịch hẹn và thời gian khách chọn.", "予約とお客様が選択した日時を管理します。"))}</p>
+          <p>${escapeHtml(appointmentText("Admin tạo các khung giờ hẹn để khách chọn và theo dõi kết quả tại đây.", "管理者が候補日時を作成し、お客様の選択状況をここで確認します。"))}</p>
         </div>
-        <button class="primary-button appointment-create-main" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo đề xuất lịch", "予約候補を作成"))}</button>
       </div>
       <div class="request-filter-bar appointment-filter-bar">
         <input id="appointmentSearch" class="request-search-input" value="${escapeHtml(state.filters.appointmentSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "Tìm mã yêu cầu, khách, công trình, kỹ thuật viên" : "依頼ID・顧客・工事名・技術者を検索")}" />
         <button class="request-search-btn" type="button" data-appointment-search>${escapeHtml(t("searchButton"))}</button>
-        <button class="primary-button appointment-create-inline" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo đề xuất lịch", "予約候補を作成"))}</button>
+        <button class="primary-button appointment-create-inline" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</button>
+        <button class="btn btn-soft appointment-refresh-btn" type="button" data-appointment-refresh>${escapeHtml(t("refresh"))}</button>
       </div>
       <div class="request-status-row appointment-status-row">
         ${renderAppointmentFilterChips()}
@@ -9024,7 +9018,10 @@
             </div>
             <div class="appointment-slot-list">
               <b>${escapeHtml(appointmentText("Khung giờ đề xuất", "候補日時"))}</b>
-              ${appointmentSlots(item).map(slot => `<span class="${appointmentSelectedSlot(item)?.slotId === slot.slotId ? "is-selected" : ""}">${escapeHtml(appointmentSlotText(slot))}</span>`).join("") || `<em>${escapeHtml(t("noData"))}</em>`}
+              ${appointmentSlots(item).map(slot => {
+                const selected = appointmentSelectedSlot(item);
+                return `<span class="${selected?.slotId === slot.slotId ? "is-selected" : selected ? "is-unselected" : ""}">${escapeHtml(appointmentSlotText(slot))}</span>`;
+              }).join("") || `<em>${escapeHtml(t("noData"))}</em>`}
             </div>
             <div class="request-edit-grid">
               <label class="field"><span>${escapeHtml(t("technician"))}</span><input data-appointment-field="technicianName" value="${escapeHtml(item.technicianName || item.technician || "")}"></label>
@@ -9049,6 +9046,32 @@
     document.body.appendChild(overlay);
   }
 
+  function renderAppointmentProposalSlotRow(index = 0) {
+    return `<div class="appointment-slot-edit" data-proposal-slot>
+      <b>${escapeHtml(appointmentText("Khung giờ", "候補"))} <span data-slot-index>${index + 1}</span></b>
+      <label><span>${escapeHtml(t("appointmentDate"))}</span><input type="date" data-slot-field="date"></label>
+      <label><span>${escapeHtml(appointmentText("Giờ bắt đầu", "開始時間"))}</span><input type="time" data-slot-field="startTime"></label>
+      <label><span>${escapeHtml(appointmentText("Giờ kết thúc", "終了時間"))}</span><input type="time" data-slot-field="endTime"></label>
+      <button class="ghost-button appointment-slot-remove" type="button" data-remove-proposal-slot>${escapeHtml(t("delete"))}</button>
+    </div>`;
+  }
+
+  function renumberAppointmentProposalSlots() {
+    const overlay = $("appointmentProposalOverlay");
+    if (!overlay) return;
+    overlay.querySelectorAll("[data-proposal-slot]").forEach((row, index) => {
+      const indexLabel = row.querySelector("[data-slot-index]");
+      if (indexLabel) indexLabel.textContent = String(index + 1);
+    });
+  }
+
+  function showAppointmentProposalError(message = "") {
+    const errorBox = $("appointmentProposalOverlay")?.querySelector("[data-proposal-error]");
+    if (!errorBox) return;
+    errorBox.hidden = !message;
+    errorBox.textContent = message;
+  }
+
   function renderAppointmentProposalModal(requestId = "") {
     const overlay = document.createElement("div");
     overlay.className = "request-detail-overlay";
@@ -9066,7 +9089,7 @@
         <header class="request-detail-header">
           <div>
             <p class="eyebrow">${escapeHtml(appointmentText("LỊCH HẸN", "予約"))}</p>
-            <h2>${escapeHtml(appointmentText("Tạo đề xuất lịch", "予約候補を作成"))}</h2>
+            <h2>${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</h2>
             <p class="note">${escapeHtml(appointmentText("Chọn yêu cầu và nhập các khung giờ có thể hẹn khách.", "依頼を選択し、お客様に提示する候補日時を入力します。"))}</p>
           </div>
           <button class="close-button" type="button" data-close-appointment-proposal>&times;</button>
@@ -9083,13 +9106,9 @@
             </div>
             <h3>${escapeHtml(appointmentText("Khung giờ đề xuất", "候補日時"))}</h3>
             <div class="appointment-slot-editor">
-              ${[0, 1, 2].map(index => `<div class="appointment-slot-edit" data-proposal-slot>
-                <b>${escapeHtml(appointmentText("Khung giờ", "候補"))} ${index + 1}</b>
-                <label><span>${escapeHtml(t("appointmentDate"))}</span><input type="date" data-slot-field="date"></label>
-                <label><span>${escapeHtml(appointmentText("Giờ bắt đầu", "開始時間"))}</span><input type="time" data-slot-field="startTime"></label>
-                <label><span>${escapeHtml(appointmentText("Giờ kết thúc", "終了時間"))}</span><input type="time" data-slot-field="endTime"></label>
-              </div>`).join("")}
+              ${[0, 1].map(index => renderAppointmentProposalSlotRow(index)).join("")}
             </div>
+            <button class="btn btn-soft" type="button" data-add-proposal-slot>+ ${escapeHtml(appointmentText("Thêm khung giờ", "候補を追加"))}</button>
             <div class="form-error" data-proposal-error hidden></div>
           </section>
         </div>
@@ -9128,7 +9147,7 @@
       startTime: row.querySelector("[data-slot-field='startTime']")?.value || "",
       endTime: row.querySelector("[data-slot-field='endTime']")?.value || "",
       status: "available"
-    })).filter(slot => slot.date && slot.startTime && slot.endTime);
+    }));
     return {
       requestId,
       assigneeId,
@@ -9137,6 +9156,24 @@
       slots,
       sendNow
     };
+  }
+
+  function validateAppointmentProposalPayload(payload) {
+    if (!payload.requestId) return appointmentText("Vui lòng chọn yêu cầu.", "依頼を選択してください。");
+    if (!Array.isArray(payload.slots) || !payload.slots.length) return appointmentText("Vui lòng nhập ít nhất 1 khung giờ.", "候補日時を1件以上入力してください。");
+    const filledSlots = payload.slots.filter(slot => slot.date || slot.startTime || slot.endTime);
+    if (!filledSlots.length) return appointmentText("Vui lòng nhập ít nhất 1 khung giờ.", "候補日時を1件以上入力してください。");
+    const seen = new Set();
+    for (let index = 0; index < filledSlots.length; index += 1) {
+      const slot = filledSlots[index];
+      if (!slot.date || !slot.startTime || !slot.endTime) return appointmentText(`Khung giờ ${index + 1} chưa đủ ngày/giờ.`, `候補${index + 1}の日付・時間を入力してください。`);
+      if (slot.startTime >= slot.endTime) return appointmentText(`Khung giờ ${index + 1} có giờ kết thúc không hợp lệ.`, `候補${index + 1}の終了時間が不正です。`);
+      const key = `${slot.date}|${slot.startTime}|${slot.endTime}`;
+      if (seen.has(key)) return appointmentText("Có khung giờ bị trùng.", "重複している候補日時があります。");
+      seen.add(key);
+    }
+    payload.slots = filledSlots;
+    return "";
   }
 
   function collectAppointmentPayload() {
@@ -9557,18 +9594,39 @@
         renderAppointmentProposalModal(openAppointmentProposal.dataset.openAppointmentProposal || "");
         return;
       }
+      const addProposalSlot = event.target.closest("[data-add-proposal-slot]");
+      if (addProposalSlot) {
+        const editor = $("appointmentProposalOverlay")?.querySelector(".appointment-slot-editor");
+        if (editor) {
+          editor.insertAdjacentHTML("beforeend", renderAppointmentProposalSlotRow(editor.querySelectorAll("[data-proposal-slot]").length));
+          renumberAppointmentProposalSlots();
+          showAppointmentProposalError("");
+        }
+        return;
+      }
+      const removeProposalSlot = event.target.closest("[data-remove-proposal-slot]");
+      if (removeProposalSlot) {
+        const editor = $("appointmentProposalOverlay")?.querySelector(".appointment-slot-editor");
+        const rows = editor ? Array.from(editor.querySelectorAll("[data-proposal-slot]")) : [];
+        if (rows.length <= 1) {
+          showAppointmentProposalError(appointmentText("Cần giữ ít nhất 1 khung giờ.", "候補日時は1件以上必要です。"));
+          return;
+        }
+        removeProposalSlot.closest("[data-proposal-slot]")?.remove();
+        renumberAppointmentProposalSlots();
+        showAppointmentProposalError("");
+        return;
+      }
       const saveAppointmentProposal = event.target.closest("[data-save-appointment-proposal]");
       if (saveAppointmentProposal) {
         const sendNow = saveAppointmentProposal.dataset.saveAppointmentProposal !== "draft";
         const payload = collectAppointmentProposalPayload(sendNow);
-        const errorBox = $("appointmentProposalOverlay")?.querySelector("[data-proposal-error]");
-        if (!payload.requestId || !payload.slots.length) {
-          if (errorBox) {
-            errorBox.hidden = false;
-            errorBox.textContent = appointmentText("Vui lòng chọn yêu cầu và nhập ít nhất 1 khung giờ.", "依頼を選択し、候補日時を1件以上入力してください。");
-          }
+        const errorMessage = validateAppointmentProposalPayload(payload);
+        if (errorMessage) {
+          showAppointmentProposalError(errorMessage);
           return;
         }
+        showAppointmentProposalError("");
         const response = await AdminAPI.createAppointmentProposal(payload);
         upsertAppointment(response);
         $("appointmentProposalOverlay")?.remove();
