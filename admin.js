@@ -8913,66 +8913,68 @@
       <td>${escapeHtml(item.technicianName || item.technician || "-")}</td>
       <td><span class="status-badge status-${escapeHtml(normalizeAppointmentStatusValue(item.status))}">${escapeHtml(appointmentStatusLabel(item.status))}</span></td>
       <td>${escapeHtml(formatDateTime(item.createdAt))}</td>
-      <td>${escapeHtml(item.createdBy || "-")}</td>
       <td><button class="btn btn-soft" type="button" data-appointment-detail="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button></td>
     </tr>`;
   }
 
-  function renderAppointmentCard(item) {
-    const id = appointmentId(item);
-    const slots = appointmentSlots(item);
-    const selected = appointmentSelectedSlot(item);
-    return `<article class="appointment-card" data-appointment-detail="${escapeHtml(id)}">
-      <div class="appointment-card-main">
-        <div class="appointment-card-head">
-          <div>
-            <strong class="appointment-code">${escapeHtml(item.appointmentCode || id)}</strong>
-            <span>${escapeHtml(appointmentRequestId(item) || "-")}</span>
-          </div>
-          <span class="status-badge status-${escapeHtml(normalizeAppointmentStatusValue(item.status))}">${escapeHtml(appointmentStatusLabel(item.status))}</span>
-        </div>
-        <div class="appointment-card-grid">
-          ${infoItem(appointmentText("Khách hàng", "顧客"), item.customerName)}
-          ${infoItem(appointmentText("Người phụ trách", "担当者"), item.assigneeName || item.technicianName || item.technician)}
-          ${infoItem(appointmentText("Công trình", "工事名"), item.projectName || item.address)}
-          ${infoItem(appointmentText("Số khung giờ đề xuất", "候補数"), String(slots.length))}
-        </div>
-        <div class="appointment-slot-list">
-          <b>${escapeHtml(appointmentText("Khung giờ đề xuất", "候補日時"))}</b>
-          ${slots.length ? slots.map(slot => `<span class="${selected?.slotId === slot.slotId ? "is-selected" : selected ? "is-unselected" : ""}">${escapeHtml(appointmentSlotText(slot))}</span>`).join("") : `<em>${escapeHtml(t("noData"))}</em>`}
-        </div>
-        ${selected ? `<div class="appointment-selected-box"><b>${escapeHtml(appointmentText("Khách đã chọn", "お客様が選択済み"))}</b><span>${escapeHtml(appointmentSlotText(selected))}</span></div>` : ""}
-      </div>
-      <div class="appointment-card-actions">
-        <button class="btn btn-soft" type="button" data-appointment-detail="${escapeHtml(id)}">${escapeHtml(t("detail"))}</button>
-        ${normalizeAppointmentStatusValue(item.status) === "draft" ? `<button class="btn btn-soft" type="button" data-appointment-action="send" data-appointment-id="${escapeHtml(id)}">${escapeHtml(appointmentText("Gửi cho khách", "お客様へ送信"))}</button>` : ""}
-        ${!["cancelled", "completed"].includes(normalizeAppointmentStatusValue(item.status)) ? `<button class="btn btn-danger" type="button" data-appointment-action="cancelled" data-appointment-id="${escapeHtml(id)}">${escapeHtml(t("appointmentCancel"))}</button>` : ""}
-      </div>
-    </article>`;
+  function renderAppointmentEmptyState() {
+    return `<div class="appointment-empty-state">
+      <div class="appointment-empty-icon" aria-hidden="true">${navIcon("appointments", "calendar")}</div>
+      <h3>${escapeHtml(appointmentText("Chưa có lịch hẹn nào", "予約はまだありません"))}</h3>
+      <p>${escapeHtml(appointmentText("Hãy tạo khung giờ để khách hàng lựa chọn lịch phù hợp.", "お客様が選択できる候補日時を作成してください。"))}</p>
+      <button class="primary-button appointment-empty-action" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</button>
+    </div>`;
   }
 
   function renderAppointments() {
     const filtered = filterAppointments(state.appointments);
+    const totalText = appointmentText(`${filtered.length} lịch hẹn`, `${filtered.length}件`);
     $("viewRoot").innerHTML = `
-      <div class="appointment-page-head">
+      <section class="appointment-page">
+      <header class="appointment-page-head">
         <div>
           <p class="eyebrow">${escapeHtml(appointmentText("LỊCH HẸN", "予約"))}</p>
           <h1>${escapeHtml(t("appointments"))}</h1>
           <p>${escapeHtml(appointmentText("Admin tạo các khung giờ hẹn để khách chọn và theo dõi kết quả tại đây.", "管理者が候補日時を作成し、お客様の選択状況をここで確認します。"))}</p>
         </div>
         <button class="primary-button appointment-create-button" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</button>
-      </div>
+      </header>
       <div class="request-filter-bar appointment-filter-bar">
-        <input id="appointmentSearch" class="request-search-input" value="${escapeHtml(state.filters.appointmentSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "Tìm mã yêu cầu, khách, công trình, kỹ thuật viên" : "依頼ID・顧客・工事名・技術者を検索")}" />
+        <input id="appointmentSearch" class="request-search-input" value="${escapeHtml(state.filters.appointmentSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "Tìm mã yêu cầu, khách, công trình, kỹ thuật viên..." : "依頼ID・顧客・工事名・技術者を検索...")}" />
         <button class="request-search-btn" type="button" data-appointment-search>${escapeHtml(t("searchButton"))}</button>
         <button class="btn btn-soft appointment-refresh-btn" type="button" data-appointment-refresh>${escapeHtml(t("refresh"))}</button>
       </div>
       <div class="request-status-row appointment-status-row">
         ${renderAppointmentFilterChips()}
       </div>
-      <div class="appointment-card-list">
-        ${state.loading.appointments ? `<div class="empty-state">${escapeHtml(t("loading"))}</div>` : filtered.length ? filtered.map(renderAppointmentCard).join("") : showEmptyState(t("noData"))}
-      </div>
+      <section class="appointment-list-panel">
+        <div class="appointment-list-head">
+          <h2>${escapeHtml(appointmentText("Danh sách lịch hẹn", "予約一覧"))}</h2>
+          <span>${escapeHtml(totalText)}</span>
+        </div>
+        ${state.loading.appointments ? `<div class="appointment-empty-state"><div class="appointment-empty-icon" aria-hidden="true">${navIcon("appointments", "calendar")}</div><h3>${escapeHtml(t("loading"))}</h3></div>` : filtered.length ? `
+          <div class="table-wrap appointment-table-wrap">
+            <table class="data-table appointment-table">
+              <thead>
+                <tr>
+                  <th>${escapeHtml(t("appointmentCode"))}</th>
+                  <th>${escapeHtml(t("appointmentRequest"))}</th>
+                  <th>${escapeHtml(t("customer"))}</th>
+                  <th>${escapeHtml(t("appointmentProject"))}</th>
+                  <th>${escapeHtml(t("appointmentDate"))}</th>
+                  <th>${escapeHtml(t("appointmentTime"))}</th>
+                  <th>${escapeHtml(t("technician"))}</th>
+                  <th>${escapeHtml(t("status"))}</th>
+                  <th>${escapeHtml(t("createdAt"))}</th>
+                  <th>${escapeHtml(t("action"))}</th>
+                </tr>
+              </thead>
+              <tbody>${filtered.map(renderAppointmentRow).join("")}</tbody>
+            </table>
+          </div>
+        ` : renderAppointmentEmptyState()}
+      </section>
+      </section>
     `;
   }
 
