@@ -2353,7 +2353,7 @@
     $("languageSelect").value = state.lang;
     $("logoutButton").textContent = t("logout");
     $("refreshButton").textContent = t("refresh");
-    $("refreshButton").style.display = state.currentView === "quotes" ? "none" : "";
+    $("refreshButton").style.display = ["quotes", "appointments"].includes(state.currentView) ? "none" : "";
     const renderNavItem = ([view, labelKey, icon]) => `
       <button class="nav-item ${state.currentView === view ? "active" : ""}" type="button" data-view="${view}" data-tooltip="${escapeHtml(navLabel(view, labelKey))}" aria-label="${escapeHtml(navLabel(view, labelKey))}">
         <span class="nav-icon">${navIcon(view, icon)}</span>
@@ -2985,10 +2985,6 @@
   function renderRequestDetail(request) {
     const id = getRowId(request);
     const media = normalizeRequestMedia(request);
-    const relatedAppointments = state.appointments.filter(item => {
-      const keys = [item.requestId, item.requestCode].map(value => String(value || ""));
-      return keys.includes(String(id)) || keys.includes(String(request.requestCode || "")) || keys.includes(String(request.id || ""));
-    });
     const timeline = Array.isArray(request.timeline) ? request.timeline : [];
     const assignmentCandidates = getAssignmentCandidates(request);
     const editUrgency = requestEditUrgencyValue(request);
@@ -3060,8 +3056,6 @@
           <span class="request-unsaved-note" data-unsaved-note hidden>${escapeHtml(t("unsavedChanges"))}</span>
           <button class="btn btn-soft" type="button" data-create-quote-from-request="${escapeHtml(id)}">${escapeHtml(quoteButtonLabel)}</button>
           <button class="btn btn-soft" type="button" data-open-appointment-proposal="${escapeHtml(getRequestDisplayId(request) || getRowId(request))}">${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</button>
-          ${relatedAppointments.length ? `<button class="btn btn-soft" type="button" data-appointment-detail="${escapeHtml(appointmentId(relatedAppointments[0]))}">${escapeHtml(appointmentText("Xem lịch hẹn", "予約を見る"))}</button>` : ""}
-          <button class="ghost-button" type="button" data-close-request-detail>${escapeHtml(t("close"))}</button>
           <button class="primary-button" type="button" data-save-request="${escapeHtml(id)}" disabled>${escapeHtml(t("saveChanges"))}</button>
         </footer>
       </article>
@@ -8962,14 +8956,15 @@
     $("viewRoot").innerHTML = `
       <div class="appointment-page-head">
         <div>
+          <p class="eyebrow">${escapeHtml(appointmentText("LỊCH HẸN", "予約"))}</p>
           <h1>${escapeHtml(t("appointments"))}</h1>
           <p>${escapeHtml(appointmentText("Admin tạo các khung giờ hẹn để khách chọn và theo dõi kết quả tại đây.", "管理者が候補日時を作成し、お客様の選択状況をここで確認します。"))}</p>
         </div>
+        <button class="primary-button appointment-create-button" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</button>
       </div>
       <div class="request-filter-bar appointment-filter-bar">
         <input id="appointmentSearch" class="request-search-input" value="${escapeHtml(state.filters.appointmentSearch || "")}" placeholder="${escapeHtml(state.lang === "vi" ? "Tìm mã yêu cầu, khách, công trình, kỹ thuật viên" : "依頼ID・顧客・工事名・技術者を検索")}" />
         <button class="request-search-btn" type="button" data-appointment-search>${escapeHtml(t("searchButton"))}</button>
-        <button class="primary-button appointment-create-inline" type="button" data-open-appointment-proposal>+ ${escapeHtml(appointmentText("Tạo lịch hẹn", "予約作成"))}</button>
         <button class="btn btn-soft appointment-refresh-btn" type="button" data-appointment-refresh>${escapeHtml(t("refresh"))}</button>
       </div>
       <div class="request-status-row appointment-status-row">
