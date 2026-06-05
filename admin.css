@@ -87,7 +87,7 @@ button { cursor: pointer; }
 .ghost-button { background: #eef2f7; color: var(--text); }
 .ghost-button:disabled, .primary-button:disabled { opacity: .48; cursor: not-allowed; }
 
-.content { padding: 24px; width: 100%; max-width: 1480px; min-width: 0; margin: 0 auto; }
+.content { padding: 24px; width: 100%; max-width: none; min-width: 0; margin: 0; }
 .view-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 18px; }
 .view-subtitle { max-width: 760px; margin: 6px 0 0; color: #475569; font-weight: 800; line-height: 1.55; }
 .view-header-actions { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
@@ -731,7 +731,7 @@ html {
 }
 
 .content {
-  max-width: 1520px;
+  max-width: none;
   padding: 28px;
   width: 100%;
   flex: 1 1 auto;
@@ -4059,8 +4059,8 @@ body {
 }
 
 .content {
-  max-width: 1600px;
-  padding: 22px;
+  max-width: none;
+  padding: 24px;
 }
 
 .view-head {
@@ -4694,7 +4694,7 @@ body {
   gap: 0;
   min-width: 0;
   min-height: 0;
-  height: 100%;
+  height: auto;
 }
 
 .admin-v2[data-view="settings"] .main {
@@ -4705,8 +4705,9 @@ body {
   height: calc(100dvh - var(--topbar-height));
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  padding: 18px 22px 22px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px;
 }
 
 .admin-v2[data-view="settings"] .view-head {
@@ -4722,17 +4723,19 @@ body {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
   gap: 20px;
-  align-items: stretch;
+  align-items: start;
   min-height: 0;
-  height: 100%;
-  overflow: hidden;
+  height: auto;
+  overflow: visible;
 }
 
 .settings-menu-card {
   position: sticky;
   top: 0;
-  height: 100%;
-  overflow: hidden;
+  height: auto;
+  max-height: calc(100dvh - var(--topbar-height) - 48px);
+  overflow-y: auto;
+  overflow-x: hidden;
   align-self: stretch;
   display: grid;
   align-content: start;
@@ -4828,10 +4831,10 @@ body {
 .settings-content-panel {
   min-width: 0;
   min-height: 0;
-  height: 100%;
+  height: auto;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .settings-content-grid {
@@ -4843,9 +4846,8 @@ body {
   min-width: 0;
   align-content: start;
   align-items: stretch;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 0 4px 14px 0;
+  overflow: visible;
+  padding: 0;
 }
 
 .settings-shell-card {
@@ -6576,6 +6578,8 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+  padding: 0 24px;
+  box-sizing: border-box;
   overflow: visible;
 }
 
@@ -6650,7 +6654,6 @@ body {
 
 .admin-v2.sidebar-collapsed .sidebar-brand,
 .admin-v2.sidebar-collapsed .nav-label,
-.admin-v2.sidebar-collapsed .nav-badge,
 .admin-v2.sidebar-collapsed .sidebar-footer {
   display: none !important;
 }
@@ -6694,12 +6697,12 @@ body {
   display: grid;
   grid-template-columns: var(--sidebar-icon-size) minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-height: var(--sidebar-icon-size);
   width: 100%;
   border-radius: 16px;
   overflow: hidden;
-  padding: 0;
+  padding: 0 12px 0 0;
   transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
 
@@ -6729,11 +6732,32 @@ body {
 
 .nav-label {
   min-width: 0;
+  line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: 1;
   transition: opacity 150ms ease;
+}
+
+.nav-badge {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  margin-left: auto;
+  box-shadow: 0 8px 18px rgba(239, 68, 68, .25);
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .admin-shell.sidebar-collapsed .sidebar-nav {
@@ -6749,6 +6773,7 @@ body {
   grid-template-columns: var(--sidebar-icon-size);
   gap: 0;
   padding: 0;
+  position: relative;
   overflow: visible;
 }
 
@@ -6759,6 +6784,19 @@ body {
 .admin-shell.sidebar-collapsed .nav-icon {
   margin: 0;
   justify-self: start;
+}
+
+.admin-shell.sidebar-collapsed .nav-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 10px;
+  line-height: 20px;
+  display: inline-flex !important;
+  z-index: 2;
 }
 
 .admin-shell.sidebar-collapsed .sidebar-toggle {
@@ -6806,6 +6844,15 @@ body {
     grid-template-columns: 28px minmax(0, 1fr) auto;
     justify-items: stretch;
     padding: 10px 12px;
+  }
+
+  .admin-v2.sidebar-collapsed .nav-badge {
+    position: static;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    font-size: 12px;
+    line-height: 24px;
   }
 
   .topbar {
